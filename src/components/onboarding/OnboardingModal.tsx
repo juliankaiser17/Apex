@@ -114,6 +114,14 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
   const [taglineVisible, setTaglineVisible] = useState(false);
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
 
+  // Reset step to auth whenever modal opens (e.g., on logout)
+  useEffect(() => {
+    if (isOpen) {
+      setStep('auth');
+      setCelebStage(0);
+    }
+  }, [isOpen]);
+
   // Wordmark entrance timing
   useEffect(() => {
     if (step !== 'auth') return;
@@ -132,6 +140,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
   // Celebration timeline
   useEffect(() => {
     if (step !== 'celebration') return;
+    setCelebStage(0);
     const timers = [
       setTimeout(() => setCelebStage(1), 200),   // Orange flash
       setTimeout(() => setCelebStage(2), 660),    // WELCOME drops
@@ -141,10 +150,15 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
         confetti({ particleCount: 60, spread: 80, origin: { y: 0.45 }, colors: ['#F0EBE3', '#FF4500', '#FFA500'] });
       }, 1200),
       setTimeout(() => setCelebStage(5), 2000),   // CTA
-      setTimeout(() => { completeOnboarding(); onClose(); }, 4000),
+      setTimeout(() => {
+        completeOnboarding();
+        onClose();
+        setStep('auth');
+        setCelebStage(0);
+      }, 4000),
     ];
     return () => timers.forEach(clearTimeout);
-  }, [step, completeOnboarding, onClose]);
+  }, [step]);
 
   const handleGoogleAuth = () => {
     sounds.playTargetLock();
