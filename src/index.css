@@ -1,0 +1,219 @@
+@import "tailwindcss";
+
+/* ═══════════════════════════════════════
+   APEX V3 — "ASPHALT" DESIGN SYSTEM
+   ═══════════════════════════════════════ */
+
+@layer base {
+  :root {
+    /* TYPOGRAPHY */
+    --font-display: 'Bebas Neue', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+    --font-data: 'Barlow Condensed', sans-serif;
+
+    /* BACKGROUNDS */
+    --void: #080808;
+    --carbon: #111111;
+    --tarmac: #1A1A1A;
+    --gridline: #2C2C2C;
+    --smoke: #383838;
+
+    /* BRAND — Only two accents */
+    --ignition: #FF4500;
+    --heat: #FF6A00;
+
+    /* ACHIEVEMENTS & RARITY */
+    --gold: #FFA500;
+    --fire: #FF2200;
+
+    /* TEXT */
+    --chalk: #F0EBE3;
+    --dust: #9A9088;
+    --void-text: #5A5550;
+
+    /* RARITY — Heat progression, NO blue/purple */
+    --r-common: #787878;
+    --r-uncommon: #3DAA6A;
+    --r-rare: #E8A020;
+    --r-epic: #C85000;
+    --r-legendary: #FFA500;
+    --r-mythic: #FF2200;
+
+    /* FUNCTIONAL */
+    --success: #2ECC71;
+    --warning: #FFA500;
+    --danger: #FF3B30;
+
+    /* SPACING — 4px base */
+    --s-1: 4px;  --s-2: 8px;  --s-3: 12px; --s-4: 16px;
+    --s-5: 20px; --s-6: 24px; --s-8: 32px; --s-10: 40px;
+    --s-12: 48px; --s-16: 64px; --s-20: 80px;
+
+    /* RADIUS — deliberate, not generous */
+    --r-sharp: 4px;
+    --r-card: 12px;
+    --r-sheet: 20px;
+    --r-full: 9999px;
+  }
+
+  body {
+    font-family: var(--font-body);
+    background-color: var(--void);
+    color: var(--chalk);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  h1, h2, h3, .font-display {
+    font-family: var(--font-display);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .font-data {
+    font-family: var(--font-data);
+    letter-spacing: 0.04em;
+  }
+}
+
+/* ═══ UTILITY CLASSES ═══ */
+
+/* Text colors */
+.text-chalk { color: var(--chalk); }
+.text-dust { color: var(--dust); }
+.text-void-text { color: var(--void-text); }
+.text-ignition { color: var(--ignition); }
+.text-heat { color: var(--heat); }
+
+/* Backgrounds */
+.bg-void { background-color: var(--void); }
+.bg-carbon { background-color: var(--carbon); }
+.bg-tarmac { background-color: var(--tarmac); }
+
+/* ═══ GLOW SYSTEM — Only 3 variants ═══ */
+.glow-orange {
+  box-shadow: 0 0 0 1px rgba(255,69,0,0.12), 0 0 16px rgba(255,69,0,0.2), 0 0 40px rgba(255,69,0,0.1);
+}
+.glow-gold {
+  box-shadow: 0 0 0 1px rgba(255,165,0,0.18), 0 0 20px rgba(255,165,0,0.25), 0 0 48px rgba(255,165,0,0.12);
+}
+.glow-fire {
+  box-shadow: 0 0 0 1px rgba(255,34,0,0.18), 0 0 24px rgba(255,34,0,0.3), 0 0 60px rgba(255,34,0,0.15);
+}
+
+/* ═══ CARD SURFACE ═══ */
+.card-surface {
+  background-color: var(--carbon);
+  border: 1px solid var(--gridline);
+  border-radius: var(--r-card);
+}
+
+/* ═══ ANIMATION KEYFRAMES ═══ */
+
+/* Radar sweep for scanner */
+@keyframes radarSweep {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+.animate-radar { animation: radarSweep 1.4s linear infinite; }
+
+/* Pulse ring (Pokémon GO location) */
+@keyframes pulseRing {
+  0% { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
+.animate-pulse-ring { animation: pulseRing 2s ease-out infinite; }
+
+/* Foil sweep for cards */
+@keyframes foilSweep {
+  0% { transform: translate(-100%, -100%) rotate(-30deg); }
+  100% { transform: translate(100%, 100%) rotate(-30deg); }
+}
+
+/* Shimmer sweep for buttons */
+@keyframes shimmerSweep {
+  0% { transform: translateX(-100%) skewX(-15deg); }
+  100% { transform: translateX(200%) skewX(-15deg); }
+}
+.animate-shimmer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+  animation: shimmerSweep 1.5s ease-in-out;
+}
+
+/* Bell swing for notifications */
+@keyframes bellSwing {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(12deg); }
+  75% { transform: rotate(-12deg); }
+}
+.animate-bell-swing { animation: bellSwing 2s ease-in-out infinite; }
+
+/* Aperture blade opening */
+@keyframes apertureOpen {
+  0% { transform: rotate(0deg) scale(0.3); opacity: 0.4; }
+  100% { transform: rotate(45deg) scale(1); opacity: 1; }
+}
+
+/* Stagger appear (3 words) */
+@keyframes staggerIn {
+  0% { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+/* Odometer digit flip */
+@keyframes odometerFlip {
+  0% { transform: translateY(0); opacity: 1; }
+  50% { transform: translateY(-100%); opacity: 0; }
+  51% { transform: translateY(100%); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+/* XP bar liquid fill leading edge */
+@keyframes liquidEdge {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* Gradient border rotation for Mythic */
+@keyframes rotateGradient {
+  0% { filter: hue-rotate(0deg); }
+  100% { filter: hue-rotate(360deg); }
+}
+
+.animate-gradient-border {
+  position: relative;
+}
+.animate-gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  padding: 2px;
+  background: linear-gradient(135deg, #FF2200, #FFA500, #FF4500, #FF6A00, #FFA500, #FF2200);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: rotateGradient 3s linear infinite;
+  pointer-events: none;
+}
+
+/* ═══ LEAFLET MAP OVERRIDES ═══ */
+.leaflet-container {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 550px !important;
+  background-color: var(--void) !important;
+}
+.dark-tiles .leaflet-tile {
+  filter: brightness(0.6) invert(1) contrast(1.2) hue-rotate(200deg) saturate(0.3);
+}
+
+/* ═══ SCROLLBAR HIDE ═══ */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* ═══ SAFE AREA ═══ */
+.pb-safe { padding-bottom: env(safe-area-inset-bottom, 0px); }
+.pt-safe { padding-top: env(safe-area-inset-top, 0px); }
