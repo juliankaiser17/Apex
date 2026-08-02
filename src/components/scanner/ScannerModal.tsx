@@ -24,17 +24,32 @@ export const ScannerModal: React.FC = () => {
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const dataUrl = event.target?.result as string;
+        setCapturedPhotoUrl(dataUrl);
+        stopCameraStream();
+        setPhase('analyzing');
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const analysisMessages = [
     'Stage 1: Validating EXIF timestamp & software signatures...',
-    'Stage 2: Running Claude claude-sonnet-4-6 visual authenticity check...',
-    'Running GPT-4o Vision vehicle identification engine...',
-    'Applying 1.5km–2.2km spatial blur to GPS coordinates...',
-    'Calculating two-factor regional rarity (production + 100km density)...'
+    'Stage 2: Running Gemini 2.0 Flash visual authenticity check...',
+    'Running AI Vision vehicle identification engine...',
+    'Applying spatial blur to GPS coordinates...',
+    'Calculating regional rarity score...'
   ];
 
-  // Initialize Hardware Rear Camera Stream
+  // Initialize Hardware Rear Camera Stream with fallbacks
   const initHardwareCamera = async () => {
     setPermissionState('requesting');
     try {
@@ -43,22 +58,31 @@ export const ScannerModal: React.FC = () => {
         return;
       }
 
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: { ideal: 'environment' },
-          width: { ideal: 1920 },
-          height: { ideal: 1080 },
-          frameRate: { ideal: 60, min: 30 }
-        },
-        audio: false
-      });
+      let stream: MediaStream | null = null;
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: { ideal: 'environment' },
+            width: { ideal: 1920 },
+            height: { ideal: 1080 }
+          },
+          audio: false
+        });
+      } catch {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: false
+        });
+      }
 
       streamRef.current = stream;
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
+        videoRef.current.play().catch(e => console.warn('Video play error:', e));
       }
       setPermissionState('granted');
-    } catch {
+    } catch (err) {
+      console.warn('Hardware camera init failed:', err);
       setPermissionState('denied');
     }
   };
@@ -275,23 +299,40 @@ export const ScannerModal: React.FC = () => {
       {/* PERMISSION DENIED FULL-SCREEN PROMPT */}
       {permissionState === 'denied' && phase === 'camera' && (
         <div className="flex-1 flex flex-col items-center justify-center p-6 text-center space-y-6 max-w-md mx-auto">
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileSelect}
+            accept="image/*"
+            className="hidden"
+          />
+
           <div className="w-20 h-20 rounded-full bg-[#1A1A1A] border border-[#FF4500] flex items-center justify-center text-[#FF4500] glow-orange">
             <ShieldAlert className="w-10 h-10" />
           </div>
 
           <div className="space-y-2">
-            <h2 className="font-display text-4xl text-[#F0EBE3]">CAMERA ACCESS REQUIRED</h2>
+            <h2 className="font-display text-4xl text-[#F0EBE3]">CAMERA ACCESS</h2>
             <p className="text-sm text-[#9A9088] leading-relaxed">
-              Apex uses your device's native camera hardware to spot and identify real cars in the moment.
+              Scan with your live camera or upload a car photo from your device gallery.
             </p>
           </div>
 
-          <button
-            onClick={initHardwareCamera}
-            className="w-full py-4 rounded-xl bg-[#FF4500] text-[#F0EBE3] font-display text-xl tracking-wider glow-orange flex items-center justify-center gap-2"
-          >
-            <Settings className="w-5 h-5" /> GRANT CAMERA PERMISSION
-          </button>
+          <div className="w-full space-y-3">
+            <button
+              onClick={initHardwareCamera}
+              className="w-full py-4 rounded-xl bg-[#FF4500] text-[#F0EBE3] font-display text-xl tracking-wider glow-orange flex items-center justify-center gap-2"
+            >
+              <Settings className="w-5 h-5" /> TRY LIVE CAMERA AGAIN
+            </button>
+
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="w-full py-3.5 rounded-xl bg-[#1A1A1A] hover:bg-[#2C2C2C] text-[#F0EBE3] font-display text-base tracking-wider border border-[#2C2C2C] flex items-center justify-center gap-2"
+            >
+              <Camera className="w-5 h-5 text-[#FF4500]" /> UPLOAD PHOTO FROM GALLERY / CAMERA
+            </button>
+          </div>
         </div>
       )}
 
@@ -355,22 +396,43 @@ export const ScannerModal: React.FC = () => {
             </div>
           </div>
 
+          {/* Hidden File Input */}
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileSelect}
+            accept="image/*"
+            className="hidden"
+          />
+
           {/* Bottom Shutter Bar */}
           <div className="relative z-30 pb-10 flex flex-col items-center gap-3">
             <span className="text-[11px] font-data text-[#9A9088] bg-[#080808]/70 px-3 py-1 rounded-full border border-[#2C2C2C] backdrop-blur-md">
-              GPT-4o VISION · 60 FPS
+              GEMINI 2.0 FLASH AI VISION
             </span>
 
-            {/* Shutter Button (72px ring + 60px inner fill) */}
-            <motion.button
-              onClick={handleShutterCapture}
-              whileTap={{ scale: 0.88 }}
-              className="w-[72px] h-[72px] rounded-full border-2 border-[#F0EBE3]/60 bg-[#080808] flex items-center justify-center glow-orange"
-            >
-              <div className="w-[60px] h-[60px] rounded-full bg-[#F0EBE3] flex items-center justify-center">
-                <Camera className="w-7 h-7 text-[#080808]" />
-              </div>
-            </motion.button>
+            <div className="flex items-center gap-6">
+              {/* Gallery Upload Button */}
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="px-4 py-2 rounded-xl bg-[#1A1A1A] border border-[#2C2C2C] text-xs font-data text-[#F0EBE3] hover:border-[#FF4500] flex items-center gap-2"
+              >
+                <span>🖼️ UPLOAD PHOTO</span>
+              </button>
+
+              {/* Shutter Button (72px ring + 60px inner fill) */}
+              <motion.button
+                onClick={handleShutterCapture}
+                whileTap={{ scale: 0.88 }}
+                className="w-[72px] h-[72px] rounded-full border-2 border-[#F0EBE3]/60 bg-[#080808] flex items-center justify-center glow-orange shrink-0"
+              >
+                <div className="w-[60px] h-[60px] rounded-full bg-[#F0EBE3] flex items-center justify-center">
+                  <Camera className="w-7 h-7 text-[#080808]" />
+                </div>
+              </motion.button>
+
+              <div className="w-28" />
+            </div>
           </div>
         </div>
       )}

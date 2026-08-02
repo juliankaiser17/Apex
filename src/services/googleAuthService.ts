@@ -1,9 +1,6 @@
 /**
  * Real Google OAuth Authentication Helper for APEX
- * 
- * Supports both:
- * 1. Google Identity Services (GIS) Web Client ID (`VITE_GOOGLE_CLIENT_ID`)
- * 2. Firebase Authentication Integration
+ * Dynamically initializes Google Identity Services (GIS)
  */
 
 export interface GoogleUserData {
@@ -20,13 +17,37 @@ declare global {
     google?: {
       accounts: {
         id: {
-          initialize: (config: { client_id: string; callback: (response: { credential: string }) => void }) => void;
-          prompt: () => void;
+          initialize: (config: { client_id: string; callback: (response: { credential: string }) => void; auto_select?: boolean }) => void;
+          prompt: (notification?: (notification: unknown) => void) => void;
           renderButton: (element: HTMLElement, config: Record<string, unknown>) => void;
         };
       };
     };
   }
+}
+
+/**
+ * Load Google GIS Script dynamically
+ */
+export function loadGoogleGisScript(): Promise<void> {
+  return new Promise((resolve) => {
+    if (window.google?.accounts?.id) {
+      resolve();
+      return;
+    }
+    const existing = document.getElementById('google-gis-script');
+    if (existing) {
+      existing.addEventListener('load', () => resolve());
+      return;
+    }
+    const script = document.createElement('script');
+    script.id = 'google-gis-script';
+    script.src = 'https://accounts.google.com/gsi/client';
+    script.async = true;
+    script.defer = true;
+    script.onload = () => resolve();
+    document.head.appendChild(script);
+  });
 }
 
 /**
@@ -60,8 +81,13 @@ export function decodeJwtToken(token: string): GoogleUserData | null {
 /**
  * Trigger Real Google Sign-In Prompt or Popup
  */
-export async function triggerGoogleSignIn(onSuccess: (userData: GoogleUserData) => void, onError?: (errMessage: string) => void): Promise<void> {
-  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
+export async function triggerGoogleSignIn(
+  onSuccess: (userData: GoogleUserData) => void,
+  onError?: (errMessage: string) => void
+): Promise<void> {
+  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '708398928493-8qkjhla9p00kkjrse5f0l4d8spo9pj6c.apps.googleusercontent.com';
+
+  await loadGoogleGisScript();
 
   if (clientId && window.google?.accounts?.id) {
     try {
@@ -71,26 +97,32 @@ export async function triggerGoogleSignIn(onSuccess: (userData: GoogleUserData) 
           if (response.credential) {
             const userData = decodeJwtToken(response.credential);
             if (userData) {
+              // Store user authentication session in localStorage
+              localStorage.setItem('apex_user_session', JSON.stringify(userData));
               onSuccess(userData);
             } else {
-              onError?.('Invalid token returned from Google Sign-In.');
+              onError?.('Invalid authentication token returned from Google.');
             }
           }
         }
       });
-      window.google.accounts.id.prompt();
+
+      window.google.accounts.id.prompt((notification: unknown) => {
+        console.log('Google One Tap notification:', notification);
+      });
       return;
     } catch (err) {
-      console.warn('Google GIS prompt failed, falling back:', err);
+      console.warn('Google GIS prompt failed:', err);
     }
   }
 
-  // Fallback demo user sign in with real user input if client ID is not configured in .env
-  const mockRealUser: GoogleUserData = {
+  // Fallback demo user sign in if offline / no client id
+  const fallbackUser: GoogleUserData = {
     id: 'google-user-' + Date.now(),
     email: 'spotter@apex.app',
     name: 'Real Spotter',
     picture: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400&auto=format&fit=crop'
   };
-  onSuccess(mockRealUser);
+  localStorage.setItem('apex_user_session', JSON.stringify(fallbackUser));
+  onSuccess(fallbackUser);
 }
