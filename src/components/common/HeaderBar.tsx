@@ -1,10 +1,10 @@
 import React from 'react';
-import { Flame, Zap } from 'lucide-react';
+import { Flame, Zap, Settings } from 'lucide-react';
 import { useApexStore } from '../../store/useApexStore';
 import { getLevelFromXp } from '../../utils/rarity';
 
 export const HeaderBar: React.FC = () => {
-  const { user, setActiveTab } = useApexStore();
+  const { user, setActiveTab, setSettingsModalOpen } = useApexStore();
   const { level, progressPercent } = getLevelFromXp(user.xp);
 
   return (
@@ -31,12 +31,23 @@ export const HeaderBar: React.FC = () => {
               </div>
             )}
 
-            {/* Right: XP counter */}
-            <div className="flex items-center gap-1.5">
-              <Zap className="w-4 h-4" style={{ color: '#FF4500' }} />
-              <span className="font-data text-[16px] font-medium" style={{ color: '#F0EBE3' }}>
-                {user.xp.toLocaleString()}
-              </span>
+            {/* Right: XP counter & Settings Gear */}
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1.5">
+                <Zap className="w-4 h-4" style={{ color: '#FF4500' }} />
+                <span className="font-data text-[16px] font-medium" style={{ color: '#F0EBE3' }}>
+                  {user.xp.toLocaleString()}
+                </span>
+              </div>
+
+              {/* Profile Settings Gear Icon */}
+              <button
+                onClick={() => setSettingsModalOpen(true)}
+                className="w-8 h-8 rounded-full bg-white/10 hover:bg-[#FF4500]/20 flex items-center justify-center text-[#F0EBE3] hover:text-[#FF4500] transition-colors border border-white/10"
+                title="Profile & Privacy Settings"
+              >
+                <Settings className="w-4 h-4" />
+              </button>
             </div>
           </div>
         </div>

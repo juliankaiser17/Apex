@@ -12,6 +12,7 @@ import { ActiveHuntNotification } from './components/hunts/ActiveHuntNotificatio
 import { EnthusiastModal } from './components/premium/EnthusiastModal';
 import { HuntScreen } from './components/hunts/HuntScreen';
 import { Card3DDetail } from './components/garage/Card3DDetail';
+import { ProfileSettingsModal } from './components/profile/ProfileSettingsModal';
 
 export const App: React.FC = () => {
   useEffect(() => {
@@ -25,7 +26,9 @@ export const App: React.FC = () => {
     closeHuntModal, 
     setScannerOpen,
     selectedCardForDetail,
-    setSelectedCardForDetail
+    setSelectedCardForDetail,
+    settingsModalOpen,
+    setSettingsModalOpen
   } = useApexStore();
 
   return (
@@ -55,6 +58,12 @@ export const App: React.FC = () => {
       <ScannerModal />
       <ActiveHuntNotification />
       <EnthusiastModal />
+
+      {/* Profile & Privacy Settings Modal */}
+      <ProfileSettingsModal
+        isOpen={settingsModalOpen}
+        onClose={() => setSettingsModalOpen(false)}
+      />
 
       {/* Dedicated Full-Screen Hunt Experience */}
       <HuntScreen

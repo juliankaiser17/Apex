@@ -31,7 +31,10 @@ interface ApexState {
   leaderboards: LeaderboardEntry[];
   liveEventExpiresAt: number;
 
-  // Actions
+  settingsModalOpen: boolean;
+  setSettingsModalOpen: (open: boolean) => void;
+  updateUserProfile: (profile: Partial<UserProfile>) => void;
+  logoutUser: () => void;
   setActiveTab: (tab: 'home' | 'map' | 'garage' | 'social' | 'profile') => void;
   setScannerOpen: (open: boolean) => void;
   setPersona: (persona: Persona) => void;
@@ -554,6 +557,27 @@ export const useApexStore = create<ApexState>((set) => ({
   feedPosts: INITIAL_POSTS,
   leaderboards: INITIAL_LEADERBOARD,
   liveEventExpiresAt: GLOBAL_EVENT_EXPIRES_AT,
+
+  settingsModalOpen: false,
+  setSettingsModalOpen: (open) => set({ settingsModalOpen: open }),
+
+  updateUserProfile: (profile) => set((state) => ({
+    user: { ...state.user, ...profile }
+  })),
+
+  logoutUser: () => {
+    localStorage.removeItem('apex_user_session');
+    set({
+      onboardingCompleted: false,
+      settingsModalOpen: false,
+      user: {
+        ...INITIAL_USER,
+        displayName: 'Spotter',
+        username: 'spotter_guest',
+        email: ''
+      }
+    });
+  },
 
   setActiveTab: (tab) => set({ activeTab: tab }),
   
