@@ -16,7 +16,7 @@ interface ApexState {
   activeHuntAlert: Hunt | null;
   activeHuntModal: Hunt | null;
   selectedCardForDetail: CarCard | null;
-  
+
   // User Profile
   user: UserProfile;
 
@@ -166,7 +166,7 @@ export const useApexStore = create<ApexState>((set) => ({
   },
 
   setActiveTab: (tab) => set({ activeTab: tab }),
-  
+
   setScannerOpen: (open) => set({ scannerOpen: open }),
 
   setPersona: (persona) => set((state) => ({
@@ -388,10 +388,10 @@ export const useApexStore = create<ApexState>((set) => ({
   },
 
   toggleAllowHunts: () => set((state) => ({
-    user: { 
-      ...state.user, 
+    user: {
+      ...state.user,
       allowHunts: !state.user.allowHunts,
-      defaultPrivacyLevel: !state.user.allowHunts ? 'public_blurred' : 'no_hunt_private' 
+      defaultPrivacyLevel: !state.user.allowHunts ? 'public_blurred' : 'no_hunt_private'
     }
   })),
 
