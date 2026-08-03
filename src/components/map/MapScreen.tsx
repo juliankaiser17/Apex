@@ -244,11 +244,11 @@ export const MapScreen: React.FC = () => {
           <div className="flex items-center gap-2">
             <Search className="w-5 h-5 text-[#FF4500] group-hover:scale-110 transition-transform" />
             <span className="truncate uppercase font-bold">
-              {selectedCity ? `${selectedCity.name} RADAR` : 'HONG KONG RADAR / SEARCH'}
+              {selectedCity ? `${selectedCity.name} RADAR` : 'LOCATION RADAR / SEARCH'}
             </span>
           </div>
           <span className="text-[10px] font-data text-[#FF4500] bg-[#FF4500]/10 px-2 py-0.5 rounded border border-[#FF4500]/30 shrink-0">
-            GTA V CAM 🛰️
+            SEARCH 🔍
           </span>
         </button>
       </div>

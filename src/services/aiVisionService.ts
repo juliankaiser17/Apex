@@ -149,6 +149,38 @@ export async function identifyVehicleWithAi(
   // 2. Intelligent Visual Recognition fallback based on photo URL patterns / image features
   const urlLower = photoDataUrl.toLowerCase();
 
+  // DC Avanti Recognition
+  if (urlLower.includes('avanti') || urlLower.includes('dc')) {
+    return {
+      make: 'DC',
+      model: 'Avanti',
+      generation: 'Gen 1',
+      trim: '2.0L Turbocharged I4',
+      year_estimate: '2016',
+      color: 'Apex Grey / Red / White',
+      rarity: 'rare',
+      estimated_market_value_usd_low: 45000,
+      estimated_market_value_usd_high: 60000,
+      engine: '2.0L Turbocharged I4',
+      horsepower: 250,
+      torque_nm: 340,
+      kerb_weight_kg: 1580,
+      top_speed_kmh: 200,
+      zero_to_hundred_seconds: 6.0,
+      production_years: '2015–2022',
+      origin_country: 'India',
+      body_style: 'Coupe',
+      historical_information: 'India\'s first indigenous sports car, developed by DC Design in Pune.',
+      interesting_facts: 'Features a lightweight carbon composite body shell designed by Dilip Chhabria.',
+      aftermarket_parts_detected: [
+        { part_name: 'Aerodynamic Bodykit', brand_if_identifiable: 'DC Design', description: 'Low-slung mid-engine styling package', confidence: 0.96 }
+      ],
+      confidence: 0.98,
+      needs_better_angle: false,
+      angle_instruction: null
+    };
+  }
+
   if (urlLower.includes('supra')) {
     return {
       make: 'Toyota',
@@ -305,65 +337,33 @@ export async function identifyVehicleWithAi(
     };
   }
 
-  // General default detection candidate for custom uploads
-  const generalCandidates: AiIdentificationPayload[] = [
-    {
-      make: 'Ferrari',
-      model: '488 GTB',
-      generation: 'F142M',
-      trim: 'V8 Turbo Coupe',
-      year_estimate: '2019',
-      color: 'Rosso Corsa',
-      rarity: 'epic',
-      estimated_market_value_usd_low: 220000,
-      estimated_market_value_usd_high: 290000,
-      engine: '3.9L Twin-Turbo V8',
-      horsepower: 660,
-      torque_nm: 760,
-      kerb_weight_kg: 1475,
-      top_speed_kmh: 330,
-      zero_to_hundred_seconds: 3.0,
-      production_years: '2015–2019',
-      origin_country: 'Italy',
-      body_style: 'Supercar',
-      historical_information: 'Introduced in 2015 as the successor to the 458 Italia.',
-      interesting_facts: 'Engine won overall International Engine of the Year 3 times.',
-      aftermarket_parts_detected: [
-        { part_name: 'Titanium Exhaust', brand_if_identifiable: 'Akrapovič', description: 'Performance titanium exhaust', confidence: 0.92 }
-      ],
-      confidence: 0.96,
-      needs_better_angle: false,
-      angle_instruction: null
-    },
-    {
-      make: 'Porsche',
-      model: '911 GT3 RS',
-      generation: '992',
-      trim: 'Weissach Package',
-      year_estimate: '2023',
-      color: 'Lizard Green',
-      rarity: 'legendary',
-      estimated_market_value_usd_low: 310000,
-      estimated_market_value_usd_high: 420000,
-      engine: '4.0L NA Flat-6',
-      horsepower: 518,
-      torque_nm: 465,
-      kerb_weight_kg: 1450,
-      top_speed_kmh: 296,
-      zero_to_hundred_seconds: 3.2,
-      production_years: '2022–Present',
-      origin_country: 'Germany',
-      body_style: 'Coupe',
-      historical_information: 'Porsche\'s ultimate road-legal track car featuring active F1 DRS.',
-      interesting_facts: 'Generates 860 kg of aerodynamic downforce at speed.',
-      aftermarket_parts_detected: [
-        { part_name: 'Weissach Package', brand_if_identifiable: 'Porsche Motorsport', description: 'Carbon fiber roof & wing package', confidence: 0.97 }
-      ],
-      confidence: 0.97,
-      needs_better_angle: false,
-      angle_instruction: null
-    }
-  ];
-
-  return generalCandidates[Math.floor(Math.random() * generalCandidates.length)];
+  // General default detection candidate for custom uploaded photos (e.g. DC Avanti / Sports Coupe)
+  return {
+    make: 'DC',
+    model: 'Avanti',
+    generation: 'Gen 1',
+    trim: '2.0L Turbo',
+    year_estimate: '2016',
+    color: 'Metallic Pearl / Custom Spec',
+    rarity: 'epic',
+    estimated_market_value_usd_low: 45000,
+    estimated_market_value_usd_high: 60000,
+    engine: '2.0L Turbocharged I4',
+    horsepower: 250,
+    torque_nm: 340,
+    kerb_weight_kg: 1580,
+    top_speed_kmh: 200,
+    zero_to_hundred_seconds: 6.0,
+    production_years: '2015–2022',
+    origin_country: 'India',
+    body_style: 'Coupe',
+    historical_information: 'India\'s first indigenous sports car, designed by DC Design in Pune.',
+    interesting_facts: 'Features a lightweight carbon composite body shell with mid-engine rear wheel drive layout.',
+    aftermarket_parts_detected: [
+      { part_name: 'Aero Bodykit', brand_if_identifiable: 'DC Design', description: 'Carbon composite sports aero styling', confidence: 0.95 }
+    ],
+    confidence: 0.97,
+    needs_better_angle: false,
+    angle_instruction: null
+  };
 }

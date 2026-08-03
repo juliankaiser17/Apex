@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, MapPin, Globe, Sparkles, Navigation, X } from 'lucide-react';
+import { Search, MapPin, Globe, Navigation, X } from 'lucide-react';
 import { sounds } from '../../utils/audio';
 
 export interface CityLocation {
@@ -9,20 +9,19 @@ export interface CityLocation {
   lat: number;
   lng: number;
   tagline: string;
-  activeCarsCount: number;
 }
 
 export const FAMOUS_CITIES: CityLocation[] = [
-  { name: 'Tokyo', country: 'Japan', lat: 35.6762, lng: 139.6503, tagline: 'Shibuya & Daikanyama JDM Mecca', activeCarsCount: 142 },
-  { name: 'Dubai', country: 'United Arab Emirates', lat: 25.2048, lng: 55.2708, tagline: 'Downtown & Palm Jumeirah Hypercars', activeCarsCount: 198 },
-  { name: 'Monaco', country: 'Monaco', lat: 43.7384, lng: 7.4246, tagline: 'Casino Square Millionaire Corridor', activeCarsCount: 86 },
-  { name: 'London', country: 'United Kingdom', lat: 51.5074, lng: -0.1278, tagline: 'Mayfair & Knightsbridge Supercar Season', activeCarsCount: 164 },
-  { name: 'New York', country: 'United States', lat: 40.7128, lng: -74.0060, tagline: 'Manhattan & Hamptons Exotic Radar', activeCarsCount: 120 },
-  { name: 'Hong Kong', country: 'Hong Kong', lat: 22.2950, lng: 114.1720, tagline: 'Tsim Sha Tsui Harbour Supercar Strip', activeCarsCount: 134 },
-  { name: 'Los Angeles', country: 'United States', lat: 34.0522, lng: -118.2437, tagline: 'Rodeo Drive & Angeles Crest Highway', activeCarsCount: 175 },
-  { name: 'Paris', country: 'France', lat: 48.8566, lng: 2.3522, tagline: 'Champs-Élysées Luxury & Vintage Spec', activeCarsCount: 110 },
-  { name: 'Stuttgart', country: 'Germany', lat: 48.7758, lng: 9.1829, tagline: 'Porsche & Mercedes Motorsport Heritage', activeCarsCount: 95 },
-  { name: 'Mumbai', country: 'India', lat: 19.0760, lng: 72.8777, tagline: 'Marine Drive & Bandra Supercar Spotting', activeCarsCount: 88 }
+  { name: 'Tokyo', country: 'Japan', lat: 35.6762, lng: 139.6503, tagline: 'Shibuya & Daikanyama JDM Mecca' },
+  { name: 'Dubai', country: 'United Arab Emirates', lat: 25.2048, lng: 55.2708, tagline: 'Downtown & Palm Jumeirah Hypercars' },
+  { name: 'Monaco', country: 'Monaco', lat: 43.7384, lng: 7.4246, tagline: 'Casino Square Millionaire Corridor' },
+  { name: 'London', country: 'United Kingdom', lat: 51.5074, lng: -0.1278, tagline: 'Mayfair & Knightsbridge Supercar Season' },
+  { name: 'New York', country: 'United States', lat: 40.7128, lng: -74.0060, tagline: 'Manhattan & Hamptons Exotic Radar' },
+  { name: 'Hong Kong', country: 'Hong Kong', lat: 22.2950, lng: 114.1720, tagline: 'Tsim Sha Tsui Harbour Supercar Strip' },
+  { name: 'Los Angeles', country: 'United States', lat: 34.0522, lng: -118.2437, tagline: 'Rodeo Drive & Angeles Crest Highway' },
+  { name: 'Paris', country: 'France', lat: 48.8566, lng: 2.3522, tagline: 'Champs-Élysées Luxury & Vintage Spec' },
+  { name: 'Stuttgart', country: 'Germany', lat: 48.7758, lng: 9.1829, tagline: 'Porsche & Mercedes Motorsport Heritage' },
+  { name: 'Mumbai', country: 'India', lat: 19.0760, lng: 72.8777, tagline: 'Marine Drive & Bandra Supercar Spotting' }
 ];
 
 interface CitySearchModalProps {
@@ -50,19 +49,16 @@ export const CitySearchModal: React.FC<CitySearchModalProps> = ({ isOpen, onClos
     e.preventDefault();
     if (!query.trim()) return;
 
-    // Check if query matches a city or fallback to default coordinates
     const matched = FAMOUS_CITIES.find(c => c.name.toLowerCase() === query.trim().toLowerCase());
     if (matched) {
       handleSelect(matched);
     } else {
-      // Dynamic fallback for custom typed places
       const customCity: CityLocation = {
         name: query.trim(),
-        country: 'Global Transit',
-        lat: 25.2048 + (Math.random() * 20 - 10),
-        lng: 55.2708 + (Math.random() * 20 - 10),
-        tagline: 'Custom Apex Satellite Co-ordinates',
-        activeCarsCount: Math.floor(25 + Math.random() * 75)
+        country: 'Search Location',
+        lat: 25.2048 + (Math.random() * 10 - 5),
+        lng: 55.2708 + (Math.random() * 10 - 5),
+        tagline: 'Custom Radar Search Co-ordinates'
       };
       handleSelect(customCity);
     }
@@ -81,7 +77,7 @@ export const CitySearchModal: React.FC<CitySearchModalProps> = ({ isOpen, onClos
           <div className="flex items-center justify-between border-b border-white/10 pb-3">
             <div className="flex items-center gap-2">
               <Globe className="w-5 h-5 text-[#FF5500]" />
-              <h3 className="font-display text-2xl text-white tracking-wide">GTA 5 SATELLITE SEARCH</h3>
+              <h3 className="font-display text-2xl text-white tracking-wide">LOCATION SEARCH</h3>
             </div>
             <button
               onClick={onClose}
@@ -129,19 +125,10 @@ export const CitySearchModal: React.FC<CitySearchModalProps> = ({ isOpen, onClos
                 </div>
 
                 <div className="text-right">
-                  <span className="text-[10px] font-mono text-emerald-400 bg-emerald-950 px-2 py-0.5 rounded border border-emerald-500/40">
-                    {city.activeCarsCount} SPOTS
-                  </span>
-                  <Navigation className="w-3.5 h-3.5 text-slate-400 ml-auto mt-1 group-hover:text-[#FF5500]" />
+                  <Navigation className="w-4 h-4 text-slate-400 ml-auto group-hover:text-[#FF5500]" />
                 </div>
               </div>
             ))}
-          </div>
-
-          {/* GTA V Camera Transition Info Footer */}
-          <div className="p-3 rounded-2xl bg-slate-950 border border-slate-800 text-[11px] text-slate-400 font-mono flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-amber-400 shrink-0 animate-pulse" />
-            <span>Triggers GTA V style satellite skyward lift-off & high-speed camera switch animation!</span>
           </div>
         </motion.div>
       </div>

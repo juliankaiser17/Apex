@@ -57,27 +57,27 @@ interface ApexState {
 
 const INITIAL_USER: UserProfile = {
   id: 'user-apex-01',
-  username: 'prateek_k',
-  displayName: 'Prateek K',
-  email: 'prateek@apex.app',
+  username: 'hunter',
+  displayName: 'Apex Hunter',
+  email: 'hunter@apex.app',
   avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400&auto=format&fit=crop',
   persona: 'spotter',
-  level: 12,
-  xp: 4820,
-  coins: 320,
-  streakDays: 7,
+  level: 1,
+  xp: 0,
+  coins: 50,
+  streakDays: 0,
   streakLastAt: new Date().toISOString(),
-  rankGlobal: 1420,
-  rankCountry: 340,
-  rankCity: 142,
-  city: 'Hong Kong',
-  country: 'Hong Kong',
-  countryCode: 'HK',
+  rankGlobal: 1,
+  rankCountry: 1,
+  rankCity: 1,
+  city: 'Local Area',
+  country: 'Your Country',
+  countryCode: 'GLOBAL',
   isPremium: false,
-  totalSpots: 142,
-  rarestFind: 'mythic',
-  badgesUnlocked: 18,
-  citiesExplored: 3,
+  totalSpots: 0,
+  rarestFind: 'common',
+  badgesUnlocked: 0,
+  citiesExplored: 1,
   allowHunts: true,
   defaultPrivacyLevel: 'public_blurred'
 };
@@ -122,10 +122,7 @@ const INITIAL_BADGES: Badge[] = [
 export const INITIAL_POSTS: FeedPost[] = [];
 
 const INITIAL_LEADERBOARD: LeaderboardEntry[] = [
-  { rank: 1, username: 'apex_king', displayName: 'Apex King', avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=200&auto=format&fit=crop', xp: 12450, level: 32, rankChange: 'up', changeAmount: 2, rarestCard: 'Bugatti Chiron' },
-  { rank: 2, username: 'driver_27', displayName: 'Driver 27', avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=200&auto=format&fit=crop', xp: 11200, level: 28, rankChange: 'same', rarestCard: 'Porsche GT3 RS' },
-  { rank: 3, username: 'spotmeister', displayName: 'Spot Meister', avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200&auto=format&fit=crop', xp: 9800, level: 25, rankChange: 'down', changeAmount: 1, rarestCard: 'Lamborghini Huracan' },
-  { rank: 142, username: 'prateek_k', displayName: 'You (Prateek K)', avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400&auto=format&fit=crop', xp: 4820, level: 12, rankChange: 'up', changeAmount: 1, isUser: true, rarestCard: 'Bugatti Chiron' }
+  { rank: 1, username: 'you', displayName: 'You', avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400&auto=format&fit=crop', xp: 0, level: 1, rankChange: 'same', isUser: true, rarestCard: 'None Yet' }
 ];
 
 export const useApexStore = create<ApexState>((set) => ({

@@ -14,9 +14,20 @@ import { HuntScreen } from './components/hunts/HuntScreen';
 import { Card3DDetail } from './components/garage/Card3DDetail';
 import { ProfileSettingsModal } from './components/profile/ProfileSettingsModal';
 
+import { requestRealLocationPermission } from './utils/geolocation';
+
 export const App: React.FC = () => {
   useEffect(() => {
     document.title = 'APEX — Every Street Is a Track';
+
+    requestRealLocationPermission().then((res) => {
+      if (res.city && res.city !== 'Your City') {
+        useApexStore.getState().updateUserProfile({
+          city: res.city,
+          country: res.country
+        });
+      }
+    });
   }, []);
 
   const { 

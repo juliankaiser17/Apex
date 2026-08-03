@@ -215,20 +215,15 @@ export const SocialScreen: React.FC = () => {
             />
           </div>
 
-          {/* Active Challenge Banner */}
-          <div className="p-4 rounded-xl bg-[#111111] border border-[#FF4500]/40 space-y-3">
-            <div className="flex items-center gap-2 text-[#FF4500] font-data text-xs font-semibold uppercase">
-              <Zap className="w-4 h-4" /> ACTIVE FRIEND CHALLENGE
+          <div className="text-center py-12 px-6 space-y-4 bg-[#111111] rounded-2xl border border-[#2C2C2C]">
+            <div className="w-14 h-14 rounded-full bg-[#1A1A1A] border border-[#FF4500] flex items-center justify-center mx-auto text-[#FF4500] glow-orange">
+              <Zap className="w-7 h-7" />
             </div>
-            <h4 className="font-display text-2xl text-[#F0EBE3]">7-DAY XP RACE VS @driver_27</h4>
-            <div className="space-y-1">
-              <div className="flex justify-between text-xs font-data text-[#9A9088]">
-                <span>You: 4,820 XP</span>
-                <span className="text-[#FFA500] font-semibold">@driver_27: 5,100 XP</span>
-              </div>
-              <div className="h-2 bg-[#1A1A1A] rounded-full overflow-hidden border border-[#2C2C2C]">
-                <div className="h-full bg-[#FF4500] w-2/5 rounded-full" />
-              </div>
+            <div>
+              <h4 className="font-display text-2xl text-[#F0EBE3]">NO FRIENDS ADDED YET</h4>
+              <p className="text-xs text-[#9A9088] mt-1 max-w-xs mx-auto">
+                Connect with other real car spotters in your city to compare cards and start 7-day XP races.
+              </p>
             </div>
           </div>
         </div>
