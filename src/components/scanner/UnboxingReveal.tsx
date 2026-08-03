@@ -278,8 +278,8 @@ export const UnboxingReveal: React.FC<UnboxingRevealProps> = ({ card, onComplete
                 phase === 1
                   ? { scale: 1.0, opacity: 1, y: 0 }
                   : phase === 4
-                  ? { x: [6, -6, 4, -4, 2, 0], scale: 1.0 }
-                  : { scale: 1.0, y: 0 }
+                  ? { x: [6, -6, 4, -4, 2, 0], scale: 1.0, opacity: 1, y: 0 }
+                  : { scale: 1.0, opacity: 1, y: 0 }
               }
               transition={
                 phase === 1
@@ -291,7 +291,9 @@ export const UnboxingReveal: React.FC<UnboxingRevealProps> = ({ card, onComplete
               style={{
                 boxShadow: phase >= 3 ? `0 20px 60px ${rarityConf.color}66` : '0 20px 60px rgba(0,0,0,0.8)'
               }}
-              className="relative w-[320px] h-[448px] rounded-[16px] overflow-hidden bg-[#111111] border border-[#2C2C2C] flex flex-col items-center justify-center p-6 text-center select-none"
+              className={`relative w-[320px] h-[448px] rounded-[16px] overflow-hidden flex flex-col items-center justify-center p-6 text-center select-none ${
+                phase >= 5 ? 'bg-transparent border-none' : 'bg-[#111111] border border-[#2C2C2C]'
+              }`}
             >
               {/* Rarity Ring overlay (Phase 2+) */}
               {phase >= 2 && (
