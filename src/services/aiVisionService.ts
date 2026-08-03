@@ -400,6 +400,83 @@ export async function identifyVehicleWithAi(
     }
   }
 
+  // 1.5 Try OpenAI Vision API if VITE_OPENAI_API_KEY is configured
+  const openAiKey = import.meta.env.VITE_OPENAI_API_KEY;
+  if (openAiKey && photoDataUrl.startsWith('data:image')) {
+    try {
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${openAiKey}`
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o',
+          response_format: { type: 'json_object' },
+          messages: [
+            {
+              role: 'system',
+              content: `You are an expert Automotive Vision AI classifier. Analyze this car photo and return ONLY valid JSON matching this schema exactly:
+{
+  "make": "Exact Make (e.g. Porsche, Toyota, Ferrari)",
+  "model": "Exact Model (e.g. 911 Carrera, GR Supra, 458 Italia)",
+  "generation": "Model Generation code",
+  "trim": "Trim specification",
+  "year_estimate": "Estimated Year",
+  "color": "Observed car body color",
+  "rarity": "common" | "uncommon" | "rare" | "epic" | "legendary" | "mythic",
+  "estimated_market_value_usd_low": number,
+  "estimated_market_value_usd_high": number,
+  "engine": "Engine spec",
+  "horsepower": number,
+  "torque_nm": number,
+  "kerb_weight_kg": number,
+  "top_speed_kmh": number,
+  "zero_to_hundred_seconds": number,
+  "production_years": "YYYY-YYYY",
+  "origin_country": "Country",
+  "body_style": "Coupe" | "Sedan" | "Convertible" | "SUV" | "Supercar",
+  "historical_information": "Brief concise history",
+  "interesting_facts": "Key engineering fact",
+  "aftermarket_parts_detected": [],
+  "confidence": 0.98,
+  "needs_better_angle": false,
+  "angle_instruction": null
+}`
+            },
+            {
+              role: 'user',
+              content: [
+                { type: 'text', text: 'Analyze this vehicle and output JSON.' },
+                { type: 'image_url', image_url: { url: photoDataUrl } }
+              ]
+            }
+          ]
+        })
+      });
+
+      if (response.ok) {
+        const jsonRes = await response.json();
+        const content = jsonRes.choices?.[0]?.message?.content;
+        if (content) {
+          const parsed = JSON.parse(content);
+          if (parsed.make && parsed.model) {
+            return {
+              ...parsed,
+              confidence: parsed.confidence || 0.98,
+              needs_better_angle: false,
+              angle_instruction: null
+            };
+          }
+        }
+      } else {
+        console.warn('OpenAI API Error:', await response.text());
+      }
+    } catch (e) {
+      console.warn('OpenAI Vision API fetch error:', e);
+    }
+  }
+
   // 2. Try Gemini Vision API if VITE_GEMINI_API_KEY is configured
   const geminiApiKey = import.meta.env.VITE_GEMINI_API_KEY;
   if (geminiApiKey && photoDataUrl.startsWith('data:image')) {
