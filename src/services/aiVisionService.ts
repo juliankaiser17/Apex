@@ -341,39 +341,7 @@ export async function identifyVehicleWithAi(
     };
   }
 
-  const urlLower = photoDataUrl.toLowerCase();
 
-  // 1. DIRECT KEYWORD MATCHING (High precision for uploaded files / photos)
-  if (urlLower.includes('supra') || urlLower.includes('a90') || urlLower.includes('toyota')) {
-    return SMART_CAR_DATABASE.supra;
-  }
-  if (urlLower.includes('997') || urlLower.includes('porsche997') || urlLower.includes('porsche_997')) {
-    return SMART_CAR_DATABASE.porsche997;
-  }
-  if (urlLower.includes('996') || urlLower.includes('porsche996') || urlLower.includes('porsche_996')) {
-    return SMART_CAR_DATABASE.porsche996;
-  }
-  if (urlLower.includes('porsche') || urlLower.includes('911') || urlLower.includes('carrera')) {
-    return SMART_CAR_DATABASE.porsche997;
-  }
-  if (urlLower.includes('mclaren') || urlLower.includes('650s')) {
-    return SMART_CAR_DATABASE.mclaren650s;
-  }
-  if (urlLower.includes('ferrari') || urlLower.includes('458')) {
-    return SMART_CAR_DATABASE.ferrari458;
-  }
-  if (urlLower.includes('lamborghini') || urlLower.includes('huracan')) {
-    return SMART_CAR_DATABASE.lamborghini_huracan;
-  }
-  if (urlLower.includes('bmw') || urlLower.includes('m3') || urlLower.includes('g80')) {
-    return SMART_CAR_DATABASE.bmw_m3;
-  }
-  if (urlLower.includes('gtr') || urlLower.includes('nissan') || urlLower.includes('r35')) {
-    return SMART_CAR_DATABASE.gtr;
-  }
-  if (urlLower.includes('avanti') || urlLower.includes('dc')) {
-    return SMART_CAR_DATABASE.dc_avanti;
-  }
 
   // 2. Try Gemini Vision API if VITE_GEMINI_API_KEY is configured
   const geminiApiKey = import.meta.env.VITE_GEMINI_API_KEY;
