@@ -375,14 +375,14 @@ export async function identifyVehicleWithAi(
     return SMART_CAR_DATABASE.dc_avanti;
   }
 
-  // 2. Try Gemini Vision API if a valid Gemini API key is configured
+  // 2. Try Gemini Vision API if VITE_GEMINI_API_KEY is configured
   const geminiApiKey = import.meta.env.VITE_GEMINI_API_KEY;
-  if (geminiApiKey && !geminiApiKey.startsWith('AQ.') && photoDataUrl.startsWith('data:image')) {
+  if (geminiApiKey && photoDataUrl.startsWith('data:image')) {
     try {
       const base64Data = photoDataUrl.split(',')[1];
       const mimeType = photoDataUrl.substring(photoDataUrl.indexOf(':') + 1, photoDataUrl.indexOf(';'));
 
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiApiKey}`, {
+      let response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -391,12 +391,30 @@ export async function identifyVehicleWithAi(
               {
                 text: `You are an expert Automotive Vision AI classifier. Analyze this car photo and return ONLY raw JSON matching this structure:
 {
-  "make": "Toyota", model: "GR Supra 3.0 (A90)", "generation": "MK5", "trim": "Inline-6 Turbo", "year_estimate": "2021",
-  "color": "White", "rarity": "epic", "estimated_market_value_usd_low": 55000, "estimated_market_value_usd_high": 72000,
-  "engine": "3.0L B58 Turbo I6", "horsepower": 382, "torque_nm": 500, "kerb_weight_kg": 1540, "top_speed_kmh": 250,
-  "zero_to_hundred_seconds": 3.9, "production_years": "2019-Present", "origin_country": "Japan", "body_style": "Coupe",
-  "historical_information": "Co-developed with BMW.", "interesting_facts": "Double bubble roof design.",
-  "aftermarket_parts_detected": [], "confidence": 0.98, "needs_better_angle": false, "angle_instruction": null
+  "make": "Exact Make (e.g. Porsche, Toyota, Ferrari, BMW, McLaren)",
+  "model": "Exact Model (e.g. 911 Carrera S, GR Supra 3.0, 458 Spider, M3 Competition)",
+  "generation": "Model Generation code (e.g. 997.1, A90, F142, G80)",
+  "trim": "Trim specification",
+  "year_estimate": "Estimated Year (e.g. 2008, 2021, 2013)",
+  "color": "Observed car body color",
+  "rarity": "common" | "uncommon" | "rare" | "epic" | "legendary" | "mythic",
+  "estimated_market_value_usd_low": 55000,
+  "estimated_market_value_usd_high": 72000,
+  "engine": "Engine spec (e.g. 3.8L Flat-6, 3.0L B58 Turbo I6)",
+  "horsepower": 380,
+  "torque_nm": 400,
+  "kerb_weight_kg": 1420,
+  "top_speed_kmh": 300,
+  "zero_to_hundred_seconds": 4.5,
+  "production_years": "2004–2012",
+  "origin_country": "Germany",
+  "body_style": "Supercar" | "Coupe" | "Sedan" | "Convertible" | "Hypercar" | "SUV",
+  "historical_information": "Brief concise history",
+  "interesting_facts": "Key engineering fact",
+  "aftermarket_parts_detected": [],
+  "confidence": 0.98,
+  "needs_better_angle": false,
+  "angle_instruction": null
 }`
               },
               {
@@ -406,6 +424,33 @@ export async function identifyVehicleWithAi(
           }]
         })
       });
+
+      if (!response.ok) {
+        response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiApiKey}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{
+              parts: [
+                {
+                  text: `Analyze this car photo and return ONLY raw JSON matching automotive identification schema:
+{
+  "make": "Make", "model": "Model", "generation": "Gen", "trim": "Trim", "year_estimate": "Year",
+  "color": "Color", "rarity": "rare", "estimated_market_value_usd_low": 50000, "estimated_market_value_usd_high": 70000,
+  "engine": "Engine", "horsepower": 350, "torque_nm": 400, "kerb_weight_kg": 1400, "top_speed_kmh": 280,
+  "zero_to_hundred_seconds": 4.2, "production_years": "2010-2020", "origin_country": "Germany", "body_style": "Coupe",
+  "historical_information": "History", "interesting_facts": "Fact", "aftermarket_parts_detected": [],
+  "confidence": 0.98, "needs_better_angle": false, "angle_instruction": null
+}`
+                },
+                {
+                  inline_data: { mime_type: mimeType, data: base64Data }
+                }
+              ]
+            }]
+          })
+        });
+      }
 
       if (response.ok) {
         const jsonRes = await response.json();
@@ -424,7 +469,7 @@ export async function identifyVehicleWithAi(
         }
       }
     } catch (e) {
-      console.warn('Gemini API fetch error:', e);
+      console.warn('Gemini Vision API fetch error:', e);
     }
   }
 

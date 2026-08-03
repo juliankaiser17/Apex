@@ -4,7 +4,6 @@ import type { CarCard, RarityTier } from '../../types/apex';
 import { RARITY_CONFIG } from '../../utils/rarity';
 import { ApexCollectibleCard } from '../card/ApexCollectibleCard';
 import { PostComposer } from './PostComposer';
-import { VehicleSelectorModal } from './VehicleSelectorModal';
 import { sounds } from '../../utils/audio';
 import confetti from 'canvas-confetti';
 
@@ -27,10 +26,8 @@ type RevealPhase =
   | 11; // Face-up content + action buttons
 
 export const UnboxingReveal: React.FC<UnboxingRevealProps> = ({ card, onComplete }) => {
-  const [activeCard, setActiveCard] = useState<CarCard>(card);
-  const [phase, setPhase] = useState<RevealPhase>(11);
+  const [phase, setPhase] = useState<RevealPhase>(0);
   const [showPostComposer, setShowPostComposer] = useState(false);
-  const [isSelectorOpen, setIsSelectorOpen] = useState(false);
   const [fireworkParticles, setFireworkParticles] = useState<Array<{ id: number; x: number; y: number; size: number; color: string }>>([]);
 
   const rarityConf = RARITY_CONFIG[card.rarity];
@@ -149,7 +146,7 @@ export const UnboxingReveal: React.FC<UnboxingRevealProps> = ({ card, onComplete
       <AnimatePresence>
         {showPostComposer && (
           <PostComposer
-            card={activeCard}
+            card={card}
             onBack={() => setShowPostComposer(false)}
             onPostComplete={() => {
               setShowPostComposer(false);
@@ -356,47 +353,34 @@ export const UnboxingReveal: React.FC<UnboxingRevealProps> = ({ card, onComplete
               />
 
               {/* Main Collectible Card */}
-              <ApexCollectibleCard card={activeCard} showHolo={true} />
+              <ApexCollectibleCard card={card} showHolo={true} />
 
-              {/* PHASE 11: ACTION BUTTONS */}
+              {/* PHASE 11: ACTION BUTTONS ("SAVE PRIVATELY" and "POST TO APEX →") */}
               {phase >= 11 && (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3 }}
-                  className="space-y-2 w-full max-w-[320px]"
+                  className="flex items-center gap-3 w-full max-w-[320px]"
                 >
-                  {/* Edit / Confirm Vehicle Specs Button */}
+                  {/* Save Privately Ghost Button */}
+                  <button
+                    onClick={handleSavePrivately}
+                    className="flex-1 h-13 rounded-xl border border-[#2C2C2C] bg-[#111111] hover:bg-[#1A1A1A] text-[#F0EBE3] font-display text-lg tracking-wider transition-all"
+                  >
+                    SAVE PRIVATELY
+                  </button>
+
+                  {/* Post to Apex Ignition CTA */}
                   <button
                     onClick={() => {
                       sounds.playTargetLock();
-                      setIsSelectorOpen(true);
+                      setShowPostComposer(true);
                     }}
-                    className="w-full py-2.5 rounded-xl border border-[#FF4500]/50 bg-[#FF4500]/10 hover:bg-[#FF4500]/20 text-[#FF4500] font-data text-xs font-semibold tracking-wider flex items-center justify-center gap-1.5 transition-all"
+                    className="flex-1 h-13 rounded-xl bg-[#FF4500] hover:bg-[#FF6A00] text-[#F0EBE3] font-display text-lg tracking-wider glow-orange transition-all flex items-center justify-center gap-1"
                   >
-                    <span>✏️ WRONG CAR? EDIT / CONFIRM MODEL</span>
+                    POST TO APEX →
                   </button>
-
-                  <div className="flex items-center gap-3 w-full">
-                    {/* Save Privately Ghost Button */}
-                    <button
-                      onClick={handleSavePrivately}
-                      className="flex-1 h-12 rounded-xl border border-[#2C2C2C] bg-[#111111] hover:bg-[#1A1A1A] text-[#F0EBE3] font-display text-base tracking-wider transition-all"
-                    >
-                      SAVE PRIVATELY
-                    </button>
-
-                    {/* Post to Apex Ignition CTA */}
-                    <button
-                      onClick={() => {
-                        sounds.playTargetLock();
-                        setShowPostComposer(true);
-                      }}
-                      className="flex-1 h-12 rounded-xl bg-[#FF4500] hover:bg-[#FF6A00] text-[#F0EBE3] font-display text-base tracking-wider glow-orange transition-all flex items-center justify-center gap-1"
-                    >
-                      POST TO APEX →
-                    </button>
-                  </div>
                 </motion.div>
               )}
             </motion.div>
@@ -404,16 +388,6 @@ export const UnboxingReveal: React.FC<UnboxingRevealProps> = ({ card, onComplete
 
         </div>
       )}
-
-      {/* Vehicle Selector Modal for 100% Guaranteed Model Selection */}
-      <VehicleSelectorModal
-        isOpen={isSelectorOpen}
-        onClose={() => setIsSelectorOpen(false)}
-        currentCard={activeCard}
-        onConfirm={(updatedCard) => {
-          setActiveCard(updatedCard);
-        }}
-      />
 
     </div>
   );

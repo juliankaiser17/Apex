@@ -6,13 +6,13 @@ import type { CarCard } from '../../types/apex';
 import { sounds } from '../../utils/audio';
 import { applySpatialOffset } from '../../utils/privacyPipeline';
 import { calculateRegionalRarity } from '../../utils/regionalRarityEngine';
-import { SMART_CAR_DATABASE } from '../../services/aiVisionService';
+import { identifyVehicleWithAi } from '../../services/aiVisionService';
 import { UnboxingReveal } from './UnboxingReveal';
 import { PostScanHuntModal } from '../hunts/PostScanHuntModal';
 
 export const ScannerModal: React.FC = () => {
   const { scannerOpen, setScannerOpen, addCardToGarage, user, triggerMockHunt } = useApexStore();
-  const [phase, setPhase] = useState<'camera' | 'analyzing' | 'select_vehicle' | 'rejected' | 'hunt_prompt' | 'unboxing'>('camera');
+  const [phase, setPhase] = useState<'camera' | 'analyzing' | 'rejected' | 'hunt_prompt' | 'unboxing'>('camera');
   const [permissionState, setPermissionState] = useState<'granted' | 'denied' | 'requesting'>('requesting');
   const [capturedPhotoUrl, setCapturedPhotoUrl] = useState<string | null>(null);
   const [analysisTextIndex, setAnalysisTextIndex] = useState(0);
@@ -103,151 +103,93 @@ export const ScannerModal: React.FC = () => {
     }
   };
 
-  const handleConfirmVehicleSelection = (selectedKey?: string, customMakeInput?: string, customModelInput?: string) => {
-    sounds.playTargetLock();
-
-    let make = 'Toyota';
-    let model = 'GR Supra 3.0 (A90)';
-    let generation = 'MK5';
-    let trim = 'Inline-6 Turbo';
-    let yearEstimate = '2021';
-    let color = 'Ice Cap White';
-    let rarity: any = 'epic';
-    let topSpeedKmH = 250;
-    let horsepower = 382;
-    let engine = '3.0L B58 Turbo I6';
-    let zeroToHundredSec = 3.9;
-    let torqueNm = 500;
-    let kerbWeightKg = 1540;
-    let originCountry = 'Japan';
-    let bodyStyle: any = 'Coupe';
-    let interestingFact = 'Double-bubble roof design lowers aerodynamic drag without sacrificing driver headroom.';
-    let briefHistory = 'Co-developed with BMW, featuring the legendary B58 engine and 50:50 weight distribution.';
-    let productionYears = '2019–Present';
-    let modsDetected: any[] = [
-      { part: 'Titanium Exhaust', description: 'Akrapovič slip-on titanium exhaust', confidence: 0.95 }
-    ];
-
-    if (selectedKey && SMART_CAR_DATABASE[selectedKey]) {
-      const preset = SMART_CAR_DATABASE[selectedKey];
-      make = preset.make;
-      model = preset.model;
-      generation = preset.generation;
-      trim = preset.trim || 'Factory Spec';
-      yearEstimate = preset.year_estimate;
-      color = preset.color;
-      rarity = preset.rarity;
-      topSpeedKmH = preset.top_speed_kmh;
-      horsepower = preset.horsepower;
-      engine = preset.engine;
-      zeroToHundredSec = preset.zero_to_hundred_seconds;
-      torqueNm = preset.torque_nm;
-      kerbWeightKg = preset.kerb_weight_kg;
-      originCountry = preset.origin_country;
-      bodyStyle = preset.body_style;
-      interestingFact = preset.interesting_facts;
-      briefHistory = preset.historical_information;
-      productionYears = preset.production_years;
-      modsDetected = preset.aftermarket_parts_detected.map(p => ({
-        part: p.part_name,
-        description: p.description,
-        confidence: p.confidence
-      }));
-    } else if (customMakeInput && customModelInput) {
-      make = customMakeInput.trim();
-      model = customModelInput.trim();
-      trim = 'Custom Spec';
-      yearEstimate = '2023';
-      color = 'Custom Spec';
-      rarity = 'rare';
-      topSpeedKmH = 280;
-      horsepower = 420;
-      engine = 'V8 Twin-Turbo';
-      zeroToHundredSec = 4.0;
-      productionYears = '2020–Present';
-    }
-
-    const offset = applySpatialOffset(22.2950, 114.1720);
-    const rarityEngineResult = calculateRegionalRarity({
-      make,
-      model,
-      city: 'Hong Kong',
-      country: 'Hong Kong'
-    });
-
-    const newCard: CarCard = {
-      id: `card-${Date.now()}`,
-      cardNumber: `#APX-${Math.floor(1000 + Math.random() * 9000)}`,
-      make,
-      model,
-      generation,
-      trim,
-      yearEstimate,
-      releasedYear: yearEstimate,
-      productionYears,
-      discontinuedStatus: productionYears.includes('Present') ? 'ACTIVE PRODUCTION' : 'DISCONTINUED',
-      color,
-      bodyStyle,
-      rarity: rarityEngineResult.rarity || rarity,
-      rarityScore: rarityEngineResult.rarityScore || 85,
-      topSpeedKmH,
-      horsepower,
-      engine,
-      zeroToHundredSec,
-      torqueNm,
-      kerbWeightKg,
-      originCountry,
-      interestingFact,
-      briefHistory,
-      modsDetected,
-      imageUrl: capturedPhotoUrl || 'https://images.unsplash.com/photo-1544829099-b9a0c07fad1a?q=80&w=1200',
-      latApprox: offset.latApprox,
-      lngApprox: offset.lngApprox,
-      city: 'Hong Kong',
-      stateRegion: 'Kowloon',
-      country: 'Hong Kong',
-      xpEarned: 150,
-      marketValueLowUsd: 60000,
-      marketValueHighUsd: 120000,
-      scanValidated: true,
-      isPublic: user.defaultPrivacyLevel === 'public_blurred',
-      huntTriggered: false,
-      privacyLevel: user.defaultPrivacyLevel,
-      aiConfidence: 0.99,
-      createdAt: new Date().toISOString(),
-      spottedDateFormatted: 'TODAY',
-      isFirstCityScan: true
-    };
-
-    setCreatedCard(newCard);
-
-    if (
-      user.defaultPrivacyLevel === 'no_hunt_private' ||
-      !user.allowHunts ||
-      newCard.rarity === 'common'
-    ) {
-      setPhase('unboxing');
-    } else {
-      setPhase('hunt_prompt');
-    }
-  };
-
   useEffect(() => {
     if (phase === 'analyzing') {
       const interval = setInterval(() => {
         setAnalysisTextIndex(i => (i + 1) % analysisMessages.length);
       }, 700);
 
+      const processScan = async () => {
+        const aiResult = await identifyVehicleWithAi(capturedPhotoUrl || '');
+        const offset = applySpatialOffset(22.2950, 114.1720);
+        const rarityEngineResult = calculateRegionalRarity({
+          make: aiResult.make,
+          model: aiResult.model,
+          city: 'Hong Kong',
+          country: 'Hong Kong'
+        });
+
+        const newCard: CarCard = {
+          id: `card-${Date.now()}`,
+          cardNumber: `#APX-${Math.floor(1000 + Math.random() * 9000)}`,
+          make: aiResult.make,
+          model: aiResult.model,
+          generation: aiResult.generation,
+          trim: aiResult.trim || undefined,
+          yearEstimate: aiResult.year_estimate,
+          releasedYear: aiResult.year_estimate,
+          productionYears: aiResult.production_years || '2019–Present',
+          discontinuedStatus: (aiResult.production_years || '').includes('Present') ? 'ACTIVE PRODUCTION' : 'DISCONTINUED',
+          color: aiResult.color,
+          bodyStyle: aiResult.body_style,
+          rarity: rarityEngineResult.rarity || aiResult.rarity,
+          rarityScore: rarityEngineResult.rarityScore || 85,
+          topSpeedKmH: aiResult.top_speed_kmh,
+          horsepower: aiResult.horsepower,
+          engine: aiResult.engine,
+          zeroToHundredSec: aiResult.zero_to_hundred_seconds,
+          torqueNm: aiResult.torque_nm,
+          kerbWeightKg: aiResult.kerb_weight_kg,
+          originCountry: aiResult.origin_country,
+          interestingFact: aiResult.interesting_facts,
+          briefHistory: aiResult.historical_information,
+          modsDetected: (aiResult.aftermarket_parts_detected || []).map((p: any) => ({
+            part: p.part_name,
+            description: p.description,
+            confidence: p.confidence
+          })),
+          imageUrl: capturedPhotoUrl || 'https://images.unsplash.com/photo-1544829099-b9a0c07fad1a?q=80&w=1200',
+          latApprox: offset.latApprox,
+          lngApprox: offset.lngApprox,
+          city: 'Hong Kong',
+          stateRegion: 'Kowloon',
+          country: 'Hong Kong',
+          xpEarned: 150,
+          marketValueLowUsd: aiResult.estimated_market_value_usd_low || 50000,
+          marketValueHighUsd: aiResult.estimated_market_value_usd_high || 80000,
+          scanValidated: true,
+          isPublic: user.defaultPrivacyLevel === 'public_blurred',
+          huntTriggered: false,
+          privacyLevel: user.defaultPrivacyLevel,
+          aiConfidence: aiResult.confidence || 0.98,
+          createdAt: new Date().toISOString(),
+          spottedDateFormatted: 'TODAY',
+          isFirstCityScan: true
+        };
+
+        setCreatedCard(newCard);
+
+        if (
+          user.defaultPrivacyLevel === 'no_hunt_private' ||
+          !user.allowHunts ||
+          newCard.rarity === 'common'
+        ) {
+          setPhase('unboxing');
+        } else {
+          setPhase('hunt_prompt');
+        }
+      };
+
       const timer = setTimeout(() => {
-        setPhase('select_vehicle');
-      }, 600);
+        processScan();
+      }, 1000);
 
       return () => {
         clearInterval(interval);
         clearTimeout(timer);
       };
     }
-  }, [phase]);
+  }, [phase, capturedPhotoUrl, user]);
 
   if (!scannerOpen) return null;
 
@@ -538,87 +480,6 @@ export const ScannerModal: React.FC = () => {
           >
             <RotateCw className="w-5 h-5" /> TRY AGAIN WITH LIVE CAMERA
           </button>
-        </div>
-      )}
-
-      {/* VEHICLE SELECTION SCREEN (Guaranteeing 100% accurate make & model) */}
-      {phase === 'select_vehicle' && (
-        <div className="relative flex-1 flex flex-col justify-between p-5 overflow-y-auto max-w-md mx-auto w-full text-[#F0EBE3]">
-          <div className="space-y-3 z-10 pt-2">
-            <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-full bg-[#FF4500]/20 text-[#FF4500] border border-[#FF4500]/40 font-data text-[10px] font-bold tracking-wider">
-                STEP 2 OF 2
-              </span>
-            </div>
-            <h2 className="font-display text-3xl tracking-wide text-[#F0EBE3]">
-              IDENTIFY SPOTTED CAR
-            </h2>
-            <p className="text-xs font-data text-[#9A9088]">
-              Select your exact car model from the verified database or type a custom make & model below:
-            </p>
-          </div>
-
-          {/* Quick Preset Grid */}
-          <div className="grid grid-cols-1 gap-2 my-4 max-h-64 overflow-y-auto pr-1 no-scrollbar z-10">
-            {[
-              { key: 'supra', label: '🏎️ Toyota GR Supra 3.0 (A90)', sub: 'Japan · EPIC' },
-              { key: 'porsche997', label: '🏎️ Porsche 911 Carrera S (997)', sub: 'Germany · RARE' },
-              { key: 'porsche996', label: '🏎️ Porsche 911 Cabriolet (996)', sub: 'Germany · RARE' },
-              { key: 'bmw_m3', label: '🏎️ BMW M3 Competition (G80)', sub: 'Germany · EPIC' },
-              { key: 'mclaren650s', label: '🏎️ McLaren 650S', sub: 'UK · LEGENDARY' },
-              { key: 'ferrari458', label: '🏎️ Ferrari 458 Spider', sub: 'Italy · LEGENDARY' },
-              { key: 'lamborghini_huracan', label: '🏎️ Lamborghini Huracán LP610-4', sub: 'Italy · LEGENDARY' },
-              { key: 'gtr', label: '🏎️ Nissan GT-R Nismo (R35)', sub: 'Japan · LEGENDARY' },
-              { key: 'dc_avanti', label: '🏎️ DC Avanti', sub: 'India · RARE' },
-            ].map(item => (
-              <button
-                key={item.key}
-                onClick={() => handleConfirmVehicleSelection(item.key)}
-                className="w-full p-3 rounded-xl bg-[#141414] border border-[#2C2C2C] hover:border-[#FF4500] hover:bg-[#FF4500]/10 transition-all text-left flex items-center justify-between group"
-              >
-                <div>
-                  <span className="font-display text-base text-[#F0EBE3] group-hover:text-[#FF4500] transition-colors block">
-                    {item.label}
-                  </span>
-                  <span className="text-[10px] font-data text-[#9A9088]">{item.sub}</span>
-                </div>
-                <CornerDownRight className="w-4 h-4 text-[#9A9088] group-hover:text-[#FF4500]" />
-              </button>
-            ))}
-          </div>
-
-          {/* Or Custom Make/Model Input */}
-          <div className="p-4 rounded-2xl bg-[#111111] border border-[#2C2C2C] space-y-3 z-10">
-            <span className="text-xs font-display text-[#F0EBE3] tracking-wider block">
-              OR TYPE CUSTOM VEHICLE MODEL:
-            </span>
-            <div className="grid grid-cols-2 gap-2">
-              <input
-                id="customMakeInput"
-                type="text"
-                placeholder="Make (e.g. BMW)"
-                className="w-full bg-[#080808] border border-[#2C2C2C] rounded-xl px-3 py-2 text-xs text-[#F0EBE3] focus:border-[#FF4500] focus:outline-none"
-              />
-              <input
-                id="customModelInput"
-                type="text"
-                placeholder="Model (e.g. M5 CS)"
-                className="w-full bg-[#080808] border border-[#2C2C2C] rounded-xl px-3 py-2 text-xs text-[#F0EBE3] focus:border-[#FF4500] focus:outline-none"
-              />
-            </div>
-            <button
-              onClick={() => {
-                const makeVal = (document.getElementById('customMakeInput') as HTMLInputElement)?.value;
-                const modelVal = (document.getElementById('customModelInput') as HTMLInputElement)?.value;
-                if (makeVal && modelVal) {
-                  handleConfirmVehicleSelection(undefined, makeVal, modelVal);
-                }
-              }}
-              className="w-full py-2.5 rounded-xl bg-[#FF4500] hover:bg-[#FF6A00] text-[#F0EBE3] font-display text-sm tracking-wider glow-orange transition-all"
-            >
-              GENERATE CUSTOM CARD →
-            </button>
-          </div>
         </div>
       )}
 
