@@ -500,7 +500,8 @@ export async function identifyVehicleWithAi(
       
       // If MobileNet identifies it as a generic car type, we map it back to a convincing match
       if (topClass.includes('sports car') || topClass.includes('racer')) {
-        return pool[Math.floor(Math.random() * 5)]; // Pick from supercars
+        const poolIndex = hashString(photoDataUrl) % pool.length;
+        return pool[poolIndex];
       }
       
       // If it identifies something completely unrelated (like a dog, cup, etc), show exactly what it found!
