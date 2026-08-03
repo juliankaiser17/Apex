@@ -28,7 +28,7 @@ type RevealPhase =
 
 export const UnboxingReveal: React.FC<UnboxingRevealProps> = ({ card, onComplete }) => {
   const [activeCard, setActiveCard] = useState<CarCard>(card);
-  const [phase, setPhase] = useState<RevealPhase>(0);
+  const [phase, setPhase] = useState<RevealPhase>(11);
   const [showPostComposer, setShowPostComposer] = useState(false);
   const [isSelectorOpen, setIsSelectorOpen] = useState(false);
   const [fireworkParticles, setFireworkParticles] = useState<Array<{ id: number; x: number; y: number; size: number; color: string }>>([]);

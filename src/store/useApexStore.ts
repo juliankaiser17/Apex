@@ -125,17 +125,51 @@ const INITIAL_LEADERBOARD: LeaderboardEntry[] = [
   { rank: 1, username: 'you', displayName: 'You', avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400&auto=format&fit=crop', xp: 0, level: 1, rankChange: 'same', isUser: true, rarestCard: 'None Yet' }
 ];
 
+const getSavedUser = (): UserProfile => {
+  try {
+    const saved = localStorage.getItem('apex_user_session');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (parsed && parsed.username) return parsed;
+    }
+  } catch (e) {
+    console.warn('Error reading saved user session:', e);
+  }
+  return INITIAL_USER;
+};
+
+const getSavedGarage = (): CarCard[] => {
+  try {
+    const saved = localStorage.getItem('apex_garage_cards');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed)) return parsed;
+    }
+  } catch (e) {
+    console.warn('Error reading saved garage cards:', e);
+  }
+  return [];
+};
+
+const getSavedOnboarding = (): boolean => {
+  try {
+    const saved = localStorage.getItem('apex_onboarding_completed');
+    if (saved !== null) return saved === 'true';
+  } catch (e) {}
+  return true;
+};
+
 export const useApexStore = create<ApexState>((set) => ({
   activeTab: 'home',
   scannerOpen: false,
-  onboardingCompleted: true,
+  onboardingCompleted: getSavedOnboarding(),
   enthusiastModalOpen: false,
   activeHuntAlert: null,
   activeHuntModal: null,
   selectedCardForDetail: null,
 
-  user: INITIAL_USER,
-  garage: [],
+  user: getSavedUser(),
+  garage: getSavedGarage(),
   activeHunts: [],
   dailyQuests: INITIAL_QUESTS,
   dailyMissions: INITIAL_MISSIONS,
@@ -147,21 +181,31 @@ export const useApexStore = create<ApexState>((set) => ({
   settingsModalOpen: false,
   setSettingsModalOpen: (open) => set({ settingsModalOpen: open }),
 
-  updateUserProfile: (profile) => set((state) => ({
-    user: { ...state.user, ...profile }
-  })),
+  updateUserProfile: (profile) => set((state) => {
+    const updatedUser = { ...state.user, ...profile };
+    try {
+      localStorage.setItem('apex_user_session', JSON.stringify(updatedUser));
+    } catch (e) {}
+    return { user: updatedUser };
+  }),
 
   logoutUser: () => {
     localStorage.removeItem('apex_user_session');
+    localStorage.removeItem('apex_onboarding_completed');
+    localStorage.removeItem('apex_garage_cards');
     set({
       onboardingCompleted: false,
       settingsModalOpen: false,
       user: {
         ...INITIAL_USER,
-        displayName: 'Spotter',
-        username: 'spotter_guest',
-        email: ''
-      }
+        id: `user-${Date.now()}`,
+        username: 'guest_hunter',
+        displayName: 'Guest Hunter',
+        level: 1,
+        xp: 0,
+        totalSpots: 0
+      },
+      garage: []
     });
   },
 
