@@ -1,6 +1,7 @@
 import type { BodyStyle, RarityTier } from '../types/apex';
 import * as tf from '@tensorflow/tfjs';
 import * as mobilenet from '@tensorflow-models/mobilenet';
+import { GoogleGenAI } from '@google/genai';
 
 export interface AftermarketPart {
   part_name: string;
@@ -477,101 +478,71 @@ export async function identifyVehicleWithAi(
     }
   }
 
-  // 2. Try Gemini Vision API if VITE_GEMINI_API_KEY is configured
+  // 2. Try Gemini Vision API using official @google/genai SDK
   const geminiApiKey = import.meta.env.VITE_GEMINI_API_KEY;
   if (geminiApiKey && photoDataUrl.startsWith('data:image')) {
     try {
       const base64Data = photoDataUrl.split(',')[1];
       const mimeType = photoDataUrl.substring(photoDataUrl.indexOf(':') + 1, photoDataUrl.indexOf(';'));
 
-      let response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{
-            parts: [
-              {
-                text: `You are an expert Automotive Vision AI classifier. Analyze this car photo and return ONLY raw JSON matching this structure:
+      const ai = new GoogleGenAI({ apiKey: geminiApiKey });
+      
+      const prompt = `You are an expert Automotive Vision AI classifier. Analyze this car photo and return ONLY valid JSON matching this schema exactly:
 {
-  "make": "Exact Make (e.g. Porsche, Toyota, Ferrari, BMW, McLaren)",
-  "model": "Exact Model (e.g. 911 Carrera S, GR Supra 3.0, 458 Spider, M3 Competition)",
-  "generation": "Model Generation code (e.g. 997.1, A90, F142, G80)",
+  "make": "Exact Make (e.g. Porsche, Toyota, Ferrari)",
+  "model": "Exact Model (e.g. 911 Carrera, GR Supra, 458 Italia)",
+  "generation": "Model Generation code",
   "trim": "Trim specification",
-  "year_estimate": "Estimated Year (e.g. 2008, 2021, 2013)",
+  "year_estimate": "Estimated Year",
   "color": "Observed car body color",
   "rarity": "common" | "uncommon" | "rare" | "epic" | "legendary" | "mythic",
-  "estimated_market_value_usd_low": 55000,
-  "estimated_market_value_usd_high": 72000,
-  "engine": "Engine spec (e.g. 3.8L Flat-6, 3.0L B58 Turbo I6)",
-  "horsepower": 380,
-  "torque_nm": 400,
-  "kerb_weight_kg": 1420,
-  "top_speed_kmh": 300,
-  "zero_to_hundred_seconds": 4.5,
-  "production_years": "2004–2012",
-  "origin_country": "Germany",
-  "body_style": "Supercar" | "Coupe" | "Sedan" | "Convertible" | "Hypercar" | "SUV",
+  "estimated_market_value_usd_low": number,
+  "estimated_market_value_usd_high": number,
+  "engine": "Engine spec",
+  "horsepower": number,
+  "torque_nm": number,
+  "kerb_weight_kg": number,
+  "top_speed_kmh": number,
+  "zero_to_hundred_seconds": number,
+  "production_years": "YYYY-YYYY",
+  "origin_country": "Country",
+  "body_style": "Coupe" | "Sedan" | "Convertible" | "SUV" | "Supercar",
   "historical_information": "Brief concise history",
   "interesting_facts": "Key engineering fact",
   "aftermarket_parts_detected": [],
   "confidence": 0.98,
   "needs_better_angle": false,
   "angle_instruction": null
-}`
-              },
-              {
-                inline_data: { mime_type: mimeType, data: base64Data }
-              }
-            ]
-          }]
-        })
+}`;
+
+      const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: [
+          prompt,
+          {
+            inlineData: {
+              data: base64Data,
+              mimeType: mimeType
+            }
+          }
+        ]
       });
 
-      if (!response.ok) {
-        response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiApiKey}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{
-              parts: [
-                {
-                  text: `Analyze this car photo and return ONLY raw JSON matching automotive identification schema:
-{
-  "make": "Make", "model": "Model", "generation": "Gen", "trim": "Trim", "year_estimate": "Year",
-  "color": "Color", "rarity": "rare", "estimated_market_value_usd_low": 50000, "estimated_market_value_usd_high": 70000,
-  "engine": "Engine", "horsepower": 350, "torque_nm": 400, "kerb_weight_kg": 1400, "top_speed_kmh": 280,
-  "zero_to_hundred_seconds": 4.2, "production_years": "2010-2020", "origin_country": "Germany", "body_style": "Coupe",
-  "historical_information": "History", "interesting_facts": "Fact", "aftermarket_parts_detected": [],
-  "confidence": 0.98, "needs_better_angle": false, "angle_instruction": null
-}`
-                },
-                {
-                  inline_data: { mime_type: mimeType, data: base64Data }
-                }
-              ]
-            }]
-          })
-        });
-      }
-
-      if (response.ok) {
-        const jsonRes = await response.json();
-        const rawText = jsonRes.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (rawText) {
-          const cleanedText = rawText.replace(/```json\n?|\n?```/g, '').trim();
-          const parsed = JSON.parse(cleanedText);
-          if (parsed.make && parsed.model) {
-            return {
-              ...parsed,
-              confidence: parsed.confidence || 0.98,
-              needs_better_angle: false,
-              angle_instruction: null
-            };
-          }
+      const rawText = response.text;
+      if (rawText) {
+        const cleanedText = rawText.replace(/```json\n?|\n?```/g, '').trim();
+        const parsed = JSON.parse(cleanedText);
+        if (parsed.make && parsed.model) {
+          return {
+            ...parsed,
+            confidence: parsed.confidence || 0.98,
+            needs_better_angle: false,
+            angle_instruction: null
+          };
         }
       }
     } catch (e) {
-      console.warn('Gemini Vision API fetch error:', e);
+      console.warn('Gemini Official SDK fetch error:', e);
     }
   }
 
