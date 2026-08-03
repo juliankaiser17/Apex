@@ -33,6 +33,8 @@ export interface CarCard {
   trim?: string;
   yearEstimate: string;
   releasedYear?: string; // e.g. "2019"
+  productionYears?: string; // e.g. "2004–2012" or "2019–Present"
+  discontinuedStatus?: string; // e.g. "Discontinued" or "Active Production"
   color: string;
   bodyStyle: BodyStyle;
   rarity: RarityTier;

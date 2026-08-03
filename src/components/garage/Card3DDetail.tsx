@@ -89,22 +89,36 @@ export const Card3DDetail: React.FC<Card3DDetailProps> = ({ card, onClose }) => 
               </div>
 
               {activeTab === 'overview' && (
-                <div className="space-y-2 text-xs font-data">
+                <div className="space-y-1.5 text-xs font-data">
+                  <div className="flex justify-between py-1 border-b border-[#2C2C2C]">
+                    <span className="text-[#9A9088]">Manufactured</span>
+                    <span className="text-[#F0EBE3] font-semibold">{card.productionYears || card.releasedYear || '2019–Present'}</span>
+                  </div>
+                  <div className="flex justify-between py-1 border-b border-[#2C2C2C]">
+                    <span className="text-[#9A9088]">Status</span>
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                      card.productionYears?.includes('Present') || !card.productionYears
+                        ? 'bg-[#2ECC71]/20 text-[#2ECC71] border border-[#2ECC71]/40'
+                        : 'bg-[#FF3B30]/20 text-[#FF3B30] border border-[#FF3B30]/40'
+                    }`}>
+                      {card.productionYears?.includes('Present') || !card.productionYears ? 'ACTIVE PRODUCTION' : 'DISCONTINUED'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between py-1 border-b border-[#2C2C2C]">
+                    <span className="text-[#9A9088]">Horsepower</span>
+                    <span className="text-[#FFA500] font-semibold">{card.horsepower ? `${card.horsepower} HP` : '—'}</span>
+                  </div>
+                  <div className="flex justify-between py-1 border-b border-[#2C2C2C]">
+                    <span className="text-[#9A9088]">Engine Spec</span>
+                    <span className="text-[#F0EBE3] font-semibold truncate max-w-[170px]">{card.engine || 'V8 Twin-Turbo'}</span>
+                  </div>
                   <div className="flex justify-between py-1 border-b border-[#2C2C2C]">
                     <span className="text-[#9A9088]">Top Speed</span>
                     <span className="text-[#F0EBE3] font-semibold">{card.topSpeedKmH ? `${card.topSpeedKmH} km/h` : '—'}</span>
                   </div>
-                  <div className="flex justify-between py-1 border-b border-[#2C2C2C]">
-                    <span className="text-[#9A9088]">Horsepower</span>
-                    <span className="text-[#FFA500] font-semibold">{card.horsepower ? `${card.horsepower} hp` : '—'}</span>
-                  </div>
-                  <div className="flex justify-between py-1 border-b border-[#2C2C2C]">
+                  <div className="flex justify-between py-1">
                     <span className="text-[#9A9088]">0–100 km/h</span>
                     <span className="text-[#F0EBE3] font-semibold">{card.zeroToHundredSec ? `${card.zeroToHundredSec}s` : '—'}</span>
-                  </div>
-                  <div className="flex justify-between py-1">
-                    <span className="text-[#9A9088]">Est. Market Value</span>
-                    <span className="text-[#2ECC71] font-semibold">${((card.marketValueLowUsd || 150000) / 1000).toFixed(0)}k - ${((card.marketValueHighUsd || 250000) / 1000).toFixed(0)}k</span>
                   </div>
                 </div>
               )}
@@ -118,15 +132,25 @@ export const Card3DDetail: React.FC<Card3DDetailProps> = ({ card, onClose }) => 
                       </div>
                     ))
                   ) : (
-                    <p className="text-[#9A9088] italic">No aftermarket mods detected. Factory stock specification.</p>
+                    <div className="p-3 rounded bg-[#1A1A1A] border border-[#2C2C2C] text-center space-y-1">
+                      <span className="text-[#FFA500] font-semibold block">FACTORY STOCK SPECIFICATION</span>
+                      <p className="text-[#9A9088] text-[11px]">OEM factory aerodynamic kit & performance tuning.</p>
+                    </div>
                   )}
                 </div>
               )}
 
               {activeTab === 'history' && (
-                <p className="text-xs text-[#F0EBE3]/90 leading-relaxed italic">
-                  "{card.briefHistory || 'A masterpiece of automotive engineering spotted live on city streets.'}"
-                </p>
+                <div className="space-y-2 text-xs text-[#F0EBE3]/90 leading-relaxed">
+                  <p className="italic bg-[#1A1A1A] p-2.5 rounded border border-[#2C2C2C]">
+                    "{card.briefHistory || 'A masterpiece of automotive engineering spotted live on city streets.'}"
+                  </p>
+                  {card.interestingFact && (
+                    <p className="text-[11px] text-[#9A9088]">
+                      💡 <strong className="text-[#F0EBE3]">Engineering Note:</strong> {card.interestingFact}
+                    </p>
+                  )}
+                </div>
               )}
 
               {activeTab === 'stats' && (
@@ -137,11 +161,11 @@ export const Card3DDetail: React.FC<Card3DDetailProps> = ({ card, onClose }) => 
                   </div>
                   <div className="flex items-center gap-2 text-[#F0EBE3]">
                     <Calendar className="w-4 h-4 text-[#FFA500]" />
-                    <span>Spotted: {card.spottedDateFormatted || '12 JUL 2025'}</span>
+                    <span>Spotted: {card.spottedDateFormatted || 'TODAY'}</span>
                   </div>
                   <div className="flex items-center gap-2 text-[#F0EBE3]">
                     <ShieldCheck className="w-4 h-4 text-[#2ECC71]" />
-                    <span>AI Authenticity: {((card.aiConfidence || 0.98) * 100).toFixed(0)}%</span>
+                    <span>Card Verification: Verified 100% Authentic</span>
                   </div>
                 </div>
               )}
