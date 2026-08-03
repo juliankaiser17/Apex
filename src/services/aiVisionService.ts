@@ -99,29 +99,53 @@ export const SMART_CAR_DATABASE: Record<string, AiIdentificationPayload> = {
   },
   porsche996: {
     make: 'Porsche',
-    model: '911 Carrera Cabriolet (996)',
-    generation: '996.2',
-    trim: 'Carrera Cabriolet',
-    year_estimate: '2002',
+    model: '911 Carrera (996)',
+    generation: '996',
+    trim: 'Carrera 2',
+    year_estimate: '2001',
     color: 'Arctic Silver Metallic',
     rarity: 'rare',
-    estimated_market_value_usd_low: 32000,
-    estimated_market_value_usd_high: 45000,
-    engine: '3.6L Flat-6',
-    horsepower: 315,
-    torque_nm: 370,
-    kerb_weight_kg: 1395,
-    top_speed_kmh: 285,
-    zero_to_hundred_seconds: 5.0,
+    estimated_market_value_usd_low: 25000,
+    estimated_market_value_usd_high: 35000,
+    engine: '3.4L Flat-6 (M96)',
+    horsepower: 296,
+    torque_nm: 350,
+    kerb_weight_kg: 1320,
+    top_speed_kmh: 280,
+    zero_to_hundred_seconds: 5.2,
     production_years: '1997–2004',
     origin_country: 'Germany',
-    body_style: 'Convertible',
-    historical_information: 'The pioneer first water-cooled 911 in Porsche history, now experiencing major enthusiast appreciation.',
-    interesting_facts: 'Shares front bodywork and interior architecture with the original Boxster 986.',
-    aftermarket_parts_detected: [
-      { part_name: 'Turbo Twist Alloys', brand_if_identifiable: 'Porsche OEM', description: 'Factory 18-inch Turbo Twist alloy wheels', confidence: 0.96 }
-    ],
-    confidence: 0.96,
+    body_style: 'Coupe',
+    historical_information: 'The first water-cooled 911, breaking decades of air-cooled tradition.',
+    interesting_facts: 'Known for its controversial "fried egg" headlights shared with the Boxster.',
+    aftermarket_parts_detected: [],
+    confidence: 0.94,
+    needs_better_angle: false,
+    angle_instruction: null
+  },
+  maserati_gt: {
+    make: 'Maserati',
+    model: 'GranTurismo',
+    generation: 'First Gen',
+    trim: 'Sport',
+    year_estimate: '2016',
+    color: 'Blu Sofisticato',
+    rarity: 'epic',
+    estimated_market_value_usd_low: 45000,
+    estimated_market_value_usd_high: 65000,
+    engine: '4.7L Ferrari-derived V8',
+    horsepower: 454,
+    torque_nm: 520,
+    kerb_weight_kg: 1880,
+    top_speed_kmh: 299,
+    zero_to_hundred_seconds: 4.7,
+    production_years: '2007–2019',
+    origin_country: 'Italy',
+    body_style: 'Coupe',
+    historical_information: 'A timeless grand tourer featuring a glorious naturally aspirated V8 co-developed with Ferrari.',
+    interesting_facts: 'The exhaust note was specifically tuned by a team of acousticians to sound like a musical instrument.',
+    aftermarket_parts_detected: [],
+    confidence: 0.95,
     needs_better_angle: false,
     angle_instruction: null
   },
@@ -371,6 +395,9 @@ export async function identifyVehicleWithAi(
     if (nameLower.includes('gtr') || nameLower.includes('nissan')) {
       return SMART_CAR_DATABASE.gtr;
     }
+    if (nameLower.includes('maserati')) {
+      return SMART_CAR_DATABASE.maserati_gt;
+    }
   }
 
   // 2. Try Gemini Vision API if VITE_GEMINI_API_KEY is configured
@@ -480,7 +507,8 @@ export async function identifyVehicleWithAi(
     SMART_CAR_DATABASE.lamborghini_huracan,
     SMART_CAR_DATABASE.bmw_m3,
     SMART_CAR_DATABASE.gtr,
-    SMART_CAR_DATABASE.porsche996
+    SMART_CAR_DATABASE.porsche996,
+    SMART_CAR_DATABASE.maserati_gt
   ];
 
   try {
