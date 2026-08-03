@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import type { CarCard, RarityTier } from '../../types/apex';
 import { RARITY_CONFIG } from '../../utils/rarity';
 import { ApexCollectibleCard } from '../card/ApexCollectibleCard';
+import { PostComposer } from './PostComposer';
+import { VehicleSelectorModal } from './VehicleSelectorModal';
 import { sounds } from '../../utils/audio';
 import confetti from 'canvas-confetti';
 
@@ -11,153 +13,188 @@ interface UnboxingRevealProps {
   onComplete?: () => void;
 }
 
+// 11 Phases matching Section 8 of the APEX Specification
+type RevealPhase =
+  | 0 // Black out
+  | 1 // Card materialises (face-down)
+  | 2 // Rarity suspense ("SCANNING RARITY...", dots, border ring)
+  | 3 // Rarity stamp ("LEGENDARY" / etc.)
+  | 4 // Pre-crack shudder
+  | 5 // Card splits horizontally
+  | 6 // Energy streaks & ribbons
+  | 9 // Pure white flash
+  | 10 // Card flip to face-up + specular highlight
+  | 11; // Face-up content + action buttons
+
 export const UnboxingReveal: React.FC<UnboxingRevealProps> = ({ card, onComplete }) => {
-  // Stages:
-  // 1. 'materializing': scale 0.4x -> 1.0x (900ms easeOutBack)
-  // 2. 'dramatic_pause': idle float (1.2s pause)
-  // 3. 'splitting': 600ms heavy vault door split + energy streaks fire
-  // 4. 'flash': 150ms pure white flash
-  // 5. 'revealed': face-up card + ribbons & fireworks trailing
-  const [stage, setStage] = useState<'materializing' | 'dramatic_pause' | 'splitting' | 'flash' | 'revealed'>('materializing');
-  const [showFireworks, setShowFireworks] = useState(false);
+  const [activeCard, setActiveCard] = useState<CarCard>(card);
+  const [phase, setPhase] = useState<RevealPhase>(0);
+  const [showPostComposer, setShowPostComposer] = useState(false);
+  const [isSelectorOpen, setIsSelectorOpen] = useState(false);
   const [fireworkParticles, setFireworkParticles] = useState<Array<{ id: number; x: number; y: number; size: number; color: string }>>([]);
 
   const rarityConf = RARITY_CONFIG[card.rarity];
   const isMythic = card.rarity === 'mythic';
+  const isLegendary = card.rarity === 'legendary';
 
-  // Tier-specific energy streak specs
-  const streakSpecs: Record<RarityTier, { color: string; reach: number; durationMs: number; ribbonSpeed: string }> = {
-    common: { color: '#8B8B8B', reach: 100, durationMs: 1000, ribbonSpeed: '4s' },
-    uncommon: { color: '#4CAF50', reach: 180, durationMs: 1200, ribbonSpeed: '3.2s' },
-    rare: { color: '#2196F3', reach: 260, durationMs: 1400, ribbonSpeed: '2.5s' },
-    epic: { color: '#9C27B0', reach: 320, durationMs: 1600, ribbonSpeed: '2s' },
-    legendary: { color: '#FF9800', reach: 400, durationMs: 1800, ribbonSpeed: '1.8s' },
-    mythic: { color: '#FF1744', reach: 500, durationMs: 2200, ribbonSpeed: '1.5s' }
+  // Tier-specific streak counts & lengths
+  const streakSpecs: Record<RarityTier, { count: number; color: string; reach: number; width: number }> = {
+    common: { count: 14, color: '#787878', reach: 140, width: 1.5 },
+    uncommon: { count: 20, color: '#3DAA6A', reach: 220, width: 2.0 },
+    rare: { count: 26, color: '#E8A020', reach: 300, width: 2.5 },
+    epic: { count: 32, color: '#C85000', reach: 380, width: 3.0 },
+    legendary: { count: 38, color: '#FFA500', reach: 460, width: 3.5 },
+    mythic: { count: 44, color: '#FF2200', reach: 520, width: 4.0 }
   };
 
   const currentStreak = streakSpecs[card.rarity];
 
-  // Automated Timeline Sequence
+  // 11-Phase Timed Animation Sequence
   useEffect(() => {
-    // 0ms: Play low deep haptic thud for materialization
-    sounds.playShutter();
+    // Phase 0 -> Phase 1 at 200ms
+    const t1 = setTimeout(() => {
+      sounds.playShutter();
+      setPhase(1);
+    }, 200);
 
-    // 900ms: Materialization complete -> enter 1.2s dramatic pause
-    const pauseTimer = setTimeout(() => {
-      setStage('dramatic_pause');
+    // Phase 1 -> Phase 2 at 900ms
+    const t2 = setTimeout(() => {
+      setPhase(2);
     }, 900);
 
-    // 2100ms (900ms + 1200ms pause): Automatic reveal starts -> heavy vault split (600ms) & energy burst
-    const splitTimer = setTimeout(() => {
+    // Phase 2 -> Phase 3 (Stamp) at 2100ms
+    const t3 = setTimeout(() => {
       sounds.playCardFlip();
-      setStage('splitting');
-      setShowFireworks(true);
+      setPhase(3);
     }, 2100);
 
-    // 3200ms (1100ms after split start): Peak intensity -> Pure White Flash (150ms)
-    const flashTimer = setTimeout(() => {
+    // Phase 3 -> Phase 4 (Pre-crack Shudder) at 2400ms
+    const t4 = setTimeout(() => {
+      setPhase(4);
+    }, 2400);
+
+    // Phase 4 -> Phase 5 (Card Splits) at 2680ms
+    const t5 = setTimeout(() => {
+      sounds.playTargetLock();
+      setPhase(5);
+    }, 2680);
+
+    // Phase 5 -> Phase 6 (Streaks & Ribbons) at 2880ms
+    const t6 = setTimeout(() => {
+      setPhase(6);
+    }, 2880);
+
+    // Phase 6 -> Phase 9 (White Flash) at 4400ms
+    const t7 = setTimeout(() => {
       sounds.playRarityReveal(card.rarity);
-      setStage('flash');
+      setPhase(9);
 
-      // Trigger celebratory burst
       confetti({
-        particleCount: isMythic ? 140 : 80,
-        spread: 90,
-        origin: { y: 0.55 }
+        particleCount: isMythic ? 120 : isLegendary ? 80 : 50,
+        spread: 80,
+        origin: { y: 0.5 },
+        colors: isMythic
+          ? ['#FF2200', '#FFA500', '#C85000', '#E8A020', '#3DAA6A']
+          : [rarityConf.color, '#F0EBE3', '#FF4500']
       });
-    }, 3200);
+    }, 4400);
 
-    // 3350ms (after white flash): Reveal face-up collectible card automatically
-    const revealTimer = setTimeout(() => {
-      setStage('revealed');
-    }, 3350);
+    // Phase 9 -> Phase 10 (Card Flip) at 4455ms
+    const t8 = setTimeout(() => {
+      setPhase(10);
+    }, 4455);
 
-    // Stop fireworks 2.5s after reveal
-    const fireworkStopTimer = setTimeout(() => {
-      setShowFireworks(false);
-    }, 5850);
+    // Phase 10 -> Phase 11 (Face-up Content Reveals) at 5055ms
+    const t9 = setTimeout(() => {
+      setPhase(11);
+    }, 5055);
 
     return () => {
-      clearTimeout(pauseTimer);
-      clearTimeout(splitTimer);
-      clearTimeout(flashTimer);
-      clearTimeout(revealTimer);
-      clearTimeout(fireworkStopTimer);
+      [t1, t2, t3, t4, t5, t6, t7, t8, t9].forEach(clearTimeout);
     };
-  }, [card]);
+  }, [card, isMythic, isLegendary, rarityConf]);
 
-  // Firework starburst generator loop
+  // Fireworks generator during Phases 6 to 11
   useEffect(() => {
-    if (!showFireworks) return;
+    if (phase < 6) return;
     const interval = setInterval(() => {
       const newParticles = Array.from({ length: 8 }).map((_, i) => ({
         id: Date.now() + i,
-        x: (Math.random() - 0.5) * 240,
-        y: (Math.random() - 0.5) * 320,
-        size: Math.random() * 6 + 3,
+        x: (Math.random() - 0.5) * 260,
+        y: (Math.random() - 0.5) * 340,
+        size: Math.random() * 5 + 3,
         color: isMythic
-          ? ['#8B8B8B', '#4CAF50', '#2196F3', '#9C27B0', '#FF9800'][i % 5]
+          ? ['#787878', '#3DAA6A', '#E8A020', '#C85000', '#FFA500', '#FF2200'][i % 6]
           : rarityConf.color
       }));
       setFireworkParticles(newParticles);
-    }, 350);
+    }, 380);
 
     return () => clearInterval(interval);
-  }, [showFireworks, isMythic, rarityConf]);
+  }, [phase, isMythic, rarityConf]);
+
+  const handleSavePrivately = () => {
+    sounds.playTargetLock();
+    if (onComplete) onComplete();
+  };
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#0A0A0A] flex flex-col items-center justify-center overflow-hidden select-none">
-      {/* 1. PURE WHITE SCREEN FLASH (150ms bleaching flash, 250ms fade out) */}
+    <div className="fixed inset-0 z-50 bg-[#080808] flex flex-col items-center justify-center overflow-hidden select-none" style={{ fontFamily: 'DM Sans' }}>
+      
+      {/* PHASE 9: PURE WHITE FLASH (55ms on, 100ms hold, 340ms fade) */}
       <AnimatePresence>
-        {stage === 'flash' && (
+        {phase === 9 && (
           <motion.div
             initial={{ opacity: 1 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.25 }}
+            transition={{ duration: 0.34 }}
             className="fixed inset-0 z-50 bg-white"
           />
         )}
       </AnimatePresence>
 
-      {/* 2. BACKWARD-FLOWING COLOR RIBBON AURORAS */}
-      {(stage === 'splitting' || stage === 'revealed') && (
-        <div className="absolute inset-0 pointer-events-none flex items-center justify-center overflow-hidden">
-          {/* Continuous looping auroras trailing behind card */}
-          <div
-            style={{
-              animationDuration: currentStreak.ribbonSpeed,
-              borderColor: rarityConf.color
+      {/* POST COMPOSER SCREEN OVERLAY */}
+      <AnimatePresence>
+        {showPostComposer && (
+          <PostComposer
+            card={activeCard}
+            onBack={() => setShowPostComposer(false)}
+            onPostComplete={() => {
+              setShowPostComposer(false);
+              if (onComplete) onComplete();
             }}
-            className="w-[480px] h-[480px] rounded-full border-2 border-dashed opacity-40 animate-[spin_linear_infinite] shadow-[0_0_80px_rgba(255,255,255,0.2)]"
           />
+        )}
+      </AnimatePresence>
 
-          {/* Mythic Prismatic Aurora overlay */}
+      {/* PHASE 6-11: RIBBON AURORAS TRAILING BEHIND CARD */}
+      {phase >= 6 && !showPostComposer && (
+        <div className="absolute inset-0 pointer-events-none flex items-center justify-center overflow-hidden">
+          <div
+            style={{ borderColor: rarityConf.color }}
+            className="w-[460px] h-[460px] rounded-full border-2 border-dashed opacity-35 animate-[spin_4s_linear_infinite] shadow-[0_0_60px_rgba(255,255,255,0.15)]"
+          />
           {isMythic && (
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,23,68,0.35)_0%,rgba(156,39,176,0.3)_30%,rgba(33,150,243,0.25)_60%,transparent_80%)] animate-[spin_3s_linear_infinite]" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,34,0,0.3)_0%,rgba(255,165,0,0.25)_30%,rgba(200,80,0,0.2)_60%,transparent_80%)] animate-[spin_2.5s_linear_infinite]" />
           )}
         </div>
       )}
 
-      {/* 3. SURROUNDING STARBURST FIREWORKS (3-5 bursts/sec, 6-10 particles) */}
-      {showFireworks && (
+      {/* PHASE 6-11: FIREWORKS SPARKLES */}
+      {phase >= 6 && !showPostComposer && (
         <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
           {fireworkParticles.map((p) => (
             <motion.div
               key={p.id}
               initial={{ opacity: 1, scale: 0.3, x: 0, y: 0 }}
-              animate={{
-                opacity: 0,
-                scale: 1.5,
-                x: p.x,
-                y: p.y - 40
-              }}
+              animate={{ opacity: 0, scale: 1.4, x: p.x, y: p.y - 30 }}
               transition={{ duration: 0.7, ease: 'easeOut' }}
               style={{
                 width: `${p.size}px`,
                 height: `${p.size}px`,
                 backgroundColor: p.color,
-                boxShadow: `0 0 12px ${p.color}`
+                boxShadow: `0 0 10px ${p.color}`
               }}
               className="absolute rounded-full"
             />
@@ -165,121 +202,228 @@ export const UnboxingReveal: React.FC<UnboxingRevealProps> = ({ card, onComplete
         </div>
       )}
 
-      {/* 4. RADIAL ENERGY STREAKS FIRING OUTWARD */}
-      {stage === 'splitting' && (
+      {/* PHASE 6: RADIAL ENERGY STREAKS FIRING OUTWARD */}
+      {phase === 6 && (
         <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-          {Array.from({ length: 16 }).map((_, i) => {
-            const angle = i * 22.5;
+          {Array.from({ length: currentStreak.count }).map((_, i) => {
+            const angle = (360 / currentStreak.count) * i;
             return (
               <motion.div
                 key={i}
                 initial={{ opacity: 0, scale: 0.1 }}
-                animate={{ opacity: [0, 1, 0.9, 0], scale: [0.2, 1.6, 2.0, 0.4] }}
-                transition={{ duration: currentStreak.durationMs / 1000, ease: 'easeOut' }}
+                animate={{ opacity: [0, 1, 0.8, 0], scale: [0.2, 1.5, 2.0, 0.4] }}
+                transition={{ duration: 1.2, ease: 'easeOut' }}
                 style={{
                   transform: `rotate(${angle}deg)`,
                   width: `${currentStreak.reach}px`,
                   background: isMythic
-                    ? `linear-gradient(90deg, #8b8b8b, #4caf50, #2196f3, #9c27b0, #ff9800, transparent)`
+                    ? `linear-gradient(90deg, #787878, #3DAA6A, #E8A020, #C85000, #FFA500, #FF2200, transparent)`
                     : `linear-gradient(90deg, ${currentStreak.color}, transparent)`
                 }}
-                className="h-2 rounded-full absolute shadow-[0_0_24px_rgba(255,255,255,0.9)]"
+                className="h-[2px] rounded-full absolute shadow-[0_0_20px_rgba(255,255,255,0.9)]"
               />
             );
           })}
         </div>
       )}
 
-      {/* 5. FACE-DOWN CARD vs REVEALED CARD STAGES */}
-      {stage !== 'revealed' ? (
-        <div className="relative perspective-1000 flex flex-col items-center justify-center">
-          {/* FACE-DOWN CARBON-FIBER CARD */}
-          <motion.div
-            initial={{ scale: 0.4 }}
-            animate={
-              stage === 'materializing'
-                ? { scale: 1.0, y: 0 }
-                : stage === 'dramatic_pause'
-                ? { y: [0, -8, 0], rotateY: 10, scale: 1.0 }
-                : { y: 0, rotateY: 0, scale: 1.05 }
-            }
-            transition={
-              stage === 'materializing'
-                ? { duration: 0.9, ease: [0.175, 0.885, 0.32, 1.275] } // easeOutBack curve
-                : stage === 'dramatic_pause'
-                ? { y: { repeat: Infinity, duration: 3, ease: 'easeInOut' } }
-                : { duration: 0.6 }
-            }
-            style={{
-              boxShadow: `0 20px 50px ${rarityConf.color}44`
-            }}
-            className="relative w-[320px] h-[448px] rounded-[16px] overflow-hidden border-2 border-white/20 bg-carbon-dense shadow-2xl flex flex-col items-center justify-center p-6 text-center"
-          >
-            {/* Heavy Vault-Door Split (Top & Bottom halves hinging open over 600ms) */}
-            {stage === 'splitting' ? (
-              <div className="absolute inset-0 flex flex-col justify-between overflow-hidden">
-                {/* Top Half Split (hinges upward -75deg over 600ms) */}
-                <motion.div
-                  initial={{ y: 0, rotateX: 0 }}
-                  animate={{ y: -180, rotateX: -75, opacity: 0 }}
-                  transition={{ duration: 0.6, ease: 'easeInOut' }}
-                  className="w-full h-1/2 bg-carbon border-b-2 border-[#FF5500] flex items-end justify-center pb-3"
-                >
-                  <div className="w-16 h-16 rounded-2xl bg-[#FF5500]/20 border border-[#FF5500] flex items-center justify-center font-display text-4xl text-[#FF5500]">
-                    A
+      {/* MAIN CARD CONTAINER */}
+      {!showPostComposer && (
+        <div className="relative flex flex-col items-center justify-center">
+          
+          {/* PHASE 2 & 3: RARITY SUSPENSE / RARITY STAMP HEADLINE */}
+          {phase >= 2 && phase < 9 && (
+            <div className="absolute -top-20 inset-x-0 flex flex-col items-center z-30">
+              {phase === 2 && (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: [0.4, 0.9, 0.4] }} transition={{ duration: 0.9, repeat: Infinity }} className="flex flex-col items-center gap-2">
+                  <span className="text-[11px] font-medium tracking-[3px] text-[#9A9088]">
+                    SCANNING RARITY...
+                  </span>
+                  <div className="flex gap-2">
+                    {[0, 1, 2].map((dot) => (
+                      <motion.div
+                        key={dot}
+                        animate={{ y: [0, -8, 0] }}
+                        transition={{ duration: 0.6, repeat: Infinity, delay: dot * 0.18 }}
+                        className="w-2 h-2 rounded-full bg-[#9A9088]"
+                      />
+                    ))}
                   </div>
                 </motion.div>
+              )}
 
-                {/* Bottom Half Split (hinges downward 75deg over 600ms) */}
-                <motion.div
-                  initial={{ y: 0, rotateX: 0 }}
-                  animate={{ y: 180, rotateX: 75, opacity: 0 }}
-                  transition={{ duration: 0.6, ease: 'easeInOut' }}
-                  className="w-full h-1/2 bg-carbon border-t-2 border-[#FF5500] flex items-start justify-center pt-3"
+              {phase >= 3 && (
+                <motion.h2
+                  initial={{ scale: 2.8, opacity: 0 }}
+                  animate={{ scale: 1.0, opacity: 1 }}
+                  transition={{ type: 'spring', damping: 16, stiffness: 100 }}
+                  style={{ color: rarityConf.color, textShadow: `0 0 30px ${rarityConf.color}` }}
+                  className="font-display text-[52px] leading-none tracking-widest uppercase"
                 >
-                  <span className="font-display text-2xl tracking-widest text-slate-400">APEX</span>
+                  {rarityConf.label}
+                </motion.h2>
+              )}
+            </div>
+          )}
+
+          {/* FACE-DOWN TRADING CARD (Phases 1 through 5) */}
+          {phase < 9 ? (
+            <motion.div
+              initial={{ scale: 0.55, opacity: 0, y: 100 }}
+              animate={
+                phase === 1
+                  ? { scale: 1.0, opacity: 1, y: 0 }
+                  : phase === 4
+                  ? { x: [6, -6, 4, -4, 2, 0], scale: 1.0 }
+                  : { scale: 1.0, y: 0 }
+              }
+              transition={
+                phase === 1
+                  ? { type: 'spring', damping: 18, stiffness: 90, mass: 1.4 }
+                  : phase === 4
+                  ? { duration: 0.27 }
+                  : { duration: 0.4 }
+              }
+              style={{
+                boxShadow: phase >= 3 ? `0 20px 60px ${rarityConf.color}66` : '0 20px 60px rgba(0,0,0,0.8)'
+              }}
+              className="relative w-[320px] h-[448px] rounded-[16px] overflow-hidden bg-[#111111] border border-[#2C2C2C] flex flex-col items-center justify-center p-6 text-center select-none"
+            >
+              {/* Rarity Ring overlay (Phase 2+) */}
+              {phase >= 2 && (
+                <motion.div
+                  initial={{ scale: 1.6, opacity: 0 }}
+                  animate={{ scale: 1.0, opacity: 1 }}
+                  transition={{ type: 'spring', damping: 10, stiffness: 280 }}
+                  style={{ borderColor: rarityConf.color }}
+                  className="absolute inset-0 border-2 rounded-[16px] pointer-events-none"
+                />
+              )}
+
+              {/* Phase 5: Card Split animation */}
+              {phase >= 5 ? (
+                <div className="absolute inset-0 flex flex-col justify-between overflow-hidden">
+                  {/* Top half split */}
+                  <motion.div
+                    initial={{ rotateX: 0 }}
+                    animate={{ rotateX: -90, y: -60, opacity: 0 }}
+                    transition={{ duration: 0.8, ease: [0.4, 0, 0, 1] }}
+                    style={{ transformOrigin: 'bottom center' }}
+                    className="w-full h-1/2 bg-[#111111] border-b border-white flex items-end justify-center pb-4"
+                  >
+                    <span className="font-display text-4xl text-[#9A9088]">APEX</span>
+                  </motion.div>
+
+                  {/* Bottom half split */}
+                  <motion.div
+                    initial={{ rotateX: 0 }}
+                    animate={{ rotateX: 90, y: 60, opacity: 0 }}
+                    transition={{ duration: 0.8, ease: [0.4, 0, 0, 1] }}
+                    style={{ transformOrigin: 'top center' }}
+                    className="w-full h-1/2 bg-[#111111] border-t border-white flex items-start justify-center pt-4"
+                  >
+                    <span className="font-display text-4xl text-[#9A9088]">APEX</span>
+                  </motion.div>
+
+                  {/* Center Crack Line */}
+                  <div
+                    style={{
+                      boxShadow: `0 0 8px white, 0 0 30px ${rarityConf.color}, 0 0 80px ${rarityConf.color}`
+                    }}
+                    className="absolute top-1/2 inset-x-0 h-[2px] bg-white z-20"
+                  />
+                </div>
+              ) : (
+                /* Carbon Weave Face-Down Backing */
+                <div className="space-y-4">
+                  <div className="w-20 h-20 rounded-2xl bg-[#1A1A1A] border border-[#2C2C2C] flex items-center justify-center font-display text-5xl text-[#F0EBE3] shadow-lg mx-auto">
+                    A
+                  </div>
+                  <div>
+                    <h3 className="font-display text-4xl text-[#F0EBE3] tracking-widest">APEX</h3>
+                    <p className="text-[11px] font-data text-[#9A9088] uppercase tracking-wider mt-1">
+                      COLLECTIBLE CARD
+                    </p>
+                  </div>
+                </div>
+              )}
+            </motion.div>
+          ) : (
+            /* PHASES 10 & 11: REVEALED FACE-UP APEX COLLECTIBLE CARD */
+            <motion.div
+              initial={{ rotateY: 180 }}
+              animate={{ rotateY: 0 }}
+              transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
+              className="flex flex-col items-center space-y-6 z-20 relative"
+            >
+              {/* Specular Highlight Sweep (Phase 10 light bounce) */}
+              <motion.div
+                initial={{ x: '100%', opacity: 0 }}
+                animate={{ x: '-100%', opacity: [0, 0.65, 0] }}
+                transition={{ duration: 0.6 }}
+                className="absolute inset-0 pointer-events-none rounded-2xl bg-gradient-to-r from-transparent via-white/40 to-transparent z-30"
+              />
+
+              {/* Main Collectible Card */}
+              <ApexCollectibleCard card={activeCard} showHolo={true} />
+
+              {/* PHASE 11: ACTION BUTTONS */}
+              {phase >= 11 && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="space-y-2 w-full max-w-[320px]"
+                >
+                  {/* Edit / Confirm Vehicle Specs Button */}
+                  <button
+                    onClick={() => {
+                      sounds.playTargetLock();
+                      setIsSelectorOpen(true);
+                    }}
+                    className="w-full py-2.5 rounded-xl border border-[#FF4500]/50 bg-[#FF4500]/10 hover:bg-[#FF4500]/20 text-[#FF4500] font-data text-xs font-semibold tracking-wider flex items-center justify-center gap-1.5 transition-all"
+                  >
+                    <span>✏️ WRONG CAR? EDIT / CONFIRM MODEL</span>
+                  </button>
+
+                  <div className="flex items-center gap-3 w-full">
+                    {/* Save Privately Ghost Button */}
+                    <button
+                      onClick={handleSavePrivately}
+                      className="flex-1 h-12 rounded-xl border border-[#2C2C2C] bg-[#111111] hover:bg-[#1A1A1A] text-[#F0EBE3] font-display text-base tracking-wider transition-all"
+                    >
+                      SAVE PRIVATELY
+                    </button>
+
+                    {/* Post to Apex Ignition CTA */}
+                    <button
+                      onClick={() => {
+                        sounds.playTargetLock();
+                        setShowPostComposer(true);
+                      }}
+                      className="flex-1 h-12 rounded-xl bg-[#FF4500] hover:bg-[#FF6A00] text-[#F0EBE3] font-display text-base tracking-wider glow-orange transition-all flex items-center justify-center gap-1"
+                    >
+                      POST TO APEX →
+                    </button>
+                  </div>
                 </motion.div>
-              </div>
-            ) : (
-              /* Face-Down Carbon Fiber Back with Muted Silver APEX Emblem */
-              <div className="space-y-4">
-                <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900 border border-white/20 flex items-center justify-center font-display text-5xl text-slate-300 shadow-[0_0_30px_rgba(255,255,255,0.15)] mx-auto">
-                  A
-                </div>
+              )}
+            </motion.div>
+          )}
 
-                <div>
-                  <h3 className="font-display text-4xl text-white tracking-widest">APEX</h3>
-                  <p className="text-xs font-mono text-orange-400 tracking-wider mt-1 uppercase">
-                    {rarityConf.label} COLLECTIBLE CARD
-                  </p>
-                </div>
-              </div>
-            )}
-          </motion.div>
         </div>
-      ) : (
-        /* 6. REVEALED FACE-UP APEX COLLECTIBLE CARD */
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ duration: 0.4, ease: 'easeOut' }}
-          className="flex flex-col items-center space-y-6 z-20"
-        >
-          {/* Main Portrait Card with 58% photo, 6-stat grid & location footer */}
-          <ApexCollectibleCard card={card} showHolo={true} />
-
-          {/* Add to Garage CTA */}
-          <button
-            onClick={() => {
-              sounds.playTargetLock();
-              if (onComplete) onComplete();
-            }}
-            className="py-3.5 px-10 rounded-2xl bg-gradient-to-r from-orange-600 via-[#FF5500] to-amber-500 text-white font-display text-2xl tracking-wider shadow-[0_0_30px_rgba(255,85,0,0.6)] hover:scale-105 active:scale-95 transition-all border border-orange-400/50"
-          >
-            ADD TO GARAGE
-          </button>
-        </motion.div>
       )}
+
+      {/* Vehicle Selector Modal for 100% Guaranteed Model Selection */}
+      <VehicleSelectorModal
+        isOpen={isSelectorOpen}
+        onClose={() => setIsSelectorOpen(false)}
+        currentCard={activeCard}
+        onConfirm={(updatedCard) => {
+          setActiveCard(updatedCard);
+        }}
+      />
+
     </div>
   );
 };
