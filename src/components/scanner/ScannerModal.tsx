@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { X, Camera, ShieldAlert, Settings, RefreshCw, AlertTriangle, RotateCw, CornerDownRight } from 'lucide-react';
+import { X, Camera, ShieldAlert, Settings, RefreshCw, AlertTriangle, RotateCw, CornerDownRight, Check } from 'lucide-react';
 import { useApexStore } from '../../store/useApexStore';
 import type { CarCard } from '../../types/apex';
 import { sounds } from '../../utils/audio';
@@ -12,7 +12,7 @@ import { PostScanHuntModal } from '../hunts/PostScanHuntModal';
 
 export const ScannerModal: React.FC = () => {
   const { scannerOpen, setScannerOpen, addCardToGarage, user, triggerMockHunt } = useApexStore();
-  const [phase, setPhase] = useState<'camera' | 'analyzing' | 'rejected' | 'hunt_prompt' | 'unboxing'>('camera');
+  const [phase, setPhase] = useState<'camera' | 'analyzing' | 'analyzing_success' | 'rejected' | 'hunt_prompt' | 'unboxing'>('camera');
   const [permissionState, setPermissionState] = useState<'granted' | 'denied' | 'requesting'>('requesting');
   const [capturedPhotoUrl, setCapturedPhotoUrl] = useState<string | null>(null);
   const [analysisTextIndex, setAnalysisTextIndex] = useState(0);
@@ -105,6 +105,7 @@ export const ScannerModal: React.FC = () => {
 
   useEffect(() => {
     if (phase === 'analyzing') {
+      const startTime = Date.now();
       const interval = setInterval(() => {
         setAnalysisTextIndex(i => (i + 1) % analysisMessages.length);
       }, 700);
@@ -167,17 +168,24 @@ export const ScannerModal: React.FC = () => {
           isFirstCityScan: true
         };
 
-        setCreatedCard(newCard);
-        setPhase('unboxing');
+        const elapsedTime = Date.now() - startTime;
+        const remainingWait = Math.max(0, 1500 - elapsedTime);
+
+        setTimeout(() => {
+          setCreatedCard(newCard);
+          sounds.playXpPop();
+          setPhase('analyzing_success');
+          
+          setTimeout(() => {
+            setPhase('unboxing');
+          }, 1500);
+        }, remainingWait);
       };
 
-      const timer = setTimeout(() => {
-        processScan();
-      }, 1000);
+      processScan();
 
       return () => {
         clearInterval(interval);
-        clearTimeout(timer);
       };
     }
   }, [phase, capturedPhotoUrl, user]);
@@ -430,6 +438,40 @@ export const ScannerModal: React.FC = () => {
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {/* PHASE 2.5: AI IDENTIFIED CAR NAME */}
+      {phase === 'analyzing_success' && capturedPhotoUrl && createdCard && (
+        <div className="relative flex-1 flex flex-col justify-center items-center p-6 text-center">
+          <img src={capturedPhotoUrl} alt="Captured Photo" className="absolute inset-0 w-full h-full object-cover filter blur-sm brightness-40" />
+          <div className="absolute inset-0 bg-[#080808]/70" />
+
+          <motion.div 
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="relative z-10 space-y-6"
+          >
+            <div className="w-20 h-20 mx-auto rounded-full bg-[#3DAA6A]/10 flex items-center justify-center border border-[#3DAA6A]/40 shadow-[0_0_20px_rgba(61,170,106,0.3)]">
+              <Check className="w-10 h-10 text-[#3DAA6A]" />
+            </div>
+            
+            <div>
+              <h3 className="font-display text-[11px] text-[#3DAA6A] tracking-[0.2em] font-semibold border border-[#3DAA6A]/30 bg-[#3DAA6A]/10 px-3 py-1 rounded-full inline-block mb-3">
+                VEHICLE IDENTIFIED
+              </h3>
+              <p className="text-[#F0EBE3] font-display text-4xl mt-2 tracking-wide uppercase leading-tight drop-shadow-lg">
+                {createdCard.make}<br />{createdCard.model}
+              </p>
+            </div>
+
+            <div className="pt-4 flex flex-col items-center gap-3">
+              <RefreshCw className="w-5 h-5 text-[#FF4500] animate-spin opacity-80" />
+              <p className="text-[#9A9088] font-data text-[10px] tracking-widest uppercase">
+                PREPARING COLLECTIBLE CARD...
+              </p>
+            </div>
+          </motion.div>
         </div>
       )}
 
