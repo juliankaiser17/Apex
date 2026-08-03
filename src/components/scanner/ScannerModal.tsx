@@ -168,16 +168,7 @@ export const ScannerModal: React.FC = () => {
         };
 
         setCreatedCard(newCard);
-
-        if (
-          user.defaultPrivacyLevel === 'no_hunt_private' ||
-          !user.allowHunts ||
-          newCard.rarity === 'common'
-        ) {
-          setPhase('unboxing');
-        } else {
-          setPhase('hunt_prompt');
-        }
+        setPhase('unboxing');
       };
 
       const timer = setTimeout(() => {
