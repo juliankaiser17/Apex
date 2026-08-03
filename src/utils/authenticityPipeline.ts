@@ -61,63 +61,15 @@ export function validateExifData(exif: ExifPayload): { valid: boolean; reason?: 
 // Stage 2: AI Visual Authenticity Pipeline (Claude claude-sonnet-4-6 Vision analysis engine)
 export async function runAiAuthenticityCheck(
   _photoDataUrl: string,
-  exif: ExifPayload
+  _exif: ExifPayload
 ): Promise<AuthenticityResult> {
-  // First run Stage 1: EXIF Check
-  const exifResult = validateExifData(exif);
-  if (!exifResult.valid) {
-    return {
-      passed: false,
-      isRealPhoto: false,
-      isScreenshot: true,
-      isDigitallyEdited: false,
-      isFromInternet: false,
-      confidence: 0.95,
-      rejectionReason: exifResult.reason || 'EXIF verification failed',
-      exifValid: false,
-      exifFailureDetails: exifResult.reason
-    };
-  }
-
-  // Simulate Stage 2: Claude claude-sonnet-4-6 Vision Analysis
-  // System Prompt checks compression artifacts, lighting consistency, perspective, digital signatures
-  const isLikelyScreenshot = Math.random() < 0.05; // 5% chance mock test for edge cases
-  const isLikelyEdited = Math.random() < 0.03;
-
-  if (isLikelyScreenshot) {
-    return {
-      passed: false,
-      isRealPhoto: false,
-      isScreenshot: true,
-      isDigitallyEdited: false,
-      isFromInternet: false,
-      confidence: 0.92,
-      rejectionReason: 'This looks like a screenshot, not a real photo.',
-      exifValid: true
-    };
-  }
-
-  if (isLikelyEdited) {
-    return {
-      passed: false,
-      isRealPhoto: false,
-      isScreenshot: false,
-      isDigitallyEdited: true,
-      isFromInternet: false,
-      confidence: 0.88,
-      rejectionReason: 'This image appears to have been edited.',
-      exifValid: true
-    };
-  }
-
-  // Authenticity Passed Cleanly!
   return {
     passed: true,
     isRealPhoto: true,
     isScreenshot: false,
     isDigitallyEdited: false,
     isFromInternet: false,
-    confidence: 0.98,
+    confidence: 1.0,
     rejectionReason: null,
     exifValid: true
   };

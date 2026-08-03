@@ -42,10 +42,9 @@ export const ScannerModal: React.FC = () => {
   };
 
   const analysisMessages = [
-    'Stage 1: Validating EXIF timestamp & software signatures...',
-    'Stage 2: Running Gemini 2.0 Flash visual authenticity check...',
-    'Running AI Vision vehicle identification engine...',
-    'Applying spatial blur to GPS coordinates...',
+    'Processing image metadata...',
+    'Extracting vehicle specifications...',
+    'Applying spatial location privacy...',
     'Calculating regional rarity score...'
   ];
 
