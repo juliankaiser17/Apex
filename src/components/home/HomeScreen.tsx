@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Camera, ChevronRight, Zap, Trophy, ShieldAlert, CheckCircle2, Clock, AlertCircle, Eye } from 'lucide-react';
 import { useApexStore, GLOBAL_QUEST_EXPIRES_AT, GLOBAL_EVENT_EXPIRES_AT } from '../../store/useApexStore';
-import { CAR_PRESETS } from '../../data/carDatabase';
 import { RARITY_CONFIG } from '../../utils/rarity';
 import type { Mission } from '../../types/apex';
 
@@ -24,11 +23,9 @@ const LiveCountdownTimer: React.FC<{ targetTimestamp: number; className?: string
   const minutes = Math.floor((timeLeft % 3600) / 60);
   const seconds = timeLeft % 60;
 
-  const pad = (n: number) => n.toString().padStart(2, '0');
-
   return (
-    <span className={className || "font-data font-semibold text-[#FF4500]"}>
-      {pad(hours)}:{pad(minutes)}:{pad(seconds)}
+    <span className={className}>
+      {hours > 0 ? `${hours}h ` : ''}{minutes}m {seconds < 10 ? '0' : ''}{seconds}s
     </span>
   );
 };
@@ -43,6 +40,7 @@ export const HomeScreen: React.FC = () => {
     setActiveTab, 
     completeMission,
     garage,
+    feedPosts,
     liveEventExpiresAt
   } = useApexStore();
 
@@ -147,56 +145,58 @@ export const HomeScreen: React.FC = () => {
         </motion.button>
       </div>
 
-      {/* 3. Near You Section */}
-      <div className="space-y-2.5">
-        <div className="flex items-center justify-between">
-          <h3 className="font-display text-lg text-[#F0EBE3] tracking-wide flex items-center gap-1.5">
-            <span>NEAR YOU</span>
-            <span className="text-xs font-data text-[#9A9088]">(within 3 km)</span>
-          </h3>
-          <button 
-            onClick={() => setActiveTab('map')}
-            className="text-xs font-semibold text-[#FF4500] hover:underline flex items-center gap-0.5"
-          >
-            See all on map <ChevronRight className="w-3.5 h-3.5" />
-          </button>
-        </div>
+      {/* 3. Near You Section (Rendered only when real posts exist) */}
+      {feedPosts.length > 0 && (
+        <div className="space-y-2.5">
+          <div className="flex items-center justify-between">
+            <h3 className="font-display text-lg text-[#F0EBE3] tracking-wide flex items-center gap-1.5">
+              <span>NEAR YOU</span>
+              <span className="text-xs font-data text-[#9A9088]">(within 3 km)</span>
+            </h3>
+            <button 
+              onClick={() => setActiveTab('map')}
+              className="text-xs font-semibold text-[#FF4500] hover:underline flex items-center gap-0.5"
+            >
+              See all on map <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
 
-        <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2 -mx-4 px-4">
-          {CAR_PRESETS.map((preset) => {
-            const rarityConf = RARITY_CONFIG[preset.rarity];
-            return (
-              <div
-                key={preset.id}
-                onClick={() => setScannerOpen(true)}
-                className="flex-shrink-0 w-32 h-44 rounded-xl overflow-hidden relative border border-[#2C2C2C] bg-[#111111] group cursor-pointer hover:border-[#FF4500]/60 transition-all"
-              >
-                {/* Background Image */}
-                <img 
-                  src={preset.imageUrl} 
-                  alt={preset.model} 
-                  className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#080808] via-[#080808]/40 to-transparent" />
+          <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2 -mx-4 px-4">
+            {feedPosts.map((post) => {
+              const rarityConf = RARITY_CONFIG[post.card.rarity];
+              return (
+                <div
+                  key={post.id}
+                  onClick={() => setActiveTab('social')}
+                  className="flex-shrink-0 w-32 h-44 rounded-xl overflow-hidden relative border border-[#2C2C2C] bg-[#111111] group cursor-pointer hover:border-[#FF4500]/60 transition-all"
+                >
+                  {/* Background Image */}
+                  <img 
+                    src={post.card.imageUrl} 
+                    alt={post.card.model} 
+                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#080808] via-[#080808]/40 to-transparent" />
 
-                {/* Top Rarity Badge */}
-                <div className="absolute top-2 left-2">
-                  <span className={`text-[9px] font-data font-semibold px-1.5 py-0.5 rounded border ${rarityConf.badgeBg}`}>
-                    {rarityConf.label}
-                  </span>
+                  {/* Top Rarity Badge */}
+                  <div className="absolute top-2 left-2">
+                    <span className={`text-[9px] font-data font-semibold px-1.5 py-0.5 rounded border ${rarityConf.badgeBg}`}>
+                      {rarityConf.label}
+                    </span>
+                  </div>
+
+                  {/* Bottom Info */}
+                  <div className="absolute bottom-2 left-2 right-2">
+                    <h4 className="font-display text-sm text-[#F0EBE3] leading-tight truncate">{post.card.make}</h4>
+                    <p className="text-[11px] font-medium text-[#F0EBE3]/80 truncate">{post.card.model}</p>
+                    <p className="text-[9px] text-[#9A9088] font-data mt-0.5">Spotted in {post.card.city}</p>
+                  </div>
                 </div>
-
-                {/* Bottom Info */}
-                <div className="absolute bottom-2 left-2 right-2">
-                  <h4 className="font-display text-sm text-[#F0EBE3] leading-tight truncate">{preset.make}</h4>
-                  <p className="text-[11px] font-medium text-[#F0EBE3]/80 truncate">{preset.model}</p>
-                  <p className="text-[9px] text-[#9A9088] font-data mt-0.5">0.4 km · 12m ago</p>
-                </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* 4. Daily Missions */}
       <div className="bg-[#111111] border border-[#2C2C2C] rounded-xl p-4 space-y-3">

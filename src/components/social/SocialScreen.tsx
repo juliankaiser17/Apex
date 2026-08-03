@@ -13,7 +13,8 @@ export const SocialScreen: React.FC = () => {
     leaderboards, 
     badges, 
     toggleLikePost, 
-    toggleEnthusiastModal
+    toggleEnthusiastModal,
+    setScannerOpen
   } = useApexStore();
 
   const [subTab, setSubTab] = useState<'feed' | 'leaderboard' | 'friends' | 'profile'>('feed');
@@ -44,76 +45,97 @@ export const SocialScreen: React.FC = () => {
       {/* SUB-TAB 1: FEED */}
       {subTab === 'feed' && (
         <div className="space-y-4">
-          {feedPosts.map((post) => {
-            const conf = RARITY_CONFIG[post.card.rarity];
-            return (
-              <div 
-                key={post.id}
-                className="bg-[#111111] border border-[#2C2C2C] rounded-xl overflow-hidden space-y-3"
-              >
-                {/* User Info Header */}
-                <div className="p-4 pb-0 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <img src={post.user.avatarUrl} alt={post.user.username} className="w-10 h-10 rounded-full object-cover border border-[#2C2C2C]" />
-                    <div>
-                      <h4 className="text-sm font-semibold text-[#F0EBE3]">@{post.user.username}</h4>
-                      <p className="text-[10px] font-data text-[#9A9088]">Level {post.user.level} Spotter · {post.createdAt}</p>
+          {feedPosts.length > 0 ? (
+            feedPosts.map((post) => {
+              const conf = RARITY_CONFIG[post.card.rarity];
+              return (
+                <div 
+                  key={post.id}
+                  className="bg-[#111111] border border-[#2C2C2C] rounded-xl overflow-hidden space-y-3"
+                >
+                  {/* User Info Header */}
+                  <div className="p-4 pb-0 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <img src={post.user.avatarUrl} alt={post.user.username} className="w-10 h-10 rounded-full object-cover border border-[#2C2C2C]" />
+                      <div>
+                        <h4 className="text-sm font-semibold text-[#F0EBE3]">@{post.user.username}</h4>
+                        <p className="text-[10px] font-data text-[#9A9088]">Level {post.user.level} Spotter · {post.createdAt}</p>
+                      </div>
+                    </div>
+                    <span className={`text-[9px] font-data font-semibold px-2 py-0.5 rounded border ${conf.badgeBg}`}>
+                      {conf.label}
+                    </span>
+                  </div>
+
+                  {/* Car Photo with Double Tap Like */}
+                  <div 
+                    onDoubleClick={() => toggleLikePost(post.id)}
+                    className="relative h-64 overflow-hidden cursor-pointer group bg-[#080808]"
+                  >
+                    <img src={post.card.imageUrl} alt={post.card.model} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#080808] via-transparent to-transparent" />
+                    
+                    {/* Car Name overlay */}
+                    <div className="absolute bottom-3 left-4 right-4">
+                      <h3 className="font-display text-2xl text-[#F0EBE3] leading-none">{post.card.make} {post.card.model}</h3>
+                      <p className="text-xs text-[#9A9088] font-data mt-0.5">Spotted in {post.card.city} · +{post.card.xpEarned} XP</p>
                     </div>
                   </div>
-                  <span className={`text-[9px] font-data font-semibold px-2 py-0.5 rounded border ${conf.badgeBg}`}>
-                    {conf.label}
-                  </span>
-                </div>
 
-                {/* Car Photo with Double Tap Like */}
-                <div 
-                  onDoubleClick={() => toggleLikePost(post.id)}
-                  className="relative h-64 overflow-hidden cursor-pointer group bg-[#080808]"
-                >
-                  <img src={post.card.imageUrl} alt={post.card.model} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#080808] via-transparent to-transparent" />
-                  
-                  {/* Car Name overlay */}
-                  <div className="absolute bottom-3 left-4 right-4">
-                    <h3 className="font-display text-2xl text-[#F0EBE3] leading-none">{post.card.make} {post.card.model}</h3>
-                    <p className="text-xs text-[#9A9088] font-data mt-0.5">Spotted in {post.card.city} · +{post.card.xpEarned} XP</p>
-                  </div>
-                </div>
+                  {/* Interactions Row */}
+                  <div className="p-4 pt-0 flex items-center justify-between text-xs font-data">
+                    <div className="flex items-center gap-5">
+                      {/* Heart Like Button */}
+                      <button
+                        onClick={() => toggleLikePost(post.id)}
+                        className={`flex items-center gap-1.5 transition-colors ${
+                          post.isLiked ? 'text-[#FF2200] font-semibold' : 'text-[#9A9088] hover:text-[#F0EBE3]'
+                        }`}
+                      >
+                        <Heart className={`w-4 h-4 ${post.isLiked ? 'fill-[#FF2200]' : ''}`} />
+                        <span>{post.likesCount}</span>
+                      </button>
 
-                {/* Interactions Row */}
-                <div className="p-4 pt-0 flex items-center justify-between text-xs font-data">
-                  <div className="flex items-center gap-5">
-                    {/* Heart Like Button */}
+                      {/* Comments Button */}
+                      <button
+                        onClick={() => setSelectedPostForComments(post)}
+                        className="flex items-center gap-1.5 text-[#9A9088] hover:text-[#FF4500] transition-colors cursor-pointer group"
+                      >
+                        <MessageSquare className="w-4 h-4 text-[#FF4500] group-hover:scale-110 transition-transform" />
+                        <span className="font-semibold">{post.commentsCount} Comments</span>
+                      </button>
+                    </div>
+
                     <button
-                      onClick={() => toggleLikePost(post.id)}
-                      className={`flex items-center gap-1.5 transition-colors ${
-                        post.isLiked ? 'text-[#FF2200] font-semibold' : 'text-[#9A9088] hover:text-[#F0EBE3]'
-                      }`}
+                      onClick={() => setSelectedCard(post.card)}
+                      className="text-[#FF4500] font-semibold flex items-center gap-1 hover:underline"
                     >
-                      <Heart className={`w-4 h-4 ${post.isLiked ? 'fill-[#FF2200]' : ''}`} />
-                      <span>{post.likesCount}</span>
-                    </button>
-
-                    {/* Comments Button */}
-                    <button
-                      onClick={() => setSelectedPostForComments(post)}
-                      className="flex items-center gap-1.5 text-[#9A9088] hover:text-[#FF4500] transition-colors cursor-pointer group"
-                    >
-                      <MessageSquare className="w-4 h-4 text-[#FF4500] group-hover:scale-110 transition-transform" />
-                      <span className="font-semibold">{post.commentsCount} Comments</span>
+                      <Share2 className="w-3.5 h-3.5" /> View Card
                     </button>
                   </div>
-
-                  <button
-                    onClick={() => setSelectedCard(post.card)}
-                    className="text-[#FF4500] font-semibold flex items-center gap-1 hover:underline"
-                  >
-                    <Share2 className="w-3.5 h-3.5" /> View Card
-                  </button>
                 </div>
+              );
+            })
+          ) : (
+            /* IMMACULATE EMPTY STATE */
+            <div className="text-center py-16 px-6 space-y-5 bg-[#111111] rounded-2xl border border-[#2C2C2C] shadow-2xl">
+              <div className="w-16 h-16 rounded-full bg-[#1A1A1A] border border-[#FF4500] flex items-center justify-center mx-auto text-[#FF4500] glow-orange">
+                <Search className="w-8 h-8" />
               </div>
-            );
-          })}
+              <div className="space-y-2">
+                <h3 className="font-display text-3xl text-[#F0EBE3] tracking-wide">NO DISCOVERIES YET</h3>
+                <p className="text-xs text-[#9A9088] leading-relaxed max-w-xs mx-auto">
+                  The community feed is pristine. Spot a car and post your first discovery to make history on APEX.
+                </p>
+              </div>
+              <button
+                onClick={() => setScannerOpen(true)}
+                className="py-3.5 px-6 rounded-xl bg-[#FF4500] text-[#F0EBE3] font-display text-lg tracking-wider glow-orange inline-flex items-center gap-2"
+              >
+                OPEN VISION SCANNER →
+              </button>
+            </div>
+          )}
         </div>
       )}
 

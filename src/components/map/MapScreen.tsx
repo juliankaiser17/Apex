@@ -4,7 +4,6 @@ import L from 'leaflet';
 import { ShieldAlert, Crosshair, Eye, Search, Flame, ArrowLeft } from 'lucide-react';
 import { useApexStore } from '../../store/useApexStore';
 import { RARITY_CONFIG } from '../../utils/rarity';
-import { CAR_PRESETS } from '../../data/carDatabase';
 import type { CarCard } from '../../types/apex';
 import { CitySearchModal } from './CitySearchModal';
 import type { CityLocation } from './CitySearchModal';
@@ -115,7 +114,7 @@ export interface MapSpotPin extends CarCard {
 }
 
 export const MapScreen: React.FC = () => {
-  const { activeHunts, openHuntModal, setSelectedCardForDetail, setActiveTab } = useApexStore();
+  const { activeHunts, garage, openHuntModal, setSelectedCardForDetail, setActiveTab } = useApexStore();
   const [selectedPin, setSelectedPin] = useState<MapSpotPin | null>(null);
   const [searchModalOpen, setSearchModalOpen] = useState(false);
   const [selectedCity, setSelectedCity] = useState<CityLocation | null>(null);
@@ -124,48 +123,15 @@ export const MapScreen: React.FC = () => {
   const defaultCenter: [number, number] = [22.2950, 114.1720];
 
   const mapSpots = useMemo<MapSpotPin[]>(() => {
-    const coordsList: Array<{ lat: number; lng: number; city: string; distance: string }> = [
-      { lat: 22.2970, lng: 114.1750, city: 'Hong Kong', distance: '0.4 km away' },
-      { lat: 22.2920, lng: 114.1690, city: 'Hong Kong', distance: '0.8 km away' },
-      { lat: 22.3010, lng: 114.1780, city: 'Hong Kong', distance: '1.2 km away' },
-      { lat: 22.2880, lng: 114.1650, city: 'Hong Kong', distance: '1.9 km away' },
-      { lat: 22.3050, lng: 114.1820, city: 'Hong Kong', distance: '2.5 km away' },
-      { lat: 22.2850, lng: 114.1600, city: 'Hong Kong', distance: '3.1 km away' },
-      { lat: 22.3090, lng: 114.1860, city: 'Hong Kong', distance: '3.8 km away' },
-
-      { lat: 35.6762, lng: 139.6503, city: 'Tokyo', distance: '2.1 km away' },
-      { lat: 35.6895, lng: 139.6917, city: 'Tokyo', distance: '1.4 km away' },
-      { lat: 25.2048, lng: 55.2708, city: 'Dubai', distance: '0.9 km away' },
-      { lat: 25.1972, lng: 55.2744, city: 'Dubai', distance: '1.8 km away' },
-      { lat: 40.7128, lng: -74.0060, city: 'New York', distance: '3.2 km away' },
-      { lat: 51.5074, lng: -0.1278, city: 'London', distance: '1.5 km away' }
-    ];
-
-    return CAR_PRESETS.map((preset, index) => {
-      const locationInfo = coordsList[index % coordsList.length];
-      return {
-        ...preset,
-        id: `map-spot-${preset.id}`,
-        cardNumber: `APX-MAP-${index + 100}`,
-        lat: locationInfo.lat,
-        lng: locationInfo.lng,
-        city: locationInfo.city,
-        distance: locationInfo.distance,
-        latApprox: locationInfo.lat,
-        lngApprox: locationInfo.lng,
-        country: 'India',
-        xpEarned: 100,
-        marketValueLowUsd: 120000,
-        marketValueHighUsd: 200000,
-        scanValidated: true,
-        isPublic: true,
-        huntTriggered: false,
-        privacyLevel: 'public_blurred',
-        aiConfidence: 0.98,
-        createdAt: new Date().toISOString()
-      } as MapSpotPin;
-    });
-  }, []);
+    return garage.map((card, index) => ({
+      ...card,
+      id: `map-spot-${card.id}`,
+      lat: card.latApprox,
+      lng: card.lngApprox,
+      city: 'Unknown City',
+      distance: `${(0.4 + (index % 5) * 0.4).toFixed(1)} km away`
+    }));
+  }, [garage]);
 
   const activeMatchingHunt = useMemo(() => {
     if (!selectedPin) return null;
