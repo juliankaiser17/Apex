@@ -15,6 +15,7 @@ export const ScannerModal: React.FC = () => {
   const [phase, setPhase] = useState<'camera' | 'analyzing' | 'analyzing_success' | 'rejected' | 'hunt_prompt' | 'unboxing'>('camera');
   const [permissionState, setPermissionState] = useState<'granted' | 'denied' | 'requesting'>('requesting');
   const [capturedPhotoUrl, setCapturedPhotoUrl] = useState<string | null>(null);
+  const [capturedFileName, setCapturedFileName] = useState<string | null>(null);
   const [analysisTextIndex, setAnalysisTextIndex] = useState(0);
   const [authenticityError, setAuthenticityError] = useState<string | null>(null);
   const [angleInstruction, setAngleInstruction] = useState<string | null>(null);
@@ -29,12 +30,39 @@ export const ScannerModal: React.FC = () => {
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      setCapturedFileName(file.name);
       const reader = new FileReader();
       reader.onload = (event) => {
-        const dataUrl = event.target?.result as string;
-        setCapturedPhotoUrl(dataUrl);
-        stopCameraStream();
-        setPhase('analyzing');
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const MAX_WIDTH = 1200;
+          const MAX_HEIGHT = 1200;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height *= MAX_WIDTH / width;
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width *= MAX_HEIGHT / height;
+              height = MAX_HEIGHT;
+            }
+          }
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx?.drawImage(img, 0, 0, width, height);
+          
+          const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+          setCapturedPhotoUrl(compressedDataUrl);
+          stopCameraStream();
+          setPhase('analyzing');
+        };
+        img.src = event.target?.result as string;
       };
       reader.readAsDataURL(file);
     }
@@ -111,7 +139,7 @@ export const ScannerModal: React.FC = () => {
       }, 700);
 
       const processScan = async () => {
-        const aiResult = await identifyVehicleWithAi(capturedPhotoUrl || '');
+        const aiResult = await identifyVehicleWithAi(capturedPhotoUrl || '', false, capturedFileName || undefined);
         const offset = applySpatialOffset(22.2950, 114.1720);
         const rarityEngineResult = calculateRegionalRarity({
           make: aiResult.make,
@@ -507,6 +535,7 @@ export const ScannerModal: React.FC = () => {
             onClick={() => {
               setPhase('camera');
               setCapturedPhotoUrl(null);
+              setCapturedFileName(null);
               setAuthenticityError(null);
             }}
             className="w-full py-4 rounded-xl bg-[#FF4500] text-[#F0EBE3] font-display text-xl tracking-wider glow-orange flex items-center justify-center gap-2"
