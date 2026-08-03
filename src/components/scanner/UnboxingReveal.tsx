@@ -233,7 +233,7 @@ export const UnboxingReveal: React.FC<UnboxingRevealProps> = ({ card, onComplete
 
       {/* MAIN CARD CONTAINER */}
       {!showPostComposer && (
-        <div className="relative flex flex-col items-center justify-center">
+        <div className="relative flex flex-col items-center justify-center" style={{ perspective: '1000px' }}>
           
           {/* PHASE 2 & 3: RARITY SUSPENSE / RARITY STAMP HEADLINE */}
           {phase >= 2 && phase < 9 && (
