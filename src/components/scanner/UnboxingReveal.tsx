@@ -49,68 +49,51 @@ export const UnboxingReveal: React.FC<UnboxingRevealProps> = ({ card, onComplete
 
   const currentStreak = streakSpecs[card.rarity];
 
-  // 11-Phase Timed Animation Sequence
+  // Streamlined, bulletproof reveal sequence (~1.2s total)
   useEffect(() => {
-    // Phase 0 -> Phase 1 at 200ms
+    const safePlay = (fn: () => void) => {
+      try { fn(); } catch (e) { console.warn('Audio play error:', e); }
+    };
+
     const t1 = setTimeout(() => {
-      sounds.playShutter();
+      safePlay(() => sounds.playShutter());
       setPhase(1);
-    }, 200);
+    }, 100);
 
-    // Phase 1 -> Phase 2 at 900ms
     const t2 = setTimeout(() => {
-      setPhase(2);
-    }, 900);
-
-    // Phase 2 -> Phase 3 (Stamp) at 2100ms
-    const t3 = setTimeout(() => {
-      sounds.playCardFlip();
+      safePlay(() => sounds.playCardFlip());
       setPhase(3);
-    }, 2100);
+    }, 400);
 
-    // Phase 3 -> Phase 4 (Pre-crack Shudder) at 2400ms
-    const t4 = setTimeout(() => {
-      setPhase(4);
-    }, 2400);
-
-    // Phase 4 -> Phase 5 (Card Splits) at 2680ms
-    const t5 = setTimeout(() => {
-      sounds.playTargetLock();
-      setPhase(5);
-    }, 2680);
-
-    // Phase 5 -> Phase 6 (Streaks & Ribbons) at 2880ms
-    const t6 = setTimeout(() => {
+    const t3 = setTimeout(() => {
+      safePlay(() => sounds.playTargetLock());
       setPhase(6);
-    }, 2880);
+    }, 700);
 
-    // Phase 6 -> Phase 9 (White Flash) at 4400ms
-    const t7 = setTimeout(() => {
-      sounds.playRarityReveal(card.rarity);
-      setPhase(9);
-
-      confetti({
-        particleCount: isMythic ? 120 : isLegendary ? 80 : 50,
-        spread: 80,
-        origin: { y: 0.5 },
-        colors: isMythic
-          ? ['#FF2200', '#FFA500', '#C85000', '#E8A020', '#3DAA6A']
-          : [rarityConf.color, '#F0EBE3', '#FF4500']
-      });
-    }, 4400);
-
-    // Phase 9 -> Phase 10 (Card Flip) at 4455ms
-    const t8 = setTimeout(() => {
+    const t4 = setTimeout(() => {
+      safePlay(() => sounds.playRarityReveal(card.rarity));
       setPhase(10);
-    }, 4455);
 
-    // Phase 10 -> Phase 11 (Face-up Content Reveals) at 5055ms
-    const t9 = setTimeout(() => {
+      try {
+        confetti({
+          particleCount: isMythic ? 120 : isLegendary ? 80 : 50,
+          spread: 80,
+          origin: { y: 0.5 },
+          colors: isMythic
+            ? ['#FF2200', '#FFA500', '#C85000', '#E8A020', '#3DAA6A']
+            : [rarityConf.color, '#F0EBE3', '#FF4500']
+        });
+      } catch (e) {
+        console.warn('Confetti error:', e);
+      }
+    }, 1000);
+
+    const t5 = setTimeout(() => {
       setPhase(11);
-    }, 5055);
+    }, 1200);
 
     return () => {
-      [t1, t2, t3, t4, t5, t6, t7, t8, t9].forEach(clearTimeout);
+      [t1, t2, t3, t4, t5].forEach(clearTimeout);
     };
   }, [card, isMythic, isLegendary, rarityConf]);
 
@@ -139,7 +122,15 @@ export const UnboxingReveal: React.FC<UnboxingRevealProps> = ({ card, onComplete
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#080808] flex flex-col items-center justify-center overflow-hidden select-none" style={{ fontFamily: 'DM Sans' }}>
+    <div
+      onClick={() => {
+        if (phase < 11 && !showPostComposer) {
+          setPhase(11);
+        }
+      }}
+      className="fixed inset-0 z-50 bg-[#080808] flex flex-col items-center justify-center overflow-hidden select-none cursor-pointer"
+      style={{ fontFamily: 'DM Sans' }}
+    >
       
       {/* PHASE 9: PURE WHITE FLASH (55ms on, 100ms hold, 340ms fade) */}
       <AnimatePresence>
