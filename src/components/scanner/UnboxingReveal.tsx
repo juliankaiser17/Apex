@@ -46,7 +46,7 @@ export const UnboxingReveal: React.FC<UnboxingRevealProps> = ({ card, onComplete
 
   const currentStreak = streakSpecs[card.rarity];
 
-  // Streamlined, bulletproof reveal sequence (~1.2s total)
+  // Full suspenseful reveal sequence (~6.0s total)
   useEffect(() => {
     const safePlay = (fn: () => void) => {
       try { fn(); } catch (e) { console.warn('Audio play error:', e); }
@@ -55,19 +55,35 @@ export const UnboxingReveal: React.FC<UnboxingRevealProps> = ({ card, onComplete
     const t1 = setTimeout(() => {
       safePlay(() => sounds.playShutter());
       setPhase(1);
-    }, 100);
+    }, 300);
 
     const t2 = setTimeout(() => {
-      safePlay(() => sounds.playCardFlip());
-      setPhase(3);
-    }, 400);
+      setPhase(2);
+    }, 1100);
 
     const t3 = setTimeout(() => {
-      safePlay(() => sounds.playTargetLock());
-      setPhase(6);
-    }, 700);
+      safePlay(() => sounds.playXpPop());
+      setPhase(3);
+    }, 2400);
 
     const t4 = setTimeout(() => {
+      setPhase(4);
+    }, 3400);
+
+    const t5 = setTimeout(() => {
+      safePlay(() => sounds.playTargetLock());
+      setPhase(5);
+    }, 3700);
+
+    const t6 = setTimeout(() => {
+      setPhase(6);
+    }, 4100);
+
+    const t7 = setTimeout(() => {
+      setPhase(9);
+    }, 4800);
+
+    const t8 = setTimeout(() => {
       safePlay(() => sounds.playRarityReveal(card.rarity));
       setPhase(10);
 
@@ -83,14 +99,14 @@ export const UnboxingReveal: React.FC<UnboxingRevealProps> = ({ card, onComplete
       } catch (e) {
         console.warn('Confetti error:', e);
       }
-    }, 1000);
+    }, 4850);
 
-    const t5 = setTimeout(() => {
+    const t9 = setTimeout(() => {
       setPhase(11);
-    }, 1200);
+    }, 6000);
 
     return () => {
-      [t1, t2, t3, t4, t5].forEach(clearTimeout);
+      [t1, t2, t3, t4, t5, t6, t7, t8, t9].forEach(clearTimeout);
     };
   }, [card, isMythic, isLegendary, rarityConf]);
 
