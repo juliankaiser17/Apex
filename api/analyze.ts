@@ -28,6 +28,13 @@ const AI_SCHEMA = `
   "needs_better_angle": false,
   "angle_instruction": null
 }`;
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '4mb',
+    },
+  },
+};
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
