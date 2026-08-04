@@ -255,8 +255,8 @@ export const ScannerModal: React.FC = () => {
     setPhase('unboxing');
   };
 
-  const handleUnboxingComplete = () => {
-    if (createdCard) {
+  const handleUnboxingComplete = (postedToFeed?: boolean) => {
+    if (createdCard && !postedToFeed) {
       addCardToGarage(createdCard);
     }
     setScannerOpen(false);

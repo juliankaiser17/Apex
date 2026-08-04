@@ -9,7 +9,7 @@ import confetti from 'canvas-confetti';
 
 interface UnboxingRevealProps {
   card: CarCard;
-  onComplete?: () => void;
+  onComplete?: (postedToFeed?: boolean) => void;
 }
 
 // 11 Phases matching Section 8 of the APEX Specification
@@ -134,7 +134,7 @@ export const UnboxingReveal: React.FC<UnboxingRevealProps> = ({ card, onComplete
 
   const handleSavePrivately = () => {
     sounds.playTargetLock();
-    if (onComplete) onComplete();
+    if (onComplete) onComplete(false);
   };
 
   return (
@@ -184,7 +184,7 @@ export const UnboxingReveal: React.FC<UnboxingRevealProps> = ({ card, onComplete
             onBack={() => setShowPostComposer(false)}
             onPostComplete={() => {
               setShowPostComposer(false);
-              if (onComplete) onComplete();
+              if (onComplete) onComplete(true);
             }}
           />
         )}
