@@ -104,10 +104,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (geminiKey) {
       const prompt = `You are an expert Automotive Vision AI classifier. Analyze this car photo and return ONLY valid JSON matching this schema exactly:\n${AI_SCHEMA}`;
 
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`, {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'x-goog-api-key': geminiKey
         },
         body: JSON.stringify({
           contents: [
