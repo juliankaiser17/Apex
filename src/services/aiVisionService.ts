@@ -429,11 +429,14 @@ export async function identifyVehicleWithAi(
         }
       } else {
         const errorData = await response.json().catch(() => ({}));
-        console.warn('Backend proxy analysis failed:', errorData.error || response.statusText);
+        const errString = errorData.error || response.statusText;
+        console.warn('Backend proxy analysis failed:', errString);
+        alert('VERCEL PROXY ERROR: ' + errString);
         throw new Error('Proxy failed, falling back to local');
       }
-    } catch (e) {
+    } catch (e: any) {
       console.warn('Backend API proxy fetch error, attempting local fallback...', e);
+      alert('FETCH ERROR: ' + (e.message || e));
       
       // LOCAL DEV FALLBACK: If proxy fails (e.g., running `npm run dev` instead of `vercel dev`), try local VITE_ key
       const localGeminiKey = import.meta.env.VITE_GEMINI_API_KEY;
