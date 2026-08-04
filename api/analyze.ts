@@ -132,7 +132,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
   } catch (error: any) {
-    console.error('Backend Proxy Error:', error.message || error);
-    return res.status(500).json({ error: 'AI Analysis Failed on Backend' });
+    const errorMsg = error.message || String(error);
+    console.error('Backend Proxy Error:', errorMsg);
+    return res.status(500).json({ error: 'AI Analysis Failed on Backend: ' + errorMsg });
   }
 }
