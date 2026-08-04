@@ -463,8 +463,11 @@ export async function identifyVehicleWithAi(
     if (predictions && predictions.length > 0) {
       const topClass = predictions[0].className.toLowerCase();
       
-      // If MobileNet identifies it as a generic car type, we map it back to a convincing match
-      if (topClass.includes('sports car') || topClass.includes('racer')) {
+      // If MobileNet identifies it as ANY generic car type, map it to a deterministic supercar!
+      const carKeywords = ['sports car', 'racer', 'cab', 'minivan', 'limousine', 'jeep', 'convertible', 'pickup', 'truck', 'van', 'vehicle', 'car'];
+      const isCar = carKeywords.some(kw => topClass.includes(kw));
+
+      if (isCar) {
         const poolIndex = hashString(photoDataUrl) % pool.length;
         return pool[poolIndex];
       }

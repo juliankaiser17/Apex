@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { CarCard, RarityTier } from '../../types/apex';
 import { RARITY_CONFIG } from '../../utils/rarity';
@@ -29,6 +29,7 @@ export const UnboxingReveal: React.FC<UnboxingRevealProps> = ({ card, onComplete
   const [phase, setPhase] = useState<RevealPhase>(0);
   const [showPostComposer, setShowPostComposer] = useState(false);
   const [fireworkParticles, setFireworkParticles] = useState<Array<{ id: number; x: number; y: number; size: number; color: string }>>([]);
+  const timeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   const rarityConf = RARITY_CONFIG[card.rarity];
   const isMythic = card.rarity === 'mythic';
@@ -105,8 +106,10 @@ export const UnboxingReveal: React.FC<UnboxingRevealProps> = ({ card, onComplete
       setPhase(11);
     }, 6000);
 
+    timeoutsRef.current = [t1, t2, t3, t4, t5, t6, t7, t8, t9];
+
     return () => {
-      [t1, t2, t3, t4, t5, t6, t7, t8, t9].forEach(clearTimeout);
+      timeoutsRef.current.forEach(clearTimeout);
     };
   }, [card, isMythic, isLegendary, rarityConf]);
 
@@ -138,7 +141,22 @@ export const UnboxingReveal: React.FC<UnboxingRevealProps> = ({ card, onComplete
     <div
       onClick={() => {
         if (phase < 11 && !showPostComposer) {
+          timeoutsRef.current.forEach(clearTimeout);
           setPhase(11);
+          
+          if (phase < 10) {
+            try { sounds.playRarityReveal(card.rarity); } catch (e) {}
+            try {
+              confetti({
+                particleCount: isMythic ? 120 : isLegendary ? 80 : 50,
+                spread: 80,
+                origin: { y: 0.5 },
+                colors: isMythic
+                  ? ['#FF2200', '#FFA500', '#C85000', '#E8A020', '#3DAA6A']
+                  : [rarityConf.color, '#F0EBE3', '#FF4500']
+              });
+            } catch (e) {}
+          }
         }
       }}
       className="fixed inset-0 z-50 bg-[#080808] flex flex-col items-center justify-center overflow-hidden select-none cursor-pointer"
