@@ -100,26 +100,40 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
     }
 
-    // 2. Try Gemini using official SDK
+    // 2. Try Gemini using REST API to avoid SDK credential parsing bugs
     if (geminiKey) {
-      const ai = new GoogleGenAI({ apiKey: geminiKey });
-      
       const prompt = `You are an expert Automotive Vision AI classifier. Analyze this car photo and return ONLY valid JSON matching this schema exactly:\n${AI_SCHEMA}`;
 
-      const response = await ai.models.generateContent({
-        model: 'gemini-2.0-flash',
-        contents: [
-          prompt,
-          {
-            inlineData: {
-              data: imageBase64,
-              mimeType: mimeType || 'image/jpeg'
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [
+                { text: prompt },
+                {
+                  inline_data: {
+                    mime_type: mimeType || 'image/jpeg',
+                    data: imageBase64
+                  }
+                }
+              ]
             }
-          }
-        ]
+          ]
+        })
       });
 
-      const rawText = response.text;
+      if (!response.ok) {
+        const errJson = await response.json().catch(() => ({}));
+        throw new Error(errJson.error?.message || `Gemini REST returned ${response.status}`);
+      }
+
+      const jsonRes = await response.json();
+      const rawText = jsonRes.candidates?.[0]?.content?.parts?.[0]?.text;
+      
       if (rawText) {
         const cleanedText = rawText.replace(/```json\n?|\n?```/g, '').trim();
         const parsed = JSON.parse(cleanedText);
