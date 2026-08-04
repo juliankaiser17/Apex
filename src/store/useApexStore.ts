@@ -156,7 +156,7 @@ const getSavedOnboarding = (): boolean => {
     const saved = localStorage.getItem('apex_onboarding_completed');
     if (saved !== null) return saved === 'true';
   } catch (e) {}
-  return true;
+  return false;
 };
 
 export const useApexStore = create<ApexState>((set) => ({
@@ -227,7 +227,12 @@ export const useApexStore = create<ApexState>((set) => ({
     }
   })),
 
-  completeOnboarding: () => set({ onboardingCompleted: true }),
+  completeOnboarding: () => {
+    try {
+      localStorage.setItem('apex_onboarding_completed', 'true');
+    } catch (e) {}
+    set({ onboardingCompleted: true });
+  },
 
   addCardToGarage: (newCard) => {
     sounds.playXpPop();
