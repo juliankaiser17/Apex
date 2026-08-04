@@ -1,6 +1,7 @@
 import type { BodyStyle, RarityTier } from '../types/apex';
 import * as tf from '@tensorflow/tfjs';
 import * as mobilenet from '@tensorflow-models/mobilenet';
+import { GoogleGenAI } from '@google/genai';
 
 export interface AftermarketPart {
   part_name: string;
@@ -429,9 +430,70 @@ export async function identifyVehicleWithAi(
       } else {
         const errorData = await response.json().catch(() => ({}));
         console.warn('Backend proxy analysis failed:', errorData.error || response.statusText);
+        throw new Error('Proxy failed, falling back to local');
       }
     } catch (e) {
-      console.warn('Backend API proxy fetch error:', e);
+      console.warn('Backend API proxy fetch error, attempting local fallback...', e);
+      
+      // LOCAL DEV FALLBACK: If proxy fails (e.g., running `npm run dev` instead of `vercel dev`), try local VITE_ key
+      const localGeminiKey = import.meta.env.VITE_GEMINI_API_KEY;
+      if (localGeminiKey) {
+        try {
+          const ai = new GoogleGenAI({ apiKey: localGeminiKey });
+          const base64Data = photoDataUrl.split(',')[1];
+          const mimeType = photoDataUrl.substring(photoDataUrl.indexOf(':') + 1, photoDataUrl.indexOf(';'));
+          
+          const response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: [
+              `You are an expert Automotive Vision AI classifier. Analyze this car photo and return ONLY valid JSON matching this schema exactly:
+{
+  "make": "Exact Make (e.g. Porsche, Toyota, Ferrari)",
+  "model": "Exact Model",
+  "generation": "Model Generation code",
+  "trim": "Trim specification",
+  "year_estimate": "Estimated Year",
+  "color": "Observed car body color",
+  "rarity": "common" | "uncommon" | "rare" | "epic" | "legendary" | "mythic",
+  "estimated_market_value_usd_low": 50000,
+  "estimated_market_value_usd_high": 70000,
+  "engine": "Engine spec",
+  "horsepower": 400,
+  "torque_nm": 450,
+  "kerb_weight_kg": 1500,
+  "top_speed_kmh": 280,
+  "zero_to_hundred_seconds": 4.0,
+  "production_years": "YYYY-YYYY",
+  "origin_country": "Country",
+  "body_style": "Coupe" | "Sedan" | "Convertible" | "SUV" | "Supercar",
+  "historical_information": "Brief concise history",
+  "interesting_facts": "Key engineering fact",
+  "aftermarket_parts_detected": [],
+  "confidence": 0.98,
+  "needs_better_angle": false,
+  "angle_instruction": null
+}`,
+              { inlineData: { data: base64Data, mimeType: mimeType } }
+            ]
+          });
+
+          const rawText = response.text;
+          if (rawText) {
+            const cleanedText = rawText.replace(/```json\n?|\n?```/g, '').trim();
+            const parsed = JSON.parse(cleanedText);
+            if (parsed.make && parsed.model) {
+              return {
+                ...parsed,
+                confidence: parsed.confidence || 0.98,
+                needs_better_angle: false,
+                angle_instruction: null
+              };
+            }
+          }
+        } catch (localError) {
+          console.warn('Local Gemini fallback also failed:', localError);
+        }
+      }
     }
   }
 

@@ -198,7 +198,7 @@ export const UnboxingReveal: React.FC<UnboxingRevealProps> = ({ card, onComplete
             className="w-[460px] h-[460px] rounded-full border-2 border-dashed opacity-35 animate-[spin_4s_linear_infinite] shadow-[0_0_60px_rgba(255,255,255,0.15)]"
           />
           {isMythic && (
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,34,0,0.3)_0%,rgba(255,165,0,0.25)_30%,rgba(200,80,0,0.2)_60%,transparent_80%)] animate-[spin_2.5s_linear_infinite]" />
+            <div className="absolute inset-0 bg-[conic-gradient(from_0deg,transparent_0%,rgba(255,34,0,0.4)_30%,rgba(255,165,0,0.5)_50%,rgba(255,34,0,0.4)_70%,transparent_100%)] animate-[spin_2.5s_linear_infinite]" />
           )}
         </div>
       )}
