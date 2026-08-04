@@ -48,8 +48,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   // Use environment variables WITHOUT VITE_ prefix to keep them strictly server-side (but support VITE_ fallback if user pasted it that way)
-  const openAiKey = process.env.OPENAI_API_KEY || process.env.VITE_OPENAI_API_KEY;
-  const geminiKey = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
+  const openAiKey = (process.env.OPENAI_API_KEY || process.env.VITE_OPENAI_API_KEY || '').trim();
+  const geminiKey = (process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY || '').trim();
 
   if (!openAiKey && !geminiKey) {
     return res.status(503).json({ error: 'No API keys configured on the server.' });
