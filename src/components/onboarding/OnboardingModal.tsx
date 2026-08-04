@@ -6,13 +6,14 @@ import type { Persona } from '../../types/apex';
 import { sounds } from '../../utils/audio';
 import { triggerGoogleSignIn } from '../../services/googleAuthService';
 import confetti from 'canvas-confetti';
+import { requestRealLocationPermission } from '../../utils/geolocation';
 
 interface OnboardingModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-type OnboardingStep = 'auth' | 'email_input' | 'email_otp' | 'roles' | 'cam_perm' | 'loc_perm' | 'notif_perm' | 'celebration';
+type OnboardingStep = 'auth' | 'email_input' | 'email_otp' | 'profile_setup' | 'roles' | 'cam_perm' | 'loc_perm' | 'notif_perm' | 'celebration';
 
 /* Spring configs matching the spec */
 const SPRING_HEAVY = { type: 'spring' as const, damping: 18, stiffness: 90, mass: 1.4 };
@@ -112,6 +113,8 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
   const [celebStage, setCelebStage] = useState(0);
   const [wordmarkVisible, setWordmarkVisible] = useState(false);
   const [taglineVisible, setTaglineVisible] = useState(false);
+  const [setupDisplayName, setSetupDisplayName] = useState('');
+  const [setupUsername, setSetupUsername] = useState('');
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   // Reset step to auth whenever modal opens (e.g., on logout)
@@ -164,7 +167,9 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
     sounds.playTargetLock();
     triggerGoogleSignIn((userData) => {
       setGoogleUser(userData);
-      setStep('roles');
+      setSetupDisplayName(userData.name || '');
+      setSetupUsername((userData.email || '').split('@')[0]);
+      setStep('profile_setup');
     });
   };
 
@@ -184,7 +189,9 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
     if (val && idx < 5) otpRefs.current[idx + 1]?.focus();
     if (val && idx === 5 && next.every(d => d)) {
       sounds.playTargetLock();
-      setTimeout(() => setStep('roles'), 300);
+      setSetupDisplayName('Apex Hunter');
+      setSetupUsername('hunter_' + Math.floor(Math.random() * 9999));
+      setTimeout(() => setStep('profile_setup'), 300);
     }
   }, [otpCode]);
 
@@ -346,6 +353,52 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
           </motion.div>
         )}
 
+        {/* ═══ SCREEN 2.5: PROFILE SETUP ═══ */}
+        {step === 'profile_setup' && (
+          <motion.div key="profile_setup" initial={{ opacity: 0, x: 60 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -60 }}
+            transition={{ duration: 0.3 }}
+            className="flex-1 flex flex-col justify-center px-6 max-w-md mx-auto w-full">
+            <h2 className="font-display text-[36px] leading-none mb-6" style={{ color: '#F0EBE3' }}>YOUR IDENTITY</h2>
+            
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              if (setupDisplayName && setupUsername) {
+                sounds.playTargetLock();
+                useApexStore.getState().updateUserProfile({
+                  displayName: setupDisplayName,
+                  username: setupUsername.toLowerCase().replace(/[^a-z0-9_]/g, '')
+                });
+                setStep('roles');
+              }
+            }} className="space-y-6">
+              <div>
+                <label className="text-[11px] tracking-[2px] mb-2 block" style={{ color: '#9A9088', fontFamily: 'DM Sans' }}>DISPLAY NAME</label>
+                <input type="text" required placeholder="John Doe" value={setupDisplayName}
+                  onChange={e => setSetupDisplayName(e.target.value)}
+                  className="w-full h-14 px-5 rounded-xl text-base outline-none"
+                  style={{ background: '#1A1A1A', border: '1px solid #2C2C2C', color: '#F0EBE3', fontFamily: 'DM Sans' }} />
+              </div>
+
+              <div>
+                <label className="text-[11px] tracking-[2px] mb-2 block" style={{ color: '#9A9088', fontFamily: 'DM Sans' }}>USERNAME</label>
+                <div className="relative">
+                  <span className="absolute left-5 top-1/2 -translate-y-1/2 opacity-50" style={{ color: '#F0EBE3', fontFamily: 'DM Sans' }}>@</span>
+                  <input type="text" required placeholder="username" value={setupUsername}
+                    onChange={e => setSetupUsername(e.target.value)}
+                    className="w-full h-14 pl-10 pr-5 rounded-xl text-base outline-none"
+                    style={{ background: '#1A1A1A', border: '1px solid #2C2C2C', color: '#F0EBE3', fontFamily: 'DM Sans' }} />
+                </div>
+              </div>
+
+              <motion.button type="submit" whileTap={{ scale: 0.97 }}
+                className="w-full h-14 rounded-xl font-display text-xl tracking-wider mt-4"
+                style={{ background: '#FF4500', color: '#F0EBE3' }}>
+                CONTINUE
+              </motion.button>
+            </form>
+          </motion.div>
+        )}
+
         {/* ═══ SCREEN 3: ROLE SELECTION CAROUSEL ═══ */}
         {step === 'roles' && (
           <motion.div key="roles" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
@@ -486,7 +539,18 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
             </motion.p>
             <div className="absolute bottom-8 left-6 right-6 max-w-md mx-auto space-y-3">
               <motion.button initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}
-                onClick={() => { sounds.playTargetLock(); setStep('notif_perm'); }}
+                onClick={() => {
+                  sounds.playTargetLock();
+                  requestRealLocationPermission().then((res) => {
+                    if (res.city && res.city !== 'Your City') {
+                      useApexStore.getState().updateUserProfile({
+                        city: res.city,
+                        country: res.country
+                      });
+                    }
+                  });
+                  setStep('notif_perm');
+                }}
                 whileTap={{ scale: 0.97 }}
                 className="w-full h-14 rounded-xl font-display text-xl tracking-wider glow-orange"
                 style={{ background: '#FF4500', color: '#F0EBE3' }}>

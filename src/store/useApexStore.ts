@@ -159,7 +159,7 @@ const getSavedOnboarding = (): boolean => {
   return false;
 };
 
-export const useApexStore = create<ApexState>((set) => ({
+export const useApexStore = create<ApexState>((set, get) => ({
   activeTab: 'home',
   scannerOpen: false,
   onboardingCompleted: getSavedOnboarding(),
@@ -213,19 +213,20 @@ export const useApexStore = create<ApexState>((set) => ({
 
   setScannerOpen: (open) => set({ scannerOpen: open }),
 
-  setPersona: (persona) => set((state) => ({
-    user: { ...state.user, persona }
-  })),
+  setPersona: (persona) => {
+    const state = get();
+    state.updateUserProfile({ persona });
+  },
 
-  setGoogleUser: (userData) => set((state) => ({
-    user: {
-      ...state.user,
+  setGoogleUser: (userData) => {
+    const state = get();
+    state.updateUserProfile({
       displayName: userData.name,
       username: userData.email.split('@')[0] || state.user.username,
       email: userData.email,
       avatarUrl: userData.picture || state.user.avatarUrl
-    }
-  })),
+    });
+  },
 
   completeOnboarding: () => {
     try {
