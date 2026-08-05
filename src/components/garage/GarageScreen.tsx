@@ -67,7 +67,7 @@ export const GarageScreen: React.FC = () => {
         <div className="flex gap-2 overflow-x-auto no-scrollbar py-1">
           <button
             onClick={() => setSelectedRarity('all')}
-            className={`px-3 py-1 rounded-lg text-xs font-data transition-all border ${
+            className={`flex-shrink-0 px-3 py-1 rounded-lg text-xs font-data transition-all border whitespace-nowrap ${
               selectedRarity === 'all' 
                 ? 'bg-[#FF4500] text-[#F0EBE3] border-[#FF6A00] font-semibold' 
                 : 'bg-black/40 backdrop-blur-md text-[#9A9088] border-white/10 hover:border-[#FF4500]/40'
@@ -81,7 +81,7 @@ export const GarageScreen: React.FC = () => {
               <button
                 key={r}
                 onClick={() => setSelectedRarity(r)}
-                className={`px-3 py-1 rounded-lg text-xs font-data uppercase transition-all border whitespace-nowrap ${
+                className={`flex-shrink-0 px-3 py-1 rounded-lg text-xs font-data uppercase transition-all border whitespace-nowrap ${
                   selectedRarity === r 
                     ? 'bg-[#FF4500] text-[#F0EBE3] border-[#FF6A00] font-semibold' 
                     : 'bg-black/40 backdrop-blur-md text-[#9A9088] border-white/10 hover:border-[#FF4500]/40'
