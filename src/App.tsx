@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { useApexStore } from './store/useApexStore';
 import { HeaderBar } from './components/common/HeaderBar';
 import { TabBar } from './components/common/TabBar';
+import { AmbientBackground } from './components/common/AmbientBackground';
 import { HomeScreen } from './components/home/HomeScreen';
 import { MapScreen } from './components/map/MapScreen';
 import { GarageScreen } from './components/garage/GarageScreen';
@@ -43,7 +44,8 @@ export const App: React.FC = () => {
   } = useApexStore();
 
   return (
-    <div className="min-h-screen bg-[#080808] text-[#F0EBE3] flex flex-col selection:bg-[#FF4500] selection:text-white" style={{ fontFamily: 'DM Sans' }}>
+    <div className="min-h-screen bg-transparent text-[#F0EBE3] flex flex-col selection:bg-[#FF4500] selection:text-white relative z-0" style={{ fontFamily: 'DM Sans' }}>
+      <AmbientBackground />
       {/* Top Status Header */}
       <HeaderBar />
 

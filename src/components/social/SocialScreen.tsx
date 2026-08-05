@@ -26,7 +26,7 @@ export const SocialScreen: React.FC = () => {
   return (
     <div className="flex-1 pb-24 px-4 pt-4 max-w-md mx-auto space-y-4" style={{ fontFamily: 'DM Sans' }}>
       {/* Sub-Tab Navigation Header */}
-      <div className="flex gap-1 p-1 bg-[#111111] border border-[#2C2C2C] rounded-xl">
+      <div className="flex gap-1 p-1 bg-black/40 backdrop-blur-md border border-white/10 rounded-xl relative z-10">
         {(['feed', 'leaderboard', 'friends', 'profile'] as const).map((tab) => (
           <button
             key={tab}
@@ -51,7 +51,7 @@ export const SocialScreen: React.FC = () => {
               return (
                 <div 
                   key={post.id}
-                  className="bg-[#111111] border border-[#2C2C2C] rounded-xl overflow-hidden space-y-3"
+                  className="bg-black/40 backdrop-blur-md border border-white/10 rounded-xl overflow-hidden space-y-3"
                 >
                   {/* User Info Header */}
                   <div className="p-4 pb-0 flex items-center justify-between">
@@ -70,7 +70,7 @@ export const SocialScreen: React.FC = () => {
                   {/* Car Photo with Double Tap Like */}
                   <div 
                     onDoubleClick={() => toggleLikePost(post.id)}
-                    className="relative h-64 overflow-hidden cursor-pointer group bg-[#080808]"
+                    className="relative h-64 overflow-hidden cursor-pointer group bg-transparent"
                   >
                     <img src={post.card.imageUrl} alt={post.card.model} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                     <div className="absolute inset-0 bg-gradient-to-t from-[#080808] via-transparent to-transparent" />
@@ -118,8 +118,8 @@ export const SocialScreen: React.FC = () => {
             })
           ) : (
             /* IMMACULATE EMPTY STATE */
-            <div className="text-center py-16 px-6 space-y-5 bg-[#111111] rounded-2xl border border-[#2C2C2C] shadow-2xl">
-              <div className="w-16 h-16 rounded-full bg-[#1A1A1A] border border-[#FF4500] flex items-center justify-center mx-auto text-[#FF4500] glow-orange">
+            <div className="text-center py-16 px-6 space-y-5 bg-black/40 backdrop-blur-md rounded-2xl border border-white/10 shadow-2xl">
+              <div className="w-16 h-16 rounded-full bg-black/60 border border-[#FF4500] flex items-center justify-center mx-auto text-[#FF4500] glow-orange">
                 <Search className="w-8 h-8" />
               </div>
               <div className="space-y-2">

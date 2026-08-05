@@ -73,7 +73,7 @@ export const HomeScreen: React.FC = () => {
         <motion.div 
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="relative overflow-hidden rounded-xl border border-[#2C2C2C] bg-[#111111] transition-all"
+          className="relative overflow-hidden rounded-xl border border-white/10 bg-black/40 backdrop-blur-md transition-all"
         >
           {/* Left accent bar */}
           <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-[#FF4500]" />
@@ -168,7 +168,7 @@ export const HomeScreen: React.FC = () => {
                 <div
                   key={post.id}
                   onClick={() => setActiveTab('social')}
-                  className="flex-shrink-0 w-32 h-44 rounded-xl overflow-hidden relative border border-[#2C2C2C] bg-[#111111] group cursor-pointer hover:border-[#FF4500]/60 transition-all"
+                  className="flex-shrink-0 w-32 h-44 rounded-xl overflow-hidden relative border border-white/10 bg-black/40 backdrop-blur-md group cursor-pointer hover:border-[#FF4500]/60 transition-all"
                 >
                   {/* Background Image */}
                   <img 
@@ -199,7 +199,7 @@ export const HomeScreen: React.FC = () => {
       )}
 
       {/* 4. Daily Missions */}
-      <div className="bg-[#111111] border border-[#2C2C2C] rounded-xl p-4 space-y-3">
+      <div className="bg-black/40 backdrop-blur-md border border-white/10 rounded-xl p-4 space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="font-display text-lg text-[#F0EBE3] tracking-wide">DAILY MISSIONS</h3>
           <span className="text-xs font-data text-[#9A9088]">
@@ -214,8 +214,8 @@ export const HomeScreen: React.FC = () => {
               onClick={() => handleMissionCheckboxClick(m)}
               className={`p-3 rounded-lg flex items-center justify-between border transition-all cursor-pointer ${
                 m.completed 
-                  ? 'bg-[#1A1A1A]/40 border-[#2C2C2C] opacity-60' 
-                  : 'bg-[#1A1A1A] border-[#2C2C2C] hover:border-[#FF4500]/50'
+                  ? 'bg-black/20 border-white/5 opacity-60' 
+                  : 'bg-black/40 border-white/10 hover:border-[#FF4500]/50'
               }`}
             >
               <div className="flex items-center gap-3">
@@ -292,9 +292,9 @@ export const HomeScreen: React.FC = () => {
         )}
       </AnimatePresence>
 
-      {/* 5. Live Event Banner (Supercar Sunday with ASPHALT dark warm aesthetic - NO PURPLE) */}
-      <div className="p-4 rounded-xl bg-[#111111] border border-[#FFA500]/40 flex items-center gap-3 relative overflow-hidden">
-        <div className="p-3 rounded-xl bg-[#1A1A1A] text-[#FFA500] border border-[#FFA500]/30">
+      {/* 5. Live Event Banner */}
+      <div className="p-4 rounded-xl bg-black/40 backdrop-blur-md border border-[#FFA500]/30 flex items-center gap-3 relative overflow-hidden">
+        <div className="p-3 rounded-xl bg-black/60 text-[#FFA500] border border-[#FFA500]/30">
           <ShieldAlert className="w-6 h-6 animate-pulse" />
         </div>
         <div className="flex-1">

@@ -9,9 +9,9 @@ export const HeaderBar: React.FC = () => {
 
   return (
     <>
-      {/* Top HUD Bar — fades into content */}
-      <header className="sticky top-0 z-30 w-full"
-        style={{ background: 'linear-gradient(180deg, rgba(8,8,8,0.95) 0%, rgba(8,8,8,0.6) 70%, transparent 100%)' }}>
+      {/* Top HUD Bar — Frosted Glass */}
+      <header className="sticky top-0 z-30 w-full backdrop-blur-xl border-b border-white/5"
+        style={{ background: 'rgba(8,8,8,0.65)' }}>
         <div className="max-w-md mx-auto px-4 pt-3 pb-5">
           <div className="flex items-center justify-between">
             {/* Left: APEX wordmark (Clickable to go Home) */}

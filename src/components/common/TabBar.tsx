@@ -18,8 +18,8 @@ export const TabBar: React.FC = () => {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-30 pb-safe"
-      style={{ background: 'rgba(8,8,8,0.95)', borderTop: '1px solid #2C2C2C' }}>
+    <nav className="fixed bottom-0 left-0 right-0 z-30 pb-safe backdrop-blur-xl"
+      style={{ background: 'rgba(8,8,8,0.65)', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
       <div className="max-w-md mx-auto flex items-end justify-between px-4 pt-1 pb-2">
         {tabs.map((tab) => {
           const Icon = tab.icon;

@@ -34,7 +34,7 @@ export const GarageScreen: React.FC = () => {
         </div>
 
         {/* View Toggle Buttons */}
-        <div className="flex items-center gap-1 bg-[#1A1A1A] p-1 rounded-xl border border-[#2C2C2C]">
+        <div className="flex items-center gap-1 bg-black/40 backdrop-blur-md p-1 rounded-xl border border-white/10">
           <button
             onClick={() => setViewMode('grid')}
             className={`p-1.5 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-[#FF4500] text-[#F0EBE3]' : 'text-[#9A9088] hover:text-[#F0EBE3]'}`}
@@ -59,7 +59,7 @@ export const GarageScreen: React.FC = () => {
             placeholder="Search make or model..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-[#111111] border border-[#2C2C2C] rounded-xl pl-9 pr-4 py-2.5 text-xs text-[#F0EBE3] placeholder-[#5A5550] focus:outline-none focus:border-[#FF4500]"
+            className="w-full bg-black/40 backdrop-blur-md border border-white/10 rounded-xl pl-9 pr-4 py-2.5 text-xs text-[#F0EBE3] placeholder-[#5A5550] focus:outline-none focus:border-[#FF4500]"
           />
         </div>
 
@@ -70,7 +70,7 @@ export const GarageScreen: React.FC = () => {
             className={`px-3 py-1 rounded-lg text-xs font-data transition-all border ${
               selectedRarity === 'all' 
                 ? 'bg-[#FF4500] text-[#F0EBE3] border-[#FF6A00] font-semibold' 
-                : 'bg-[#1A1A1A] text-[#9A9088] border-[#2C2C2C] hover:border-[#FF4500]/40'
+                : 'bg-black/40 backdrop-blur-md text-[#9A9088] border-white/10 hover:border-[#FF4500]/40'
             }`}
           >
             ALL ({garage.length})
@@ -84,7 +84,7 @@ export const GarageScreen: React.FC = () => {
                 className={`px-3 py-1 rounded-lg text-xs font-data uppercase transition-all border whitespace-nowrap ${
                   selectedRarity === r 
                     ? 'bg-[#FF4500] text-[#F0EBE3] border-[#FF6A00] font-semibold' 
-                    : 'bg-[#1A1A1A] text-[#9A9088] border-[#2C2C2C] hover:border-[#FF4500]/40'
+                    : 'bg-black/40 backdrop-blur-md text-[#9A9088] border-white/10 hover:border-[#FF4500]/40'
                 }`}
               >
                 {r} ({count})
@@ -114,12 +114,12 @@ export const GarageScreen: React.FC = () => {
                 <div
                   key={card.id}
                   onClick={() => setSelectedCardForDetail(card)}
-                  className={`group relative rounded-xl overflow-hidden border-2 ${rarityConf.borderClass} bg-[#0E0E0E] cursor-pointer hover:scale-[1.03] transition-all shadow-xl ${
+                  className={`group relative rounded-xl overflow-hidden border-2 ${rarityConf.borderClass} bg-black/40 backdrop-blur-md cursor-pointer hover:scale-[1.03] transition-all shadow-xl ${
                     isMythic ? 'animate-gradient-border shadow-[0_0_24px_rgba(255,34,0,0.4)]' : ''
                   }`}
                 >
                   {/* Image Header */}
-                  <div className="relative h-32 overflow-hidden bg-[#050505]">
+                  <div className="relative h-32 overflow-hidden bg-transparent">
                     <img 
                       src={card.imageUrl} 
                       alt={card.model} 
@@ -149,7 +149,7 @@ export const GarageScreen: React.FC = () => {
                   </div>
 
                   {/* Card Info & Performance Specs */}
-                  <div className="p-2.5 bg-[#0E0E0E] border-t border-[#2C2C2C] space-y-1.5">
+                  <div className="p-2.5 bg-black/60 border-t border-white/10 space-y-1.5">
                     <div>
                       <h4 className="font-display text-base text-[#F0EBE3] truncate leading-tight uppercase tracking-wide group-hover:text-[#FF4500] transition-colors">{card.make}</h4>
                       <p className="text-xs text-[#9A9088] font-medium truncate font-data">{card.model}</p>
@@ -176,7 +176,7 @@ export const GarageScreen: React.FC = () => {
                 <div
                   key={card.id}
                   onClick={() => setSelectedCardForDetail(card)}
-                  className={`p-3 rounded-xl bg-[#111111] border ${rarityConf.borderClass} flex items-center justify-between cursor-pointer hover:border-[#FF4500]/50 transition-all`}
+                  className={`p-3 rounded-xl bg-black/40 backdrop-blur-md border ${rarityConf.borderClass} flex items-center justify-between cursor-pointer hover:border-[#FF4500]/50 transition-all`}
                 >
                   <div className="flex items-center gap-3">
                     <img src={card.imageUrl} alt={card.model} className="w-14 h-14 rounded-lg object-cover border border-[#2C2C2C]" />
@@ -195,8 +195,8 @@ export const GarageScreen: React.FC = () => {
         )
       ) : (
         /* Empty State */
-        <div className="text-center py-16 px-4 space-y-4 bg-[#111111] rounded-xl border border-[#2C2C2C]">
-          <div className="w-16 h-16 rounded-full bg-[#1A1A1A] border border-[#FF4500] flex items-center justify-center mx-auto text-[#FF4500] glow-orange">
+        <div className="text-center py-16 px-4 space-y-4 bg-black/40 backdrop-blur-md rounded-xl border border-white/10">
+          <div className="w-16 h-16 rounded-full bg-black/60 border border-[#FF4500] flex items-center justify-center mx-auto text-[#FF4500] glow-orange">
             <Filter className="w-8 h-8" />
           </div>
           <div>
