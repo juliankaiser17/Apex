@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mail, Bell, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Mail, Bell, ChevronLeft } from 'lucide-react';
 import { useApexStore } from '../../store/useApexStore';
 import type { Persona } from '../../types/apex';
 import { sounds } from '../../utils/audio';
@@ -207,10 +207,6 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
     setStep('celebration');
   };
 
-  // Role carousel swipe
-  const swipeRole = (dir: number) => {
-    setActiveRoleIdx(prev => Math.max(0, Math.min(ROLES.length - 1, prev + dir)));
-  };
 
   if (!isOpen) return null;
 
