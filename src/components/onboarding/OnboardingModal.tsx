@@ -33,7 +33,7 @@ const ROLES = [
     name: 'THE SPOTTER',
     ctaText: "I'M A SPOTTER",
     desc: "Cities hide things in plain sight.\nYou're the one who finds them.\nDiscovery is your discipline.",
-    gradient: 'radial-gradient(ellipse at top right, rgba(0,120,255,0.1) 0%, rgba(8,8,8,1) 70%)',
+    gradient: 'radial-gradient(ellipse at top right, rgba(255,255,255,0.1) 0%, rgba(8,8,8,1) 70%)',
   },
   {
     id: 'love_of_cars' as Persona,
@@ -436,83 +436,72 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
           </motion.div>
         )}
 
-        {/* ═══ SCREEN 3: ROLE SELECTION CAROUSEL ═══ */}
+        {/* ═══ SCREEN 3: ROLE SELECTION CARDS ═══ */}
         {step === 'roles' && (
           <motion.div key="roles" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="flex-1 flex flex-col relative overflow-hidden bg-black">
+            className="flex-1 flex flex-col relative overflow-hidden bg-[#080808] px-5 pt-12 pb-8">
             
-            {/* Scroll Container */}
-            <div 
-              className="flex-1 flex overflow-x-auto snap-x snap-mandatory"
-              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-              onScroll={(e) => {
-                const scrollX = e.currentTarget.scrollLeft;
-                const width = e.currentTarget.offsetWidth;
-                const index = Math.round(scrollX / width);
-                if (index !== activeRoleIdx) setActiveRoleIdx(index);
-              }}
-            >
-              {ROLES.map((role, idx) => (
-                <div key={role.id} className="min-w-full w-full h-full relative snap-center flex-shrink-0">
-                  <div className="absolute inset-0" style={{ background: role.gradient }} />
-                  {/* Overlay vignette */}
-                  <div className="absolute inset-0"
-                    style={{ background: 'linear-gradient(to bottom, transparent 30%, rgba(8,8,8,0.98) 100%)' }} />
-                  
-                  {/* Content bottom aligned */}
-                  <div className="absolute bottom-[160px] left-0 right-0 px-[28px] pointer-events-none">
-                    {/* Accent bar */}
-                    <AnimatePresence>
-                      {activeRoleIdx === idx && (
-                        <motion.div 
-                          initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} exit={{ scaleX: 0 }}
-                          transition={{ duration: 0.3 }}
-                          style={{ transformOrigin: 'left' }}
-                          className="w-[32px] h-[4px] bg-[#FF4500] rounded-[2px] mb-[8px]" 
-                        />
-                      )}
-                    </AnimatePresence>
-                    
-                    <h2 className="font-display text-[72px] leading-none tracking-[2px] text-[#F0EBE3]">
-                      {role.name}
-                    </h2>
-                    
-                    <div className="h-[12px]" />
-                    
-                    <p className="text-[16px] leading-[1.65] text-[#F0EBE3] opacity-70 whitespace-pre-line"
-                       style={{ fontFamily: 'DM Sans' }}>
-                      {role.desc}
-                    </p>
-                  </div>
-                </div>
-              ))}
+            <div className="text-center mb-6">
+              <h2 className="font-display text-3xl text-[#F0EBE3] tracking-wider mb-1">WHO ARE YOU?</h2>
+              <p className="text-[#9A9088] font-data text-xs">Choose your identity on APEX.</p>
             </div>
 
-            {/* Fixed Bottom Overlay */}
-            <div className="absolute bottom-0 left-0 right-0 h-[140px] pointer-events-none flex flex-col justify-end pb-[32px]">
-              
-              {/* PAGE DOTS */}
-              <div className="flex justify-center gap-[8px] mb-[24px]">
-                {ROLES.map((_, i) => (
-                  <motion.div key={i}
-                    animate={{ width: i === activeRoleIdx ? 28 : 8, background: i === activeRoleIdx ? '#F0EBE3' : '#2C2C2C' }}
-                    transition={{ duration: 0.2, ease: 'easeOut' }}
-                    className="h-[8px] rounded-[4px]"
-                  />
-                ))}
-              </div>
-              
-              {/* CONTINUE BUTTON */}
-              <div className="px-[20px] pointer-events-auto">
-                <motion.button
-                  onClick={() => { sounds.playTargetLock(); setStep('cam_perm'); }}
-                  whileTap={{ scale: 0.97 }}
-                  className="w-full h-[56px] rounded-[12px] font-display text-[22px] tracking-[2px]"
-                  style={{ background: '#FF4500', color: '#F0EBE3', boxShadow: '0 4px 24px rgba(255,69,0,0.4)' }}>
-                  {ROLES[activeRoleIdx].ctaText}
-                </motion.button>
-              </div>
+            <div className="flex-1 flex flex-col gap-3">
+              {ROLES.map((role, idx) => {
+                const isActive = activeRoleIdx === idx;
+                return (
+                  <motion.div
+                    key={role.id}
+                    onClick={() => setActiveRoleIdx(idx)}
+                    animate={{ 
+                      scale: isActive ? 1.02 : 1,
+                      backgroundColor: isActive ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.2)',
+                      borderColor: isActive ? 'rgba(255,69,0,0.6)' : 'rgba(255,255,255,0.05)',
+                    }}
+                    whileTap={{ scale: 0.98 }}
+                    className="flex-1 rounded-2xl border backdrop-blur-xl p-5 relative overflow-hidden cursor-pointer flex flex-col justify-center shadow-2xl transition-shadow"
+                    style={{
+                      boxShadow: isActive ? '0 8px 32px rgba(255,69,0,0.25)' : 'none'
+                    }}
+                  >
+                    <div className="absolute inset-0 opacity-60 pointer-events-none" style={{ background: role.gradient }} />
+                    <div className="relative z-10 w-full flex items-center justify-between">
+                      <div className="space-y-2">
+                        <h3 className={`font-display text-2xl tracking-wider transition-colors duration-300 ${isActive ? 'text-[#FF4500]' : 'text-[#F0EBE3]'}`}>
+                          {role.name}
+                        </h3>
+                        <p className="text-[#9A9088] text-xs leading-relaxed max-w-[90%] whitespace-pre-line">
+                          {role.desc.replace(/\n/g, ' ')}
+                        </p>
+                      </div>
+                      
+                      {/* Selection Checkmark */}
+                      <div className={`flex-shrink-0 w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all duration-300 ${
+                        isActive ? 'border-[#FF4500] bg-[#FF4500]' : 'border-[#5A5550]'
+                      }`}>
+                        {isActive && <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="w-3.5 h-3.5 bg-[#F0EBE3] rounded-full" />}
+                      </div>
+                    </div>
+                  </motion.div>
+                )
+              })}
             </div>
+
+            <motion.div 
+              className="mt-6 h-14 shrink-0"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+            >
+              <motion.button
+                onClick={() => { sounds.playTargetLock(); setStep('cam_perm'); }}
+                whileTap={{ scale: 0.97 }}
+                className="w-full h-full rounded-xl font-display text-xl tracking-wider flex items-center justify-center glow-orange"
+                style={{ background: '#FF4500', color: '#F0EBE3', boxShadow: '0 4px 24px rgba(255,69,0,0.4)' }}
+              >
+                {ROLES[activeRoleIdx].ctaText}
+              </motion.button>
+            </motion.div>
           </motion.div>
         )}
 

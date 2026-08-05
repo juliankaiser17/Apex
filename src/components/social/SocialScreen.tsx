@@ -150,8 +150,8 @@ export const SocialScreen: React.FC = () => {
                 onClick={() => setLeaderboardFilter(filter)}
                 className={`flex-1 py-1.5 rounded-lg text-xs font-data uppercase border transition-all ${
                   leaderboardFilter === filter 
-                    ? 'bg-[#1A1A1A] text-[#FFA500] border-[#FFA500]/50 font-semibold' 
-                    : 'bg-[#111111] text-[#9A9088] border-[#2C2C2C]'
+                    ? 'bg-black/60 text-[#FFA500] border-[#FFA500]/50 font-semibold' 
+                    : 'bg-black/40 backdrop-blur-md text-[#9A9088] border-white/10'
                 }`}
               >
                 {filter}
@@ -159,7 +159,7 @@ export const SocialScreen: React.FC = () => {
             ))}
           </div>
 
-          <div className="bg-[#111111] border border-[#2C2C2C] rounded-xl p-4 space-y-2">
+          <div className="bg-black/40 backdrop-blur-md border border-white/10 rounded-xl p-4 space-y-2">
             {leaderboards.map((entry) => {
               const isMe = entry.username === user.username;
               return (
@@ -167,8 +167,8 @@ export const SocialScreen: React.FC = () => {
                   key={entry.username}
                   className={`p-3 rounded-lg flex items-center justify-between border transition-all ${
                     isMe 
-                      ? 'bg-[#1A1A1A] border-[#FF4500] glow-orange' 
-                      : 'bg-[#1A1A1A]/60 border-[#2C2C2C]'
+                      ? 'bg-black/60 border-[#FF4500] glow-orange' 
+                      : 'bg-black/20 border-white/5'
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -198,6 +198,10 @@ export const SocialScreen: React.FC = () => {
               );
             })}
           </div>
+
+          <button className="w-full py-4 rounded-xl bg-[#FF4500] text-[#F0EBE3] font-display text-lg tracking-wider flex items-center justify-center gap-2 glow-orange mt-2">
+            <Zap className="w-5 h-5" /> INVITE TO RACE
+          </button>
         </div>
       )}
 
@@ -211,20 +215,24 @@ export const SocialScreen: React.FC = () => {
               placeholder="Search friends by username..."
               value={friendSearch}
               onChange={(e) => setFriendSearch(e.target.value)}
-              className="w-full bg-[#111111] border border-[#2C2C2C] rounded-xl pl-9 pr-4 py-2.5 text-xs text-[#F0EBE3] placeholder-[#5A5550] focus:outline-none"
+              className="w-full bg-black/40 backdrop-blur-md border border-white/10 rounded-xl pl-9 pr-4 py-2.5 text-xs text-[#F0EBE3] placeholder-[#5A5550] focus:outline-none"
             />
           </div>
 
-          <div className="text-center py-12 px-6 space-y-4 bg-[#111111] rounded-2xl border border-[#2C2C2C]">
-            <div className="w-14 h-14 rounded-full bg-[#1A1A1A] border border-[#FF4500] flex items-center justify-center mx-auto text-[#FF4500] glow-orange">
+          <div className="text-center py-12 px-6 space-y-4 bg-black/40 backdrop-blur-md rounded-2xl border border-white/10">
+            <div className="w-14 h-14 rounded-full bg-black/60 border border-[#FF4500] flex items-center justify-center mx-auto text-[#FF4500] glow-orange">
               <Zap className="w-7 h-7" />
             </div>
-            <div>
+            <div className="space-y-1">
               <h4 className="font-display text-2xl text-[#F0EBE3]">NO FRIENDS ADDED YET</h4>
-              <p className="text-xs text-[#9A9088] mt-1 max-w-xs mx-auto">
+              <p className="text-xs text-[#9A9088] leading-relaxed max-w-xs mx-auto pb-4">
                 Connect with other real car spotters in your city to compare cards and start 7-day XP races.
               </p>
             </div>
+            
+            <button className="py-3 px-8 rounded-xl bg-[#FF4500] text-[#F0EBE3] font-display text-lg tracking-wider glow-orange inline-flex items-center gap-2">
+              <Crown className="w-5 h-5" /> + ADD NEW FRIEND
+            </button>
           </div>
         </div>
       )}
@@ -233,7 +241,7 @@ export const SocialScreen: React.FC = () => {
       {subTab === 'profile' && (
         <div className="space-y-4">
           {/* Profile Card */}
-          <div className="p-5 rounded-xl bg-[#111111] border border-[#2C2C2C] text-center space-y-3 relative overflow-hidden">
+          <div className="p-5 rounded-xl bg-black/40 backdrop-blur-md border border-white/10 text-center space-y-3 relative overflow-hidden">
             <img src={user.avatarUrl} alt={user.username} className="w-24 h-24 rounded-full border-2 border-[#FF4500] object-cover mx-auto glow-orange" />
             
             <div>
@@ -268,7 +276,7 @@ export const SocialScreen: React.FC = () => {
           </div>
 
           {/* Badges Showcase */}
-          <div className="bg-[#111111] border border-[#2C2C2C] rounded-xl p-5 space-y-3">
+          <div className="bg-black/40 backdrop-blur-md border border-white/10 rounded-xl p-5 space-y-3">
             <h3 className="font-display text-xl text-[#F0EBE3] flex items-center gap-2">
               <Award className="w-5 h-5 text-[#FFA500]" /> BADGES UNLOCKED ({badges.filter(b => b.isUnlocked).length})
             </h3>
@@ -279,8 +287,8 @@ export const SocialScreen: React.FC = () => {
                   key={badge.id}
                   className={`p-3 rounded-xl border text-center space-y-1 ${
                     badge.isUnlocked 
-                      ? 'bg-[#1A1A1A] border-[#FFA500]/40' 
-                      : 'bg-[#080808] border-[#2C2C2C] opacity-40 grayscale'
+                      ? 'bg-black/60 border-[#FFA500]/40' 
+                      : 'bg-black/20 border-white/5 opacity-40 grayscale'
                   }`}
                 >
                   <span className="text-3xl block">{badge.icon}</span>
