@@ -26,21 +26,21 @@ const ROLES = [
     name: 'THE COLLECTOR',
     ctaText: "I'M A COLLECTOR",
     desc: "You see what others walk past.\nEvery lot. Every street.\nEvery car is a target.",
-    image: '/role_collector_bg.png',
+    gradient: 'radial-gradient(ellipse at top left, rgba(255,69,0,0.15) 0%, rgba(8,8,8,1) 70%)',
   },
   {
     id: 'finder' as Persona,
     name: 'THE SPOTTER',
     ctaText: "I'M A SPOTTER",
     desc: "Cities hide things in plain sight.\nYou're the one who finds them.\nDiscovery is your discipline.",
-    image: '/role_spotter_bg.png',
+    gradient: 'radial-gradient(ellipse at top right, rgba(0,120,255,0.1) 0%, rgba(8,8,8,1) 70%)',
   },
   {
     id: 'love_of_cars' as Persona,
     name: 'FOR THE LOVE',
     ctaText: "I'M IN FOR THE LOVE",
     desc: "You don't need a reason.\nThe machines are enough.\nYou know. You feel it.",
-    image: '/role_love_bg.png',
+    gradient: 'radial-gradient(ellipse at bottom, rgba(255,180,0,0.12) 0%, rgba(8,8,8,1) 80%)',
   },
 ];
 
@@ -218,20 +218,37 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
         {step === 'auth' && (
           <motion.div key="auth" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             className="flex-1 flex flex-col relative">
-            {/* Hero photo fills 100%, bottom 30% gets covered */}
-            <div className="absolute inset-0">
-              <img src="/hero_auth.png" alt="" className="w-full h-full object-cover" />
-              {/* Top gradient for status bar */}
-              <div className="absolute top-0 left-0 right-0 h-[80px]"
-                style={{ background: 'linear-gradient(to bottom, #080808, transparent)' }} />
+            {/* Ambient Animated Background */}
+            <div className="absolute inset-0 bg-[#080808] overflow-hidden flex items-center justify-center">
+              {/* Core glow */}
+              <motion.div
+                animate={{ rotate: [0, 360], scale: [1, 1.2, 1] }}
+                transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
+                className="absolute w-[150vw] h-[150vw] md:w-[800px] md:h-[800px]"
+                style={{
+                  background: 'radial-gradient(circle, rgba(255,69,0,0.15) 0%, rgba(255,69,0,0) 60%)',
+                  filter: 'blur(60px)'
+                }}
+              />
+              {/* Secondary sweeping light */}
+              <motion.div
+                animate={{ rotate: [360, 0], scale: [1, 1.3, 1] }}
+                transition={{ duration: 25, repeat: Infinity, ease: 'linear' }}
+                className="absolute w-[120vw] h-[120vw] md:w-[600px] md:h-[600px] opacity-70"
+                style={{
+                  background: 'conic-gradient(from 90deg, transparent 0%, rgba(255,69,0,0.1) 25%, transparent 50%, rgba(255,69,0,0.05) 75%, transparent 100%)',
+                  filter: 'blur(40px)'
+                }}
+              />
+              {/* Heavy Vignette for dramatic contrast */}
+              <div className="absolute inset-0" style={{ background: 'radial-gradient(circle, transparent 30%, #080808 100%)' }} />
+              
+              {/* Noise overlay for texture */}
+              <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E")' }} />
             </div>
 
-            {/* Solid Bottom 30% */}
-            <div className="absolute bottom-0 left-0 right-0 h-[30%]"
-              style={{ background: '#080808' }} />
-
             {/* Content overlay */}
-            <div className="relative z-10 flex-1 flex flex-col justify-between max-w-md mx-auto w-full px-6">
+            <div className="relative z-10 flex-1 flex flex-col justify-end max-w-md mx-auto w-full px-6">
               {/* Wordmark — Center 30% */}
               <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                 <motion.h1
@@ -437,9 +454,10 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
             >
               {ROLES.map((role, idx) => (
                 <div key={role.id} className="min-w-full w-full h-full relative snap-center flex-shrink-0">
-                  <img src={role.image} alt="" className="w-full h-full object-cover" />
+                  <div className="absolute inset-0" style={{ background: role.gradient }} />
+                  {/* Overlay vignette */}
                   <div className="absolute inset-0"
-                    style={{ background: 'linear-gradient(to bottom, transparent 40%, rgba(8,8,8,0.92) 100%)' }} />
+                    style={{ background: 'linear-gradient(to bottom, transparent 30%, rgba(8,8,8,0.98) 100%)' }} />
                   
                   {/* Content bottom aligned */}
                   <div className="absolute bottom-[160px] left-0 right-0 px-[28px] pointer-events-none">
