@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { supabase } from './lib/supabase';
 import { useApexStore } from './store/useApexStore';
 import { HeaderBar } from './components/common/HeaderBar';
 import { TabBar } from './components/common/TabBar';
@@ -29,6 +30,21 @@ export const App: React.FC = () => {
         });
       }
     });
+
+    // ─── AUTH LISTENER ───
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        useApexStore.getState().initializeSession(session.user.id);
+      }
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        useApexStore.getState().initializeSession(session.user.id);
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const { 

@@ -37,9 +37,9 @@ interface ApexState {
   setActiveTab: (tab: 'home' | 'map' | 'garage' | 'social' | 'profile') => void;
   setScannerOpen: (open: boolean) => void;
   setPersona: (persona: Persona) => void;
-  setGoogleUser: (userData: { name: string; email: string; picture: string }) => void;
+  initializeSession: (userId: string) => Promise<void>;
   completeOnboarding: () => void;
-  addCardToGarage: (newCard: CarCard) => void;
+  addCardToGarage: (newCard: CarCard) => Promise<void>;
   addXp: (amount: number, reason?: string) => void;
   toggleLikePost: (postId: string) => void;
   addCommentToPost: (postId: string, text: string) => void;
@@ -189,7 +189,9 @@ export const useApexStore = create<ApexState>((set, get) => ({
     return { user: updatedUser };
   }),
 
-  logoutUser: () => {
+  logoutUser: async () => {
+    const { supabase } = await import('../lib/supabase');
+    await supabase.auth.signOut();
     localStorage.removeItem('apex_user_session');
     localStorage.removeItem('apex_onboarding_completed');
     localStorage.removeItem('apex_garage_cards');
@@ -213,19 +215,35 @@ export const useApexStore = create<ApexState>((set, get) => ({
 
   setScannerOpen: (open) => set({ scannerOpen: open }),
 
-  setPersona: (persona) => {
-    const state = get();
-    state.updateUserProfile({ persona });
-  },
-
-  setGoogleUser: (userData) => {
-    const state = get();
-    state.updateUserProfile({
-      displayName: userData.name,
-      username: userData.email.split('@')[0] || state.user.username,
-      email: userData.email,
-      avatarUrl: userData.picture || state.user.avatarUrl
-    });
+  setPersona: (persona) => set((state) => ({ user: { ...state.user, persona } })),
+  
+  initializeSession: async (userId: string) => {
+    try {
+      const { supabase } = await import('../lib/supabase');
+      const { data: profile } = await supabase.from('profiles').select('*').eq('id', userId).single();
+      const { data: garage } = await supabase.from('garage').select('*').eq('user_id', userId);
+      
+      if (profile) {
+        set({
+          user: {
+            ...INITIAL_USER,
+            id: profile.id,
+            username: profile.username,
+            displayName: profile.display_name,
+            avatarUrl: profile.avatar_url || INITIAL_USER.avatarUrl,
+            level: profile.level,
+            xp: profile.xp,
+            coins: profile.coins,
+            totalSpots: profile.total_spots,
+            rarestFind: profile.rarest_find as any
+          },
+          garage: garage || [],
+          onboardingCompleted: true
+        });
+      }
+    } catch (e) {
+      console.error('Failed to initialize session', e);
+    }
   },
 
   completeOnboarding: () => {
@@ -235,9 +253,42 @@ export const useApexStore = create<ApexState>((set, get) => ({
     set({ onboardingCompleted: true });
   },
 
-  addCardToGarage: (newCard) => {
+  addCardToGarage: async (newCard) => {
     sounds.playXpPop();
     const xpGained = calculateScanXp(newCard.rarity, newCard.isFirstGlobalScan, newCard.isFirstCityScan);
+
+    const { supabase } = await import('../lib/supabase');
+    const state = get();
+    
+    // Insert into cloud database
+    await supabase.from('garage').insert({
+      id: newCard.id,
+      user_id: state.user.id,
+      make: newCard.make,
+      model: newCard.model,
+      year_estimate: newCard.yearEstimate || 'Unknown',
+      color: newCard.color,
+      rarity: newCard.rarity,
+      image_url: newCard.imageUrl,
+      city: newCard.city,
+      country: newCard.country,
+      latitude: newCard.latApprox,
+      longitude: newCard.lngApprox,
+      xp_earned: xpGained,
+      is_minted: false,
+      card_number: `A-${Math.floor(Math.random() * 9999)}`
+    });
+
+    await supabase.from('posts').insert({
+      user_id: state.user.id,
+      car_id: newCard.id,
+      caption: `Just found this incredible ${newCard.make} ${newCard.model} in ${newCard.city}!`
+    });
+
+    await supabase.from('profiles').update({ 
+      xp: state.user.xp + xpGained,
+      total_spots: state.user.totalSpots + 1 
+    }).eq('id', state.user.id);
 
     set((state) => {
       const updatedGarage = [newCard, ...state.garage];

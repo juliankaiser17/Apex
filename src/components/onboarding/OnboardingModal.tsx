@@ -4,7 +4,6 @@ import { Mail, Bell, ChevronLeft } from 'lucide-react';
 import { useApexStore } from '../../store/useApexStore';
 import type { Persona } from '../../types/apex';
 import { sounds } from '../../utils/audio';
-import { triggerGoogleSignIn } from '../../services/googleAuthService';
 import confetti from 'canvas-confetti';
 import { requestRealLocationPermission } from '../../utils/geolocation';
 
@@ -15,9 +14,9 @@ interface OnboardingModalProps {
 
 type OnboardingStep = 'auth' | 'email_input' | 'email_otp' | 'profile_setup' | 'roles' | 'cam_perm' | 'loc_perm' | 'notif_perm' | 'celebration';
 
-/* Spring configs matching the spec */
-const SPRING_HEAVY = { type: 'spring' as const, damping: 18, stiffness: 90, mass: 1.4 };
+import { supabase } from '../../lib/supabase';
 const SPRING_POP = { type: 'spring' as const, damping: 10, stiffness: 280, mass: 0.8 };
+const SPRING_HEAVY = { type: 'spring' as const, damping: 18, stiffness: 90, mass: 1.4 };
 
 /* ═══ ROLE DATA ═══ */
 const ROLES = [
@@ -104,7 +103,9 @@ const GpsCrosshair: React.FC<{ size?: number }> = ({ size = 72 }) => (
 
 /* ═══ MAIN ONBOARDING ═══ */
 export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClose }) => {
-  const { setPersona, setGoogleUser, completeOnboarding } = useApexStore();
+  const { setPersona, completeOnboarding } = useApexStore();
+  const [isAuthLoading, setIsAuthLoading] = useState(false);
+  const [authError, setAuthError] = useState('');
   const [step, setStep] = useState<OnboardingStep>('auth');
   const [emailInput, setEmailInput] = useState('');
   const [otpCode, setOtpCode] = useState(['', '', '', '', '', '']);
@@ -165,48 +166,115 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
     return () => timers.forEach(clearTimeout);
   }, [step]);
 
-  const handleGoogleAuth = () => {
+  // 1. Google OAuth (Redirects to Supabase)
+  const handleGoogleSignIn = async () => {
     sounds.playTargetLock();
-    triggerGoogleSignIn((userData) => {
-      setGoogleUser(userData);
-      setSetupDisplayName(userData.name || '');
-      setSetupUsername((userData.email || '').split('@')[0]);
-      setStep('profile_setup');
-    });
+    setIsAuthLoading(true);
+    await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } });
   };
 
-  const handleEmailSend = (e: React.FormEvent) => {
+  // 2. Email Submit (New User = Instant, Returning User = OTP)
+  const handleEmailSend = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!emailInput.includes('@')) return;
+    
     sounds.playTargetLock();
-    setResendCountdown(45);
-    setStep('email_otp');
+    setIsAuthLoading(true);
+    setAuthError('');
+
+    const { error: otpError } = await supabase.auth.signInWithOtp({ 
+      email: emailInput, 
+      options: { shouldCreateUser: false } 
+    });
+
+    if (otpError) {
+      const dummyPassword = emailInput + "ApexSecret!2026";
+      const { error: signUpError } = await supabase.auth.signUp({ 
+        email: emailInput, 
+        password: dummyPassword 
+      });
+
+      setIsAuthLoading(false);
+
+      if (signUpError) {
+        setAuthError(signUpError.message);
+      } else {
+        setSetupDisplayName(emailInput.split('@')[0]);
+        setSetupUsername(emailInput.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, ''));
+        setStep('profile_setup');
+      }
+    } else {
+      setIsAuthLoading(false);
+      setResendCountdown(60);
+      setStep('email_otp');
+    }
   };
 
-  const handleOtpChange = useCallback((idx: number, val: string) => {
+  // 3. OTP Verification (For returning users)
+  const handleOtpChange = useCallback(async (idx: number, val: string) => {
     if (val.length > 1) return;
     const next = [...otpCode];
     next[idx] = val;
     setOtpCode(next);
+    
     if (val && idx < 5) otpRefs.current[idx + 1]?.focus();
+    
     if (val && idx === 5 && next.every(d => d)) {
-      sounds.playTargetLock();
-      setSetupDisplayName('Apex Hunter');
-      setSetupUsername('hunter_' + Math.floor(Math.random() * 9999));
-      setTimeout(() => setStep('profile_setup'), 300);
+      setIsAuthLoading(true);
+      const { data, error } = await supabase.auth.verifyOtp({
+        email: emailInput,
+        token: next.join(''),
+        type: 'email'
+      });
+      
+      setIsAuthLoading(false);
+      
+      if (!error && data.session) {
+        sounds.playTargetLock();
+        
+        const { data: profile } = await supabase.from('profiles').select('*').eq('id', data.user?.id).single();
+        if (profile) {
+          onClose();
+        } else {
+          setSetupDisplayName(emailInput.split('@')[0]);
+          setSetupUsername(emailInput.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, ''));
+          setTimeout(() => setStep('profile_setup'), 300);
+        }
+      } else {
+        setAuthError('Invalid code. Please try again.');
+        setOtpCode(['','','','','','']);
+        otpRefs.current[0]?.focus();
+      }
     }
-  }, [otpCode]);
+  }, [otpCode, emailInput, onClose]);
 
   const handleOtpKeyDown = useCallback((idx: number, e: React.KeyboardEvent) => {
     if (e.key === 'Backspace' && !otpCode[idx] && idx > 0) otpRefs.current[idx - 1]?.focus();
   }, [otpCode]);
 
-  const handleFinish = () => {
+  const handleFinish = async () => {
     sounds.playXpPop();
-    setPersona(ROLES[activeRoleIdx].id);
+    const roleId = ROLES[activeRoleIdx].id;
+    setPersona(roleId);
+    
+    // Create profile in Supabase
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (sessionData?.session?.user) {
+      await supabase.from('profiles').insert({
+        id: sessionData.session.user.id,
+        username: setupUsername,
+        display_name: setupDisplayName,
+        avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400&auto=format&fit=crop',
+        level: 1,
+        xp: 0,
+        coins: 50,
+      });
+      
+      await useApexStore.getState().initializeSession(sessionData.session.user.id);
+    }
+    
     setStep('celebration');
   };
-
 
   if (!isOpen) return null;
 
@@ -218,9 +286,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
         {step === 'auth' && (
           <motion.div key="auth" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             className="flex-1 flex flex-col relative">
-            {/* Ambient Animated Background */}
             <div className="absolute inset-0 bg-[#080808] overflow-hidden flex items-center justify-center">
-              {/* Core glow */}
               <motion.div
                 animate={{ rotate: [0, 360], scale: [1, 1.2, 1] }}
                 transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
@@ -230,7 +296,6 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
                   filter: 'blur(60px)'
                 }}
               />
-              {/* Secondary sweeping light */}
               <motion.div
                 animate={{ rotate: [360, 0], scale: [1, 1.3, 1] }}
                 transition={{ duration: 25, repeat: Infinity, ease: 'linear' }}
@@ -240,16 +305,11 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
                   filter: 'blur(40px)'
                 }}
               />
-              {/* Heavy Vignette for dramatic contrast */}
               <div className="absolute inset-0" style={{ background: 'radial-gradient(circle, transparent 30%, #080808 100%)' }} />
-              
-              {/* Noise overlay for texture */}
               <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E")' }} />
             </div>
 
-            {/* Content overlay */}
             <div className="relative z-10 flex-1 flex flex-col justify-end max-w-md mx-auto w-full px-6">
-              {/* Wordmark — Center 30% */}
               <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                 <motion.h1
                   initial={{ opacity: 0, y: -60 }}
@@ -271,12 +331,11 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
                 </motion.p>
               </div>
 
-              {/* Auth buttons — bottom */}
               <div className="pb-8 space-y-[12px]">
                 <motion.button
-                  onClick={handleGoogleAuth}
+                  onClick={handleGoogleSignIn}
                   whileTap={{ scale: 0.97 }}
-                  transition={{ duration: 0.08 }}
+                  disabled={isAuthLoading}
                   className="w-full h-[56px] rounded-[12px] flex items-center justify-center gap-[12px] text-[15px] font-semibold"
                   style={{ background: '#F0EBE3', color: '#1A1A1A', fontFamily: 'DM Sans' }}
                 >
@@ -332,12 +391,14 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
                   className="w-full h-[52px] px-[16px] rounded-[8px] text-[16px] outline-none"
                   style={{ background: '#1A1A1A', border: '1.5px solid #2C2C2C', color: '#F0EBE3', fontFamily: 'DM Sans' }} />
                 
-                <motion.button type="submit" whileTap={{ scale: 0.97 }}
+                {authError && <p className="text-[#FF4500] text-xs text-center">{authError}</p>}
+
+                <motion.button type="submit" whileTap={{ scale: 0.97 }} disabled={isAuthLoading}
                   className="w-full h-[52px] rounded-[8px] font-display text-[20px] tracking-[2px]"
                   style={{ background: '#FF4500', color: '#F0EBE3',
                            opacity: emailInput ? 1 : 0.35,
                            boxShadow: emailInput ? '0 4px 20px rgba(255,69,0,0.3)' : 'none' }}>
-                  SEND CODE
+                  {isAuthLoading ? 'VERIFYING...' : 'CONTINUE'}
                 </motion.button>
               </form>
             </div>
@@ -361,6 +422,8 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
                 Sent to <span style={{ color: '#F0EBE3', fontFamily: 'DM Sans', fontWeight: 500 }}>{emailInput}</span>
               </p>
               
+              {authError && <p className="text-[#FF4500] text-xs text-center mt-4">{authError}</p>}
+                
               <div className="h-[24px]" />
               
               <div className="flex gap-[8px] justify-center">
@@ -475,7 +538,6 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
                         </p>
                       </div>
                       
-                      {/* Selection Checkmark */}
                       <div className={`flex-shrink-0 w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all duration-300 ${
                         isActive ? 'border-[#FF4500] bg-[#FF4500]' : 'border-[#5A5550]'
                       }`}>
@@ -622,13 +684,12 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
         {/* ═══ SCREEN 7: CELEBRATION ═══ */}
         {step === 'celebration' && (
           <motion.div key="celebration" initial={{ opacity: 1 }} className="flex-1 flex flex-col items-center justify-center relative overflow-hidden bg-black">
-            {/* Spark burst */}
             {celebStage >= 1 && celebStage < 2 && (
               <motion.div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
                 <motion.div
                   initial={{ scale: 0 }}
                   animate={{ scale: 100 }}
-                  transition={{ duration: 0.18, ease: [0.19, 1, 0.22, 1] }} // ease-out-expo
+                  transition={{ duration: 0.18, ease: [0.19, 1, 0.22, 1] }}
                   className="w-[10px] h-[10px] rounded-full"
                   style={{ background: '#FF4500' }} />
               </motion.div>
@@ -639,13 +700,12 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
                 <motion.div
                   initial={{ scale: 100 }}
                   animate={{ scale: 0 }}
-                  transition={{ duration: 0.28, ease: [0.95, 0.05, 0.795, 0.035] }} // reverse ease-in
+                  transition={{ duration: 0.28, ease: [0.95, 0.05, 0.795, 0.035] }}
                   className="w-[10px] h-[10px] rounded-full"
                   style={{ background: 'black', boxShadow: '0 0 0 1000px black' }} />
               </motion.div>
             )}
 
-            {/* WELCOME */}
             {celebStage >= 3 && (
               <motion.h1 initial={{ y: -80, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={SPRING_HEAVY}
                 className="font-display text-[80px] leading-none" style={{ color: '#F0EBE3', letterSpacing: '4px' }}>
@@ -653,7 +713,6 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
               </motion.h1>
             )}
 
-            {/* Role name */}
             {celebStage >= 4 && (
               <motion.h2 initial={{ scale: 0 }} animate={{ scale: [0, 1.15, 1] }} transition={SPRING_POP}
                 className="font-display text-[48px] leading-none mt-2" style={{ color: '#FF4500' }}>
@@ -661,7 +720,6 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
               </motion.h2>
             )}
 
-            {/* Stat chips */}
             {celebStage >= 6 && (
               <div className="flex gap-3 mt-8">
                 {[
@@ -681,7 +739,6 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
               </div>
             )}
 
-            {/* CTA */}
             {celebStage >= 7 && (
               <motion.button
                 initial={{ opacity: 0, y: 20 }}
