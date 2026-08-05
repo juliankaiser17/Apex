@@ -23,23 +23,23 @@ const SPRING_POP = { type: 'spring' as const, damping: 10, stiffness: 280, mass:
 const ROLES = [
   {
     id: 'spotter' as Persona,
-    name: 'THE HUNTER',
-    ctaText: "I'M A HUNTER",
-    desc: "You see what others walk past.\nEvery lot. Every street. Every target.",
-    image: '/role_hunter_bg.png',
+    name: 'THE COLLECTOR',
+    ctaText: "I'M A COLLECTOR",
+    desc: "You see what others walk past.\nEvery lot. Every street.\nEvery car is a target.",
+    image: '/role_collector_bg.png',
   },
   {
     id: 'finder' as Persona,
     name: 'THE SPOTTER',
     ctaText: "I'M A SPOTTER",
-    desc: "Cities have secrets. You find them.\nYour eyes, your map, your discovery.",
+    desc: "Cities hide things in plain sight.\nYou're the one who finds them.\nDiscovery is your discipline.",
     image: '/role_spotter_bg.png',
   },
   {
     id: 'love_of_cars' as Persona,
     name: 'FOR THE LOVE',
     ctaText: "I'M IN FOR THE LOVE",
-    desc: "The cars are enough. Always have been.\nYou know. You feel it.",
+    desc: "You don't need a reason.\nThe machines are enough.\nYou know. You feel it.",
     image: '/role_love_bg.png',
   },
 ];
@@ -145,20 +145,22 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
     if (step !== 'celebration') return;
     setCelebStage(0);
     const timers = [
-      setTimeout(() => setCelebStage(1), 200),   // Orange flash
-      setTimeout(() => setCelebStage(2), 660),    // WELCOME drops
-      setTimeout(() => setCelebStage(3), 760),    // Role name pops
+      setTimeout(() => setCelebStage(1), 200),    // Spark expands
+      setTimeout(() => setCelebStage(2), 380),    // Spark contracts
+      setTimeout(() => setCelebStage(3), 660),    // WELCOME drops
+      setTimeout(() => setCelebStage(4), 760),    // Role title appears
       setTimeout(() => {
-        setCelebStage(4);                          // Stat chips
-        confetti({ particleCount: 60, spread: 80, origin: { y: 0.45 }, colors: ['#F0EBE3', '#FF4500', '#FFA500'] });
-      }, 1200),
-      setTimeout(() => setCelebStage(5), 2000),   // CTA
+        setCelebStage(5);                         // Particles burst
+        confetti({ particleCount: 20, spread: 120, origin: { y: 0.45 }, colors: ['#FF4500'], disableForReducedMotion: true });
+      }, 900),
+      setTimeout(() => setCelebStage(6), 1400),   // Stat chips
+      setTimeout(() => setCelebStage(7), 2000),   // CTA button
       setTimeout(() => {
         completeOnboarding();
         onClose();
         setStep('auth');
         setCelebStage(0);
-      }, 4000),
+      }, 3400),
     ];
     return () => timers.forEach(clearTimeout);
   }, [step]);
@@ -220,71 +222,77 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
         {step === 'auth' && (
           <motion.div key="auth" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             className="flex-1 flex flex-col relative">
-            {/* Hero photo */}
+            {/* Hero photo fills 100%, bottom 30% gets covered */}
             <div className="absolute inset-0">
               <img src="/hero_auth.png" alt="" className="w-full h-full object-cover" />
-              {/* Bottom gradient merge */}
-              <div className="absolute bottom-0 left-0 right-0 h-[45%]"
-                style={{ background: 'linear-gradient(to top, #080808, #08080800)' }} />
+              {/* Top gradient for status bar */}
+              <div className="absolute top-0 left-0 right-0 h-[80px]"
+                style={{ background: 'linear-gradient(to bottom, #080808, transparent)' }} />
             </div>
+
+            {/* Solid Bottom 30% */}
+            <div className="absolute bottom-0 left-0 right-0 h-[30%]"
+              style={{ background: '#080808' }} />
 
             {/* Content overlay */}
             <div className="relative z-10 flex-1 flex flex-col justify-between max-w-md mx-auto w-full px-6">
-              {/* Wordmark — 42% from top */}
-              <div className="flex-1 flex flex-col items-center justify-center" style={{ paddingTop: '28vh' }}>
+              {/* Wordmark — Center 30% */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                 <motion.h1
-                  initial={{ opacity: 0, y: -40 }}
+                  initial={{ opacity: 0, y: -60 }}
                   animate={wordmarkVisible ? { opacity: 1, y: 0 } : {}}
-                  transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-                  className="font-display text-[88px] leading-none tracking-[8px]"
-                  style={{ color: '#F0EBE3', textShadow: '0 2px 20px rgba(255,69,0,0.15)' }}
+                  transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                  className="font-display text-[84px] leading-none tracking-[10px]"
+                  style={{ color: '#F0EBE3' }}
                 >
                   APEX
                 </motion.h1>
                 <motion.p
                   initial={{ opacity: 0 }}
-                  animate={taglineVisible ? { opacity: 0.6 } : {}}
-                  transition={{ duration: 0.4 }}
-                  className="text-sm tracking-[2px] mt-3"
+                  animate={taglineVisible ? { opacity: 0.55 } : {}}
+                  transition={{ duration: 0.5, ease: 'easeIn' }}
+                  className="text-[14px] tracking-[2px] mt-2"
                   style={{ fontFamily: 'DM Sans', color: '#F0EBE3' }}
                 >
-                  Every street. Every find. Every win.
+                  Every street. Every find.
                 </motion.p>
               </div>
 
               {/* Auth buttons — bottom */}
-              <div className="pb-8 space-y-3">
+              <div className="pb-8 space-y-[12px]">
                 <motion.button
                   onClick={handleGoogleAuth}
                   whileTap={{ scale: 0.97 }}
                   transition={{ duration: 0.08 }}
-                  className="w-full h-14 rounded-xl flex items-center justify-center gap-3 text-[15px] font-medium"
-                  style={{ background: '#F0EBE3', color: '#1A1A1A', fontFamily: 'DM Sans', fontWeight: 600 }}
+                  className="w-full h-[56px] rounded-[12px] flex items-center justify-center gap-[12px] text-[15px] font-semibold"
+                  style={{ background: '#F0EBE3', color: '#1A1A1A', fontFamily: 'DM Sans' }}
                 >
-                  <svg className="w-5 h-5" viewBox="0 0 24 24">
+                  <svg className="w-[20px] h-[20px]" viewBox="0 0 24 24">
                     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                     <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
                     <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
                     <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
                   </svg>
-                  Continue with Google
+                  Sign in with Google
                 </motion.button>
 
                 <motion.button
                   onClick={() => setStep('email_input')}
                   whileTap={{ scale: 0.97 }}
-                  className="w-full h-14 rounded-xl flex items-center justify-center gap-3 text-[15px]"
+                  className="w-full h-[56px] rounded-[12px] flex items-center justify-center gap-[12px] text-[15px]"
                   style={{ background: 'transparent', border: '1.5px solid #2C2C2C', fontFamily: 'DM Sans', fontWeight: 500 }}
                 >
-                  <Mail className="w-5 h-5" style={{ color: '#F0EBE3', opacity: 0.7 }} />
-                  <span style={{ color: '#F0EBE3', opacity: 0.8 }}>Continue with Email</span>
+                  <Mail className="w-[20px] h-[20px]" style={{ color: '#F0EBE3', opacity: 0.6 }} />
+                  <span style={{ color: '#F0EBE3', opacity: 0.75 }}>Continue with Email</span>
                 </motion.button>
 
-                <p className="text-center text-[11px] pt-2" style={{ color: '#9A9088', fontFamily: 'DM Sans' }}>
-                  By continuing, you agree to our{' '}
-                  <span style={{ color: '#FF4500' }}>Terms</span> and{' '}
-                  <span style={{ color: '#FF4500' }}>Privacy Policy</span>
-                </p>
+                <div className="pt-[8px]">
+                  <p className="text-center text-[11px]" style={{ color: '#5A5550', fontFamily: 'DM Sans' }}>
+                    By continuing you agree to our{' '}
+                    <span style={{ color: '#FF4500' }}>Terms</span> &amp;{' '}
+                    <span style={{ color: '#FF4500' }}>Privacy Policy</span>
+                  </p>
+                </div>
               </div>
             </div>
           </motion.div>
@@ -294,26 +302,32 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
         {step === 'email_input' && (
           <motion.div key="email_input" initial={{ opacity: 0, x: 60 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -60 }}
             transition={{ duration: 0.3 }}
-            className="flex-1 flex flex-col justify-center px-6 max-w-md mx-auto w-full">
+            className="flex-1 flex flex-col justify-center items-center px-[20px] w-full relative">
             <button onClick={() => setStep('auth')} className="absolute top-6 left-6 z-20 flex items-center gap-1 text-sm" style={{ color: '#9A9088' }}>
               <ChevronLeft className="w-4 h-4" /> Back
             </button>
-            <h2 className="font-display text-[36px] leading-none" style={{ color: '#F0EBE3' }}>ENTER YOUR EMAIL</h2>
-            <p className="text-sm mt-2 mb-6" style={{ color: '#9A9088', fontFamily: 'DM Sans' }}>
-              We'll send a 6-digit code. No passwords.
-            </p>
-            <form onSubmit={handleEmailSend} className="space-y-4">
-              <input type="email" required autoFocus placeholder="racer@apex.app" value={emailInput}
-                onChange={e => setEmailInput(e.target.value)}
-                className="w-full h-14 px-5 rounded-xl text-base outline-none"
-                style={{ background: '#1A1A1A', border: '1px solid #2C2C2C', color: '#F0EBE3', fontFamily: 'DM Sans',
-                  boxShadow: 'inset 0 2px 8px rgba(0,0,0,0.4)' }} />
-              <motion.button type="submit" whileTap={{ scale: 0.97 }}
-                className="w-full h-14 rounded-xl font-display text-xl tracking-wider"
-                style={{ background: '#FF4500', color: '#F0EBE3' }}>
-                SEND CODE
-              </motion.button>
-            </form>
+            
+            <div className="w-full max-w-md p-[28px] rounded-[16px] text-center"
+                 style={{ background: '#111111', border: '1px solid #2C2C2C' }}>
+              <h2 className="font-display text-[32px] leading-none text-center" style={{ color: '#F0EBE3' }}>ENTER YOUR EMAIL</h2>
+              
+              <div className="h-[16px]" />
+              
+              <form onSubmit={handleEmailSend} className="space-y-[20px]">
+                <input type="email" required autoFocus placeholder="you@example.com" value={emailInput}
+                  onChange={e => setEmailInput(e.target.value)}
+                  className="w-full h-[52px] px-[16px] rounded-[8px] text-[16px] outline-none"
+                  style={{ background: '#1A1A1A', border: '1.5px solid #2C2C2C', color: '#F0EBE3', fontFamily: 'DM Sans' }} />
+                
+                <motion.button type="submit" whileTap={{ scale: 0.97 }}
+                  className="w-full h-[52px] rounded-[8px] font-display text-[20px] tracking-[2px]"
+                  style={{ background: '#FF4500', color: '#F0EBE3',
+                           opacity: emailInput ? 1 : 0.35,
+                           boxShadow: emailInput ? '0 4px 20px rgba(255,69,0,0.3)' : 'none' }}>
+                  SEND CODE
+                </motion.button>
+              </form>
+            </div>
           </motion.div>
         )}
 
@@ -321,34 +335,44 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
         {step === 'email_otp' && (
           <motion.div key="email_otp" initial={{ opacity: 0, x: 60 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -60 }}
             transition={{ duration: 0.3 }}
-            className="flex-1 flex flex-col justify-center px-6 max-w-md mx-auto w-full">
+            className="flex-1 flex flex-col justify-center items-center px-[20px] w-full relative">
             <button onClick={() => setStep('email_input')} className="absolute top-6 left-6 z-20 flex items-center gap-1 text-sm" style={{ color: '#9A9088' }}>
               <ChevronLeft className="w-4 h-4" /> Back
             </button>
-            <h2 className="font-display text-[32px] leading-none" style={{ color: '#F0EBE3' }}>VERIFY CODE</h2>
-            <p className="text-sm mt-2 mb-6" style={{ color: '#9A9088', fontFamily: 'DM Sans' }}>
-              Sent to <span style={{ color: '#F0EBE3', fontFamily: 'DM Sans', fontWeight: 500 }}>{emailInput}</span>
-            </p>
-            <div className="flex gap-3 justify-center mb-6">
-              {otpCode.map((d, i) => (
-                <input key={i} ref={el => { otpRefs.current[i] = el; }} type="text" inputMode="numeric" maxLength={1}
-                  value={d} onChange={e => handleOtpChange(i, e.target.value.replace(/\D/, ''))}
-                  onKeyDown={e => handleOtpKeyDown(i, e)}
-                  className="w-12 h-14 rounded-xl text-center font-display text-2xl outline-none transition-all"
-                  style={{ background: '#1A1A1A', color: '#F0EBE3',
-                    border: d ? '2px solid #FF4500' : '1px solid #2C2C2C',
-                    boxShadow: d ? '0 0 12px rgba(255,69,0,0.2)' : 'inset 0 2px 6px rgba(0,0,0,0.5)' }} />
-              ))}
-            </div>
-            <div className="text-center">
-              {resendCountdown > 0 ? (
-                <p className="text-xs" style={{ color: '#5A5550', fontFamily: 'DM Sans' }}>
-                  Resend in <span style={{ color: '#FF4500' }}>{resendCountdown}s</span>
-                </p>
-              ) : (
-                <button onClick={() => { setResendCountdown(45); sounds.playTargetLock(); }}
-                  className="text-sm font-medium" style={{ color: '#FF4500' }}>Resend Code</button>
-              )}
+            
+            <div className="w-full max-w-md p-[28px] rounded-[16px] text-center"
+                 style={{ background: '#111111', border: '1px solid #2C2C2C' }}>
+              <h2 className="font-display text-[32px] leading-none" style={{ color: '#F0EBE3' }}>CHECK YOUR EMAIL</h2>
+              
+              <p className="text-[13px] mt-[8px]" style={{ color: '#9A9088', fontFamily: 'DM Sans' }}>
+                Sent to <span style={{ color: '#F0EBE3', fontFamily: 'DM Sans', fontWeight: 500 }}>{emailInput}</span>
+              </p>
+              
+              <div className="h-[24px]" />
+              
+              <div className="flex gap-[8px] justify-center">
+                {otpCode.map((d, i) => (
+                  <input key={i} ref={el => { otpRefs.current[i] = el; }} type="text" inputMode="numeric" maxLength={1}
+                    value={d} onChange={e => handleOtpChange(i, e.target.value.replace(/\D/, ''))}
+                    onKeyDown={e => handleOtpKeyDown(i, e)}
+                    className="w-[44px] h-[56px] rounded-[8px] text-center font-display text-[28px] outline-none transition-all"
+                    style={{ background: '#1A1A1A', color: '#F0EBE3',
+                      border: d ? '1.5px solid #FF4500' : '1.5px solid #2C2C2C' }} />
+                ))}
+              </div>
+              
+              <div className="h-[16px]" />
+              
+              <div className="text-center">
+                {resendCountdown > 0 ? (
+                  <p className="text-[13px]" style={{ color: '#9A9088', fontFamily: 'DM Sans' }}>
+                    Resend in 0:{resendCountdown.toString().padStart(2, '0')}
+                  </p>
+                ) : (
+                  <button onClick={() => { setResendCountdown(45); sounds.playTargetLock(); }}
+                    className="text-[13px]" style={{ color: '#FF4500', fontFamily: 'DM Sans' }}>Resend code</button>
+                )}
+              </div>
             </div>
           </motion.div>
         )}
@@ -402,83 +426,78 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
         {/* ═══ SCREEN 3: ROLE SELECTION CAROUSEL ═══ */}
         {step === 'roles' && (
           <motion.div key="roles" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="flex-1 flex flex-col relative overflow-hidden">
-            {/* Top label */}
-            <div className="absolute top-6 left-0 right-0 z-20 text-center">
-              <p className="text-[11px] tracking-[3px] font-medium" style={{ color: 'rgba(240,235,227,0.5)', fontFamily: 'DM Sans' }}>
-                CHOOSE YOUR ROLE
-              </p>
-            </div>
-
-            {/* Carousel */}
-            <div className="flex-1 relative">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={activeRoleIdx}
-                  initial={{ opacity: 0, scale: 0.96 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.96 }}
-                  transition={{ duration: 0.4 }}
-                  className="absolute inset-0"
-                >
-                  {/* Full-bleed photo */}
-                  <img src={ROLES[activeRoleIdx].image} alt="" className="w-full h-full object-cover" />
-                  {/* Bottom gradient */}
-                  <div className="absolute bottom-0 left-0 right-0 h-[55%]"
-                    style={{ background: 'linear-gradient(to top, #080808, #08080800)' }} />
-
-                  {/* Role info — 62% from top */}
-                  <div className="absolute left-0 right-0 px-7" style={{ top: '58%' }}>
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="w-[3px] h-12 rounded-full" style={{ background: '#FF4500' }} />
-                      <h2 className="font-display text-[56px] leading-none tracking-[4px]"
-                        style={{ color: '#F0EBE3' }}>
-                        {ROLES[activeRoleIdx].name}
-                      </h2>
-                    </div>
-                    <p className="text-[15px] leading-relaxed whitespace-pre-line pl-[15px]"
-                      style={{ color: 'rgba(240,235,227,0.75)', fontFamily: 'DM Sans' }}>
-                      {ROLES[activeRoleIdx].desc}
+            className="flex-1 flex flex-col relative overflow-hidden bg-black">
+            
+            {/* Scroll Container */}
+            <div 
+              className="flex-1 flex overflow-x-auto snap-x snap-mandatory"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+              onScroll={(e) => {
+                const scrollX = e.currentTarget.scrollLeft;
+                const width = e.currentTarget.offsetWidth;
+                const index = Math.round(scrollX / width);
+                if (index !== activeRoleIdx) setActiveRoleIdx(index);
+              }}
+            >
+              {ROLES.map((role, idx) => (
+                <div key={role.id} className="min-w-full w-full h-full relative snap-center flex-shrink-0">
+                  <img src={role.image} alt="" className="w-full h-full object-cover" />
+                  <div className="absolute inset-0"
+                    style={{ background: 'linear-gradient(to bottom, transparent 40%, rgba(8,8,8,0.92) 100%)' }} />
+                  
+                  {/* Content bottom aligned */}
+                  <div className="absolute bottom-[160px] left-0 right-0 px-[28px] pointer-events-none">
+                    {/* Accent bar */}
+                    <AnimatePresence>
+                      {activeRoleIdx === idx && (
+                        <motion.div 
+                          initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} exit={{ scaleX: 0 }}
+                          transition={{ duration: 0.3 }}
+                          style={{ transformOrigin: 'left' }}
+                          className="w-[32px] h-[4px] bg-[#FF4500] rounded-[2px] mb-[8px]" 
+                        />
+                      )}
+                    </AnimatePresence>
+                    
+                    <h2 className="font-display text-[72px] leading-none tracking-[2px] text-[#F0EBE3]">
+                      {role.name}
+                    </h2>
+                    
+                    <div className="h-[12px]" />
+                    
+                    <p className="text-[16px] leading-[1.65] text-[#F0EBE3] opacity-70 whitespace-pre-line"
+                       style={{ fontFamily: 'DM Sans' }}>
+                      {role.desc}
                     </p>
                   </div>
-                </motion.div>
-              </AnimatePresence>
-
-              {/* Swipe arrows */}
-              {activeRoleIdx > 0 && (
-                <button onClick={() => swipeRole(-1)} className="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full flex items-center justify-center"
-                  style={{ background: 'rgba(8,8,8,0.6)' }}>
-                  <ChevronLeft className="w-5 h-5" style={{ color: '#F0EBE3' }} />
-                </button>
-              )}
-              {activeRoleIdx < ROLES.length - 1 && (
-                <button onClick={() => swipeRole(1)} className="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full flex items-center justify-center"
-                  style={{ background: 'rgba(8,8,8,0.6)' }}>
-                  <ChevronRight className="w-5 h-5" style={{ color: '#F0EBE3' }} />
-                </button>
-              )}
+                </div>
+              ))}
             </div>
 
-            {/* Bottom overlay: dots + CTA */}
-            <div className="absolute bottom-0 left-0 right-0 z-20 px-6 pb-8">
-              {/* Dot indicator */}
-              <div className="flex justify-center gap-2 mb-5">
+            {/* Fixed Bottom Overlay */}
+            <div className="absolute bottom-0 left-0 right-0 h-[140px] pointer-events-none flex flex-col justify-end pb-[32px]">
+              
+              {/* PAGE DOTS */}
+              <div className="flex justify-center gap-[8px] mb-[24px]">
                 {ROLES.map((_, i) => (
                   <motion.div key={i}
-                    animate={{ width: i === activeRoleIdx ? 24 : 8, background: i === activeRoleIdx ? '#F0EBE3' : '#2C2C2C' }}
-                    transition={{ duration: 0.2 }}
-                    className="h-2 rounded-full cursor-pointer"
-                    onClick={() => setActiveRoleIdx(i)} />
+                    animate={{ width: i === activeRoleIdx ? 28 : 8, background: i === activeRoleIdx ? '#F0EBE3' : '#2C2C2C' }}
+                    transition={{ duration: 0.2, ease: 'easeOut' }}
+                    className="h-[8px] rounded-[4px]"
+                  />
                 ))}
               </div>
-              {/* CTA */}
-              <motion.button
-                onClick={() => { sounds.playTargetLock(); setStep('cam_perm'); }}
-                whileTap={{ scale: 0.97 }}
-                className="w-full h-14 rounded-xl font-display text-[22px] tracking-wider relative overflow-hidden glow-orange"
-                style={{ background: '#FF4500', color: '#F0EBE3' }}>
-                {ROLES[activeRoleIdx].ctaText}
-              </motion.button>
+              
+              {/* CONTINUE BUTTON */}
+              <div className="px-[20px] pointer-events-auto">
+                <motion.button
+                  onClick={() => { sounds.playTargetLock(); setStep('cam_perm'); }}
+                  whileTap={{ scale: 0.97 }}
+                  className="w-full h-[56px] rounded-[12px] font-display text-[22px] tracking-[2px]"
+                  style={{ background: '#FF4500', color: '#F0EBE3', boxShadow: '0 4px 24px rgba(255,69,0,0.4)' }}>
+                  {ROLES[activeRoleIdx].ctaText}
+                </motion.button>
+              </div>
             </div>
           </motion.div>
         )}
@@ -486,31 +505,31 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
         {/* ═══ SCREEN 4: CAMERA PERMISSION ═══ */}
         {step === 'cam_perm' && (
           <motion.div key="cam_perm" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="flex-1 flex flex-col items-center justify-center px-6 max-w-md mx-auto w-full">
+            className="flex-1 flex flex-col items-center relative pt-[24vh] px-[24px] w-full max-w-md mx-auto">
             <ApertureIcon animate size={72} />
-            <div className="text-center mt-10 space-y-1">
+            <div className="text-center mt-[32px] space-y-1">
               {['POINT.', 'SCAN.', 'COLLECT.'].map((word, i) => (
                 <motion.span key={word}
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.4 + i * 0.3, duration: 0.25 }}
+                  transition={{ delay: 1.2 + i * 0.3, duration: 0.25, ease: 'easeOut' }}
                   className="block font-display text-[52px] leading-none"
                   style={{ color: '#F0EBE3' }}>
                   {word}
                 </motion.span>
               ))}
             </div>
-            <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.5, duration: 0.5 }}
-              className="text-center text-[15px] leading-relaxed mt-6 max-w-[280px]"
+            <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 2.1, duration: 0.7 }}
+              className="text-center text-[15px] leading-[1.6] mt-[20px] max-w-[280px]"
               style={{ color: '#9A9088', fontFamily: 'DM Sans' }}>
               Apex needs your camera to photograph real cars.
-              Your photos stay on your device unless you post them.
+              Photos stay on your device until you post them.
             </motion.p>
-            <div className="absolute bottom-8 left-6 right-6 max-w-md mx-auto">
-              <motion.button initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.8 }}
+            <div className="absolute bottom-[48px] left-[24px] right-[24px]">
+              <motion.button initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 2.4 }}
                 onClick={() => { sounds.playTargetLock(); setStep('loc_perm'); }}
                 whileTap={{ scale: 0.97 }}
-                className="w-full h-14 rounded-xl font-display text-xl tracking-wider glow-orange"
+                className="w-full h-[56px] rounded-[12px] font-display text-[22px] tracking-[2px]"
                 style={{ background: '#FF4500', color: '#F0EBE3' }}>
                 ENABLE CAMERA
               </motion.button>
@@ -521,9 +540,9 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
         {/* ═══ SCREEN 5: LOCATION PERMISSION ═══ */}
         {step === 'loc_perm' && (
           <motion.div key="loc_perm" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="flex-1 flex flex-col items-center justify-center px-6 max-w-md mx-auto w-full">
+            className="flex-1 flex flex-col items-center relative pt-[24vh] px-[24px] w-full max-w-md mx-auto">
             <GpsCrosshair size={72} />
-            <div className="text-center mt-10">
+            <div className="text-center mt-[32px]">
               <h2 className="font-display text-[46px] leading-none" style={{ color: '#F0EBE3' }}>
                 WHERE YOU ARE
               </h2>
@@ -532,12 +551,13 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
               </h2>
             </div>
             <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4, duration: 0.5 }}
-              className="text-center text-[15px] leading-relaxed mt-6 max-w-[280px]"
+              className="text-center text-[15px] leading-[1.6] mt-[20px] max-w-[300px]"
               style={{ color: '#9A9088', fontFamily: 'DM Sans' }}>
-              Local rarity is calculated from your city.
-              A car that's everywhere in Tokyo might be legendary where you are.
+              Rarity is calculated for your specific city.
+              A Ferrari might be common in Dubai.
+              In your city? It could be Legendary.
             </motion.p>
-            <div className="absolute bottom-8 left-6 right-6 max-w-md mx-auto space-y-3">
+            <div className="absolute bottom-[48px] left-[24px] right-[24px] space-y-[12px]">
               <motion.button initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}
                 onClick={() => {
                   sounds.playTargetLock();
@@ -552,13 +572,13 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
                   setStep('notif_perm');
                 }}
                 whileTap={{ scale: 0.97 }}
-                className="w-full h-14 rounded-xl font-display text-xl tracking-wider glow-orange"
+                className="w-full h-[56px] rounded-[12px] font-display text-[22px] tracking-[2px]"
                 style={{ background: '#FF4500', color: '#F0EBE3' }}>
                 ENABLE LOCATION
               </motion.button>
               <button onClick={() => { sounds.playTargetLock(); setStep('notif_perm'); }}
-                className="w-full text-center text-sm underline" style={{ color: '#9A9088', fontFamily: 'DM Sans' }}>
-                Approximate location only →
+                className="w-full text-center text-[13px]" style={{ color: '#9A9088', fontFamily: 'DM Sans' }}>
+                Approximate only
               </button>
             </div>
           </motion.div>
@@ -567,31 +587,30 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
         {/* ═══ SCREEN 6: NOTIFICATIONS PERMISSION ═══ */}
         {step === 'notif_perm' && (
           <motion.div key="notif_perm" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="flex-1 flex flex-col items-center justify-center px-6 max-w-md mx-auto w-full">
-            <motion.div animate={{ rotate: [0, 12, 0, -12, 0] }} transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}>
-              <Bell className="w-[72px] h-[72px]" style={{ color: '#F0EBE3' }} />
-              <motion.div className="absolute -top-1 -right-1 w-3 h-3 rounded-full" style={{ background: '#FF4500' }}
-                animate={{ scale: [1, 1.4, 1] }} transition={{ duration: 1.2, repeat: Infinity }} />
+            className="flex-1 flex flex-col items-center relative pt-[24vh] px-[24px] w-full max-w-md mx-auto">
+            <motion.div animate={{ rotate: [0, 12, 0, -12, 0] }} transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}>
+              <Bell className="w-[72px] h-[72px]" style={{ color: '#F0EBE3', opacity: 0.7 }} strokeWidth={1.5} />
+              <motion.div className="absolute top-[4px] right-[4px] w-[8px] h-[8px] rounded-[4px]" style={{ background: '#FF4500' }}
+                animate={{ scale: [1, 1.4, 1] }} transition={{ duration: 1.5, repeat: Infinity }} />
             </motion.div>
-            <h2 className="font-display text-[52px] leading-none mt-10 text-center" style={{ color: '#F0EBE3' }}>
+            <h2 className="font-display text-[52px] leading-none mt-[32px] text-center" style={{ color: '#F0EBE3' }}>
               HUNTS HAPPEN FAST.
             </h2>
             <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4, duration: 0.5 }}
-              className="text-center text-[15px] leading-relaxed mt-6 max-w-[280px]"
+              className="text-center text-[15px] leading-[1.6] mt-[20px] max-w-[280px]"
               style={{ color: '#9A9088', fontFamily: 'DM Sans' }}>
-              We alert you when a rare car appears nearby.
-              Nothing else. Miss a hunt, miss the points.
+              We only notify you when rare cars appear nearby or a hunt goes live. Nothing else.
             </motion.p>
-            <div className="absolute bottom-8 left-6 right-6 max-w-md mx-auto space-y-3">
+            <div className="absolute bottom-[48px] left-[24px] right-[24px] space-y-[12px]">
               <motion.button initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}
                 onClick={handleFinish} whileTap={{ scale: 0.97 }}
-                className="w-full h-14 rounded-xl font-display text-xl tracking-wider glow-orange"
+                className="w-full h-[56px] rounded-[12px] font-display text-[22px] tracking-[2px]"
                 style={{ background: '#FF4500', color: '#F0EBE3' }}>
                 ENABLE NOTIFICATIONS
               </motion.button>
               <button onClick={handleFinish}
-                className="w-full text-center text-sm" style={{ color: '#5A5550', fontFamily: 'DM Sans' }}>
-                I'll miss hunts (skip)
+                className="w-full text-center text-[13px]" style={{ color: '#9A9088', fontFamily: 'DM Sans' }}>
+                Skip for now
               </button>
             </div>
           </motion.div>
@@ -599,26 +618,40 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
 
         {/* ═══ SCREEN 7: CELEBRATION ═══ */}
         {step === 'celebration' && (
-          <motion.div key="celebration" initial={{ opacity: 1 }} className="flex-1 flex flex-col items-center justify-center relative overflow-hidden">
-            {/* Orange flash burst */}
+          <motion.div key="celebration" initial={{ opacity: 1 }} className="flex-1 flex flex-col items-center justify-center relative overflow-hidden bg-black">
+            {/* Spark burst */}
             {celebStage >= 1 && celebStage < 2 && (
-              <motion.div className="absolute inset-0 z-10"
-                initial={{ scale: 0, borderRadius: '50%' }}
-                animate={{ scale: [0, 30, 0], opacity: [1, 1, 0] }}
-                transition={{ duration: 0.66, times: [0, 0.27, 1] }}
-                style={{ background: '#FF4500', transformOrigin: 'center' }} />
+              <motion.div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 100 }}
+                  transition={{ duration: 0.18, ease: [0.19, 1, 0.22, 1] }} // ease-out-expo
+                  className="w-[10px] h-[10px] rounded-full"
+                  style={{ background: '#FF4500' }} />
+              </motion.div>
+            )}
+            
+            {celebStage >= 2 && celebStage < 3 && (
+              <motion.div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none bg-[#FF4500]">
+                <motion.div
+                  initial={{ scale: 100 }}
+                  animate={{ scale: 0 }}
+                  transition={{ duration: 0.28, ease: [0.95, 0.05, 0.795, 0.035] }} // reverse ease-in
+                  className="w-[10px] h-[10px] rounded-full"
+                  style={{ background: 'black', boxShadow: '0 0 0 1000px black' }} />
+              </motion.div>
             )}
 
             {/* WELCOME */}
-            {celebStage >= 2 && (
+            {celebStage >= 3 && (
               <motion.h1 initial={{ y: -80, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={SPRING_HEAVY}
-                className="font-display text-[80px] leading-none" style={{ color: '#F0EBE3' }}>
+                className="font-display text-[80px] leading-none" style={{ color: '#F0EBE3', letterSpacing: '4px' }}>
                 WELCOME
               </motion.h1>
             )}
 
             {/* Role name */}
-            {celebStage >= 3 && (
+            {celebStage >= 4 && (
               <motion.h2 initial={{ scale: 0 }} animate={{ scale: [0, 1.15, 1] }} transition={SPRING_POP}
                 className="font-display text-[48px] leading-none mt-2" style={{ color: '#FF4500' }}>
                 {ROLES[activeRoleIdx].name.replace('THE ', '')}.
@@ -626,7 +659,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
             )}
 
             {/* Stat chips */}
-            {celebStage >= 4 && (
+            {celebStage >= 6 && (
               <div className="flex gap-3 mt-8">
                 {[
                   { icon: '⚡', text: 'LEVEL 1' },
@@ -646,19 +679,15 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
             )}
 
             {/* CTA */}
-            {celebStage >= 5 && (
+            {celebStage >= 7 && (
               <motion.button
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 onClick={() => { completeOnboarding(); onClose(); }}
                 whileTap={{ scale: 0.97 }}
-                className="mt-12 px-12 h-14 rounded-xl font-display text-xl tracking-wider relative overflow-hidden glow-orange"
+                className="mt-12 px-12 h-14 rounded-xl font-display text-xl tracking-wider relative overflow-hidden glow-orange z-20"
                 style={{ background: '#FF4500', color: '#F0EBE3' }}>
                 ENTER APEX →
-                <motion.div className="absolute inset-0"
-                  style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent)' }}
-                  animate={{ x: ['-100%', '200%'] }}
-                  transition={{ duration: 1.5, repeat: 2, ease: 'easeInOut' }} />
               </motion.button>
             )}
           </motion.div>
