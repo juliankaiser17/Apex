@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mail, ChevronLeft, Target, Map, Flame, Settings } from 'lucide-react';
+import { Mail, ChevronLeft, Target, Map, Flame } from 'lucide-react';
 import { useApexStore } from '../../store/useApexStore';
 import type { Persona } from '../../types/apex';
 import { sounds } from '../../utils/audio';
@@ -170,7 +170,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
   // When auth completes via any method, App.tsx's onAuthStateChange will trigger initializeSession.
   // Wait, if it triggers initializeSession and onboardingCompleted is false, we should advance to 'roles'.
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user && (step === 'auth' || step === 'email_otp')) {
         setStep('roles');
       }
