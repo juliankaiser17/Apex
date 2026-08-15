@@ -122,7 +122,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
           throw new Error("No ID Token found");
         }
       } else {
-        await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin + '/' } });
+        await supabase.auth.signInWithOAuth({ provider: 'google' });
       }
     } catch (err: any) {
       console.error(err);
