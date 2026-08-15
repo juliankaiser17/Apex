@@ -255,7 +255,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] bg-[#080808] text-[#F0EBE3]" style={{ fontFamily: 'DM Sans' }}>
+    <div className="fixed inset-0 z-[100] bg-[#080808] text-[#F0EBE3]" style={{ fontFamily: 'Inter, sans-serif' }}>
       <AnimatePresence mode="wait">
         
         {/* SCREEN 1: AUTH */}
