@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from 'react-leaflet';
 import L from 'leaflet';
-import { ShieldAlert, Crosshair, Eye, Search, Flame, ArrowLeft } from 'lucide-react';
+import { ShieldAlert, Crosshair, Eye, Search, Flame, ArrowLeft, MapPin } from 'lucide-react';
 import { useApexStore } from '../../store/useApexStore';
 import { RARITY_CONFIG } from '../../utils/rarity';
 import type { CarCard } from '../../types/apex';
@@ -106,6 +106,20 @@ const MapInvalidator: React.FC = () => {
   return null;
 };
 
+// AutoLocater component to recenter map when location is acquired
+const AutoLocater: React.FC<{ userLat: number; userLng: number }> = ({ userLat, userLng }) => {
+  const map = useMap();
+  const hasLocated = useRef(false);
+
+  React.useEffect(() => {
+    if (userLat !== 0 && userLng !== 0 && !hasLocated.current) {
+      map.setView([userLat, userLng], 14, { animate: true, duration: 1.5 });
+      hasLocated.current = true;
+    }
+  }, [userLat, userLng, map]);
+  return null;
+};
+
 export interface MapSpotPin extends CarCard {
   lat: number;
   lng: number;
@@ -113,14 +127,31 @@ export interface MapSpotPin extends CarCard {
   distance: string;
 }
 
+import { requestRealLocationPermission } from '../../utils/geolocation';
+
 export const MapScreen: React.FC = () => {
-  const { activeHunts, garage, openHuntModal, setSelectedCardForDetail, setActiveTab } = useApexStore();
+  const { garage, activeHunts, user, updateUserProfile, locationDisplayMode, setLocationDisplayMode, setSelectedCardForDetail, setActiveTab, openHuntModal } = useApexStore();
   const [selectedPin, setSelectedPin] = useState<MapSpotPin | null>(null);
   const [searchModalOpen, setSearchModalOpen] = useState(false);
   const [selectedCity, setSelectedCity] = useState<CityLocation | null>(null);
   const [gtaAnimationPhase, setGtaAnimationPhase] = useState<'ascent' | 'pan' | 'descent' | null>(null);
 
-  const defaultCenter: [number, number] = [22.2950, 114.1720];
+  React.useEffect(() => {
+    // If user's latitude is 0 (hasn't been set or acquired), fetch it now
+    if (user.latitude === 0) {
+      requestRealLocationPermission().then((res) => {
+        if (res.granted) {
+          updateUserProfile({
+            latitude: res.latitude,
+            longitude: res.longitude,
+            city: res.city,
+          });
+        }
+      }).catch(err => console.warn('Location fetch failed in MapScreen:', err));
+    }
+  }, [user.latitude, updateUserProfile]);
+
+  const defaultCenter: [number, number] = [user.latitude || 20.5937, user.longitude || 78.9629];
 
   const mapSpots = useMemo<MapSpotPin[]>(() => {
     return garage.map((card, index) => ({
@@ -163,10 +194,28 @@ export const MapScreen: React.FC = () => {
           style={{ width: '100%', height: '100%' }}
         >
           <MapInvalidator />
+          <AutoLocater userLat={user.latitude} userLng={user.longitude} />
           <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution='&copy; <a href="https://carto.com/">CartoDB</a>'
+            url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
           />
+
+          {/* User Location */}
+          {user.latitude && user.longitude && (
+            locationDisplayMode === 'radius' ? (
+              <Circle
+                center={[user.latitude, user.longitude]}
+                radius={1000}
+                pathOptions={{ color: '#FF4500', fillColor: '#FF4500', fillOpacity: 0.15, weight: 2, dashArray: '6 6', className: 'animate-map-glow' }}
+              />
+            ) : (
+              <Circle
+                center={[user.latitude, user.longitude]}
+                radius={30}
+                pathOptions={{ color: '#FF4500', fillColor: '#FF4500', fillOpacity: 1, weight: 3 }}
+              />
+            )
+          )}
 
           {/* GTA V Camera Controller */}
           <GtaCameraController
@@ -268,6 +317,22 @@ export const MapScreen: React.FC = () => {
         onClose={() => setSearchModalOpen(false)}
         onSelectCity={handleSelectCity}
       />
+
+      {/* Map Settings / Location Mode Toggle */}
+      <button
+        onClick={() => {
+          sounds.playXpPop();
+          setLocationDisplayMode(locationDisplayMode === 'radius' ? 'exact' : 'radius');
+        }}
+        className="absolute bottom-44 right-4 z-30 p-3 rounded-full bg-[#111111]/95 backdrop-blur-md border border-[#2C2C2C] text-[#F0EBE3] shadow-2xl hover:border-[#FF4500] transition-colors pointer-events-auto"
+        title="Toggle Location Mode (1km Radius vs Exact)"
+      >
+        {locationDisplayMode === 'radius' ? (
+           <Eye className="w-6 h-6 text-[#FF4500]" />
+        ) : (
+           <MapPin className="w-6 h-6 text-[#2ECC71]" />
+        )}
+      </button>
 
       {/* Recenter Button */}
       <button

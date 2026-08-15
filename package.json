@@ -10,10 +10,15 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@capacitor/android": "^8.5.0",
+    "@capacitor/camera": "^8.2.2",
+    "@capacitor/cli": "^8.5.0",
+    "@capacitor/core": "^8.5.0",
+    "@capacitor/geolocation": "^8.2.0",
+    "@capacitor/push-notifications": "^8.1.2",
+    "@capawesome/capacitor-google-sign-in": "^0.1.2",
     "@google/genai": "^2.15.0",
     "@supabase/supabase-js": "^2.112.0",
-    "@tensorflow-models/mobilenet": "^2.1.1",
-    "@tensorflow/tfjs": "^4.22.0",
     "canvas-confetti": "^1.9.4",
     "clsx": "^2.1.1",
     "framer-motion": "^12.43.0",
@@ -22,6 +27,7 @@
     "lucide-react": "^1.27.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
+    "react-image-crop": "^11.1.2",
     "react-leaflet": "^5.0.0",
     "tailwind-merge": "^3.6.0",
     "zustand": "^5.0.14"

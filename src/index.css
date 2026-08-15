@@ -207,7 +207,7 @@
   background-color: var(--void) !important;
 }
 .dark-tiles .leaflet-tile {
-  filter: brightness(0.6) invert(1) contrast(1.2) hue-rotate(200deg) saturate(0.3);
+  filter: brightness(2.2) contrast(1.1) saturate(1.2) !important;
 }
 
 /* ═══ SCROLLBAR HIDE ═══ */
@@ -217,3 +217,11 @@
 /* ═══ SAFE AREA ═══ */
 .pb-safe { padding-bottom: env(safe-area-inset-bottom, 0px); }
 .pt-safe { padding-top: env(safe-area-inset-top, 0px); }
+@import 'react-image-crop/dist/ReactCrop.css';
+
+@keyframes mapGlow {
+  0%, 100% { opacity: 0.15; filter: drop-shadow(0 0 10px rgba(255,69,0,0.5)); }
+  50% { opacity: 0.35; filter: drop-shadow(0 0 20px rgba(255,69,0,0.9)); }
+}
+.animate-map-glow { animation: mapGlow 2s ease-in-out infinite; transform-origin: center; }
+

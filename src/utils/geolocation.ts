@@ -27,16 +27,10 @@ const DEFAULT_CENTER = {
  * Apply a random 1.5km - 2.0km privacy radius offset to raw GPS coordinates
  */
 export function offsetCoordinatesApprox(lat: number, lng: number): { latApprox: number; lngApprox: number } {
-  // ~111,000 meters per degree of latitude
-  const radiusKm = 1.5 + Math.random() * 0.5; // 1.5km to 2.0km
-  const angle = Math.random() * Math.PI * 2;
-
-  const latOffset = (radiusKm * Math.cos(angle)) / 111;
-  const lngOffset = (radiusKm * Math.sin(angle)) / (111 * Math.cos((lat * Math.PI) / 180));
-
+  // Removing privacy offset to provide exact accuracy per user request
   return {
-    latApprox: Number((lat + latOffset).toFixed(4)),
-    lngApprox: Number((lng + lngOffset).toFixed(4))
+    latApprox: Number(lat.toFixed(5)),
+    lngApprox: Number(lng.toFixed(5))
   };
 }
 
@@ -59,53 +53,49 @@ export async function reverseGeocodeCity(lat: number, lng: number): Promise<{ ci
   return { city: 'Local Area', country: 'Your Region' };
 }
 
+import { Geolocation } from '@capacitor/geolocation';
+
 /**
  * Request real device GPS location permission
  */
-export function requestRealLocationPermission(): Promise<LocationPermissionResult> {
-  return new Promise((resolve) => {
-    if (!navigator.geolocation) {
-      const approx = offsetCoordinatesApprox(DEFAULT_CENTER.latitude, DEFAULT_CENTER.longitude);
-      resolve({
-        granted: false,
-        latitude: DEFAULT_CENTER.latitude,
-        longitude: DEFAULT_CENTER.longitude,
-        ...approx,
-        city: DEFAULT_CENTER.city,
-        country: DEFAULT_CENTER.country
-      });
-      return;
+export async function requestRealLocationPermission(): Promise<LocationPermissionResult> {
+  try {
+    // 1. Check and Request Permissions natively
+    let permStatus = await Geolocation.checkPermissions();
+    if (permStatus.location !== 'granted') {
+      permStatus = await Geolocation.requestPermissions();
     }
 
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        const lat = pos.coords.latitude;
-        const lng = pos.coords.longitude;
-        const approx = offsetCoordinatesApprox(lat, lng);
-        const geoInfo = await reverseGeocodeCity(lat, lng);
+    if (permStatus.location !== 'granted') {
+      throw new Error('Location permission denied');
+    }
 
-        resolve({
-          granted: true,
-          latitude: lat,
-          longitude: lng,
-          ...approx,
-          city: geoInfo.city,
-          country: geoInfo.country
-        });
-      },
-      (err) => {
-        console.warn('Location permission denied or unavailable:', err.message);
-        const approx = offsetCoordinatesApprox(DEFAULT_CENTER.latitude, DEFAULT_CENTER.longitude);
-        resolve({
-          granted: false,
-          latitude: DEFAULT_CENTER.latitude,
-          longitude: DEFAULT_CENTER.longitude,
-          ...approx,
-          city: DEFAULT_CENTER.city,
-          country: DEFAULT_CENTER.country
-        });
-      },
-      { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 }
-    );
-  });
+    // 2. Get high-accuracy GPS natively (bypasses browser HTTPS restriction)
+    const pos = await Geolocation.getCurrentPosition({ enableHighAccuracy: true, timeout: 8000 });
+    
+    const lat = pos.coords.latitude;
+    const lng = pos.coords.longitude;
+    const approx = offsetCoordinatesApprox(lat, lng);
+    const geoInfo = await reverseGeocodeCity(lat, lng);
+
+    return {
+      granted: true,
+      latitude: lat,
+      longitude: lng,
+      ...approx,
+      city: geoInfo.city,
+      country: geoInfo.country
+    };
+  } catch (err: any) {
+    console.warn('Native Location permission denied or unavailable:', err.message);
+    const approx = offsetCoordinatesApprox(DEFAULT_CENTER.latitude, DEFAULT_CENTER.longitude);
+    return {
+      granted: false,
+      latitude: DEFAULT_CENTER.latitude,
+      longitude: DEFAULT_CENTER.longitude,
+      ...approx,
+      city: DEFAULT_CENTER.city,
+      country: DEFAULT_CENTER.country
+    };
+  }
 }

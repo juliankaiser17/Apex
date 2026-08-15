@@ -6,6 +6,7 @@ import { X, Camera, Sparkles, LogOut, AlertTriangle, ArrowLeft } from 'lucide-re
 import type { Hunt } from '../../types/apex';
 import { RARITY_CONFIG } from '../../utils/rarity';
 import { sounds } from '../../utils/audio';
+import { useApexStore } from '../../store/useApexStore';
 
 interface HuntScreenProps {
   hunt: Hunt | null;
@@ -114,6 +115,7 @@ export const HuntScreen: React.FC<HuntScreenProps> = ({
 }) => {
   const [inZone] = useState(false);
   const [showCancelConfirmModal, setShowCancelConfirmModal] = useState(false);
+  const { user } = useApexStore();
 
   useEffect(() => {
     if (hunt) {
@@ -123,13 +125,15 @@ export const HuntScreen: React.FC<HuntScreenProps> = ({
 
   if (!hunt) return null;
 
-  const userGpsPos: [number, number] = [22.2950, 114.1720];
+  const userLat = user.latitude || 20.5937;
+  const userLng = user.longitude || 78.9629;
+  const userGpsPos: [number, number] = [userLat, userLng];
   const targetPos: [number, number] = [hunt.latApprox, hunt.lngApprox];
 
   const nearbySpots = [
-    { id: 'spot-1', lat: 22.2970, lng: 114.1750, make: 'Ferrari', model: '488 GTB', rarity: 'epic' },
-    { id: 'spot-2', lat: 22.2920, lng: 114.1690, make: 'Lamborghini', model: 'Huracán', rarity: 'legendary' },
-    { id: 'spot-3', lat: 22.3010, lng: 114.1780, make: 'Porsche', model: '911 GT3 RS', rarity: 'mythic' }
+    { id: 'spot-1', lat: userLat + 0.002, lng: userLng + 0.003, make: 'Ferrari', model: '488 GTB', rarity: 'epic' },
+    { id: 'spot-2', lat: userLat - 0.003, lng: userLng - 0.003, make: 'Lamborghini', model: 'Huracán', rarity: 'legendary' },
+    { id: 'spot-3', lat: userLat + 0.006, lng: userLng + 0.006, make: 'Porsche', model: '911 GT3 RS', rarity: 'mythic' }
   ];
 
   const handleConfirmCancel = () => {

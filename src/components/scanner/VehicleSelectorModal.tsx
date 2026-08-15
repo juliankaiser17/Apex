@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, X, Check, Car, ChevronRight } from 'lucide-react';
 import type { CarCard, RarityTier } from '../../types/apex';
-import { SMART_CAR_DATABASE } from '../../services/aiVisionService';
 import { sounds } from '../../utils/audio';
 
 interface VehicleSelectorModalProps {
@@ -43,35 +42,14 @@ export const VehicleSelectorModal: React.FC<VehicleSelectorModalProps> = ({
 
   const handleSelectPreset = (key: string) => {
     sounds.playTargetLock();
-    const preset = SMART_CAR_DATABASE[key];
-    if (preset) {
+    const vehicle = POPULAR_VEHICLES.find(v => v.key === key);
+    if (vehicle) {
       const updatedCard: CarCard = {
         ...currentCard,
-        make: preset.make,
-        model: preset.model,
-        generation: preset.generation,
-        trim: preset.trim || undefined,
-        yearEstimate: preset.year_estimate,
-        releasedYear: preset.year_estimate,
-        color: preset.color,
-        bodyStyle: preset.body_style,
-        rarity: preset.rarity,
-        topSpeedKmH: preset.top_speed_kmh,
-        horsepower: preset.horsepower,
-        engine: preset.engine,
-        zeroToHundredSec: preset.zero_to_hundred_seconds,
-        torqueNm: preset.torque_nm,
-        kerbWeightKg: preset.kerb_weight_kg,
-        originCountry: preset.origin_country,
-        interestingFact: preset.interesting_facts,
-        briefHistory: preset.historical_information,
-        modsDetected: preset.aftermarket_parts_detected.map(p => ({
-          part: p.part_name,
-          description: p.description,
-          confidence: p.confidence
-        })),
-        marketValueLowUsd: preset.estimated_market_value_usd_low,
-        marketValueHighUsd: preset.estimated_market_value_usd_high,
+        make: vehicle.make,
+        model: vehicle.model,
+        rarity: vehicle.rarity,
+        originCountry: vehicle.country,
       };
       onConfirm(updatedCard);
       onClose();

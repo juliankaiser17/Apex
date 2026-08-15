@@ -9,10 +9,10 @@ export const HeaderBar: React.FC = () => {
 
   return (
     <>
-      {/* Top HUD Bar — Frosted Glass */}
-      <header className="sticky top-0 z-30 w-full backdrop-blur-xl border-b border-white/5"
-        style={{ background: 'rgba(8,8,8,0.65)' }}>
-        <div className="max-w-md mx-auto px-4 pt-3 pb-5">
+      {/* Top HUD Bar — Solid dark, no backdrop-blur for 60fps */}
+      <header className="sticky top-0 z-30 w-full pt-safe border-b border-white/5"
+        style={{ background: '#080808' }}>
+        <div className="px-4 pt-3 pb-5">
           <div className="flex items-center justify-between">
             {/* Left: APEX wordmark (Clickable to go Home) */}
             <div onClick={() => setActiveTab('home')} className="cursor-pointer flex items-center gap-1 group">
@@ -55,7 +55,7 @@ export const HeaderBar: React.FC = () => {
 
       {/* XP Progress Bar — thin, premium */}
       <div className="sticky z-30 w-full" style={{ top: '52px' }}>
-        <div className="max-w-md mx-auto relative">
+        <div className="relative">
           <div className="h-[3px] w-full" style={{ background: '#2C2C2C' }}>
             <div className="h-full relative transition-all duration-700 ease-out"
               style={{ width: `${progressPercent}%`, background: '#FF4500' }}>

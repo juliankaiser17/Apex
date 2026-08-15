@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Heart, MessageSquare, Share2, Search, Zap, Crown, Flame, Award } from 'lucide-react';
+import { Heart, MessageSquare, Share2, Search, Zap, Crown, Flame, Award, Target, Flag, Globe } from 'lucide-react';
 import { useApexStore } from '../../store/useApexStore';
 import { RARITY_CONFIG } from '../../utils/rarity';
 import { Card3DDetail } from '../garage/Card3DDetail';
@@ -24,9 +24,9 @@ export const SocialScreen: React.FC = () => {
   const [selectedPostForComments, setSelectedPostForComments] = useState<FeedPost | null>(null);
 
   return (
-    <div className="flex-1 pb-24 px-4 pt-4 max-w-md mx-auto space-y-4" style={{ fontFamily: 'DM Sans' }}>
+    <div className="flex-1 pb-32 px-4 pt-4 space-y-4" style={{ fontFamily: 'DM Sans' }}>
       {/* Sub-Tab Navigation Header */}
-      <div className="flex gap-1 p-1 bg-black/40 backdrop-blur-md border border-white/10 rounded-xl relative z-10">
+      <div className="flex gap-1 p-1 bg-[#111111] border border-white/10 rounded-xl relative z-10">
         {(['feed', 'leaderboard', 'friends', 'profile'] as const).map((tab) => (
           <button
             key={tab}
@@ -51,7 +51,7 @@ export const SocialScreen: React.FC = () => {
               return (
                 <div 
                   key={post.id}
-                  className="bg-black/40 backdrop-blur-md border border-white/10 rounded-xl overflow-hidden space-y-3"
+                  className="bg-[#111111] border border-white/10 rounded-xl overflow-hidden space-y-3"
                 >
                   {/* User Info Header */}
                   <div className="p-4 pb-0 flex items-center justify-between">
@@ -118,7 +118,7 @@ export const SocialScreen: React.FC = () => {
             })
           ) : (
             /* IMMACULATE EMPTY STATE */
-            <div className="text-center py-16 px-6 space-y-5 bg-black/40 backdrop-blur-md rounded-2xl border border-white/10 shadow-2xl">
+            <div className="text-center py-16 px-6 space-y-5 bg-[#111111] rounded-2xl border border-white/10 shadow-2xl">
               <div className="w-16 h-16 rounded-full bg-black/60 border border-[#FF4500] flex items-center justify-center mx-auto text-[#FF4500] glow-orange">
                 <Search className="w-8 h-8" />
               </div>
@@ -151,7 +151,7 @@ export const SocialScreen: React.FC = () => {
                 className={`flex-1 py-1.5 rounded-lg text-xs font-data uppercase border transition-all ${
                   leaderboardFilter === filter 
                     ? 'bg-black/60 text-[#FFA500] border-[#FFA500]/50 font-semibold' 
-                    : 'bg-black/40 backdrop-blur-md text-[#9A9088] border-white/10'
+                    : 'bg-[#111111] text-[#9A9088] border-white/10'
                 }`}
               >
                 {filter}
@@ -159,7 +159,7 @@ export const SocialScreen: React.FC = () => {
             ))}
           </div>
 
-          <div className="bg-black/40 backdrop-blur-md border border-white/10 rounded-xl p-4 space-y-2">
+          <div className="bg-[#111111] border border-white/10 rounded-xl p-4 space-y-2">
             {leaderboards.map((entry) => {
               const isMe = entry.username === user.username;
               return (
@@ -215,11 +215,11 @@ export const SocialScreen: React.FC = () => {
               placeholder="Search friends by username..."
               value={friendSearch}
               onChange={(e) => setFriendSearch(e.target.value)}
-              className="w-full bg-black/40 backdrop-blur-md border border-white/10 rounded-xl pl-9 pr-4 py-2.5 text-xs text-[#F0EBE3] placeholder-[#5A5550] focus:outline-none"
+              className="w-full bg-[#111111] border border-white/10 rounded-xl pl-9 pr-4 py-2.5 text-xs text-[#F0EBE3] placeholder-[#5A5550] focus:outline-none"
             />
           </div>
 
-          <div className="text-center py-12 px-6 space-y-4 bg-black/40 backdrop-blur-md rounded-2xl border border-white/10">
+          <div className="text-center py-12 px-6 space-y-4 bg-[#111111] rounded-2xl border border-white/10">
             <div className="w-14 h-14 rounded-full bg-black/60 border border-[#FF4500] flex items-center justify-center mx-auto text-[#FF4500] glow-orange">
               <Zap className="w-7 h-7" />
             </div>
@@ -241,7 +241,7 @@ export const SocialScreen: React.FC = () => {
       {subTab === 'profile' && (
         <div className="space-y-4">
           {/* Profile Card */}
-          <div className="p-5 rounded-xl bg-black/40 backdrop-blur-md border border-white/10 text-center space-y-3 relative overflow-hidden">
+          <div className="p-5 rounded-xl bg-[#111111] border border-white/10 text-center space-y-3 relative overflow-hidden">
             <img src={user.avatarUrl} alt={user.username} className="w-24 h-24 rounded-full border-2 border-[#FF4500] object-cover mx-auto glow-orange" />
             
             <div>
@@ -276,26 +276,36 @@ export const SocialScreen: React.FC = () => {
           </div>
 
           {/* Badges Showcase */}
-          <div className="bg-black/40 backdrop-blur-md border border-white/10 rounded-xl p-5 space-y-3">
+          <div className="bg-[#111111] border border-white/10 rounded-xl p-5 space-y-3">
             <h3 className="font-display text-xl text-[#F0EBE3] flex items-center gap-2">
               <Award className="w-5 h-5 text-[#FFA500]" /> BADGES UNLOCKED ({badges.filter(b => b.isUnlocked).length})
             </h3>
 
             <div className="grid grid-cols-3 gap-3">
-              {badges.map((badge) => (
-                <div
-                  key={badge.id}
-                  className={`p-3 rounded-xl border text-center space-y-1 ${
-                    badge.isUnlocked 
-                      ? 'bg-black/60 border-[#FFA500]/40' 
-                      : 'bg-black/20 border-white/5 opacity-40 grayscale'
-                  }`}
-                >
-                  <span className="text-3xl block">{badge.icon}</span>
-                  <h4 className="font-display text-xs text-[#F0EBE3] truncate">{badge.name}</h4>
-                  <span className="text-[9px] font-data text-[#FFA500]">+{badge.xpBonus} XP</span>
-                </div>
-              ))}
+              {badges.map((badge) => {
+                const IconComponent = 
+                  badge.icon === 'Target' ? Target :
+                  badge.icon === 'Zap' ? Zap :
+                  badge.icon === 'Flag' ? Flag :
+                  badge.icon === 'Crown' ? Crown :
+                  badge.icon === 'Flame' ? Flame :
+                  badge.icon === 'Globe' ? Globe : Award;
+                  
+                return (
+                  <div
+                    key={badge.id}
+                    className={`p-3 rounded-xl border flex flex-col items-center text-center space-y-1 ${
+                      badge.isUnlocked 
+                        ? 'bg-black/60 border-[#FFA500]/40' 
+                        : 'bg-black/20 border-white/5 opacity-40 grayscale'
+                    }`}
+                  >
+                    <IconComponent className="w-8 h-8 mb-1 text-[#FFA500]" />
+                    <h4 className="font-display text-xs text-[#F0EBE3] truncate w-full">{badge.name}</h4>
+                    <span className="text-[9px] font-data text-[#FFA500]">+{badge.xpBonus} XP</span>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>

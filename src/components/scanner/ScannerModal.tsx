@@ -9,6 +9,7 @@ import { calculateRegionalRarity } from '../../utils/regionalRarityEngine';
 import { identifyVehicleWithAi } from '../../services/aiVisionService';
 import { UnboxingReveal } from './UnboxingReveal';
 import { PostScanHuntModal } from '../hunts/PostScanHuntModal';
+import { Camera as CapCamera } from '@capacitor/camera';
 
 export const ScannerModal: React.FC = () => {
   const { scannerOpen, setScannerOpen, addCardToGarage, user, triggerMockHunt } = useApexStore();
@@ -24,49 +25,9 @@ export const ScannerModal: React.FC = () => {
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const streamRef = useRef<MediaStream | null>(null);
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setCapturedFileName(file.name);
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const img = new Image();
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          const MAX_WIDTH = 1200;
-          const MAX_HEIGHT = 1200;
-          let width = img.width;
-          let height = img.height;
-
-          if (width > height) {
-            if (width > MAX_WIDTH) {
-              height *= MAX_WIDTH / width;
-              width = MAX_WIDTH;
-            }
-          } else {
-            if (height > MAX_HEIGHT) {
-              width *= MAX_HEIGHT / height;
-              height = MAX_HEIGHT;
-            }
-          }
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext('2d');
-          ctx?.drawImage(img, 0, 0, width, height);
-          
-          const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.8);
-          setCapturedPhotoUrl(compressedDataUrl);
-          stopCameraStream();
-          setPhase('analyzing');
-        };
-        img.src = event.target?.result as string;
-      };
-      reader.readAsDataURL(file);
-    }
-  };
 
   const analysisMessages = [
     'Processing image metadata...',
@@ -79,6 +40,16 @@ export const ScannerModal: React.FC = () => {
   const initHardwareCamera = async () => {
     setPermissionState('requesting');
     try {
+      // 1. Request native camera permissions via Capacitor
+      try {
+        const permStatus = await CapCamera.requestPermissions();
+        if (permStatus.camera !== 'granted' && permStatus.camera !== 'prompt-with-rationale') {
+          console.warn('Native camera permission not granted:', permStatus.camera);
+        }
+      } catch (e) {
+        console.log('Capacitor camera request failed or running in web', e);
+      }
+
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         setPermissionState('denied');
         return;
@@ -140,12 +111,23 @@ export const ScannerModal: React.FC = () => {
 
       const processScan = async () => {
         const aiResult = await identifyVehicleWithAi(capturedPhotoUrl || '', false, capturedFileName || undefined);
-        const offset = applySpatialOffset(22.2950, 114.1720);
+        
+        // CAR-ONLY GATE: If the AI says it's not a car, reject immediately
+        if (!aiResult.is_car) {
+          clearInterval(interval);
+          setAuthenticityError(aiResult.rejection_reason || 'This image does not contain a vehicle. APEX only accepts automobile photographs.');
+          setPhase('rejected');
+          return;
+        }
+
+        const userLat = user.latitude || 0;
+        const userLng = user.longitude || 0;
+        const offset = applySpatialOffset(userLat, userLng);
         const rarityEngineResult = calculateRegionalRarity({
           make: aiResult.make,
           model: aiResult.model,
-          city: 'Hong Kong',
-          country: 'Hong Kong'
+          city: user.city || 'Local Area',
+          country: user.country || 'Your Country'
         });
 
         const newCard: CarCard = {
@@ -180,9 +162,9 @@ export const ScannerModal: React.FC = () => {
           imageUrl: capturedPhotoUrl || 'https://images.unsplash.com/photo-1544829099-b9a0c07fad1a?q=80&w=1200',
           latApprox: offset.latApprox,
           lngApprox: offset.lngApprox,
-          city: 'Hong Kong',
-          stateRegion: 'Kowloon',
-          country: 'Hong Kong',
+          city: user.city || 'Local Area',
+          stateRegion: user.country || 'Your Region',
+          country: user.country || 'Your Country',
           xpEarned: 150,
           marketValueLowUsd: aiResult.estimated_market_value_usd_low || 50000,
           marketValueHighUsd: aiResult.estimated_market_value_usd_high || 80000,
@@ -301,13 +283,6 @@ export const ScannerModal: React.FC = () => {
       {/* PERMISSION DENIED FULL-SCREEN PROMPT */}
       {permissionState === 'denied' && phase === 'camera' && (
         <div className="flex-1 flex flex-col items-center justify-center p-6 text-center space-y-6 max-w-md mx-auto">
-          <input
-            type="file"
-            ref={fileInputRef}
-            onChange={handleFileSelect}
-            accept="image/*"
-            className="hidden"
-          />
 
           <div className="w-20 h-20 rounded-full bg-[#1A1A1A] border border-[#FF4500] flex items-center justify-center text-[#FF4500] glow-orange">
             <ShieldAlert className="w-10 h-10" />
@@ -316,7 +291,7 @@ export const ScannerModal: React.FC = () => {
           <div className="space-y-2">
             <h2 className="font-display text-4xl text-[#F0EBE3]">CAMERA ACCESS</h2>
             <p className="text-sm text-[#9A9088] leading-relaxed">
-              Scan with your live camera or upload a car photo from your device gallery.
+              Scan real cars with your live camera to earn XP.
             </p>
           </div>
 
@@ -326,13 +301,6 @@ export const ScannerModal: React.FC = () => {
               className="w-full py-4 rounded-xl bg-[#FF4500] text-[#F0EBE3] font-display text-xl tracking-wider glow-orange flex items-center justify-center gap-2"
             >
               <Settings className="w-5 h-5" /> TRY LIVE CAMERA AGAIN
-            </button>
-
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              className="w-full py-3.5 rounded-xl bg-[#1A1A1A] hover:bg-[#2C2C2C] text-[#F0EBE3] font-display text-base tracking-wider border border-[#2C2C2C] flex items-center justify-center gap-2"
-            >
-              <Camera className="w-5 h-5 text-[#FF4500]" /> UPLOAD PHOTO FROM GALLERY / CAMERA
             </button>
           </div>
         </div>
@@ -345,8 +313,11 @@ export const ScannerModal: React.FC = () => {
             ref={videoRef}
             autoPlay
             playsInline
+            controls={false}
             muted
-            className="absolute inset-0 w-full h-full object-cover"
+            disablePictureInPicture
+            className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+            style={{ WebkitTransform: 'translateZ(0)' }} // Force hardware acceleration to prevent native player fallback
           />
 
           {/* ANGLE INSTRUCTION OVERLAY BANNER IF APPLICABLE */}
@@ -398,14 +369,6 @@ export const ScannerModal: React.FC = () => {
             </div>
           </div>
 
-          {/* Hidden File Input */}
-          <input
-            type="file"
-            ref={fileInputRef}
-            onChange={handleFileSelect}
-            accept="image/*"
-            className="hidden"
-          />
 
           {/* Bottom Shutter Bar */}
           <div className="relative z-30 pb-10 flex flex-col items-center gap-3">
@@ -414,13 +377,8 @@ export const ScannerModal: React.FC = () => {
             </span>
 
             <div className="flex items-center gap-6">
-              {/* Gallery Upload Button */}
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                className="px-4 py-2 rounded-xl bg-[#1A1A1A] border border-[#2C2C2C] text-xs font-data text-[#F0EBE3] hover:border-[#FF4500] flex items-center gap-2"
-              >
-                <span>🖼️ UPLOAD PHOTO</span>
-              </button>
+              {/* Empty placeholder for alignment */}
+              <div className="w-28" />
 
               {/* Shutter Button (72px ring + 60px inner fill) */}
               <motion.button

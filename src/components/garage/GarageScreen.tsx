@@ -23,7 +23,7 @@ export const GarageScreen: React.FC = () => {
   };
 
   return (
-    <div className="flex-1 pb-24 px-4 pt-4 max-w-md mx-auto space-y-4" style={{ fontFamily: 'DM Sans' }}>
+    <div className="flex-1 pb-32 px-4 pt-4 space-y-4" style={{ fontFamily: 'DM Sans' }}>
       {/* Garage Header */}
       <div className="flex items-center justify-between">
         <div>

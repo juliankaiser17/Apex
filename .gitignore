@@ -27,3 +27,5 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+APEX.apk
+src/components/onboarding/OnboardingModalNew.tsx

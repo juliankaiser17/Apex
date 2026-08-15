@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { supabase } from './lib/supabase';
 import { useApexStore } from './store/useApexStore';
 import { HeaderBar } from './components/common/HeaderBar';
@@ -19,28 +19,57 @@ import { ProfileSettingsModal } from './components/profile/ProfileSettingsModal'
 import { requestRealLocationPermission } from './utils/geolocation';
 
 export const App: React.FC = () => {
+  const [isAuthReady, setIsAuthReady] = useState(false);
   useEffect(() => {
     document.title = 'APEX — Every Street Is a Track';
 
-    requestRealLocationPermission().then((res) => {
-      if (res.city && res.city !== 'Your City') {
-        useApexStore.getState().updateUserProfile({
-          city: res.city,
-          country: res.country
-        });
-      }
-    });
+    // Location will be requested during onboarding or when needed.
 
     // ─── AUTH LISTENER ───
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
-        useApexStore.getState().initializeSession(session.user.id);
+        useApexStore.getState().initializeSession(session.user.id).then(() => {
+          setIsAuthReady(true);
+          // If already onboarded, silently refresh location for exact accuracy
+          if (useApexStore.getState().onboardingCompleted) {
+            requestRealLocationPermission().then((res) => {
+              if (res.city && res.city !== 'Your City') {
+                useApexStore.getState().updateUserProfile({
+                  city: res.city,
+                  country: res.country,
+                  latitude: res.latitude,
+                  longitude: res.longitude
+                });
+              } else if (res.latitude !== 0) {
+                useApexStore.getState().updateUserProfile({
+                  latitude: res.latitude,
+                  longitude: res.longitude
+                });
+              }
+            });
+          }
+        });
+      } else {
+        // Prevent flashing login screen during OAuth redirect processing
+        if (window.location.hash && window.location.hash.includes('access_token=')) {
+          return;
+        }
+        useApexStore.getState().logoutUser();
+        setIsAuthReady(true);
       }
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (_event === 'INITIAL_SESSION') return;
       if (session?.user) {
-        useApexStore.getState().initializeSession(session.user.id);
+        useApexStore.getState().initializeSession(session.user.id).then(() => {
+          setIsAuthReady(true);
+        });
+      } else {
+        // Only set ready if we aren't waiting for a redirect
+        if (!window.location.hash.includes('access_token=')) {
+          setIsAuthReady(true);
+        }
       }
     });
 
@@ -59,8 +88,16 @@ export const App: React.FC = () => {
     setSettingsModalOpen
   } = useApexStore();
 
+  if (!isAuthReady) {
+    return (
+      <div className="min-h-[100dvh] bg-[#080808] flex items-center justify-center">
+        <div className="w-12 h-12 border-4 border-[#FF4500] border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-transparent text-[#F0EBE3] flex flex-col selection:bg-[#FF4500] selection:text-white relative z-0" style={{ fontFamily: 'DM Sans' }}>
+    <div className="min-h-[100dvh] bg-transparent text-[#F0EBE3] flex flex-col selection:bg-[#FF4500] selection:text-white relative z-0 pb-[110px]" style={{ fontFamily: 'DM Sans' }}>
       <AmbientBackground />
       {/* Top Status Header */}
       <HeaderBar />
@@ -104,11 +141,7 @@ export const App: React.FC = () => {
         }}
       />
       
-      {/* Onboarding Trigger Modal */}
-      <OnboardingModal 
-        isOpen={!onboardingCompleted} 
-        onClose={() => {}} 
-      />
+      <OnboardingModal isOpen={!onboardingCompleted} onClose={() => {}} />
     </div>
   );
 };

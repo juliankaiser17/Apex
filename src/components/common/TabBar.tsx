@@ -18,9 +18,9 @@ export const TabBar: React.FC = () => {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-30 pb-safe backdrop-blur-xl"
-      style={{ background: 'rgba(8,8,8,0.65)', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-      <div className="max-w-md mx-auto flex items-end justify-between px-4 pt-1 pb-2">
+    <nav className="fixed bottom-0 left-0 right-0 z-30 pb-safe"
+      style={{ background: '#080808', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+      <div className="flex items-end justify-between px-4 pt-1 pb-2">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = !tab.isCenter && activeTab === tab.id;
@@ -35,12 +35,6 @@ export const TabBar: React.FC = () => {
                   className="relative w-[76px] h-[76px] rounded-full flex items-center justify-center"
                   style={{ background: '#080808', border: '2px solid #FF4500' }}
                 >
-                  {/* Pulsing glow ring */}
-                  <motion.div
-                    className="absolute inset-[-4px] rounded-full"
-                    animate={{ boxShadow: ['0 0 0px rgba(255,69,0,0)', '0 0 24px rgba(255,69,0,0.4)', '0 0 0px rgba(255,69,0,0)'] }}
-                    transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
-                  />
                   {/* Inner fill */}
                   <div className="w-[60px] h-[60px] rounded-full flex items-center justify-center"
                     style={{ background: '#FF4500' }}>

@@ -89,6 +89,8 @@ export interface UserProfile {
   rankCity: number;
   city: string;
   country: string;
+  latitude: number;
+  longitude: number;
   countryCode: string;
   isPremium: boolean;
   premiumUntil?: string;

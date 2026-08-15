@@ -67,13 +67,13 @@ export const HomeScreen: React.FC = () => {
   };
 
   return (
-    <div className="flex-1 pb-24 px-4 pt-4 max-w-md mx-auto space-y-4" style={{ fontFamily: 'DM Sans' }}>
+    <div className="flex-1 pb-32 px-4 pt-4 space-y-4" style={{ fontFamily: 'DM Sans' }}>
       {/* 1. Daily Quest Card (Collapsible, left ignition accent bar) */}
       {activeQuest && (
         <motion.div 
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="relative overflow-hidden rounded-xl border border-white/10 bg-black/40 backdrop-blur-md transition-all"
+          className="relative overflow-hidden rounded-xl border border-white/10 bg-[#111111] transition-all"
         >
           {/* Left accent bar */}
           <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-[#FF4500]" />
@@ -168,7 +168,7 @@ export const HomeScreen: React.FC = () => {
                 <div
                   key={post.id}
                   onClick={() => setActiveTab('social')}
-                  className="flex-shrink-0 w-32 h-44 rounded-xl overflow-hidden relative border border-white/10 bg-black/40 backdrop-blur-md group cursor-pointer hover:border-[#FF4500]/60 transition-all"
+                  className="flex-shrink-0 w-32 h-44 rounded-xl overflow-hidden relative border border-white/10 bg-[#111111] group cursor-pointer hover:border-[#FF4500]/60 transition-all"
                 >
                   {/* Background Image */}
                   <img 
@@ -199,7 +199,7 @@ export const HomeScreen: React.FC = () => {
       )}
 
       {/* 4. Daily Missions */}
-      <div className="bg-black/40 backdrop-blur-md border border-white/10 rounded-xl p-4 space-y-3">
+      <div className="bg-[#111111] border border-white/10 rounded-xl p-4 space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="font-display text-lg text-[#F0EBE3] tracking-wide">DAILY MISSIONS</h3>
           <span className="text-xs font-data text-[#9A9088]">
@@ -239,7 +239,7 @@ export const HomeScreen: React.FC = () => {
       {/* MISSION CAR PROOF REQUIRED MODAL */}
       <AnimatePresence>
         {selectedMissionForProof && (
-          <div className="fixed inset-0 z-50 bg-[#080808]/85 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-50 bg-[#080808]/90 flex items-center justify-center p-4">
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
@@ -293,7 +293,7 @@ export const HomeScreen: React.FC = () => {
       </AnimatePresence>
 
       {/* 5. Live Event Banner */}
-      <div className="p-4 rounded-xl bg-black/40 backdrop-blur-md border border-[#FFA500]/30 flex items-center gap-3 relative overflow-hidden">
+      <div className="p-4 rounded-xl bg-[#111111] border border-[#FFA500]/30 flex items-center gap-3 relative overflow-hidden">
         <div className="p-3 rounded-xl bg-black/60 text-[#FFA500] border border-[#FFA500]/30">
           <ShieldAlert className="w-6 h-6 animate-pulse" />
         </div>
