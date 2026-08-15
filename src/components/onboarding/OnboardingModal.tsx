@@ -7,7 +7,7 @@ import { sounds } from '../../utils/audio';
 import confetti from 'canvas-confetti';
 import { requestRealLocationPermission } from '../../utils/geolocation';
 import { Camera as CapCamera } from '@capacitor/camera';
-import { supabase, OAUTH_REDIRECT_URL } from '../../lib/supabase';
+import { supabase } from '../../lib/supabase';
 import { Capacitor } from '@capacitor/core';
 import { GoogleSignIn } from '@capawesome/capacitor-google-sign-in';
 import { PushNotifications } from '@capacitor/push-notifications';
@@ -108,10 +108,12 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
     sounds.playTargetLock();
     setIsAuthLoading(true);
     setAuthError('');
+    const CLIENT_ID = '708398928493-8qkjhla9p00kkjrse5f0l4d8spo9pj6c.apps.googleusercontent.com';
     try {
       if (Capacitor.isNativePlatform()) {
+        // Native: use Capacitor plugin
         await GoogleSignIn.initialize({
-          clientId: '708398928493-8qkjhla9p00kkjrse5f0l4d8spo9pj6c.apps.googleusercontent.com',
+          clientId: CLIENT_ID,
           scopes: ['profile', 'email'],
         });
         const result = await GoogleSignIn.signIn();
@@ -122,11 +124,47 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
           throw new Error("No ID Token found");
         }
       } else {
-        await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: OAUTH_REDIRECT_URL } });
+        // Web: use Google Identity Services popup — NO redirects!
+        const loadGIS = (): Promise<void> => new Promise((resolve) => {
+          if (window.google?.accounts?.id) { resolve(); return; }
+          const script = document.createElement('script');
+          script.src = 'https://accounts.google.com/gsi/client';
+          script.async = true;
+          script.onload = () => resolve();
+          document.head.appendChild(script);
+        });
+        await loadGIS();
+
+        if (!window.google?.accounts?.id) throw new Error('Google Identity Services failed to load');
+
+        // Create a promise that resolves when the GIS callback fires
+        const idToken = await new Promise<string>((resolve, reject) => {
+          window.google!.accounts.id.initialize({
+            client_id: CLIENT_ID,
+            callback: (response: { credential: string }) => {
+              if (response.credential) {
+                resolve(response.credential);
+              } else {
+                reject(new Error('No credential returned from Google'));
+              }
+            },
+          });
+          // Try One Tap first, fall back to button
+          window.google!.accounts.id.prompt((notification: any) => {
+            // If One Tap is dismissed/skipped, we let the user retry
+            if (notification?.isNotDisplayed?.() || notification?.isSkippedMoment?.()) {
+              reject(new Error('Google One Tap was dismissed. Please try again.'));
+            }
+          });
+        });
+
+        // Exchange the Google ID token for a Supabase session — no redirect!
+        const { error } = await supabase.auth.signInWithIdToken({ provider: 'google', token: idToken });
+        if (error) throw error;
       }
     } catch (err: any) {
       console.error(err);
-      setAuthError('Google Sign-In failed.');
+      setAuthError(err?.message || 'Google Sign-In failed. Please try again.');
       setIsAuthLoading(false);
     }
   };
