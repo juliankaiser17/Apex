@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mail, ChevronLeft, Target, Map, Flame } from 'lucide-react';
+import { Mail, ChevronLeft } from 'lucide-react';
 import { useApexStore } from '../../store/useApexStore';
 import type { Persona } from '../../types/apex';
 import { sounds } from '../../utils/audio';
+import { SPRING_HEAVY, SPRING_POP, SPRING_SETTLE, EASE_OUT_EXPO, GLOW_ORANGE } from '../../utils/animationConfig';
 import confetti from 'canvas-confetti';
 import { requestRealLocationPermission } from '../../utils/geolocation';
 import { Camera as CapCamera } from '@capacitor/camera';
@@ -19,76 +20,97 @@ interface OnboardingModalProps {
 
 type OnboardingStep = 'auth' | 'email_input' | 'email_otp' | 'roles' | 'cam_perm' | 'loc_perm' | 'notif_perm' | 'celebration';
 
-const ROLES = [
+const ROLES: { id: Persona; title: string; ctaLabel: string; desc: string }[] = [
   {
-    id: 'spotter' as Persona,
-    name: 'CAR SPOTTER 🎯',
-    desc: 'I hunt rare cars everywhere I go. Every street is a target.',
-    icon: Target
+    id: 'spotter',
+    title: 'THE HUNTER',
+    ctaLabel: "I'M A HUNTER",
+    desc: "You see what others walk past.\nEvery lot. Every street. Every target.",
   },
   {
-    id: 'finder' as Persona,
-    name: 'CAR FINDER 🗺',
-    desc: "I explore cities and discover what's hiding in plain sight.",
-    icon: Map
+    id: 'finder',
+    title: 'THE SPOTTER',
+    ctaLabel: "I'M A SPOTTER",
+    desc: "Cities have secrets. You find them.\nYour eyes, your map, your discovery.",
   },
   {
-    id: 'love_of_cars' as Persona,
-    name: 'LOVE OF THE GAME 🔥',
-    desc: "I'm here for the cars. Knowledge, beauty, obsession.",
-    icon: Flame
-  }
+    id: 'love_of_cars',
+    title: 'FOR THE LOVE',
+    ctaLabel: "I'M IN FOR THE LOVE",
+    desc: "The cars are enough. Always have been.\nYou know. You feel it.",
+  },
 ];
 
-const CameraIllustration = () => (
-  <svg width="200" height="200" viewBox="0 0 200 200" fill="none">
-    <motion.path
-      d="M40 80 L40 40 L80 40" stroke="#FF4500" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"
-      initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1 }}
+// ─── SVG ILLUSTRATIONS ───
+
+const ApertureIris: React.FC = () => {
+  const blades = 8;
+  return (
+    <svg width="72" height="72" viewBox="0 0 72 72" fill="none">
+      {Array.from({ length: blades }).map((_, i) => {
+        const angle = (360 / blades) * i;
+        const rad = (angle * Math.PI) / 180;
+        const x1 = 36 + 14 * Math.cos(rad);
+        const y1 = 36 + 14 * Math.sin(rad);
+        const x2 = 36 + 32 * Math.cos(rad);
+        const y2 = 36 + 32 * Math.sin(rad);
+        return (
+          <motion.line
+            key={i}
+            x1={36} y1={36} x2={x2} y2={y2}
+            stroke="#F0EBE3" strokeWidth="3" strokeLinecap="round"
+            initial={{ x1: 36, y1: 36, x2: 36, y2: 36, opacity: 0 }}
+            animate={{ x1, y1, x2, y2, opacity: 1 }}
+            transition={{ delay: i * 0.06, duration: 1, ease: 'easeInOut' }}
+          />
+        );
+      })}
+      <motion.circle
+        cx="36" cy="36" r="6" fill="#FF4500"
+        initial={{ opacity: 0 }} animate={{ opacity: [0, 0.15, 0.15] }}
+        transition={{ delay: 0.8, duration: 1 }}
+      />
+    </svg>
+  );
+};
+
+const GpsCrosshair: React.FC = () => (
+  <svg width="72" height="72" viewBox="0 0 72 72" fill="none">
+    <circle cx="36" cy="36" r="28" stroke="#F0EBE3" strokeWidth="1.5" opacity="0.3" />
+    <line x1="36" y1="4" x2="36" y2="20" stroke="#F0EBE3" strokeWidth="1.5" opacity="0.4" />
+    <line x1="36" y1="52" x2="36" y2="68" stroke="#F0EBE3" strokeWidth="1.5" opacity="0.4" />
+    <line x1="4" y1="36" x2="20" y2="36" stroke="#F0EBE3" strokeWidth="1.5" opacity="0.4" />
+    <line x1="52" y1="36" x2="68" y2="36" stroke="#F0EBE3" strokeWidth="1.5" opacity="0.4" />
+    <motion.circle cx="36" cy="36" r="4" fill="#FF4500" />
+    <motion.circle
+      cx="36" cy="36" r="12" stroke="#FF4500" strokeWidth="1.5" fill="none"
+      initial={{ scale: 1, opacity: 1 }}
+      animate={{ scale: 2.5, opacity: 0 }}
+      transition={{ duration: 1.8, repeat: Infinity, ease: 'easeOut' }}
     />
-    <motion.path
-      d="M160 80 L160 40 L120 40" stroke="#FF4500" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"
-      initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1 }}
-    />
-    <motion.path
-      d="M40 120 L40 160 L80 160" stroke="#FF4500" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"
-      initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1 }}
-    />
-    <motion.path
-      d="M160 120 L160 160 L120 160" stroke="#FF4500" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"
-      initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1 }}
-    />
-    <circle cx="100" cy="100" r="30" stroke="#F0EBE3" strokeWidth="2" opacity="0.3" />
-    <motion.circle cx="100" cy="100" r="15" fill="#FF4500" animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }} transition={{ duration: 2, repeat: Infinity }} />
   </svg>
 );
 
-const CityMapIllustration = () => (
-  <svg width="200" height="200" viewBox="0 0 200 200" fill="none">
-    {/* Grid lines */}
-    {[20, 60, 100, 140, 180].map(x => (
-      <line key={`x-${x}`} x1={x} y1="0" x2={x} y2="200" stroke="#F0EBE3" strokeWidth="1" opacity="0.1" />
-    ))}
-    {[20, 60, 100, 140, 180].map(y => (
-      <line key={`y-${y}`} x1="0" y1={y} x2="200" y2={y} stroke="#F0EBE3" strokeWidth="1" opacity="0.1" />
-    ))}
-    <motion.circle cx="100" cy="100" r="40" stroke="#FF4500" strokeWidth="2" strokeDasharray="4 4" opacity="0.5"
-      animate={{ scale: [1, 1.5], opacity: [0.5, 0] }} transition={{ duration: 2, repeat: Infinity }} />
-    <motion.circle cx="100" cy="100" r="8" fill="#FF4500" />
-    <motion.path d="M100 100 L100 80 L115 80" stroke="#FF4500" strokeWidth="2" fill="none" opacity="0.8" />
-  </svg>
+const NotificationBell: React.FC = () => (
+  <motion.svg
+    width="72" height="72" viewBox="0 0 72 72" fill="none"
+    animate={{ rotate: [-12, 12, -12] }}
+    transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+  >
+    {/* Bell body */}
+    <path d="M36 8 C24 8, 14 20, 14 32 L14 44 L10 50 L62 50 L58 44 L58 32 C58 20, 48 8, 36 8Z" fill="#F0EBE3" opacity="0.85" />
+    {/* Bell clapper */}
+    <circle cx="36" cy="56" r="5" fill="#F0EBE3" opacity="0.85" />
+    {/* Orange notification dot */}
+    <motion.circle
+      cx="52" cy="14" r="6" fill="#FF4500"
+      animate={{ scale: [1, 1.3, 1], opacity: [1, 0.7, 1] }}
+      transition={{ duration: 1.5, repeat: Infinity }}
+    />
+  </motion.svg>
 );
 
-const NotificationIllustration = () => (
-  <svg width="200" height="200" viewBox="0 0 200 200" fill="none">
-    <rect x="60" y="20" width="80" height="160" rx="12" stroke="#F0EBE3" strokeWidth="2" opacity="0.3" />
-    <motion.rect x="50" y="60" width="100" height="40" rx="8" fill="#1A1A1A" stroke="#FF4500" strokeWidth="1"
-      initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2, type: 'spring' }} />
-    <motion.circle cx="70" cy="80" r="6" fill="#FF4500" initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.4 }} />
-    <motion.line x1="85" y1="75" x2="130" y2="75" stroke="#F0EBE3" strokeWidth="4" strokeLinecap="round" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ delay: 0.5 }} />
-    <motion.line x1="85" y1="85" x2="110" y2="85" stroke="#F0EBE3" strokeWidth="2" strokeLinecap="round" opacity="0.5" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ delay: 0.6 }} />
-  </svg>
-);
+// ─── MAIN COMPONENT ───
 
 export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClose }) => {
   const { setPersona, completeOnboarding } = useApexStore();
@@ -97,34 +119,35 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
   const [authError, setAuthError] = useState('');
   const [emailInput, setEmailInput] = useState('');
   const [otpCode, setOtpCode] = useState(['', '', '', '', '', '']);
-  const [activeRoleIdx, setActiveRoleIdx] = useState<number | null>(null);
+  const [activeRoleIdx, setActiveRoleIdx] = useState(1); // Middle page pre-selected
+  const [camDenied, setCamDenied] = useState(false);
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const carouselRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (isOpen) setStep('auth');
   }, [isOpen]);
 
+  // ─── AUTH HANDLERS ───
+
+  const CLIENT_ID = '708398928493-8qkjhla9p00kkjrse5f0l4d8spo9pj6c.apps.googleusercontent.com';
+
   const handleGoogleSignIn = async () => {
     sounds.playTargetLock();
     setIsAuthLoading(true);
     setAuthError('');
-    const CLIENT_ID = '708398928493-8qkjhla9p00kkjrse5f0l4d8spo9pj6c.apps.googleusercontent.com';
     try {
       if (Capacitor.isNativePlatform()) {
-        // Native: use Capacitor plugin
-        await GoogleSignIn.initialize({
-          clientId: CLIENT_ID,
-          scopes: ['profile', 'email'],
-        });
+        await GoogleSignIn.initialize({ clientId: CLIENT_ID, scopes: ['profile', 'email'] });
         const result = await GoogleSignIn.signIn();
         if (result.idToken) {
           const { error } = await supabase.auth.signInWithIdToken({ provider: 'google', token: result.idToken });
           if (error) throw error;
         } else {
-          throw new Error("No ID Token found");
+          throw new Error('No ID Token found');
         }
       } else {
-        // Web: use Google Identity Services popup — NO redirects!
+        // Web: Google Identity Services popup — zero redirects
         const loadGIS = (): Promise<void> => new Promise((resolve) => {
           if (window.google?.accounts?.id) { resolve(); return; }
           const script = document.createElement('script');
@@ -134,37 +157,27 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
           document.head.appendChild(script);
         });
         await loadGIS();
-
         if (!window.google?.accounts?.id) throw new Error('Google Identity Services failed to load');
-
-        // Create a promise that resolves when the GIS callback fires
         const idToken = await new Promise<string>((resolve, reject) => {
           window.google!.accounts.id.initialize({
             client_id: CLIENT_ID,
             callback: (response: { credential: string }) => {
-              if (response.credential) {
-                resolve(response.credential);
-              } else {
-                reject(new Error('No credential returned from Google'));
-              }
+              if (response.credential) resolve(response.credential);
+              else reject(new Error('No credential returned'));
             },
           });
-          // Try One Tap first, fall back to button
           window.google!.accounts.id.prompt((notification: any) => {
-            // If One Tap is dismissed/skipped, we let the user retry
             if (notification?.isNotDisplayed?.() || notification?.isSkippedMoment?.()) {
               reject(new Error('Google One Tap was dismissed. Please try again.'));
             }
           });
         });
-
-        // Exchange the Google ID token for a Supabase session — no redirect!
         const { error } = await supabase.auth.signInWithIdToken({ provider: 'google', token: idToken });
         if (error) throw error;
       }
     } catch (err: any) {
       console.error(err);
-      setAuthError(err?.message || 'Google Sign-In failed. Please try again.');
+      setAuthError(err?.message || 'Google Sign-In failed.');
       setIsAuthLoading(false);
     }
   };
@@ -176,13 +189,8 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
     setIsAuthLoading(true);
     setAuthError('');
     const { error } = await supabase.auth.signInWithOtp({ email: emailInput, options: { shouldCreateUser: true } });
-    if (error) {
-      setAuthError(error.message);
-      setIsAuthLoading(false);
-    } else {
-      setIsAuthLoading(false);
-      setStep('email_otp');
-    }
+    if (error) { setAuthError(error.message); setIsAuthLoading(false); }
+    else { setIsAuthLoading(false); setStep('email_otp'); }
   };
 
   const handleOtpChange = async (idx: number, val: string) => {
@@ -190,23 +198,15 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
     const next = [...otpCode];
     next[idx] = val;
     setOtpCode(next);
-    if (val && idx < 5) {
-      otpRefs.current[idx + 1]?.focus();
-    }
+    if (val && idx < 5) otpRefs.current[idx + 1]?.focus();
     if (next.every(c => c !== '')) {
       setIsAuthLoading(true);
-      const code = next.join('');
-      const { error } = await supabase.auth.verifyOtp({ email: emailInput, token: code, type: 'email' });
-      if (error) {
-        setAuthError(error.message);
-        setIsAuthLoading(false);
-      }
-      // Success is handled by App.tsx listener, but we also want to advance the modal locally
+      const { error } = await supabase.auth.verifyOtp({ email: emailInput, token: next.join(''), type: 'email' });
+      if (error) { setAuthError(error.message); setIsAuthLoading(false); }
     }
   };
 
-  // When auth completes via any method, App.tsx's onAuthStateChange will trigger initializeSession.
-  // Wait, if it triggers initializeSession and onboardingCompleted is false, we should advance to 'roles'.
+  // Advance to roles when auth completes
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user && (step === 'auth' || step === 'email_otp')) {
@@ -216,16 +216,17 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
     return () => subscription.unsubscribe();
   }, [step]);
 
+  // ─── PERMISSION HANDLERS ───
+
   const handleRoleContinue = () => {
-    if (activeRoleIdx !== null) {
-      setPersona(ROLES[activeRoleIdx].id);
-      setStep('cam_perm');
-    }
+    setPersona(ROLES[activeRoleIdx].id);
+    setStep('cam_perm');
   };
 
   const requestCamera = async () => {
     try {
-      await CapCamera.requestPermissions();
+      const result = await CapCamera.requestPermissions();
+      if (result.camera === 'denied') { setCamDenied(true); return; }
     } catch (e) { console.log(e); }
     setStep('loc_perm');
   };
@@ -237,55 +238,118 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
     setStep('notif_perm');
   };
 
-  const handleFinish = async () => {
+  const handleNotifications = async () => {
     try {
-      if (Capacitor.isNativePlatform()) {
-        await PushNotifications.requestPermissions();
-      }
-    } catch (e) {
-      console.log(e);
-    }
+      if (Capacitor.isNativePlatform()) await PushNotifications.requestPermissions();
+    } catch (e) { console.log(e); }
     setStep('celebration');
   };
 
-  const handleSkipFinish = () => {
-    setStep('celebration');
+  // ─── CAROUSEL SCROLL HANDLER ───
+
+  const handleCarouselScroll = () => {
+    if (!carouselRef.current) return;
+    const el = carouselRef.current;
+    const page = Math.round(el.scrollLeft / el.clientWidth);
+    setActiveRoleIdx(Math.min(Math.max(page, 0), 2));
   };
+
+  useEffect(() => {
+    if (step === 'roles' && carouselRef.current) {
+      // Scroll to middle page (pre-selected)
+      carouselRef.current.scrollTo({ left: carouselRef.current.clientWidth, behavior: 'instant' as ScrollBehavior });
+    }
+  }, [step]);
 
   if (!isOpen) return null;
 
+  // ─── RENDER ───
+
   return (
-    <div className="fixed inset-0 z-[100] bg-[#080808] text-[#F0EBE3]" style={{ fontFamily: 'Inter, sans-serif' }}>
+    <div className="fixed inset-0 z-[100] bg-[#080808] text-[#F0EBE3] overflow-hidden" style={{ fontFamily: "'Inter', 'DM Sans', sans-serif" }}>
       <AnimatePresence mode="wait">
-        
-        {/* SCREEN 1: AUTH */}
+
+        {/* ═══════════════════════════════════════ */}
+        {/* SCREEN 1 — THE OPENING (Auth)           */}
+        {/* ═══════════════════════════════════════ */}
         {step === 'auth' && (
-          <motion.div key="auth" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col h-full items-center p-6">
-            <div className="flex-1 flex items-center justify-center">
-              <h1 className="font-display text-[64px] tracking-widest text-white">APEX</h1>
+          <motion.div key="auth" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="relative flex flex-col h-full w-full">
+            {/* Layer 1: Full-bleed photograph */}
+            <div className="absolute inset-0">
+              <img src="/auth-bg.jpg" alt="" className="w-full h-full object-cover" />
             </div>
-            
-            <div className="w-full max-w-sm space-y-4 mb-8">
-              <button onClick={handleGoogleSignIn} disabled={isAuthLoading} className="w-full h-12 bg-white text-black rounded-full flex items-center justify-center gap-3 font-medium text-[15px] hover:bg-gray-100 transition-colors">
+            {/* Layer 2: Gradient bottom merge */}
+            <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, transparent 55%, #080808 88%)' }} />
+
+            {/* Layer 3: APEX wordmark */}
+            <div className="relative z-10 flex-1 flex flex-col items-center justify-center" style={{ paddingTop: '30%' }}>
+              <motion.h1
+                className="font-display text-[88px] tracking-[8px] text-[#F0EBE3] leading-none"
+                initial={{ opacity: 0, y: -40 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, ease: EASE_OUT_EXPO as any }}
+                style={{ textShadow: '0 2px 20px rgba(255,69,0,0.16)' }}
+              >
+                APEX
+              </motion.h1>
+
+              {/* Layer 4: Tagline */}
+              <motion.p
+                className="mt-3 text-[14px] tracking-[2px] text-[#F0EBE3]/60"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 1.2, duration: 0.4 }}
+                style={{ fontFamily: "'DM Sans', sans-serif" }}
+              >
+                Every street. Every find. Every win.
+              </motion.p>
+            </div>
+
+            {/* Layer 5: Auth buttons */}
+            <div className="relative z-10 px-6 pb-8 space-y-3">
+              {/* Google button */}
+              <motion.button
+                onClick={handleGoogleSignIn}
+                disabled={isAuthLoading}
+                whileTap={{ scale: 0.97 }}
+                className="w-full h-14 rounded-xl flex items-center justify-center gap-3 transition-colors"
+                style={{ background: '#F0EBE3', fontFamily: "'DM Sans', sans-serif" }}
+              >
                 <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="w-5 h-5" />
-                Continue with Google
-              </button>
-              
-              <button onClick={() => setStep('email_input')} disabled={isAuthLoading} className="w-full h-12 border border-[#2C2C2C] text-white rounded-full flex items-center justify-center gap-3 font-medium text-[15px] hover:bg-[#1A1A1A] transition-colors">
-                <Mail className="w-5 h-5" />
-                Continue with Email
-              </button>
-              
-              <p className="text-center text-[#9A9088] text-[12px] mt-6">
-                By continuing you agree to our <span className="underline cursor-pointer">Terms of Service</span> and <span className="underline cursor-pointer">Privacy Policy</span>
+                <span className="text-[#1A1A1A] font-semibold text-[15px]">Continue with Google</span>
+              </motion.button>
+
+              {/* Email button */}
+              <motion.button
+                onClick={() => setStep('email_input')}
+                disabled={isAuthLoading}
+                whileTap={{ scale: 0.97 }}
+                className="w-full h-14 rounded-xl flex items-center justify-center gap-3 transition-colors"
+                style={{ background: 'transparent', border: '1.5px solid #2C2C2C', fontFamily: "'DM Sans', sans-serif" }}
+              >
+                <Mail className="w-5 h-5 text-[#F0EBE3]/70" />
+                <span className="text-[#F0EBE3]/80 font-medium text-[15px]">Continue with Email</span>
+              </motion.button>
+
+              {/* Error */}
+              {authError && <p className="text-[#FF4500] text-sm text-center">{authError}</p>}
+
+              {/* Legal text */}
+              <p className="text-center text-[11px] mt-4" style={{ color: '#9A9088', fontFamily: "'DM Sans', sans-serif" }}>
+                By continuing, you agree to our{' '}
+                <span className="text-[#FF4500] cursor-pointer">Terms</span> and{' '}
+                <span className="text-[#FF4500] cursor-pointer">Privacy Policy</span>
               </p>
             </div>
           </motion.div>
         )}
 
-        {/* EMAIL INPUT */}
+        {/* ═══════════════════════════════════════ */}
+        {/* EMAIL INPUT                             */}
+        {/* ═══════════════════════════════════════ */}
         {step === 'email_input' && (
-          <motion.div key="email_input" initial={{ x: 300, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -300, opacity: 0 }} className="flex flex-col h-full p-6 max-w-sm mx-auto w-full">
+          <motion.div key="email_input" initial={{ x: 300, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -300, opacity: 0 }}
+            className="flex flex-col h-full p-6 max-w-sm mx-auto w-full">
             <button onClick={() => setStep('auth')} className="mt-8 text-[#9A9088]"><ChevronLeft className="w-8 h-8" /></button>
             <h2 className="font-display text-[32px] mt-8 mb-4">ENTER EMAIL</h2>
             <form onSubmit={handleEmailSend} className="space-y-4">
@@ -299,9 +363,12 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
           </motion.div>
         )}
 
-        {/* EMAIL OTP */}
+        {/* ═══════════════════════════════════════ */}
+        {/* EMAIL OTP                               */}
+        {/* ═══════════════════════════════════════ */}
         {step === 'email_otp' && (
-          <motion.div key="email_otp" initial={{ x: 300, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -300, opacity: 0 }} className="flex flex-col h-full p-6 max-w-sm mx-auto w-full">
+          <motion.div key="email_otp" initial={{ x: 300, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -300, opacity: 0 }}
+            className="flex flex-col h-full p-6 max-w-sm mx-auto w-full">
             <button onClick={() => setStep('email_input')} className="mt-8 text-[#9A9088]"><ChevronLeft className="w-8 h-8" /></button>
             <h2 className="font-display text-[32px] mt-8 mb-2">VERIFY EMAIL</h2>
             <p className="text-[#9A9088] text-sm mb-8">Code sent to {emailInput}</p>
@@ -315,126 +382,331 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
           </motion.div>
         )}
 
-        {/* SCREEN 2: ROLE SELECTION */}
+        {/* ═══════════════════════════════════════ */}
+        {/* SCREEN 2 — ROLE SELECTION (Carousel)    */}
+        {/* ═══════════════════════════════════════ */}
         {step === 'roles' && (
-          <motion.div key="roles" initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }} className="flex flex-col h-full p-6 max-w-md mx-auto w-full pt-16">
-            <h2 className="font-display text-[44px] text-center text-white mb-2 leading-none">WHY ARE YOU HERE?</h2>
-            <p className="text-center text-[#9A9088] text-[14px] mb-8">This shapes your entire Apex experience.</p>
-            <div className="space-y-3 flex-1">
-              {ROLES.map((role, idx) => {
-                const Icon = role.icon;
-                const isSelected = activeRoleIdx === idx;
-                return (
-                  <motion.div key={role.id} onClick={() => setActiveRoleIdx(idx)}
-                    animate={{ scale: isSelected ? 1.03 : 1 }}
-                    className={`p-4 rounded-2xl flex items-center gap-4 cursor-pointer relative overflow-hidden transition-colors ${isSelected ? 'bg-[#1A1A1A]' : 'bg-[#0F0F0F] hover:bg-[#151515]'}`}
-                    style={{ border: isSelected ? '1px solid rgba(255,69,0,0.5)' : '1px solid rgba(255,255,255,0.05)', boxShadow: isSelected ? '0 0 20px rgba(255,69,0,0.1)' : 'none' }}>
-                    {isSelected && <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#FF4500]" />}
-                    <div className="w-[60px] h-[60px] shrink-0 bg-black/40 rounded-xl flex items-center justify-center">
-                      <Icon className={`w-8 h-8 ${isSelected ? 'text-[#FF4500]' : 'text-[#F0EBE3]'}`} />
-                    </div>
-                    <div>
-                      <h3 className="font-display text-[20px] text-white tracking-wider">{role.name}</h3>
-                      <p className="text-[13px] text-[#9A9088] leading-snug pr-2">{role.desc}</p>
-                    </div>
-                  </motion.div>
-                );
-              })}
-            </div>
-            <AnimatePresence>
-              {activeRoleIdx !== null && (
-                <motion.button initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 50, opacity: 0 }}
-                  onClick={handleRoleContinue} className="w-full h-14 bg-[#FF4500] text-white font-display text-xl tracking-wider rounded-xl mb-8">
-                  CONTINUE
-                </motion.button>
-              )}
-            </AnimatePresence>
-          </motion.div>
-        )}
-
-        {/* SCREEN 3: CAMERA PERMISSION */}
-        {step === 'cam_perm' && (
-          <motion.div key="cam_perm" initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }} className="flex flex-col h-full items-center text-center p-6 max-w-md mx-auto w-full pt-12">
-            <div className="h-[40%] w-full flex items-center justify-center relative">
-              <CameraIllustration />
-            </div>
-            <h2 className="font-display text-[36px] text-white leading-none mt-8 mb-4">POINT. SCAN. COLLECT.</h2>
-            <p className="text-[#9A9088] text-[14px] max-w-[300px]">
-              Apex needs camera access to photograph real cars and identify them using AI. Without this, the app cannot work.
-            </p>
-            <div className="flex-1" />
-            <button onClick={requestCamera} className="w-full h-14 bg-[#FF4500] text-white font-display text-xl tracking-wider rounded-xl mb-8">
-              ENABLE CAMERA
-            </button>
-          </motion.div>
-        )}
-
-        {/* SCREEN 4: LOCATION PERMISSION */}
-        {step === 'loc_perm' && (
-          <motion.div key="loc_perm" initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }} className="flex flex-col h-full items-center text-center p-6 max-w-md mx-auto w-full pt-12">
-            <div className="h-[40%] w-full flex items-center justify-center relative">
-              <CityMapIllustration />
-            </div>
-            <h2 className="font-display text-[36px] text-white leading-none mt-8 mb-4">YOUR CITY IS FULL OF RARE FINDS.</h2>
-            <p className="text-[#9A9088] text-[14px] max-w-[300px]">
-              Location lets Apex calculate how rare a car is in your specific area, show you active hunts nearby, and place your discoveries on the community map. Your exact location is never stored or shared.
-            </p>
-            <div className="flex-1" />
-            <div className="w-full space-y-3 mb-6">
-              <button onClick={() => requestLocation(true)} className="w-full h-14 bg-[#FF4500] text-white font-display text-xl tracking-wider rounded-xl">
-                ENABLE PRECISE LOCATION
-              </button>
-              <button onClick={() => requestLocation(false)} className="w-full h-12 border border-[#2C2C2C] text-white font-display text-lg tracking-wider rounded-xl">
-                USE APPROXIMATE LOCATION
-              </button>
-            </div>
-            <p className="text-[#9A9088] text-[10px] mb-2 max-w-[280px]">
-              Location data is blurred before storage. Hunt locations are delayed 15 minutes.
-            </p>
-          </motion.div>
-        )}
-
-        {/* SCREEN 5: NOTIFICATIONS */}
-        {step === 'notif_perm' && (
-          <motion.div key="notif_perm" initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }} className="flex flex-col h-full items-center text-center p-6 max-w-md mx-auto w-full pt-12">
-            <div className="h-[40%] w-full flex items-center justify-center relative">
-              <NotificationIllustration />
-            </div>
-            <h2 className="font-display text-[36px] text-white leading-none mt-8 mb-4">DON'T MISS A HUNT.</h2>
-            <p className="text-[#9A9088] text-[14px] max-w-[300px]">
-              Apex only notifies you when something rare appears nearby or a hunt goes live. No spam. No irrelevant alerts.
-            </p>
-            <div className="flex-1" />
-            <div className="w-full space-y-3 mb-8">
-              <button onClick={handleFinish} className="w-full h-14 bg-[#FF4500] text-white font-display text-xl tracking-wider rounded-xl">
-                ENABLE NOTIFICATIONS
-              </button>
-              <button onClick={handleSkipFinish} className="w-full h-12 text-[#9A9088] font-medium text-[14px]">
-                Maybe Later
-              </button>
-            </div>
-          </motion.div>
-        )}
-
-        {/* CELEBRATION */}
-        {step === 'celebration' && (
-          <motion.div key="celebration" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col h-full items-center justify-center relative">
-            <motion.div
-              initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.2, type: 'spring', damping: 12 }}
-              onAnimationComplete={() => {
-                confetti({ particleCount: 50, spread: 100, origin: { y: 0.5 }, colors: ['#FF4500', '#FFA500', '#FFFFFF'], disableForReducedMotion: true });
-                setTimeout(() => {
-                  completeOnboarding();
-                  onClose();
-                }, 2500);
-              }}
+          <motion.div key="roles" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="relative h-full w-full">
+            {/* Horizontal paged carousel */}
+            <div
+              ref={carouselRef}
+              onScroll={handleCarouselScroll}
+              className="h-full w-full flex overflow-x-auto snap-x snap-mandatory scrollbar-hide"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}
             >
-              <h1 className="font-display text-[64px] text-white tracking-widest text-center">WELCOME TO<br/><span className="text-[#FF4500]">APEX</span></h1>
-            </motion.div>
+              {ROLES.map((role, idx) => (
+                <div key={role.id} className="h-full min-w-full w-full snap-center relative flex-shrink-0">
+                  {/* Background gradient instead of photo — ambient color per role */}
+                  <div className="absolute inset-0" style={{
+                    background: idx === 0
+                      ? 'radial-gradient(ellipse at 50% 40%, rgba(255,69,0,0.08) 0%, #080808 70%)'
+                      : idx === 1
+                        ? 'radial-gradient(ellipse at 50% 40%, rgba(255,106,0,0.08) 0%, #080808 70%)'
+                        : 'radial-gradient(ellipse at 50% 40%, rgba(255,165,0,0.06) 0%, #080808 70%)'
+                  }} />
+
+                  {/* Role content */}
+                  <div className="absolute bottom-[200px] left-7 right-7 z-10">
+                    <div className="flex items-center gap-3 mb-2">
+                      {activeRoleIdx === idx && (
+                        <motion.div
+                          className="w-[3px] h-12 bg-[#FF4500] rounded-full"
+                          initial={{ x: -30, opacity: 0 }}
+                          animate={{ x: 0, opacity: 1 }}
+                          transition={{ duration: 0.3 }}
+                        />
+                      )}
+                      <h2 className="font-display text-[72px] text-[#F0EBE3] leading-none tracking-[4px]">
+                        {role.title}
+                      </h2>
+                    </div>
+                    <p className="text-[16px] text-[#F0EBE3]/75 leading-relaxed whitespace-pre-line ml-[15px]" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+                      {role.desc}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Fixed overlay: label + dots + CTA */}
+            <div className="absolute inset-0 pointer-events-none flex flex-col items-center justify-between z-20">
+              {/* Top label */}
+              <p className="mt-12 text-[11px] tracking-[3px] font-medium text-[#F0EBE3]/50" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+                CHOOSE YOUR ROLE
+              </p>
+
+              <div className="w-full px-6 pb-8 pointer-events-auto space-y-4">
+                {/* Dot indicator */}
+                <div className="flex items-center justify-center gap-2 mb-4">
+                  {ROLES.map((_, idx) => (
+                    <motion.div
+                      key={idx}
+                      className="h-2 rounded-full"
+                      animate={{
+                        width: activeRoleIdx === idx ? 24 : 8,
+                        backgroundColor: activeRoleIdx === idx ? '#F0EBE3' : '#2C2C2C',
+                      }}
+                      transition={{ duration: 0.2 }}
+                    />
+                  ))}
+                </div>
+
+                {/* Continue CTA */}
+                <motion.button
+                  onClick={handleRoleContinue}
+                  whileTap={{ scale: 0.96 }}
+                  className="w-full h-14 rounded-xl text-[#F0EBE3] font-display text-[22px] tracking-[2px]"
+                  style={{ background: '#FF4500', boxShadow: GLOW_ORANGE }}
+                >
+                  {ROLES[activeRoleIdx].ctaLabel}
+                </motion.button>
+              </div>
+            </div>
           </motion.div>
+        )}
+
+        {/* ═══════════════════════════════════════ */}
+        {/* SCREEN 3 — CAMERA PERMISSION            */}
+        {/* ═══════════════════════════════════════ */}
+        {step === 'cam_perm' && (
+          <motion.div key="cam_perm" initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }}
+            className="flex flex-col h-full items-center justify-center text-center p-6 max-w-md mx-auto w-full">
+            <ApertureIris />
+
+            <div className="mt-10 mb-6">
+              {['POINT.', 'SCAN.', 'COLLECT.'].map((word, i) => (
+                <motion.span
+                  key={word}
+                  className="font-display text-[52px] text-[#F0EBE3] inline-block mr-3"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 + i * 0.3, duration: 0.25, ease: EASE_OUT_EXPO as any }}
+                >
+                  {word}
+                </motion.span>
+              ))}
+            </div>
+
+            <motion.p
+              className="text-[15px] text-[#9A9088] max-w-[280px]"
+              style={{ fontFamily: "'DM Sans', sans-serif" }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.5, duration: 0.6 }}
+            >
+              Apex needs your camera to photograph real cars. Your photos stay on your device unless you post them.
+            </motion.p>
+
+            <div className="flex-1" />
+
+            <div className="w-full space-y-2 mb-8">
+              <motion.button
+                onClick={requestCamera}
+                whileTap={{ scale: 0.96 }}
+                className="w-full h-14 bg-[#FF4500] text-white font-display text-xl tracking-wider rounded-xl"
+                style={{ boxShadow: GLOW_ORANGE }}
+              >
+                {camDenied ? 'OPEN SETTINGS' : 'ENABLE CAMERA'}
+              </motion.button>
+              {camDenied && (
+                <p className="text-[12px] text-[#9A9088] text-center" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+                  Camera is required to use Apex.
+                </p>
+              )}
+            </div>
+          </motion.div>
+        )}
+
+        {/* ═══════════════════════════════════════ */}
+        {/* SCREEN 4 — LOCATION PERMISSION          */}
+        {/* ═══════════════════════════════════════ */}
+        {step === 'loc_perm' && (
+          <motion.div key="loc_perm" initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }}
+            className="flex flex-col h-full items-center justify-center text-center p-6 max-w-md mx-auto w-full">
+            <GpsCrosshair />
+
+            <h2 className="font-display text-[46px] text-white leading-none mt-10 mb-4">
+              WHERE YOU ARE<br />CHANGES EVERYTHING.
+            </h2>
+            <p className="text-[15px] text-[#9A9088] max-w-[280px]" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+              Local rarity is calculated from your city. A car that's everywhere in Tokyo might be legendary where you are.
+            </p>
+
+            <div className="flex-1" />
+
+            <div className="w-full space-y-3 mb-8">
+              <motion.button
+                onClick={() => requestLocation(true)}
+                whileTap={{ scale: 0.96 }}
+                className="w-full h-14 bg-[#FF4500] text-white font-display text-xl tracking-wider rounded-xl"
+                style={{ boxShadow: GLOW_ORANGE }}
+              >
+                ENABLE LOCATION
+              </motion.button>
+              <button
+                onClick={() => requestLocation(false)}
+                className="w-full text-[#9A9088] text-[14px] underline py-2"
+                style={{ fontFamily: "'DM Sans', sans-serif" }}
+              >
+                Approximate location only →
+              </button>
+            </div>
+          </motion.div>
+        )}
+
+        {/* ═══════════════════════════════════════ */}
+        {/* SCREEN 5 — NOTIFICATIONS                */}
+        {/* ═══════════════════════════════════════ */}
+        {step === 'notif_perm' && (
+          <motion.div key="notif_perm" initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }}
+            className="flex flex-col h-full items-center justify-center text-center p-6 max-w-md mx-auto w-full">
+            <NotificationBell />
+
+            <h2 className="font-display text-[52px] text-white leading-none mt-10 mb-4">
+              HUNTS HAPPEN FAST.
+            </h2>
+            <p className="text-[15px] text-[#9A9088] max-w-[280px]" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+              We alert you when a rare car appears nearby. Nothing else. Miss a hunt, miss the points.
+            </p>
+
+            <div className="flex-1" />
+
+            <div className="w-full space-y-3 mb-8">
+              <motion.button
+                onClick={handleNotifications}
+                whileTap={{ scale: 0.96 }}
+                className="w-full h-14 bg-[#FF4500] text-white font-display text-xl tracking-wider rounded-xl"
+                style={{ boxShadow: GLOW_ORANGE }}
+              >
+                ENABLE NOTIFICATIONS
+              </motion.button>
+              <button
+                onClick={() => setStep('celebration')}
+                className="w-full text-[#9A9088] text-[14px] py-2"
+                style={{ fontFamily: "'DM Sans', sans-serif" }}
+              >
+                I'll miss hunts (skip)
+              </button>
+            </div>
+          </motion.div>
+        )}
+
+        {/* ═══════════════════════════════════════ */}
+        {/* SCREEN 6 — CELEBRATION                  */}
+        {/* ═══════════════════════════════════════ */}
+        {step === 'celebration' && (
+          <CelebrationScreen
+            role={ROLES[activeRoleIdx]}
+            onEnter={() => { completeOnboarding(); onClose(); }}
+          />
         )}
 
       </AnimatePresence>
     </div>
+  );
+};
+
+// ─── CELEBRATION SCREEN (Separate for clean state management) ───
+
+const CelebrationScreen: React.FC<{ role: typeof ROLES[number]; onEnter: () => void }> = ({ role, onEnter }) => {
+  const [phase, setPhase] = useState(0); // 0=black, 1=flash, 2=welcome, 3=role, 4=chips, 5=cta
+
+  useEffect(() => {
+    const t1 = setTimeout(() => setPhase(1), 200);    // Orange flash
+    const t2 = setTimeout(() => setPhase(2), 660);    // Welcome drops
+    const t3 = setTimeout(() => setPhase(3), 760);    // Role pops
+    const t4 = setTimeout(() => {                      // Particles + confetti
+      setPhase(4);
+      confetti({
+        particleCount: 40,
+        spread: 180,
+        origin: { y: 0.5, x: 0.5 },
+        colors: ['#FF4500', '#FFA500', '#F0EBE3'],
+        disableForReducedMotion: true,
+      });
+    }, 900);
+    const t5 = setTimeout(() => setPhase(5), 2000);   // CTA
+    const t6 = setTimeout(() => onEnter(), 5200);     // Auto-advance
+
+    return () => { [t1, t2, t3, t4, t5, t6].forEach(clearTimeout); };
+  }, []);
+
+  return (
+    <motion.div key="celebration" className="relative flex flex-col h-full items-center justify-center bg-[#080808]">
+      {/* Orange flash overlay */}
+      <AnimatePresence>
+        {phase >= 1 && phase < 2 && (
+          <motion.div
+            className="absolute inset-0 z-50"
+            style={{ background: '#FF4500' }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.18, ease: 'easeOut' }}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* WELCOME text */}
+      {phase >= 2 && (
+        <motion.h1
+          className="font-display text-[80px] text-[#F0EBE3] tracking-widest leading-none"
+          initial={{ y: -80, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={SPRING_HEAVY}
+        >
+          WELCOME
+        </motion.h1>
+      )}
+
+      {/* Role name */}
+      {phase >= 3 && (
+        <motion.h2
+          className="font-display text-[48px] text-[#FF4500] tracking-wider leading-none mt-2"
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={SPRING_POP}
+        >
+          {role.title.replace('THE ', '').replace('FOR ', '')}.
+        </motion.h2>
+      )}
+
+      {/* Stat chips */}
+      {phase >= 4 && (
+        <div className="flex items-center gap-3 mt-8">
+          {[
+            { icon: '⚡', label: 'LEVEL 1' },
+            { icon: '🔥', label: '0 STREAK' },
+            { icon: '🏆', label: 'UNRANKED' },
+          ].map((chip, i) => (
+            <motion.div
+              key={chip.label}
+              className="px-3 py-1.5 rounded-lg text-[13px] font-medium"
+              style={{ background: '#1A1A1A', color: '#F0EBE3', fontFamily: "'DM Sans', sans-serif" }}
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: i * 0.12, ...SPRING_SETTLE }}
+            >
+              {chip.icon} {chip.label}
+            </motion.div>
+          ))}
+        </div>
+      )}
+
+      {/* ENTER APEX CTA */}
+      {phase >= 5 && (
+        <motion.button
+          onClick={onEnter}
+          className="absolute bottom-12 left-6 right-6 h-14 rounded-xl font-display text-[22px] tracking-[2px] text-[#F0EBE3]"
+          style={{ background: '#FF4500', boxShadow: GLOW_ORANGE }}
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={SPRING_SETTLE}
+          whileTap={{ scale: 0.96 }}
+        >
+          ENTER APEX →
+        </motion.button>
+      )}
+    </motion.div>
   );
 };

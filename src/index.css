@@ -211,8 +211,8 @@
 }
 
 /* ═══ SCROLLBAR HIDE ═══ */
-.no-scrollbar::-webkit-scrollbar { display: none; }
-.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar, .scrollbar-hide::-webkit-scrollbar { display: none; }
+.no-scrollbar, .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 
 /* ═══ SAFE AREA ═══ */
 .pb-safe { padding-bottom: env(safe-area-inset-bottom, 0px); }
