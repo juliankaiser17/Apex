@@ -388,6 +388,28 @@ export const UnboxingReveal: React.FC<UnboxingRevealProps> = ({ card, onComplete
                 className="absolute inset-0 pointer-events-none rounded-2xl bg-gradient-to-r from-transparent via-white/40 to-transparent z-30"
               />
 
+              {/* Floating "+XP" pill — rises and fades */}
+              <motion.div
+                className="absolute -top-16 left-1/2 z-40 pointer-events-none font-display text-[18px] tracking-wider px-4 py-1 rounded-full"
+                style={{ background: 'rgba(8,8,8,0.85)', color: '#FF4500', border: '1px solid rgba(255,69,0,0.3)' }}
+                initial={{ y: 20, opacity: 0, x: '-50%' }}
+                animate={{ y: -60, opacity: [0, 1, 1, 0] }}
+                transition={{ delay: 0.8, duration: 1.5, ease: 'easeOut' }}
+              >
+                +{card.xpEarned || 850} XP
+              </motion.div>
+
+              {/* Floating "ADDED TO GARAGE" pill */}
+              <motion.div
+                className="absolute -top-4 left-1/2 z-40 pointer-events-none font-display text-[14px] tracking-wider px-4 py-1 rounded-full whitespace-nowrap"
+                style={{ background: '#FF4500', color: '#F0EBE3' }}
+                initial={{ y: 30, opacity: 0, x: '-50%' }}
+                animate={{ y: -30, opacity: [0, 1, 1, 0] }}
+                transition={{ delay: 1.2, duration: 1.8, ease: 'easeOut' }}
+              >
+                ADDED TO GARAGE
+              </motion.div>
+
               {/* Main Collectible Card */}
               <ApexCollectibleCard card={card} showHolo={true} />
 

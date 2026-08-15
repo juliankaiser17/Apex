@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import { Heart, MessageSquare, Share2, Search, Zap, Crown, Flame, Award, Target, Flag, Globe } from 'lucide-react';
 import { useApexStore } from '../../store/useApexStore';
 import { RARITY_CONFIG } from '../../utils/rarity';
@@ -51,7 +52,7 @@ export const SocialScreen: React.FC = () => {
               return (
                 <div 
                   key={post.id}
-                  className="bg-[#111111] border border-white/10 rounded-xl overflow-hidden space-y-3"
+                  className="bg-[#111111] overflow-hidden space-y-3 border-b border-[#2C2C2C]"
                 >
                   {/* User Info Header */}
                   <div className="p-4 pb-0 flex items-center justify-between">
@@ -70,7 +71,7 @@ export const SocialScreen: React.FC = () => {
                   {/* Car Photo with Double Tap Like */}
                   <div 
                     onDoubleClick={() => toggleLikePost(post.id)}
-                    className="relative h-64 overflow-hidden cursor-pointer group bg-transparent"
+                    className="relative h-[280px] overflow-hidden cursor-pointer group bg-transparent"
                   >
                     <img src={post.card.imageUrl} alt={post.card.model} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                     <div className="absolute inset-0 bg-gradient-to-t from-[#080808] via-transparent to-transparent" />
@@ -92,7 +93,14 @@ export const SocialScreen: React.FC = () => {
                           post.isLiked ? 'text-[#FF2200] font-semibold' : 'text-[#9A9088] hover:text-[#F0EBE3]'
                         }`}
                       >
-                        <Heart className={`w-4 h-4 ${post.isLiked ? 'fill-[#FF2200]' : ''}`} />
+                        <motion.div
+                          key={`heart-${post.id}-${post.isLiked}`}
+                          initial={post.isLiked ? { scale: 1.5 } : { scale: 1 }}
+                          animate={{ scale: 1 }}
+                          transition={{ type: 'spring', damping: 10, stiffness: 280, mass: 0.8 }}
+                        >
+                          <Heart className={`w-4 h-4 ${post.isLiked ? 'fill-[#FF2200]' : ''}`} />
+                        </motion.div>
                         <span>{post.likesCount}</span>
                       </button>
 

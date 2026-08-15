@@ -383,12 +383,15 @@ export const ScannerModal: React.FC = () => {
               {/* Shutter Button (72px ring + 60px inner fill) */}
               <motion.button
                 onClick={handleShutterCapture}
-                whileTap={{ scale: 0.88 }}
-                className="w-[72px] h-[72px] rounded-full border-2 border-[#F0EBE3]/60 bg-[#080808] flex items-center justify-center glow-orange shrink-0"
+                whileTap={{ scale: 0.82, transition: { duration: 0.08 } }}
+                className="w-[72px] h-[72px] rounded-full border-2 border-[#F0EBE3]/50 bg-[#080808] flex items-center justify-center shrink-0"
               >
-                <div className="w-[60px] h-[60px] rounded-full bg-[#F0EBE3] flex items-center justify-center">
+                <motion.div
+                  className="w-[60px] h-[60px] rounded-full bg-[#F0EBE3]/90 flex items-center justify-center"
+                  whileTap={{ scale: 0.88, transition: { duration: 0.06 } }}
+                >
                   <Camera className="w-7 h-7 text-[#080808]" />
-                </div>
+                </motion.div>
               </motion.button>
 
               <div className="w-28" />
@@ -405,11 +408,28 @@ export const ScannerModal: React.FC = () => {
 
           {phase === 'analyzing' && (
             <div className="relative z-10 space-y-6">
-              {/* Radar Sweep Animation */}
-              <div className="relative w-36 h-36 mx-auto rounded-full border border-[#F0EBE3]/20 flex items-center justify-center p-2">
-                <div className="absolute inset-0 rounded-full border border-[#FF4500] animate-ping opacity-30" />
-                <div className="w-full h-full rounded-full border-t-2 border-r-2 border-[#FF4500] animate-radar" />
-                <RefreshCw className="w-10 h-10 text-[#FF4500] animate-spin" />
+              {/* Radar Sweep — Angular conic-gradient sweep */}
+              <div className="relative w-40 h-40 mx-auto flex items-center justify-center">
+                {/* Outer ring */}
+                <div className="absolute inset-0 rounded-full" style={{ background: 'rgba(240,235,227,0.15)', border: '1.5px solid rgba(240,235,227,0.4)' }} />
+                {/* Rotating sweep */}
+                <motion.div
+                  className="absolute inset-0 rounded-full"
+                  animate={{ rotate: 360 }}
+                  transition={{ repeat: Infinity, duration: 1.4, ease: 'linear' }}
+                  style={{
+                    background: 'conic-gradient(from 0deg, transparent 0deg, transparent 240deg, rgba(255,69,0,0.4) 300deg, rgba(255,69,0,0) 360deg)',
+                    maskImage: 'radial-gradient(circle, transparent 30%, black 31%, black 98%, transparent 100%)',
+                    WebkitMaskImage: 'radial-gradient(circle, transparent 30%, black 31%, black 98%, transparent 100%)'
+                  }}
+                />
+                {/* Crosshair lines */}
+                <div className="absolute w-4 h-[1px] bg-[#F0EBE3]/30 left-4 top-1/2" />
+                <div className="absolute w-4 h-[1px] bg-[#F0EBE3]/30 right-4 top-1/2" />
+                <div className="absolute h-4 w-[1px] bg-[#F0EBE3]/30 top-4 left-1/2" />
+                <div className="absolute h-4 w-[1px] bg-[#F0EBE3]/30 bottom-4 left-1/2" />
+                {/* Center dot */}
+                <div className="w-2 h-2 rounded-full bg-[#FF4500] z-10" />
               </div>
 
               <div>
@@ -419,8 +439,14 @@ export const ScannerModal: React.FC = () => {
                 </p>
               </div>
 
-              <div className="w-64 h-1.5 bg-[#1A1A1A] rounded-full overflow-hidden mx-auto border border-[#2C2C2C]">
-                <div className="h-full bg-[#FF4500] rounded-full animate-pulse w-4/5" />
+              {/* Thin progress bar at bottom */}
+              <div className="w-64 h-[2px] bg-[#1A1A1A] rounded-full overflow-hidden mx-auto">
+                <motion.div
+                  className="h-full bg-[#FF4500] rounded-full"
+                  initial={{ width: '0%' }}
+                  animate={{ width: '90%' }}
+                  transition={{ duration: 6, ease: 'linear' }}
+                />
               </div>
             </div>
           )}
