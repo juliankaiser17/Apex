@@ -7,7 +7,7 @@ import { sounds } from '../../utils/audio';
 import confetti from 'canvas-confetti';
 import { requestRealLocationPermission } from '../../utils/geolocation';
 import { Camera as CapCamera } from '@capacitor/camera';
-import { supabase } from '../../lib/supabase';
+import { supabase, OAUTH_REDIRECT_URL } from '../../lib/supabase';
 import { Capacitor } from '@capacitor/core';
 import { GoogleSignIn } from '@capawesome/capacitor-google-sign-in';
 import { PushNotifications } from '@capacitor/push-notifications';
@@ -122,7 +122,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
           throw new Error("No ID Token found");
         }
       } else {
-        await supabase.auth.signInWithOAuth({ provider: 'google' });
+        await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: OAUTH_REDIRECT_URL } });
       }
     } catch (err: any) {
       console.error(err);
