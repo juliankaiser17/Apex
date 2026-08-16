@@ -49,6 +49,10 @@ export const App: React.FC = () => {
               }
             });
           }
+          // Sanitize URL hash to prevent access/refresh tokens from lingering in browser history or referrer headers
+          if (typeof window !== 'undefined' && window.location.hash && window.location.hash.includes('access_token=')) {
+            window.history.replaceState(null, '', window.location.pathname);
+          }
         });
       } else {
         // Prevent flashing login screen during OAuth redirect processing
@@ -64,6 +68,9 @@ export const App: React.FC = () => {
       if (_event === 'INITIAL_SESSION') return;
       if (session?.user) {
         useApexStore.getState().initializeSession(session.user.id).then(() => {
+          if (typeof window !== 'undefined' && window.location.hash && window.location.hash.includes('access_token=')) {
+            window.history.replaceState(null, '', window.location.pathname);
+          }
           setIsAuthReady(true);
         });
       } else {

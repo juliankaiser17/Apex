@@ -243,7 +243,7 @@ export const useApexStore = create<ApexState>((set, get) => ({
     localStorage.removeItem('apex_garage_cards');
 
     try {
-      await supabase.auth.signOut();
+      await supabase.auth.signOut({ scope: 'global' });
     } catch (e) {
       console.warn('Signout error', e);
     }
