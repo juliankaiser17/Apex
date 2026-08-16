@@ -31,10 +31,17 @@ export const TabBar: React.FC = () => {
                 {/* Scanner button — the heartbeat */}
                 <motion.button
                   onClick={() => setScannerOpen(true)}
-                  whileTap={{ scale: 0.88 }}
+                  whileTap={{ scale: 0.82, transition: { duration: 0.08 } }}
                   className="relative w-[76px] h-[76px] rounded-full flex items-center justify-center"
-                  style={{ background: '#080808', border: '2px solid #FF4500' }}
+                  style={{ background: '#080808', border: '2px solid #FF4500', boxShadow: '0 0 20px rgba(255,69,0,0.3), 0 0 40px rgba(255,69,0,0.1)' }}
                 >
+                  {/* Pulsing glow ring */}
+                  <motion.div
+                    className="absolute inset-[-4px] rounded-full"
+                    style={{ border: '1.5px solid rgba(255,69,0,0.4)' }}
+                    animate={{ scale: [1, 1.15, 1], opacity: [0.6, 0, 0.6] }}
+                    transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
+                  />
                   {/* Inner fill */}
                   <div className="w-[60px] h-[60px] rounded-full flex items-center justify-center"
                     style={{ background: '#FF4500' }}>

@@ -11,7 +11,7 @@ export const HeaderBar: React.FC = () => {
     <>
       {/* Top HUD Bar — Solid dark, no backdrop-blur for 60fps */}
       <header className="sticky top-0 z-30 w-full pt-safe border-b border-white/5"
-        style={{ background: '#080808' }}>
+        style={{ background: 'linear-gradient(to bottom, #080808 60%, rgba(8,8,8,0.85))' }}>
         <div className="px-4 pt-3 pb-5">
           <div className="flex items-center justify-between">
             {/* Left: APEX wordmark (Clickable to go Home) */}

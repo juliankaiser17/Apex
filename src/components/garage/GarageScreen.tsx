@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import { Search, Grid, List, Filter, Plus } from 'lucide-react';
 import { useApexStore } from '../../store/useApexStore';
 import type { RarityTier } from '../../types/apex';
@@ -111,8 +112,11 @@ export const GarageScreen: React.FC = () => {
               const ovrScore = Math.min(99, Math.max(65, rawOvr));
 
               return (
-                <div
+                <motion.div
                   key={card.id}
+                  initial={{ opacity: 0, y: 30, scale: 0.92 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ type: 'spring', damping: 7, stiffness: 350, mass: 0.7, delay: filteredGarage.indexOf(card) * 0.06 }}
                   onClick={() => setSelectedCardForDetail(card)}
                   className={`group relative rounded-xl overflow-hidden border-2 ${rarityConf.borderClass} bg-black/40 backdrop-blur-md cursor-pointer hover:scale-[1.03] transition-all shadow-xl ${
                     isMythic ? 'animate-gradient-border shadow-[0_0_24px_rgba(255,34,0,0.4)]' : ''
@@ -164,7 +168,7 @@ export const GarageScreen: React.FC = () => {
                       <span className="text-[#FF4500] font-semibold">#{cardNumStr.slice(-4)}</span>
                     </div>
                   </div>
-                </div>
+                </motion.div>
               );
             })}
           </div>
