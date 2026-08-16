@@ -10,31 +10,35 @@ import type { CityLocation } from './CitySearchModal';
 import { Gta5SatelliteHud } from './Gta5SatelliteHud';
 import { sounds } from '../../utils/audio';
 
-// Custom Leaflet Icons for Rarity Pins
-const createCustomPinIcon = (color: string) => {
+// Custom Leaflet Icons for Rarity Pins — 52×64px with car thumbnail + rarity bar
+const createCustomPinIcon = (color: string, imageUrl?: string) => {
+  const safeImg = imageUrl || '';
   return L.divIcon({
     className: 'custom-pin',
     html: `
       <div style="
-        width: 36px;
-        height: 36px;
-        border-radius: 50%;
-        background: #111111;
-        border: 2.5px solid ${color};
-        box-shadow: 0 0 16px ${color};
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-weight: bold;
-        font-size: 16px;
-        cursor: pointer;
+        width: 52px; height: 64px; position: relative; cursor: pointer;
+        filter: drop-shadow(0 2px 6px rgba(0,0,0,0.5));
       ">
-        🚗
+        <div style="
+          width: 52px; height: 48px; border-radius: 10px;
+          background: #111111; border: 2px solid ${color};
+          overflow: hidden; position: relative;
+        ">
+          ${safeImg ? `<img src="${safeImg}" style="width:100%;height:36px;object-fit:cover;border-radius:7px 7px 0 0;" onerror="this.style.display='none'" />` : '<div style="width:100%;height:36px;background:#1A1A1A;display:flex;align-items:center;justify-content:center;font-size:20px;">🚗</div>'}
+          <div style="height:4px;width:100%;background:${color};position:absolute;bottom:0;left:0;"></div>
+        </div>
+        <div style="
+          width: 0; height: 0;
+          border-left: 8px solid transparent; border-right: 8px solid transparent;
+          border-top: 12px solid ${color};
+          margin: 0 auto; position: relative; top: -1px;
+        "></div>
       </div>
     `,
-    iconSize: [36, 36],
-    iconAnchor: [18, 18]
+    iconSize: [52, 64],
+    iconAnchor: [26, 64],
+    popupAnchor: [0, -64]
   });
 };
 
@@ -236,7 +240,7 @@ export const MapScreen: React.FC = () => {
           {/* Spot Markers */}
           {mapSpots.map((spot) => {
             const conf = RARITY_CONFIG[spot.rarity];
-            const icon = createCustomPinIcon(conf.color);
+            const icon = createCustomPinIcon(conf.color, spot.imageUrl);
             return (
               <Marker
                 key={spot.id}
