@@ -102,7 +102,7 @@ export const HomeScreen: React.FC = () => {
             <div className="flex items-center justify-between cursor-pointer" onClick={() => setQuestExpanded(!questExpanded)}>
               <div className="flex items-center gap-2">
                 <Zap className="w-4 h-4 text-[#FF4500]" />
-                <span className="font-display text-sm tracking-wider text-[#F0EBE3]">TODAY'S RESEARCH</span>
+                <span className="font-display text-sm tracking-wider text-[#F0EBE3]">DAILY SPOTLIGHT</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="flex items-center gap-1 bg-[#1A1A1A] px-2 py-0.5 rounded border border-[#2C2C2C]">

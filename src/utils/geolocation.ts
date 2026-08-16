@@ -1,9 +1,11 @@
 /**
  * Real Location & Geolocation Service for APEX
  * 
- * Requests user location permissions and generates an approximate location offset 
- * (~1.5km - 2.0km radius) for privacy while preserving local city accuracy.
+ * Requests user location permissions and resolves real city and country accurately
+ * across Android, iOS, and Web environments.
  */
+
+import { Geolocation } from '@capacitor/geolocation';
 
 export interface LocationPermissionResult {
   granted: boolean;
@@ -15,26 +17,22 @@ export interface LocationPermissionResult {
   country: string;
 }
 
-// Default fallback approximate center if GPS is denied or unavailable
+// Default fallback center if GPS is completely denied
 const DEFAULT_CENTER = {
-  latitude: 22.2950,
-  longitude: 114.1720,
-  city: 'Your City',
-  country: 'Local Area'
+  latitude: 35.6762,
+  longitude: 139.6503,
+  city: 'Tokyo',
+  country: 'Japan'
 };
 
-/**
- * Apply a random 1.5km - 2.0km privacy radius offset to raw GPS coordinates
- */
 export function offsetCoordinatesApprox(lat: number, lng: number): { latApprox: number; lngApprox: number } {
-  // Removing privacy offset to provide exact accuracy per user request
   return {
     latApprox: Number(lat.toFixed(5)),
     lngApprox: Number(lng.toFixed(5))
   };
 }
 
-// In-memory cache for reverse geocoding to prevent excessive third-party requests
+// In-memory cache for reverse geocoding
 const geocodeCache = new Map<string, { city: string; country: string; timestamp: number }>();
 
 /**
@@ -47,34 +45,57 @@ export async function reverseGeocodeCity(lat: number, lng: number): Promise<{ ci
     return { city: cached.city, country: cached.country };
   }
 
+  // 1. Primary fast provider: BigDataCloud Reverse Geocoding API
+  try {
+    const bdcUrl = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`;
+    const res = await fetch(bdcUrl);
+    if (res.ok) {
+      const data = await res.json();
+      const city = data.city || data.locality || data.principalSubdivision || data.localityInfo?.administrative?.[2]?.name || '';
+      const country = data.countryName || 'Global';
+      if (city && city.trim().length > 0) {
+        geocodeCache.set(cacheKey, { city: city.trim(), country, timestamp: Date.now() });
+        return { city: city.trim(), country };
+      }
+    }
+  } catch (e) {
+    console.warn('BigDataCloud geocode failed, trying fallback:', e);
+  }
+
+  // 2. Secondary fallback: OpenStreetMap Nominatim with User-Agent
   try {
     const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=10`, {
       headers: {
-        'Accept': 'application/json'
+        'Accept': 'application/json',
+        'User-Agent': 'APEX-Spotter-App/1.0'
       }
     });
     if (res.ok) {
       const data = await res.json();
       const addr = data.address || {};
-      const city = addr.city || addr.town || addr.village || addr.state_district || addr.county || 'Local Area';
+      const city = addr.city || addr.town || addr.municipality || addr.village || addr.state_district || addr.county || '';
       const country = addr.country || 'Global';
-      geocodeCache.set(cacheKey, { city, country, timestamp: Date.now() });
-      return { city, country };
+      if (city && city.trim().length > 0) {
+        geocodeCache.set(cacheKey, { city: city.trim(), country, timestamp: Date.now() });
+        return { city: city.trim(), country };
+      }
     }
   } catch (e) {
-    console.warn('Reverse geocoding fetch failed:', e);
+    console.warn('Nominatim geocode failed:', e);
   }
-  return { city: 'Local Area', country: 'Your Region' };
-}
 
-import { Geolocation } from '@capacitor/geolocation';
+  // 3. Fallback based on Timezone estimation if coordinates are valid
+  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+  const tzCity = tz.split('/')[1]?.replace(/_/g, ' ') || 'Global City';
+
+  return { city: tzCity, country: 'Local Region' };
+}
 
 /**
  * Request real device GPS location permission
  */
 export async function requestRealLocationPermission(): Promise<LocationPermissionResult> {
   try {
-    // 1. Check and Request Permissions natively
     let permStatus = await Geolocation.checkPermissions();
     if (permStatus.location !== 'granted') {
       permStatus = await Geolocation.requestPermissions();
@@ -84,9 +105,7 @@ export async function requestRealLocationPermission(): Promise<LocationPermissio
       throw new Error('Location permission denied');
     }
 
-    // 2. Get high-accuracy GPS natively (bypasses browser HTTPS restriction)
     const pos = await Geolocation.getCurrentPosition({ enableHighAccuracy: true, timeout: 8000 });
-    
     const lat = pos.coords.latitude;
     const lng = pos.coords.longitude;
     const approx = offsetCoordinatesApprox(lat, lng);
@@ -103,12 +122,14 @@ export async function requestRealLocationPermission(): Promise<LocationPermissio
   } catch (err: any) {
     console.warn('Native Location permission denied or unavailable:', err.message);
     const approx = offsetCoordinatesApprox(DEFAULT_CENTER.latitude, DEFAULT_CENTER.longitude);
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+    const tzCity = tz.split('/')[1]?.replace(/_/g, ' ') || 'Local Hub';
     return {
       granted: false,
       latitude: DEFAULT_CENTER.latitude,
       longitude: DEFAULT_CENTER.longitude,
       ...approx,
-      city: DEFAULT_CENTER.city,
+      city: tzCity,
       country: DEFAULT_CENTER.country
     };
   }

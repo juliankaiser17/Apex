@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Circle, CircleMarker, useMap } from 'react-leaflet';
 import L from 'leaflet';
-import { ShieldAlert, Crosshair, Eye, Search, Flame, ArrowLeft, MapPin } from 'lucide-react';
+import { ShieldAlert, Crosshair, Eye, Search, Flame, ArrowLeft, Globe } from 'lucide-react';
 import { useApexStore } from '../../store/useApexStore';
 import { RARITY_CONFIG } from '../../utils/rarity';
 import type { CarCard } from '../../types/apex';
@@ -9,6 +9,7 @@ import { CitySearchModal } from './CitySearchModal';
 import type { CityLocation } from './CitySearchModal';
 import { Gta5SatelliteHud } from './Gta5SatelliteHud';
 import { sounds } from '../../utils/audio';
+import { requestRealLocationPermission } from '../../utils/geolocation';
 
 // Custom Leaflet Icons for Rarity Pins — 52×64px with car thumbnail + rarity bar
 const createCustomPinIcon = (color: string, imageUrl?: string) => {
@@ -98,6 +99,22 @@ const GtaCameraController: React.FC<GtaCameraControllerProps> = ({ targetCity, o
   return null;
 };
 
+// Navigation controller for programmatic flyTo actions
+const MapNavigationController: React.FC<{
+  recenterTarget: { lat: number; lng: number; zoom?: number; timestamp: number } | null;
+}> = ({ recenterTarget }) => {
+  const map = useMap();
+  React.useEffect(() => {
+    if (!recenterTarget) return;
+    map.flyTo([recenterTarget.lat, recenterTarget.lng], recenterTarget.zoom || 15, {
+      duration: 1.5,
+      easeLinearity: 0.25
+    });
+    map.invalidateSize();
+  }, [recenterTarget, map]);
+  return null;
+};
+
 // Helper component to trigger Leaflet map invalidateSize on mount
 const MapInvalidator: React.FC = () => {
   const map = useMap();
@@ -131,42 +148,41 @@ export interface MapSpotPin extends CarCard {
   distance: string;
 }
 
-import { requestRealLocationPermission } from '../../utils/geolocation';
-
 export const MapScreen: React.FC = () => {
-  const { garage, activeHunts, user, updateUserProfile, locationDisplayMode, setLocationDisplayMode, setSelectedCardForDetail, setActiveTab, openHuntModal } = useApexStore();
+  const { garage, activeHunts, user, updateUserProfile, setSelectedCardForDetail, setActiveTab, openHuntModal } = useApexStore();
   const [selectedPin, setSelectedPin] = useState<MapSpotPin | null>(null);
   const [searchModalOpen, setSearchModalOpen] = useState(false);
   const [selectedCity, setSelectedCity] = useState<CityLocation | null>(null);
   const [gtaAnimationPhase, setGtaAnimationPhase] = useState<'ascent' | 'pan' | 'descent' | null>(null);
+  const [recenterTarget, setRecenterTarget] = useState<{ lat: number; lng: number; zoom?: number; timestamp: number } | null>(null);
 
   React.useEffect(() => {
-    // If user's latitude is 0 (hasn't been set or acquired), fetch it now
     if (user.latitude === 0) {
       requestRealLocationPermission().then((res) => {
-        if (res.granted) {
+        if (res.granted && res.city && res.city !== 'Local Area') {
           updateUserProfile({
             latitude: res.latitude,
             longitude: res.longitude,
             city: res.city,
+            country: res.country
           });
         }
       }).catch(err => console.warn('Location fetch failed in MapScreen:', err));
     }
   }, [user.latitude, updateUserProfile]);
 
-  const defaultCenter: [number, number] = [user.latitude || 20.5937, user.longitude || 78.9629];
+  const defaultCenter: [number, number] = [user.latitude || 35.6762, user.longitude || 139.6503];
 
   const mapSpots = useMemo<MapSpotPin[]>(() => {
     return garage.map((card, index) => ({
       ...card,
       id: `map-spot-${card.id}`,
-      lat: card.latApprox,
-      lng: card.lngApprox,
-      city: 'Unknown City',
+      lat: card.latApprox || (user.latitude ? user.latitude + (index % 3) * 0.005 : 35.6762),
+      lng: card.lngApprox || (user.longitude ? user.longitude + (index % 3) * 0.005 : 139.6503),
+      city: card.city || user.city || 'Radar Sector',
       distance: `${(0.4 + (index % 5) * 0.4).toFixed(1)} km away`
     }));
-  }, [garage]);
+  }, [garage, user.latitude, user.longitude, user.city]);
 
   const activeMatchingHunt = useMemo(() => {
     if (!selectedPin) return null;
@@ -182,7 +198,32 @@ export const MapScreen: React.FC = () => {
 
   const handleSelectCity = (city: CityLocation) => {
     setSelectedCity(city);
+    updateUserProfile({ city: city.name, country: city.country });
     setSearchModalOpen(false);
+  };
+
+  const handleRecenterGps = async () => {
+    sounds.playTargetLock();
+    setSelectedPin(null);
+    setSelectedCity(null);
+    try {
+      const res = await requestRealLocationPermission();
+      if (res.granted) {
+        updateUserProfile({
+          latitude: res.latitude,
+          longitude: res.longitude,
+          city: res.city,
+          country: res.country
+        });
+        setRecenterTarget({ lat: res.latitude, lng: res.longitude, zoom: 15, timestamp: Date.now() });
+      } else if (user.latitude && user.longitude) {
+        setRecenterTarget({ lat: user.latitude, lng: user.longitude, zoom: 15, timestamp: Date.now() });
+      }
+    } catch {
+      if (user.latitude && user.longitude) {
+        setRecenterTarget({ lat: user.latitude, lng: user.longitude, zoom: 15, timestamp: Date.now() });
+      }
+    }
   };
 
   return (
@@ -199,6 +240,7 @@ export const MapScreen: React.FC = () => {
         >
           <MapInvalidator />
           <AutoLocater userLat={user.latitude} userLng={user.longitude} />
+          <MapNavigationController recenterTarget={recenterTarget} />
           <TileLayer
             attribution='&copy; <a href="https://carto.com/">CartoDB</a>'
             url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
@@ -207,25 +249,21 @@ export const MapScreen: React.FC = () => {
           {/* User Location — 3-Ring Ripple Marker */}
           {user.latitude && user.longitude && (
             <>
-              {/* Outer ripple ring 1 */}
               <CircleMarker
                 center={[user.latitude, user.longitude]}
                 radius={24}
                 pathOptions={{ color: '#FF4500', fillColor: '#FF4500', fillOpacity: 0.06, weight: 1, className: 'animate-ripple-1' }}
               />
-              {/* Outer ripple ring 2 */}
               <CircleMarker
                 center={[user.latitude, user.longitude]}
                 radius={16}
                 pathOptions={{ color: '#FF4500', fillColor: '#FF4500', fillOpacity: 0.1, weight: 1, className: 'animate-ripple-2' }}
               />
-              {/* Outer ripple ring 3 */}
               <CircleMarker
                 center={[user.latitude, user.longitude]}
                 radius={10}
                 pathOptions={{ color: '#FF4500', fillColor: '#FF4500', fillOpacity: 0.15, weight: 1.5, className: 'animate-ripple-3' }}
               />
-              {/* Core dot */}
               <CircleMarker
                 center={[user.latitude, user.longitude]}
                 radius={5}
@@ -240,22 +278,19 @@ export const MapScreen: React.FC = () => {
             onAnimationPhaseChange={setGtaAnimationPhase}
           />
 
-          {/* Active Hunt Zone — Multi-layer animated rings */}
+          {/* Active Hunt Zone */}
           {activeHunts.map((hunt) => (
             <React.Fragment key={hunt.id}>
-              {/* Outer pulsing ring */}
               <Circle
                 center={[hunt.latApprox, hunt.lngApprox]}
                 radius={2500}
                 pathOptions={{ color: '#FF4500', fillColor: 'transparent', fillOpacity: 0, weight: 1, dashArray: '8 4', className: 'animate-hunt-ring' }}
               />
-              {/* Middle ring */}
               <Circle
                 center={[hunt.latApprox, hunt.lngApprox]}
                 radius={2000}
                 pathOptions={{ color: '#FF4500', fillColor: '#FF4500', fillOpacity: 0.08, weight: 1.5 }}
               />
-              {/* Inner fill */}
               <Circle
                 center={[hunt.latApprox, hunt.lngApprox]}
                 radius={1500}
@@ -300,7 +335,7 @@ export const MapScreen: React.FC = () => {
         </MapContainer>
       </div>
 
-      {/* 2. Top GTA 5 Search & Back Button Bar */}
+      {/* Top Search & Back Button Bar */}
       <div className="absolute top-4 left-4 right-4 z-40 max-w-md mx-auto flex items-center gap-2 pointer-events-auto">
         <button
           onClick={() => {
@@ -323,8 +358,8 @@ export const MapScreen: React.FC = () => {
         >
           <div className="flex items-center gap-2">
             <Search className="w-5 h-5 text-[#FF4500] group-hover:scale-110 transition-transform" />
-            <span className="truncate uppercase font-bold">
-              {selectedCity ? `${selectedCity.name} RADAR` : 'LOCATION RADAR / SEARCH'}
+            <span className="truncate uppercase font-bold text-xs tracking-wider">
+              {selectedCity ? `${selectedCity.name} RADAR` : `${user.city || 'LOCATION'} RADAR`}
             </span>
           </div>
           <span className="text-[10px] font-data text-[#FF4500] bg-[#FF4500]/10 px-2 py-0.5 rounded border border-[#FF4500]/30 shrink-0">
@@ -337,7 +372,7 @@ export const MapScreen: React.FC = () => {
       {gtaAnimationPhase && (
         <Gta5SatelliteHud
           cityName={selectedCity?.name || 'Hong Kong'}
-          countryName={selectedCity?.country || 'India'}
+          countryName={selectedCity?.country || 'Japan'}
           phase={gtaAnimationPhase}
         />
       )}
@@ -349,28 +384,25 @@ export const MapScreen: React.FC = () => {
         onSelectCity={handleSelectCity}
       />
 
-      {/* Map Settings / Location Mode Toggle */}
+      {/* BUTTON 1: Location Radar / City Search Modal Button */}
       <button
         onClick={() => {
-          sounds.playXpPop();
-          setLocationDisplayMode(locationDisplayMode === 'radius' ? 'exact' : 'radius');
+          sounds.playTargetLock();
+          setSearchModalOpen(true);
         }}
-        className="absolute bottom-44 right-4 z-30 p-3 rounded-full bg-[#111111]/95 backdrop-blur-md border border-[#2C2C2C] text-[#F0EBE3] shadow-2xl hover:border-[#FF4500] transition-colors pointer-events-auto"
-        title="Toggle Location Mode (1km Radius vs Exact)"
+        className="absolute bottom-44 right-4 z-30 p-3.5 rounded-full bg-[#111111]/95 backdrop-blur-md border border-[#2C2C2C] text-[#F0EBE3] shadow-2xl hover:border-[#FF4500] transition-colors pointer-events-auto group"
+        title="Search Global Cities & Radars"
       >
-        {locationDisplayMode === 'radius' ? (
-           <Eye className="w-6 h-6 text-[#FF4500]" />
-        ) : (
-           <MapPin className="w-6 h-6 text-[#2ECC71]" />
-        )}
+        <Globe className="w-6 h-6 text-[#FF4500] group-hover:rotate-45 transition-transform" />
       </button>
 
-      {/* Recenter Button */}
+      {/* BUTTON 2: Recenter GPS Live Location Button */}
       <button
-        onClick={() => setSelectedPin(null)}
-        className="absolute bottom-28 right-4 z-30 p-3 rounded-full bg-[#111111]/90 backdrop-blur-md border border-[#2C2C2C] text-[#F0EBE3] shadow-2xl hover:border-[#FF4500] transition-colors glow-orange pointer-events-auto"
+        onClick={handleRecenterGps}
+        className="absolute bottom-28 right-4 z-30 p-3.5 rounded-full bg-[#111111]/95 backdrop-blur-md border border-[#2C2C2C] text-[#F0EBE3] shadow-2xl hover:border-[#FF4500] transition-colors glow-orange pointer-events-auto group"
+        title="Recenter on Device GPS Location"
       >
-        <Crosshair className="w-6 h-6 text-[#FF4500]" />
+        <Crosshair className="w-6 h-6 text-[#FF4500] group-hover:scale-110 transition-transform" />
       </button>
 
       {/* Pin Tap Detail Bottom Sheet */}

@@ -77,10 +77,10 @@ const INITIAL_USER: UserProfile = {
   rankGlobal: 1,
   rankCountry: 1,
   rankCity: 1,
-  city: 'Local Area',
-  country: 'Your Country',
-  latitude: 0,
-  longitude: 0,
+  city: 'Tokyo',
+  country: 'Japan',
+  latitude: 35.6762,
+  longitude: 139.6503,
   countryCode: 'GLOBAL',
   isPremium: false,
   totalSpots: 0,
@@ -95,17 +95,17 @@ export const INITIAL_HUNTS: Hunt[] = [];
 
 const INITIAL_QUESTS: DailyQuest[] = [
   {
-    id: 'quest-german-day',
-    title: 'German Engineering Day',
-    description: 'Spot 3 German-made cars (Porsche, BMW, Mercedes, Audi) before midnight.',
+    id: 'quest-daily-spotlight',
+    title: 'Daily Spotlight: 3 Vehicle Scans',
+    description: 'Spot and photograph 3 real vehicles in the wild before midnight.',
     targetCount: 3,
-    currentCount: 2,
+    currentCount: 0,
     xpReward: 500,
     coinReward: 100,
-    badgeName: 'Das Auto',
+    badgeName: 'Apex Spotter',
     expiresInSeconds: 13642,
     expiresAtTimestamp: GLOBAL_QUEST_EXPIRES_AT,
-    allowedMakes: ['Porsche', 'BMW', 'Mercedes-Benz', 'Audi', 'Volkswagen'],
+    allowedMakes: [],
     isCompleted: false
   }
 ];
@@ -439,7 +439,7 @@ export const useApexStore = create<ApexState>((set, get) => ({
       const { level } = getLevelFromXp(newXp);
 
       const updatedQuests = state.dailyQuests.map(quest => {
-        if (!quest.isCompleted && quest.allowedMakes?.includes(newCard.make)) {
+        if (!quest.isCompleted && (!quest.allowedMakes || quest.allowedMakes.length === 0 || quest.allowedMakes.includes(newCard.make))) {
           const newCount = quest.currentCount + 1;
           const isNowCompleted = newCount >= quest.targetCount;
           return {

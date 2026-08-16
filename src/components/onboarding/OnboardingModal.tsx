@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mail, ChevronLeft } from 'lucide-react';
+import { Mail, ChevronLeft, User, AtSign, MapPin, Sparkles } from 'lucide-react';
 import { useApexStore } from '../../store/useApexStore';
 import type { Persona } from '../../types/apex';
 import { sounds } from '../../utils/audio';
@@ -12,13 +12,14 @@ import { supabase } from '../../lib/supabase';
 import { Capacitor } from '@capacitor/core';
 import { GoogleSignIn } from '@capawesome/capacitor-google-sign-in';
 import { PushNotifications } from '@capacitor/push-notifications';
+import { FAMOUS_CITIES } from '../map/CitySearchModal';
 
 interface OnboardingModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-type OnboardingStep = 'auth' | 'email_input' | 'email_otp' | 'roles' | 'cam_perm' | 'loc_perm' | 'notif_perm' | 'celebration';
+type OnboardingStep = 'auth' | 'email_input' | 'email_otp' | 'profile_setup' | 'roles' | 'cam_perm' | 'loc_perm' | 'notif_perm' | 'celebration';
 
 const ROLES: { id: Persona; title: string; ctaLabel: string; desc: string }[] = [
   {
@@ -76,7 +77,7 @@ const ApertureIris: React.FC = () => {
 
 const GpsCrosshair: React.FC = () => (
   <svg width="72" height="72" viewBox="0 0 72 72" fill="none">
-    <circle cx="36" cy="36" r="28" stroke="#F0EBE3" strokeWidth="1.5" opacity="0.3" />
+    <circle cx="36" cy="28" r="28" stroke="#F0EBE3" strokeWidth="1.5" opacity="0.3" />
     <line x1="36" y1="4" x2="36" y2="20" stroke="#F0EBE3" strokeWidth="1.5" opacity="0.4" />
     <line x1="36" y1="52" x2="36" y2="68" stroke="#F0EBE3" strokeWidth="1.5" opacity="0.4" />
     <line x1="4" y1="36" x2="20" y2="36" stroke="#F0EBE3" strokeWidth="1.5" opacity="0.4" />
@@ -97,11 +98,8 @@ const NotificationBell: React.FC = () => (
     animate={{ rotate: [-12, 12, -12] }}
     transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
   >
-    {/* Bell body */}
     <path d="M36 8 C24 8, 14 20, 14 32 L14 44 L10 50 L62 50 L58 44 L58 32 C58 20, 48 8, 36 8Z" fill="#F0EBE3" opacity="0.85" />
-    {/* Bell clapper */}
     <circle cx="36" cy="56" r="5" fill="#F0EBE3" opacity="0.85" />
-    {/* Orange notification dot */}
     <motion.circle
       cx="52" cy="14" r="6" fill="#FF4500"
       animate={{ scale: [1, 1.3, 1], opacity: [1, 0.7, 1] }}
@@ -113,19 +111,35 @@ const NotificationBell: React.FC = () => (
 // ─── MAIN COMPONENT ───
 
 export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClose }) => {
-  const { setPersona, completeOnboarding } = useApexStore();
+  const { user, updateUserProfile, setPersona, completeOnboarding } = useApexStore();
   const [step, setStep] = useState<OnboardingStep>('auth');
   const [isAuthLoading, setIsAuthLoading] = useState(false);
   const [authError, setAuthError] = useState('');
   const [emailInput, setEmailInput] = useState('');
   const [otpCode, setOtpCode] = useState(['', '', '', '', '', '']);
-  const [activeRoleIdx, setActiveRoleIdx] = useState(1); // Middle page pre-selected
+  const [activeRoleIdx, setActiveRoleIdx] = useState(1);
   const [camDenied, setCamDenied] = useState(false);
+
+  // Profile Setup State
+  const [displayNameInput, setDisplayNameInput] = useState(user.displayName || 'Apex Hunter');
+  const [usernameInput, setUsernameInput] = useState(user.username || 'hunter_01');
+  const [selectedCity, setSelectedCity] = useState(user.city && user.city !== 'Local Area' ? user.city : 'Tokyo');
+  const [selectedCountry, setSelectedCountry] = useState(user.country && user.country !== 'Your Country' ? user.country : 'Japan');
+
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
   const carouselRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (isOpen) setStep('auth');
+    if (isOpen) {
+      setStep('auth');
+      // Pre-fetch real GPS in background to populate city
+      requestRealLocationPermission().then((res) => {
+        if (res.granted && res.city && res.city !== 'Local Area') {
+          setSelectedCity(res.city);
+          setSelectedCountry(res.country);
+        }
+      }).catch(() => {});
+    }
   }, [isOpen]);
 
   // ─── AUTH HANDLERS ───
@@ -141,13 +155,17 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
         await GoogleSignIn.initialize({ clientId: CLIENT_ID, scopes: ['profile', 'email'] });
         const result = await GoogleSignIn.signIn();
         if (result.idToken) {
-          const { error } = await supabase.auth.signInWithIdToken({ provider: 'google', token: result.idToken });
+          const { error, data } = await supabase.auth.signInWithIdToken({ provider: 'google', token: result.idToken });
           if (error) throw error;
+          if (data?.user?.user_metadata?.full_name) {
+            setDisplayNameInput(data.user.user_metadata.full_name);
+            const slug = data.user.user_metadata.full_name.toLowerCase().replace(/[^a-z0-9]/g, '_');
+            setUsernameInput(slug || 'hunter_01');
+          }
         } else {
           throw new Error('No ID Token found');
         }
       } else {
-        // Web: Google Identity Services popup — zero redirects
         const loadGIS = (): Promise<void> => new Promise((resolve) => {
           if (window.google?.accounts?.id) { resolve(); return; }
           const script = document.createElement('script');
@@ -172,9 +190,16 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
             }
           });
         });
-        const { error } = await supabase.auth.signInWithIdToken({ provider: 'google', token: idToken });
+        const { error, data } = await supabase.auth.signInWithIdToken({ provider: 'google', token: idToken });
         if (error) throw error;
+        if (data?.user?.user_metadata?.full_name) {
+          setDisplayNameInput(data.user.user_metadata.full_name);
+          const slug = data.user.user_metadata.full_name.toLowerCase().replace(/[^a-z0-9]/g, '_');
+          setUsernameInput(slug || 'hunter_01');
+        }
       }
+      setIsAuthLoading(false);
+      setStep('profile_setup');
     } catch (err: any) {
       console.error(err);
       setAuthError(err?.message || 'Google Sign-In failed.');
@@ -202,19 +227,42 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
     if (next.every(c => c !== '')) {
       setIsAuthLoading(true);
       const { error } = await supabase.auth.verifyOtp({ email: emailInput, token: next.join(''), type: 'email' });
-      if (error) { setAuthError(error.message); setIsAuthLoading(false); }
+      if (error) {
+        setAuthError(error.message);
+        setIsAuthLoading(false);
+      } else {
+        setIsAuthLoading(false);
+        setStep('profile_setup');
+      }
     }
   };
 
-  // Advance to roles when auth completes
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user && (step === 'auth' || step === 'email_otp')) {
-        setStep('roles');
+        setStep('profile_setup');
       }
     });
     return () => subscription.unsubscribe();
   }, [step]);
+
+  // ─── PROFILE SETUP HANDLER ───
+
+  const handleProfileSetupSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    sounds.playTargetLock();
+    const cleanUsername = usernameInput.replace(/^@+/, '').trim().toLowerCase().replace(/[^a-z0-9_]/g, '') || 'hunter_01';
+    const cleanDisplayName = displayNameInput.trim() || 'Apex Hunter';
+    
+    updateUserProfile({
+      displayName: cleanDisplayName,
+      username: cleanUsername,
+      city: selectedCity,
+      country: selectedCountry
+    });
+
+    setStep('roles');
+  };
 
   // ─── PERMISSION HANDLERS ───
 
@@ -233,7 +281,17 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
 
   const requestLocation = async (precise: boolean) => {
     if (precise) {
-      try { await requestRealLocationPermission(); } catch (e) { console.log(e); }
+      try {
+        const res = await requestRealLocationPermission();
+        if (res.granted && res.city && res.city !== 'Local Area') {
+          updateUserProfile({
+            latitude: res.latitude,
+            longitude: res.longitude,
+            city: res.city,
+            country: res.country
+          });
+        }
+      } catch (e) { console.log(e); }
     }
     setStep('notif_perm');
   };
@@ -245,8 +303,6 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
     setStep('celebration');
   };
 
-  // ─── CAROUSEL SCROLL HANDLER ───
-
   const handleCarouselScroll = () => {
     if (!carouselRef.current) return;
     const el = carouselRef.current;
@@ -256,33 +312,27 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
 
   useEffect(() => {
     if (step === 'roles' && carouselRef.current) {
-      // Scroll to middle page (pre-selected)
       carouselRef.current.scrollTo({ left: carouselRef.current.clientWidth, behavior: 'instant' as ScrollBehavior });
     }
   }, [step]);
 
   if (!isOpen) return null;
 
-  // ─── RENDER ───
-
   return (
     <div className="fixed inset-0 z-[100] bg-[#080808] text-[#F0EBE3] overflow-hidden" style={{ fontFamily: "'Inter', 'DM Sans', sans-serif" }}>
       <AnimatePresence mode="wait">
 
         {/* ═══════════════════════════════════════ */}
-        {/* SCREEN 1 — THE OPENING (Auth)           */}
+        {/* SCREEN 1 — AUTH (Google / Email OTP)    */}
         {/* ═══════════════════════════════════════ */}
         {step === 'auth' && (
           <motion.div key="auth" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="relative flex flex-col h-full w-full">
-            {/* Layer 1: Full-bleed photograph */}
             <div className="absolute inset-0">
               <img src="/auth-bg.jpg" alt="" className="w-full h-full object-cover" />
             </div>
-            {/* Layer 2: Gradient bottom merge */}
-            <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, transparent 55%, #080808 88%)' }} />
+            <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, transparent 50%, #080808 85%)' }} />
 
-            {/* Layer 3: APEX wordmark */}
-            <div className="relative z-10 flex-1 flex flex-col items-center justify-center" style={{ paddingTop: '30%' }}>
+            <div className="relative z-10 flex-1 flex flex-col items-center justify-center" style={{ paddingTop: '28%' }}>
               <motion.h1
                 className="font-display text-[88px] tracking-[8px] text-[#F0EBE3] leading-none"
                 initial={{ opacity: 0, y: -40 }}
@@ -293,52 +343,45 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
                 APEX
               </motion.h1>
 
-              {/* Layer 4: Tagline */}
               <motion.p
                 className="mt-3 text-[14px] tracking-[2px] text-[#F0EBE3]/60"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 1.2, duration: 0.4 }}
-                style={{ fontFamily: "'DM Sans', sans-serif" }}
+                transition={{ delay: 0.2 }}
               >
-                Every street. Every find. Every win.
+                SPOTTED. CLAIMED. RANKED.
               </motion.p>
             </div>
 
-            {/* Layer 5: Auth buttons */}
-            <div className="relative z-10 px-6 pb-8 space-y-3">
-              {/* Google button */}
+            <div className="relative z-10 px-6 pb-12 w-full max-w-sm mx-auto space-y-3">
               <motion.button
                 onClick={handleGoogleSignIn}
                 disabled={isAuthLoading}
-                whileTap={{ scale: 0.97 }}
-                className="w-full h-14 rounded-xl flex items-center justify-center gap-3 transition-colors"
-                style={{ background: '#F0EBE3', fontFamily: "'DM Sans', sans-serif" }}
+                whileTap={{ scale: 0.96 }}
+                className="w-full h-14 rounded-xl bg-white text-[#080808] font-medium text-[15px] flex items-center justify-center gap-3 shadow-lg hover:bg-white/90 transition-all disabled:opacity-50"
               >
-                <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="w-5 h-5" />
-                <span className="text-[#1A1A1A] font-semibold text-[15px]">Continue with Google</span>
+                <svg className="w-5 h-5" viewBox="0 0 24 24">
+                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
+                </svg>
+                <span>Continue with Google</span>
               </motion.button>
 
-              {/* Email button */}
               <motion.button
-                onClick={() => setStep('email_input')}
-                disabled={isAuthLoading}
-                whileTap={{ scale: 0.97 }}
-                className="w-full h-14 rounded-xl flex items-center justify-center gap-3 transition-colors"
-                style={{ background: 'transparent', border: '1.5px solid #2C2C2C', fontFamily: "'DM Sans', sans-serif" }}
+                onClick={() => { sounds.playTargetLock(); setStep('email_input'); }}
+                whileTap={{ scale: 0.96 }}
+                className="w-full h-14 rounded-xl bg-[#1A1A1A] border border-[#2C2C2C] flex items-center justify-center gap-3 text-[#F0EBE3] hover:border-[#FF4500]/50 transition-all"
               >
                 <Mail className="w-5 h-5 text-[#F0EBE3]/70" />
                 <span className="text-[#F0EBE3]/80 font-medium text-[15px]">Continue with Email</span>
               </motion.button>
 
-              {/* Error */}
-              {authError && <p className="text-[#FF4500] text-sm text-center">{authError}</p>}
+              {authError && <p className="text-[#FF4500] text-sm text-center font-data">{authError}</p>}
 
-              {/* Legal text */}
               <p className="text-center text-[11px] mt-4" style={{ color: '#9A9088', fontFamily: "'DM Sans', sans-serif" }}>
-                By continuing, you agree to our{' '}
-                <span className="text-[#FF4500] cursor-pointer">Terms</span> and{' '}
-                <span className="text-[#FF4500] cursor-pointer">Privacy Policy</span>
+                By continuing, you agree to our <span className="text-[#FF4500]">Terms</span> and <span className="text-[#FF4500]">Privacy Policy</span>
               </p>
             </div>
           </motion.div>
@@ -383,11 +426,141 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
         )}
 
         {/* ═══════════════════════════════════════ */}
+        {/* NEW SCREEN — CALLSIGN & PROFILE SETUP   */}
+        {/* ═══════════════════════════════════════ */}
+        {step === 'profile_setup' && (
+          <motion.div
+            key="profile_setup"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="flex flex-col h-full p-6 max-w-md mx-auto w-full justify-between overflow-y-auto scrollbar-hide"
+          >
+            <div className="pt-6 space-y-5">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-[#FF4500]" />
+                <span className="font-display text-sm tracking-widest text-[#FF4500]">HUNTER REGISTRATION</span>
+              </div>
+
+              <div>
+                <h2 className="font-display text-[42px] text-[#F0EBE3] leading-none">CHOOSE YOUR CALLSIGN</h2>
+                <p className="text-[#9A9088] text-xs font-data mt-2 leading-relaxed">
+                  Set your public spotter handle, display name, and home radar hub.
+                </p>
+              </div>
+
+              {/* LIVE HUNTER BADGE PREVIEW */}
+              <div className="p-4 rounded-2xl bg-[#111111] border border-[#FF4500]/40 shadow-2xl relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-[#FF4500]/10 rounded-full blur-2xl pointer-events-none" />
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-12 h-12 rounded-full border-2 border-[#FF4500] overflow-hidden bg-[#1A1A1A] shrink-0">
+                    <img src={user.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="font-display text-xl text-[#F0EBE3] tracking-wide">
+                        {displayNameInput || 'Apex Hunter'}
+                      </span>
+                      <span className="text-[9px] font-data bg-[#FF4500]/20 text-[#FF4500] px-1.5 py-0.5 rounded border border-[#FF4500]/40">
+                        LVL 1
+                      </span>
+                    </div>
+                    <span className="text-xs font-data text-[#FF4500]">
+                      @{usernameInput.replace(/^@+/, '') || 'hunter_01'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between pt-2 border-t border-[#2C2C2C] text-[11px] font-data text-[#9A9088]">
+                  <div className="flex items-center gap-1">
+                    <MapPin className="w-3.5 h-3.5 text-[#FF4500]" />
+                    <span>{selectedCity}, {selectedCountry}</span>
+                  </div>
+                  <span className="text-[#2ECC71] font-semibold">VERIFIED SPOTTER</span>
+                </div>
+              </div>
+
+              {/* INPUT FIELDS */}
+              <form onSubmit={handleProfileSetupSubmit} className="space-y-4 pt-2">
+                <div>
+                  <label className="text-[11px] font-data font-semibold text-[#9A9088] uppercase tracking-wider block mb-1.5">
+                    Display Name
+                  </label>
+                  <div className="relative">
+                    <User className="w-4 h-4 text-[#9A9088] absolute left-4 top-4" />
+                    <input
+                      type="text"
+                      required
+                      value={displayNameInput}
+                      onChange={e => setDisplayNameInput(e.target.value)}
+                      placeholder="e.g. Alex Vance"
+                      className="w-full h-12 bg-[#1A1A1A] border border-[#2C2C2C] rounded-xl pl-11 pr-4 text-sm text-white focus:border-[#FF4500] outline-none font-sans"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-[11px] font-data font-semibold text-[#9A9088] uppercase tracking-wider block mb-1.5">
+                    Callsign / Nickname (Unique Handle)
+                  </label>
+                  <div className="relative">
+                    <AtSign className="w-4 h-4 text-[#FF4500] absolute left-4 top-4" />
+                    <input
+                      type="text"
+                      required
+                      value={usernameInput}
+                      onChange={e => setUsernameInput(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
+                      placeholder="e.g. tokyo_drifter"
+                      className="w-full h-12 bg-[#1A1A1A] border border-[#2C2C2C] rounded-xl pl-11 pr-4 text-sm text-white focus:border-[#FF4500] outline-none font-data"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-[11px] font-data font-semibold text-[#9A9088] uppercase tracking-wider block mb-1.5">
+                    Primary Radar Hub (City)
+                  </label>
+                  <select
+                    value={selectedCity}
+                    onChange={(e) => {
+                      const found = FAMOUS_CITIES.find(c => c.name === e.target.value);
+                      if (found) {
+                        setSelectedCity(found.name);
+                        setSelectedCountry(found.country);
+                      } else {
+                        setSelectedCity(e.target.value);
+                      }
+                    }}
+                    className="w-full h-12 bg-[#1A1A1A] border border-[#2C2C2C] rounded-xl px-4 text-sm text-white focus:border-[#FF4500] outline-none font-sans cursor-pointer"
+                  >
+                    {FAMOUS_CITIES.map(city => (
+                      <option key={city.name} value={city.name} className="bg-[#111111] text-white">
+                        {city.name} ({city.country}) — {city.tagline}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </form>
+            </div>
+
+            <div className="pt-6 pb-6">
+              <motion.button
+                onClick={handleProfileSetupSubmit}
+                whileTap={{ scale: 0.96 }}
+                className="w-full h-14 bg-[#FF4500] text-white font-display text-xl tracking-wider rounded-xl glow-orange"
+                style={{ boxShadow: GLOW_ORANGE }}
+              >
+                CONFIRM CALLSIGN →
+              </motion.button>
+            </div>
+          </motion.div>
+        )}
+
+        {/* ═══════════════════════════════════════ */}
         {/* SCREEN 2 — ROLE SELECTION (Carousel)    */}
         {/* ═══════════════════════════════════════ */}
         {step === 'roles' && (
           <motion.div key="roles" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="relative h-full w-full">
-            {/* Horizontal paged carousel */}
             <div
               ref={carouselRef}
               onScroll={handleCarouselScroll}
@@ -396,7 +569,6 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
             >
               {ROLES.map((role, idx) => (
                 <div key={role.id} className="h-full min-w-full w-full snap-center relative flex-shrink-0">
-                  {/* Background gradient instead of photo — ambient color per role */}
                   <div className="absolute inset-0" style={{
                     background: idx === 0
                       ? 'radial-gradient(ellipse at 50% 40%, rgba(255,69,0,0.08) 0%, #080808 70%)'
@@ -405,7 +577,6 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
                         : 'radial-gradient(ellipse at 50% 40%, rgba(255,165,0,0.06) 0%, #080808 70%)'
                   }} />
 
-                  {/* Role content */}
                   <div className="absolute bottom-[200px] left-7 right-7 z-10">
                     <div className="flex items-center gap-3 mb-2">
                       {activeRoleIdx === idx && (
@@ -428,15 +599,12 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
               ))}
             </div>
 
-            {/* Fixed overlay: label + dots + CTA */}
             <div className="absolute inset-0 pointer-events-none flex flex-col items-center justify-between z-20">
-              {/* Top label */}
               <p className="mt-12 text-[11px] tracking-[3px] font-medium text-[#F0EBE3]/50" style={{ fontFamily: "'DM Sans', sans-serif" }}>
                 CHOOSE YOUR ROLE
               </p>
 
               <div className="w-full px-6 pb-8 pointer-events-auto space-y-4">
-                {/* Dot indicator */}
                 <div className="flex items-center justify-center gap-2 mb-4">
                   {ROLES.map((_, idx) => (
                     <motion.div
@@ -451,7 +619,6 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
                   ))}
                 </div>
 
-                {/* Continue CTA */}
                 <motion.button
                   onClick={handleRoleContinue}
                   whileTap={{ scale: 0.96 }}
@@ -606,16 +773,16 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
   );
 };
 
-// ─── CELEBRATION SCREEN (Separate for clean state management) ───
+// ─── CELEBRATION SCREEN ───
 
 const CelebrationScreen: React.FC<{ role: typeof ROLES[number]; onEnter: () => void }> = ({ role, onEnter }) => {
-  const [phase, setPhase] = useState(0); // 0=black, 1=flash, 2=welcome, 3=role, 4=chips, 5=cta
+  const [phase, setPhase] = useState(0);
 
   useEffect(() => {
-    const t1 = setTimeout(() => setPhase(1), 200);    // Orange flash
-    const t2 = setTimeout(() => setPhase(2), 660);    // Welcome drops
-    const t3 = setTimeout(() => setPhase(3), 760);    // Role pops
-    const t4 = setTimeout(() => {                      // Particles + confetti
+    const t1 = setTimeout(() => setPhase(1), 200);
+    const t2 = setTimeout(() => setPhase(2), 660);
+    const t3 = setTimeout(() => setPhase(3), 760);
+    const t4 = setTimeout(() => {
       setPhase(4);
       confetti({
         particleCount: 40,
@@ -625,15 +792,14 @@ const CelebrationScreen: React.FC<{ role: typeof ROLES[number]; onEnter: () => v
         disableForReducedMotion: true,
       });
     }, 900);
-    const t5 = setTimeout(() => setPhase(5), 2000);   // CTA
-    const t6 = setTimeout(() => onEnter(), 5200);     // Auto-advance
+    const t5 = setTimeout(() => setPhase(5), 2000);
+    const t6 = setTimeout(() => onEnter(), 5200);
 
     return () => { [t1, t2, t3, t4, t5, t6].forEach(clearTimeout); };
   }, []);
 
   return (
     <motion.div key="celebration" className="relative flex flex-col h-full items-center justify-center bg-[#080808]">
-      {/* Orange flash overlay */}
       <AnimatePresence>
         {phase >= 1 && phase < 2 && (
           <motion.div
@@ -647,7 +813,6 @@ const CelebrationScreen: React.FC<{ role: typeof ROLES[number]; onEnter: () => v
         )}
       </AnimatePresence>
 
-      {/* WELCOME text */}
       {phase >= 2 && (
         <motion.h1
           className="font-display text-[80px] text-[#F0EBE3] tracking-widest leading-none"
@@ -659,7 +824,6 @@ const CelebrationScreen: React.FC<{ role: typeof ROLES[number]; onEnter: () => v
         </motion.h1>
       )}
 
-      {/* Role name */}
       {phase >= 3 && (
         <motion.h2
           className="font-display text-[48px] text-[#FF4500] tracking-wider leading-none mt-2"
@@ -671,7 +835,6 @@ const CelebrationScreen: React.FC<{ role: typeof ROLES[number]; onEnter: () => v
         </motion.h2>
       )}
 
-      {/* Stat chips */}
       {phase >= 4 && (
         <div className="flex items-center gap-3 mt-8">
           {[
@@ -693,7 +856,6 @@ const CelebrationScreen: React.FC<{ role: typeof ROLES[number]; onEnter: () => v
         </div>
       )}
 
-      {/* ENTER APEX CTA */}
       {phase >= 5 && (
         <motion.button
           onClick={onEnter}
