@@ -1,6 +1,6 @@
 -- ════════════════════════════════════════════════════════════════════════════
 -- APEX SUPABASE HARDENED PRODUCTION SCHEMA & AUTHORIZATION POLICIES
--- Zero-Trust Server-Side Authority Architecture
+-- Zero-Trust Server-Side Authority Architecture & Immutable Ledger
 -- ════════════════════════════════════════════════════════════════════════════
 
 -- Enable required extensions
@@ -19,6 +19,8 @@ CREATE TABLE IF NOT EXISTS profiles (
   coins INTEGER DEFAULT 50 NOT NULL CHECK (coins >= 0),
   streak_days INTEGER DEFAULT 0 NOT NULL CHECK (streak_days >= 0),
   last_scan_at TIMESTAMP WITH TIME ZONE,
+  daily_scans_count INTEGER DEFAULT 0 NOT NULL CHECK (daily_scans_count >= 0),
+  daily_scans_reset_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
   total_spots INTEGER DEFAULT 0 NOT NULL CHECK (total_spots >= 0),
   rarest_find TEXT DEFAULT 'None' NOT NULL,
   city TEXT DEFAULT 'Local Area',
@@ -32,7 +34,7 @@ CREATE TABLE IF NOT EXISTS profiles (
 );
 
 -- ────────────────────────────────────────────────────────────────────────────
--- 2. GARAGE TABLE (Scanned & Minted Cars)
+-- 2. GARAGE TABLE (Scanned & Minted Cars — Immutable Collectibles)
 -- ────────────────────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS garage (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
@@ -48,9 +50,9 @@ CREATE TABLE IF NOT EXISTS garage (
   country TEXT NOT NULL,
   latitude DOUBLE PRECISION,
   longitude DOUBLE PRECISION,
-  horsepower INTEGER DEFAULT 0 CHECK (horsepower >= 0),
-  top_speed_kmh INTEGER DEFAULT 0 CHECK (top_speed_kmh >= 0),
-  xp_earned INTEGER DEFAULT 0 NOT NULL CHECK (xp_earned >= 0),
+  horsepower INTEGER DEFAULT 0 CHECK (horsepower >= 0 AND horsepower <= 2500),
+  top_speed_kmh INTEGER DEFAULT 0 CHECK (top_speed_kmh >= 0 AND top_speed_kmh <= 600),
+  xp_earned INTEGER DEFAULT 0 NOT NULL CHECK (xp_earned >= 0 AND xp_earned <= 5000),
   is_minted BOOLEAN DEFAULT false NOT NULL,
   card_number TEXT NOT NULL,
   scanned_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
@@ -88,14 +90,64 @@ CREATE INDEX IF NOT EXISTS idx_scan_receipts_user_hash ON scan_receipts(user_id,
 CREATE INDEX IF NOT EXISTS idx_scan_receipts_user_time ON scan_receipts(user_id, created_at DESC);
 
 -- ────────────────────────────────────────────────────────────────────────────
--- 5. ROW LEVEL SECURITY (RLS) POLICIES
+-- 5. IMMUTABLE XP & COIN LEDGER (Double-Entry Accounting)
+-- ────────────────────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS economy_ledger (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
+  currency_type TEXT NOT NULL CHECK (currency_type IN ('xp', 'coins')),
+  amount INTEGER NOT NULL, -- Positive for rewards/earnings, negative for spends
+  reason TEXT NOT NULL, -- e.g. 'car_scan', 'quest_reward', 'level_up_bonus', 'mint_fee'
+  reference_id UUID, -- References garage(id) or quest_claim(id)
+  balance_after INTEGER NOT NULL CHECK (balance_after >= 0),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_economy_ledger_user ON economy_ledger(user_id, created_at DESC);
+
+-- ────────────────────────────────────────────────────────────────────────────
+-- 6. REWARD & QUEST CLAIMS (Idempotency Table)
+-- ────────────────────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS reward_claims (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
+  reward_type TEXT NOT NULL, -- 'daily_quest', 'level_up', 'streak_milestone', 'daily_mission'
+  claim_key TEXT NOT NULL, -- e.g. 'quest_2026-08-16_supercar_hunter', 'level_10_unlock'
+  coins_awarded INTEGER DEFAULT 0 NOT NULL CHECK (coins_awarded >= 0),
+  xp_awarded INTEGER DEFAULT 0 NOT NULL CHECK (xp_awarded >= 0),
+  claimed_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+  CONSTRAINT uq_user_reward_claim UNIQUE (user_id, reward_type, claim_key)
+);
+
+-- ────────────────────────────────────────────────────────────────────────────
+-- 7. DYNAMIC LEADERBOARD VIEWS
+-- ────────────────────────────────────────────────────────────────────────────
+CREATE OR REPLACE VIEW leaderboard_global_view AS
+SELECT 
+  id AS user_id,
+  username,
+  display_name,
+  avatar_url,
+  level,
+  xp,
+  total_spots,
+  rarest_find,
+  city,
+  country,
+  DENSE_RANK() OVER (ORDER BY xp DESC, total_spots DESC, created_at ASC) AS rank_global
+FROM profiles;
+
+-- ────────────────────────────────────────────────────────────────────────────
+-- 8. ROW LEVEL SECURITY (RLS) POLICIES
 -- ────────────────────────────────────────────────────────────────────────────
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE garage ENABLE ROW LEVEL SECURITY;
 ALTER TABLE posts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE scan_receipts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE economy_ledger ENABLE ROW LEVEL SECURITY;
+ALTER TABLE reward_claims ENABLE ROW LEVEL SECURITY;
 
--- 5.1 Profiles RLS
+-- 8.1 Profiles RLS
 DROP POLICY IF EXISTS "Public profiles are viewable by everyone." ON profiles;
 CREATE POLICY "Public profiles are viewable by everyone." 
   ON profiles FOR SELECT USING (true);
@@ -108,17 +160,16 @@ DROP POLICY IF EXISTS "Users can update own profile." ON profiles;
 CREATE POLICY "Users can update own profile." 
   ON profiles FOR UPDATE USING (auth.uid() = id);
 
--- 5.2 Garage RLS
+-- 8.2 Garage RLS (Public read, client insert/update completely blocked)
 DROP POLICY IF EXISTS "Garage is viewable by everyone." ON garage;
 CREATE POLICY "Garage is viewable by everyone." 
   ON garage FOR SELECT USING (true);
 
--- Disallow raw client direct INSERT and UPDATE on garage!
--- Card creations MUST go through the authoritative record_car_scan() RPC.
 DROP POLICY IF EXISTS "Users can insert own cars." ON garage;
 DROP POLICY IF EXISTS "Users can update own cars." ON garage;
+DROP POLICY IF EXISTS "Users can delete own cars." ON garage;
 
--- 5.3 Posts RLS
+-- 8.3 Posts RLS
 DROP POLICY IF EXISTS "Posts are viewable by everyone." ON posts;
 CREATE POLICY "Posts are viewable by everyone." 
   ON posts FOR SELECT USING (true);
@@ -132,16 +183,23 @@ CREATE POLICY "Users can create posts."
     AND EXISTS (SELECT 1 FROM garage WHERE id = car_id AND user_id = auth.uid())
   );
 
--- 5.4 Scan Receipts RLS (Service role / Internal only)
+-- 8.4 Ledger & Claims RLS (Users can only view their own records)
 DROP POLICY IF EXISTS "Users view own scan receipts." ON scan_receipts;
 CREATE POLICY "Users view own scan receipts." 
   ON scan_receipts FOR SELECT USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users view own economy ledger." ON economy_ledger;
+CREATE POLICY "Users view own economy ledger." 
+  ON economy_ledger FOR SELECT USING (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "Users view own reward claims." ON reward_claims;
+CREATE POLICY "Users view own reward claims." 
+  ON reward_claims FOR SELECT USING (auth.uid() = user_id);
+
 -- ────────────────────────────────────────────────────────────────────────────
--- 6. SECURITY TRIGGERS: PREVENT CLIENT MANIPULATION OF SENSITIVE STATS
+-- 9. SECURITY TRIGGERS: PREVENT CLIENT MANIPULATION OF SENSITIVE STATS
 -- ────────────────────────────────────────────────────────────────────────────
 
--- Trigger to prevent direct client modification of sensitive profile fields (xp, level, coins, total_spots)
 CREATE OR REPLACE FUNCTION protect_profile_stats_trigger()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -212,7 +270,7 @@ CREATE TRIGGER on_auth_user_created
   FOR EACH ROW EXECUTE FUNCTION handle_new_user();
 
 -- ────────────────────────────────────────────────────────────────────────────
--- 7. AUTHORITATIVE SERVER FUNCTIONS & RPCs
+-- 10. AUTHORITATIVE SERVER FUNCTIONS & RPCs
 -- ────────────────────────────────────────────────────────────────────────────
 
 -- Calculate Level from XP
@@ -309,7 +367,7 @@ END;
 $$ LANGUAGE plpgsql IMMUTABLE;
 
 -- ────────────────────────────────────────────────────────────────────────────
--- 8. CORE RPC: RECORD_CAR_SCAN (Atomic Server-Verified Scan Processing)
+-- 11. CORE RPC: RECORD_CAR_SCAN (Atomic Server-Verified Scan Processing)
 -- ────────────────────────────────────────────────────────────────────────────
 CREATE OR REPLACE FUNCTION record_car_scan(
   p_make TEXT,
@@ -336,8 +394,10 @@ DECLARE
   v_card_id UUID;
   v_card_number TEXT;
   v_last_scan_time TIMESTAMP WITH TIME ZONE;
+  v_daily_scans INTEGER;
+  v_daily_reset TIMESTAMP WITH TIME ZONE;
   v_duplicate_count INTEGER;
-  v_created_card JSONB;
+  v_user_row profiles%ROWTYPE;
 BEGIN
   -- 1. Verify User Authentication
   v_user_id := auth.uid();
@@ -345,13 +405,36 @@ BEGIN
     RAISE EXCEPTION 'Authentication required: User must be signed in to record a scan.';
   END IF;
 
-  -- 2. Anti-Spam & Rate Limiting (Minimum 3 seconds between consecutive scans)
-  SELECT last_scan_at INTO v_last_scan_time FROM profiles WHERE id = v_user_id;
+  -- 2. Lock User Row for Concurrency Protection (Prevents Race Conditions)
+  SELECT * INTO v_user_row 
+  FROM profiles 
+  WHERE id = v_user_id 
+  FOR UPDATE;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'User profile not found.';
+  END IF;
+
+  -- 3. Anti-Spam & Rate Limiting (Minimum 3 seconds between consecutive scans)
+  v_last_scan_time := v_user_row.last_scan_at;
   IF v_last_scan_time IS NOT NULL AND (timezone('utc'::text, now()) - v_last_scan_time) < interval '3 seconds' THEN
     RAISE EXCEPTION 'Rate limit exceeded: Please wait before scanning another vehicle.';
   END IF;
 
-  -- 3. Duplicate Image / Replay Detection
+  -- 4. Daily Scan Quota Enforcement (Max 50 scans per day per account)
+  v_daily_scans := v_user_row.daily_scans_count;
+  v_daily_reset := v_user_row.daily_scans_reset_at;
+
+  IF v_daily_reset IS NULL OR (timezone('utc'::text, now()) - v_daily_reset) >= interval '24 hours' THEN
+    v_daily_scans := 0;
+    v_daily_reset := timezone('utc'::text, now());
+  END IF;
+
+  IF v_daily_scans >= 50 THEN
+    RAISE EXCEPTION 'Daily scan limit reached: Free accounts can scan a maximum of 50 vehicles per 24 hours.';
+  END IF;
+
+  -- 5. Duplicate Image / Replay Detection
   IF p_image_hash IS NOT NULL AND length(p_image_hash) > 8 THEN
     SELECT count(*) INTO v_duplicate_count 
     FROM scan_receipts 
@@ -362,13 +445,13 @@ BEGIN
     END IF;
   END IF;
 
-  -- 4. Server-Side Authoritative Rarity & XP Derivation
+  -- 6. Server-Side Authoritative Rarity & XP Derivation
   v_authoritative_rarity := derive_authoritative_rarity(p_make, p_model, p_city, p_country);
   v_xp_earned := calculate_scan_xp(v_authoritative_rarity);
   v_card_id := uuid_generate_v4();
   v_card_number := 'APX-' || upper(substring(v_card_id::text, 1, 4)) || '-' || lpad((floor(random() * 9000 + 1000))::text, 4, '0');
 
-  -- 5. Insert Collectible Car into Garage
+  -- 7. Insert Collectible Car into Garage
   INSERT INTO garage (
     id,
     user_id,
@@ -403,18 +486,18 @@ BEGIN
     COALESCE(p_country, 'Global'),
     p_latitude,
     p_longitude,
-    GREATEST(0, COALESCE(p_horsepower, 0)),
-    GREATEST(0, COALESCE(p_top_speed_kmh, 0)),
+    LEAST(2500, GREATEST(0, COALESCE(p_horsepower, 0))),
+    LEAST(600, GREATEST(0, COALESCE(p_top_speed_kmh, 0))),
     v_xp_earned,
     false,
     v_card_number,
     timezone('utc'::text, now())
   );
 
-  -- 6. Atomically Update User Profile Stats in Security Context
+  -- 8. Atomically Update User Profile Stats in Security Context
   PERFORM set_config('apex.internal_authorized_call', 'true', true);
 
-  SELECT xp INTO v_old_xp FROM profiles WHERE id = v_user_id;
+  v_old_xp := v_user_row.xp;
   v_new_xp := COALESCE(v_old_xp, 0) + v_xp_earned;
   v_new_level := calculate_level_from_xp(v_new_xp);
 
@@ -422,6 +505,8 @@ BEGIN
     xp = v_new_xp,
     level = v_new_level,
     total_spots = total_spots + 1,
+    daily_scans_count = v_daily_scans + 1,
+    daily_scans_reset_at = v_daily_reset,
     last_scan_at = timezone('utc'::text, now()),
     rarest_find = CASE 
       WHEN v_authoritative_rarity = 'mythic' THEN 'mythic'
@@ -432,9 +517,26 @@ BEGIN
     END
   WHERE id = v_user_id;
 
+  -- 9. Record Immutable Double-Entry Ledger Entry
+  INSERT INTO economy_ledger (
+    user_id,
+    currency_type,
+    amount,
+    reason,
+    reference_id,
+    balance_after
+  ) VALUES (
+    v_user_id,
+    'xp',
+    v_xp_earned,
+    'car_scan',
+    v_card_id,
+    v_new_xp
+  );
+
   PERFORM set_config('apex.internal_authorized_call', 'false', true);
 
-  -- 7. Audit Log in scan_receipts
+  -- 10. Audit Log in scan_receipts
   IF p_image_hash IS NOT NULL THEN
     INSERT INTO scan_receipts (
       user_id,
@@ -453,7 +555,7 @@ BEGIN
     );
   END IF;
 
-  -- 8. Create Post if caption was provided
+  -- 11. Create Post if caption was provided
   IF p_caption IS NOT NULL AND length(trim(p_caption)) > 0 THEN
     INSERT INTO posts (
       user_id,
@@ -470,7 +572,7 @@ BEGIN
     );
   END IF;
 
-  -- 9. Return Unified JSON Response
+  -- 12. Return Unified JSON Response
   RETURN jsonb_build_object(
     'success', true,
     'card_id', v_card_id,
@@ -481,6 +583,78 @@ BEGIN
     'xp_earned', v_xp_earned,
     'new_total_xp', v_new_xp,
     'new_level', v_new_level
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- ────────────────────────────────────────────────────────────────────────────
+-- 12. RPC: CLAIM_REWARD (Atomic Idempotent Reward Disbursement)
+-- ────────────────────────────────────────────────────────────────────────────
+CREATE OR REPLACE FUNCTION claim_reward(
+  p_reward_type TEXT,
+  p_claim_key TEXT,
+  p_coins INTEGER DEFAULT 0,
+  p_xp INTEGER DEFAULT 0
+) RETURNS JSONB AS $$
+DECLARE
+  v_user_id UUID;
+  v_new_coins INTEGER;
+  v_new_xp INTEGER;
+  v_claim_id UUID;
+BEGIN
+  v_user_id := auth.uid();
+  IF v_user_id IS NULL THEN
+    RAISE EXCEPTION 'Authentication required.';
+  END IF;
+
+  -- 1. Insert Idempotency Claim Record (Fails if already claimed)
+  BEGIN
+    INSERT INTO reward_claims (
+      user_id,
+      reward_type,
+      claim_key,
+      coins_awarded,
+      xp_awarded
+    ) VALUES (
+      v_user_id,
+      p_reward_type,
+      p_claim_key,
+      p_coins,
+      p_xp
+    ) RETURNING id INTO v_claim_id;
+  EXCEPTION WHEN unique_violation THEN
+    RAISE EXCEPTION 'Reward already claimed: This milestone or quest reward has already been redeemed.';
+  END;
+
+  -- 2. Atomically Credit Coins and XP to Profile
+  PERFORM set_config('apex.internal_authorized_call', 'true', true);
+
+  UPDATE profiles SET
+    coins = coins + p_coins,
+    xp = xp + p_xp,
+    level = calculate_level_from_xp(xp + p_xp)
+  WHERE id = v_user_id
+  RETURNING coins, xp INTO v_new_coins, v_new_xp;
+
+  -- 3. Record in Ledger
+  IF p_coins > 0 THEN
+    INSERT INTO economy_ledger (user_id, currency_type, amount, reason, reference_id, balance_after)
+    VALUES (v_user_id, 'coins', p_coins, p_reward_type, v_claim_id, v_new_coins);
+  END IF;
+
+  IF p_xp > 0 THEN
+    INSERT INTO economy_ledger (user_id, currency_type, amount, reason, reference_id, balance_after)
+    VALUES (v_user_id, 'xp', p_xp, p_reward_type, v_claim_id, v_new_xp);
+  END IF;
+
+  PERFORM set_config('apex.internal_authorized_call', 'false', true);
+
+  RETURN jsonb_build_object(
+    'success', true,
+    'coins_awarded', p_coins,
+    'xp_awarded', p_xp,
+    'new_coins', v_new_coins,
+    'new_xp', v_new_xp
   );
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
