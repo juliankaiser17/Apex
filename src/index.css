@@ -10,6 +10,7 @@
     --font-display: 'Bebas Neue', sans-serif;
     --font-body: 'DM Sans', sans-serif;
     --font-data: 'Barlow Condensed', sans-serif;
+    --font-serif: 'Playfair Display', 'Newsreader', serif;
 
     /* BACKGROUNDS */
     --void: #080808;
@@ -84,6 +85,10 @@
   .font-data {
     font-family: var(--font-data);
     letter-spacing: 0.04em;
+  }
+
+  .font-serif {
+    font-family: var(--font-serif);
   }
 }
 
