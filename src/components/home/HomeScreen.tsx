@@ -41,7 +41,8 @@ export const HomeScreen: React.FC = () => {
     completeMission,
     garage,
     feedPosts,
-    liveEventExpiresAt
+    liveEventExpiresAt,
+    setSelectedCardForDetail
   } = useApexStore();
 
   const [selectedMissionForProof, setSelectedMissionForProof] = useState<Mission | null>(null);
@@ -330,6 +331,58 @@ export const HomeScreen: React.FC = () => {
           <p className="text-xs text-[#9A9088]">Find supercars this weekend for 2× XP rewards.</p>
         </div>
       </div>
+
+      {/* 5.5. Nearby Discoveries Strip */}
+      {feedPosts.length > 0 && (
+        <div className="bg-[#111111] border border-[#2C2C2C] rounded-xl p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="font-display text-lg text-[#F0EBE3] tracking-wide flex items-center gap-1.5">
+              <Eye className="w-4 h-4 text-[#FF4500]" />
+              <span>NEARBY DISCOVERIES</span>
+            </h3>
+            <button 
+              onClick={() => setActiveTab('social')}
+              className="text-xs font-semibold text-[#FF4500] hover:underline"
+            >
+              View Feed →
+            </button>
+          </div>
+
+          <div className="grid grid-cols-3 gap-2.5">
+            {feedPosts.slice(0, 3).map((post) => {
+              const rConf = RARITY_CONFIG[post.card.rarity];
+              return (
+                <motion.div
+                  key={post.id}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setSelectedCardForDetail(post.card)}
+                  className="group relative rounded-lg overflow-hidden bg-[#1A1A1A] border border-[#2C2C2C] cursor-pointer hover:border-[#FF4500]/60 transition-all flex flex-col"
+                  style={{ borderTop: `2px solid ${rConf.color}` }}
+                >
+                  <div className="h-16 w-full overflow-hidden bg-[#080808]">
+                    <img 
+                      src={post.card.imageUrl} 
+                      alt={post.card.model}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" 
+                    />
+                  </div>
+                  <div className="p-1.5 text-center bg-[#111111]">
+                    <span 
+                      style={{ color: rConf.color }} 
+                      className="font-display text-[10px] tracking-wider uppercase block truncate"
+                    >
+                      {rConf.label}
+                    </span>
+                    <span className="text-[10px] text-[#F0EBE3] font-data font-semibold block truncate leading-tight">
+                      {post.card.make}
+                    </span>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* 6. City Leaderboard Peek */}
       <div className="bg-[#111111] border border-[#2C2C2C] rounded-xl p-4 space-y-3">

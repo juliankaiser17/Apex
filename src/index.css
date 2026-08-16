@@ -54,6 +54,18 @@
     --r-card: 12px;
     --r-sheet: 20px;
     --r-full: 9999px;
+
+    /* TYPE SCALE */
+    --t-micro: 10px;
+    --t-caption: 12px;
+    --t-body: 15px;
+    --t-ui: 15px;
+    --t-title: 18px;
+    --t-stat: 22px;
+    --t-card: 24px;
+    --t-screen: 36px;
+    --t-hero: 56px;
+    --t-mega: 80px;
   }
 
   body {

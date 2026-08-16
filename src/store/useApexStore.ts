@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import type { UserProfile, CarCard, Hunt, DailyQuest, Mission, Badge, FeedPost, PostComment, LeaderboardEntry, Persona, PrivacyLevel } from '../types/apex';
 import { getLevelFromXp, calculateScanXp } from '../utils/rarity';
 import { sounds } from '../utils/audio';
+import { supabase } from '../lib/supabase';
 
 // PERSISTENT GLOBAL EVENT EXPIRATION TIMESTAMPS (Never reset on tab switch!)
 export const GLOBAL_QUEST_EXPIRES_AT = Date.now() + 3 * 3600 * 1000 + 47 * 60 * 1000 + 22 * 1000;
@@ -43,7 +44,7 @@ interface ApexState {
   initializeSession: (userId: string) => Promise<void>;
   fetchFeedPosts: () => Promise<void>;
   completeOnboarding: () => void;
-  addCardToGarage: (newCard: CarCard) => Promise<void>;
+  addCardToGarage: (newCard: CarCard, customCaption?: string) => Promise<void>;
   addXp: (amount: number, reason?: string) => void;
   toggleLikePost: (postId: string) => void;
   addCommentToPost: (postId: string, text: string) => void;
@@ -55,6 +56,8 @@ interface ApexState {
   closeHuntModal: () => void;
   triggerMockHunt: (card: CarCard) => void;
   completeMission: (missionId: string) => void;
+  levelUpLevel: number | null;
+  dismissLevelUp: () => void;
   toggleAllowHunts: () => void;
   setDefaultPrivacyLevel: (level: PrivacyLevel) => void;
 }
@@ -210,6 +213,9 @@ export const useApexStore = create<ApexState>((set, get) => ({
   leaderboards: INITIAL_LEADERBOARD,
   liveEventExpiresAt: GLOBAL_EVENT_EXPIRES_AT,
 
+  levelUpLevel: null,
+  dismissLevelUp: () => set({ levelUpLevel: null }),
+
   settingsModalOpen: false,
   setSettingsModalOpen: (open) => set({ settingsModalOpen: open }),
   setLocationDisplayMode: (mode) => set({ locationDisplayMode: mode }),
@@ -237,7 +243,6 @@ export const useApexStore = create<ApexState>((set, get) => ({
     localStorage.removeItem('apex_garage_cards');
 
     try {
-      const { supabase } = await import('../lib/supabase');
       await supabase.auth.signOut();
     } catch (e) {
       console.warn('Signout error', e);
@@ -252,7 +257,6 @@ export const useApexStore = create<ApexState>((set, get) => ({
   
   initializeSession: async (userId: string) => {
     try {
-      const { supabase } = await import('../lib/supabase');
       const { data: profile } = await supabase.from('profiles').select('*').eq('id', userId).single();
       const { data: garage } = await supabase.from('garage').select('*').eq('user_id', userId);
       
@@ -310,7 +314,6 @@ export const useApexStore = create<ApexState>((set, get) => ({
 
   fetchFeedPosts: async () => {
     try {
-      const { supabase } = await import('../lib/supabase');
       // Use standard Supabase syntax for joins without renaming
       const { data: postsData, error } = await supabase
         .from('posts')
@@ -388,12 +391,12 @@ export const useApexStore = create<ApexState>((set, get) => ({
     set({ onboardingCompleted: true });
   },
 
-  addCardToGarage: async (newCard) => {
+  addCardToGarage: async (newCard, customCaption) => {
     sounds.playXpPop();
     const xpGained = calculateScanXp(newCard.rarity, newCard.isFirstGlobalScan, newCard.isFirstCityScan);
 
-    const { supabase } = await import('../lib/supabase');
     const state = get();
+    const postCaption = customCaption?.trim() || `Just found this incredible ${newCard.make} ${newCard.model} in ${newCard.city}!`;
     
     // Insert into cloud database
     await supabase.from('garage').insert({
@@ -417,7 +420,7 @@ export const useApexStore = create<ApexState>((set, get) => ({
     await supabase.from('posts').insert({
       user_id: state.user.id,
       car_id: newCard.id,
-      caption: `Just found this incredible ${newCard.make} ${newCard.model} in ${newCard.city}!`
+      caption: postCaption
     });
 
     await supabase.from('profiles').update({ 
@@ -463,12 +466,15 @@ export const useApexStore = create<ApexState>((set, get) => ({
           level: level
         },
         card: newCard,
+        caption: postCaption,
         likesCount: 1,
         commentsCount: 0,
         isLiked: true,
         createdAt: 'Just now',
         comments: []
       };
+
+      const isLevelUp = level > state.user.level;
 
       return {
         garage: updatedGarage,
@@ -478,6 +484,7 @@ export const useApexStore = create<ApexState>((set, get) => ({
           level: level,
           totalSpots: state.user.totalSpots + 1
         },
+        levelUpLevel: isLevelUp ? level : state.levelUpLevel,
         dailyQuests: updatedQuests,
         dailyMissions: updatedMissions,
         feedPosts: [newPost, ...state.feedPosts]
@@ -490,8 +497,10 @@ export const useApexStore = create<ApexState>((set, get) => ({
     set((state) => {
       const newXp = state.user.xp + amount;
       const { level } = getLevelFromXp(newXp);
+      const isLevelUp = level > state.user.level;
       return {
-        user: { ...state.user, xp: newXp, level }
+        user: { ...state.user, xp: newXp, level },
+        levelUpLevel: isLevelUp ? level : state.levelUpLevel
       };
     });
   },

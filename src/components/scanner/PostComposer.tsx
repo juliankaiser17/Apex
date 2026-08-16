@@ -51,7 +51,7 @@ export const PostComposer: React.FC<PostComposerProps> = ({ card, onBack, onPost
         ...card,
         isPublic: showLocation,
         privacyLevel: showLocation ? 'public_blurred' : 'no_hunt_private'
-      });
+      }, caption);
 
       setTimeout(() => {
         onPostComplete();

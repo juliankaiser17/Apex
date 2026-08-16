@@ -15,6 +15,7 @@ import { EnthusiastModal } from './components/premium/EnthusiastModal';
 import { HuntScreen } from './components/hunts/HuntScreen';
 import { Card3DDetail } from './components/garage/Card3DDetail';
 import { ProfileSettingsModal } from './components/profile/ProfileSettingsModal';
+import { LevelUpModal } from './components/common/LevelUpModal';
 
 import { requestRealLocationPermission } from './utils/geolocation';
 
@@ -141,6 +142,7 @@ export const App: React.FC = () => {
         }}
       />
       
+      <LevelUpModal />
       <OnboardingModal isOpen={!onboardingCompleted} onClose={() => {}} />
     </div>
   );

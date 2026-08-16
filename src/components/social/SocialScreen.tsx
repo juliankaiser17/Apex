@@ -23,6 +23,14 @@ export const SocialScreen: React.FC = () => {
   const [friendSearch, setFriendSearch] = useState('');
   const [selectedCard, setSelectedCard] = useState<CarCard | null>(null);
   const [selectedPostForComments, setSelectedPostForComments] = useState<FeedPost | null>(null);
+  const [followedUsers, setFollowedUsers] = useState<Record<string, boolean>>({});
+
+  const toggleFollowUser = (username: string) => {
+    setFollowedUsers(prev => ({
+      ...prev,
+      [username]: !prev[username]
+    }));
+  };
 
   return (
     <div className="flex-1 pb-32 px-4 pt-4 space-y-4" style={{ fontFamily: 'DM Sans' }}>
@@ -64,11 +72,28 @@ export const SocialScreen: React.FC = () => {
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      {/* Follow pill */}
+                      {/* Follow pill with shimmer sweep */}
                       {post.user.username !== user.username && (
-                        <button className="relative overflow-hidden text-[10px] font-semibold px-3 py-1 rounded-full border border-[#FF4500] text-[#FF4500] hover:bg-[#FF4500] hover:text-[#F0EBE3] transition-all">
-                          FOLLOW
-                        </button>
+                        <motion.button 
+                          whileTap={{ scale: 0.93 }}
+                          onClick={() => toggleFollowUser(post.user.username)}
+                          className={`relative overflow-hidden text-[10px] font-semibold px-3 py-1 rounded-full border transition-all ${
+                            followedUsers[post.user.username]
+                              ? 'bg-[#1A1A1A] border-[#2C2C2C] text-[#9A9088]'
+                              : 'bg-transparent border-[#FF4500] text-[#FF4500] hover:bg-[#FF4500]/15'
+                          }`}
+                        >
+                          {!followedUsers[post.user.username] && (
+                            <motion.div
+                              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+                              animate={{ x: ['-100%', '200%'] }}
+                              transition={{ repeat: Infinity, duration: 2.5, ease: 'linear' }}
+                            />
+                          )}
+                          <span className="relative z-10">
+                            {followedUsers[post.user.username] ? 'FOLLOWING' : 'FOLLOW'}
+                          </span>
+                        </motion.button>
                       )}
                       <span className={`text-[9px] font-data font-semibold px-2 py-0.5 rounded border ${conf.badgeBg}`}>
                         {conf.label}
