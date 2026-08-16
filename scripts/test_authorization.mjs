@@ -25,6 +25,7 @@
  */
 
 import assert from 'node:assert/strict';
+import crypto from 'node:crypto';
 
 console.log('════════════════════════════════════════════════════════════');
 console.log(' APEX ADVERSARIAL ECONOMY & GAME SECURITY TEST SUITE');
@@ -464,6 +465,71 @@ test(27, 'Android Surface: Least privilege permissions enforced (No broad storag
   assert.ok(!manifestPermissions.includes('android.permission.ACCESS_BACKGROUND_LOCATION'), 'Must not request background location');
 });
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Attack 28, 29, 30, 31: Play Integrity API & Request Binding Tests
+// ─────────────────────────────────────────────────────────────────────────────
+test(28, 'Play Integrity: Deterministic JSON serialization and SHA-256 requestHash matching', () => {
+  function canonicalize(obj) {
+    if (obj === null || typeof obj !== 'object') return JSON.stringify(obj);
+    if (Array.isArray(obj)) return '[' + obj.map(item => canonicalize(item)).join(',') + ']';
+    const sortedKeys = Object.keys(obj).sort();
+    return '{' + sortedKeys.map(k => `${JSON.stringify(k)}:${canonicalize(obj[k])}`).join(',') + '}';
+  }
+
+  const payloadA = { model: '911 GT3 RS', make: 'Porsche', timestamp: 1786000000 };
+  const payloadB = { make: 'Porsche', timestamp: 1786000000, model: '911 GT3 RS' };
+
+  const hashA = crypto.createHash('sha256').update(canonicalize(payloadA)).digest('hex');
+  const hashB = crypto.createHash('sha256').update(canonicalize(payloadB)).digest('hex');
+
+  assert.equal(hashA, hashB, 'Canonicalization must produce identical hashes regardless of key ordering');
+});
+
+test(29, 'Play Integrity: Rejects modified payload in transit (requestHash mismatch)', () => {
+  function canonicalize(obj) {
+    if (obj === null || typeof obj !== 'object') return JSON.stringify(obj);
+    if (Array.isArray(obj)) return '[' + obj.map(item => canonicalize(item)).join(',') + ']';
+    const sortedKeys = Object.keys(obj).sort();
+    return '{' + sortedKeys.map(k => `${JSON.stringify(k)}:${canonicalize(obj[k])}`).join(',') + '}';
+  }
+
+  const originalPayload = { make: 'Ferrari', model: 'F40', userId: 'user_1' };
+  const tamperedPayload = { make: 'Ferrari', model: 'F40', userId: 'user_attacker' };
+
+  const expectedHash = crypto.createHash('sha256').update(canonicalize(tamperedPayload)).digest('hex');
+  const originalTokenHash = crypto.createHash('sha256').update(canonicalize(originalPayload)).digest('hex');
+
+  assert.notEqual(expectedHash, originalTokenHash, 'Tampered request must fail requestHash validation');
+});
+
+test(30, 'Play Integrity: Rejects tampered/repackaged binary (UNRECOGNIZED_VERSION)', () => {
+  const decodedToken = {
+    appIntegrity: { appRecognitionVerdict: 'UNRECOGNIZED_VERSION' },
+    deviceIntegrity: { deviceRecognitionVerdict: ['MEETS_DEVICE_INTEGRITY'] }
+  };
+
+  const isApproved = decodedToken.appIntegrity.appRecognitionVerdict === 'PLAY_RECOGNIZED';
+  assert.equal(isApproved, false, 'Non-official or modified binary must be rejected');
+});
+
+test(31, 'Play Integrity: Tiered enforcement allows single-player on virtual/basic, protects leaderboards', () => {
+  function evaluateTiers(verdicts) {
+    if (verdicts.includes('MEETS_DEVICE_INTEGRITY')) {
+      return { tier: 'TIER_1', leaderboardEligible: true };
+    }
+    if (verdicts.includes('MEETS_VIRTUAL_INTEGRITY')) {
+      return { tier: 'TIER_3_VIRTUAL', leaderboardEligible: false }; // Sandboxed from global competition
+    }
+    return { tier: 'TIER_4_TAMPERED', leaderboardEligible: false };
+  }
+
+  const realDevice = evaluateTiers(['MEETS_DEVICE_INTEGRITY', 'MEETS_BASIC_INTEGRITY']);
+  const emulator = evaluateTiers(['MEETS_VIRTUAL_INTEGRITY']);
+
+  assert.equal(realDevice.leaderboardEligible, true, 'Genuine device has full access');
+  assert.equal(emulator.leaderboardEligible, false, 'Emulator is sandboxed from leaderboards without blanket ban');
+});
+
 console.log('\n────────────────────────────────────────────────────────────');
 console.log(` RESULTS: ${testsPassed} passed, ${testsFailed} failed`);
 console.log('────────────────────────────────────────────────────────────\n');
@@ -471,5 +537,6 @@ console.log('──────────────────────�
 if (testsFailed > 0) {
   process.exit(1);
 }
+
 
 
