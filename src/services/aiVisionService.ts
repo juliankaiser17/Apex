@@ -96,9 +96,11 @@ RARITY GUIDE:
 
 If the photo is blurry or the angle makes identification difficult, set "needs_better_angle": true, lower the confidence, and provide "angle_instruction" with guidance.`;
 
+import { supabase } from '../lib/supabase';
+
 /**
- * APEX Vision Engine — Direct Gemini 2.0 Flash Analysis
- * No proxies, no TensorFlow, no fallbacks. Pure AI.
+ * APEX Vision Engine — Hybrid Secure Architecture
+ * Authenticated calls proxy via /api/analyze with client fallback
  */
 export async function identifyVehicleWithAi(
   photoDataUrl: string,
@@ -106,23 +108,84 @@ export async function identifyVehicleWithAi(
   _fileName?: string
 ): Promise<AiIdentificationPayload> {
   
-  const geminiKey = import.meta.env.VITE_GEMINI_API_KEY;
-  
-  if (!geminiKey) {
-    return createRejection('Gemini API key not configured. Please add VITE_GEMINI_API_KEY to your .env file.');
-  }
-
   if (!photoDataUrl.startsWith('data:image')) {
     return createRejection('Invalid image data provided.');
   }
 
+  const base64Data = photoDataUrl.split(',')[1];
+  const mimeType = photoDataUrl.substring(
+    photoDataUrl.indexOf(':') + 1,
+    photoDataUrl.indexOf(';')
+  );
+
+  // 1. Attempt Secure Serverless Proxy (/api/analyze) with Supabase Session JWT
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    const token = session?.access_token;
+
+    const proxyRes = await fetch('/api/analyze', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+      },
+      body: JSON.stringify({
+        imageBase64: base64Data,
+        mimeType: mimeType
+      })
+    });
+
+    if (proxyRes.ok) {
+      const parsed = await proxyRes.json();
+      if (parsed.is_car === false) {
+        return {
+          ...getEmptyPayload(),
+          is_car: false,
+          rejection_reason: parsed.rejection_reason || 'This image does not contain a vehicle.'
+        };
+      }
+      return {
+        is_car: true,
+        make: parsed.make || 'Unknown',
+        model: parsed.model || 'Vehicle',
+        generation: parsed.generation || 'Unknown',
+        trim: parsed.trim || null,
+        year_estimate: parsed.year_estimate || '2020',
+        color: parsed.color || 'Unknown',
+        rarity: parsed.rarity || 'common',
+        estimated_market_value_usd_low: parsed.estimated_market_value_usd_low || 20000,
+        estimated_market_value_usd_high: parsed.estimated_market_value_usd_high || 30000,
+        engine: parsed.engine || 'Unknown',
+        horsepower: parsed.horsepower || 150,
+        torque_nm: parsed.torque_nm || 200,
+        kerb_weight_kg: parsed.kerb_weight_kg || 1400,
+        top_speed_kmh: parsed.top_speed_kmh || 180,
+        zero_to_hundred_seconds: parsed.zero_to_hundred_seconds || 8.0,
+        production_years: parsed.production_years || 'Unknown',
+        origin_country: parsed.origin_country || 'Unknown',
+        body_style: parsed.body_style || 'Sedan',
+        historical_information: parsed.historical_information || '',
+        interesting_facts: parsed.interesting_facts || '',
+        aftermarket_parts_detected: Array.isArray(parsed.aftermarket_parts_detected) 
+          ? parsed.aftermarket_parts_detected 
+          : [],
+        confidence: parsed.confidence || 0.90,
+        needs_better_angle: parsed.needs_better_angle || false,
+        angle_instruction: parsed.angle_instruction || null
+      };
+    }
+  } catch (proxyErr) {
+    console.warn('Backend proxy attempt failed, checking client fallback...', proxyErr);
+  }
+
+  // 2. Direct Client Fallback (Only if key available in dev environment)
+  const geminiKey = import.meta.env.VITE_GEMINI_API_KEY;
+  if (!geminiKey) {
+    return createRejection('AI Vision analysis service temporarily unavailable. Please try again.');
+  }
+
   try {
     const ai = new GoogleGenAI({ apiKey: geminiKey });
-    const base64Data = photoDataUrl.split(',')[1];
-    const mimeType = photoDataUrl.substring(
-      photoDataUrl.indexOf(':') + 1,
-      photoDataUrl.indexOf(';')
-    );
 
     const response = await ai.models.generateContent({
       model: 'gemini-2.0-flash',

@@ -110,19 +110,14 @@ export async function triggerGoogleSignIn(
       window.google.accounts.id.prompt((notification: unknown) => {
         console.log('Google One Tap notification:', notification);
       });
+      onError?.('Google Sign-In prompt failed. Please try again.');
       return;
-    } catch (err) {
+    } catch (err: any) {
       console.warn('Google GIS prompt failed:', err);
+      onError?.(err?.message || 'Google Sign-In failed.');
+      return;
     }
   }
 
-  // Fallback demo user sign in if offline / no client id
-  const fallbackUser: GoogleUserData = {
-    id: 'google-user-' + Date.now(),
-    email: 'spotter@apex.app',
-    name: 'Real Spotter',
-    picture: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400&auto=format&fit=crop'
-  };
-  localStorage.setItem('apex_user_session', JSON.stringify(fallbackUser));
-  onSuccess(fallbackUser);
+  onError?.('Google Sign-In client configuration is unavailable. Please sign in with Email.');
 }

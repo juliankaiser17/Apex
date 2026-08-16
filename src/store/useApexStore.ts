@@ -390,47 +390,51 @@ export const useApexStore = create<ApexState>((set, get) => ({
     } catch (e) {}
     set({ onboardingCompleted: true });
   },
-
   addCardToGarage: async (newCard, customCaption) => {
     sounds.playXpPop();
-    const xpGained = calculateScanXp(newCard.rarity, newCard.isFirstGlobalScan, newCard.isFirstCityScan);
-
-    const state = get();
     const postCaption = customCaption?.trim() || `Just found this incredible ${newCard.make} ${newCard.model} in ${newCard.city}!`;
     
-    // Insert into cloud database
-    await supabase.from('garage').insert({
-      id: newCard.id,
-      user_id: state.user.id,
-      make: newCard.make,
-      model: newCard.model,
-      year_estimate: newCard.yearEstimate || 'Unknown',
-      color: newCard.color,
-      rarity: newCard.rarity,
-      image_url: newCard.imageUrl,
-      city: newCard.city,
-      country: newCard.country,
-      latitude: newCard.latApprox,
-      longitude: newCard.lngApprox,
-      xp_earned: xpGained,
-      is_minted: false,
-      card_number: `A-${Math.floor(Math.random() * 9999)}`
-    });
+    let authoritativeXp = calculateScanXp(newCard.rarity, newCard.isFirstGlobalScan, newCard.isFirstCityScan);
+    let authoritativeRarity = newCard.rarity;
+    let serverCardId = newCard.id;
 
-    await supabase.from('posts').insert({
-      user_id: state.user.id,
-      car_id: newCard.id,
-      caption: postCaption
-    });
+    // 1. Invoke Authoritative Server-Side PostgreSQL RPC
+    try {
+      const { data: rpcResult, error: rpcError } = await supabase.rpc('record_car_scan', {
+        p_make: newCard.make,
+        p_model: newCard.model,
+        p_year_estimate: newCard.yearEstimate || 'Unknown',
+        p_color: newCard.color || 'Unknown',
+        p_image_url: newCard.imageUrl,
+        p_city: newCard.city || 'Local Area',
+        p_country: newCard.country || 'Global',
+        p_latitude: newCard.latApprox || null,
+        p_longitude: newCard.lngApprox || null,
+        p_horsepower: newCard.horsepower || 0,
+        p_top_speed_kmh: newCard.topSpeedKmH || 0,
+        p_caption: postCaption,
+        p_image_hash: `hash_${Date.now()}_${newCard.make}_${newCard.model}`
+      });
 
-    await supabase.from('profiles').update({ 
-      xp: state.user.xp + xpGained,
-      total_spots: state.user.totalSpots + 1 
-    }).eq('id', state.user.id);
+      if (!rpcError && rpcResult?.success) {
+        authoritativeXp = rpcResult.xp_earned || authoritativeXp;
+        authoritativeRarity = rpcResult.rarity || authoritativeRarity;
+        serverCardId = rpcResult.card_id || serverCardId;
+      }
+    } catch (dbErr) {
+      console.warn('RPC record_car_scan execution fallback:', dbErr);
+    }
+
+    const authoritativeCard: CarCard = {
+      ...newCard,
+      id: serverCardId,
+      rarity: authoritativeRarity,
+      xpEarned: authoritativeXp
+    };
 
     set((state) => {
-      const updatedGarage = [newCard, ...state.garage];
-      const newXp = state.user.xp + xpGained;
+      const updatedGarage = [authoritativeCard, ...state.garage];
+      const newXp = state.user.xp + authoritativeXp;
       const { level } = getLevelFromXp(newXp);
 
       const updatedQuests = state.dailyQuests.map(quest => {

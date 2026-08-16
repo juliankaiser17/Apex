@@ -34,17 +34,31 @@ export function offsetCoordinatesApprox(lat: number, lng: number): { latApprox: 
   };
 }
 
+// In-memory cache for reverse geocoding to prevent excessive third-party requests
+const geocodeCache = new Map<string, { city: string; country: string; timestamp: number }>();
+
 /**
  * Reverse geocode latitude & longitude to get real city and country name
  */
 export async function reverseGeocodeCity(lat: number, lng: number): Promise<{ city: string; country: string }> {
+  const cacheKey = `${lat.toFixed(2)},${lng.toFixed(2)}`;
+  const cached = geocodeCache.get(cacheKey);
+  if (cached && Date.now() - cached.timestamp < 3600000) {
+    return { city: cached.city, country: cached.country };
+  }
+
   try {
-    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=10`);
+    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=10`, {
+      headers: {
+        'Accept': 'application/json'
+      }
+    });
     if (res.ok) {
       const data = await res.json();
       const addr = data.address || {};
       const city = addr.city || addr.town || addr.village || addr.state_district || addr.county || 'Local Area';
       const country = addr.country || 'Global';
+      geocodeCache.set(cacheKey, { city, country, timestamp: Date.now() });
       return { city, country };
     }
   } catch (e) {
