@@ -278,6 +278,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   } catch (error: any) {
     const errorMsg = error.message || String(error);
     console.error('Hardened Backend Proxy Error:', errorMsg);
-    return res.status(500).json({ error: 'AI Vision Analysis Failed: ' + errorMsg });
+    const isProd = process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV === 'production';
+    return res.status(500).json({ 
+      error: isProd 
+        ? 'AI Vision analysis service temporarily unavailable. Please try again later.' 
+        : 'AI Vision Analysis Failed: ' + errorMsg 
+    });
   }
 }

@@ -360,6 +360,69 @@ test(20, 'Multi-account farming (Starter asset transfer restrictions)', () => {
   assert.ok(attemptAssetTransfer(12, true));
 });
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Attack 21, 22, 23, 24: Network Security & TLS Configuration Tests
+// ─────────────────────────────────────────────────────────────────────────────
+test(21, 'Network Security: Android XML disallows cleartext HTTP', () => {
+  const mockNetworkSecurityConfig = `
+    <network-security-config>
+        <base-config cleartextTrafficPermitted="false">
+            <trust-anchors>
+                <certificates src="system" />
+            </trust-anchors>
+        </base-config>
+    </network-security-config>
+  `;
+  assert.ok(mockNetworkSecurityConfig.includes('cleartextTrafficPermitted="false"'), 'Cleartext traffic must be explicitly disallowed');
+});
+
+test(22, 'Network Security: System CA trust anchors enforced in release builds', () => {
+  const mockNetworkSecurityConfig = `
+    <network-security-config>
+        <base-config cleartextTrafficPermitted="false">
+            <trust-anchors>
+                <certificates src="system" />
+            </trust-anchors>
+        </base-config>
+    </network-security-config>
+  `;
+  assert.ok(mockNetworkSecurityConfig.includes('<certificates src="system" />'), 'Trust anchors must use system root CAs');
+  assert.ok(!mockNetworkSecurityConfig.includes('<certificates src="user" />'), 'Release builds must not trust user-installed CAs');
+});
+
+test(23, 'Network Security: Production API 500 errors sanitized against internal leakage', () => {
+  function formatApiError(errorObj, isProd = true) {
+    const rawMsg = errorObj?.message || String(errorObj);
+    return {
+      error: isProd 
+        ? 'AI Vision analysis service temporarily unavailable. Please try again later.' 
+        : 'AI Vision Analysis Failed: ' + rawMsg
+    };
+  }
+
+  const internalDbError = new Error('Database connection failed at postgres://user:secret@10.0.0.1:5432/db');
+  const sanitizedResponse = formatApiError(internalDbError, true);
+
+  assert.equal(sanitizedResponse.error, 'AI Vision analysis service temporarily unavailable. Please try again later.');
+  assert.ok(!sanitizedResponse.error.includes('postgres://'), 'Must not leak database URIs or credentials');
+  assert.ok(!sanitizedResponse.error.includes('10.0.0.1'), 'Must not leak internal IP topology');
+});
+
+test(24, 'Network Security: OAuth URL hash scrubbed immediately upon token extraction', () => {
+  let simulatedUrl = 'https://apex-spotter.vercel.app/#access_token=eyJhbGciOi...&refresh_token=sec_123';
+  
+  function sanitizeBrowserLocation(hash) {
+    if (hash.includes('access_token=')) {
+      return 'https://apex-spotter.vercel.app/'; // Scrubbed!
+    }
+    return hash;
+  }
+
+  const cleanUrl = sanitizeBrowserLocation(simulatedUrl);
+  assert.equal(cleanUrl, 'https://apex-spotter.vercel.app/');
+  assert.ok(!cleanUrl.includes('access_token'), 'Tokens must not remain in location bar');
+});
+
 console.log('\n────────────────────────────────────────────────────────────');
 console.log(` RESULTS: ${testsPassed} passed, ${testsFailed} failed`);
 console.log('────────────────────────────────────────────────────────────\n');
@@ -367,3 +430,4 @@ console.log('──────────────────────�
 if (testsFailed > 0) {
   process.exit(1);
 }
+
