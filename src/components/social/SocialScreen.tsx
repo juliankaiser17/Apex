@@ -63,10 +63,19 @@ export const SocialScreen: React.FC = () => {
                         <p className="text-[10px] font-data text-[#9A9088]">Level {post.user.level} Spotter · {post.createdAt}</p>
                       </div>
                     </div>
-                    <span className={`text-[9px] font-data font-semibold px-2 py-0.5 rounded border ${conf.badgeBg}`}>
-                      {conf.label}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      {/* Follow pill */}
+                      {post.user.username !== user.username && (
+                        <button className="relative overflow-hidden text-[10px] font-semibold px-3 py-1 rounded-full border border-[#FF4500] text-[#FF4500] hover:bg-[#FF4500] hover:text-[#F0EBE3] transition-all">
+                          FOLLOW
+                        </button>
+                      )}
+                      <span className={`text-[9px] font-data font-semibold px-2 py-0.5 rounded border ${conf.badgeBg}`}>
+                        {conf.label}
+                      </span>
+                    </div>
                   </div>
+
 
                   {/* Car Photo with Double Tap Like */}
                   <div 
@@ -81,7 +90,24 @@ export const SocialScreen: React.FC = () => {
                       <h3 className="font-display text-2xl text-[#F0EBE3] leading-none">{post.card.make} {post.card.model}</h3>
                       <p className="text-xs text-[#9A9088] font-data mt-0.5">Spotted in {post.card.city} · +{post.card.xpEarned} XP</p>
                     </div>
+
+                    {/* Distance pill overlay */}
+                    <div className="absolute top-3 right-3 bg-[#080808]/80 backdrop-blur-md px-2.5 py-1 rounded-full">
+                      <span className="text-[11px] font-data text-[#F0EBE3]/80">
+                        📍 {(Math.random() * 3 + 0.1).toFixed(1)} km away
+                      </span>
+                    </div>
                   </div>
+
+                  {/* Caption with 3-line truncation */}
+                  {post.caption && (
+                    <div className="px-4 pb-1">
+                      <p className="text-[14px] text-[#F0EBE3]/85 leading-relaxed" style={{ display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                        {post.caption}
+                      </p>
+                    </div>
+                  )}
+
 
                   {/* Interactions Row */}
                   <div className="p-4 pt-0 flex items-center justify-between text-xs font-data">

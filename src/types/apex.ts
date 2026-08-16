@@ -180,6 +180,7 @@ export interface FeedPost {
     level: number;
   };
   card: CarCard;
+  caption?: string;
   likesCount: number;
   commentsCount: number;
   isLiked: boolean;
