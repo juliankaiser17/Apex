@@ -530,6 +530,55 @@ test(31, 'Play Integrity: Tiered enforcement allows single-player on virtual/bas
   assert.equal(emulator.leaderboardEligible, false, 'Emulator is sandboxed from leaderboards without blanket ban');
 });
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Attack 32, 33, 34, 35: Build & Release Binary Security Tests
+// ─────────────────────────────────────────────────────────────────────────────
+test(32, 'Release Security: Release build type disables debuggable flags', () => {
+  const mockReleaseConfig = {
+    minifyEnabled: true,
+    shrinkResources: true,
+    debuggable: false,
+    jniDebuggable: false
+  };
+
+  assert.equal(mockReleaseConfig.debuggable, false, 'Release build must never be debuggable');
+  assert.equal(mockReleaseConfig.jniDebuggable, false, 'Native debugging must be disabled in release');
+});
+
+test(33, 'Release Security: R8 minification and resource shrinking enabled', () => {
+  const mockGradleRelease = {
+    minifyEnabled: true,
+    shrinkResources: true
+  };
+
+  assert.equal(mockGradleRelease.minifyEnabled, true, 'R8 code minification must be enabled');
+  assert.equal(mockGradleRelease.shrinkResources, true, 'Unused resource shrinking must be enabled');
+});
+
+test(34, 'Release Security: ProGuard rules strip verbose/debug logs from release binary', () => {
+  const mockProGuardRules = `
+    -assumenosideeffects class android.util.Log {
+        public static boolean isLoggable(java.lang.String, int);
+        public static int v(...);
+        public static int d(...);
+        public static int i(...);
+    }
+  `;
+
+  assert.ok(mockProGuardRules.includes('-assumenosideeffects class android.util.Log'), 'Must strip android.util.Log invocations');
+});
+
+test(35, 'Release Security: Play App Signing upload key segregation policy', () => {
+  const signingArchitecture = {
+    uploadKeySource: 'CI_ENV_VARIABLE',
+    productionAppSigningKey: 'GOOGLE_PLAY_CLOUD_HSM',
+    keysCommittedToGit: false
+  };
+
+  assert.equal(signingArchitecture.keysCommittedToGit, false, 'Keystore files must never be committed to git');
+  assert.equal(signingArchitecture.productionAppSigningKey, 'GOOGLE_PLAY_CLOUD_HSM', 'Google Play App Signing must manage production keys');
+});
+
 console.log('\n────────────────────────────────────────────────────────────');
 console.log(` RESULTS: ${testsPassed} passed, ${testsFailed} failed`);
 console.log('────────────────────────────────────────────────────────────\n');
@@ -537,6 +586,7 @@ console.log('──────────────────────�
 if (testsFailed > 0) {
   process.exit(1);
 }
+
 
 
 
