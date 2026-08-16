@@ -93,8 +93,8 @@ export const PostComposer: React.FC<PostComposerProps> = ({ card, onBack, onPost
           </button>
         </div>
 
-        {/* PHOTO PREVIEW (Full width, 200px height) */}
-        <div className="relative w-full h-[200px] bg-[#111111] overflow-hidden">
+        {/* PHOTO PREVIEW (Full width, 220px height) */}
+        <div className="relative w-full h-[220px] bg-[#111111] overflow-hidden">
           <img 
             src={card.imageUrl} 
             alt={`${card.make} ${card.model}`}

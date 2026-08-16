@@ -225,3 +225,19 @@
 }
 .animate-map-glow { animation: mapGlow 2s ease-in-out infinite; transform-origin: center; }
 
+/* ═══ 3-RING RIPPLE — User Location ═══ */
+@keyframes ripplePulse {
+  0% { opacity: 0.6; transform: scale(1); }
+  100% { opacity: 0; transform: scale(2.2); }
+}
+.animate-ripple-1 { animation: ripplePulse 2.4s ease-out infinite; }
+.animate-ripple-2 { animation: ripplePulse 2.4s ease-out 0.6s infinite; }
+.animate-ripple-3 { animation: ripplePulse 2.4s ease-out 1.2s infinite; }
+
+/* ═══ HUNT ZONE — Spinning dashed border ═══ */
+@keyframes huntRingSpin {
+  0% { stroke-dashoffset: 0; opacity: 0.4; }
+  50% { opacity: 0.8; }
+  100% { stroke-dashoffset: 48; opacity: 0.4; }
+}
+.animate-hunt-ring { animation: huntRingSpin 3s linear infinite; }

@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useRef } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Circle, CircleMarker, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { ShieldAlert, Crosshair, Eye, Search, Flame, ArrowLeft, MapPin } from 'lucide-react';
 import { useApexStore } from '../../store/useApexStore';
@@ -204,21 +204,34 @@ export const MapScreen: React.FC = () => {
             url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
           />
 
-          {/* User Location */}
+          {/* User Location — 3-Ring Ripple Marker */}
           {user.latitude && user.longitude && (
-            locationDisplayMode === 'radius' ? (
-              <Circle
+            <>
+              {/* Outer ripple ring 1 */}
+              <CircleMarker
                 center={[user.latitude, user.longitude]}
-                radius={1000}
-                pathOptions={{ color: '#FF4500', fillColor: '#FF4500', fillOpacity: 0.15, weight: 2, dashArray: '6 6', className: 'animate-map-glow' }}
+                radius={24}
+                pathOptions={{ color: '#FF4500', fillColor: '#FF4500', fillOpacity: 0.06, weight: 1, className: 'animate-ripple-1' }}
               />
-            ) : (
-              <Circle
+              {/* Outer ripple ring 2 */}
+              <CircleMarker
                 center={[user.latitude, user.longitude]}
-                radius={30}
-                pathOptions={{ color: '#FF4500', fillColor: '#FF4500', fillOpacity: 1, weight: 3 }}
+                radius={16}
+                pathOptions={{ color: '#FF4500', fillColor: '#FF4500', fillOpacity: 0.1, weight: 1, className: 'animate-ripple-2' }}
               />
-            )
+              {/* Outer ripple ring 3 */}
+              <CircleMarker
+                center={[user.latitude, user.longitude]}
+                radius={10}
+                pathOptions={{ color: '#FF4500', fillColor: '#FF4500', fillOpacity: 0.15, weight: 1.5, className: 'animate-ripple-3' }}
+              />
+              {/* Core dot */}
+              <CircleMarker
+                center={[user.latitude, user.longitude]}
+                radius={5}
+                pathOptions={{ color: '#FF4500', fillColor: '#FF4500', fillOpacity: 1, weight: 2 }}
+              />
+            </>
           )}
 
           {/* GTA V Camera Controller */}
@@ -227,14 +240,28 @@ export const MapScreen: React.FC = () => {
             onAnimationPhaseChange={setGtaAnimationPhase}
           />
 
-          {/* Active Hunt Zone Circles */}
+          {/* Active Hunt Zone — Multi-layer animated rings */}
           {activeHunts.map((hunt) => (
-            <Circle
-              key={hunt.id}
-              center={[hunt.latApprox, hunt.lngApprox]}
-              radius={2000}
-              pathOptions={{ color: '#FF4500', fillColor: '#FF4500', fillOpacity: 0.2 }}
-            />
+            <React.Fragment key={hunt.id}>
+              {/* Outer pulsing ring */}
+              <Circle
+                center={[hunt.latApprox, hunt.lngApprox]}
+                radius={2500}
+                pathOptions={{ color: '#FF4500', fillColor: 'transparent', fillOpacity: 0, weight: 1, dashArray: '8 4', className: 'animate-hunt-ring' }}
+              />
+              {/* Middle ring */}
+              <Circle
+                center={[hunt.latApprox, hunt.lngApprox]}
+                radius={2000}
+                pathOptions={{ color: '#FF4500', fillColor: '#FF4500', fillOpacity: 0.08, weight: 1.5 }}
+              />
+              {/* Inner fill */}
+              <Circle
+                center={[hunt.latApprox, hunt.lngApprox]}
+                radius={1500}
+                pathOptions={{ color: '#FF4500', fillColor: '#FF4500', fillOpacity: 0.15, weight: 0 }}
+              />
+            </React.Fragment>
           ))}
 
           {/* Spot Markers */}

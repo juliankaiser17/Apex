@@ -66,8 +66,27 @@ export const HomeScreen: React.FC = () => {
     }
   };
 
+  // Build a static dark map tile URL centered on user location
+  const mapLat = user.latitude || 40.7128;
+  const mapLng = user.longitude || -74.006;
+
   return (
-    <div className="flex-1 pb-32 px-4 pt-4 space-y-4" style={{ fontFamily: 'DM Sans' }}>
+    <div className="relative flex-1" style={{ fontFamily: 'DM Sans' }}>
+      {/* Layer 0: Dark map background */}
+      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+        <iframe
+          title="home-map-bg"
+          src={`https://www.openstreetmap.org/export/embed.html?bbox=${mapLng - 0.02},${mapLat - 0.01},${mapLng + 0.02},${mapLat + 0.01}&layer=mapnik`}
+          className="w-full h-full border-none opacity-[0.08] saturate-0 invert"
+          style={{ filter: 'brightness(0.3) contrast(1.2) saturate(0) invert(1)', pointerEvents: 'none' }}
+          loading="lazy"
+        />
+        {/* Gradient fade from top and bottom to merge into #080808 */}
+        <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, #080808 0%, transparent 15%, transparent 70%, #080808 100%)' }} />
+      </div>
+
+      {/* Layer 1: HUD Content */}
+      <div className="relative z-10 pb-32 px-4 pt-4 space-y-4">
       {/* 1. Daily Quest Card (Collapsible, left ignition accent bar) */}
       {activeQuest && (
         <motion.div 
@@ -357,6 +376,7 @@ export const HomeScreen: React.FC = () => {
             );
           })}
         </div>
+      </div>
       </div>
     </div>
   );
