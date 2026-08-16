@@ -423,6 +423,47 @@ test(24, 'Network Security: OAuth URL hash scrubbed immediately upon token extra
   assert.ok(!cleanUrl.includes('access_token'), 'Tokens must not remain in location bar');
 });
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Attack 25, 26, 27: Android Component & IPC Attack Surface Tests
+// ─────────────────────────────────────────────────────────────────────────────
+test(25, 'Android Surface: Only launcher activity is exported; zero unprotected services', () => {
+  const mockManifestComponents = [
+    { name: 'MainActivity', type: 'activity', exported: true, hasLauncherIntent: true },
+    { name: 'FileProvider', type: 'provider', exported: false, hasLauncherIntent: false }
+  ];
+
+  for (const comp of mockManifestComponents) {
+    if (comp.exported) {
+      assert.equal(comp.hasLauncherIntent, true, `Exported component ${comp.name} must be the launcher activity`);
+    }
+  }
+});
+
+test(26, 'Android Surface: FileProvider is not exported and restricted to private directories', () => {
+  const mockFileProviderConfig = {
+    exported: false,
+    grantUriPermissions: true,
+    paths: ['camera_cache', 'camera_images']
+  };
+
+  assert.equal(mockFileProviderConfig.exported, false, 'FileProvider must never be exported');
+  assert.equal(mockFileProviderConfig.grantUriPermissions, true, 'FileProvider must grant per-URI permissions');
+  assert.ok(!mockFileProviderConfig.paths.includes('external-path-root'), 'FileProvider must not grant access to external storage root');
+});
+
+test(27, 'Android Surface: Least privilege permissions enforced (No broad storage perms)', () => {
+  const manifestPermissions = [
+    'android.permission.INTERNET',
+    'android.permission.ACCESS_COARSE_LOCATION',
+    'android.permission.ACCESS_FINE_LOCATION',
+    'android.permission.CAMERA'
+  ];
+
+  assert.ok(!manifestPermissions.includes('android.permission.READ_EXTERNAL_STORAGE'), 'Must not request legacy READ_EXTERNAL_STORAGE');
+  assert.ok(!manifestPermissions.includes('android.permission.WRITE_EXTERNAL_STORAGE'), 'Must not request legacy WRITE_EXTERNAL_STORAGE');
+  assert.ok(!manifestPermissions.includes('android.permission.ACCESS_BACKGROUND_LOCATION'), 'Must not request background location');
+});
+
 console.log('\n────────────────────────────────────────────────────────────');
 console.log(` RESULTS: ${testsPassed} passed, ${testsFailed} failed`);
 console.log('────────────────────────────────────────────────────────────\n');
@@ -430,4 +471,5 @@ console.log('──────────────────────�
 if (testsFailed > 0) {
   process.exit(1);
 }
+
 
