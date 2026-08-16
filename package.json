@@ -17,7 +17,6 @@
     "@capacitor/geolocation": "^8.2.0",
     "@capacitor/push-notifications": "^8.1.2",
     "@capawesome/capacitor-google-sign-in": "^0.1.2",
-    "@google/genai": "^2.15.0",
     "@supabase/supabase-js": "^2.112.0",
     "canvas-confetti": "^1.9.4",
     "clsx": "^2.1.1",
