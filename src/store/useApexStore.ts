@@ -239,6 +239,7 @@ export const useApexStore = create<ApexState>((set, get) => ({
       garage: []
     });
     localStorage.removeItem('apex_user_session');
+    localStorage.removeItem('apex_onboarding_v2_completed');
     localStorage.removeItem('apex_onboarding_completed');
     localStorage.removeItem('apex_garage_cards');
 
