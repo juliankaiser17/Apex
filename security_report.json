@@ -1,0 +1,35 @@
+{
+  "scanTimestamp": "2026-08-16T09:45:13.670Z",
+  "target": "APEX (org.juliankaiser.apex)",
+  "summary": {
+    "totalRulesEvaluated": 35,
+    "findingsCount": 2,
+    "activeVulnerabilities": 0,
+    "suppressedFalsePositives": 2,
+    "overallSecurityPosture": "HARDENED / SECURE"
+  },
+  "findings": [
+    {
+      "category": "CRYPTO",
+      "ruleId": "SUP-CRY-01",
+      "severity": "INFORMATIONAL",
+      "title": "Math.random() usage in UI animation particle coordinates and non-cryptographic mock card numbers",
+      "file": "src\\components\\scanner\\ScannerModal.tsx",
+      "line": 135,
+      "details": "Math.random() used strictly for visual confetti dispersion and cosmetic card ID numbers (#APX-XXXX), not security tokens.",
+      "suppressionJustification": "Accepted cosmetic randomness; security nonces and request hashes use crypto.subtle and crypto.createHash(sha256).",
+      "status": "SUPPRESSED_FALSE_POSITIVE"
+    },
+    {
+      "category": "AUTH",
+      "ruleId": "SUP-AUT-01",
+      "severity": "INFORMATIONAL",
+      "title": "Public Google OAuth Client ID in client build",
+      "file": "src\\components\\onboarding\\OnboardingModal.tsx",
+      "line": 133,
+      "details": "VITE_GOOGLE_CLIENT_ID is a public OAuth 2.0 identifier required by Google Identity Services to render the user consent dialog.",
+      "suppressionJustification": "Public identifier by OAuth 2.0 PKCE design. No client secret is stored on client.",
+      "status": "SUPPRESSED_FALSE_POSITIVE"
+    }
+  ]
+}
