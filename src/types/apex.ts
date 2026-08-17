@@ -2,7 +2,7 @@ import type { PrivacyLevel } from '../utils/privacyPipeline';
 
 export type { PrivacyLevel };
 
-export type Persona = 'spotter' | 'finder' | 'love_of_cars';
+export type Persona = 'spotter' | 'finder' | 'love_of_cars' | 'unspecified';
 
 export type RarityTier = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary' | 'mythic';
 

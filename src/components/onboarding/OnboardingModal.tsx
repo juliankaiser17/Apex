@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { User, AtSign, MapPin, ChevronLeft } from 'lucide-react';
+import { User, AtSign, ChevronLeft } from 'lucide-react';
 import { useApexStore } from '../../store/useApexStore';
 import type { Persona } from '../../types/apex';
 import { sounds } from '../../utils/audio';
@@ -69,7 +69,7 @@ const GoogleIcon: React.FC<{ className?: string }> = ({ className }) => (
 const ApertureIris: React.FC = () => {
   const blades = 8;
   return (
-    <svg width="72" height="72" viewBox="0 0 72 72" fill="none">
+    <svg width="64" height="64" viewBox="0 0 72 72" fill="none">
       {Array.from({ length: blades }).map((_, i) => {
         const angle = (360 / blades) * i;
         const rad = (angle * Math.PI) / 180;
@@ -98,7 +98,7 @@ const ApertureIris: React.FC = () => {
 };
 
 const GpsCrosshair: React.FC = () => (
-  <svg width="72" height="72" viewBox="0 0 72 72" fill="none">
+  <svg width="64" height="64" viewBox="0 0 72 72" fill="none">
     <circle cx="36" cy="28" r="28" stroke="#F0EBE3" strokeWidth="1.5" opacity="0.3" />
     <line x1="36" y1="4" x2="36" y2="20" stroke="#F0EBE3" strokeWidth="1.5" opacity="0.4" />
     <line x1="36" y1="52" x2="36" y2="68" stroke="#F0EBE3" strokeWidth="1.5" opacity="0.4" />
@@ -116,87 +116,71 @@ const GpsCrosshair: React.FC = () => (
 
 const NotificationBell: React.FC = () => (
   <motion.svg
-    width="72" height="72" viewBox="0 0 72 72" fill="none"
+    width="64" height="64" viewBox="0 0 72 72" fill="none"
     animate={{ rotate: [-12, 12, -12] }}
-    transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+    transition={{ duration: 1.2, repeat: Infinity, ease: 'easeInOut' }}
   >
-    <path d="M36 8 C24 8, 14 20, 14 32 L14 44 L10 50 L62 50 L58 44 L58 32 C58 20, 48 8, 36 8Z" fill="#F0EBE3" opacity="0.85" />
-    <circle cx="36" cy="56" r="5" fill="#F0EBE3" opacity="0.85" />
-    <motion.circle
-      cx="52" cy="14" r="6" fill="#FF4500"
-      animate={{ scale: [1, 1.3, 1], opacity: [1, 0.7, 1] }}
-      transition={{ duration: 1.5, repeat: Infinity }}
+    <path
+      d="M36 12C26.0589 12 18 20.0589 18 30V44L12 50V54H60V50L54 44V30C54 20.0589 45.9411 12 36 12Z"
+      stroke="#F0EBE3" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
     />
+    <path d="M30 54C30 57.3137 32.6863 60 36 60C39.3137 60 42 57.3137 42 54" stroke="#FF4500" strokeWidth="2.5" />
+    <circle cx="50" cy="18" r="5" fill="#FF4500" />
   </motion.svg>
 );
 
-// ─── MAIN ONBOARDING MODAL COMPONENT ───
+const CLIENT_ID = '1069695648831-2947a7k8m1skrve8e87g898f0u0f1vba.apps.googleusercontent.com';
 
 export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClose }) => {
   const { user, updateUserProfile, setPersona, completeOnboarding } = useApexStore();
   const [step, setStep] = useState<OnboardingStep>('auth');
-  const [isAuthLoading, setIsAuthLoading] = useState(false);
-  const [authError, setAuthError] = useState('');
-  
-  // Auth Form State
+
+  // Form states
   const [emailInput, setEmailInput] = useState('');
   const [passwordInput, setPasswordInput] = useState('');
+  const [isAuthLoading, setIsAuthLoading] = useState(false);
+  const [authError, setAuthError] = useState('');
   const [otpCode, setOtpCode] = useState(['', '', '', '', '', '']);
-  
-  // Profile Setup State (immediately asked after login)
-  const [displayNameInput, setDisplayNameInput] = useState(user.displayName || 'Alex Vance');
-  const [usernameInput, setUsernameInput] = useState(user.username || 'tokyo_drifter');
-  const [selectedCity, setSelectedCity] = useState(user.city && user.city !== 'Local Area' ? user.city : 'Tokyo');
-  const [selectedCountry, setSelectedCountry] = useState(user.country && user.country !== 'Your Country' ? user.country : 'Japan');
-
-  // Role Selection State
-  const [selectedRoleId, setSelectedRoleId] = useState<Persona>('finder'); // Default to SPOTTER
-  const [camDenied, setCamDenied] = useState(false);
-
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-  useEffect(() => {
-    if (isOpen) {
-      setStep('auth');
-      requestRealLocationPermission().then((res) => {
-        if (res.granted && res.city && res.city !== 'Local Area') {
-          setSelectedCity(res.city);
-          setSelectedCountry(res.country);
-        }
-      }).catch(() => {});
-    }
-  }, [isOpen]);
+  // Profile setup states
+  const [displayNameInput, setDisplayNameInput] = useState(user.displayName || '');
+  const [usernameInput, setUsernameInput] = useState(user.username || '');
+  const [selectedCity, setSelectedCity] = useState(user.city || 'Tokyo');
+  const [selectedCountry, setSelectedCountry] = useState(user.country || 'Japan');
 
-  const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '708398928493-8qkjhla9p00kkjrse5f0l4d8spo9pj6c.apps.googleusercontent.com';
+  // Role selection state (defaults to unspecified until explicitly chosen)
+  const [selectedRoleId, setSelectedRoleId] = useState<Persona>('unspecified');
 
-  // ─── AUTH HANDLERS ───
+  // Permissions states
+  const [camDenied, setCamDenied] = useState(false);
+
+  if (!isOpen) return null;
+
+  // ─── AUTH ACTIONS ───
 
   const handleEnterTheSpace = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!emailInput.trim()) {
-      setAuthError('Please enter your email address.');
-      return;
-    }
+    if (!emailInput.trim()) return;
+
     sounds.playTargetLock();
     setIsAuthLoading(true);
     setAuthError('');
 
     try {
-      // If password provided, attempt password login or signup
       if (passwordInput.trim()) {
         const { error } = await supabase.auth.signInWithPassword({
           email: emailInput.trim(),
-          password: passwordInput.trim()
+          password: passwordInput.trim(),
         });
+
         if (error) {
-          // If user doesn't exist, try auto sign up
-          if (error.message.toLowerCase().includes('invalid login') || error.message.toLowerCase().includes('not found')) {
+          if (error.message.toLowerCase().includes('invalid login credentials')) {
             const signUpRes = await supabase.auth.signUp({
               email: emailInput.trim(),
-              password: passwordInput.trim()
+              password: passwordInput.trim(),
             });
             if (signUpRes.error) {
-              // Fallback to OTP
               const otpRes = await supabase.auth.signInWithOtp({ email: emailInput.trim(), options: { shouldCreateUser: true } });
               if (otpRes.error) throw otpRes.error;
               setIsAuthLoading(false);
@@ -208,7 +192,6 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
           }
         }
       } else {
-        // Passwordless OTP Flow
         const { error } = await supabase.auth.signInWithOtp({ email: emailInput.trim(), options: { shouldCreateUser: true } });
         if (error) throw error;
         setIsAuthLoading(false);
@@ -217,11 +200,9 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
       }
 
       setIsAuthLoading(false);
-      // Immediately proceed to profile customization
       setStep('profile_setup');
     } catch (err: any) {
       console.warn('Auth fallback:', err);
-      // If network/offline or testing, allow user into profile setup cleanly
       setIsAuthLoading(false);
       setStep('profile_setup');
     }
@@ -241,42 +222,8 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
           if (data?.user?.user_metadata?.full_name) {
             setDisplayNameInput(data.user.user_metadata.full_name);
             const slug = data.user.user_metadata.full_name.toLowerCase().replace(/[^a-z0-9]/g, '_');
-            setUsernameInput(slug || 'hunter_01');
+            setUsernameInput(slug);
           }
-        } else {
-          throw new Error('No ID Token found');
-        }
-      } else {
-        const loadGIS = (): Promise<void> => new Promise((resolve) => {
-          if (window.google?.accounts?.id) { resolve(); return; }
-          const script = document.createElement('script');
-          script.src = 'https://accounts.google.com/gsi/client';
-          script.async = true;
-          script.onload = () => resolve();
-          document.head.appendChild(script);
-        });
-        await loadGIS();
-        if (!window.google?.accounts?.id) throw new Error('Google Identity Services failed to load');
-        const idToken = await new Promise<string>((resolve, reject) => {
-          window.google!.accounts.id.initialize({
-            client_id: CLIENT_ID,
-            callback: (response: { credential: string }) => {
-              if (response.credential) resolve(response.credential);
-              else reject(new Error('No credential returned'));
-            },
-          });
-          window.google!.accounts.id.prompt((notification: any) => {
-            if (notification?.isNotDisplayed?.() || notification?.isSkippedMoment?.()) {
-              reject(new Error('Google One Tap was dismissed. Please try again.'));
-            }
-          });
-        });
-        const { error, data } = await supabase.auth.signInWithIdToken({ provider: 'google', token: idToken });
-        if (error) throw error;
-        if (data?.user?.user_metadata?.full_name) {
-          setDisplayNameInput(data.user.user_metadata.full_name);
-          const slug = data.user.user_metadata.full_name.toLowerCase().replace(/[^a-z0-9]/g, '_');
-          setUsernameInput(slug || 'hunter_01');
         }
       }
       setIsAuthLoading(false);
@@ -284,14 +231,12 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
     } catch (err: any) {
       console.warn('Google auth:', err);
       setIsAuthLoading(false);
-      // Advance to profile setup
       setStep('profile_setup');
     }
   };
 
   const handleAppleSignIn = () => {
     sounds.playTargetLock();
-    // Advance to profile setup
     setStep('profile_setup');
   };
 
@@ -320,17 +265,17 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
   const handleProfileSetupSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     sounds.playTargetLock();
-    const cleanUsername = usernameInput.replace(/^@+/, '').trim().toLowerCase().replace(/[^a-z0-9_]/g, '') || 'hunter_01';
+    const cleanUsername = usernameInput.replace(/^@+/, '').trim().toLowerCase().replace(/[^a-z0-9_]/g, '') || `hunter_${Math.floor(1000 + Math.random() * 9000)}`;
     const cleanDisplayName = displayNameInput.trim() || 'Apex Hunter';
     
     updateUserProfile({
       displayName: cleanDisplayName,
       username: cleanUsername,
       city: selectedCity,
-      country: selectedCountry
+      country: selectedCountry,
+      persona: selectedRoleId
     });
 
-    // Advance to Role Selection
     setStep('roles');
   };
 
@@ -338,58 +283,75 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
 
   const handleRoleContinue = () => {
     sounds.playTargetLock();
-    setPersona(selectedRoleId);
+    const roleToSet = selectedRoleId === 'unspecified' ? 'finder' : selectedRoleId;
+    setSelectedRoleId(roleToSet);
+    setPersona(roleToSet);
+    updateUserProfile({ persona: roleToSet });
     setStep('cam_perm');
   };
 
   const handleSkipRoles = () => {
     sounds.playTargetLock();
-    setPersona('spotter');
+    setSelectedRoleId('unspecified');
+    setPersona('unspecified');
+    updateUserProfile({ persona: 'unspecified' });
     setStep('cam_perm');
   };
 
   // ─── PERMISSION HANDLERS ───
 
   const requestCamera = async () => {
+    sounds.playTargetLock();
     try {
-      const result = await CapCamera.requestPermissions();
-      if (result.camera === 'denied') { setCamDenied(true); return; }
-    } catch (e) { console.log(e); }
-    setStep('loc_perm');
+      const res = await CapCamera.requestPermissions();
+      if (res.camera === 'granted') {
+        setStep('loc_perm');
+      } else {
+        setCamDenied(true);
+        setStep('loc_perm');
+      }
+    } catch {
+      setStep('loc_perm');
+    }
   };
 
-  const requestLocation = async (precise: boolean) => {
-    if (precise) {
-      try {
+  const requestLocation = async (isPrecise: boolean) => {
+    sounds.playTargetLock();
+    try {
+      if (isPrecise) {
         const res = await requestRealLocationPermission();
-        if (res.granted && res.city && res.city !== 'Local Area') {
+        if (res.city && res.city !== 'Your City') {
+          setSelectedCity(res.city);
+          setSelectedCountry(res.country);
           updateUserProfile({
-            latitude: res.latitude,
-            longitude: res.longitude,
             city: res.city,
-            country: res.country
+            country: res.country,
+            latitude: res.latitude,
+            longitude: res.longitude
           });
         }
-      } catch (e) { console.log(e); }
-    }
+      }
+    } catch {}
     setStep('notif_perm');
   };
 
-  const handleNotifications = async () => {
-    try {
-      if (Capacitor.isNativePlatform()) await PushNotifications.requestPermissions();
-    } catch (e) { console.log(e); }
+  const requestNotifications = async (enable: boolean) => {
+    sounds.playTargetLock();
+    if (enable) {
+      try {
+        await PushNotifications.requestPermissions();
+        await PushNotifications.register();
+      } catch {}
+    }
     setStep('celebration');
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 z-[100] bg-[#080808] text-[#F0EBE3] overflow-hidden" style={{ fontFamily: "'Inter', 'DM Sans', sans-serif" }}>
+    <div className="fixed inset-0 z-50 bg-[#080808] flex flex-col justify-between overflow-hidden" style={{ minHeight: '100dvh' }}>
       <AnimatePresence mode="wait">
-
+        
         {/* ══════════════════════════════════════════════════════ */}
-        {/* SCREEN 1 — LOGIN SCREEN (Exact match to User Screenshot) */}
+        {/* SCREEN 1 — AUTH / LOGIN (Exact Match to Screenshot 1) */}
         {/* ══════════════════════════════════════════════════════ */}
         {step === 'auth' && (
           <motion.div
@@ -397,70 +359,53 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="relative flex flex-col justify-between h-full w-full max-w-md mx-auto px-6 py-10 overflow-y-auto scrollbar-hide"
+            className="relative flex flex-col justify-between min-h-full w-full max-w-md mx-auto px-6 py-6 sm:py-8 overflow-y-auto scrollbar-hide select-none"
           >
             {/* Background hypercar photograph */}
-            <div className="absolute inset-0 z-0 overflow-hidden">
+            <div className="absolute inset-0 z-0 pointer-events-none">
               <img
                 src="/auth-bg.jpg"
-                alt="Apex Hypercar Background"
-                className="w-full h-full object-cover object-center filter brightness-45 scale-105"
+                alt="Background"
+                className="w-full h-full object-cover filter brightness-35 scale-105"
               />
-              <div
-                className="absolute inset-0"
-                style={{
-                  background: 'linear-gradient(to bottom, rgba(8,8,8,0.2) 0%, rgba(8,8,8,0.6) 40%, rgba(8,8,8,0.95) 80%, #080808 100%)'
-                }}
-              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#080808] via-[#080808]/75 to-transparent" />
             </div>
 
-            {/* Top Brand Header & Title */}
-            <div className="relative z-10 pt-8 space-y-2">
+            {/* TOP BRAND HEADER */}
+            <div className="relative z-10 pt-2 space-y-1">
               <span className="text-[#FF4500] font-data text-xs tracking-[0.25em] uppercase font-bold block">
                 APEX
               </span>
-
-              <h1 className="font-serif italic text-[52px] text-white font-normal leading-[1.05] tracking-tight">
+              <h1 className="font-serif italic text-[52px] sm:text-[60px] text-white font-normal leading-[0.95] tracking-tight">
                 Spot the best
               </h1>
-
-              <p className="text-[#9A9088] text-[13.5px] leading-relaxed max-w-[270px] pt-1">
-                Join the community tracking the world's most coveted rides.
+              <p className="text-[#9A9088] text-[13px] sm:text-[14px] leading-relaxed pt-1">
+                Enter your details to register or sign in.
               </p>
             </div>
 
-            {/* Middle Form Fields */}
-            <form onSubmit={handleEnterTheSpace} className="relative z-10 space-y-6 pt-6 pb-4">
-              {/* EMAIL ADDRESS */}
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-data font-semibold text-[#9A9088] uppercase tracking-[0.2em] block">
-                  EMAIL ADDRESS
+            {/* INPUT FORM */}
+            <form onSubmit={handleEnterTheSpace} className="relative z-10 space-y-4 my-auto py-4">
+              <div>
+                <label className="text-[10px] font-data font-semibold text-[#9A9088] uppercase tracking-[0.2em] block mb-1">
+                  EMAIL
                 </label>
                 <input
                   type="email"
                   required
                   value={emailInput}
                   onChange={e => setEmailInput(e.target.value)}
-                  placeholder="hello@apex.app"
-                  className="w-full bg-transparent border-b border-white/20 pb-2 text-[15px] text-white placeholder-white/25 focus:border-[#FF4500] outline-none font-sans transition-colors"
+                  placeholder="name@apex.app"
+                  className="w-full h-11 bg-transparent border-b border-white/20 text-white placeholder-white/30 focus:border-[#FF4500] outline-none text-[15px] font-sans transition-colors"
                 />
               </div>
 
-              {/* PASSWORD */}
-              <div className="space-y-1.5 pt-1">
-                <div className="flex items-center justify-between">
-                  <label className="text-[10px] font-data font-semibold text-[#9A9088] uppercase tracking-[0.2em] block">
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-[10px] font-data font-semibold text-[#9A9088] uppercase tracking-[0.2em]">
                     PASSWORD
                   </label>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (!emailInput) { setAuthError('Enter your email to receive an instant code'); return; }
-                      supabase.auth.signInWithOtp({ email: emailInput });
-                      setStep('email_otp');
-                    }}
-                    className="text-[11px] font-data text-[#FF4500] hover:underline"
-                  >
+                  <button type="button" className="text-[11px] text-[#9A9088] hover:text-[#FF4500] transition-colors">
                     Forgot?
                   </button>
                 </div>
@@ -468,37 +413,29 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
                   type="password"
                   value={passwordInput}
                   onChange={e => setPasswordInput(e.target.value)}
-                  placeholder="••••••••••••"
-                  className="w-full bg-transparent border-b border-white/20 pb-2 text-[15px] text-white placeholder-white/25 focus:border-[#FF4500] outline-none font-sans transition-colors"
+                  placeholder="••••••••"
+                  className="w-full h-11 bg-transparent border-b border-white/20 text-white placeholder-white/30 focus:border-[#FF4500] outline-none text-[15px] font-sans tracking-widest transition-colors"
                 />
               </div>
 
-              {authError && <p className="text-[#FF4500] text-xs font-data text-center pt-1">{authError}</p>}
+              {authError && <p className="text-[#FF4500] text-xs font-data">{authError}</p>}
 
-              {/* ENTER THE SPACE BUTTON */}
+              {/* PRIMARY ACTION: ENTER THE SPACE */}
               <motion.button
                 type="submit"
                 disabled={isAuthLoading}
                 whileTap={{ scale: 0.97 }}
-                className="w-full h-14 rounded-2xl bg-[#FF4500] text-white font-sans font-semibold text-[16px] shadow-[0_4px_24px_rgba(255,69,0,0.4)] hover:bg-[#FF5500] transition-all flex items-center justify-center gap-2 mt-2"
+                className="w-full h-13 rounded-2xl bg-[#FF4500] text-white font-sans font-semibold text-[15px] shadow-[0_4px_24px_rgba(255,69,0,0.4)] hover:bg-[#FF5500] transition-all flex items-center justify-center gap-2 mt-4"
               >
-                {isAuthLoading ? 'Entering...' : 'Enter the space'}
+                {isAuthLoading ? 'Authenticating...' : 'Enter the space'}
               </motion.button>
 
-              {/* OR CONTINUE WITH DIVIDER */}
-              <div className="relative flex items-center justify-center pt-2">
-                <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-white/10" /></div>
-                <span className="relative bg-[#080808]/90 px-3 text-[10px] font-data font-semibold uppercase tracking-[0.22em] text-[#9A9088]">
-                  OR CONTINUE WITH
-                </span>
-              </div>
-
-              {/* APPLE & GOOGLE PILL BUTTONS */}
-              <div className="flex gap-3 pt-1">
+              {/* SOCIAL SIGN IN PILL BUTTONS */}
+              <div className="flex gap-3 pt-2">
                 <button
                   type="button"
                   onClick={handleAppleSignIn}
-                  className="flex-1 h-12 rounded-full border border-white/15 bg-white/5 backdrop-blur-md flex items-center justify-center gap-2 text-white text-xs font-medium hover:border-white/30 transition-all active:scale-95"
+                  className="flex-1 h-11 rounded-full border border-white/15 bg-white/5 backdrop-blur-md flex items-center justify-center gap-2 text-white text-xs font-medium hover:border-white/30 transition-all active:scale-95"
                 >
                   <AppleIcon className="w-4 h-4 fill-white" />
                   <span>Apple</span>
@@ -507,22 +444,10 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
                 <button
                   type="button"
                   onClick={handleGoogleSignIn}
-                  className="flex-1 h-12 rounded-full border border-white/15 bg-white/5 backdrop-blur-md flex items-center justify-center gap-2 text-white text-xs font-medium hover:border-white/30 transition-all active:scale-95"
+                  className="flex-1 h-11 rounded-full border border-white/15 bg-white/5 backdrop-blur-md flex items-center justify-center gap-2 text-white text-xs font-medium hover:border-white/30 transition-all active:scale-95"
                 >
                   <GoogleIcon className="w-4 h-4" />
                   <span>Google</span>
-                </button>
-              </div>
-
-              {/* FOOTER */}
-              <div className="text-center pt-2 pb-2">
-                <span className="text-[12px] text-[#9A9088]">New to Apex? </span>
-                <button
-                  type="button"
-                  onClick={handleEnterTheSpace}
-                  className="text-[12px] text-[#FF4500] font-medium hover:underline"
-                >
-                  Request invitation
                 </button>
               </div>
             </form>
@@ -538,17 +463,17 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
             initial={{ x: 300, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: -300, opacity: 0 }}
-            className="flex flex-col h-full p-6 max-w-sm mx-auto w-full justify-between py-12"
+            className="flex flex-col min-h-full p-6 max-w-sm mx-auto w-full justify-between py-8"
           >
             <div>
-              <button onClick={() => setStep('auth')} className="text-[#9A9088] mb-6">
-                <ChevronLeft className="w-8 h-8" />
+              <button onClick={() => setStep('auth')} className="text-[#9A9088] mb-4">
+                <ChevronLeft className="w-7 h-7" />
               </button>
-              <span className="text-[#FF4500] font-data text-xs tracking-[0.25em] uppercase font-bold block mb-2">APEX</span>
-              <h2 className="font-serif italic text-[42px] text-white leading-none">Enter Passcode</h2>
+              <span className="text-[#FF4500] font-data text-xs tracking-[0.25em] uppercase font-bold block mb-1">APEX</span>
+              <h2 className="font-serif italic text-[38px] text-white leading-none">Enter Passcode</h2>
               <p className="text-[#9A9088] text-xs font-data mt-2">6-digit access code sent to {emailInput}</p>
               
-              <div className="flex justify-between my-8">
+              <div className="flex justify-between my-6">
                 {otpCode.map((c, i) => (
                   <input
                     key={i}
@@ -556,7 +481,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
                     type="number"
                     value={c}
                     onChange={e => handleOtpChange(i, e.target.value)}
-                    className="w-12 h-14 bg-[#1A1A1A] border border-[#2C2C2C] rounded-xl text-center text-xl text-white outline-none focus:border-[#FF4500]"
+                    className="w-11 h-13 bg-[#1A1A1A] border border-[#2C2C2C] rounded-xl text-center text-lg text-white outline-none focus:border-[#FF4500]"
                   />
                 ))}
               </div>
@@ -566,7 +491,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
             <button
               type="button"
               onClick={() => setStep('profile_setup')}
-              className="w-full h-14 rounded-2xl bg-[#FF4500] text-white font-semibold text-sm shadow-lg hover:bg-[#FF5500]"
+              className="w-full h-13 rounded-2xl bg-[#FF4500] text-white font-semibold text-sm shadow-lg hover:bg-[#FF5500]"
             >
               Verify & Enter →
             </button>
@@ -574,7 +499,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
         )}
 
         {/* ══════════════════════════════════════════════════════ */}
-        {/* SCREEN 2 — PROFILE SETUP (Just after user logs in)     */}
+        {/* SCREEN 2 — PROFILE SETUP (Display Name & Handle)       */}
         {/* ══════════════════════════════════════════════════════ */}
         {step === 'profile_setup' && (
           <motion.div
@@ -582,91 +507,60 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="flex flex-col justify-between h-full w-full max-w-md mx-auto px-6 py-10 overflow-y-auto scrollbar-hide"
+            className="flex flex-col justify-between min-h-full w-full max-w-md mx-auto px-5 sm:px-6 py-6 overflow-y-auto scrollbar-hide"
           >
-            <div className="pt-4 space-y-5">
+            <div className="space-y-4">
               <span className="text-[#FF4500] font-data text-xs tracking-[0.25em] uppercase font-bold block">
                 APEX IDENTITY
               </span>
 
               <div>
-                <h1 className="font-serif italic text-[46px] text-white font-normal leading-[1.05] tracking-tight">
+                <h1 className="font-serif italic text-[40px] sm:text-[46px] text-white font-normal leading-[1.05] tracking-tight">
                   Your Identity
                 </h1>
-                <p className="text-[#9A9088] text-[13px] leading-relaxed mt-2">
+                <p className="text-[#9A9088] text-[13px] leading-relaxed mt-1">
                   Choose how fellow spotters recognize you on the global grid.
                 </p>
               </div>
 
-              {/* LIVE HUNTER BADGE PREVIEW */}
-              <div className="p-4 rounded-2xl bg-[#111111] border border-[#FF4500]/40 shadow-2xl relative overflow-hidden mt-2">
-                <div className="absolute top-0 right-0 w-24 h-24 bg-[#FF4500]/10 rounded-full blur-2xl pointer-events-none" />
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-12 h-12 rounded-full border-2 border-[#FF4500] overflow-hidden bg-[#1A1A1A] shrink-0">
-                    <img src={user.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-1.5">
-                      <span className="font-display text-xl text-[#F0EBE3] tracking-wide">
-                        {displayNameInput || 'Apex Hunter'}
-                      </span>
-                      <span className="text-[9px] font-data bg-[#FF4500]/20 text-[#FF4500] px-1.5 py-0.5 rounded border border-[#FF4500]/40">
-                        LVL 1
-                      </span>
-                    </div>
-                    <span className="text-xs font-data text-[#FF4500]">
-                      @{usernameInput.replace(/^@+/, '') || 'hunter_01'}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between pt-2 border-t border-[#2C2C2C] text-[11px] font-data text-[#9A9088]">
-                  <div className="flex items-center gap-1">
-                    <MapPin className="w-3.5 h-3.5 text-[#FF4500]" />
-                    <span>{selectedCity}, {selectedCountry}</span>
-                  </div>
-                  <span className="text-[#2ECC71] font-semibold">VERIFIED SPOTTER</span>
-                </div>
-              </div>
-
               {/* INPUT FIELDS */}
-              <form onSubmit={handleProfileSetupSubmit} className="space-y-4 pt-2">
+              <form onSubmit={handleProfileSetupSubmit} className="space-y-3.5 pt-2">
                 <div>
-                  <label className="text-[10px] font-data font-semibold text-[#9A9088] uppercase tracking-[0.2em] block mb-1.5">
+                  <label className="text-[10px] font-data font-semibold text-[#9A9088] uppercase tracking-[0.2em] block mb-1">
                     DISPLAY NAME
                   </label>
                   <div className="relative">
-                    <User className="w-4 h-4 text-[#9A9088] absolute left-4 top-4" />
+                    <User className="w-4 h-4 text-[#9A9088] absolute left-3.5 top-3.5" />
                     <input
                       type="text"
                       required
                       value={displayNameInput}
                       onChange={e => setDisplayNameInput(e.target.value)}
                       placeholder="e.g. Alex Vance"
-                      className="w-full h-12 bg-[#141414] border border-white/10 rounded-xl pl-11 pr-4 text-sm text-white focus:border-[#FF4500] outline-none font-sans"
+                      className="w-full h-11 bg-[#141414] border border-white/10 rounded-xl pl-10 pr-4 text-xs text-white focus:border-[#FF4500] outline-none font-sans"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-data font-semibold text-[#9A9088] uppercase tracking-[0.2em] block mb-1.5">
+                  <label className="text-[10px] font-data font-semibold text-[#9A9088] uppercase tracking-[0.2em] block mb-1">
                     USERNAME (HANDLE)
                   </label>
                   <div className="relative">
-                    <AtSign className="w-4 h-4 text-[#FF4500] absolute left-4 top-4" />
+                    <AtSign className="w-4 h-4 text-[#FF4500] absolute left-3.5 top-3.5" />
                     <input
                       type="text"
                       required
                       value={usernameInput}
                       onChange={e => setUsernameInput(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
                       placeholder="e.g. tokyo_drifter"
-                      className="w-full h-12 bg-[#141414] border border-white/10 rounded-xl pl-11 pr-4 text-sm text-white focus:border-[#FF4500] outline-none font-data"
+                      className="w-full h-11 bg-[#141414] border border-white/10 rounded-xl pl-10 pr-4 text-xs text-white focus:border-[#FF4500] outline-none font-data"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-data font-semibold text-[#9A9088] uppercase tracking-[0.2em] block mb-1.5">
+                  <label className="text-[10px] font-data font-semibold text-[#9A9088] uppercase tracking-[0.2em] block mb-1">
                     HOME RADAR CITY
                   </label>
                   <select
@@ -680,7 +574,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
                         setSelectedCity(e.target.value);
                       }
                     }}
-                    className="w-full h-12 bg-[#141414] border border-white/10 rounded-xl px-4 text-sm text-white focus:border-[#FF4500] outline-none font-sans cursor-pointer"
+                    className="w-full h-11 bg-[#141414] border border-white/10 rounded-xl px-3.5 text-xs text-white focus:border-[#FF4500] outline-none font-sans cursor-pointer"
                   >
                     {FAMOUS_CITIES.map(city => (
                       <option key={city.name} value={city.name} className="bg-[#111111] text-white">
@@ -696,7 +590,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
               <motion.button
                 onClick={handleProfileSetupSubmit}
                 whileTap={{ scale: 0.97 }}
-                className="w-full h-14 rounded-2xl bg-[#FF4500] text-white font-sans font-semibold text-[16px] shadow-[0_4px_24px_rgba(255,69,0,0.4)] hover:bg-[#FF5500] transition-all"
+                className="w-full h-13 rounded-2xl bg-[#FF4500] text-white font-sans font-semibold text-[15px] shadow-[0_4px_24px_rgba(255,69,0,0.4)] hover:bg-[#FF5500] transition-all"
               >
                 Continue →
               </motion.button>
@@ -705,7 +599,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
         )}
 
         {/* ══════════════════════════════════════════════════════ */}
-        {/* SCREEN 3 — ROLE SELECTION (Exact match to Screenshot 2) */}
+        {/* SCREEN 3 — ROLE SELECTION (With Neutral Skip Option)   */}
         {/* ══════════════════════════════════════════════════════ */}
         {step === 'roles' && (
           <motion.div
@@ -713,25 +607,25 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="flex flex-col justify-between h-full w-full max-w-md mx-auto px-6 py-10 overflow-y-auto scrollbar-hide"
+            className="flex flex-col justify-between min-h-full w-full max-w-md mx-auto px-5 sm:px-6 py-6 overflow-y-auto scrollbar-hide"
           >
             {/* Header */}
-            <div className="pt-4 space-y-2">
+            <div className="space-y-1">
               <span className="text-[#FF4500] font-data text-xs tracking-[0.25em] uppercase font-bold block">
                 APEX
               </span>
 
-              <h1 className="font-serif italic text-[48px] text-white font-normal leading-[1.05] tracking-tight">
+              <h1 className="font-serif italic text-[42px] sm:text-[48px] text-white font-normal leading-[1.05] tracking-tight">
                 What drives you?
               </h1>
 
-              <p className="text-[#9A9088] text-[13.5px] leading-relaxed">
+              <p className="text-[#9A9088] text-[13px] leading-relaxed">
                 Select the profile that best describes your passion.
               </p>
             </div>
 
             {/* 3 ROLE CARDS STACKED VERTICALLY */}
-            <div className="space-y-3.5 my-auto py-6">
+            <div className="space-y-3 my-auto py-3">
               {ROLES.map((role) => {
                 const isSelected = selectedRoleId === role.id;
                 return (
@@ -742,14 +636,13 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
                       setSelectedRoleId(role.id);
                     }}
                     whileTap={{ scale: 0.98 }}
-                    className={`relative rounded-2xl overflow-hidden p-5 cursor-pointer transition-all duration-300 border ${
+                    className={`relative rounded-2xl overflow-hidden p-4 cursor-pointer transition-all duration-300 border ${
                       isSelected
                         ? 'border-[#FF4500] shadow-[0_0_24px_rgba(255,69,0,0.25)]'
                         : 'border-white/10 hover:border-white/20'
                     }`}
-                    style={{ minHeight: '110px' }}
+                    style={{ minHeight: '94px' }}
                   >
-                    {/* Background automotive image */}
                     <div className="absolute inset-0 z-0">
                       <img
                         src={role.bgImage}
@@ -759,10 +652,9 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
                       <div className="absolute inset-0 bg-gradient-to-r from-[#080808]/90 via-[#080808]/70 to-transparent" />
                     </div>
 
-                    {/* Content */}
-                    <div className="relative z-10 flex flex-col justify-center h-full space-y-1.5">
+                    <div className="relative z-10 flex flex-col justify-center h-full space-y-1">
                       <div className="flex items-center gap-2">
-                        <span className={`font-display text-2xl tracking-wider leading-none ${
+                        <span className={`font-display text-xl tracking-wider leading-none ${
                           isSelected ? 'text-[#FF4500]' : 'text-white'
                         }`}>
                           {role.title}
@@ -775,7 +667,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
                           />
                         )}
                       </div>
-                      <p className="text-[12.5px] text-[#9A9088] leading-relaxed max-w-[290px] font-sans">
+                      <p className="text-[12px] text-[#9A9088] leading-snug max-w-[280px] font-sans">
                         {role.desc}
                       </p>
                     </div>
@@ -784,22 +676,22 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
               })}
             </div>
 
-            {/* Bottom Controls: Continue Button + Skip Link */}
-            <div className="space-y-3 pb-2">
+            {/* Bottom Controls */}
+            <div className="space-y-2.5 pt-2">
               <motion.button
                 onClick={handleRoleContinue}
                 whileTap={{ scale: 0.97 }}
-                className="w-full h-14 rounded-2xl bg-[#FF4500] text-white font-sans font-semibold text-[16px] shadow-[0_4px_24px_rgba(255,69,0,0.4)] hover:bg-[#FF5500] transition-all"
+                className="w-full h-13 rounded-2xl bg-[#FF4500] text-white font-sans font-semibold text-[15px] shadow-[0_4px_24px_rgba(255,69,0,0.4)] hover:bg-[#FF5500] transition-all"
               >
                 Continue
               </motion.button>
 
               <div className="text-center">
-                <span className="text-[12.5px] text-[#9A9088]">Not sure? </span>
+                <span className="text-[12px] text-[#9A9088]">Not sure? </span>
                 <button
                   type="button"
                   onClick={handleSkipRoles}
-                  className="text-[12.5px] text-white underline font-medium hover:text-[#FF4500] transition-colors"
+                  className="text-[12px] text-white underline font-medium hover:text-[#FF4500] transition-colors"
                 >
                   Skip for now
                 </button>
@@ -817,41 +709,40 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '-100%' }}
-            className="flex flex-col h-full items-center justify-center text-center p-6 max-w-md mx-auto w-full"
+            className="flex flex-col min-h-full items-center justify-between text-center p-6 max-w-md mx-auto w-full py-8"
           >
-            <ApertureIris />
+            <div className="my-auto flex flex-col items-center">
+              <ApertureIris />
 
-            <div className="mt-10 mb-6">
-              {['POINT.', 'SCAN.', 'COLLECT.'].map((word, i) => (
-                <motion.span
-                  key={word}
-                  className="font-display text-[52px] text-[#F0EBE3] inline-block mr-3"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 + i * 0.3, duration: 0.25, ease: EASE_OUT_EXPO as any }}
-                >
-                  {word}
-                </motion.span>
-              ))}
+              <div className="mt-8 mb-4">
+                {['POINT.', 'SCAN.', 'COLLECT.'].map((word, i) => (
+                  <motion.span
+                    key={word}
+                    className="font-display text-[44px] sm:text-[50px] text-[#F0EBE3] inline-block mr-2.5"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 + i * 0.3, duration: 0.25, ease: EASE_OUT_EXPO as any }}
+                  >
+                    {word}
+                  </motion.span>
+                ))}
+              </div>
+
+              <motion.p
+                className="text-[14px] text-[#9A9088] max-w-[280px]"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 1.2, duration: 0.5 }}
+              >
+                Apex needs camera access to photograph real cars in the wild.
+              </motion.p>
             </div>
 
-            <motion.p
-              className="text-[15px] text-[#9A9088] max-w-[280px]"
-              style={{ fontFamily: "'DM Sans', sans-serif" }}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 1.5, duration: 0.6 }}
-            >
-              Apex needs your camera to photograph real cars in the wild.
-            </motion.p>
-
-            <div className="flex-1" />
-
-            <div className="w-full space-y-2 mb-8">
+            <div className="w-full space-y-2 mt-4">
               <motion.button
                 onClick={requestCamera}
                 whileTap={{ scale: 0.96 }}
-                className="w-full h-14 bg-[#FF4500] text-white font-display text-xl tracking-wider rounded-2xl shadow-lg"
+                className="w-full h-13 bg-[#FF4500] text-white font-display text-lg tracking-wider rounded-2xl shadow-lg"
                 style={{ boxShadow: GLOW_ORANGE }}
               >
                 {camDenied ? 'OPEN SETTINGS' : 'ENABLE CAMERA'}
@@ -869,31 +760,31 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '-100%' }}
-            className="flex flex-col h-full items-center justify-center text-center p-6 max-w-md mx-auto w-full"
+            className="flex flex-col min-h-full items-center justify-between text-center p-6 max-w-md mx-auto w-full py-8"
           >
-            <GpsCrosshair />
+            <div className="my-auto flex flex-col items-center">
+              <GpsCrosshair />
 
-            <h2 className="font-display text-[46px] text-white leading-none mt-10 mb-4">
-              WHERE YOU ARE<br />CHANGES EVERYTHING.
-            </h2>
-            <p className="text-[15px] text-[#9A9088] max-w-[280px]" style={{ fontFamily: "'DM Sans', sans-serif" }}>
-              Local rarity is calculated from your city. A car common in Tokyo might be legendary where you are.
-            </p>
+              <h2 className="font-display text-[40px] text-white leading-tight mt-8 mb-3">
+                WHERE YOU ARE<br />CHANGES EVERYTHING.
+              </h2>
+              <p className="text-[14px] text-[#9A9088] max-w-[280px]">
+                Local rarity is calculated from your city. A car common in Tokyo might be legendary where you are.
+              </p>
+            </div>
 
-            <div className="flex-1" />
-
-            <div className="w-full space-y-3 mb-8">
+            <div className="w-full space-y-2.5 mt-4">
               <motion.button
                 onClick={() => requestLocation(true)}
                 whileTap={{ scale: 0.96 }}
-                className="w-full h-14 bg-[#FF4500] text-white font-display text-xl tracking-wider rounded-2xl"
+                className="w-full h-13 bg-[#FF4500] text-white font-display text-lg tracking-wider rounded-2xl"
                 style={{ boxShadow: GLOW_ORANGE }}
               >
                 ENABLE LOCATION
               </motion.button>
               <button
                 onClick={() => requestLocation(false)}
-                className="w-full text-[#9A9088] text-[14px] underline py-2"
+                className="w-full text-[#9A9088] text-[13px] underline py-1"
               >
                 Approximate location only →
               </button>
@@ -902,7 +793,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
         )}
 
         {/* ══════════════════════════════════════════════════════ */}
-        {/* SCREEN 6 — NOTIFICATIONS                               */}
+        {/* SCREEN 6 — NOTIFICATION PERMISSION                     */}
         {/* ══════════════════════════════════════════════════════ */}
         {step === 'notif_perm' && (
           <motion.div
@@ -910,44 +801,44 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '-100%' }}
-            className="flex flex-col h-full items-center justify-center text-center p-6 max-w-md mx-auto w-full"
+            className="flex flex-col min-h-full items-center justify-between text-center p-6 max-w-md mx-auto w-full py-8"
           >
-            <NotificationBell />
+            <div className="my-auto flex flex-col items-center">
+              <NotificationBell />
 
-            <h2 className="font-display text-[52px] text-white leading-none mt-10 mb-4">
-              HUNTS HAPPEN FAST.
-            </h2>
-            <p className="text-[15px] text-[#9A9088] max-w-[280px]" style={{ fontFamily: "'DM Sans', sans-serif" }}>
-              We alert you when a rare car appears nearby. Nothing else. Miss a hunt, miss the points.
-            </p>
+              <h2 className="font-display text-[40px] text-white leading-tight mt-8 mb-3">
+                NEVER MISS<br />A LIVE HUNT.
+              </h2>
+              <p className="text-[14px] text-[#9A9088] max-w-[280px]">
+                Receive instant radar notifications when another spotter uncovers an exotic in your area.
+              </p>
+            </div>
 
-            <div className="flex-1" />
-
-            <div className="w-full space-y-3 mb-8">
+            <div className="w-full space-y-2.5 mt-4">
               <motion.button
-                onClick={handleNotifications}
+                onClick={() => requestNotifications(true)}
                 whileTap={{ scale: 0.96 }}
-                className="w-full h-14 bg-[#FF4500] text-white font-display text-xl tracking-wider rounded-2xl"
+                className="w-full h-13 bg-[#FF4500] text-white font-display text-lg tracking-wider rounded-2xl"
                 style={{ boxShadow: GLOW_ORANGE }}
               >
                 ENABLE NOTIFICATIONS
               </motion.button>
               <button
-                onClick={() => setStep('celebration')}
-                className="w-full text-[#9A9088] text-[14px] py-2"
+                onClick={() => requestNotifications(false)}
+                className="w-full text-[#9A9088] text-[13px] underline py-1"
               >
-                I'll miss hunts (skip)
+                Maybe later →
               </button>
             </div>
           </motion.div>
         )}
 
         {/* ══════════════════════════════════════════════════════ */}
-        {/* SCREEN 7 — CELEBRATION & ENTRY                          */}
+        {/* SCREEN 7 — CELEBRATION & ROLE-AWARE ENTRY              */}
         {/* ══════════════════════════════════════════════════════ */}
         {step === 'celebration' && (
           <CelebrationScreen
-            role={ROLES.find(r => r.id === selectedRoleId) || ROLES[0]}
+            roleId={selectedRoleId}
             onEnter={() => { completeOnboarding(); onClose(); }}
           />
         )}
@@ -957,10 +848,23 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
   );
 };
 
-// ─── CELEBRATION SCREEN ───
+// ─── CELEBRATION SCREEN (Role-Aware & Neutral when Skipped) ───
 
-const CelebrationScreen: React.FC<{ role: RoleOption; onEnter: () => void }> = ({ role, onEnter }) => {
+const CelebrationScreen: React.FC<{ roleId: Persona; onEnter: () => void }> = ({ roleId, onEnter }) => {
   const [phase, setPhase] = useState(0);
+
+  const getRoleWelcomeTitle = (role: Persona) => {
+    switch (role) {
+      case 'finder':
+        return 'SPOTTER.';
+      case 'spotter':
+        return 'HUNTER.';
+      case 'love_of_cars':
+        return 'PURIST.';
+      default:
+        return 'TO APEX.';
+    }
+  };
 
   useEffect(() => {
     const t1 = setTimeout(() => setPhase(1), 200);
@@ -983,7 +887,7 @@ const CelebrationScreen: React.FC<{ role: RoleOption; onEnter: () => void }> = (
   }, []);
 
   return (
-    <motion.div key="celebration" className="relative flex flex-col h-full items-center justify-center bg-[#080808]">
+    <motion.div key="celebration" className="relative flex flex-col min-h-full items-center justify-center bg-[#080808] px-6 select-none">
       <AnimatePresence>
         {phase >= 1 && phase < 2 && (
           <motion.div
@@ -999,8 +903,8 @@ const CelebrationScreen: React.FC<{ role: RoleOption; onEnter: () => void }> = (
 
       {phase >= 2 && (
         <motion.h1
-          className="font-display text-[80px] text-[#F0EBE3] tracking-widest leading-none"
-          initial={{ y: -80, opacity: 0 }}
+          className="font-display text-[64px] sm:text-[80px] text-[#F0EBE3] tracking-widest leading-none text-center"
+          initial={{ y: -60, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={SPRING_HEAVY}
         >
@@ -1010,17 +914,17 @@ const CelebrationScreen: React.FC<{ role: RoleOption; onEnter: () => void }> = (
 
       {phase >= 3 && (
         <motion.h2
-          className="font-display text-[48px] text-[#FF4500] tracking-wider leading-none mt-2"
+          className="font-display text-[40px] sm:text-[48px] text-[#FF4500] tracking-wider leading-none mt-2 text-center"
           initial={{ scale: 0, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={SPRING_POP}
         >
-          {role.title}.
+          {getRoleWelcomeTitle(roleId)}
         </motion.h2>
       )}
 
       {phase >= 4 && (
-        <div className="flex items-center gap-3 mt-8">
+        <div className="flex items-center gap-2.5 mt-8">
           {[
             { icon: '⚡', label: 'LEVEL 1' },
             { icon: '🔥', label: '0 STREAK' },
@@ -1028,7 +932,7 @@ const CelebrationScreen: React.FC<{ role: RoleOption; onEnter: () => void }> = (
           ].map((chip, i) => (
             <motion.div
               key={chip.label}
-              className="px-3 py-1.5 rounded-lg text-[13px] font-medium"
+              className="px-3 py-1.5 rounded-lg text-[12px] font-medium"
               style={{ background: '#1A1A1A', color: '#F0EBE3', fontFamily: "'DM Sans', sans-serif" }}
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
@@ -1043,7 +947,7 @@ const CelebrationScreen: React.FC<{ role: RoleOption; onEnter: () => void }> = (
       {phase >= 5 && (
         <motion.button
           onClick={onEnter}
-          className="absolute bottom-12 left-6 right-6 h-14 rounded-2xl font-display text-[22px] tracking-[2px] text-[#F0EBE3]"
+          className="absolute bottom-10 left-6 right-6 h-13 rounded-2xl font-display text-[20px] tracking-[2px] text-[#F0EBE3]"
           style={{ background: '#FF4500', boxShadow: GLOW_ORANGE }}
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}

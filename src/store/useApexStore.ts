@@ -60,18 +60,19 @@ interface ApexState {
   dismissLevelUp: () => void;
   toggleAllowHunts: () => void;
   setDefaultPrivacyLevel: (level: PrivacyLevel) => void;
+  resetDevelopmentState: () => void;
 }
 
 const INITIAL_USER: UserProfile = {
   id: 'user-apex-01',
-  username: 'hunter',
-  displayName: 'Apex Hunter',
-  email: 'hunter@apex.app',
+  username: '',
+  displayName: '',
+  email: '',
   avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400&auto=format&fit=crop',
-  persona: 'spotter',
+  persona: 'unspecified',
   level: 1,
   xp: 0,
-  coins: 50,
+  coins: 0,
   streakDays: 0,
   streakLastAt: new Date().toISOString(),
   rankGlobal: 1,
@@ -86,7 +87,7 @@ const INITIAL_USER: UserProfile = {
   totalSpots: 0,
   rarestFind: 'common',
   badgesUnlocked: 0,
-  citiesExplored: 1,
+  citiesExplored: 0,
   allowHunts: true,
   defaultPrivacyLevel: 'public_blurred'
 };
@@ -110,21 +111,20 @@ const INITIAL_QUESTS: DailyQuest[] = [
   }
 ];
 
-// Car-related missions start uncompleted (completed: false), Daily Login starts completed
 const INITIAL_MISSIONS: Mission[] = [
   { id: 'm1', title: 'Scan 1 car today', xpReward: 50, completed: false, type: 'scan' },
   { id: 'm2', title: 'Identify 1 Rare or higher', xpReward: 100, completed: false, type: 'rarity' },
-  { id: 'm3', title: 'Daily Login Bonus', xpReward: 25, completed: true, type: 'login' },
+  { id: 'm3', title: 'Daily Login Bonus', xpReward: 25, completed: false, type: 'login' },
   { id: 'm4', title: 'Spot an SUV or Coupe', xpReward: 75, completed: false, type: 'body' },
   { id: 'm5', title: 'Scan a car you\'ve never seen', xpReward: 200, completed: false, type: 'new_car' }
 ];
 
 const INITIAL_BADGES: Badge[] = [
-  { id: 'b1', slug: 'first_blood', name: 'First Blood', description: 'Scanned your very first car card.', icon: 'Target', rarity: 'bronze', isUnlocked: true, xpBonus: 100, earnedAt: '2025-01-10' },
-  { id: 'b2', slug: 'rare_encounter', name: 'Rare Encounter', description: 'Spotted a Rare rarity car in the wild.', icon: 'Zap', rarity: 'silver', isUnlocked: true, xpBonus: 250, earnedAt: '2025-01-14' },
-  { id: 'b3', slug: 'das_auto', name: 'Das Auto', description: 'Spotted 3 German cars in a single day.', icon: 'Flag', rarity: 'silver', isUnlocked: true, xpBonus: 300, earnedAt: '2025-01-18' },
-  { id: 'b4', slug: 'mythic_hunter', name: 'Mythic Hunter', description: 'Scanned an ultra-rare Mythic tier hypercar!', icon: 'Crown', rarity: 'diamond', isUnlocked: true, xpBonus: 1000, earnedAt: '2025-01-22' },
-  { id: 'b5', slug: 'streak_7', name: '7-Day Spotter', description: 'Maintained a 7-day active scan streak.', icon: 'Flame', rarity: 'gold', isUnlocked: true, xpBonus: 500, earnedAt: '2025-01-28' },
+  { id: 'b1', slug: 'first_blood', name: 'First Blood', description: 'Scanned your very first car card.', icon: 'Target', rarity: 'bronze', isUnlocked: false, xpBonus: 100 },
+  { id: 'b2', slug: 'rare_encounter', name: 'Rare Encounter', description: 'Spotted a Rare rarity car in the wild.', icon: 'Zap', rarity: 'silver', isUnlocked: false, xpBonus: 250 },
+  { id: 'b3', slug: 'das_auto', name: 'Das Auto', description: 'Spotted 3 German cars in a single day.', icon: 'Flag', rarity: 'silver', isUnlocked: false, xpBonus: 300 },
+  { id: 'b4', slug: 'mythic_hunter', name: 'Mythic Hunter', description: 'Scanned an ultra-rare Mythic tier hypercar!', icon: 'Crown', rarity: 'diamond', isUnlocked: false, xpBonus: 1000 },
+  { id: 'b5', slug: 'streak_7', name: '7-Day Spotter', description: 'Maintained a 7-day active scan streak.', icon: 'Flame', rarity: 'gold', isUnlocked: false, xpBonus: 500 },
   { id: 'b6', slug: 'jdm_royalty', name: 'JDM Royalty', description: 'Spot 10 iconic Japanese domestic market cars.', icon: 'Globe', rarity: 'gold', isUnlocked: false, xpBonus: 600 }
 ];
 
@@ -248,6 +248,25 @@ export const useApexStore = create<ApexState>((set, get) => ({
     } catch (e) {
       console.warn('Signout error', e);
     }
+  },
+
+  resetDevelopmentState: async () => {
+    try {
+      localStorage.clear();
+    } catch (e) {}
+    set({
+      onboardingCompleted: false,
+      settingsModalOpen: false,
+      user: { ...INITIAL_USER },
+      garage: [],
+      activeHunts: [],
+      dailyQuests: INITIAL_QUESTS,
+      dailyMissions: INITIAL_MISSIONS,
+      badges: INITIAL_BADGES,
+    });
+    try {
+      await supabase.auth.signOut({ scope: 'global' });
+    } catch (e) {}
   },
 
   setActiveTab: (tab) => set({ activeTab: tab }),

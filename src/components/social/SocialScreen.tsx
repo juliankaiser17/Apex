@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Heart, MessageSquare, Share2, Search, Zap, Crown, Flame, Award, Target, Flag, Globe } from 'lucide-react';
+import { Flame, Trophy, Users, User, Zap, Crown, Award, Search, MessageSquare, Heart, Share2, Target, Flag, Globe } from 'lucide-react';
 import { useApexStore } from '../../store/useApexStore';
-import { RARITY_CONFIG } from '../../utils/rarity';
+import type { FeedPost, CarCard } from '../../types/apex';
 import { Card3DDetail } from '../garage/Card3DDetail';
 import { CommentsModal } from './CommentsModal';
-import type { CarCard, FeedPost } from '../../types/apex';
+import { RARITY_CONFIG } from '../../utils/rarity';
 
 export const SocialScreen: React.FC = () => {
   const { 
@@ -18,165 +17,138 @@ export const SocialScreen: React.FC = () => {
     setScannerOpen
   } = useApexStore();
 
-  const [subTab, setSubTab] = useState<'feed' | 'leaderboard' | 'friends' | 'profile'>('feed');
-  const [leaderboardFilter, setLeaderboardFilter] = useState<'city' | 'country' | 'global'>('city');
-  const [friendSearch, setFriendSearch] = useState('');
+  const [subTab, setSubTab] = useState<'activity' | 'leaderboard' | 'friends' | 'profile'>('activity');
   const [selectedCard, setSelectedCard] = useState<CarCard | null>(null);
   const [selectedPostForComments, setSelectedPostForComments] = useState<FeedPost | null>(null);
-  const [followedUsers, setFollowedUsers] = useState<Record<string, boolean>>({});
+  const [leaderboardFilter, setLeaderboardFilter] = useState<'city' | 'country' | 'global'>('global');
+  const [friendSearch, setFriendSearch] = useState('');
 
-  const toggleFollowUser = (username: string) => {
-    setFollowedUsers(prev => ({
-      ...prev,
-      [username]: !prev[username]
-    }));
+  const handleShare = async (post: FeedPost) => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `APEX — ${post.card.make} ${post.card.model}`,
+          text: `Check out this ${post.card.rarity.toUpperCase()} spot on APEX: ${post.card.make} ${post.card.model}!`,
+          url: window.location.href,
+        });
+      } catch (err) {
+        console.log('Error sharing:', err);
+      }
+    }
   };
 
   return (
-    <div className="flex-1 pb-32 px-4 pt-4 space-y-4" style={{ fontFamily: 'DM Sans' }}>
-      {/* Sub-Tab Navigation Header */}
-      <div className="flex gap-1 p-1 bg-[#111111] border border-white/10 rounded-xl relative z-10">
-        {(['feed', 'leaderboard', 'friends', 'profile'] as const).map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setSubTab(tab)}
-            className={`flex-1 py-2 rounded-lg text-xs font-data capitalize transition-all ${
-              subTab === tab 
-                ? 'bg-[#FF4500] text-[#F0EBE3] font-semibold shadow-lg' 
-                : 'text-[#9A9088] hover:text-[#F0EBE3]'
-            }`}
-          >
-            {tab}
-          </button>
-        ))}
+    <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 pb-28">
+      {/* Top 4-Way Segmented Tabs */}
+      <div className="flex bg-[#111111] p-1 rounded-xl border border-white/10">
+        {[
+          { id: 'activity', label: 'Activity', icon: Flame },
+          { id: 'leaderboard', label: 'Ranks', icon: Trophy },
+          { id: 'friends', label: 'Friends', icon: Users },
+          { id: 'profile', label: 'Profile', icon: User },
+        ].map((tab) => {
+          const Icon = tab.icon;
+          const isActive = subTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setSubTab(tab.id as any)}
+              className={`flex-1 py-2 rounded-lg text-xs font-data flex items-center justify-center gap-1.5 transition-all ${
+                isActive
+                  ? 'bg-[#FF4500] text-[#F0EBE3] font-semibold glow-orange'
+                  : 'text-[#9A9088] hover:text-[#F0EBE3]'
+              }`}
+            >
+              <Icon className="w-3.5 h-3.5" />
+              <span>{tab.label}</span>
+            </button>
+          );
+        })}
       </div>
 
-      {/* SUB-TAB 1: FEED */}
-      {subTab === 'feed' && (
+      {/* SUB-TAB 1: LIVE COMMUNITY ACTIVITY FEED */}
+      {subTab === 'activity' && (
         <div className="space-y-4">
-          {feedPosts.length > 0 ? (
-            feedPosts.map((post) => {
-              const conf = RARITY_CONFIG[post.card.rarity];
-              return (
-                <div 
-                  key={post.id}
-                  className="bg-[#111111] overflow-hidden space-y-3 border-b border-[#2C2C2C]"
-                >
-                  {/* User Info Header */}
-                  <div className="p-4 pb-0 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <img src={post.user.avatarUrl} alt={post.user.username} className="w-10 h-10 rounded-full object-cover border border-[#2C2C2C]" />
-                      <div>
-                        <h4 className="text-sm font-semibold text-[#F0EBE3]">@{post.user.username}</h4>
-                        <p className="text-[10px] font-data text-[#9A9088]">Level {post.user.level} Spotter · {post.createdAt}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {/* Follow pill with shimmer sweep */}
-                      {post.user.username !== user.username && (
-                        <motion.button 
-                          whileTap={{ scale: 0.93 }}
-                          onClick={() => toggleFollowUser(post.user.username)}
-                          className={`relative overflow-hidden text-[10px] font-semibold px-3 py-1 rounded-full border transition-all ${
-                            followedUsers[post.user.username]
-                              ? 'bg-[#1A1A1A] border-[#2C2C2C] text-[#9A9088]'
-                              : 'bg-transparent border-[#FF4500] text-[#FF4500] hover:bg-[#FF4500]/15'
-                          }`}
-                        >
-                          {!followedUsers[post.user.username] && (
-                            <motion.div
-                              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
-                              animate={{ x: ['-100%', '200%'] }}
-                              transition={{ repeat: Infinity, duration: 2.5, ease: 'linear' }}
-                            />
-                          )}
-                          <span className="relative z-10">
-                            {followedUsers[post.user.username] ? 'FOLLOWING' : 'FOLLOW'}
-                          </span>
-                        </motion.button>
-                      )}
-                      <span className={`text-[9px] font-data font-semibold px-2 py-0.5 rounded border ${conf.badgeBg}`}>
-                        {conf.label}
-                      </span>
-                    </div>
-                  </div>
-
-
-                  {/* Car Photo with Double Tap Like */}
-                  <div 
-                    onDoubleClick={() => toggleLikePost(post.id)}
-                    className="relative h-[280px] overflow-hidden cursor-pointer group bg-transparent"
-                  >
-                    <img src={post.card.imageUrl} alt={post.card.model} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#080808] via-transparent to-transparent" />
-                    
-                    {/* Car Name overlay */}
-                    <div className="absolute bottom-3 left-4 right-4">
-                      <h3 className="font-display text-2xl text-[#F0EBE3] leading-none">{post.card.make} {post.card.model}</h3>
-                      <p className="text-xs text-[#9A9088] font-data mt-0.5">Spotted in {post.card.city} · +{post.card.xpEarned} XP</p>
-                    </div>
-
-                    {/* Distance pill overlay */}
-                    <div className="absolute top-3 right-3 bg-[#080808]/80 backdrop-blur-md px-2.5 py-1 rounded-full">
-                      <span className="text-[11px] font-data text-[#F0EBE3]/80">
-                        📍 {(Math.random() * 3 + 0.1).toFixed(1)} km away
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Caption with 3-line truncation */}
-                  {post.caption && (
-                    <div className="px-4 pb-1">
-                      <p className="text-[14px] text-[#F0EBE3]/85 leading-relaxed" style={{ display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                        {post.caption}
-                      </p>
-                    </div>
-                  )}
-
-
-                  {/* Interactions Row */}
-                  <div className="p-4 pt-0 flex items-center justify-between text-xs font-data">
-                    <div className="flex items-center gap-5">
-                      {/* Heart Like Button */}
-                      <button
-                        onClick={() => toggleLikePost(post.id)}
-                        className={`flex items-center gap-1.5 transition-colors ${
-                          post.isLiked ? 'text-[#FF2200] font-semibold' : 'text-[#9A9088] hover:text-[#F0EBE3]'
-                        }`}
-                      >
-                        <motion.div
-                          key={`heart-${post.id}-${post.isLiked}`}
-                          initial={post.isLiked ? { scale: 1.5 } : { scale: 1 }}
-                          animate={{ scale: 1 }}
-                          transition={{ type: 'spring', damping: 10, stiffness: 280, mass: 0.8 }}
-                        >
-                          <Heart className={`w-4 h-4 ${post.isLiked ? 'fill-[#FF2200]' : ''}`} />
-                        </motion.div>
-                        <span>{post.likesCount}</span>
-                      </button>
-
-                      {/* Comments Button */}
-                      <button
-                        onClick={() => setSelectedPostForComments(post)}
-                        className="flex items-center gap-1.5 text-[#9A9088] hover:text-[#FF4500] transition-colors cursor-pointer group"
-                      >
-                        <MessageSquare className="w-4 h-4 text-[#FF4500] group-hover:scale-110 transition-transform" />
-                        <span className="font-semibold">{post.commentsCount} Comments</span>
-                      </button>
-                    </div>
-
-                    <button
-                      onClick={() => setSelectedCard(post.card)}
-                      className="text-[#FF4500] font-semibold flex items-center gap-1 hover:underline"
-                    >
-                      <Share2 className="w-3.5 h-3.5" /> View Card
-                    </button>
+          {feedPosts.map((post) => (
+            <div key={post.id} className="bg-[#111111] border border-white/10 rounded-2xl overflow-hidden shadow-2xl space-y-3 p-4">
+              {/* User Header */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <img src={post.user.avatarUrl} alt={post.user.username} className="w-8 h-8 rounded-full object-cover border border-[#FF4500]" />
+                  <div>
+                    <h4 className="text-xs font-semibold text-[#F0EBE3]">@{post.user.username}</h4>
+                    <p className="text-[10px] font-data text-[#9A9088]">Level {post.user.level} · {post.createdAt}</p>
                   </div>
                 </div>
-              );
-            })
-          ) : (
-            /* IMMACULATE EMPTY STATE */
+
+                <span 
+                  className="text-[9px] font-data font-bold uppercase px-2 py-0.5 rounded border"
+                  style={{
+                    color: RARITY_CONFIG[post.card.rarity]?.color || '#FFA500',
+                    borderColor: `${RARITY_CONFIG[post.card.rarity]?.color || '#FFA500'}40`,
+                    backgroundColor: `${RARITY_CONFIG[post.card.rarity]?.color || '#FFA500'}10`
+                  }}
+                >
+                  {post.card.rarity}
+                </span>
+              </div>
+
+              {/* Vehicle Photograph Preview Card */}
+              <div 
+                onClick={() => setSelectedCard(post.card)}
+                className="relative aspect-video rounded-xl overflow-hidden cursor-pointer group border border-white/5"
+              >
+                <img 
+                  src={post.card.imageUrl} 
+                  alt={post.card.model} 
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                />
+                
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex flex-col justify-end p-3">
+                  <span className="text-[10px] font-data text-[#FF4500] font-semibold">{post.card.yearEstimate} {post.card.make}</span>
+                  <h3 className="font-display text-xl text-[#F0EBE3] tracking-wide leading-tight">{post.card.model}</h3>
+                  <p className="text-[10px] font-data text-[#9A9088]">{post.card.city}, {post.card.country}</p>
+                </div>
+              </div>
+
+              {/* Caption */}
+              {post.caption && (
+                <p className="text-xs text-[#F0EBE3] leading-relaxed pt-1">
+                  {post.caption}
+                </p>
+              )}
+
+              {/* Social Engagement Actions */}
+              <div className="flex items-center justify-between pt-2 border-t border-[#2C2C2C] text-xs font-data">
+                <div className="flex items-center gap-4">
+                  <button 
+                    onClick={() => toggleLikePost(post.id)}
+                    className={`flex items-center gap-1.5 transition-colors ${post.isLiked ? 'text-[#FF4500]' : 'text-[#9A9088] hover:text-[#F0EBE3]'}`}
+                  >
+                    <Heart className={`w-4 h-4 ${post.isLiked ? 'fill-current' : ''}`} />
+                    <span>{post.likesCount}</span>
+                  </button>
+
+                  <button 
+                    onClick={() => setSelectedPostForComments(post)}
+                    className="flex items-center gap-1.5 text-[#9A9088] hover:text-[#F0EBE3] transition-colors"
+                  >
+                    <MessageSquare className="w-4 h-4" />
+                    <span>{post.commentsCount}</span>
+                  </button>
+                </div>
+
+                <button 
+                  onClick={() => handleShare(post)}
+                  className="text-[#9A9088] hover:text-[#FF4500] transition-colors"
+                >
+                  <Share2 className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          ))}
+
+          {feedPosts.length === 0 && (
             <div className="text-center py-16 px-6 space-y-5 bg-[#111111] rounded-2xl border border-white/10 shadow-2xl">
               <div className="w-16 h-16 rounded-full bg-black/60 border border-[#FF4500] flex items-center justify-center mx-auto text-[#FF4500] glow-orange">
                 <Search className="w-8 h-8" />
@@ -304,8 +276,10 @@ export const SocialScreen: React.FC = () => {
             <img src={user.avatarUrl} alt={user.username} className="w-24 h-24 rounded-full border-2 border-[#FF4500] object-cover mx-auto glow-orange" />
             
             <div>
-              <h2 className="font-display text-3xl text-[#F0EBE3]">{user.displayName}</h2>
-              <p className="text-xs font-data text-[#FF4500]">@{user.username} · Level {user.level} Spotter</p>
+              <h2 className="font-display text-3xl text-[#F0EBE3]">{user.displayName || 'Apex Member'}</h2>
+              <p className="text-xs font-data text-[#FF4500]">
+                @{user.username || 'user'} · Level {user.level} {user.persona === 'finder' ? 'Spotter' : user.persona === 'spotter' ? 'Hunter' : user.persona === 'love_of_cars' ? 'Purist' : 'Member'}
+              </p>
             </div>
 
             <div className="grid grid-cols-3 gap-2 py-3 border-y border-[#2C2C2C] text-center font-data text-xs">

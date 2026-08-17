@@ -1,12 +1,13 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Lock, Eye, Users, MapPin, LogOut, User, Camera, Check, Globe } from 'lucide-react';
+import { X, Lock, Eye, Users, MapPin, LogOut, User, Camera, Check, Globe, RefreshCcw } from 'lucide-react';
 import { useApexStore } from '../../store/useApexStore';
 import { PRIVACY_LEVEL_LABELS } from '../../utils/privacyPipeline';
 import type { PrivacyLevel, Persona } from '../../types/apex';
 import { sounds } from '../../utils/audio';
 import { Camera as CapCamera, CameraResultType, CameraSource } from '@capacitor/camera';
-import ReactCrop, { type Crop, centerCrop, makeAspectCrop } from 'react-image-crop';
+import ReactCrop, { type Crop } from 'react-image-crop';
+import { supabase } from '../../lib/supabase';
 
 interface ProfileSettingsModalProps {
   isOpen: boolean;
@@ -14,16 +15,28 @@ interface ProfileSettingsModalProps {
 }
 
 export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ isOpen, onClose }) => {
-  const { user, updateUserProfile, setDefaultPrivacyLevel, logoutUser } = useApexStore();
+  const { user, updateUserProfile, setDefaultPrivacyLevel, logoutUser, resetDevelopmentState } = useApexStore();
   const [activeTab, setActiveTab] = useState<'profile' | 'privacy'>('profile');
 
-  // Form state
+  // Form state synced with user
   const [displayName, setDisplayName] = useState(user.displayName);
   const [username, setUsername] = useState(user.username);
-  const [city, setCity] = useState(user.city || 'Hong Kong');
+  const [city, setCity] = useState(user.city || 'Tokyo');
   const [avatarUrl, setAvatarUrl] = useState(user.avatarUrl);
-  const [persona, setPersona] = useState<Persona>(user.persona || 'spotter');
+  const [persona, setPersona] = useState<Persona>(user.persona || 'unspecified');
   const [savedSuccess, setSavedSuccess] = useState(false);
+
+  // Sync state whenever modal opens or user updates
+  useEffect(() => {
+    if (isOpen) {
+      setDisplayName(user.displayName || '');
+      setUsername(user.username || '');
+      setCity(user.city || 'Tokyo');
+      setAvatarUrl(user.avatarUrl);
+      setPersona(user.persona || 'unspecified');
+      setSavedSuccess(false);
+    }
+  }, [isOpen, user]);
 
   // Cropping State
   const [cropTargetUrl, setCropTargetUrl] = useState<string | null>(null);
@@ -48,13 +61,13 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ isOp
     try {
       const image = await CapCamera.getPhoto({
         quality: 90,
-        allowEditing: true, // Native edit if supported
+        allowEditing: true,
         resultType: CameraResultType.DataUrl,
-        source: CameraSource.Camera // STRICTLY Camera only, no gallery
+        source: CameraSource.Camera
       });
       
       if (image.dataUrl) {
-        setCropTargetUrl(image.dataUrl); // Show ReactCrop UI just in case native crop didn't work
+        setCropTargetUrl(image.dataUrl);
       }
     } catch (error) {
       console.warn('User cancelled photo or error occurred:', error);
@@ -89,18 +102,40 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ isOp
     }
   };
 
-  const handleSaveProfile = (e: React.FormEvent) => {
+  const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     sounds.playXpPop();
+    const cleanDisplayName = displayName.trim();
+    const cleanUsername = username.trim().toLowerCase().replace(/[^a-z0-9_]/g, '');
+
     updateUserProfile({
-      displayName: displayName.trim(),
-      username: username.trim(),
+      displayName: cleanDisplayName,
+      username: cleanUsername,
       city: city.trim(),
       avatarUrl,
       persona
     });
+
+    // Update remote profile in Supabase if logged in
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        await supabase.from('profiles').update({
+          display_name: cleanDisplayName,
+          username: cleanUsername,
+          city: city.trim(),
+          avatar_url: avatarUrl,
+          updated_at: new Date().toISOString()
+        }).eq('id', session.user.id);
+      }
+    } catch (err) {
+      console.warn('Remote profile update:', err);
+    }
+
     setSavedSuccess(true);
-    setTimeout(() => setSavedSuccess(false), 2000);
+    setTimeout(() => {
+      onClose();
+    }, 500);
   };
 
   const handleLogout = () => {
@@ -109,53 +144,66 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ isOp
     onClose();
   };
 
+  const handleDevReset = async () => {
+    if (window.confirm('Reset all development data and start with a clean zero state?')) {
+      sounds.playTargetLock();
+      await resetDevelopmentState();
+      onClose();
+    }
+  };
+
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-end sm:items-center justify-center p-4">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        {/* Backdrop */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="w-full max-w-md bg-[#080808]/95 backdrop-blur-xl border border-white/10 rounded-3xl overflow-hidden relative z-50 flex flex-col max-h-[90vh]"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={onClose}
+          className="absolute inset-0 bg-black/80 backdrop-blur-md"
+        />
+
+        {/* Modal Window */}
+        <motion.div
+          initial={{ scale: 0.95, opacity: 0, y: 20 }}
+          animate={{ scale: 1, opacity: 1, y: 0 }}
+          exit={{ scale: 0.95, opacity: 0, y: 20 }}
+          className="relative w-full max-w-lg bg-[#111111] border border-white/10 rounded-3xl overflow-hidden shadow-2xl z-10 max-h-[90vh] flex flex-col"
         >
+          {/* Cropping View */}
           {cropTargetUrl ? (
-            <div className="p-6 flex flex-col h-full bg-[#111111]">
-              <h3 className="font-display text-xl text-white mb-4 text-center">CROP PROFILE PHOTO</h3>
-              <div className="flex-1 overflow-hidden rounded-xl border border-white/10 flex items-center justify-center bg-black mb-4 min-h-[300px]">
-                <ReactCrop 
-                  crop={crop} 
-                  onChange={c => setCrop(c)} 
+            <div className="p-6 flex flex-col items-center justify-center space-y-4">
+              <h3 className="text-lg font-display text-[#F0EBE3]">ADJUST AVATAR</h3>
+              <div className="max-h-64 overflow-hidden rounded-2xl border border-white/10">
+                <ReactCrop
+                  crop={crop}
+                  onChange={(c) => setCrop(c)}
                   aspect={1}
                   circularCrop
                 >
-                  <img 
-                    src={cropTargetUrl} 
+                  <img
                     ref={imgRef}
-                    onLoad={(e) => {
-                      const { width, height } = e.currentTarget;
-                      const c = centerCrop(
-                        makeAspectCrop({ unit: '%', width: 90 }, 1, width, height),
-                        width, height
-                      );
-                      setCrop(c);
-                    }}
-                    alt="Crop target" 
-                    className="max-h-[60vh] object-contain"
+                    src={cropTargetUrl}
+                    alt="Crop preview"
+                    className="max-h-64 object-contain"
                   />
                 </ReactCrop>
               </div>
-              <div className="flex gap-3 mt-auto">
-                <button 
+              <div className="flex gap-4 w-full">
+                <button
+                  type="button"
                   onClick={() => setCropTargetUrl(null)}
-                  className="flex-1 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white font-bold"
+                  className="flex-1 py-3 rounded-xl bg-[#1A1A1A] text-[#9A9088] font-display text-sm"
                 >
                   CANCEL
                 </button>
-                <button 
+                <button
+                  type="button"
                   onClick={handleCropComplete}
-                  className="flex-1 py-3 rounded-xl bg-[#FF4500] hover:bg-[#FF4500]/80 text-white font-bold glow-orange"
+                  className="flex-1 py-3 rounded-xl bg-[#FF4500] text-[#F0EBE3] font-display text-sm glow-orange"
                 >
-                  APPLY
+                  USE PHOTO
                 </button>
               </div>
             </div>
@@ -163,189 +211,198 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ isOp
             <>
               {/* Header */}
               <div className="flex items-center justify-between p-5 border-b border-white/10">
-                <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-2xl bg-orange-950/60 border border-orange-500/40 text-[#FF5500]">
-                    <User className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <h3 className="font-display text-2xl text-white">SETTINGS & PROFILE</h3>
-                    <p className="text-xs font-mono text-slate-400">Manage account, avatar & privacy</p>
-                  </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setActiveTab('profile')}
+                    className={`px-4 py-1.5 rounded-full text-xs font-display tracking-wider transition-colors ${
+                      activeTab === 'profile'
+                        ? 'bg-[#FF4500] text-[#F0EBE3] glow-orange'
+                        : 'bg-[#1A1A1A] text-[#9A9088] hover:text-[#F0EBE3]'
+                    }`}
+                  >
+                    PROFILE
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('privacy')}
+                    className={`px-4 py-1.5 rounded-full text-xs font-display tracking-wider transition-colors ${
+                      activeTab === 'privacy'
+                        ? 'bg-[#FF4500] text-[#F0EBE3] glow-orange'
+                        : 'bg-[#1A1A1A] text-[#9A9088] hover:text-[#F0EBE3]'
+                    }`}
+                  >
+                    PRIVACY & DEV
+                  </button>
                 </div>
-
                 <button
                   onClick={onClose}
-                  className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20"
+                  className="w-8 h-8 rounded-full bg-[#1A1A1A] flex items-center justify-center text-[#9A9088] hover:text-[#F0EBE3]"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="w-4 h-4" />
                 </button>
               </div>
 
-              {/* Sub Navigation Tabs */}
-              <div className="grid grid-cols-2 p-1 m-4 mb-0 rounded-2xl bg-white/5 border border-white/10 text-sm font-medium">
-                <button
-                  onClick={() => setActiveTab('profile')}
-                  className={`py-2.5 rounded-xl transition-colors ${
-                    activeTab === 'profile' ? 'bg-[#FF4500] text-white font-bold' : 'text-slate-400 hover:text-white'
-                  }`}
-                >
-                  EDIT PROFILE
-                </button>
-                <button
-                  onClick={() => setActiveTab('privacy')}
-                  className={`py-2.5 rounded-xl transition-colors ${
-                    activeTab === 'privacy' ? 'bg-[#FF4500] text-white font-bold' : 'text-slate-400 hover:text-white'
-                  }`}
-                >
-                  PRIVACY & LOCATION
-                </button>
-              </div>
-
-              {/* TAB 1: EDIT PROFILE */}
+              {/* Tab 1: Profile Details */}
               {activeTab === 'profile' && (
-                <div className="flex-1 overflow-y-auto p-5 custom-scrollbar">
-                  <form onSubmit={handleSaveProfile} className="space-y-4">
-                    {/* Avatar Upload */}
-                    <div className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/10">
-                      <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-[#FF4500] group shrink-0">
-                        <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
-                        <div
-                          onClick={handleAvatarFileSelect}
-                          className="absolute inset-0 bg-black/60 flex items-center justify-center cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity text-white"
-                        >
-                          <Camera className="w-5 h-5" />
-                        </div>
-                      </div>
-
-                      <div className="flex-1 space-y-1">
-                        <p className="text-sm font-semibold text-white">Profile Photo</p>
-                        <button
-                          type="button"
-                          onClick={handleAvatarFileSelect}
-                          className="px-3 py-1.5 rounded-xl bg-[#FF4500]/10 border border-[#FF4500]/40 text-xs font-mono text-[#FF4500] hover:bg-[#FF4500]/20"
-                        >
-                          Change Avatar
-                        </button>
-                      </div>
+                <form onSubmit={handleSaveProfile} className="p-6 space-y-4 overflow-y-auto max-h-[65vh]">
+                  {/* Avatar Upload */}
+                  <div className="flex items-center gap-4 pb-2 border-b border-white/5">
+                    <div className="relative w-16 h-16 rounded-full overflow-hidden border border-[#FF4500] shrink-0">
+                      <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={handleAvatarFileSelect}
+                        className="absolute inset-0 bg-black/40 flex items-center justify-center text-white/90 hover:bg-black/60 transition-colors"
+                      >
+                        <Camera className="w-5 h-5" />
+                      </button>
                     </div>
+                    <div>
+                      <span className="text-xs font-data text-[#F0EBE3] font-semibold block">PROFILE PHOTO</span>
+                      <span className="text-[11px] text-[#9A9088] block">Take a new photo with camera</span>
+                    </div>
+                  </div>
 
-                    {/* Display Name */}
-                    <div className="space-y-1">
-                      <label className="text-xs font-mono text-slate-400 uppercase">Display Name</label>
+                  {/* Display Name */}
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-data text-[#9A9088] uppercase tracking-wider block">
+                      DISPLAY NAME
+                    </label>
+                    <div className="relative">
+                      <User className="w-4 h-4 text-[#9A9088] absolute left-3.5 top-3.5" />
                       <input
                         type="text"
+                        required
                         value={displayName}
                         onChange={(e) => setDisplayName(e.target.value)}
-                        className="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-white font-medium focus:border-[#FF4500] focus:outline-none"
+                        placeholder="Apex Hunter"
+                        className="w-full h-11 bg-[#1A1A1A] border border-[#2C2C2C] rounded-xl pl-10 pr-4 text-xs font-data text-[#F0EBE3] focus:border-[#FF4500] outline-none"
                       />
                     </div>
+                  </div>
 
-                    {/* Username */}
-                    <div className="space-y-1">
-                      <label className="text-xs font-mono text-slate-400 uppercase">Username Handle</label>
+                  {/* Username */}
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-data text-[#9A9088] uppercase tracking-wider block">
+                      USERNAME (HANDLE)
+                    </label>
+                    <div className="relative">
+                      <span className="text-[#FF4500] text-xs font-data absolute left-3.5 top-3">@</span>
                       <input
                         type="text"
+                        required
                         value={username}
-                        onChange={(e) => setUsername(e.target.value)}
-                        className="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-white font-medium focus:border-[#FF4500] focus:outline-none"
+                        onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
+                        placeholder="hunter_01"
+                        className="w-full h-11 bg-[#1A1A1A] border border-[#2C2C2C] rounded-xl pl-8 pr-4 text-xs font-data text-[#F0EBE3] focus:border-[#FF4500] outline-none"
                       />
                     </div>
+                  </div>
 
-                    {/* City Location */}
-                    <div className="space-y-1">
-                      <label className="text-xs font-mono text-slate-400 uppercase">Primary City</label>
+                  {/* City */}
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-data text-[#9A9088] uppercase tracking-wider block">
+                      HOME RADAR CITY
+                    </label>
+                    <div className="relative">
+                      <Globe className="w-4 h-4 text-[#9A9088] absolute left-3.5 top-3.5" />
                       <input
                         type="text"
                         value={city}
                         onChange={(e) => setCity(e.target.value)}
-                        className="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-white font-medium focus:border-[#FF4500] focus:outline-none"
+                        placeholder="Tokyo"
+                        className="w-full h-11 bg-[#1A1A1A] border border-[#2C2C2C] rounded-xl pl-10 pr-4 text-xs font-data text-[#F0EBE3] focus:border-[#FF4500] outline-none"
                       />
                     </div>
+                  </div>
 
-                    {/* Role Selection */}
-                    <div className="space-y-1 pt-1">
-                      <label className="text-xs font-mono text-slate-400 uppercase">Hunter Persona Role</label>
-                      <div className="grid grid-cols-3 gap-2">
-                        {[
-                          { id: 'spotter', name: 'THE HUNTER' },
-                          { id: 'finder', name: 'THE SPOTTER' },
-                          { id: 'love_of_cars', name: 'FOR THE LOVE' }
-                        ].map((r) => (
-                          <button
-                            key={r.id}
-                            type="button"
-                            onClick={() => setPersona(r.id as Persona)}
-                            className={`py-2 px-2 rounded-xl text-xs font-display tracking-wider border transition-colors ${
-                              persona === r.id
-                                ? 'bg-[#FF4500] border-[#FF4500] text-white font-bold'
-                                : 'bg-white/5 border-white/10 text-slate-400 hover:text-white'
-                            }`}
-                          >
-                            {r.name}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </form>
-                </div>
-              )}
-
-              {/* TAB 2: PRIVACY & LOCATION */}
-              {activeTab === 'privacy' && (
-                <div className="flex-1 overflow-y-auto p-5 space-y-4 custom-scrollbar">
-                  <div className="space-y-3">
-                    {privacyOptions.map((opt) => {
-                      const info = PRIVACY_LEVEL_LABELS[opt.id];
-                      const isSelected = user.defaultPrivacyLevel === opt.id;
-                      return (
-                        <div
-                          key={opt.id}
-                          onClick={() => handleSelectLevel(opt.id)}
-                          className={`p-4 rounded-2xl cursor-pointer border transition-all flex items-start gap-3.5 ${
-                            isSelected
-                              ? 'bg-gradient-to-r from-[#FF5500]/20 via-[#1A1A1A] to-[#111111] border-[#FF5500] shadow-[0_0_20px_rgba(255,85,0,0.3)]'
-                              : 'bg-white/5 border-white/10 hover:border-white/20'
+                  {/* Persona Role */}
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-data text-[#9A9088] uppercase tracking-wider block">
+                      CURRENT ROLE
+                    </label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {[
+                        { id: 'finder', name: 'SPOTTER' },
+                        { id: 'spotter', name: 'HUNTER' },
+                        { id: 'love_of_cars', name: 'PURIST' },
+                        { id: 'unspecified', name: 'UNSPECIFIED' },
+                      ].map((item) => (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={() => setPersona(item.id as Persona)}
+                          className={`py-2 px-3 rounded-xl border text-[11px] font-data font-semibold text-center transition-all ${
+                            persona === item.id
+                              ? 'border-[#FF4500] bg-[#FF4500]/15 text-[#FF4500]'
+                              : 'border-[#2C2C2C] bg-[#1A1A1A] text-[#9A9088] hover:border-white/20'
                           }`}
                         >
-                          <div className="p-2 rounded-xl bg-white/5 border border-white/10 shrink-0">
-                            {opt.icon}
-                          </div>
+                          {item.name}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </form>
+              )}
 
-                          <div className="flex-1">
-                            <div className="flex items-center justify-between">
-                              <h4 className="font-semibold text-white text-sm">{info.name}</h4>
-                              <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded flex items-center gap-1 ${
-                                isSelected ? 'bg-[#FF5500] text-white' : 'bg-white/10 text-slate-400'
-                              }`}>
-                                {info.iconName === 'Globe' && <Globe className="w-3 h-3" />}
-                                {info.iconName === 'Users' && <Users className="w-3 h-3" />}
-                                {info.iconName === 'MapPin' && <MapPin className="w-3 h-3" />}
-                                {info.iconName === 'Lock' && <Lock className="w-3 h-3" />}
-                                {info.badge}
+              {/* Tab 2: Privacy & Dev Tools */}
+              {activeTab === 'privacy' && (
+                <div className="p-6 space-y-5 overflow-y-auto max-h-[65vh]">
+                  {/* Privacy Levels */}
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-data text-[#9A9088] uppercase tracking-wider block">
+                      SCAN BROADCAST PRIVACY
+                    </label>
+                    {privacyOptions.map((opt) => {
+                      const isSelected = user.defaultPrivacyLevel === opt.id;
+                      return (
+                        <button
+                          key={opt.id}
+                          type="button"
+                          onClick={() => handleSelectLevel(opt.id)}
+                          className={`w-full p-3 rounded-xl border flex items-center justify-between text-left transition-all ${
+                            isSelected
+                              ? 'border-[#FF4500] bg-[#FF4500]/10 text-white'
+                              : 'border-[#2C2C2C] bg-[#1A1A1A] text-[#9A9088] hover:border-white/20'
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            {opt.icon}
+                            <div>
+                              <span className="text-xs font-data font-semibold block text-[#F0EBE3]">
+                                {PRIVACY_LEVEL_LABELS[opt.id].name}
+                              </span>
+                              <span className="text-[10px] text-[#9A9088] font-sans block">
+                                {PRIVACY_LEVEL_LABELS[opt.id].desc}
                               </span>
                             </div>
-                            <p className="text-xs text-slate-400 mt-1 leading-relaxed">{info.desc}</p>
                           </div>
-                        </div>
+                          {isSelected && <Check className="w-4 h-4 text-[#FF4500]" />}
+                        </button>
                       );
                     })}
                   </div>
 
-                  {/* Guarantee Note */}
-                  <div className="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 text-slate-400 text-xs font-mono space-y-1">
-                    <p className="font-bold text-slate-300">🛡 APEX PRIVACY GUARANTEE:</p>
-                    <p className="leading-normal">
-                      Your exact GPS coordinates are NEVER stored on our servers. Live position is processed client-side only during active hunts.
-                    </p>
+                  {/* Dev Reset Action */}
+                  <div className="pt-2 border-t border-white/10 space-y-2">
+                    <button
+                      type="button"
+                      onClick={handleDevReset}
+                      className="w-full py-3 rounded-xl bg-amber-950/40 hover:bg-amber-950/70 border border-amber-600/40 text-amber-400 font-display text-sm tracking-wider flex items-center justify-center gap-2 transition-colors"
+                    >
+                      <RefreshCcw className="w-4 h-4 text-amber-400" />
+                      <span>RESET DEVELOPMENT STATE (CLEAN ZERO)</span>
+                    </button>
                   </div>
 
-                  {/* LOG OUT BUTTON */}
+                  {/* Log Out */}
                   <div className="pt-2 border-t border-white/10">
                     <button
+                      type="button"
                       onClick={handleLogout}
-                      className="w-full py-3.5 rounded-xl bg-rose-950/40 hover:bg-rose-950/70 border border-rose-600/40 text-rose-400 font-display text-base tracking-wider flex items-center justify-center gap-2 transition-colors"
+                      className="w-full py-3 rounded-xl bg-rose-950/40 hover:bg-rose-950/70 border border-rose-600/40 text-rose-400 font-display text-sm tracking-wider flex items-center justify-center gap-2 transition-colors"
                     >
-                      <LogOut className="w-5 h-5 text-rose-400" />
+                      <LogOut className="w-4 h-4 text-rose-400" />
                       <span>LOG OUT OF APEX</span>
                     </button>
                   </div>
@@ -353,20 +410,20 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ isOp
               )}
 
               {/* Footer Actions */}
-              <div className="p-5 border-t border-white/10 flex gap-3 mt-auto">
+              <div className="p-4 border-t border-white/10 flex gap-3 mt-auto bg-[#141414]">
                 <button
                   type="button"
                   onClick={onClose}
-                  className="flex-1 py-3 rounded-xl bg-[#1A1A1A] hover:bg-[#2C2C2C] text-[#F0EBE3] font-display text-base tracking-wider border border-[#2C2C2C] transition-colors"
+                  className="flex-1 py-3 rounded-xl bg-[#1A1A1A] hover:bg-[#2C2C2C] text-[#F0EBE3] font-display text-sm tracking-wider border border-[#2C2C2C] transition-colors"
                 >
                   CANCEL
                 </button>
                 <button
-                  type="submit"
+                  type="button"
                   onClick={activeTab === 'profile' ? handleSaveProfile : onClose}
-                  className="flex-1 py-3 rounded-xl bg-[#FF4500] hover:bg-[#FF4500]/90 text-[#F0EBE3] font-display text-base tracking-wider glow-orange transition-colors flex items-center justify-center gap-2"
+                  className="flex-1 py-3 rounded-xl bg-[#FF4500] hover:bg-[#FF4500]/90 text-[#F0EBE3] font-display text-sm tracking-wider glow-orange transition-colors flex items-center justify-center gap-2"
                 >
-                  {savedSuccess ? <Check className="w-5 h-5" /> : 'SAVE CHANGES'}
+                  {savedSuccess ? <Check className="w-4 h-4" /> : 'SAVE CHANGES'}
                 </button>
               </div>
             </>
