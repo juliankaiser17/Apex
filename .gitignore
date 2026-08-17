@@ -28,4 +28,5 @@ dist-ssr
 *.sln
 *.sw?
 APEX.apk
+APEX-Collaborator-Safe.zip
 src/components/onboarding/OnboardingModalNew.tsx
