@@ -85,11 +85,16 @@ export async function triggerGoogleSignIn(
   onSuccess: (userData: GoogleUserData) => void,
   onError?: (errMessage: string) => void
 ): Promise<void> {
-  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '708398928493-8qkjhla9p00kkjrse5f0l4d8spo9pj6c.apps.googleusercontent.com';
+  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+
+  if (!clientId) {
+    onError?.('Google Sign-In is not configured (VITE_GOOGLE_CLIENT_ID missing in .env). Please sign in with Email.');
+    return;
+  }
 
   await loadGoogleGisScript();
 
-  if (clientId && window.google?.accounts?.id) {
+  if (window.google?.accounts?.id) {
     try {
       window.google.accounts.id.initialize({
         client_id: clientId,
@@ -110,7 +115,6 @@ export async function triggerGoogleSignIn(
       window.google.accounts.id.prompt((notification: unknown) => {
         console.log('Google One Tap notification:', notification);
       });
-      onError?.('Google Sign-In prompt failed. Please try again.');
       return;
     } catch (err: any) {
       console.warn('Google GIS prompt failed:', err);
@@ -119,5 +123,5 @@ export async function triggerGoogleSignIn(
     }
   }
 
-  onError?.('Google Sign-In client configuration is unavailable. Please sign in with Email.');
+  onError?.('Google Sign-In service is unavailable in this environment.');
 }
