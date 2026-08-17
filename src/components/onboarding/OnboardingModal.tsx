@@ -339,15 +339,20 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
     sounds.playTargetLock();
     if (enable) {
       try {
-        await PushNotifications.requestPermissions();
-        await PushNotifications.register();
-      } catch {}
+        if (Capacitor.isNativePlatform()) {
+          await PushNotifications.requestPermissions();
+        } else if ('Notification' in window && Notification.permission !== 'granted') {
+          await Notification.requestPermission();
+        }
+      } catch (e) {
+        console.warn('Notification permission request error:', e);
+      }
     }
     setStep('celebration');
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#080808] flex flex-col justify-between overflow-hidden" style={{ minHeight: '100dvh' }}>
+    <div className="fixed inset-0 z-50 bg-[#080808] flex flex-col justify-between overflow-hidden pt-safe pb-safe" style={{ height: '100dvh' }}>
       <AnimatePresence mode="wait">
         
         {/* ══════════════════════════════════════════════════════ */}

@@ -1,11 +1,8 @@
 package org.juliankaiser.apex;
 
 import android.graphics.Color;
-import android.os.Build;
 import android.os.Bundle;
-import android.view.View;
 import android.view.Window;
-import android.view.WindowManager;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import androidx.core.view.WindowCompat;
@@ -23,7 +20,10 @@ public class MainActivity extends BridgeActivity {
             window.setStatusBarColor(Color.parseColor("#080808"));
             window.setNavigationBarColor(Color.parseColor("#080808"));
             
-            // Light icons on dark status bar
+            // Explicitly fit app inside system windows (status bar at top & nav buttons at bottom)
+            WindowCompat.setDecorFitsSystemWindows(window, true);
+            
+            // Light icons on dark status bar & navigation bar
             WindowInsetsControllerCompat controller = WindowCompat.getInsetsController(window, window.getDecorView());
             if (controller != null) {
                 controller.setAppearanceLightStatusBars(false);
