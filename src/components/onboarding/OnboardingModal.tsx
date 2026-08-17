@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { User, AtSign, ChevronLeft } from 'lucide-react';
+import { User, AtSign, ChevronLeft, MapPin } from 'lucide-react';
 import { useApexStore } from '../../store/useApexStore';
 import type { Persona } from '../../types/apex';
 import { sounds } from '../../utils/audio';
@@ -560,33 +560,66 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-data font-semibold text-[#9A9088] uppercase tracking-[0.2em] block mb-1">
-                    HOME RADAR CITY
-                  </label>
-                  <select
-                    value={selectedCity}
-                    onChange={(e) => {
-                      const found = FAMOUS_CITIES.find(c => c.name === e.target.value);
-                      if (found) {
-                        setSelectedCity(found.name);
-                        setSelectedCountry(found.country);
-                      } else {
-                        setSelectedCity(e.target.value);
-                      }
-                    }}
-                    className="w-full h-11 bg-[#141414] border border-white/10 rounded-xl px-3.5 text-xs text-white focus:border-[#FF4500] outline-none font-sans cursor-pointer"
-                  >
-                    {FAMOUS_CITIES.map(city => (
-                      <option key={city.name} value={city.name} className="bg-[#111111] text-white">
-                        {city.name} ({city.country})
-                      </option>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-[10px] font-data font-semibold text-[#9A9088] uppercase tracking-[0.2em]">
+                      HOME RADAR CITY
+                    </label>
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        sounds.playTargetLock();
+                        try {
+                          const res = await requestRealLocationPermission();
+                          if (res.city && res.city !== 'Your City') {
+                            setSelectedCity(res.city);
+                            setSelectedCountry(res.country);
+                          }
+                        } catch (e) {}
+                      }}
+                      className="text-[10px] text-[#FF4500] font-data font-semibold flex items-center gap-1 hover:underline"
+                    >
+                      <MapPin className="w-3 h-3" /> Auto-Detect
+                    </button>
+                  </div>
+                  <div className="relative">
+                    <MapPin className="w-4 h-4 text-[#9A9088] absolute left-3.5 top-3.5" />
+                    <input
+                      type="text"
+                      required
+                      value={selectedCity}
+                      onChange={e => setSelectedCity(e.target.value)}
+                      placeholder="Type your city (e.g. Berlin, Miami, Sydney)..."
+                      className="w-full h-11 bg-[#141414] border border-white/10 rounded-xl pl-10 pr-4 text-xs text-white focus:border-[#FF4500] outline-none font-sans"
+                    />
+                  </div>
+
+                  {/* Quick Select Popular Pills */}
+                  <div className="flex flex-wrap gap-1.5 pt-2">
+                    {['Tokyo', 'London', 'Los Angeles', 'Dubai', 'New York', 'Paris', 'Munich', 'Mumbai'].map(cityName => (
+                      <button
+                        key={cityName}
+                        type="button"
+                        onClick={() => {
+                          sounds.playTargetLock();
+                          setSelectedCity(cityName);
+                          const found = FAMOUS_CITIES.find(c => c.name === cityName);
+                          if (found) setSelectedCountry(found.country);
+                        }}
+                        className={`text-[10px] font-data px-2.5 py-1 rounded-lg border transition-all ${
+                          selectedCity.toLowerCase() === cityName.toLowerCase()
+                            ? 'border-[#FF4500] bg-[#FF4500]/20 text-[#FF4500] font-semibold'
+                            : 'border-white/10 bg-[#1A1A1A] text-[#9A9088] hover:border-white/20'
+                        }`}
+                      >
+                        {cityName}
+                      </button>
                     ))}
-                  </select>
+                  </div>
                 </div>
               </form>
             </div>
 
-            <div className="pt-6 pb-2">
+            <div className="pt-4 pb-2">
               <motion.button
                 onClick={handleProfileSetupSubmit}
                 whileTap={{ scale: 0.97 }}

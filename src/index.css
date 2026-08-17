@@ -231,9 +231,18 @@
 .no-scrollbar::-webkit-scrollbar, .scrollbar-hide::-webkit-scrollbar { display: none; }
 .no-scrollbar, .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 
-/* ═══ SAFE AREA ═══ */
-.pb-safe { padding-bottom: env(safe-area-inset-bottom, 0px); }
-.pt-safe { padding-top: env(safe-area-inset-top, 0px); }
+/* ═══ SAFE AREA INSETS (Supports Android Status Bar & 3-Button / Gesture Nav Bar) ═══ */
+:root {
+  --sat: max(28px, env(safe-area-inset-top, 28px));
+  --sab: max(20px, env(safe-area-inset-bottom, 20px));
+}
+
+.pb-safe { padding-bottom: var(--sab) !important; }
+.pt-safe { padding-top: var(--sat) !important; }
+.top-safe { top: var(--sat) !important; }
+.bottom-safe { bottom: var(--sab) !important; }
+.mb-safe { margin-bottom: var(--sab) !important; }
+.mt-safe { margin-top: var(--sat) !important; }
 @import 'react-image-crop/dist/ReactCrop.css';
 
 @keyframes mapGlow {

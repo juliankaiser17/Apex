@@ -31,7 +31,6 @@ export const App: React.FC = () => {
       if (session?.user) {
         useApexStore.getState().initializeSession(session.user.id).then(() => {
           setIsAuthReady(true);
-          // If already onboarded, silently refresh location for exact accuracy
           if (useApexStore.getState().onboardingCompleted) {
             requestRealLocationPermission().then((res) => {
               if (res.city && res.city !== 'Your City') {
@@ -47,21 +46,23 @@ export const App: React.FC = () => {
                   longitude: res.longitude
                 });
               }
-            });
+            }).catch(() => {});
           }
-          // Sanitize URL hash to prevent access/refresh tokens from lingering in browser history or referrer headers
           if (typeof window !== 'undefined' && window.location.hash && window.location.hash.includes('access_token=')) {
             window.history.replaceState(null, '', window.location.pathname);
           }
+        }).catch(() => {
+          setIsAuthReady(true);
         });
       } else {
-        // Prevent flashing login screen during OAuth redirect processing
-        if (window.location.hash && window.location.hash.includes('access_token=')) {
+        // DO NOT log out valid local user session!
+        if (typeof window !== 'undefined' && window.location.hash && window.location.hash.includes('access_token=')) {
           return;
         }
-        useApexStore.getState().logoutUser();
         setIsAuthReady(true);
       }
+    }).catch(() => {
+      setIsAuthReady(true);
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -72,12 +73,12 @@ export const App: React.FC = () => {
             window.history.replaceState(null, '', window.location.pathname);
           }
           setIsAuthReady(true);
-        });
+        }).catch(() => setIsAuthReady(true));
+      } else if (_event === 'SIGNED_OUT') {
+        useApexStore.getState().logoutUser();
+        setIsAuthReady(true);
       } else {
-        // Only set ready if we aren't waiting for a redirect
-        if (!window.location.hash.includes('access_token=')) {
-          setIsAuthReady(true);
-        }
+        setIsAuthReady(true);
       }
     });
 

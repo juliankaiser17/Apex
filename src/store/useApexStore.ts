@@ -164,7 +164,12 @@ const getSavedUser = (): UserProfile => {
     const saved = localStorage.getItem('apex_user_session');
     if (saved) {
       const parsed = JSON.parse(saved);
-      if (parsed && parsed.username) return parsed;
+      if (parsed && typeof parsed === 'object' && (parsed.id || parsed.username || parsed.displayName)) {
+        return {
+          ...INITIAL_USER,
+          ...parsed
+        };
+      }
     }
   } catch (e) {
     console.warn('Error reading saved user session:', e);
@@ -277,58 +282,90 @@ export const useApexStore = create<ApexState>((set, get) => ({
   
   initializeSession: async (userId: string) => {
     try {
-      const { data: profile } = await supabase.from('profiles').select('*').eq('id', userId).single();
+      const currentSaved = getSavedUser();
+      const { data: profile } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle();
       const { data: garage } = await supabase.from('garage').select('*').eq('user_id', userId);
       
       if (profile) {
+        const mergedUser: UserProfile = {
+          ...INITIAL_USER,
+          ...currentSaved,
+          id: profile.id,
+          username: profile.username || currentSaved.username || `hunter_${userId.substring(0, 6)}`,
+          displayName: profile.display_name || currentSaved.displayName || 'Apex Hunter',
+          avatarUrl: profile.avatar_url || currentSaved.avatarUrl || INITIAL_USER.avatarUrl,
+          level: profile.level ?? currentSaved.level ?? 1,
+          xp: profile.xp ?? currentSaved.xp ?? 0,
+          coins: profile.coins ?? currentSaved.coins ?? 0,
+          totalSpots: profile.total_spots ?? currentSaved.totalSpots ?? 0,
+          rarestFind: (profile.rarest_find as any) || currentSaved.rarestFind || 'common',
+          city: profile.city || currentSaved.city || 'Tokyo',
+          country: profile.country || currentSaved.country || 'Japan',
+          persona: (profile.persona as any) || currentSaved.persona || 'unspecified'
+        };
+
+        try {
+          localStorage.setItem('apex_user_session', JSON.stringify(mergedUser));
+          localStorage.setItem('apex_onboarding_v2_completed', 'true');
+        } catch (e) {}
+
         set({
-          user: {
-            ...INITIAL_USER,
-            id: profile.id,
-            username: profile.username,
-            displayName: profile.display_name,
-            avatarUrl: profile.avatar_url || INITIAL_USER.avatarUrl,
-            level: profile.level,
-            xp: profile.xp,
-            coins: profile.coins,
-            totalSpots: profile.total_spots,
-            rarestFind: profile.rarest_find as any
-          },
-          garage: garage || [],
-          onboardingCompleted: getSavedOnboarding()
+          user: mergedUser,
+          garage: (garage && garage.length > 0) ? garage : getSavedGarage(),
+          onboardingCompleted: true
         });
       } else {
-        // If the Supabase trigger failed (e.g. Google idToken missing username), create it manually
-        const fallbackUsername = `hunter_${userId.substring(0, 6)}`;
+        const fallbackUsername = currentSaved.username || `hunter_${userId.substring(0, 6)}`;
+        const fallbackDisplayName = currentSaved.displayName || 'Apex Hunter';
         const fallbackProfile = {
           id: userId,
           username: fallbackUsername,
-          display_name: 'Apex Hunter',
-          level: 1,
-          xp: 0,
-          coins: 0,
-          total_spots: 0,
-          rarest_find: 'None'
+          display_name: fallbackDisplayName,
+          level: currentSaved.level || 1,
+          xp: currentSaved.xp || 0,
+          coins: currentSaved.coins || 0,
+          total_spots: currentSaved.totalSpots || 0,
+          rarest_find: currentSaved.rarestFind || 'common',
+          city: currentSaved.city || 'Tokyo',
+          country: currentSaved.country || 'Japan'
         };
-        await supabase.from('profiles').insert([fallbackProfile]);
+
+        try {
+          await supabase.from('profiles').upsert([fallbackProfile]);
+        } catch (e) {
+          console.warn('Upsert fallback profile warning:', e);
+        }
+
+        const mergedUser: UserProfile = {
+          ...INITIAL_USER,
+          ...currentSaved,
+          id: userId,
+          username: fallbackUsername,
+          displayName: fallbackDisplayName
+        };
+
+        try {
+          localStorage.setItem('apex_user_session', JSON.stringify(mergedUser));
+          localStorage.setItem('apex_onboarding_v2_completed', 'true');
+        } catch (e) {}
+
         set({
-          user: {
-            ...INITIAL_USER,
-            id: userId,
-            username: fallbackUsername,
-            displayName: 'Apex Hunter',
-            level: 1,
-            xp: 0
-          },
-          garage: [],
-          onboardingCompleted: getSavedOnboarding()
+          user: mergedUser,
+          garage: getSavedGarage(),
+          onboardingCompleted: true
         });
       }
       
-      // Fetch posts after initializing session
-      await get().fetchFeedPosts();
+      try {
+        await get().fetchFeedPosts();
+      } catch (e) {}
     } catch (e) {
-      console.error('Failed to initialize session', e);
+      console.warn('Failed to initialize remote session, preserving local user state:', e);
+      set({
+        user: getSavedUser(),
+        garage: getSavedGarage(),
+        onboardingCompleted: getSavedOnboarding()
+      });
     }
   },
 

@@ -309,9 +309,26 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ isOp
                         type="text"
                         value={city}
                         onChange={(e) => setCity(e.target.value)}
-                        placeholder="Tokyo"
+                        placeholder="Type any city (e.g. Berlin, Miami, Sydney)..."
                         className="w-full h-11 bg-[#1A1A1A] border border-[#2C2C2C] rounded-xl pl-10 pr-4 text-xs font-data text-[#F0EBE3] focus:border-[#FF4500] outline-none"
                       />
+                    </div>
+                    {/* Quick city suggestions */}
+                    <div className="flex flex-wrap gap-1.5 pt-1.5">
+                      {['Tokyo', 'London', 'Los Angeles', 'Dubai', 'New York', 'Paris', 'Munich', 'Mumbai'].map(cityName => (
+                        <button
+                          key={cityName}
+                          type="button"
+                          onClick={() => setCity(cityName)}
+                          className={`text-[10px] font-data px-2 py-0.5 rounded-lg border transition-all ${
+                            city.toLowerCase() === cityName.toLowerCase()
+                              ? 'border-[#FF4500] bg-[#FF4500]/20 text-[#FF4500]'
+                              : 'border-white/10 bg-[#141414] text-[#9A9088] hover:border-white/20'
+                          }`}
+                        >
+                          {cityName}
+                        </button>
+                      ))}
                     </div>
                   </div>
 
