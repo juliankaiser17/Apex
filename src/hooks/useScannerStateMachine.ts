@@ -5,12 +5,10 @@ import { sounds } from '../utils/audio';
 export type ScannerPhase =
   | 'IDLE'
   | 'SEARCHING'
-  | 'SCENE_ANALYZING'
-  | 'TARGETS_DETECTED'
-  | 'TARGET_SELECTED'
+  | 'CAR_DETECTED'
+  | 'POTENTIAL_DISCOVERY'
   | 'TRACKING'
   | 'TARGET_LOST'
-  | 'TARGET_REACQUIRED'
   | 'LOCKING'
   | 'LOCKED'
   | 'ANALYZING'
@@ -19,7 +17,6 @@ export type ScannerPhase =
   | 'REVEALING'
   | 'DISCOVERED'
   | 'ALREADY_COLLECTED'
-  | 'SYNC_PENDING'
   | 'ERROR';
 
 export interface PipelineStageInfo {
@@ -31,6 +28,7 @@ export interface PipelineStageInfo {
 
 export interface ScannerStateMachineResult {
   phase: ScannerPhase;
+  hasVehicle: boolean;
   createdCard: CarCard | null;
   capturedPhotoUrl: string | null;
   errorMessage: string | null;
@@ -38,6 +36,7 @@ export interface ScannerStateMachineResult {
   currentStageIndex: number;
   
   // Actions
+  onVehicleDetectedChange: (detected: boolean, isStable: boolean) => void;
   startSearching: () => void;
   selectTarget: (targetId: string) => void;
   triggerLock: () => void;
@@ -54,11 +53,12 @@ const INITIAL_PIPELINE_STAGES: PipelineStageInfo[] = [
   { index: 1, label: 'MANUFACTURER IDENTIFICATION', detail: 'Badge & silhouette recognition', status: 'pending' },
   { index: 2, label: 'MODEL SPECIFICATION', detail: 'Engine, horsepower, zero-to-hundred', status: 'pending' },
   { index: 3, label: 'GENERATION & TRIM', detail: 'Body code, aero package, trim tier', status: 'pending' },
-  { index: 4, label: 'REGIONAL RARITY & MINT', detail: 'Scarcity validation & collectible mint', status: 'pending' },
+  { index: 4, label: 'DATABASE & RARITY VERIFY', detail: 'Scarcity validation & collectible mint', status: 'pending' },
 ];
 
 export function useScannerStateMachine(): ScannerStateMachineResult {
   const [phase, setPhase] = useState<ScannerPhase>('SEARCHING');
+  const [hasVehicle, setHasVehicle] = useState<boolean>(false);
   const [createdCard, setCreatedCard] = useState<CarCard | null>(null);
   const [capturedPhotoUrl, setCapturedPhotoUrl] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -67,8 +67,30 @@ export function useScannerStateMachine(): ScannerStateMachineResult {
 
   const lockTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const onVehicleDetectedChange = useCallback((detected: boolean, isStable: boolean) => {
+    setHasVehicle(detected);
+    
+    // Only update phase if we are in searching/detection mode
+    setPhase(current => {
+      if (['ANALYZING', 'IDENTIFYING', 'VERIFYING', 'REVEALING', 'DISCOVERED', 'ALREADY_COLLECTED', 'LOCKING', 'LOCKED'].includes(current)) {
+        return current;
+      }
+
+      if (!detected) {
+        return 'SEARCHING';
+      }
+
+      if (isStable) {
+        return 'POTENTIAL_DISCOVERY';
+      }
+
+      return 'CAR_DETECTED';
+    });
+  }, []);
+
   const startSearching = useCallback(() => {
     setPhase('SEARCHING');
+    setHasVehicle(false);
     setErrorMessage(null);
     setPipelineStages(INITIAL_PIPELINE_STAGES);
     setCurrentStageIndex(0);
@@ -76,10 +98,7 @@ export function useScannerStateMachine(): ScannerStateMachineResult {
 
   const selectTarget = useCallback((_targetId: string) => {
     sounds.playTargetAcquired();
-    setPhase('TARGET_SELECTED');
-    setTimeout(() => {
-      setPhase('TRACKING');
-    }, 150);
+    setPhase('TRACKING');
   }, []);
 
   const triggerLock = useCallback(() => {
@@ -145,6 +164,7 @@ export function useScannerStateMachine(): ScannerStateMachineResult {
     setCreatedCard(null);
     setCapturedPhotoUrl(null);
     setErrorMessage(null);
+    setHasVehicle(false);
     setPipelineStages(INITIAL_PIPELINE_STAGES);
     setCurrentStageIndex(0);
     setPhase('SEARCHING');
@@ -152,6 +172,7 @@ export function useScannerStateMachine(): ScannerStateMachineResult {
 
   const resetScanner = useCallback(() => {
     setPhase('IDLE');
+    setHasVehicle(false);
     setCreatedCard(null);
     setCapturedPhotoUrl(null);
     setErrorMessage(null);
@@ -167,11 +188,13 @@ export function useScannerStateMachine(): ScannerStateMachineResult {
 
   return {
     phase,
+    hasVehicle,
     createdCard,
     capturedPhotoUrl,
     errorMessage,
     pipelineStages,
     currentStageIndex,
+    onVehicleDetectedChange,
     startSearching,
     selectTarget,
     triggerLock,
