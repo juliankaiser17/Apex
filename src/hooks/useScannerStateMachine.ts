@@ -79,7 +79,7 @@ export function useScannerStateMachine(): ScannerStateMachineResult {
     setPhase('TARGET_SELECTED');
     setTimeout(() => {
       setPhase('TRACKING');
-    }, 200);
+    }, 150);
   }, []);
 
   const triggerLock = useCallback(() => {
@@ -90,7 +90,7 @@ export function useScannerStateMachine(): ScannerStateMachineResult {
     lockTimerRef.current = setTimeout(() => {
       sounds.playTargetLock();
       setPhase('LOCKED');
-    }, 300);
+    }, 200);
   }, []);
 
   const submitForAnalysis = useCallback((photoUrl: string) => {
@@ -132,7 +132,7 @@ export function useScannerStateMachine(): ScannerStateMachineResult {
     setTimeout(() => {
       sounds.playRarityReveal(card.rarity);
       setPhase(isDuplicate ? 'ALREADY_COLLECTED' : 'DISCOVERED');
-    }, 1800);
+    }, 900);
   }, []);
 
   const onIdentificationFailed = useCallback((reason: string) => {

@@ -1,15 +1,12 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Image as ImageIcon, Sparkles, Navigation, Crosshair } from 'lucide-react';
-import type { HunterTargetCandidate, ApproachGuidance } from '../../services/hunterSceneEngine';
+import { Image as ImageIcon, Navigation, Crosshair } from 'lucide-react';
+import type { ApproachGuidance } from '../../services/hunterSceneEngine';
 import type { ScannerPhase } from '../../hooks/useScannerStateMachine';
 
 interface HunterOverlayProps {
   phase: ScannerPhase;
-  candidates: HunterTargetCandidate[];
-  selectedTarget: HunterTargetCandidate | null;
   guidance: ApproachGuidance;
-  onSelectTarget: (targetId: string) => void;
   onShutterPress: () => void;
   onGalleryPick: () => void;
   onClose: () => void;
@@ -17,10 +14,7 @@ interface HunterOverlayProps {
 
 export const HunterOverlay: React.FC<HunterOverlayProps> = ({
   phase,
-  candidates,
-  selectedTarget,
   guidance,
-  onSelectTarget,
   onShutterPress,
   onGalleryPick,
   onClose,
@@ -33,10 +27,9 @@ export const HunterOverlay: React.FC<HunterOverlayProps> = ({
       {/* 1. SIGNATURE TARGET LOCK VIGNETTE DIMMING */}
       <motion.div
         animate={{
-          opacity: isLocked ? 0.55 : 0,
-          backdropFilter: isLocked ? 'blur(3px)' : 'blur(0px)'
+          opacity: isLocked ? 0.6 : 0,
         }}
-        transition={{ duration: 0.3 }}
+        transition={{ duration: 0.2 }}
         className="absolute inset-0 bg-[#080808] pointer-events-none z-0"
       />
 
@@ -45,7 +38,7 @@ export const HunterOverlay: React.FC<HunterOverlayProps> = ({
         <button
           onClick={onClose}
           className="w-10 h-10 rounded-full bg-[#111111]/80 backdrop-blur-md border border-[#2C2C2C] flex items-center justify-center text-[#F0EBE3] hover:border-[#FF4500] transition-colors"
-          title="Exit Hunter Mode"
+          title="Exit Scanner"
         >
           <span className="text-sm font-data font-bold">✕</span>
         </button>
@@ -54,91 +47,23 @@ export const HunterOverlay: React.FC<HunterOverlayProps> = ({
         <div className="flex items-center gap-2 bg-[#111111]/80 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/10">
           <span className="w-2 h-2 rounded-full bg-[#FF4500] animate-pulse" />
           <span className="text-[11px] font-data font-semibold text-[#F0EBE3] tracking-[0.2em] uppercase">
-            APEX // HUNTER MODE
+            APEX // VISION SCANNER
           </span>
         </div>
 
         <div className="w-10 h-10" />
       </div>
 
-      {/* 3. MULTI-VEHICLE CANDIDATE RETICLES (Anchored Geometry) */}
-      <div className="absolute inset-0 z-10 pointer-events-none">
-        {candidates.map((cand) => {
-          const isSelected = selectedTarget?.id === cand.id;
-          return (
-            <motion.div
-              key={cand.id}
-              onClick={(e) => {
-                e.stopPropagation();
-                onSelectTarget(cand.id);
-              }}
-              style={{
-                left: `${cand.x}%`,
-                top: `${cand.y}%`,
-                transform: 'translate(-50%, -50%)'
-              }}
-              className="absolute pointer-events-auto cursor-pointer"
-            >
-              {/* Diamond Reticle Geometry */}
-              <div className="relative flex flex-col items-center group">
-                <motion.div
-                  animate={{
-                    scale: isSelected ? (isLocked ? 1.1 : 1.05) : 0.85,
-                    opacity: isSelected ? 1 : 0.45,
-                    rotate: isSelected ? 45 : 0
-                  }}
-                  transition={{ duration: 0.2 }}
-                  className={`w-10 h-10 rounded-lg border-2 flex items-center justify-center transition-colors ${
-                    isSelected
-                      ? isLocked
-                        ? 'border-[#FF4500] bg-[#FF4500]/20 shadow-[0_0_20px_#FF4500]'
-                        : 'border-[#FF4500] bg-[#FF4500]/10 shadow-[0_0_12px_rgba(255,69,0,0.5)]'
-                      : 'border-[#F0EBE3]/50 bg-black/40 hover:border-[#FF4500]'
-                  }`}
-                >
-                  <span className={`text-[10px] font-data font-bold -rotate-45 ${
-                    isSelected ? 'text-[#FF4500]' : 'text-[#F0EBE3]'
-                  }`}>
-                    #{cand.index < 10 ? `0${cand.index}` : cand.index}
-                  </span>
-                </motion.div>
-
-                {/* Candidate Discovery Label */}
-                {isSelected && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 5 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="absolute -bottom-7 whitespace-nowrap bg-[#111111]/90 backdrop-blur-md px-2.5 py-0.5 rounded-full border border-[#FF4500]/40 flex items-center gap-1.5"
-                  >
-                    <Sparkles className="w-3 h-3 text-[#FF4500]" />
-                    <span className="text-[10px] font-data font-bold text-[#F0EBE3] tracking-wider uppercase">
-                      {cand.status === 'lost'
-                        ? `TARGET #${cand.index} LOST`
-                        : cand.status === 'reacquired'
-                        ? `TARGET #${cand.index} REACQUIRED`
-                        : isLocked
-                        ? 'TARGET LOCKED'
-                        : cand.provisionalLabel || 'POTENTIAL DISCOVERY'}
-                    </span>
-                  </motion.div>
-                )}
-              </div>
-            </motion.div>
-          );
-        })}
-      </div>
-
-      {/* 4. SIGNATURE CENTRAL TARGETING RETICLE & CALIPERS */}
+      {/* 3. SIGNATURE CENTRAL TARGETING RETICLE & CALIPERS */}
       <div className="relative z-10 my-auto mx-auto w-72 h-72 pointer-events-none flex items-center justify-center">
         <motion.div
           animate={{
-            scale: isLocked ? 0.75 : 1,
+            scale: isLocked ? 0.8 : 1,
             rotate: isLocked ? 90 : 360,
-            borderColor: isLocked ? '#FF4500' : 'rgba(240, 235, 227, 0.25)'
           }}
           transition={{
             rotate: { repeat: isLocked ? 0 : Infinity, duration: 720, ease: 'linear' },
-            scale: { duration: 0.25, ease: 'easeOut' }
+            scale: { duration: 0.2, ease: 'easeOut' }
           }}
           className="absolute inset-0 flex items-center justify-center"
         >
@@ -165,12 +90,12 @@ export const HunterOverlay: React.FC<HunterOverlayProps> = ({
             scale: isLocked ? [1, 1.8, 1.2] : 1,
             backgroundColor: '#FF4500'
           }}
-          transition={{ duration: 0.3 }}
+          transition={{ duration: 0.2 }}
           className="w-2.5 h-2.5 rounded-full bg-[#FF4500] z-10 shadow-[0_0_12px_#FF4500]"
         />
       </div>
 
-      {/* 5. CONTEXTUAL APPROACH GUIDANCE MICRO-PILL */}
+      {/* 4. CONTEXTUAL APPROACH GUIDANCE MICRO-PILL */}
       <div className="relative z-20 px-6 flex justify-center pb-2 pointer-events-none">
         <AnimatePresence mode="wait">
           {guidance.instruction && (
@@ -194,7 +119,7 @@ export const HunterOverlay: React.FC<HunterOverlayProps> = ({
         </AnimatePresence>
       </div>
 
-      {/* 6. BOTTOM SHUTTER TRIGGER & CONTROLS */}
+      {/* 5. BOTTOM SHUTTER TRIGGER & CONTROLS */}
       <div className="relative z-20 pb-10 pt-3 flex flex-col items-center gap-3 bg-gradient-to-t from-[#080808] via-[#080808]/80 to-transparent pointer-events-auto">
         <div className="flex items-center gap-8">
           {/* Gallery Upload Button */}
@@ -226,7 +151,7 @@ export const HunterOverlay: React.FC<HunterOverlayProps> = ({
             </motion.div>
           </motion.button>
 
-          {/* Hunter Mode Status indicator */}
+          {/* Scanner Status indicator */}
           <div className="w-12 h-12 flex flex-col items-center justify-center text-center">
             <span className="text-[9px] font-data font-bold text-[#9A9088] uppercase tracking-wider block">
               STATUS

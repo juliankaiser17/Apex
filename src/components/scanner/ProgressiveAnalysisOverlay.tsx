@@ -50,7 +50,7 @@ export const ProgressiveAnalysisOverlay: React.FC<ProgressiveAnalysisOverlayProp
           </div>
         </div>
 
-        {/* Real Pipeline Stages List (No Fake Bars) */}
+        {/* Real Pipeline Stages List */}
         <div className="space-y-2.5 text-left bg-[#111111]/90 border border-white/10 rounded-2xl p-4 backdrop-blur-xl shadow-2xl">
           {stages.map((stage, idx) => {
             const isDone = stage.status === 'completed';

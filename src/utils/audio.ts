@@ -48,8 +48,8 @@ class SoundSystem {
     const gain = this.ctx.createGain();
 
     osc.type = 'sine';
-    osc.frequency.setValueAtTime(987.77, now); // B5
-    osc.frequency.exponentialRampToValueAtTime(1318.51, now + 0.04); // E6
+    osc.frequency.setValueAtTime(987.77, now);
+    osc.frequency.exponentialRampToValueAtTime(1318.51, now + 0.04);
 
     gain.gain.setValueAtTime(0.08, now);
     gain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
@@ -90,7 +90,7 @@ class SoundSystem {
     if (!this.ctx) return;
 
     const now = this.ctx.currentTime;
-    const freqs = [659.25, 1046.50]; // E5 -> C6
+    const freqs = [659.25, 1046.50];
 
     freqs.forEach((freq, idx) => {
       if (!this.ctx) return;
@@ -176,8 +176,8 @@ class SoundSystem {
     const gain = this.ctx.createGain();
 
     osc.type = 'triangle';
-    osc.frequency.setValueAtTime(523.25, now); // C5
-    osc.frequency.setValueAtTime(659.25, now + 0.05); // E5
+    osc.frequency.setValueAtTime(523.25, now);
+    osc.frequency.setValueAtTime(659.25, now + 0.05);
 
     gain.gain.setValueAtTime(0.15, now);
     gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
@@ -195,7 +195,7 @@ class SoundSystem {
     if (!this.ctx) return;
 
     const now = this.ctx.currentTime;
-    const notes = [440, 554.37, 659.25, 880]; // A Major arpeggio
+    const notes = [440, 554.37, 659.25, 880];
     notes.forEach((freq, idx) => {
       if (!this.ctx) return;
       const osc = this.ctx.createOscillator();

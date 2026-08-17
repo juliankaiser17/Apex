@@ -31,25 +31,25 @@ export const DiscoveryReveal: React.FC<DiscoveryRevealProps> = ({
   const isMythic = card.rarity === 'mythic';
   const isLegendary = card.rarity === 'legendary';
 
-  // Sequence Progressive Identity Assembly
+  // Fast, satisfying identity assembly (~800ms total)
   useEffect(() => {
-    const t1 = setTimeout(() => setRevealStep(1), 300); // Make
-    const t2 = setTimeout(() => setRevealStep(2), 700); // Model
-    const t3 = setTimeout(() => setRevealStep(3), 1100); // Specs
+    const t1 = setTimeout(() => setRevealStep(1), 150); // Make
+    const t2 = setTimeout(() => setRevealStep(2), 350); // Model
+    const t3 = setTimeout(() => setRevealStep(3), 550); // Specs
     const t4 = setTimeout(() => {
       setRevealStep(4); // Full Card
       sounds.playRarityReveal(card.rarity);
       try {
         confetti({
-          particleCount: isMythic ? 100 : isLegendary ? 70 : 40,
-          spread: 80,
+          particleCount: isMythic ? 80 : isLegendary ? 50 : 30,
+          spread: 70,
           origin: { y: 0.6 },
           colors: isMythic
             ? ['#FF2200', '#FFA500', '#C85000', '#E8A020']
             : [rarityConf.color, '#F0EBE3', '#FF4500']
         });
       } catch (e) {}
-    }, 1600);
+    }, 800);
 
     return () => {
       clearTimeout(t1);
