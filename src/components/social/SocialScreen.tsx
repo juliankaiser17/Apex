@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { Flame, Trophy, Users, User, Zap, Crown, Award, Search, MessageSquare, Heart, Share2, Target, Flag, Globe } from 'lucide-react';
+import { Flame, Trophy, Users, User, Zap, Crown, Award, Search, MessageSquare, Heart, Share2, Target, Flag, Globe, UserPlus, X, Check, UserCheck, AlertCircle } from 'lucide-react';
 import { useApexStore } from '../../store/useApexStore';
-import type { FeedPost, CarCard } from '../../types/apex';
+import type { FeedPost, CarCard, FriendUser } from '../../types/apex';
 import { Card3DDetail } from '../garage/Card3DDetail';
 import { CommentsModal } from './CommentsModal';
 import { RARITY_CONFIG } from '../../utils/rarity';
+import { sounds } from '../../utils/audio';
+import { supabase } from '../../lib/supabase';
 
 export const SocialScreen: React.FC = () => {
   const { 
@@ -12,6 +14,9 @@ export const SocialScreen: React.FC = () => {
     feedPosts, 
     leaderboards, 
     badges, 
+    friends,
+    addFriend,
+    removeFriend,
     toggleLikePost, 
     toggleEnthusiastModal,
     setScannerOpen
@@ -22,6 +27,12 @@ export const SocialScreen: React.FC = () => {
   const [selectedPostForComments, setSelectedPostForComments] = useState<FeedPost | null>(null);
   const [leaderboardFilter, setLeaderboardFilter] = useState<'city' | 'country' | 'global'>('global');
   const [friendSearch, setFriendSearch] = useState('');
+  
+  // Add Friend Modal State
+  const [isAddFriendModalOpen, setIsAddFriendModalOpen] = useState(false);
+  const [targetUsernameInput, setTargetUsernameInput] = useState('');
+  const [friendModalFeedback, setFriendModalFeedback] = useState<{ type: 'success' | 'error' | ''; message: string }>({ type: '', message: '' });
+  const [isSearchingFriend, setIsSearchingFriend] = useState(false);
 
   const handleShare = async (post: FeedPost) => {
     if (navigator.share) {
@@ -34,6 +45,74 @@ export const SocialScreen: React.FC = () => {
       } catch (err) {
         console.log('Error sharing:', err);
       }
+    }
+  };
+
+  const handleFollowOrAddFriend = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const cleanHandle = targetUsernameInput.trim().replace(/^@/, '').toLowerCase();
+    if (!cleanHandle) return;
+
+    if (cleanHandle === user.username.toLowerCase()) {
+      setFriendModalFeedback({ type: 'error', message: "You cannot add yourself as a friend." });
+      return;
+    }
+
+    if (friends.some(f => f.username.toLowerCase() === cleanHandle)) {
+      setFriendModalFeedback({ type: 'error', message: `@${cleanHandle} is already in your friends list.` });
+      return;
+    }
+
+    sounds.playTargetLock();
+    setIsSearchingFriend(true);
+    setFriendModalFeedback({ type: '', message: '' });
+
+    try {
+      // 1. Try to find remote user in Supabase
+      const { data: remoteUser } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('username', cleanHandle)
+        .maybeSingle();
+
+      const newFriend: FriendUser = {
+        id: remoteUser?.id || `friend-${Date.now()}`,
+        username: cleanHandle,
+        displayName: remoteUser?.display_name || cleanHandle,
+        avatarUrl: remoteUser?.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400',
+        level: remoteUser?.level || 1,
+        city: remoteUser?.city || 'Tokyo',
+        country: remoteUser?.country || 'Japan',
+        totalSpots: remoteUser?.total_spots || 0,
+        isFollowing: true
+      };
+
+      addFriend(newFriend);
+      setFriendModalFeedback({ type: 'success', message: `Successfully added @${cleanHandle} as a friend!` });
+      setTargetUsernameInput('');
+      setTimeout(() => {
+        setIsAddFriendModalOpen(false);
+        setFriendModalFeedback({ type: '', message: '' });
+      }, 1200);
+    } catch (err) {
+      // Offline fallback: Add friend directly by handle
+      const newFriend: FriendUser = {
+        id: `friend-${Date.now()}`,
+        username: cleanHandle,
+        displayName: cleanHandle,
+        avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400',
+        level: 1,
+        isFollowing: true
+      };
+      addFriend(newFriend);
+      setFriendModalFeedback({ type: 'success', message: `Added @${cleanHandle} to your friends!` });
+      setTargetUsernameInput('');
+      setTimeout(() => {
+        setIsAddFriendModalOpen(false);
+        setFriendModalFeedback({ type: '', message: '' });
+      }, 1200);
+    } finally {
+      setIsSearchingFriend(false);
     }
   };
 
@@ -239,32 +318,87 @@ export const SocialScreen: React.FC = () => {
       {/* SUB-TAB 3: FRIENDS & CHALLENGES */}
       {subTab === 'friends' && (
         <div className="space-y-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9A9088]" />
-            <input
-              type="text"
-              placeholder="Search friends by username..."
-              value={friendSearch}
-              onChange={(e) => setFriendSearch(e.target.value)}
-              className="w-full bg-[#111111] border border-white/10 rounded-xl pl-9 pr-4 py-2.5 text-xs text-[#F0EBE3] placeholder-[#5A5550] focus:outline-none"
-            />
-          </div>
-
-          <div className="text-center py-12 px-6 space-y-4 bg-[#111111] rounded-2xl border border-white/10">
-            <div className="w-14 h-14 rounded-full bg-black/60 border border-[#FF4500] flex items-center justify-center mx-auto text-[#FF4500] glow-orange">
-              <Zap className="w-7 h-7" />
+          <div className="flex gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9A9088]" />
+              <input
+                type="text"
+                placeholder="Filter your friends..."
+                value={friendSearch}
+                onChange={(e) => setFriendSearch(e.target.value)}
+                className="w-full bg-[#111111] border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-xs text-[#F0EBE3] placeholder-[#5A5550] focus:border-[#FF4500] outline-none"
+              />
             </div>
-            <div className="space-y-1">
-              <h4 className="font-display text-2xl text-[#F0EBE3]">NO FRIENDS ADDED YET</h4>
-              <p className="text-xs text-[#9A9088] leading-relaxed max-w-xs mx-auto pb-4">
-                Connect with other real car spotters in your city to compare cards and start 7-day XP races.
-              </p>
-            </div>
-            
-            <button className="py-3 px-8 rounded-xl bg-[#FF4500] text-[#F0EBE3] font-display text-lg tracking-wider glow-orange inline-flex items-center gap-2">
-              <Crown className="w-5 h-5" /> + ADD NEW FRIEND
+            <button
+              onClick={() => setIsAddFriendModalOpen(true)}
+              className="px-4 py-2.5 rounded-xl bg-[#FF4500] text-white font-data text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-[0_0_12px_rgba(255,69,0,0.3)] hover:bg-[#FF5500] transition-colors shrink-0"
+            >
+              <UserPlus className="w-4 h-4" /> ADD FRIEND
             </button>
           </div>
+
+          {/* Friends List */}
+          {friends.length > 0 ? (
+            <div className="space-y-2">
+              {friends
+                .filter(f => f.username.toLowerCase().includes(friendSearch.toLowerCase()) || f.displayName.toLowerCase().includes(friendSearch.toLowerCase()))
+                .map((friend) => (
+                  <div
+                    key={friend.username}
+                    className="p-3 rounded-2xl bg-[#111111] border border-white/10 flex items-center justify-between shadow-lg"
+                  >
+                    <div className="flex items-center gap-3">
+                      <img
+                        src={friend.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400'}
+                        alt={friend.username}
+                        className="w-10 h-10 rounded-full object-cover border border-[#FF4500]/60"
+                      />
+                      <div>
+                        <h4 className="text-xs font-semibold text-[#F0EBE3]">{friend.displayName}</h4>
+                        <p className="text-[10px] font-data text-[#9A9088]">
+                          @{friend.username} · Level {friend.level} {friend.city ? `· ${friend.city}` : ''}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-data text-[#2ECC71] bg-[#2ECC71]/10 px-2 py-0.5 rounded border border-[#2ECC71]/30 font-semibold">
+                        FOLLOWING
+                      </span>
+                      <button
+                        onClick={() => {
+                          sounds.playTargetLock();
+                          removeFriend(friend.username);
+                        }}
+                        className="text-[10px] font-data text-rose-400 hover:text-rose-300 p-1"
+                        title="Unfollow"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 px-6 space-y-4 bg-[#111111] rounded-2xl border border-white/10 shadow-2xl">
+              <div className="w-14 h-14 rounded-full bg-black/60 border border-[#FF4500] flex items-center justify-center mx-auto text-[#FF4500] shadow-[0_0_20px_rgba(255,69,0,0.3)]">
+                <Users className="w-7 h-7" />
+              </div>
+              <div className="space-y-1">
+                <h4 className="font-display text-2xl text-[#F0EBE3]">NO FRIENDS ADDED YET</h4>
+                <p className="text-xs text-[#9A9088] leading-relaxed max-w-xs mx-auto pb-2">
+                  Add friends by username to compare garage collections and see their real-world vehicle spots.
+                </p>
+              </div>
+              
+              <button
+                onClick={() => setIsAddFriendModalOpen(true)}
+                className="py-3 px-8 rounded-xl bg-[#FF4500] text-[#F0EBE3] font-display text-lg tracking-wider shadow-[0_0_15px_rgba(255,69,0,0.4)] inline-flex items-center gap-2"
+              >
+                <UserPlus className="w-5 h-5" /> + ADD NEW FRIEND
+              </button>
+            </div>
+          )}
         </div>
       )}
 
@@ -352,6 +486,97 @@ export const SocialScreen: React.FC = () => {
         post={selectedPostForComments}
         onClose={() => setSelectedPostForComments(null)}
       />
+
+      {/* ADD NEW FRIEND MODAL */}
+      {isAddFriendModalOpen && (
+        <div className="fixed inset-0 z-50 bg-[#080808]/90 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="w-full max-w-sm bg-[#111111] border border-white/15 rounded-3xl p-6 space-y-4 shadow-2xl relative">
+            <div className="flex items-center justify-between border-b border-white/10 pb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-[#FF4500]/10 border border-[#FF4500]/30 flex items-center justify-center text-[#FF4500]">
+                  <UserPlus className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="font-display text-xl text-[#F0EBE3] leading-tight">ADD SPOTTER</h3>
+                  <span className="text-[10px] font-data text-[#9A9088] uppercase tracking-wider block">
+                    CONNECT BY USERNAME
+                  </span>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  setIsAddFriendModalOpen(false);
+                  setFriendModalFeedback({ type: '', message: '' });
+                }}
+                className="w-8 h-8 rounded-full bg-[#1A1A1A] border border-white/10 flex items-center justify-center text-[#9A9088] hover:text-white"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleFollowOrAddFriend} className="space-y-3.5">
+              <div>
+                <label className="text-[10px] font-data font-semibold text-[#9A9088] uppercase tracking-wider block mb-1">
+                  ENTER @USERNAME
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3.5 top-3 text-[#FF4500] font-data text-xs">@</span>
+                  <input
+                    type="text"
+                    required
+                    autoFocus
+                    value={targetUsernameInput}
+                    onChange={(e) => setTargetUsernameInput(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
+                    placeholder="e.g. tokyo_drifter"
+                    className="w-full h-11 bg-[#1A1A1A] border border-white/10 rounded-xl pl-8 pr-4 text-xs text-white focus:border-[#FF4500] outline-none font-data"
+                  />
+                </div>
+              </div>
+
+              {friendModalFeedback.message && (
+                <div className={`p-2.5 rounded-xl border text-xs flex items-center gap-2 ${
+                  friendModalFeedback.type === 'success'
+                    ? 'bg-[#2ECC71]/10 border-[#2ECC71]/30 text-[#2ECC71]'
+                    : 'bg-rose-950/40 border-rose-600/40 text-rose-300'
+                }`}>
+                  {friendModalFeedback.type === 'success' ? <Check className="w-4 h-4 shrink-0" /> : <AlertCircle className="w-4 h-4 shrink-0" />}
+                  <span>{friendModalFeedback.message}</span>
+                </div>
+              )}
+
+              {/* Suggested Spotters to follow */}
+              <div className="space-y-1.5 pt-1">
+                <span className="text-[10px] font-data text-[#9A9088] uppercase tracking-wider block">
+                  SUGGESTED SPOTTERS
+                </span>
+                <div className="flex flex-wrap gap-1.5">
+                  {['tokyo_drifter', 'monaco_spotter', 'nurburg_hunter', 'dubai_exotics'].map((suggested) => (
+                    <button
+                      key={suggested}
+                      type="button"
+                      onClick={() => setTargetUsernameInput(suggested)}
+                      className="text-[10px] font-data px-2.5 py-1 rounded-lg bg-[#1A1A1A] border border-white/10 text-[#9A9088] hover:border-[#FF4500] hover:text-[#FF4500] transition-colors"
+                    >
+                      @{suggested}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="pt-2">
+                <button
+                  type="submit"
+                  disabled={isSearchingFriend || !targetUsernameInput.trim()}
+                  className="w-full h-12 rounded-xl bg-[#FF4500] hover:bg-[#FF5500] disabled:opacity-50 text-white font-sans font-semibold text-sm shadow-[0_4px_20px_rgba(255,69,0,0.4)] flex items-center justify-center gap-2 transition-all"
+                >
+                  <UserCheck className="w-4 h-4" />
+                  <span>{isSearchingFriend ? 'Searching...' : 'Add as Friend'}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

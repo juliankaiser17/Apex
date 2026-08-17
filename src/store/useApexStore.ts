@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { UserProfile, CarCard, Hunt, DailyQuest, Mission, Badge, FeedPost, PostComment, LeaderboardEntry, Persona, PrivacyLevel } from '../types/apex';
+import type { UserProfile, CarCard, Hunt, DailyQuest, Mission, Badge, FeedPost, PostComment, LeaderboardEntry, Persona, PrivacyLevel, FriendUser } from '../types/apex';
 import { getLevelFromXp, calculateScanXp } from '../utils/rarity';
 import { sounds } from '../utils/audio';
 import { supabase } from '../lib/supabase';
@@ -33,11 +33,16 @@ interface ApexState {
   feedPosts: FeedPost[];
   leaderboards: LeaderboardEntry[];
   liveEventExpiresAt: number;
+  friends: FriendUser[];
 
   settingsModalOpen: boolean;
   setSettingsModalOpen: (open: boolean) => void;
   updateUserProfile: (profile: Partial<UserProfile>) => void;
   logoutUser: () => void;
+  deleteAccount: () => Promise<void>;
+  clearStorageCache: () => void;
+  addFriend: (friend: FriendUser) => void;
+  removeFriend: (username: string) => void;
   setActiveTab: (tab: 'home' | 'map' | 'garage' | 'social' | 'profile') => void;
   setScannerOpen: (open: boolean) => void;
   setPersona: (persona: Persona) => void;
@@ -198,6 +203,17 @@ const getSavedOnboarding = (): boolean => {
   return false;
 };
 
+const getSavedFriends = (): FriendUser[] => {
+  try {
+    const saved = localStorage.getItem('apex_user_friends');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed)) return parsed;
+    }
+  } catch (e) {}
+  return [];
+};
+
 export const useApexStore = create<ApexState>((set, get) => ({
   activeTab: 'home',
   scannerOpen: false,
@@ -210,6 +226,7 @@ export const useApexStore = create<ApexState>((set, get) => ({
 
   user: getSavedUser(),
   garage: getSavedGarage(),
+  friends: getSavedFriends(),
   activeHunts: [],
   dailyQuests: INITIAL_QUESTS,
   dailyMissions: INITIAL_MISSIONS,
@@ -232,6 +249,65 @@ export const useApexStore = create<ApexState>((set, get) => ({
     } catch (e) {}
     return { user: updatedUser };
   }),
+
+  addFriend: (friend) => {
+    set((state) => {
+      const exists = state.friends.some(f => f.username.toLowerCase() === friend.username.toLowerCase());
+      if (exists) return state;
+      const updated = [...state.friends, { ...friend, isFollowing: true }];
+      try {
+        localStorage.setItem('apex_user_friends', JSON.stringify(updated));
+      } catch (e) {}
+      return { friends: updated };
+    });
+  },
+
+  removeFriend: (username) => {
+    set((state) => {
+      const updated = state.friends.filter(f => f.username.toLowerCase() !== username.toLowerCase());
+      try {
+        localStorage.setItem('apex_user_friends', JSON.stringify(updated));
+      } catch (e) {}
+      return { friends: updated };
+    });
+  },
+
+  clearStorageCache: () => {
+    try {
+      localStorage.removeItem('apex_temp_crop');
+      localStorage.removeItem('apex_cached_locations');
+    } catch (e) {}
+  },
+
+  deleteAccount: async () => {
+    const currentUser = get().user;
+    if (currentUser && currentUser.id) {
+      try {
+        await supabase.from('garage').delete().eq('user_id', currentUser.id);
+        await supabase.from('posts').delete().eq('user_id', currentUser.id);
+        await supabase.from('profiles').delete().eq('id', currentUser.id);
+      } catch (e) {
+        console.warn('Account deletion remote warning:', e);
+      }
+    }
+    try {
+      localStorage.clear();
+    } catch (e) {}
+    try {
+      await supabase.auth.signOut({ scope: 'global' });
+    } catch (e) {}
+    set({
+      onboardingCompleted: false,
+      settingsModalOpen: false,
+      user: { ...INITIAL_USER },
+      garage: [],
+      friends: [],
+      activeHunts: [],
+      dailyQuests: INITIAL_QUESTS,
+      dailyMissions: INITIAL_MISSIONS,
+      badges: INITIAL_BADGES,
+    });
+  },
 
   logoutUser: async () => {
     // Clear state synchronously first to prevent UI flashes
@@ -264,6 +340,7 @@ export const useApexStore = create<ApexState>((set, get) => ({
       settingsModalOpen: false,
       user: { ...INITIAL_USER },
       garage: [],
+      friends: [],
       activeHunts: [],
       dailyQuests: INITIAL_QUESTS,
       dailyMissions: INITIAL_MISSIONS,

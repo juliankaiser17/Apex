@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Lock, Eye, Users, MapPin, LogOut, User, Camera, Check, Globe, RefreshCcw } from 'lucide-react';
+import { X, Lock, Eye, Users, MapPin, LogOut, User, Camera, Check, Globe, RefreshCcw, Trash2, AlertTriangle } from 'lucide-react';
 import { useApexStore } from '../../store/useApexStore';
 import { PRIVACY_LEVEL_LABELS } from '../../utils/privacyPipeline';
 import type { PrivacyLevel, Persona } from '../../types/apex';
@@ -15,7 +15,15 @@ interface ProfileSettingsModalProps {
 }
 
 export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ isOpen, onClose }) => {
-  const { user, updateUserProfile, setDefaultPrivacyLevel, logoutUser, resetDevelopmentState } = useApexStore();
+  const { 
+    user, 
+    updateUserProfile, 
+    setDefaultPrivacyLevel, 
+    logoutUser, 
+    resetDevelopmentState, 
+    clearStorageCache, 
+    deleteAccount 
+  } = useApexStore();
   const [activeTab, setActiveTab] = useState<'profile' | 'privacy'>('profile');
 
   // Form state synced with user
@@ -25,6 +33,7 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ isOp
   const [avatarUrl, setAvatarUrl] = useState(user.avatarUrl);
   const [persona, setPersona] = useState<Persona>(user.persona || 'unspecified');
   const [savedSuccess, setSavedSuccess] = useState(false);
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
 
   // Sync state whenever modal opens or user updates
   useEffect(() => {
@@ -400,15 +409,47 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ isOp
                     })}
                   </div>
 
-                  {/* Dev Reset Action */}
-                  <div className="pt-2 border-t border-white/10 space-y-2">
+                  {/* Cache & Dev Reset Actions */}
+                  <div className="pt-2 border-t border-white/10 space-y-2.5">
+                    <label className="text-[10px] font-data text-[#9A9088] uppercase tracking-wider block">
+                      DATA & STORAGE MANAGEMENT
+                    </label>
+
+                    {/* Clear Cache */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        sounds.playTargetLock();
+                        clearStorageCache();
+                        alert('Local image cache and temporary buffers cleared successfully.');
+                      }}
+                      className="w-full py-3 rounded-xl bg-[#1A1A1A] hover:bg-[#222222] border border-white/10 text-[#F0EBE3] font-display text-sm tracking-wider flex items-center justify-center gap-2 transition-colors"
+                    >
+                      <Trash2 className="w-4 h-4 text-[#9A9088]" />
+                      <span>CLEAR TEMPORARY IMAGE CACHE</span>
+                    </button>
+
+                    {/* Dev Reset Action */}
                     <button
                       type="button"
                       onClick={handleDevReset}
-                      className="w-full py-3 rounded-xl bg-amber-950/40 hover:bg-amber-950/70 border border-amber-600/40 text-amber-400 font-display text-sm tracking-wider flex items-center justify-center gap-2 transition-colors"
+                      className="w-full py-3 rounded-xl bg-amber-950/30 hover:bg-amber-950/60 border border-amber-600/40 text-amber-400 font-display text-sm tracking-wider flex items-center justify-center gap-2 transition-colors"
                     >
                       <RefreshCcw className="w-4 h-4 text-amber-400" />
                       <span>RESET DEVELOPMENT STATE (CLEAN ZERO)</span>
+                    </button>
+
+                    {/* Delete Account Permanently */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        sounds.playTargetLock();
+                        setIsDeleteConfirmOpen(true);
+                      }}
+                      className="w-full py-3 rounded-xl bg-rose-950/30 hover:bg-rose-950/60 border border-rose-600/40 text-rose-400 font-display text-sm tracking-wider flex items-center justify-center gap-2 transition-colors"
+                    >
+                      <AlertTriangle className="w-4 h-4 text-rose-400" />
+                      <span>DELETE ACCOUNT PERMANENTLY</span>
                     </button>
                   </div>
 
@@ -417,9 +458,9 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ isOp
                     <button
                       type="button"
                       onClick={handleLogout}
-                      className="w-full py-3 rounded-xl bg-rose-950/40 hover:bg-rose-950/70 border border-rose-600/40 text-rose-400 font-display text-sm tracking-wider flex items-center justify-center gap-2 transition-colors"
+                      className="w-full py-3 rounded-xl bg-[#141414] hover:bg-[#1C1C1C] border border-white/10 text-[#9A9088] hover:text-white font-display text-sm tracking-wider flex items-center justify-center gap-2 transition-colors"
                     >
-                      <LogOut className="w-4 h-4 text-rose-400" />
+                      <LogOut className="w-4 h-4" />
                       <span>LOG OUT OF APEX</span>
                     </button>
                   </div>
@@ -444,6 +485,43 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ isOp
                 </button>
               </div>
             </>
+          )}
+
+          {/* DELETE ACCOUNT CONFIRMATION MODAL */}
+          {isDeleteConfirmOpen && (
+            <div className="absolute inset-0 z-50 bg-[#080808]/95 flex items-center justify-center p-6 text-center">
+              <div className="space-y-4 max-w-xs">
+                <div className="w-14 h-14 rounded-full bg-rose-950/60 border border-rose-500 flex items-center justify-center mx-auto text-rose-500 shadow-[0_0_20px_rgba(244,63,94,0.4)]">
+                  <AlertTriangle className="w-7 h-7" />
+                </div>
+                <div>
+                  <h3 className="font-display text-2xl text-[#F0EBE3]">PERMANENTLY DELETE ACCOUNT?</h3>
+                  <p className="text-xs text-[#9A9088] leading-relaxed mt-1">
+                    This action is irreversible. All your scanned vehicle cards, stats, XP, and profile will be permanently erased.
+                  </p>
+                </div>
+                <div className="space-y-2 pt-2">
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      sounds.playTargetLock();
+                      await deleteAccount();
+                      onClose();
+                    }}
+                    className="w-full py-3 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-display text-sm tracking-wider shadow-lg transition-colors"
+                  >
+                    YES, PURGE MY ACCOUNT
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsDeleteConfirmOpen(false)}
+                    className="w-full py-2.5 rounded-xl bg-[#1A1A1A] text-[#9A9088] hover:text-white font-display text-xs tracking-wider"
+                  >
+                    CANCEL & KEEP ACCOUNT
+                  </button>
+                </div>
+              </div>
+            </div>
           )}
         </motion.div>
       </div>

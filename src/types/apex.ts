@@ -200,3 +200,16 @@ export interface LeaderboardEntry {
   isUser?: boolean;
   rarestCard?: string;
 }
+
+export interface FriendUser {
+  id: string;
+  username: string;
+  displayName: string;
+  avatarUrl: string;
+  level: number;
+  city?: string;
+  country?: string;
+  totalSpots?: number;
+  rarestCard?: string;
+  isFollowing?: boolean;
+}
