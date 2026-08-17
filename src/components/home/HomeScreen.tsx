@@ -67,103 +67,115 @@ export const HomeScreen: React.FC = () => {
     }
   };
 
-  // Build a static dark map tile URL centered on user location
-  const mapLat = user.latitude || 40.7128;
-  const mapLng = user.longitude || -74.006;
 
   return (
-    <div className="relative flex-1" style={{ fontFamily: 'DM Sans' }}>
-      {/* Layer 0: Dark map background */}
-      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-        <iframe
-          title="home-map-bg"
-          src={`https://www.openstreetmap.org/export/embed.html?bbox=${mapLng - 0.02},${mapLat - 0.01},${mapLng + 0.02},${mapLat + 0.01}&layer=mapnik`}
-          className="w-full h-full border-none opacity-[0.08] saturate-0 invert"
-          style={{ filter: 'brightness(0.3) contrast(1.2) saturate(0) invert(1)', pointerEvents: 'none' }}
-          loading="lazy"
-        />
-        {/* Gradient fade from top and bottom to merge into #080808 */}
-        <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, #080808 0%, transparent 15%, transparent 70%, #080808 100%)' }} />
+    <div className="relative flex-1 select-none" style={{ fontFamily: 'DM Sans' }}>
+      {/* Layer 0: Telemetry Radar Background Grid */}
+      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none opacity-20">
+        <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <radialGradient id="radarGlow" cx="50%" cy="40%" r="50%">
+              <stop offset="0%" stopColor="#FF4500" stopOpacity="0.25" />
+              <stop offset="60%" stopColor="#FF4500" stopOpacity="0.05" />
+              <stop offset="100%" stopColor="#080808" stopOpacity="0" />
+            </radialGradient>
+            <pattern id="dotGrid" width="24" height="24" patternUnits="userSpaceOnUse">
+              <circle cx="2" cy="2" r="1" fill="#FFFFFF" fillOpacity="0.1" />
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#dotGrid)" />
+          <circle cx="50%" cy="30%" r="280" fill="url(#radarGlow)" />
+          <circle cx="50%" cy="30%" r="90" fill="none" stroke="#FF4500" strokeWidth="1" strokeDasharray="3 3" opacity="0.4" />
+          <circle cx="50%" cy="30%" r="180" fill="none" stroke="#FF4500" strokeWidth="1" strokeDasharray="4 6" opacity="0.3" />
+          <circle cx="50%" cy="30%" r="270" fill="none" stroke="#FF4500" strokeWidth="1" opacity="0.2" />
+        </svg>
       </div>
 
       {/* Layer 1: HUD Content */}
-      <div className="relative z-10 pb-32 px-4 pt-4 space-y-4">
-      {/* 1. Daily Quest Card (Collapsible, left ignition accent bar) */}
-      {activeQuest && (
-        <motion.div 
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="relative overflow-hidden rounded-xl border border-white/10 bg-[#111111] transition-all"
-        >
-          {/* Left accent bar */}
-          <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-[#FF4500]" />
+      <div className="relative z-10 pb-36 px-4 pt-3 space-y-4 max-w-lg mx-auto">
+        {/* 1. Daily Quest Card (Collapsible, left ignition accent bar) */}
+        {activeQuest && (
+          <motion.div 
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#111111]/90 backdrop-blur-xl transition-all shadow-[0_8px_30px_rgba(0,0,0,0.6)]"
+          >
+            {/* Left ignition bar */}
+            <div className="absolute left-0 top-0 bottom-0 w-[4px] bg-gradient-to-b from-[#FF2200] via-[#FF4500] to-[#FFA500]" />
 
-          <div className="p-4 pl-5">
-            <div className="flex items-center justify-between cursor-pointer" onClick={() => setQuestExpanded(!questExpanded)}>
-              <div className="flex items-center gap-2">
-                <Zap className="w-4 h-4 text-[#FF4500]" />
-                <span className="font-display text-sm tracking-wider text-[#F0EBE3]">DAILY SPOTLIGHT</span>
+            <div className="p-4 pl-5">
+              <div 
+                className="flex items-center justify-between cursor-pointer" 
+                onClick={() => setQuestExpanded(!questExpanded)}
+              >
+                <div className="flex items-center gap-2">
+                  <div className="p-1 rounded-md bg-[#FF4500]/10 border border-[#FF4500]/30">
+                    <Zap className="w-3.5 h-3.5 text-[#FF4500]" />
+                  </div>
+                  <span className="font-display text-sm tracking-widest text-[#F0EBE3]">DAILY SPOTLIGHT</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5 bg-[#171717] px-2.5 py-1 rounded-lg border border-white/10 shadow-inner">
+                    <Clock className="w-3 h-3 text-[#FF4500]" />
+                    <LiveCountdownTimer 
+                      targetTimestamp={activeQuest.expiresAtTimestamp || GLOBAL_QUEST_EXPIRES_AT} 
+                      className="text-[#FF4500] font-data text-xs font-bold" 
+                    />
+                  </div>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="flex items-center gap-1 bg-[#1A1A1A] px-2 py-0.5 rounded border border-[#2C2C2C]">
-                  <Clock className="w-3 h-3 text-[#FF4500]" />
-                  <LiveCountdownTimer 
-                    targetTimestamp={activeQuest.expiresAtTimestamp || GLOBAL_QUEST_EXPIRES_AT} 
-                    className="text-[#FF4500] font-data text-xs font-semibold" 
+
+              <h3 className="font-display text-2xl text-[#F0EBE3] tracking-wide mt-2">{activeQuest.title}</h3>
+              
+              {/* Progress bar */}
+              <div className="space-y-1.5 my-3">
+                <div className="flex justify-between text-xs font-data">
+                  <span className="text-[#9A9088]">Progress</span>
+                  <span className="text-[#FF4500] font-bold">{activeQuest.currentCount} / {activeQuest.targetCount} spotted</span>
+                </div>
+                <div className="h-2 bg-[#1A1A1A] rounded-full overflow-hidden border border-white/5 shadow-inner">
+                  <motion.div 
+                    initial={{ width: 0 }}
+                    animate={{ width: `${(activeQuest.currentCount / activeQuest.targetCount) * 100}%` }}
+                    transition={{ duration: 0.8, ease: 'easeOut' }}
+                    className="h-full bg-gradient-to-r from-[#FF2200] via-[#FF4500] to-[#FFA500] rounded-full shadow-[0_0_8px_#FF4500]"
                   />
                 </div>
               </div>
+
+              {/* Collapsed vs Expanded details */}
+              {questExpanded && (
+                <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="space-y-3 pt-2 border-t border-white/10">
+                  <p className="text-xs text-[#9A9088] leading-relaxed">{activeQuest.description}</p>
+                  <div className="flex items-center justify-between pt-1">
+                    <span className="text-xs font-data font-bold text-[#FFA500] bg-[#FFA500]/10 px-2.5 py-1 rounded-md border border-[#FFA500]/30">
+                      +{activeQuest.xpReward} XP · +{activeQuest.coinReward} Coins
+                    </span>
+                    <button 
+                      onClick={() => setScannerOpen(true)}
+                      className="text-xs font-display tracking-wider text-[#F0EBE3] bg-[#FF4500] hover:bg-[#FF6A00] px-3.5 py-1.5 rounded-xl transition-all shadow-[0_0_12px_rgba(255,69,0,0.4)]"
+                    >
+                      SCAN NOW →
+                    </button>
+                  </div>
+                </motion.div>
+              )}
             </div>
+          </motion.div>
+        )}
 
-            <h3 className="font-display text-2xl text-[#F0EBE3] tracking-wide mt-2">{activeQuest.title}</h3>
-            
-            {/* Progress bar */}
-            <div className="space-y-1 my-3">
-              <div className="flex justify-between text-xs font-data">
-                <span className="text-[#9A9088]">Progress</span>
-                <span className="text-[#FF4500] font-semibold">{activeQuest.currentCount} / {activeQuest.targetCount} spotted</span>
-              </div>
-              <div className="h-2 bg-[#1A1A1A] rounded-full overflow-hidden border border-[#2C2C2C]">
-                <div 
-                  className="h-full bg-[#FF4500] rounded-full transition-all duration-500"
-                  style={{ width: `${(activeQuest.currentCount / activeQuest.targetCount) * 100}%` }}
-                />
-              </div>
-            </div>
-
-            {/* Collapsed vs Expanded details */}
-            {questExpanded && (
-              <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="space-y-3 pt-1 border-t border-[#2C2C2C]">
-                <p className="text-xs text-[#9A9088] leading-relaxed">{activeQuest.description}</p>
-                <div className="flex items-center justify-between pt-1">
-                  <span className="text-xs font-data font-semibold text-[#FFA500]">
-                    +{activeQuest.xpReward} XP · +{activeQuest.coinReward} Coins
-                  </span>
-                  <button 
-                    onClick={() => setScannerOpen(true)}
-                    className="text-xs font-display tracking-wider text-[#F0EBE3] bg-[#FF4500] hover:bg-[#FF6A00] px-3 py-1.5 rounded-lg transition-colors glow-orange"
-                  >
-                    SCAN NOW →
-                  </button>
-                </div>
-              </motion.div>
-            )}
-          </div>
-        </motion.div>
-      )}
-
-      {/* 2. Primary Scan CTA Button */}
-      <div className="flex justify-center py-1">
-        <motion.button
-          onClick={() => setScannerOpen(true)}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.97 }}
-          className="relative group w-full py-4 px-6 rounded-xl bg-[#FF4500] text-[#F0EBE3] font-display text-2xl tracking-wider shadow-lg flex items-center justify-center gap-3 border border-[#FF6A00]/50 overflow-hidden glow-orange"
-        >
-          <Camera className="w-7 h-7 text-[#F0EBE3] group-hover:rotate-12 transition-transform" />
-          <span>SCAN A CAR</span>
-        </motion.button>
-      </div>
+        {/* 2. Primary Scan CTA Button */}
+        <div className="flex justify-center py-1">
+          <motion.button
+            onClick={() => setScannerOpen(true)}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.96 }}
+            className="relative group w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-[#FF2200] via-[#FF4500] to-[#FF6A00] text-white font-display text-2xl tracking-wider shadow-[0_8px_28px_rgba(255,69,0,0.45)] flex items-center justify-center gap-3 border border-[#FF6A00]/50 overflow-hidden"
+          >
+            <Camera className="w-7 h-7 text-white group-hover:rotate-12 transition-transform" />
+            <span>SCAN A CAR</span>
+          </motion.button>
+        </div>
 
       {/* 3. Near You Section (Rendered only when real posts exist) */}
       {feedPosts.length > 0 && (

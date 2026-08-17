@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Home, Map, Camera, Layers, Users } from 'lucide-react';
 import { useApexStore } from '../../store/useApexStore';
+import { sounds } from '../../utils/audio';
 
 export const TabBar: React.FC = () => {
   const { activeTab, setActiveTab, setScannerOpen, activeHuntModal } = useApexStore();
@@ -18,37 +19,40 @@ export const TabBar: React.FC = () => {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-30 pb-safe"
-      style={{ background: '#080808', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-      <div className="flex items-end justify-between px-4 pt-1 pb-2">
+    <nav className="fixed bottom-0 left-0 right-0 z-30 pb-safe backdrop-blur-2xl bg-[#080808]/92 border-t border-white/10 select-none shadow-[0_-10px_30px_rgba(0,0,0,0.8)]">
+      <div className="flex items-end justify-between px-4 pt-1.5 pb-2 max-w-lg mx-auto">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = !tab.isCenter && activeTab === tab.id;
 
           if (tab.isCenter) {
             return (
-              <div key="scan" className="flex flex-col items-center -mt-6">
-                {/* Scanner button — the heartbeat */}
+              <div key="scan" className="flex flex-col items-center -mt-7">
+                {/* Center Optical Shutter Button */}
                 <motion.button
-                  onClick={() => setScannerOpen(true)}
-                  whileTap={{ scale: 0.82, transition: { duration: 0.08 } }}
-                  className="relative w-[76px] h-[76px] rounded-full flex items-center justify-center"
-                  style={{ background: '#080808', border: '2px solid #FF4500', boxShadow: '0 0 20px rgba(255,69,0,0.3), 0 0 40px rgba(255,69,0,0.1)' }}
+                  onClick={() => {
+                    sounds.playShutter();
+                    setScannerOpen(true);
+                  }}
+                  whileHover={{ scale: 1.06 }}
+                  whileTap={{ scale: 0.88 }}
+                  className="relative w-[78px] h-[78px] rounded-full flex items-center justify-center cursor-pointer shadow-[0_0_25px_rgba(255,69,0,0.4)] border border-[#FF4500]/60 bg-[#080808]"
                 >
-                  {/* Pulsing glow ring */}
+                  {/* Outer Pulsing Radial Aura */}
                   <motion.div
-                    className="absolute inset-[-4px] rounded-full"
-                    style={{ border: '1.5px solid rgba(255,69,0,0.4)' }}
-                    animate={{ scale: [1, 1.15, 1], opacity: [0.6, 0, 0.6] }}
-                    transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
+                    className="absolute inset-[-4px] rounded-full border border-[#FF4500]/40"
+                    animate={{ scale: [1, 1.14, 1], opacity: [0.7, 0.1, 0.7] }}
+                    transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}
                   />
-                  {/* Inner fill */}
-                  <div className="w-[60px] h-[60px] rounded-full flex items-center justify-center"
-                    style={{ background: '#FF4500' }}>
-                    <Camera className="w-[26px] h-[26px]" style={{ color: '#F0EBE3' }} />
+
+                  {/* Tachometer Gradient Ring */}
+                  <div className="w-[62px] h-[62px] rounded-full p-[2px] bg-gradient-to-tr from-[#FF2200] via-[#FF4500] to-[#FFA500] shadow-[inset_0_0_12px_rgba(0,0,0,0.6)]">
+                    <div className="w-full h-full rounded-full bg-[#FF4500] flex items-center justify-center shadow-lg">
+                      <Camera className="w-[26px] h-[26px] text-white drop-shadow-md" />
+                    </div>
                   </div>
                 </motion.button>
-                <span className="text-[10px] font-display tracking-[2px] mt-1" style={{ color: '#FF4500' }}>
+                <span className="text-[10px] font-display tracking-[3px] mt-1 font-bold text-[#FF4500] drop-shadow-[0_0_8px_rgba(255,69,0,0.5)]">
                   SCAN
                 </span>
               </div>
@@ -56,24 +60,31 @@ export const TabBar: React.FC = () => {
           }
 
           return (
-            <button key={tab.id}
-                onClick={() => {
-                  if (tab.id !== 'scan') {
-                    setActiveTab(tab.id as 'home' | 'map' | 'garage' | 'social');
-                  }
-                }}
-              className="flex flex-col items-center gap-0.5 py-1 px-3 transition-colors min-w-[48px]">
-              <Icon className="w-5 h-5" style={{ color: isActive ? '#FF4500' : '#5A5550' }} />
-              <span className="text-[11px] font-medium"
-                style={{ color: isActive ? '#FF4500' : '#5A5550', fontFamily: 'DM Sans' }}>
+            <motion.button 
+              key={tab.id}
+              whileTap={{ scale: 0.88 }}
+              onClick={() => {
+                sounds.playTargetLock();
+                if (tab.id !== 'scan') {
+                  setActiveTab(tab.id as 'home' | 'map' | 'garage' | 'social');
+                }
+              }}
+              className="flex flex-col items-center gap-1 py-1 px-3 transition-colors min-w-[54px] relative"
+            >
+              <Icon 
+                className={`w-5 h-5 transition-transform duration-200 ${isActive ? 'text-[#FF4500] scale-110 drop-shadow-[0_0_10px_#FF4500]' : 'text-[#9A9088]'}`} 
+              />
+              <span className={`text-[10px] font-data font-semibold tracking-wider uppercase ${isActive ? 'text-[#F0EBE3]' : 'text-[#9A9088]'}`}>
                 {tab.label}
               </span>
-              {/* Active indicator dot */}
+              {/* Active illuminated dot */}
               {isActive && (
-                <motion.div layoutId="tab-dot"
-                  className="w-1 h-1 rounded-full mt-0.5" style={{ background: '#FF4500' }} />
+                <motion.div 
+                  layoutId="tab-glow-dot"
+                  className="w-1.5 h-1.5 rounded-full bg-[#FF4500] shadow-[0_0_8px_#FF4500] mt-0.5" 
+                />
               )}
-            </button>
+            </motion.button>
           );
         })}
       </div>
