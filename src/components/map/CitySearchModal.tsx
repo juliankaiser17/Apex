@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, MapPin, Globe, Navigation, X } from 'lucide-react';
+import { Search, MapPin, Globe, Navigation, X, Loader2 } from 'lucide-react';
 import { sounds } from '../../utils/audio';
+import { forwardGeocodeCity } from '../../utils/geolocation';
 
 export interface CityLocation {
   name: string;
@@ -32,6 +33,8 @@ interface CitySearchModalProps {
 
 export const CitySearchModal: React.FC<CitySearchModalProps> = ({ isOpen, onClose, onSelectCity }) => {
   const [query, setQuery] = useState('');
+  const [isGeocoding, setIsGeocoding] = useState(false);
+  const [geocodeError, setGeocodeError] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
@@ -45,28 +48,43 @@ export const CitySearchModal: React.FC<CitySearchModalProps> = ({ isOpen, onClos
     onClose();
   };
 
-  const handleCustomSearchSubmit = (e: React.FormEvent) => {
+  const handleCustomSearchSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!query.trim()) return;
+    const trimmed = query.trim();
+    if (!trimmed || isGeocoding) return;
 
-    const matched = FAMOUS_CITIES.find(c => c.name.toLowerCase() === query.trim().toLowerCase());
+    const matched = FAMOUS_CITIES.find(c => c.name.toLowerCase() === trimmed.toLowerCase());
     if (matched) {
       handleSelect(matched);
-    } else {
-      const customCity: CityLocation = {
-        name: query.trim(),
-        country: 'Search Location',
-        lat: 25.2048 + (Math.random() * 10 - 5),
-        lng: 55.2708 + (Math.random() * 10 - 5),
-        tagline: 'Custom Radar Search Co-ordinates'
-      };
-      handleSelect(customCity);
+      return;
+    }
+
+    // Real forward-geocoding — this used to fabricate a random coordinate near Dubai for
+    // any typed city; now it resolves to the place's actual real-world position (or tells
+    // the user it couldn't find one, rather than silently teleporting them somewhere fake).
+    setGeocodeError(null);
+    setIsGeocoding(true);
+    try {
+      const geo = await forwardGeocodeCity(trimmed);
+      if (geo) {
+        handleSelect({
+          name: geo.name,
+          country: geo.country,
+          lat: geo.lat,
+          lng: geo.lng,
+          tagline: 'Search Result Radar'
+        });
+      } else {
+        setGeocodeError(`Couldn't find "${trimmed}" — check the spelling or try a nearby major city.`);
+      }
+    } finally {
+      setIsGeocoding(false);
     }
   };
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xl flex items-start justify-center pt-16 px-4">
+      <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xl flex items-start justify-center pt-16 pt-safe px-4 pb-safe">
         <motion.div
           initial={{ opacity: 0, y: -20, scale: 0.96 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -92,13 +110,20 @@ export const CitySearchModal: React.FC<CitySearchModalProps> = ({ isOpen, onClos
             <input
               type="text"
               value={query}
-              onChange={e => setQuery(e.target.value)}
+              onChange={e => { setQuery(e.target.value); setGeocodeError(null); }}
               placeholder="Search any city or place (e.g. Tokyo, Dubai, Paris)..."
               autoFocus
               className="w-full bg-white/5 border border-white/15 rounded-2xl py-3 pl-11 pr-4 text-sm text-white placeholder-slate-400 focus:outline-none focus:border-[#FF5500] font-sans transition-colors"
             />
-            <Search className="w-5 h-5 text-[#FF5500] absolute left-3.5 top-3.5" />
+            {isGeocoding ? (
+              <Loader2 className="w-5 h-5 text-[#FF5500] absolute left-3.5 top-3.5 animate-spin" />
+            ) : (
+              <Search className="w-5 h-5 text-[#FF5500] absolute left-3.5 top-3.5" />
+            )}
           </form>
+          {geocodeError && (
+            <p className="text-[11px] text-rose-400 font-mono px-1 -mt-1">{geocodeError}</p>
+          )}
 
           {/* Featured Global Cities List */}
           <div className="space-y-2 max-h-80 overflow-y-auto pr-1 no-scrollbar">

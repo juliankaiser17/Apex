@@ -91,6 +91,67 @@ export async function reverseGeocodeCity(lat: number, lng: number): Promise<{ ci
   return { city: tzCity, country: 'Local Region' };
 }
 
+export interface ForwardGeocodeResult {
+  name: string;
+  country: string;
+  lat: number;
+  lng: number;
+}
+
+// In-memory cache for forward geocoding (city name -> coordinates)
+const forwardGeocodeCache = new Map<string, ForwardGeocodeResult | null>();
+
+/**
+ * Forward-geocode a free-typed place name to real coordinates using OpenStreetMap
+ * Nominatim's public /search endpoint (no API key required). Used by city/location search
+ * so typing ANY real-world city, town, or landmark resolves to its actual position instead
+ * of a fabricated random point.
+ */
+export async function forwardGeocodeCity(query: string): Promise<ForwardGeocodeResult | null> {
+  const trimmed = query.trim();
+  if (!trimmed) return null;
+
+  const cacheKey = trimmed.toLowerCase();
+  if (forwardGeocodeCache.has(cacheKey)) {
+    return forwardGeocodeCache.get(cacheKey) ?? null;
+  }
+
+  try {
+    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(trimmed)}&limit=1&addressdetails=1`;
+    const res = await fetch(url, {
+      headers: {
+        'Accept': 'application/json',
+        'User-Agent': 'APEX-Spotter-App/1.0'
+      }
+    });
+
+    if (res.ok) {
+      const results = await res.json();
+      const top = Array.isArray(results) ? results[0] : null;
+      if (top && top.lat && top.lon) {
+        const addr = top.address || {};
+        const name =
+          addr.city || addr.town || addr.municipality || addr.village ||
+          (typeof top.display_name === 'string' ? top.display_name.split(',')[0] : trimmed);
+        const country = addr.country || 'Global';
+        const result: ForwardGeocodeResult = {
+          name: name || trimmed,
+          country,
+          lat: parseFloat(top.lat),
+          lng: parseFloat(top.lon)
+        };
+        forwardGeocodeCache.set(cacheKey, result);
+        return result;
+      }
+    }
+  } catch (e) {
+    console.warn('Forward geocode failed:', e);
+  }
+
+  forwardGeocodeCache.set(cacheKey, null);
+  return null;
+}
+
 /**
  * Request real device GPS location permission
  */

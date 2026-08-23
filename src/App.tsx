@@ -19,8 +19,17 @@ import { LevelUpModal } from './components/common/LevelUpModal';
 
 import { requestRealLocationPermission } from './utils/geolocation';
 
+// The Zustand store hydrates `user`/`garage`/`onboardingCompleted` synchronously from
+// localStorage at module load (see useApexStore.ts's getSavedUser/getSavedGarage), so a
+// returning user's session is already available before this component ever mounts. We only
+// need to hold the UI behind a spinner for the narrow case of an in-flight OAuth redirect
+// (where we have no coherent profile to show yet) — everyone else should see their app
+// instantly instead of waiting on a network round trip to Supabase just to unblock render.
+const isOAuthRedirectInFlight = (): boolean =>
+  typeof window !== 'undefined' && !!window.location.hash && window.location.hash.includes('access_token=');
+
 export const App: React.FC = () => {
-  const [isAuthReady, setIsAuthReady] = useState(false);
+  const [isAuthReady, setIsAuthReady] = useState(() => !isOAuthRedirectInFlight());
   useEffect(() => {
     document.title = 'APEX — Every Street Is a Track';
 

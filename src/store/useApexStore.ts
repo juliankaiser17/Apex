@@ -3,10 +3,14 @@ import type { UserProfile, CarCard, Hunt, DailyQuest, Mission, Badge, FeedPost, 
 import { getLevelFromXp, calculateScanXp } from '../utils/rarity';
 import { sounds } from '../utils/audio';
 import { supabase } from '../lib/supabase';
+import { hashImageContent } from '../utils/imageHash';
 
 // PERSISTENT GLOBAL EVENT EXPIRATION TIMESTAMPS (Never reset on tab switch!)
 export const GLOBAL_QUEST_EXPIRES_AT = Date.now() + 3 * 3600 * 1000 + 47 * 60 * 1000 + 22 * 1000;
 export const GLOBAL_EVENT_EXPIRES_AT = Date.now() + 14 * 3600 * 1000 + 32 * 60 * 1000 + 9 * 1000;
+
+// Must match the "+100 Coin Reward" promise shown in LevelUpModal.tsx.
+export const LEVEL_UP_COIN_REWARD = 100;
 
 interface ApexState {
   // Navigation & Modals
@@ -48,6 +52,7 @@ interface ApexState {
   setPersona: (persona: Persona) => void;
   initializeSession: (userId: string) => Promise<void>;
   fetchFeedPosts: () => Promise<void>;
+  fetchLeaderboard: (scope: 'city' | 'country' | 'global') => Promise<void>;
   completeOnboarding: () => void;
   addCardToGarage: (newCard: CarCard, customCaption?: string) => Promise<void>;
   addXp: (amount: number, reason?: string) => void;
@@ -59,7 +64,7 @@ interface ApexState {
   dismissHuntAlert: () => void;
   openHuntModal: (hunt: Hunt) => void;
   closeHuntModal: () => void;
-  triggerMockHunt: (card: CarCard) => void;
+  triggerHunt: (card: CarCard) => void;
   completeMission: (missionId: string) => void;
   levelUpLevel: number | null;
   dismissLevelUp: () => void;
@@ -133,32 +138,13 @@ const INITIAL_BADGES: Badge[] = [
   { id: 'b6', slug: 'jdm_royalty', name: 'JDM Royalty', description: 'Spot 10 iconic Japanese domestic market cars.', icon: 'Globe', rarity: 'gold', isUnlocked: false, xpBonus: 600 }
 ];
 
-export const INITIAL_POSTS: FeedPost[] = [
-  {
-    id: 'post1',
-    user: { id: 'test1', username: 'tokyo_drifter', avatarUrl: 'https://images.unsplash.com/photo-1511367461989-f85a21fda167?w=100&h=100&fit=crop', level: 12 },
-    card: {
-      id: 'c1', cardNumber: '#APX-001', make: 'Porsche', model: '911 GT3 RS', yearEstimate: '2023', color: 'Guards Red', rarity: 'legendary', rarityScore: 92,
-      imageUrl: 'https://images.unsplash.com/photo-1503376713914-934394017a1e?w=800&q=80', city: 'Tokyo', country: 'Japan', latApprox: 35.6762, lngApprox: 139.6503,
-      horsepower: 518, topSpeedKmH: 296, xpEarned: 250, createdAt: new Date(Date.now() - 3600000).toISOString(),
-      bodyStyle: 'Coupe', originCountry: 'Germany', interestingFact: 'Nürburgring lap time of 6:49.328', briefHistory: '', modsDetected: [{part: 'Aero Kit', description: 'Carbon rear wing', confidence: 0.98}],
-      marketValueLowUsd: 225000, marketValueHighUsd: 280000, scanValidated: true, isPublic: true, huntTriggered: false, privacyLevel: 'public_blurred', aiConfidence: 0.99
-    },
-    likesCount: 24, commentsCount: 5, isLiked: false, createdAt: new Date(Date.now() - 3600000).toISOString()
-  },
-  {
-    id: 'post2',
-    user: { id: 'test2', username: 'm_power_guy', avatarUrl: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=100&h=100&fit=crop', level: 8 },
-    card: {
-      id: 'c2', cardNumber: '#APX-002', make: 'BMW', model: 'M4 Competition', yearEstimate: '2024', color: 'Isle of Man Green', rarity: 'epic', rarityScore: 78,
-      imageUrl: 'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?w=800&q=80', city: 'London', country: 'UK', latApprox: 51.5072, lngApprox: -0.1276,
-      horsepower: 503, topSpeedKmH: 290, xpEarned: 150, createdAt: new Date(Date.now() - 7200000).toISOString(),
-      bodyStyle: 'Coupe', originCountry: 'Germany', interestingFact: 'Features a massive kidney grille.', briefHistory: '', modsDetected: [],
-      marketValueLowUsd: 78000, marketValueHighUsd: 90000, scanValidated: true, isPublic: true, huntTriggered: false, privacyLevel: 'public_blurred', aiConfidence: 0.95
-    },
-    likesCount: 12, commentsCount: 1, isLiked: false, createdAt: new Date(Date.now() - 7200000).toISOString()
-  }
-];
+// Previously hardcoded two fake community posts ("tokyo_drifter", "m_power_guy") that
+// rendered by default before fetchFeedPosts() had a chance to load real ones — a returning
+// user with no network, or any user before their first successful fetch, would see fabricated
+// community activity presented as real. The feed now starts empty; SocialScreen already has a
+// proper "NO DISCOVERIES YET" empty state for this case, and real posts populate via
+// fetchFeedPosts()/addCardToGarage() only.
+export const INITIAL_POSTS: FeedPost[] = [];
 
 const INITIAL_LEADERBOARD: LeaderboardEntry[] = [
   { rank: 1, username: 'you', displayName: 'You', avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400&auto=format&fit=crop', xp: 0, level: 1, rankChange: 'same', isUser: true, rarestCard: 'None Yet' }
@@ -280,15 +266,28 @@ export const useApexStore = create<ApexState>((set, get) => ({
   },
 
   deleteAccount: async () => {
-    const currentUser = get().user;
-    if (currentUser && currentUser.id) {
-      try {
-        await supabase.from('garage').delete().eq('user_id', currentUser.id);
-        await supabase.from('posts').delete().eq('user_id', currentUser.id);
-        await supabase.from('profiles').delete().eq('id', currentUser.id);
-      } catch (e) {
-        console.warn('Account deletion remote warning:', e);
+    // The direct `.from('profiles').delete()` call below this used to run has no matching
+    // DELETE RLS policy, so it silently deleted zero rows — "permanently delete account"
+    // never actually removed anything server-side. Real deletion (including the auth.users
+    // record itself, which requires the service_role key) now happens via a dedicated
+    // server endpoint that verifies the caller's own session before deleting anything.
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.access_token) {
+        const res = await fetch('/api/deleteAccount', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`
+          }
+        });
+        if (!res.ok) {
+          const errBody = await res.json().catch(() => ({}));
+          console.warn('Account deletion server response:', errBody);
+        }
       }
+    } catch (e) {
+      console.warn('Account deletion remote warning:', e);
     }
     try {
       localStorage.clear();
@@ -518,6 +517,64 @@ export const useApexStore = create<ApexState>((set, get) => ({
     }
   },
 
+  // Real per-scope leaderboard, backed by the `profiles` table (ordered by xp) rather than
+  // the previous static single "you" entry that never changed regardless of which of
+  // city/country/global filter the user tapped.
+  fetchLeaderboard: async (scope) => {
+    const state = get();
+    try {
+      let query = supabase
+        .from('profiles')
+        .select('id, username, display_name, avatar_url, xp, level, city, country, rarest_find')
+        .order('xp', { ascending: false })
+        .limit(50);
+
+      if (scope === 'city' && state.user.city) {
+        query = query.eq('city', state.user.city);
+      } else if (scope === 'country' && state.user.country) {
+        query = query.eq('country', state.user.country);
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
+
+      const rows = data || [];
+      // Make sure the current user appears even if their own profile row hasn't synced
+      // yet (e.g. still on a local-only session) or fell outside the top-50 window.
+      const hasCurrentUser = rows.some(r => r.id === state.user.id);
+      const mapped: LeaderboardEntry[] = rows.map((r: any, i: number) => ({
+        rank: i + 1,
+        username: r.username || 'hunter',
+        displayName: r.display_name || r.username || 'Hunter',
+        avatarUrl: r.avatar_url || INITIAL_USER.avatarUrl,
+        xp: r.xp || 0,
+        level: r.level || 1,
+        rankChange: 'same',
+        isUser: r.id === state.user.id,
+        rarestCard: r.rarest_find || 'None Yet'
+      }));
+
+      if (!hasCurrentUser && state.user.id) {
+        mapped.push({
+          rank: mapped.length + 1,
+          username: state.user.username || 'you',
+          displayName: state.user.displayName || 'You',
+          avatarUrl: state.user.avatarUrl,
+          xp: state.user.xp,
+          level: state.user.level,
+          rankChange: 'same',
+          isUser: true,
+          rarestCard: state.user.rarestFind || 'None Yet'
+        });
+      }
+
+      set({ leaderboards: mapped.length > 0 ? mapped : state.leaderboards });
+    } catch (e) {
+      console.warn('Failed to fetch leaderboard, keeping local snapshot:', e);
+      // Leave existing leaderboard state untouched rather than clearing it on a network blip.
+    }
+  },
+
   completeOnboarding: () => {
     try {
       localStorage.setItem('apex_onboarding_v2_completed', 'true');
@@ -534,6 +591,11 @@ export const useApexStore = create<ApexState>((set, get) => ({
 
     // 1. Invoke Authoritative Server-Side PostgreSQL RPC
     try {
+      // Real content-derived hash so record_car_scan()'s duplicate-photo check can
+      // actually catch a genuine replay (was previously timestamp-based, so it never
+      // collided with anything — see src/utils/imageHash.ts).
+      const imageHash = await hashImageContent(newCard.imageUrl);
+
       const { data: rpcResult, error: rpcError } = await supabase.rpc('record_car_scan', {
         p_make: newCard.make,
         p_model: newCard.model,
@@ -547,7 +609,7 @@ export const useApexStore = create<ApexState>((set, get) => ({
         p_horsepower: newCard.horsepower || 0,
         p_top_speed_kmh: newCard.topSpeedKmH || 0,
         p_caption: postCaption,
-        p_image_hash: `hash_${Date.now()}_${newCard.make}_${newCard.model}`
+        p_image_hash: imageHash
       });
 
       if (!rpcError && rpcResult?.success) {
@@ -612,16 +674,25 @@ export const useApexStore = create<ApexState>((set, get) => ({
         comments: []
       };
 
-      const isLevelUp = level > state.user.level;
+      const levelsGained = Math.max(0, level - state.user.level);
+      const isLevelUp = levelsGained > 0;
+      // LevelUpModal promises "+100 Coin Reward — Added directly to your balance" on every
+      // level gained; that promise must actually be fulfilled here, not just displayed.
+      const coinReward = levelsGained * LEVEL_UP_COIN_REWARD;
+      const updatedUser = {
+        ...state.user,
+        xp: newXp,
+        level: level,
+        coins: state.user.coins + coinReward,
+        totalSpots: state.user.totalSpots + 1
+      };
+      try {
+        localStorage.setItem('apex_user_session', JSON.stringify(updatedUser));
+      } catch (e) {}
 
       return {
         garage: updatedGarage,
-        user: {
-          ...state.user,
-          xp: newXp,
-          level: level,
-          totalSpots: state.user.totalSpots + 1
-        },
+        user: updatedUser,
         levelUpLevel: isLevelUp ? level : state.levelUpLevel,
         dailyQuests: updatedQuests,
         dailyMissions: updatedMissions,
@@ -635,9 +706,15 @@ export const useApexStore = create<ApexState>((set, get) => ({
     set((state) => {
       const newXp = state.user.xp + amount;
       const { level } = getLevelFromXp(newXp);
-      const isLevelUp = level > state.user.level;
+      const levelsGained = Math.max(0, level - state.user.level);
+      const isLevelUp = levelsGained > 0;
+      const coinReward = levelsGained * LEVEL_UP_COIN_REWARD;
+      const updatedUser = { ...state.user, xp: newXp, level, coins: state.user.coins + coinReward };
+      try {
+        localStorage.setItem('apex_user_session', JSON.stringify(updatedUser));
+      } catch (e) {}
       return {
-        user: { ...state.user, xp: newXp, level },
+        user: updatedUser,
         levelUpLevel: isLevelUp ? level : state.levelUpLevel
       };
     });
@@ -728,8 +805,13 @@ export const useApexStore = create<ApexState>((set, get) => ({
 
   closeHuntModal: () => set({ activeHuntModal: null }),
 
-  triggerMockHunt: (card) => {
-    const mockHunt: Hunt = {
+  triggerHunt: (card) => {
+    // There is no real-time "hunts" backend table/channel yet, so this Hunt exists only in the
+    // creator's own local state — no other real hunter can actually see or join it right now.
+    // participantsCount previously hardcoded 3, presenting three fabricated hunters as already
+    // converging on the spot; it now honestly reflects just the creator until real multiplayer
+    // hunt participation is wired up server-side.
+    const newHunt: Hunt = {
       id: `hunt-${Date.now()}`,
       cardId: card.id,
       carName: `${card.make} ${card.model}`,
@@ -741,15 +823,15 @@ export const useApexStore = create<ApexState>((set, get) => ({
       radiusKm: card.privacyLevel === 'approximate_only' ? 3.0 : 2.0,
       startedAt: new Date().toISOString(),
       expiresAt: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
-      participantsCount: 3,
+      participantsCount: 1,
       city: card.city,
       imageUrl: card.imageUrl,
       status: 'active'
     };
     set((state) => ({
-      activeHunts: [mockHunt, ...state.activeHunts],
-      activeHuntAlert: mockHunt,
-      activeHuntModal: mockHunt
+      activeHunts: [newHunt, ...state.activeHunts],
+      activeHuntAlert: newHunt,
+      activeHuntModal: newHunt
     }));
   },
 

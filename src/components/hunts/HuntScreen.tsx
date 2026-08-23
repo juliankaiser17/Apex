@@ -146,7 +146,7 @@ export const HuntScreen: React.FC<HuntScreenProps> = ({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 bg-[#080808] flex flex-col select-none overflow-hidden"
+      className="fixed inset-0 z-50 bg-[#080808] flex flex-col select-none overflow-hidden pt-safe pb-safe"
       style={{ fontFamily: 'DM Sans' }}
     >
       {/* 1. TOP DEDICATED HUNT HEADER WITH BACK BUTTON */}
@@ -279,7 +279,7 @@ export const HuntScreen: React.FC<HuntScreenProps> = ({
       {/* 5. CANCEL HUNT CONFIRMATION MODAL */}
       <AnimatePresence>
         {showCancelConfirmModal && (
-          <div className="fixed inset-0 z-50 bg-[#080808]/85 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-50 bg-[#080808]/85 backdrop-blur-sm flex items-center justify-center p-4 pt-safe pb-safe">
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}

@@ -658,3 +658,80 @@ BEGIN
   );
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- ════════════════════════════════════════════════════════════════════════════
+-- SECURITY HARDENING MIGRATION (post-audit)
+-- Apply this against your live Supabase project (SQL editor or CLI migration).
+-- Nothing in this repo can apply it for you — editing this file alone does not
+-- change your running database.
+-- ════════════════════════════════════════════════════════════════════════════
+
+-- ────────────────────────────────────────────────────────────────────────────
+-- 12. DROP UNUSED, SENSITIVE PROFILE COLUMNS
+-- profiles.latitude/longitude were never written or read by any function or
+-- client code in this codebase (confirmed by full-repo search) — actual per-scan
+-- coordinates live on `garage`, already privacy-jittered client-side before
+-- being sent. With RLS on `profiles` set to `SELECT USING (true)` (public,
+-- required for usernames/avatars/xp to work for leaderboards and friends),
+-- these two columns would have been readable by anyone the moment any future
+-- feature started writing real coordinates into them. Simplest, deterministic
+-- fix: the columns don't exist, so there's nothing to leak.
+ALTER TABLE profiles DROP COLUMN IF EXISTS latitude;
+ALTER TABLE profiles DROP COLUMN IF EXISTS longitude;
+
+-- ────────────────────────────────────────────────────────────────────────────
+-- 13. DISTRIBUTED RATE LIMITING (replaces the in-memory Map in api/analyze.ts,
+-- which does not share state across concurrent/cold-started serverless
+-- instances and was not actually enforcing its stated limit in production)
+-- ────────────────────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS api_rate_limits (
+  rate_key TEXT PRIMARY KEY,
+  request_count INTEGER NOT NULL DEFAULT 0,
+  window_expires_at TIMESTAMP WITH TIME ZONE NOT NULL
+);
+
+-- No RLS policies are added on purpose: this table is written exclusively by
+-- the SECURITY DEFINER function below, which runs with the function owner's
+-- privileges regardless of RLS. Direct client access (anon or authenticated)
+-- is denied by default since RLS is enabled with zero matching policies.
+ALTER TABLE api_rate_limits ENABLE ROW LEVEL SECURITY;
+
+CREATE OR REPLACE FUNCTION check_and_increment_rate_limit(
+  p_rate_key TEXT,
+  p_window_seconds INTEGER,
+  p_max_requests INTEGER
+) RETURNS BOOLEAN AS $$
+DECLARE
+  v_now TIMESTAMP WITH TIME ZONE := timezone('utc'::text, now());
+  v_row api_rate_limits;
+BEGIN
+  INSERT INTO api_rate_limits (rate_key, request_count, window_expires_at)
+  VALUES (p_rate_key, 1, v_now + (p_window_seconds || ' seconds')::interval)
+  ON CONFLICT (rate_key) DO UPDATE SET
+    request_count = CASE
+      WHEN api_rate_limits.window_expires_at < v_now THEN 1
+      ELSE api_rate_limits.request_count + 1
+    END,
+    window_expires_at = CASE
+      WHEN api_rate_limits.window_expires_at < v_now THEN v_now + (p_window_seconds || ' seconds')::interval
+      ELSE api_rate_limits.window_expires_at
+    END
+  RETURNING * INTO v_row;
+
+  -- Best-effort cleanup of long-expired keys so this table doesn't grow
+  -- unbounded; cheap because it only ever touches rows well past their window.
+  DELETE FROM api_rate_limits WHERE window_expires_at < v_now - interval '1 day';
+
+  RETURN v_row.request_count <= p_max_requests;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- ────────────────────────────────────────────────────────────────────────────
+-- 14. REAL ACCOUNT DELETION SUPPORT
+-- profiles had no DELETE policy at all, so the existing client-side
+-- `supabase.from('profiles').delete()...` call in deleteAccount() silently
+-- affected zero rows (RLS fails closed with no matching policy) even for the
+-- user's own row. Deleting the underlying auth.users record additionally
+-- requires the service_role key, which must never be used client-side — so
+-- this is handled by a new server-side endpoint (api/deleteAccount.ts) using
+-- supabase.auth.admin.deleteUser(), not by relaxing RLS here.

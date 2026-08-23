@@ -30,7 +30,7 @@ export const LevelUpModal: React.FC = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[999] bg-[#080808]/95 backdrop-blur-xl flex flex-col items-center justify-center p-6 text-center select-none"
+        className="fixed inset-0 z-[999] bg-[#080808]/95 backdrop-blur-xl flex flex-col items-center justify-center p-6 pt-safe pb-safe text-center select-none"
         style={{ fontFamily: 'DM Sans' }}
       >
         {/* Ambient Orange Underglow */}

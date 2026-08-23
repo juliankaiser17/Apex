@@ -32,14 +32,19 @@ export const HeaderBar: React.FC = () => {
               </span>
             </div>
 
-            {/* Center: Streak (if active) */}
+            {/* Center: Streak (if active) — Duolingo-style flame micro-pulse, independent of the badge's own slower breathing scale */}
             {user.streakDays > 0 && (
-              <motion.div 
-                animate={{ scale: [1, 1.05, 1] }} 
+              <motion.div
+                animate={{ scale: [1, 1.05, 1] }}
                 transition={{ duration: 2, repeat: Infinity }}
                 className="flex items-center gap-1 bg-[#FF4500]/10 border border-[#FF4500]/30 px-2.5 py-1 rounded-full shadow-[0_0_12px_rgba(255,69,0,0.2)]"
               >
-                <Flame className="w-4 h-4 text-[#FF4500]" />
+                <motion.div
+                  animate={{ scale: [1, 1.22, 0.96, 1.1, 1], rotate: [0, -4, 3, -2, 0] }}
+                  transition={{ duration: 0.9, repeat: Infinity, ease: 'easeInOut' }}
+                >
+                  <Flame className="w-4 h-4 text-[#FF4500]" fill="currentColor" />
+                </motion.div>
                 <span className="font-data text-xs font-bold text-[#F0EBE3]">
                   {user.streakDays}D STREAK
                 </span>

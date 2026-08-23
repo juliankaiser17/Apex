@@ -29,7 +29,7 @@ export const CommentsModal: React.FC<CommentsModalProps> = ({ post, onClose }) =
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 bg-[#080808]/85 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 select-none" style={{ fontFamily: 'DM Sans' }}>
+      <div className="fixed inset-0 z-50 bg-[#080808]/85 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 pb-safe select-none" style={{ fontFamily: 'DM Sans' }}>
         {/* Backdrop click to dismiss */}
         <motion.div
           initial={{ opacity: 0 }}

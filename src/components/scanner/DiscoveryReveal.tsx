@@ -222,7 +222,7 @@ export const DiscoveryReveal: React.FC<DiscoveryRevealProps> = ({
 
       {/* Post Composer Modal */}
       {showPostComposer && (
-        <div className="fixed inset-0 z-50 bg-[#080808]">
+        <div className="fixed inset-0 z-50 bg-[#080808] pt-safe pb-safe">
           <PostComposer
             card={card}
             onBack={() => setShowPostComposer(false)}

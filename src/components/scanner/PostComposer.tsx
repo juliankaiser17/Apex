@@ -13,7 +13,7 @@ interface PostComposerProps {
 }
 
 export const PostComposer: React.FC<PostComposerProps> = ({ card, onBack, onPostComplete }) => {
-  const { addCardToGarage, triggerMockHunt, setActiveTab } = useApexStore();
+  const { addCardToGarage, triggerHunt, setActiveTab } = useApexStore();
   
   const [caption, setCaption] = useState('');
   const [showLocation, setShowLocation] = useState(true);
@@ -43,7 +43,7 @@ export const PostComposer: React.FC<PostComposerProps> = ({ card, onBack, onPost
 
       // Trigger hunt if enabled
       if (isEligibleForHunt && startHunt) {
-        triggerMockHunt(card);
+        triggerHunt(card);
       }
 
       // Add to store/garage & feed
@@ -65,7 +65,7 @@ export const PostComposer: React.FC<PostComposerProps> = ({ card, onBack, onPost
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 20 }}
-      className="fixed inset-0 z-50 bg-[#080808] flex flex-col justify-between overflow-y-auto select-none"
+      className="fixed inset-0 z-50 bg-[#080808] flex flex-col justify-between overflow-y-auto select-none pt-safe pb-safe"
       style={{ fontFamily: 'DM Sans' }}
     >
       <div>
