@@ -23,7 +23,7 @@ export const EnthusiastModal: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#080808]/90 backdrop-blur-md flex flex-col justify-between p-4 overflow-y-auto select-none" style={{ fontFamily: 'DM Sans' }}>
+    <div className="fixed inset-0 z-50 bg-[#080808]/90 backdrop-blur-md flex flex-col justify-between p-4 pt-safe pb-safe overflow-y-auto select-none" style={{ fontFamily: 'DM Sans' }}>
       <div className="max-w-md mx-auto w-full my-auto space-y-6">
         {/* Top Header */}
         <div className="flex items-center justify-between">

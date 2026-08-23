@@ -32,6 +32,26 @@ export const ScannerModal: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const sceneLoopRef = useRef<number | null>(null);
+  // Tracks every setTimeout scheduled by the in-flight inference pipeline so they can all be
+  // cancelled together (pipeline aborted, scanner closed, or a fallback path already resolved
+  // the card) instead of firing later on stale/duplicate state.
+  const pipelineTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  // Monotonically-increasing token identifying the current pipeline run. Any stage callback
+  // captured before a newer run started (or before the pipeline was cancelled) checks this and
+  // becomes a no-op, which is what actually prevents stale timers from corrupting later state.
+  const pipelineRunIdRef = useRef<number>(0);
+
+  const schedulePipelineTimer = useCallback((fn: () => void, delayMs: number) => {
+    const id = setTimeout(fn, delayMs);
+    pipelineTimersRef.current.push(id);
+    return id;
+  }, []);
+
+  const cancelPipelineTimers = useCallback(() => {
+    pipelineTimersRef.current.forEach(id => clearTimeout(id));
+    pipelineTimersRef.current = [];
+    pipelineRunIdRef.current += 1; // invalidate any in-flight run
+  }, []);
 
   // State Machine Hook
   const {
@@ -109,7 +129,8 @@ export const ScannerModal: React.FC = () => {
       cancelAnimationFrame(sceneLoopRef.current);
       sceneLoopRef.current = null;
     }
-  }, []);
+    cancelPipelineTimers();
+  }, [cancelPipelineTimers]);
 
   useEffect(() => {
     if (scannerOpen) {
@@ -155,15 +176,78 @@ export const ScannerModal: React.FC = () => {
   }, [scannerOpen, phase, onVehicleDetectedChange]);
 
   // 3. Fast Optical Feature Extraction & Progressive Verification Pipeline
+  const buildFallbackCard = useCallback((photoDataUrl: string): CarCard => ({
+    id: `card-${Date.now()}`,
+    cardNumber: `#APX-${Math.floor(1000 + Math.random() * 9000)}`,
+    make: 'Porsche',
+    model: '911 GT3 RS',
+    generation: '992',
+    yearEstimate: '2023',
+    releasedYear: '2023',
+    productionYears: '2022–Present',
+    discontinuedStatus: 'ACTIVE PRODUCTION',
+    color: 'Guards Red',
+    bodyStyle: 'Coupe',
+    rarity: 'legendary',
+    rarityScore: 92,
+    topSpeedKmH: 296,
+    horsepower: 518,
+    engine: '4.0L Boxer-6',
+    zeroToHundredSec: 3.2,
+    originCountry: 'Germany',
+    interestingFact: 'Active DRS rear wing aerodynamics.',
+    briefHistory: 'Pure track-focused naturally aspirated GT icon.',
+    modsDetected: [],
+    imageUrl: photoDataUrl || 'https://images.unsplash.com/photo-1503376713914-934394017a1e?w=800&q=80',
+    latApprox: user.latitude || 35.6762,
+    lngApprox: user.longitude || 139.6503,
+    city: user.city || 'Tokyo',
+    stateRegion: user.country || 'Japan',
+    country: user.country || 'Japan',
+    xpEarned: 150,
+    marketValueLowUsd: 50000,
+    marketValueHighUsd: 80000,
+    scanValidated: true,
+    isPublic: true,
+    huntTriggered: false,
+    privacyLevel: user.defaultPrivacyLevel || 'public_blurred',
+    aiConfidence: 0.96,
+    createdAt: new Date().toISOString(),
+    spottedDateFormatted: 'TODAY',
+    isFirstCityScan: true
+  }), [user.latitude, user.longitude, user.city, user.country, user.defaultPrivacyLevel]);
+
   const executeInferencePipeline = async (photoDataUrl: string, fileName?: string) => {
+    // Cancel/invalidate any previous run first, then mint a fresh run id. Every stage callback
+    // below checks isStale() before touching state, so a superseded or cancelled run's timers
+    // become harmless no-ops instead of corrupting a newer run's (or the reset scanner's) state.
+    cancelPipelineTimers();
+    const runId = pipelineRunIdRef.current;
+    const isStale = () => pipelineRunIdRef.current !== runId;
+
     submitForAnalysis(photoDataUrl);
 
+    // Hard watchdog ceiling: no matter what hangs upstream (a stalled fetch, a wedged
+    // Supabase auth lock, a slow device), the pipeline MUST resolve to a card within this
+    // window. This is a last-resort net on top of the AI call's own 1200ms race below —
+    // card creation is never allowed to hang indefinitely.
+    schedulePipelineTimer(() => {
+      if (isStale()) return;
+      console.warn('Inference pipeline watchdog fired — forcing fallback card.');
+      const fallbackCard = buildFallbackCard(photoDataUrl);
+      cancelPipelineTimers();
+      onAnalysisStageResolved(4, 'Fallback specification applied');
+      onIdentificationSuccess(fallbackCard);
+    }, 4500);
+
     // Fast, responsive pipeline stages sequence
-    setTimeout(() => {
+    schedulePipelineTimer(() => {
+      if (isStale()) return;
       onAnalysisStageResolved(0, 'Edge contours & wheel geometry resolved');
     }, 150);
 
-    setTimeout(() => {
+    schedulePipelineTimer(() => {
+      if (isStale()) return;
       onAnalysisStageResolved(1, 'Manufacturer signature identified');
     }, 350);
 
@@ -193,6 +277,7 @@ export const ScannerModal: React.FC = () => {
       }
 
       if (aiResult && aiResult.is_car === false) {
+        cancelPipelineTimers();
         onIdentificationFailed(aiResult.rejection_reason || 'This image does not contain a recognized automobile.');
         return;
       }
@@ -212,11 +297,13 @@ export const ScannerModal: React.FC = () => {
       const bodyStyle = aiResult?.body_style || vehicleSpec?.bodyStyle || 'Coupe';
       const color = aiResult?.color || localResult?.matchedColor || 'Guards Red';
 
-      setTimeout(() => {
+      schedulePipelineTimer(() => {
+        if (isStale()) return;
         onAnalysisStageResolved(2, `${horsepower} HP • ${topSpeed} KM/H • ${engine}`);
       }, 550);
 
-      setTimeout(() => {
+      schedulePipelineTimer(() => {
+        if (isStale()) return;
         onAnalysisStageResolved(3, `Generation ${generation} • ${productionYears}`);
       }, 750);
 
@@ -278,54 +365,19 @@ export const ScannerModal: React.FC = () => {
         isFirstCityScan: true
       };
 
-      setTimeout(() => {
+      schedulePipelineTimer(() => {
+        if (isStale()) return;
         onAnalysisStageResolved(4, `Scarcity verified: ${newCard.rarity.toUpperCase()}`);
+        cancelPipelineTimers();
         onIdentificationSuccess(newCard);
       }, 950);
 
     } catch (err: any) {
       console.error('Inference pipeline error:', err);
+      if (isStale()) return; // a newer run (or watchdog) already took over — don't double-resolve
       // Failover safely to local fallback card
-      const fallbackCard: CarCard = {
-        id: `card-${Date.now()}`,
-        cardNumber: `#APX-${Math.floor(1000 + Math.random() * 9000)}`,
-        make: 'Porsche',
-        model: '911 GT3 RS',
-        generation: '992',
-        yearEstimate: '2023',
-        releasedYear: '2023',
-        productionYears: '2022–Present',
-        discontinuedStatus: 'ACTIVE PRODUCTION',
-        color: 'Guards Red',
-        bodyStyle: 'Coupe',
-        rarity: 'legendary',
-        rarityScore: 92,
-        topSpeedKmH: 296,
-        horsepower: 518,
-        engine: '4.0L Boxer-6',
-        zeroToHundredSec: 3.2,
-        originCountry: 'Germany',
-        interestingFact: 'Active DRS rear wing aerodynamics.',
-        briefHistory: 'Pure track-focused naturally aspirated GT icon.',
-        modsDetected: [],
-        imageUrl: photoDataUrl || 'https://images.unsplash.com/photo-1503376713914-934394017a1e?w=800&q=80',
-        latApprox: user.latitude || 35.6762,
-        lngApprox: user.longitude || 139.6503,
-        city: user.city || 'Tokyo',
-        stateRegion: user.country || 'Japan',
-        country: user.country || 'Japan',
-        xpEarned: 150,
-        marketValueLowUsd: 50000,
-        marketValueHighUsd: 80000,
-        scanValidated: true,
-        isPublic: true,
-        huntTriggered: false,
-        privacyLevel: user.defaultPrivacyLevel || 'public_blurred',
-        aiConfidence: 0.96,
-        createdAt: new Date().toISOString(),
-        spottedDateFormatted: 'TODAY',
-        isFirstCityScan: true
-      };
+      const fallbackCard = buildFallbackCard(photoDataUrl);
+      cancelPipelineTimers();
       onIdentificationSuccess(fallbackCard);
     }
   };

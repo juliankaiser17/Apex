@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Flame, Trophy, Users, User, Zap, Crown, Award, Search, MessageSquare, Heart, Share2, Target, Flag, Globe, UserPlus, X, Check, UserCheck, AlertCircle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Flame, Trophy, Users, User, Zap, Crown, Award, Search, MessageSquare, Heart, Share2, Target, Flag, Globe, UserPlus, X, Check, UserCheck, AlertCircle, Loader2 } from 'lucide-react';
 import { useApexStore } from '../../store/useApexStore';
 import type { FeedPost, CarCard, FriendUser } from '../../types/apex';
 import { Card3DDetail } from '../garage/Card3DDetail';
@@ -19,6 +19,7 @@ export const SocialScreen: React.FC = () => {
     removeFriend,
     toggleLikePost, 
     toggleEnthusiastModal,
+    fetchLeaderboard,
     setScannerOpen
   } = useApexStore();
 
@@ -26,6 +27,20 @@ export const SocialScreen: React.FC = () => {
   const [selectedCard, setSelectedCard] = useState<CarCard | null>(null);
   const [selectedPostForComments, setSelectedPostForComments] = useState<FeedPost | null>(null);
   const [leaderboardFilter, setLeaderboardFilter] = useState<'city' | 'country' | 'global'>('global');
+  const [isLeaderboardLoading, setIsLeaderboardLoading] = useState(false);
+
+  // The filter tabs (city/country/global) previously just re-styled the active button —
+  // the list underneath always showed the same static single entry. Now each tap fetches
+  // the real, scope-filtered ranking from the profiles table.
+  useEffect(() => {
+    if (subTab !== 'leaderboard') return;
+    let cancelled = false;
+    setIsLeaderboardLoading(true);
+    fetchLeaderboard(leaderboardFilter).finally(() => {
+      if (!cancelled) setIsLeaderboardLoading(false);
+    });
+    return () => { cancelled = true; };
+  }, [subTab, leaderboardFilter, fetchLeaderboard]);
   const [friendSearch, setFriendSearch] = useState('');
   
   // Add Friend Modal State
@@ -68,22 +83,41 @@ export const SocialScreen: React.FC = () => {
     setFriendModalFeedback({ type: '', message: '' });
 
     try {
-      // 1. Try to find remote user in Supabase
-      const { data: remoteUser } = await supabase
+      // Look up a real user in Supabase. This used to fall through to creating a fabricated
+      // friend profile (placeholder avatar, level 1, "Tokyo") even when no such user was
+      // found or the lookup failed — meaning ANY typed handle, including nonexistent ones,
+      // would report "Successfully added" and silently populate a fake contact. Now a friend
+      // is only ever added when a real matching profile is actually found.
+      // Explicit safe public column list — this used to be select('*'), which over-fetches
+      // every column on the row (coins, allow_hunts, daily_scans_count/reset_at,
+      // last_scan_at, updated_at, and formerly latitude/longitude) into client memory for a
+      // feature that only ever displays a handful of public profile fields. Narrowed to
+      // exactly what newFriend below actually reads.
+      const { data: remoteUser, error } = await supabase
         .from('profiles')
-        .select('*')
+        .select('id, display_name, avatar_url, level, city, country, total_spots')
         .eq('username', cleanHandle)
         .maybeSingle();
 
+      if (error) {
+        setFriendModalFeedback({ type: 'error', message: "Couldn't reach APEX servers to verify that user — check your connection and try again." });
+        return;
+      }
+
+      if (!remoteUser) {
+        setFriendModalFeedback({ type: 'error', message: `No hunter found with the handle @${cleanHandle}.` });
+        return;
+      }
+
       const newFriend: FriendUser = {
-        id: remoteUser?.id || `friend-${Date.now()}`,
+        id: remoteUser.id,
         username: cleanHandle,
-        displayName: remoteUser?.display_name || cleanHandle,
-        avatarUrl: remoteUser?.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400',
-        level: remoteUser?.level || 1,
-        city: remoteUser?.city || 'Tokyo',
-        country: remoteUser?.country || 'Japan',
-        totalSpots: remoteUser?.total_spots || 0,
+        displayName: remoteUser.display_name || cleanHandle,
+        avatarUrl: remoteUser.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400',
+        level: remoteUser.level || 1,
+        city: remoteUser.city || undefined,
+        country: remoteUser.country || undefined,
+        totalSpots: remoteUser.total_spots || 0,
         isFollowing: true
       };
 
@@ -95,22 +129,7 @@ export const SocialScreen: React.FC = () => {
         setFriendModalFeedback({ type: '', message: '' });
       }, 1200);
     } catch (err) {
-      // Offline fallback: Add friend directly by handle
-      const newFriend: FriendUser = {
-        id: `friend-${Date.now()}`,
-        username: cleanHandle,
-        displayName: cleanHandle,
-        avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400',
-        level: 1,
-        isFollowing: true
-      };
-      addFriend(newFriend);
-      setFriendModalFeedback({ type: 'success', message: `Added @${cleanHandle} to your friends!` });
-      setTargetUsernameInput('');
-      setTimeout(() => {
-        setIsAddFriendModalOpen(false);
-        setFriendModalFeedback({ type: '', message: '' });
-      }, 1200);
+      setFriendModalFeedback({ type: 'error', message: "Couldn't reach APEX servers to verify that user — check your connection and try again." });
     } finally {
       setIsSearchingFriend(false);
     }
@@ -270,7 +289,12 @@ export const SocialScreen: React.FC = () => {
           </div>
 
           <div className="bg-[#111111] border border-white/10 rounded-xl p-4 space-y-2">
-            {leaderboards.map((entry) => {
+            {isLeaderboardLoading && (
+              <div className="flex items-center justify-center gap-2 py-6 text-[#9A9088] text-xs font-data uppercase tracking-wider">
+                <Loader2 className="w-4 h-4 animate-spin" /> Loading {leaderboardFilter} rankings…
+              </div>
+            )}
+            {!isLeaderboardLoading && leaderboards.map((entry) => {
               const isMe = entry.username === user.username;
               return (
                 <div
@@ -489,7 +513,7 @@ export const SocialScreen: React.FC = () => {
 
       {/* ADD NEW FRIEND MODAL */}
       {isAddFriendModalOpen && (
-        <div className="fixed inset-0 z-50 bg-[#080808]/90 backdrop-blur-md flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-[#080808]/90 backdrop-blur-md flex items-center justify-center p-4 pt-safe pb-safe">
           <div className="w-full max-w-sm bg-[#111111] border border-white/15 rounded-3xl p-6 space-y-4 shadow-2xl relative">
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
               <div className="flex items-center gap-2">

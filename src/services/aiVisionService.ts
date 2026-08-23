@@ -59,20 +59,42 @@ export async function identifyVehicleWithAi(
   );
 
   try {
-    const { data: { session } } = await supabase.auth.getSession();
-    const token = session?.access_token;
+    // Never let a wedged auth-session lookup (e.g. a stuck Supabase token-refresh mutex)
+    // block issuing the request — race it against a short timer and proceed unauthenticated
+    // if it doesn't resolve fast. The proxy endpoint tolerates a missing token.
+    let token: string | undefined;
+    try {
+      const sessionResult = await Promise.race([
+        supabase.auth.getSession(),
+        new Promise<null>((resolve) => setTimeout(() => resolve(null), 600))
+      ]);
+      token = sessionResult?.data?.session?.access_token;
+    } catch {
+      token = undefined;
+    }
 
-    const proxyRes = await fetch('/api/analyze', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-      },
-      body: JSON.stringify({
-        imageBase64: base64Data,
-        mimeType: mimeType
-      })
-    });
+    // Hard network-level timeout: actually aborts the in-flight request instead of merely
+    // abandoning it, so a stalled connection doesn't sit open consuming a socket/battery.
+    const abortController = new AbortController();
+    const abortTimer = setTimeout(() => abortController.abort(), 6000);
+
+    let proxyRes: Response;
+    try {
+      proxyRes = await fetch('/api/analyze', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({
+          imageBase64: base64Data,
+          mimeType: mimeType
+        }),
+        signal: abortController.signal
+      });
+    } finally {
+      clearTimeout(abortTimer);
+    }
 
     if (proxyRes.ok) {
       const parsed = await proxyRes.json();

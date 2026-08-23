@@ -30,7 +30,7 @@ export class HunterSceneEngine {
   private selectedTargetId: string | null = null;
   private consecutiveFramesWithCar: number = 0;
   private lastVehicleDetectedTime: number = 0;
-  private readonly gracePeriodMs: number = 1500; // 1.5s grace period before clearing target
+  private readonly gracePeriodMs: number = 700; // brief grace period to absorb a single dropped frame, not long enough to keep a stale false-positive alive
 
   public reset() {
     this.targets.clear();
@@ -49,35 +49,77 @@ export class HunterSceneEngine {
     const now = Date.now();
     let detectedInFrame = false;
     let avgLuminance = 120;
-    let edgeVariance = 0;
 
     // Optical frame evaluation
+    // NOTE: this is a heuristic optical proxy (luminance + 2D edge structure), not a trained
+    // object-detection model. It cannot achieve true semantic "is this a car" certainty on-device
+    // without bundling a real vision model. The checks below are tuned to sharply reduce false
+    // positives on plain, texturally-flat or texturally-uniform, non-vehicle scenes (walls, open
+    // road, sky, grass, pavement) by requiring BOTH strong 2D edge density AND that the edge
+    // energy is concentrated toward the center of frame (where a user-framed vehicle sits),
+    // rather than any single global contrast/texture signal.
     if (videoElement && canvasElement && videoElement.videoWidth > 0) {
       try {
         const ctx = canvasElement.getContext('2d', { willReadFrequently: true });
         if (ctx) {
-          canvasElement.width = 64;
-          canvasElement.height = 36;
-          ctx.drawImage(videoElement, 0, 0, 64, 36);
-          const imgData = ctx.getImageData(0, 0, 64, 36);
+          const W = 64, H = 36;
+          canvasElement.width = W;
+          canvasElement.height = H;
+          ctx.drawImage(videoElement, 0, 0, W, H);
+          const imgData = ctx.getImageData(0, 0, W, H);
           const data = imgData.data;
-          
+          const pixelCount = W * H;
+
+          // Precompute per-pixel luminance grid once.
+          const lumGrid = new Float32Array(pixelCount);
           let totalLum = 0;
-          let diffSum = 0;
-          for (let i = 0; i < data.length; i += 4) {
+          for (let p = 0; p < pixelCount; p++) {
+            const i = p * 4;
             const lum = data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114;
+            lumGrid[p] = lum;
             totalLum += lum;
-            if (i > 4) {
-              const prevLum = data[i - 4] * 0.299 + data[i - 3] * 0.587 + data[i - 2] * 0.114;
-              diffSum += Math.abs(lum - prevLum);
+          }
+          avgLuminance = totalLum / pixelCount;
+
+          // True 2D gradient magnitude (horizontal + vertical neighbor diffs), not a
+          // row-major linear scan that silently blends adjacent rows together.
+          // Track edge energy separately for the center region (inner ~50%) vs the
+          // full frame so we can require the edges to be centrally concentrated.
+          const cx0 = Math.floor(W * 0.25), cx1 = Math.ceil(W * 0.75);
+          const cy0 = Math.floor(H * 0.2), cy1 = Math.ceil(H * 0.8);
+          // Per-pixel edge threshold — a real edge (bumper line, window trim, wheel arch)
+          // reads much stronger than diffuse texture noise (foliage, gravel, carpet, brick).
+          const EDGE_PIXEL_THRESHOLD = 22;
+
+          let totalEdgeEnergy = 0;
+          let centerEdgeEnergy = 0;
+          let strongEdgePixels = 0;
+
+          for (let y = 1; y < H - 1; y++) {
+            for (let x = 1; x < W - 1; x++) {
+              const p = y * W + x;
+              const gx = Math.abs(lumGrid[p + 1] - lumGrid[p - 1]);
+              const gy = Math.abs(lumGrid[p + W] - lumGrid[p - W]);
+              const mag = gx + gy;
+              totalEdgeEnergy += mag;
+              if (mag > EDGE_PIXEL_THRESHOLD) strongEdgePixels++;
+              if (x >= cx0 && x < cx1 && y >= cy0 && y < cy1) centerEdgeEnergy += mag;
             }
           }
-          const pixelCount = data.length / 4;
-          avgLuminance = totalLum / pixelCount;
-          edgeVariance = diffSum / pixelCount;
 
-          // Vehicle detection heuristics: frame has sufficient contrast and edge structure
-          if (avgLuminance > 18 && edgeVariance > 3.2) {
+          const strongEdgeDensity = strongEdgePixels / pixelCount; // fraction of pixels with a real edge
+          const centerShare = totalEdgeEnergy > 0 ? centerEdgeEnergy / totalEdgeEnergy : 0;
+          const centerArea = (cx1 - cx0) * (cy1 - cy0) / pixelCount; // ~0.30 for the box above
+
+          // Require: enough light to see by, a meaningfully high density of real (not
+          // diffuse-texture) edges, AND those edges concentrated in the reticle's center
+          // well beyond what the center region's raw area share would predict at random
+          // (i.e. not just "the whole frame is uniformly textured").
+          if (
+            avgLuminance > 22 &&
+            strongEdgeDensity > 0.085 &&
+            centerShare > centerArea * 1.6
+          ) {
             detectedInFrame = true;
           }
         }
@@ -90,13 +132,16 @@ export class HunterSceneEngine {
       this.consecutiveFramesWithCar++;
       this.lastVehicleDetectedTime = now;
     } else {
-      this.consecutiveFramesWithCar = Math.max(0, this.consecutiveFramesWithCar - 1);
+      // Decay faster than we accumulate so a brief false trigger (e.g. passing behind a
+      // textured wall) doesn't linger and keep the "potential discovery" state alive.
+      this.consecutiveFramesWithCar = Math.max(0, this.consecutiveFramesWithCar - 2);
     }
 
-    // Has vehicle is true if currently detected or within 1.5s grace period
-    const isWithinGracePeriod = (now - this.lastVehicleDetectedTime) < this.gracePeriodMs && this.lastVehicleDetectedTime > 0;
-    const hasVehicle = (this.consecutiveFramesWithCar >= 3) || isWithinGracePeriod;
-    const isStableTarget = this.consecutiveFramesWithCar >= 4;
+    // Has vehicle is true only after sustained multi-frame agreement, or within the (short)
+    // grace period immediately after losing a previously-sustained detection.
+    const isWithinGracePeriod = (now - this.lastVehicleDetectedTime) < this.gracePeriodMs && this.lastVehicleDetectedTime > 0 && this.consecutiveFramesWithCar > 0;
+    const hasVehicle = (this.consecutiveFramesWithCar >= 6) || isWithinGracePeriod;
+    const isStableTarget = this.consecutiveFramesWithCar >= 9;
 
     // Manage targets based on real detection
     if (hasVehicle) {

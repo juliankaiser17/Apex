@@ -26,7 +26,7 @@ export const Card3DDetail: React.FC<Card3DDetailProps> = ({ card, onClose }) => 
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#080808]/90 backdrop-blur-md flex flex-col items-center justify-between p-4 overflow-y-auto select-none" style={{ fontFamily: 'DM Sans' }}>
+    <div className="fixed inset-0 z-50 bg-[#080808]/90 backdrop-blur-md flex flex-col items-center justify-between p-4 pt-safe pb-safe overflow-y-auto select-none" style={{ fontFamily: 'DM Sans' }}>
       {/* Top Bar */}
       <div className="w-full max-w-md flex items-center justify-between z-10 pt-2 pb-4">
         <span className="font-display text-2xl text-[#F0EBE3] tracking-widest">

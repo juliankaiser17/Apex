@@ -6,6 +6,23 @@
 
 ---
 
+> **CORRECTION ADDENDUM (post-audit, security hardening pass):** Q10 below originally
+> claimed Play Integrity enforcement was live ("RESTRICTED"). That was false — this was
+> verified by grep: `verifyIntegrity.ts` had (and still has) **zero callers** anywhere in
+> `api/` or `src/`, so nothing ever invoked it. `api/analyze.ts` never checked device/app
+> integrity in any form. Q10's answer text below has been corrected in place. Wiring this
+> for real requires two pieces that don't exist yet in this repo: (1) a native Capacitor
+> Play Integrity plugin on the Android client to obtain a real attestation token, and (2)
+> a server-side call to Google's `playintegrity.googleapis.com` decode API (with a Google
+> Cloud service account) to actually verify that token — `evaluateIntegrityVerdict()` only
+> evaluates an *already-decoded* verdict object, it does not decode/verify a raw token
+> itself. Deliberately left unwired rather than fake-wired: accepting a client-supplied
+> "decoded verdict" directly (skipping the Google decode call) would be trivially
+> spoofable — worse than the honestly-dead code that was here before, because it would
+> look like protection while doing none.
+
+---
+
 ## 1. Adversarial Attack Vector Analysis
 
 ### Attack 1: Physical Optical Spoofing (Screen-to-Camera Replay)
@@ -111,8 +128,18 @@
 ---
 
 ### 10. Can I use an unofficial/tampered version of the application to abuse the backend?
-**RESTRICTED.**  
-* **Evidence:** The Google Play Integrity Standard API implementation in [`api/verifyIntegrity.ts`](file:///c:/Apex/api/verifyIntegrity.ts) evaluates `appRecognitionVerdict`. Repackaged or tampered binaries (`UNRECOGNIZED_VERSION`) are rejected from high-value actions (Tier 4). Virtual emulators (Tier 3) are sandboxed to single-player offline mode and excluded from global leaderboards.
+**YES — NOT CURRENTLY RESTRICTED.** *(Corrected — see addendum at top of document.)*
+* **Evidence:** `api/verifyIntegrity.ts` defines `evaluateIntegrityVerdict()`, a tiered
+  policy function that *would* reject `UNRECOGNIZED_VERSION` binaries and sandbox
+  virtual/emulated devices if it were called — but nothing in `api/` or `src/` ever calls
+  it. No client sends an integrity token, and `api/analyze.ts` performs no device/app
+  attestation check of any kind. The real protection currently in place against a
+  tampered/scripted client is JWT session auth (must present a valid Supabase session) plus
+  the rate limiter (`isRateLimited` + `check_and_increment_rate_limit` RPC) — neither of
+  which distinguishes a genuine APEX binary from a scripted client replaying the same API
+  calls with a valid, legitimately-obtained token. Full Play Integrity enforcement requires
+  provisioning a native Capacitor Play Integrity plugin and a Google Cloud service account
+  for server-side token decoding — not yet done.
 
 ---
 

@@ -37,7 +37,15 @@ export const config = {
   },
 };
 
-// In-Memory Rate Limiter (Per User / IP sliding window: max 20 requests per 5 minutes)
+// Rate Limiter: Per User / IP sliding window: max 20 requests per 5 minutes.
+//
+// The in-memory Map below is a cheap first-pass check only — on Vercel serverless each
+// invocation may land on a different instance with its own empty Map, so relying on it
+// alone lets a caller who hits several cold instances in parallel blow straight past the
+// limit. It's kept as a fast, zero-latency pre-filter for the common case (same warm
+// instance), but the actual authoritative limit is enforced via the check_and_increment_rate_limit
+// SECURITY DEFINER RPC (supabase/schema.sql), which uses an atomic INSERT ... ON CONFLICT
+// against a shared Postgres table — consistent across every serverless instance.
 const RATE_LIMIT_WINDOW_MS = 5 * 60 * 1000;
 const MAX_REQUESTS_PER_WINDOW = 20;
 const rateLimitMap = new Map<string, { count: number; expiresAt: number }>();
@@ -59,6 +67,32 @@ function isRateLimited(identifier: string): boolean {
   return false;
 }
 
+// Authoritative distributed check via Postgres. Returns true if the caller IS rate-limited.
+// Fails OPEN (returns false / "not limited") on any RPC error — e.g. the migration in
+// supabase/schema.sql hasn't been applied to the live project yet — so a missing migration
+// degrades to the in-memory-only behavior above rather than hard-failing every scan request.
+async function isRateLimitedRemote(
+  supabase: ReturnType<typeof createClient>,
+  identifier: string
+): Promise<boolean> {
+  try {
+    const { data, error } = await supabase.rpc('check_and_increment_rate_limit', {
+      p_rate_key: identifier,
+      p_window_seconds: Math.floor(RATE_LIMIT_WINDOW_MS / 1000),
+      p_max_requests: MAX_REQUESTS_PER_WINDOW
+    });
+    if (error) {
+      console.warn('Distributed rate-limit RPC unavailable (has the schema.sql migration been applied?):', error.message);
+      return false;
+    }
+    // The RPC returns TRUE when the request is allowed, so a limited caller is `data === false`.
+    return data === false;
+  } catch (e) {
+    console.warn('Distributed rate-limit RPC call failed:', e);
+    return false;
+  }
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // 1. Enforce POST Method
   if (req.method !== 'POST') {
@@ -72,11 +106,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || 'https://placeholder-project.supabase.co';
   const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || 'placeholder-anon-key';
 
+  const supabase = createClient(supabaseUrl, supabaseAnonKey);
   let authenticatedUserId = 'anonymous_ip';
 
   if (token && supabaseUrl && supabaseAnonKey) {
     try {
-      const supabase = createClient(supabaseUrl, supabaseAnonKey);
       const { data: { user }, error } = await supabase.auth.getUser(token);
       if (!error && user) {
         authenticatedUserId = user.id;
@@ -98,9 +132,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const clientIp = (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress || '127.0.0.1';
   const rateLimitKey = `${authenticatedUserId}:${clientIp}`;
 
-  if (isRateLimited(rateLimitKey)) {
-    return res.status(429).json({ 
-      error: 'Rate limit exceeded: Too many scan analysis requests. Please wait a few minutes before scanning again.' 
+  if (isRateLimited(rateLimitKey) || await isRateLimitedRemote(supabase, rateLimitKey)) {
+    return res.status(429).json({
+      error: 'Rate limit exceeded: Too many scan analysis requests. Please wait a few minutes before scanning again.'
     });
   }
 

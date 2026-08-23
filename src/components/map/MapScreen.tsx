@@ -173,15 +173,37 @@ export const MapScreen: React.FC = () => {
 
   const defaultCenter: [number, number] = [user.latitude || 35.6762, user.longitude || 139.6503];
 
+  // Real great-circle distance (Haversine) between the user and a spot, in km.
+  const haversineKm = (lat1: number, lng1: number, lat2: number, lng2: number): number => {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLng = (lng2 - lng1) * Math.PI / 180;
+    const a =
+      Math.sin(dLat / 2) ** 2 +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  };
+
+  const formatDistance = (km: number): string => {
+    if (km < 1) return `${Math.round(km * 1000)} m away`;
+    if (km < 10) return `${km.toFixed(1)} km away`;
+    return `${Math.round(km)} km away`;
+  };
+
   const mapSpots = useMemo<MapSpotPin[]>(() => {
-    return garage.map((card, index) => ({
-      ...card,
-      id: `map-spot-${card.id}`,
-      lat: card.latApprox || (user.latitude ? user.latitude + (index % 3) * 0.005 : 35.6762),
-      lng: card.lngApprox || (user.longitude ? user.longitude + (index % 3) * 0.005 : 139.6503),
-      city: card.city || user.city || 'Radar Sector',
-      distance: `${(0.4 + (index % 5) * 0.4).toFixed(1)} km away`
-    }));
+    const hasUserFix = !!user.latitude && !!user.longitude;
+    return garage.map((card, index) => {
+      const lat = card.latApprox || (user.latitude ? user.latitude + (index % 3) * 0.005 : 35.6762);
+      const lng = card.lngApprox || (user.longitude ? user.longitude + (index % 3) * 0.005 : 139.6503);
+      return {
+        ...card,
+        id: `map-spot-${card.id}`,
+        lat,
+        lng,
+        city: card.city || user.city || 'Radar Sector',
+        distance: hasUserFix ? formatDistance(haversineKm(user.latitude, user.longitude, lat, lng)) : 'Distance unknown'
+      };
+    });
   }, [garage, user.latitude, user.longitude, user.city]);
 
   const activeMatchingHunt = useMemo(() => {

@@ -23,7 +23,7 @@ export const PostScanHuntModal: React.FC<PostScanHuntModalProps> = ({
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-end justify-center bg-[#080808]/85 backdrop-blur-sm select-none" style={{ fontFamily: 'DM Sans' }}>
+      <div className="fixed inset-0 z-50 flex items-end justify-center bg-[#080808]/85 backdrop-blur-sm select-none pb-safe" style={{ fontFamily: 'DM Sans' }}>
         <motion.div
           initial={{ y: '100%' }}
           animate={{ y: 0 }}
