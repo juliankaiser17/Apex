@@ -1,0 +1,506 @@
+[
+  {
+    "test_id": "REAL_001",
+    "original_filename": "WhatsApp Image 2026-09-08 at 06.51.31.jpeg",
+    "extension": ".jpeg",
+    "file_size": 384899,
+    "dimensions": {
+      "width": 2016,
+      "height": 1134
+    },
+    "mime_type": "image/jpeg",
+    "sha256": "f6b737627e80260212d3ef5b052c3f9ed0da5f482b0a40d55cd6e6711901b001",
+    "metadata_before": {
+      "exif_found": false,
+      "app1_marker": false,
+      "iptc_found": false,
+      "xmp_found": false,
+      "comment_found": false,
+      "raw_header_bytes": "ffd8ffe000104a464946000101000001"
+    },
+    "metadata_removed": [],
+    "metadata_after": {
+      "clean_for_inference": true
+    }
+  },
+  {
+    "test_id": "REAL_002",
+    "original_filename": "WhatsApp Image 2026-09-08 at 06.51.32 (1).jpeg",
+    "extension": ".jpeg",
+    "file_size": 397858,
+    "dimensions": {
+      "width": 1134,
+      "height": 2016
+    },
+    "mime_type": "image/jpeg",
+    "sha256": "6d705fec665ec7d41610ba9cb0e6a618718433c18ad3c88d3e8cc2baf4c6a537",
+    "metadata_before": {
+      "exif_found": false,
+      "app1_marker": false,
+      "iptc_found": false,
+      "xmp_found": false,
+      "comment_found": false,
+      "raw_header_bytes": "ffd8ffe000104a464946000101000001"
+    },
+    "metadata_removed": [],
+    "metadata_after": {
+      "clean_for_inference": true
+    }
+  },
+  {
+    "test_id": "REAL_003",
+    "original_filename": "WhatsApp Image 2026-09-08 at 06.51.32.jpeg",
+    "extension": ".jpeg",
+    "file_size": 497750,
+    "dimensions": {
+      "width": 1134,
+      "height": 2016
+    },
+    "mime_type": "image/jpeg",
+    "sha256": "c64d7d176cd1d58eb15f7162060b6ca028e91ca5b50fe332609b3ed8d50374b6",
+    "metadata_before": {
+      "exif_found": false,
+      "app1_marker": false,
+      "iptc_found": false,
+      "xmp_found": false,
+      "comment_found": false,
+      "raw_header_bytes": "ffd8ffe000104a464946000101000001"
+    },
+    "metadata_removed": [],
+    "metadata_after": {
+      "clean_for_inference": true
+    }
+  },
+  {
+    "test_id": "REAL_004",
+    "original_filename": "WhatsApp Image 2026-09-08 at 06.51.33 (1).jpeg",
+    "extension": ".jpeg",
+    "file_size": 241929,
+    "dimensions": {
+      "width": 900,
+      "height": 1600
+    },
+    "mime_type": "image/jpeg",
+    "sha256": "b009f7c94a15434de1e9d97270b4c807ea5b6b459f2470ac88ed6ed4eee15834",
+    "metadata_before": {
+      "exif_found": false,
+      "app1_marker": false,
+      "iptc_found": false,
+      "xmp_found": false,
+      "comment_found": false,
+      "raw_header_bytes": "ffd8ffe000104a464946000101000001"
+    },
+    "metadata_removed": [],
+    "metadata_after": {
+      "clean_for_inference": true
+    }
+  },
+  {
+    "test_id": "REAL_005",
+    "original_filename": "WhatsApp Image 2026-09-08 at 06.51.33.jpeg",
+    "extension": ".jpeg",
+    "file_size": 175551,
+    "dimensions": {
+      "width": 1134,
+      "height": 2016
+    },
+    "mime_type": "image/jpeg",
+    "sha256": "866ccdbeff6c5655940877ff7fccd92b360b22040847e52804358d2986435bec",
+    "metadata_before": {
+      "exif_found": false,
+      "app1_marker": false,
+      "iptc_found": false,
+      "xmp_found": false,
+      "comment_found": false,
+      "raw_header_bytes": "ffd8ffe000104a464946000101000001"
+    },
+    "metadata_removed": [],
+    "metadata_after": {
+      "clean_for_inference": true
+    }
+  },
+  {
+    "test_id": "REAL_006",
+    "original_filename": "WhatsApp Image 2026-09-08 at 06.51.34 (1).jpeg",
+    "extension": ".jpeg",
+    "file_size": 169596,
+    "dimensions": {
+      "width": 900,
+      "height": 1600
+    },
+    "mime_type": "image/jpeg",
+    "sha256": "736e05a7283f43f31781ba563b43cdeba5c39c81adc5045f511cfe9dce49502f",
+    "metadata_before": {
+      "exif_found": false,
+      "app1_marker": false,
+      "iptc_found": false,
+      "xmp_found": false,
+      "comment_found": false,
+      "raw_header_bytes": "ffd8ffe000104a464946000101000001"
+    },
+    "metadata_removed": [],
+    "metadata_after": {
+      "clean_for_inference": true
+    }
+  },
+  {
+    "test_id": "REAL_007",
+    "original_filename": "WhatsApp Image 2026-09-08 at 06.51.34.jpeg",
+    "extension": ".jpeg",
+    "file_size": 169877,
+    "dimensions": {
+      "width": 1200,
+      "height": 1600
+    },
+    "mime_type": "image/jpeg",
+    "sha256": "808e3a057b5f14aa132a416e57e0ed647c77c0573476ff72b0ae3dd202c6e38a",
+    "metadata_before": {
+      "exif_found": false,
+      "app1_marker": false,
+      "iptc_found": false,
+      "xmp_found": false,
+      "comment_found": false,
+      "raw_header_bytes": "ffd8ffe000104a464946000101000001"
+    },
+    "metadata_removed": [],
+    "metadata_after": {
+      "clean_for_inference": true
+    }
+  },
+  {
+    "test_id": "REAL_008",
+    "original_filename": "WhatsApp Image 2026-09-08 at 06.51.35.jpeg",
+    "extension": ".jpeg",
+    "file_size": 275237,
+    "dimensions": {
+      "width": 1200,
+      "height": 1600
+    },
+    "mime_type": "image/jpeg",
+    "sha256": "635c9adc4dc650cb92dd9eb2730fa08b88969197edcd0897db38109bb0d49cb3",
+    "metadata_before": {
+      "exif_found": false,
+      "app1_marker": false,
+      "iptc_found": false,
+      "xmp_found": false,
+      "comment_found": false,
+      "raw_header_bytes": "ffd8ffe000104a464946000101000001"
+    },
+    "metadata_removed": [],
+    "metadata_after": {
+      "clean_for_inference": true
+    }
+  },
+  {
+    "test_id": "REAL_009",
+    "original_filename": "WhatsApp Image 2026-09-08 at 06.56.54.jpeg",
+    "extension": ".jpeg",
+    "file_size": 301210,
+    "dimensions": {
+      "width": 1080,
+      "height": 1439
+    },
+    "mime_type": "image/jpeg",
+    "sha256": "ca753e351565391922cc34647191597c7174e4e30214096d40ef9df619d95fdd",
+    "metadata_before": {
+      "exif_found": false,
+      "app1_marker": false,
+      "iptc_found": false,
+      "xmp_found": false,
+      "comment_found": false,
+      "raw_header_bytes": "ffd8ffe000124a465858005741000000"
+    },
+    "metadata_removed": [],
+    "metadata_after": {
+      "clean_for_inference": true
+    }
+  },
+  {
+    "test_id": "REAL_010",
+    "original_filename": "WhatsApp Image 2026-09-08 at 06.56.55 (1).jpeg",
+    "extension": ".jpeg",
+    "file_size": 231042,
+    "dimensions": {
+      "width": 1080,
+      "height": 1439
+    },
+    "mime_type": "image/jpeg",
+    "sha256": "80195d23f85b6f2045b56076193ff2d89081787d99c77f9495793d50a926fc9f",
+    "metadata_before": {
+      "exif_found": false,
+      "app1_marker": false,
+      "iptc_found": false,
+      "xmp_found": false,
+      "comment_found": false,
+      "raw_header_bytes": "ffd8ffe000124a465858005741000000"
+    },
+    "metadata_removed": [],
+    "metadata_after": {
+      "clean_for_inference": true
+    }
+  },
+  {
+    "test_id": "REAL_011",
+    "original_filename": "WhatsApp Image 2026-09-08 at 06.56.55.jpeg",
+    "extension": ".jpeg",
+    "file_size": 289586,
+    "dimensions": {
+      "width": 1080,
+      "height": 1439
+    },
+    "mime_type": "image/jpeg",
+    "sha256": "09567a857c30e24f22f11d872cdacf3cc47355dae7b8116e399b49e954064072",
+    "metadata_before": {
+      "exif_found": false,
+      "app1_marker": false,
+      "iptc_found": false,
+      "xmp_found": false,
+      "comment_found": false,
+      "raw_header_bytes": "ffd8ffe000124a465858005741000000"
+    },
+    "metadata_removed": [],
+    "metadata_after": {
+      "clean_for_inference": true
+    }
+  },
+  {
+    "test_id": "REAL_012",
+    "original_filename": "WhatsApp Image 2026-09-08 at 06.56.56 (1).jpeg",
+    "extension": ".jpeg",
+    "file_size": 189541,
+    "dimensions": {
+      "width": 1080,
+      "height": 1439
+    },
+    "mime_type": "image/jpeg",
+    "sha256": "c344b0f8d430c900d7d8f306dfd8393960266522ea3fa862a341f8b307a1a012",
+    "metadata_before": {
+      "exif_found": false,
+      "app1_marker": false,
+      "iptc_found": false,
+      "xmp_found": false,
+      "comment_found": false,
+      "raw_header_bytes": "ffd8ffe000124a465858005741000000"
+    },
+    "metadata_removed": [],
+    "metadata_after": {
+      "clean_for_inference": true
+    }
+  },
+  {
+    "test_id": "REAL_013",
+    "original_filename": "WhatsApp Image 2026-09-08 at 06.56.56 (2).jpeg",
+    "extension": ".jpeg",
+    "file_size": 155792,
+    "dimensions": {
+      "width": 1080,
+      "height": 1439
+    },
+    "mime_type": "image/jpeg",
+    "sha256": "adc13e2c495a28b635ef59d558ec51cdc3336ea8a3b8461d9f33a71b89674e61",
+    "metadata_before": {
+      "exif_found": false,
+      "app1_marker": false,
+      "iptc_found": false,
+      "xmp_found": false,
+      "comment_found": false,
+      "raw_header_bytes": "ffd8ffe000124a465858005741000000"
+    },
+    "metadata_removed": [],
+    "metadata_after": {
+      "clean_for_inference": true
+    }
+  },
+  {
+    "test_id": "REAL_014",
+    "original_filename": "WhatsApp Image 2026-09-08 at 06.56.56.jpeg",
+    "extension": ".jpeg",
+    "file_size": 152994,
+    "dimensions": {
+      "width": 1080,
+      "height": 810
+    },
+    "mime_type": "image/jpeg",
+    "sha256": "ba44d776aa90f0f6447e19a593f15c29047d214d54e727ac0bef5e1883a70faa",
+    "metadata_before": {
+      "exif_found": false,
+      "app1_marker": false,
+      "iptc_found": false,
+      "xmp_found": false,
+      "comment_found": false,
+      "raw_header_bytes": "ffd8ffe000124a465858005741000000"
+    },
+    "metadata_removed": [],
+    "metadata_after": {
+      "clean_for_inference": true
+    }
+  },
+  {
+    "test_id": "REAL_015",
+    "original_filename": "WhatsApp Image 2026-09-08 at 06.56.57 (1).jpeg",
+    "extension": ".jpeg",
+    "file_size": 234538,
+    "dimensions": {
+      "width": 1080,
+      "height": 1439
+    },
+    "mime_type": "image/jpeg",
+    "sha256": "96d1a33e364a3afc62231f8e3e665737ffa6a9bee0a0bd0de671b6933e544ca8",
+    "metadata_before": {
+      "exif_found": false,
+      "app1_marker": false,
+      "iptc_found": false,
+      "xmp_found": false,
+      "comment_found": false,
+      "raw_header_bytes": "ffd8ffe000124a465858005741000000"
+    },
+    "metadata_removed": [],
+    "metadata_after": {
+      "clean_for_inference": true
+    }
+  },
+  {
+    "test_id": "REAL_016",
+    "original_filename": "WhatsApp Image 2026-09-08 at 06.56.57 (2).jpeg",
+    "extension": ".jpeg",
+    "file_size": 255049,
+    "dimensions": {
+      "width": 899,
+      "height": 1599
+    },
+    "mime_type": "image/jpeg",
+    "sha256": "0f9bfd921291d76610a4421676b06f6b764a486faa4defc41e2c13d82117350d",
+    "metadata_before": {
+      "exif_found": false,
+      "app1_marker": false,
+      "iptc_found": false,
+      "xmp_found": false,
+      "comment_found": false,
+      "raw_header_bytes": "ffd8ffe000104a464946000101000001"
+    },
+    "metadata_removed": [],
+    "metadata_after": {
+      "clean_for_inference": true
+    }
+  },
+  {
+    "test_id": "REAL_017",
+    "original_filename": "WhatsApp Image 2026-09-08 at 06.56.57.jpeg",
+    "extension": ".jpeg",
+    "file_size": 275597,
+    "dimensions": {
+      "width": 1080,
+      "height": 1439
+    },
+    "mime_type": "image/jpeg",
+    "sha256": "3d280b42a6f70c435b5d71da879c7b44e39cc0bed340801fe3c1c305f9505fb5",
+    "metadata_before": {
+      "exif_found": false,
+      "app1_marker": false,
+      "iptc_found": false,
+      "xmp_found": false,
+      "comment_found": false,
+      "raw_header_bytes": "ffd8ffe000124a465858005741000000"
+    },
+    "metadata_removed": [],
+    "metadata_after": {
+      "clean_for_inference": true
+    }
+  },
+  {
+    "test_id": "REAL_018",
+    "original_filename": "WhatsApp Image 2026-09-08 at 06.56.58 (1).jpeg",
+    "extension": ".jpeg",
+    "file_size": 57181,
+    "dimensions": {
+      "width": 716,
+      "height": 1600
+    },
+    "mime_type": "image/jpeg",
+    "sha256": "0cf066a605fddb14ae82b7027df37f0948be0993d853beaf71c1ea2368f39562",
+    "metadata_before": {
+      "exif_found": false,
+      "app1_marker": false,
+      "iptc_found": false,
+      "xmp_found": false,
+      "comment_found": false,
+      "raw_header_bytes": "ffd8ffe000104a464946000101000001"
+    },
+    "metadata_removed": [],
+    "metadata_after": {
+      "clean_for_inference": true
+    }
+  },
+  {
+    "test_id": "REAL_019",
+    "original_filename": "WhatsApp Image 2026-09-08 at 06.56.58 (2).jpeg",
+    "extension": ".jpeg",
+    "file_size": 142429,
+    "dimensions": {
+      "width": 1080,
+      "height": 608
+    },
+    "mime_type": "image/jpeg",
+    "sha256": "c0b9bb6ff4efb99bd017a067628c26df583fe6e7f51f47f42ded00d927de698b",
+    "metadata_before": {
+      "exif_found": false,
+      "app1_marker": false,
+      "iptc_found": false,
+      "xmp_found": false,
+      "comment_found": false,
+      "raw_header_bytes": "ffd8ffe000104a464946000101000001"
+    },
+    "metadata_removed": [],
+    "metadata_after": {
+      "clean_for_inference": true
+    }
+  },
+  {
+    "test_id": "REAL_020",
+    "original_filename": "WhatsApp Image 2026-09-08 at 06.56.58.jpeg",
+    "extension": ".jpeg",
+    "file_size": 140509,
+    "dimensions": {
+      "width": 1080,
+      "height": 810
+    },
+    "mime_type": "image/jpeg",
+    "sha256": "cc5771d9d2ae163338c0e40dfbb54c48f87ae12b20058bad081d5c7db5301850",
+    "metadata_before": {
+      "exif_found": false,
+      "app1_marker": false,
+      "iptc_found": false,
+      "xmp_found": false,
+      "comment_found": false,
+      "raw_header_bytes": "ffd8ffe000104a464946000101000001"
+    },
+    "metadata_removed": [],
+    "metadata_after": {
+      "clean_for_inference": true
+    }
+  },
+  {
+    "test_id": "REAL_021",
+    "original_filename": "WhatsApp Image 2026-09-08 at 06.56.59.jpeg",
+    "extension": ".jpeg",
+    "file_size": 107215,
+    "dimensions": {
+      "width": 899,
+      "height": 1599
+    },
+    "mime_type": "image/jpeg",
+    "sha256": "faca0c2a8d974c9ab9ccf2cc1dfcb6f047b26fd9a79f87e18352ff711322c53c",
+    "metadata_before": {
+      "exif_found": false,
+      "app1_marker": false,
+      "iptc_found": false,
+      "xmp_found": false,
+      "comment_found": false,
+      "raw_header_bytes": "ffd8ffe000104a464946000101000001"
+    },
+    "metadata_removed": [],
+    "metadata_after": {
+      "clean_for_inference": true
+    }
+  }
+]

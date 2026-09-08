@@ -1,0 +1,250 @@
+import { useState, useCallback, useRef, useEffect } from 'react';
+import type { CarCard } from '../types/apex';
+import { sounds } from '../utils/audio';
+import { offlineRecognitionEngine } from '../services/offlineRecognitionEngine';
+
+export type ScannerPhase =
+  | 'IDLE'
+  | 'SEARCHING'
+  | 'CAR_DETECTED'
+  | 'POTENTIAL_DISCOVERY'
+  | 'TRACKING'
+  | 'TARGET_LOST'
+  | 'LOCKING'
+  | 'LOCKED'
+  | 'CAPTURING'
+  | 'CAPTURED'
+  | 'ANALYZING'
+  | 'IDENTIFYING'
+  | 'VERIFYING'
+  | 'REVEALING'
+  | 'DISCOVERED'
+  | 'ALREADY_COLLECTED'
+  | 'ERROR';
+
+export interface PipelineStageInfo {
+  index: number;
+  label: string;
+  detail: string;
+  status: 'pending' | 'in_progress' | 'completed' | 'failed';
+}
+
+export interface ScannerStateMachineResult {
+  phase: ScannerPhase;
+  hasVehicle: boolean;
+  createdCard: CarCard | null;
+  capturedPhotoUrl: string | null;
+  errorMessage: string | null;
+  pipelineStages: PipelineStageInfo[];
+  currentStageIndex: number;
+  
+  // Actions
+  onVehicleDetectedChange: (detected: boolean, isStable: boolean) => void;
+  startSearching: () => void;
+  selectTarget: (targetId: string) => void;
+  triggerLock: () => void;
+  startCapturing: () => void;
+  setCapturedPhoto: (photoUrl: string) => void;
+  submitForAnalysis: (photoUrl: string) => void;
+  onAnalysisStageResolved: (stageIdx: number, detail?: string) => void;
+  onIdentificationSuccess: (card: CarCard, isDuplicate?: boolean) => void;
+  onIdentificationFailed: (reason: string) => void;
+  retryAnalysis: () => void;
+  retakePhoto: () => void;
+  continueHunting: () => void;
+  resetScanner: () => void;
+}
+
+const INITIAL_PIPELINE_STAGES: PipelineStageInfo[] = [
+  { index: 0, label: 'IMAGE QUALITY & VIEWPOINT', detail: 'Sharpness, lighting & framing check', status: 'pending' },
+  { index: 1, label: 'VISUAL FEATURES', detail: 'Grille, headlights, aero & body lines', status: 'pending' },
+  { index: 2, label: 'MANUFACTURER & MODEL FAMILY', detail: 'Hierarchical architecture matching', status: 'pending' },
+  { index: 3, label: 'CANDIDATE VERIFICATION', detail: 'Contradiction filter & trim confirmation', status: 'pending' },
+  { index: 4, label: 'IDENTIFICATION RESULT', detail: 'Calibrated certainty score & registry mint', status: 'pending' },
+];
+
+export function useScannerStateMachine(): ScannerStateMachineResult {
+  const [phase, setPhase] = useState<ScannerPhase>('SEARCHING');
+  const [hasVehicle, setHasVehicle] = useState<boolean>(false);
+  const [createdCard, setCreatedCard] = useState<CarCard | null>(null);
+  const [capturedPhotoUrl, setCapturedPhotoUrl] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [pipelineStages, setPipelineStages] = useState<PipelineStageInfo[]>(INITIAL_PIPELINE_STAGES);
+  const [currentStageIndex, setCurrentStageIndex] = useState<number>(0);
+
+  const lockTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const onVehicleDetectedChange = useCallback((detected: boolean, isStable: boolean) => {
+    setHasVehicle(detected);
+    
+    // Only update phase if we are in searching/detection mode
+    setPhase(current => {
+      if (['CAPTURING', 'CAPTURED', 'ANALYZING', 'IDENTIFYING', 'VERIFYING', 'REVEALING', 'DISCOVERED', 'ALREADY_COLLECTED', 'LOCKING', 'LOCKED', 'ERROR'].includes(current)) {
+        return current;
+      }
+
+      if (!detected) {
+        return 'SEARCHING';
+      }
+
+      if (isStable) {
+        return 'POTENTIAL_DISCOVERY';
+      }
+
+      return 'CAR_DETECTED';
+    });
+  }, []);
+
+  const startSearching = useCallback(() => {
+    setPhase('SEARCHING');
+    setHasVehicle(false);
+    setErrorMessage(null);
+    setPipelineStages(INITIAL_PIPELINE_STAGES);
+    setCurrentStageIndex(0);
+  }, []);
+
+  const selectTarget = useCallback((_targetId: string) => {
+    sounds.playTargetAcquired();
+    setPhase('TRACKING');
+  }, []);
+
+  const triggerLock = useCallback(() => {
+    sounds.playFrequencyResonanceLock();
+    setPhase('LOCKING');
+    
+    if (lockTimerRef.current) clearTimeout(lockTimerRef.current);
+    lockTimerRef.current = setTimeout(() => {
+      sounds.playTargetLock();
+      setPhase('LOCKED');
+    }, 200);
+  }, []);
+
+  const startCapturing = useCallback(() => {
+    setPhase('CAPTURING');
+  }, []);
+
+  const setCapturedPhoto = useCallback((photoUrl: string) => {
+    setCapturedPhotoUrl(photoUrl);
+    setPhase('CAPTURED');
+  }, []);
+
+  const submitForAnalysis = useCallback((photoUrl: string) => {
+    setCapturedPhotoUrl(photoUrl);
+    setPhase('ANALYZING');
+    setErrorMessage(null);
+    setCurrentStageIndex(0);
+    setPipelineStages(stages => stages.map((s, i) => ({
+      ...s,
+      status: i === 0 ? 'in_progress' : 'pending'
+    })));
+  }, []);
+
+  const onAnalysisStageResolved = useCallback((stageIdx: number, detail?: string) => {
+    sounds.playPipelineStageComplete();
+    setPipelineStages(prev => prev.map((stage, idx) => {
+      if (idx === stageIdx) {
+        return {
+          ...stage,
+          status: 'completed',
+          detail: detail || stage.detail
+        };
+      }
+      if (idx === stageIdx + 1) {
+        return { ...stage, status: 'in_progress' };
+      }
+      return stage;
+    }));
+    setCurrentStageIndex(stageIdx + 1);
+
+    if (stageIdx === 1) setPhase('IDENTIFYING');
+    if (stageIdx === 3) setPhase('VERIFYING');
+  }, []);
+
+  const onIdentificationSuccess = useCallback((card: CarCard, isDuplicate: boolean = false) => {
+    setCreatedCard(card);
+    setPipelineStages(stages => stages.map(s => ({ ...s, status: 'completed' })));
+    sounds.playRarityReveal(card.rarity);
+    setPhase(isDuplicate ? 'ALREADY_COLLECTED' : 'DISCOVERED');
+  }, []);
+
+  const onIdentificationFailed = useCallback((reason: string) => {
+    setErrorMessage(reason);
+    setPhase('ERROR');
+  }, []);
+
+  const retryAnalysis = useCallback(() => {
+    if (!capturedPhotoUrl) return;
+    setErrorMessage(null);
+    setPhase('ANALYZING');
+    setCurrentStageIndex(0);
+    setPipelineStages(stages => stages.map((s, i) => ({
+      ...s,
+      status: i === 0 ? 'in_progress' : 'pending'
+    })));
+  }, [capturedPhotoUrl]);
+
+  const retakePhoto = useCallback(() => {
+    sounds.playTargetAcquired();
+    offlineRecognitionEngine.reset();
+    setCapturedPhotoUrl(null);
+    setCreatedCard(null);
+    setErrorMessage(null);
+    setHasVehicle(false);
+    setPipelineStages(INITIAL_PIPELINE_STAGES);
+    setCurrentStageIndex(0);
+    setPhase('SEARCHING');
+  }, []);
+
+  const continueHunting = useCallback(() => {
+    sounds.playTargetAcquired();
+    offlineRecognitionEngine.reset();
+    setCreatedCard(null);
+    setCapturedPhotoUrl(null);
+    setErrorMessage(null);
+    setHasVehicle(false);
+    setPipelineStages(INITIAL_PIPELINE_STAGES);
+    setCurrentStageIndex(0);
+    setPhase('SEARCHING');
+  }, []);
+
+  const resetScanner = useCallback(() => {
+    offlineRecognitionEngine.reset();
+    setPhase('IDLE');
+    setHasVehicle(false);
+    setCreatedCard(null);
+    setCapturedPhotoUrl(null);
+    setErrorMessage(null);
+    setPipelineStages(INITIAL_PIPELINE_STAGES);
+    setCurrentStageIndex(0);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (lockTimerRef.current) clearTimeout(lockTimerRef.current);
+    };
+  }, []);
+
+  return {
+    phase,
+    hasVehicle,
+    createdCard,
+    capturedPhotoUrl,
+    errorMessage,
+    pipelineStages,
+    currentStageIndex,
+    onVehicleDetectedChange,
+    startSearching,
+    selectTarget,
+    triggerLock,
+    startCapturing,
+    setCapturedPhoto,
+    submitForAnalysis,
+    onAnalysisStageResolved,
+    onIdentificationSuccess,
+    onIdentificationFailed,
+    retryAnalysis,
+    retakePhoto,
+    continueHunting,
+    resetScanner
+  };
+}

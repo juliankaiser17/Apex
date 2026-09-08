@@ -1,0 +1,826 @@
+{
+  "version": "2.5.0-resumable",
+  "benchmark_name": "Apex Real-World Car Acceptance Test",
+  "last_updated": "2026-09-08T15:44:01.630Z",
+  "total_images": 21,
+  "completed_count": 21,
+  "quota_blocked_count": 0,
+  "pending_count": 0,
+  "scans": {
+    "REAL_001": {
+      "test_id": "REAL_001",
+      "original_filename": "WhatsApp Image 2026-09-08 at 06.51.31.jpeg",
+      "status": "completed",
+      "attempt_count": 2,
+      "scan_id": "scan_1788881932095_7344",
+      "request_id": "trc_mtsu44sf_3a8kn77",
+      "image_sha256": "f6b737627e80260212d3ef5b052c3f9ed0da5f482b0a40d55cd6e6711901b001",
+      "provider_attempted": "GeminiProvider",
+      "provider_used": "gemini-2.5-flash",
+      "fallback_used": false,
+      "cache_hit": false,
+      "started_at": "2026-09-08T15:38:52.084Z",
+      "completed_at": "2026-09-08T15:39:10.750Z",
+      "result": {
+        "predicted_make": "Porsche",
+        "predicted_model": "Macan",
+        "predicted_generation": "95B.2 (Facelift)",
+        "confidence_score": 0.408,
+        "status": "uncertain",
+        "specificity_level": "generation",
+        "quality_score": 0.9,
+        "latencies": {
+          "total_ms": 18664.4,
+          "inference_ms": 18526
+        },
+        "contradictions": [
+          "The specific wheel design and red calipers are more indicative of a GTS or higher trim, though optional on S."
+        ],
+        "evidence": [
+          "Side blade element in black along the lower door sills",
+          "Bright blue exterior paint color",
+          "Red brake calipers"
+        ]
+      },
+      "error": null
+    },
+    "REAL_002": {
+      "test_id": "REAL_002",
+      "original_filename": "WhatsApp Image 2026-09-08 at 06.51.32 (1).jpeg",
+      "status": "completed",
+      "attempt_count": 1,
+      "scan_id": "scan_1788881954818_2609",
+      "request_id": "trc_mtsu4mbm_wp41hnb",
+      "image_sha256": "6d705fec665ec7d41610ba9cb0e6a618718433c18ad3c88d3e8cc2baf4c6a537",
+      "provider_attempted": "GeminiProvider",
+      "provider_used": "gemini-2.5-flash",
+      "fallback_used": false,
+      "cache_hit": false,
+      "started_at": "2026-09-08T15:39:14.765Z",
+      "completed_at": "2026-09-08T15:39:27.830Z",
+      "result": {
+        "predicted_make": "BMW",
+        "predicted_model": "3 Series",
+        "predicted_generation": "E90",
+        "confidence_score": 0.368,
+        "status": "uncertain",
+        "specificity_level": "generation",
+        "quality_score": 0.9,
+        "latencies": {
+          "total_ms": 13062.34,
+          "inference_ms": 12908
+        },
+        "contradictions": [
+          "Headlight shape and grille proportions are distinctly different from E60",
+          "Overall body size and proportions appear smaller than an E60"
+        ],
+        "evidence": [
+          "Matte black wrap/paint finish",
+          "Aftermarket front bumper with larger lower intake",
+          "Aftermarket side skirts",
+          "Aftermarket trunk lip spoiler",
+          "Aftermarket wheels"
+        ]
+      },
+      "error": null
+    },
+    "REAL_003": {
+      "test_id": "REAL_003",
+      "original_filename": "WhatsApp Image 2026-09-08 at 06.51.32.jpeg",
+      "status": "completed",
+      "attempt_count": 1,
+      "scan_id": "scan_1788881971935_2797",
+      "request_id": "trc_mtsu4zj3_n6yi7yk",
+      "image_sha256": "c64d7d176cd1d58eb15f7162060b6ca028e91ca5b50fe332609b3ed8d50374b6",
+      "provider_attempted": "GeminiProvider",
+      "provider_used": "gemini-2.5-flash",
+      "fallback_used": false,
+      "cache_hit": false,
+      "started_at": "2026-09-08T15:39:31.849Z",
+      "completed_at": "2026-09-08T15:39:47.677Z",
+      "result": {
+        "predicted_make": "Bentley",
+        "predicted_model": "Continental GT",
+        "predicted_generation": "2nd Generation (Type 3W)",
+        "confidence_score": 0.361,
+        "status": "abstained",
+        "specificity_level": "generation",
+        "quality_score": 0.9,
+        "latencies": {
+          "total_ms": 15826.04,
+          "inference_ms": 15562
+        },
+        "contradictions": [
+          "Taillight design is distinctly different (3rd gen has more elongated, single-piece taillights).",
+          "Exhaust tip design differs (3rd gen often has wider, more integrated exhaust finishers)."
+        ],
+        "evidence": [
+          "Chrome trim strip running along the lower side profile of the car.",
+          "Distinctive rear haunches.",
+          "Fuel filler cap visible on the rear right fender."
+        ]
+      },
+      "error": null
+    },
+    "REAL_004": {
+      "test_id": "REAL_004",
+      "original_filename": "WhatsApp Image 2026-09-08 at 06.51.33 (1).jpeg",
+      "status": "completed",
+      "attempt_count": 1,
+      "scan_id": "scan_1788881991702_6564",
+      "request_id": "trc_mtsu5es6_umh3edm",
+      "image_sha256": "b009f7c94a15434de1e9d97270b4c807ea5b6b459f2470ac88ed6ed4eee15834",
+      "provider_attempted": "GeminiProvider",
+      "provider_used": "gemini-2.5-flash",
+      "fallback_used": false,
+      "cache_hit": false,
+      "started_at": "2026-09-08T15:39:51.687Z",
+      "completed_at": "2026-09-08T15:40:03.149Z",
+      "result": {
+        "predicted_make": "Rolls-Royce",
+        "predicted_model": "Phantom",
+        "predicted_generation": "VIII (Series II / EWB)",
+        "confidence_score": 0.372,
+        "status": "uncertain",
+        "specificity_level": "generation",
+        "quality_score": 0.9,
+        "latencies": {
+          "total_ms": 11458.39,
+          "inference_ms": 11418
+        },
+        "contradictions": [
+          "Headlight design (Phantom VII has more circular/oval main headlights, not integrated rectangular units).",
+          "Front bumper and lower intake design are different."
+        ],
+        "evidence": [
+          "Iconic 'Spirit of Ecstasy' hood ornament.",
+          "Massive, chrome 'Pantheon' grille.",
+          "Squared-off front fascia with integrated rectangular headlights.",
+          "Dark green exterior paint."
+        ]
+      },
+      "error": null
+    },
+    "REAL_005": {
+      "test_id": "REAL_005",
+      "original_filename": "WhatsApp Image 2026-09-08 at 06.51.33.jpeg",
+      "status": "completed",
+      "attempt_count": 0,
+      "scan_id": "scan_1788833847742_2860",
+      "request_id": "trc_mts1hiny_xu79k35",
+      "image_sha256": "866ccdbeff6c5655940877ff7fccd92b360b22040847e52804358d2986435bec",
+      "provider_attempted": "GeminiProvider",
+      "provider_used": "gemini-2.5-flash",
+      "fallback_used": false,
+      "cache_hit": false,
+      "started_at": null,
+      "completed_at": "2026-09-08T03:34:44.545Z",
+      "result": {
+        "predicted_make": "Ferrari",
+        "predicted_model": "328",
+        "predicted_generation": "328 (F106)",
+        "predicted_variant": "GTS",
+        "confidence_score": 0.322,
+        "status": "abstained",
+        "specificity_level": "variant",
+        "quality_score": 0.9,
+        "latencies": {
+          "total_ms": 11377.38,
+          "inference_ms": 11057
+        },
+        "contradictions": [
+          "The vehicle clearly has a removable targa roof panel, which is characteristic of the GTS, not the fixed-roof GTB.",
+          "Floor marking 'GTS328' contradicts GTB.",
+          "The 328 has a slightly revised and smoother body design compared to the 308, particularly around the front bumper and side vents, which are visible here.",
+          "The hood vents are characteristic of the 328, not the 308.",
+          "Floor marking 'GTS328' contradicts 308."
+        ],
+        "evidence": [
+          "Mid-engine side air intake slats behind the doors.",
+          "Black targa roof panel.",
+          "Pop-up headlights.",
+          "Iconic five-spoke Ferrari 'star' wheels."
+        ]
+      },
+      "error": null
+    },
+    "REAL_006": {
+      "test_id": "REAL_006",
+      "original_filename": "WhatsApp Image 2026-09-08 at 06.51.34 (1).jpeg",
+      "status": "completed",
+      "attempt_count": 1,
+      "scan_id": "scan_1788882007177_6245",
+      "request_id": "trc_mtsu5qq1_xf70vjh",
+      "image_sha256": "736e05a7283f43f31781ba563b43cdeba5c39c81adc5045f511cfe9dce49502f",
+      "provider_attempted": "GeminiProvider",
+      "provider_used": "gemini-2.5-flash",
+      "fallback_used": false,
+      "cache_hit": false,
+      "started_at": "2026-09-08T15:40:07.164Z",
+      "completed_at": "2026-09-08T15:40:22.129Z",
+      "result": {
+        "predicted_make": "Porsche",
+        "predicted_model": "718 Boxster",
+        "predicted_generation": "982",
+        "confidence_score": 0.407,
+        "status": "uncertain",
+        "specificity_level": "generation",
+        "quality_score": 0.9,
+        "latencies": {
+          "total_ms": 14963.14,
+          "inference_ms": 14843
+        },
+        "contradictions": [
+          "The vehicle clearly has a soft-top convertible roof, which is characteristic of the Boxster, not the fixed-roof Cayman."
+        ],
+        "evidence": [
+          "Yellow exterior paint.",
+          "Black soft-top convertible roof.",
+          "Mid-engine proportions with short front and rear overhangs.",
+          "Integrated front bumper design with black intake elements."
+        ]
+      },
+      "error": null
+    },
+    "REAL_007": {
+      "test_id": "REAL_007",
+      "original_filename": "WhatsApp Image 2026-09-08 at 06.51.34.jpeg",
+      "status": "completed",
+      "attempt_count": 1,
+      "scan_id": "scan_1788882026244_7781",
+      "request_id": "trc_mtsu65fo_z61a0kq",
+      "image_sha256": "808e3a057b5f14aa132a416e57e0ed647c77c0573476ff72b0ae3dd202c6e38a",
+      "provider_attempted": "GeminiProvider",
+      "provider_used": "gemini-2.5-flash",
+      "fallback_used": false,
+      "cache_hit": false,
+      "started_at": "2026-09-08T15:40:26.195Z",
+      "completed_at": "2026-09-08T15:40:58.391Z",
+      "result": {
+        "predicted_make": "Porsche",
+        "predicted_model": "911 GT3 RS",
+        "predicted_generation": "992",
+        "predicted_variant": "GT3",
+        "confidence_score": 0.384,
+        "status": "abstained",
+        "specificity_level": "variant",
+        "quality_score": 0.9,
+        "latencies": {
+          "total_ms": 32156.91,
+          "inference_ms": 32041
+        },
+        "contradictions": [
+          "Taillight design is different (992 has a full-width light bar)",
+          "Rear bumper and exhaust surround design differs",
+          "Rear wing design is different (991.1 has a more traditional fixed wing, not swan-neck)",
+          "Taillight design is slightly different"
+        ],
+        "evidence": [
+          "Fixed swan-neck rear wing",
+          "Central dual exhaust tips",
+          "GT3 badging"
+        ]
+      },
+      "error": null
+    },
+    "REAL_008": {
+      "test_id": "REAL_008",
+      "original_filename": "WhatsApp Image 2026-09-08 at 06.51.35.jpeg",
+      "status": "completed",
+      "attempt_count": 0,
+      "scan_id": "scan_1788833877087_9565",
+      "request_id": "trc_mts1i5b3_lbqje8x",
+      "image_sha256": "635c9adc4dc650cb92dd9eb2730fa08b88969197edcd0897db38109bb0d49cb3",
+      "provider_attempted": "GeminiProvider",
+      "provider_used": "gemini-2.5-flash",
+      "fallback_used": false,
+      "cache_hit": false,
+      "started_at": null,
+      "completed_at": "2026-09-08T03:34:44.548Z",
+      "result": {
+        "predicted_make": "Aston Martin",
+        "predicted_model": "DBS",
+        "predicted_generation": "Gen 1 (2007-2012)",
+        "confidence_score": 0.316,
+        "status": "abstained",
+        "specificity_level": "make",
+        "quality_score": 0.9,
+        "latencies": {
+          "total_ms": 18678.2,
+          "inference_ms": 18506
+        },
+        "contradictions": [
+          "The DBS has more aggressive front bumper styling and distinct hood vents compared to the DB9.",
+          "The headlight design, while similar, has subtle differences in the DBS."
+        ],
+        "evidence": [
+          "Signature Aston Martin grille shape.",
+          "Dual projector headlight design.",
+          "Hood vents."
+        ]
+      },
+      "error": null
+    },
+    "REAL_009": {
+      "test_id": "REAL_009",
+      "original_filename": "WhatsApp Image 2026-09-08 at 06.56.54.jpeg",
+      "status": "completed",
+      "attempt_count": 0,
+      "scan_id": "scan_1788833914731_3057",
+      "request_id": "trc_mts1iycr_bfysfy4",
+      "image_sha256": "ca753e351565391922cc34647191597c7174e4e30214096d40ef9df619d95fdd",
+      "provider_attempted": "GeminiProvider",
+      "provider_used": "gemini-2.5-flash",
+      "fallback_used": false,
+      "cache_hit": false,
+      "started_at": null,
+      "completed_at": "2026-09-08T03:34:44.551Z",
+      "result": {
+        "predicted_make": "McLaren",
+        "predicted_model": "650S",
+        "predicted_generation": "P11",
+        "predicted_variant": "Spider",
+        "confidence_score": 0.323,
+        "status": "abstained",
+        "specificity_level": "variant",
+        "quality_score": 0.9,
+        "latencies": {
+          "total_ms": 14107.38,
+          "inference_ms": 13830
+        },
+        "contradictions": [
+          "Headlight design is distinctly different from the 12C's more conventional shape.",
+          "Front bumper and intake design are more aggressive than the 12C.",
+          "Headlight design is completely different, 720S has 'eye-socket' headlights.",
+          "Front bumper and hood design do not match the 720S."
+        ],
+        "evidence": [
+          "Signature McLaren 'tick' headlights",
+          "Large side air intakes for engine cooling",
+          "Carbon fiber hood and roof",
+          "Bright orange paint finish"
+        ]
+      },
+      "error": null
+    },
+    "REAL_010": {
+      "test_id": "REAL_010",
+      "original_filename": "WhatsApp Image 2026-09-08 at 06.56.55 (1).jpeg",
+      "status": "completed",
+      "attempt_count": 1,
+      "scan_id": "scan_1788882062657_1839",
+      "request_id": "trc_mtsu6xj5_uff6819",
+      "image_sha256": "80195d23f85b6f2045b56076193ff2d89081787d99c77f9495793d50a926fc9f",
+      "provider_attempted": "GeminiProvider",
+      "provider_used": "gemini-2.5-flash",
+      "fallback_used": false,
+      "cache_hit": false,
+      "started_at": "2026-09-08T15:41:02.495Z",
+      "completed_at": "2026-09-08T15:41:19.274Z",
+      "result": {
+        "predicted_make": "Maserati",
+        "predicted_model": "GranTurismo",
+        "predicted_generation": "M145",
+        "confidence_score": 0.415,
+        "status": "abstained",
+        "specificity_level": "generation",
+        "quality_score": 0.9,
+        "latencies": {
+          "total_ms": 16649.01,
+          "inference_ms": 16544
+        },
+        "contradictions": [
+          "The roofline appears to be a fixed coupe roof, not a convertible top, though not fully clear."
+        ],
+        "evidence": [
+          "Prominent Maserati trident emblem on the grille.",
+          "Large, distinctive oval grille shape.",
+          "Red leather interior visible through the windshield."
+        ]
+      },
+      "error": null
+    },
+    "REAL_011": {
+      "test_id": "REAL_011",
+      "original_filename": "WhatsApp Image 2026-09-08 at 06.56.55.jpeg",
+      "status": "completed",
+      "attempt_count": 1,
+      "scan_id": "scan_1788882083291_4156",
+      "request_id": "trc_mtsu7dgb_ye8i3qo",
+      "image_sha256": "09567a857c30e24f22f11d872cdacf3cc47355dae7b8116e399b49e954064072",
+      "provider_attempted": "GeminiProvider",
+      "provider_used": "gemini-2.5-flash",
+      "fallback_used": false,
+      "cache_hit": false,
+      "started_at": "2026-09-08T15:41:23.286Z",
+      "completed_at": "2026-09-08T15:41:37.084Z",
+      "result": {
+        "predicted_make": "Nissan",
+        "predicted_model": "Skyline GT-R",
+        "predicted_generation": "R34",
+        "predicted_variant": "GT-R",
+        "confidence_score": 0.656,
+        "status": "completed",
+        "specificity_level": "variant",
+        "quality_score": 0.9,
+        "latencies": {
+          "total_ms": 13796.39,
+          "inference_ms": 13759
+        },
+        "contradictions": [],
+        "evidence": [
+          "Iconic front fascia design with the distinct headlight and grille combination.",
+          "Wide fender flares characteristic of the GT-R model.",
+          "Aftermarket black wheels."
+        ]
+      },
+      "error": null
+    },
+    "REAL_012": {
+      "test_id": "REAL_012",
+      "original_filename": "WhatsApp Image 2026-09-08 at 06.56.56 (1).jpeg",
+      "status": "completed",
+      "attempt_count": 1,
+      "scan_id": "scan_1788882101172_5352",
+      "request_id": "trc_mtsu7r90_fh4jghx",
+      "image_sha256": "c344b0f8d430c900d7d8f306dfd8393960266522ea3fa862a341f8b307a1a012",
+      "provider_attempted": "GeminiProvider",
+      "provider_used": "gemini-2.5-flash",
+      "fallback_used": false,
+      "cache_hit": false,
+      "started_at": "2026-09-08T15:41:41.141Z",
+      "completed_at": "2026-09-08T15:41:54.414Z",
+      "result": {
+        "predicted_make": "Mercedes-Benz",
+        "predicted_model": "S-Class",
+        "predicted_generation": "W223",
+        "confidence_score": 0.41,
+        "status": "uncertain",
+        "specificity_level": "generation",
+        "quality_score": 0.9,
+        "latencies": {
+          "total_ms": 13259.76,
+          "inference_ms": 13112
+        },
+        "contradictions": [
+          "The prominent vertical-slat grille and hood emblem are specific to the Maybach variant, not the standard S-Class."
+        ],
+        "evidence": [
+          "Prominent Maybach grille with vertical chrome slats.",
+          "Maybach emblem on the hood.",
+          "Sleek LED headlight design."
+        ]
+      },
+      "error": null
+    },
+    "REAL_013": {
+      "test_id": "REAL_013",
+      "original_filename": "WhatsApp Image 2026-09-08 at 06.56.56 (2).jpeg",
+      "status": "completed",
+      "attempt_count": 0,
+      "scan_id": "scan_1788833861304_1730",
+      "request_id": "trc_mts1ht4o_9vgitqu",
+      "image_sha256": "adc13e2c495a28b635ef59d558ec51cdc3336ea8a3b8461d9f33a71b89674e61",
+      "provider_attempted": "GeminiProvider",
+      "provider_used": "gemini-2.5-flash",
+      "fallback_used": false,
+      "cache_hit": false,
+      "started_at": null,
+      "completed_at": "2026-09-08T03:34:44.547Z",
+      "result": {
+        "predicted_make": "Lamborghini",
+        "predicted_model": "Huracán STO",
+        "predicted_generation": "Huracán",
+        "confidence_score": 0.448,
+        "status": "abstained",
+        "specificity_level": "generation",
+        "quality_score": 0.9,
+        "latencies": {
+          "total_ms": 13863.78,
+          "inference_ms": 13597
+        },
+        "contradictions": [
+          "The front bumper and splitter design in the image appears to be from the pre-facelift Huracán (LP 610-4/LP 580-2) rather than the more aggressive and redesigned Evo front fascia."
+        ],
+        "evidence": [
+          "Pink/magenta exterior paint color.",
+          "Yellow tinted headlight lenses.",
+          "Black soft top (suggesting Spyder variant).",
+          "Lamborghini shield emblem on the front."
+        ]
+      },
+      "error": null
+    },
+    "REAL_014": {
+      "test_id": "REAL_014",
+      "original_filename": "WhatsApp Image 2026-09-08 at 06.56.56.jpeg",
+      "status": "completed",
+      "attempt_count": 1,
+      "scan_id": "scan_1788882118471_7987",
+      "request_id": "trc_mtsu84lj_mxo4sl9",
+      "image_sha256": "ba44d776aa90f0f6447e19a593f15c29047d214d54e727ac0bef5e1883a70faa",
+      "provider_attempted": "GeminiProvider",
+      "provider_used": "gemini-2.5-flash",
+      "fallback_used": false,
+      "cache_hit": false,
+      "started_at": "2026-09-08T15:41:58.429Z",
+      "completed_at": "2026-09-08T15:42:14.135Z",
+      "result": {
+        "predicted_make": "Lamborghini",
+        "predicted_model": "Huracán STO",
+        "predicted_generation": "Huracán",
+        "confidence_score": 0.35,
+        "status": "abstained",
+        "specificity_level": "make",
+        "quality_score": 0.9,
+        "latencies": {
+          "total_ms": 15665.7,
+          "inference_ms": 15611
+        },
+        "contradictions": [
+          "Severe manufacturer mismatch: Observed Toyota architecture/emblem contradicts Lamborghini Huracán LP 610-4",
+          "Front bumper and headlight design do not match the Evo's more refined and integrated aero elements.",
+          "Severe manufacturer mismatch: Observed Toyota architecture/emblem contradicts Lamborghini Huracán Evo",
+          "Headlight and front bumper design are distinctly different from the Gallardo, which has a softer, less angular front fascia.",
+          "Severe manufacturer mismatch: Observed Toyota architecture/emblem contradicts Lamborghini Gallardo"
+        ],
+        "evidence": [
+          "Red paint with white racing stripes on the sports car.",
+          "Angular, aggressive front fascia of the sports car.",
+          "Classic Hong Kong taxi livery (red body, silver roof, 'TAXI' sign).",
+          "Rectangular, utilitarian design of the taxi."
+        ]
+      },
+      "error": null
+    },
+    "REAL_015": {
+      "test_id": "REAL_015",
+      "original_filename": "WhatsApp Image 2026-09-08 at 06.56.57 (1).jpeg",
+      "status": "completed",
+      "attempt_count": 1,
+      "scan_id": "scan_1788882138240_3410",
+      "request_id": "trc_mtsu8juo_j1d1dt1",
+      "image_sha256": "96d1a33e364a3afc62231f8e3e665737ffa6a9bee0a0bd0de671b6933e544ca8",
+      "provider_attempted": "GeminiProvider",
+      "provider_used": "gemini-2.5-flash",
+      "fallback_used": false,
+      "cache_hit": false,
+      "started_at": "2026-09-08T15:42:18.158Z",
+      "completed_at": "2026-09-08T15:42:30.922Z",
+      "result": {
+        "predicted_make": "McLaren",
+        "predicted_model": "650S",
+        "predicted_generation": "P11",
+        "confidence_score": 0.319,
+        "status": "abstained",
+        "specificity_level": "generation",
+        "quality_score": 0.9,
+        "latencies": {
+          "total_ms": 12715.17,
+          "inference_ms": 12673
+        },
+        "contradictions": [
+          "Headlight design is distinctly different (12C has more conventional rectangular headlights, not the 'speedmark' shape).",
+          "Front bumper and intake design are less aggressive than observed.",
+          "Headlight design is completely different (720S has 'eye-socket' headlights with integrated air intakes).",
+          "Front bumper and hood lines are distinct from the observed vehicle."
+        ],
+        "evidence": [
+          "Signature McLaren 'speedmark' headlight design.",
+          "Large, sculpted side air intakes.",
+          "Carbon fiber front splitter and lower body elements.",
+          "Bright orange exterior paint."
+        ]
+      },
+      "error": null
+    },
+    "REAL_016": {
+      "test_id": "REAL_016",
+      "original_filename": "WhatsApp Image 2026-09-08 at 06.56.57 (2).jpeg",
+      "status": "completed",
+      "attempt_count": 1,
+      "scan_id": "scan_1788882155064_1234",
+      "request_id": "trc_mtsu8wu0_qhykt22",
+      "image_sha256": "0f9bfd921291d76610a4421676b06f6b764a486faa4defc41e2c13d82117350d",
+      "provider_attempted": "GeminiProvider",
+      "provider_used": "gemini-2.5-flash",
+      "fallback_used": false,
+      "cache_hit": false,
+      "started_at": "2026-09-08T15:42:34.978Z",
+      "completed_at": "2026-09-08T15:42:48.686Z",
+      "result": {
+        "predicted_make": "Ferrari",
+        "predicted_model": "458 Italia",
+        "predicted_generation": "F142",
+        "predicted_variant": "Spider",
+        "confidence_score": 0.496,
+        "status": "needs_review",
+        "specificity_level": "variant",
+        "quality_score": 0.9,
+        "latencies": {
+          "total_ms": 13629.79,
+          "inference_ms": 13495
+        },
+        "contradictions": [],
+        "evidence": [
+          "Retractable hardtop visible in the stowed position.",
+          "Prominent side air intakes behind the doors (partially visible)."
+        ]
+      },
+      "error": null
+    },
+    "REAL_017": {
+      "test_id": "REAL_017",
+      "original_filename": "WhatsApp Image 2026-09-08 at 06.56.57.jpeg",
+      "status": "completed",
+      "attempt_count": 0,
+      "scan_id": "scan_1788833897942_3241",
+      "request_id": "trc_mts1ilee_4f3tz9d",
+      "image_sha256": "3d280b42a6f70c435b5d71da879c7b44e39cc0bed340801fe3c1c305f9505fb5",
+      "provider_attempted": "GeminiProvider",
+      "provider_used": "gemini-2.5-flash",
+      "fallback_used": false,
+      "cache_hit": false,
+      "started_at": null,
+      "completed_at": "2026-09-08T03:34:44.549Z",
+      "result": {
+        "predicted_make": "Lamborghini",
+        "predicted_model": "Huracán STO",
+        "predicted_generation": "Huracán",
+        "predicted_variant": "Evo Spyder",
+        "confidence_score": 0.349,
+        "status": "abstained",
+        "specificity_level": "make",
+        "quality_score": 0.9,
+        "latencies": {
+          "total_ms": 14850.16,
+          "inference_ms": 14398
+        },
+        "contradictions": [
+          "Severe manufacturer mismatch: Observed Ferrari architecture/emblem contradicts Lamborghini Huracán Evo Spyder",
+          "Performante Spyder typically features a fixed rear wing and different exhaust tip placement (higher up), which are not present here. The diffuser design is also distinct.",
+          "Severe manufacturer mismatch: Observed Ferrari architecture/emblem contradicts Lamborghini Huracán Performante Spyder",
+          "The rear bumper and diffuser design, particularly the integration of the exhaust tips and the more aggressive styling, are more consistent with the later Evo model than the original LP610-4.",
+          "Severe manufacturer mismatch: Observed Ferrari architecture/emblem contradicts Lamborghini Huracán LP610-4 Spyder"
+        ],
+        "evidence": [
+          "Engine cover with prominent longitudinal strakes/louvers.",
+          "Aggressive rear bumper design with large vents and integrated diffuser.",
+          "Distinctive hexagonal shape around the license plate area."
+        ]
+      },
+      "error": null
+    },
+    "REAL_018": {
+      "test_id": "REAL_018",
+      "original_filename": "WhatsApp Image 2026-09-08 at 06.56.58 (1).jpeg",
+      "status": "completed",
+      "attempt_count": 1,
+      "scan_id": "scan_1788882172699_1409",
+      "request_id": "trc_mtsu9afv_kwrc6x0",
+      "image_sha256": "0cf066a605fddb14ae82b7027df37f0948be0993d853beaf71c1ea2368f39562",
+      "provider_attempted": "GeminiProvider",
+      "provider_used": "gemini-2.5-flash",
+      "fallback_used": false,
+      "cache_hit": false,
+      "started_at": "2026-09-08T15:42:52.697Z",
+      "completed_at": "2026-09-08T15:43:04.533Z",
+      "result": {
+        "predicted_make": "Toyota",
+        "predicted_model": "GR Supra",
+        "predicted_generation": "A90 (DB)",
+        "predicted_variant": "3.0 Premium 6MT",
+        "confidence_score": 0.531,
+        "status": "uncertain",
+        "specificity_level": "generation",
+        "quality_score": 0.9,
+        "latencies": {
+          "total_ms": 11834.16,
+          "inference_ms": 11780
+        },
+        "contradictions": [
+          "The front fascia, grille, and headlight design are distinctly Toyota Supra (A90), not BMW Z4 (G29). The Z4 has a different kidney grille and headlight shape.",
+          "Severe manufacturer mismatch: Observed Toyota architecture/emblem contradicts BMW Z4 (G29)"
+        ],
+        "evidence": [
+          "Prominent 'double-bubble' roof design.",
+          "Aggressive front fascia with large air intakes.",
+          "Distinctive headlight design with integrated DRLs."
+        ]
+      },
+      "error": null
+    },
+    "REAL_019": {
+      "test_id": "REAL_019",
+      "original_filename": "WhatsApp Image 2026-09-08 at 06.56.58 (2).jpeg",
+      "status": "completed",
+      "attempt_count": 1,
+      "scan_id": "scan_1788882188541_1708",
+      "request_id": "trc_mtsu9mnx_xlyygrx",
+      "image_sha256": "c0b9bb6ff4efb99bd017a067628c26df583fe6e7f51f47f42ded00d927de698b",
+      "provider_attempted": "GeminiProvider",
+      "provider_used": "gemini-2.5-flash",
+      "fallback_used": false,
+      "cache_hit": false,
+      "started_at": "2026-09-08T15:43:08.538Z",
+      "completed_at": "2026-09-08T15:43:25.499Z",
+      "result": {
+        "predicted_make": "Multiple (Zeekr, McLaren, Mercedes-Benz)",
+        "predicted_model": "Multiple (001, 570S, B-Class)",
+        "predicted_generation": "Multiple (Zeekr 001: First Gen, McLaren 570S: P13, Mercedes-Benz B-Class: W246)",
+        "confidence_score": 0.392,
+        "status": "uncertain",
+        "specificity_level": "generation",
+        "quality_score": 0.9,
+        "latencies": {
+          "total_ms": 16958.9,
+          "inference_ms": 16859
+        },
+        "contradictions": [
+          "Severe manufacturer mismatch: Observed Mercedes-Benz architecture/emblem contradicts McLaren 570S Spider"
+        ],
+        "evidence": [
+          "McLaren's dihedral doors (closed)",
+          "Zeekr's distinctive split headlight design with upper DRLs",
+          "Mercedes-Benz B-Class's tall, compact MPV-like profile"
+        ]
+      },
+      "error": null
+    },
+    "REAL_020": {
+      "test_id": "REAL_020",
+      "original_filename": "WhatsApp Image 2026-09-08 at 06.56.58.jpeg",
+      "status": "completed",
+      "attempt_count": 1,
+      "scan_id": "scan_1788882209529_4052",
+      "request_id": "trc_mtsua2ux_ybedbmo",
+      "image_sha256": "cc5771d9d2ae163338c0e40dfbb54c48f87ae12b20058bad081d5c7db5301850",
+      "provider_attempted": "GeminiProvider",
+      "provider_used": "gemini-2.5-flash",
+      "fallback_used": false,
+      "cache_hit": false,
+      "started_at": "2026-09-08T15:43:29.516Z",
+      "completed_at": "2026-09-08T15:43:39.962Z",
+      "result": {
+        "predicted_make": "Porsche",
+        "predicted_model": "911 GT3 RS",
+        "predicted_generation": "992",
+        "predicted_variant": "Weissach Package",
+        "confidence_score": 0.432,
+        "status": "uncertain",
+        "specificity_level": "generation",
+        "quality_score": 0.9,
+        "latencies": {
+          "total_ms": 10435.05,
+          "inference_ms": 10383
+        },
+        "contradictions": [
+          "Headlight design (997 has distinct, rounder headlights, not 'fried egg')",
+          "Front bumper and intake design differs significantly from 996"
+        ],
+        "evidence": [
+          "Integrated 'fried egg' headlights",
+          "Soft-top convertible roof is down",
+          "Smooth, rounded body lines characteristic of late 996 generation"
+        ]
+      },
+      "error": null
+    },
+    "REAL_021": {
+      "test_id": "REAL_021",
+      "original_filename": "WhatsApp Image 2026-09-08 at 06.56.59.jpeg",
+      "status": "completed",
+      "attempt_count": 1,
+      "scan_id": "scan_1788882224002_4633",
+      "request_id": "trc_mtsuae0y_rfn2va8",
+      "image_sha256": "faca0c2a8d974c9ab9ccf2cc1dfcb6f047b26fd9a79f87e18352ff711322c53c",
+      "provider_attempted": "GeminiProvider",
+      "provider_used": "gemini-2.5-flash",
+      "fallback_used": false,
+      "cache_hit": false,
+      "started_at": "2026-09-08T15:43:43.980Z",
+      "completed_at": "2026-09-08T15:44:01.630Z",
+      "result": {
+        "predicted_make": "Porsche",
+        "predicted_model": "911 GT3 RS",
+        "predicted_generation": "992",
+        "predicted_variant": "Weissach Package",
+        "confidence_score": 0.501,
+        "status": "needs_review",
+        "specificity_level": "generation",
+        "quality_score": 0.9,
+        "latencies": {
+          "total_ms": 17628.19,
+          "inference_ms": 17502
+        },
+        "contradictions": [],
+        "evidence": [
+          "Iconic round Porsche headlights with integrated turn signals.",
+          "Front bumper design with three distinct air intakes.",
+          "Porsche crest on the hood."
+        ]
+      },
+      "error": null
+    }
+  }
+}

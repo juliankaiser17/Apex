@@ -1,0 +1,133 @@
+@import "tailwindcss";
+
+@layer base {
+  * {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  html, body {
+    background-color: #050505;
+    color: #F0EBE3;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-x pan-y;
+  }
+
+  input, button, select, textarea {
+    font-family: inherit;
+  }
+}
+
+/* ═══ LEAFLET MAP OVERRIDES & 100% KEYLESS DARK MATTER TILES ═══ */
+.leaflet-container,
+.leaflet-pane,
+.leaflet-tile-pane,
+.leaflet-layer,
+.leaflet-map-pane {
+  background: #080808 !important;
+  background-color: #080808 !important;
+}
+
+.leaflet-container {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 550px !important;
+}
+
+.leaflet-tile {
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* High-Contrast Cyber Dark Roadmap Tile Filter */
+.dark-tiles .leaflet-tile {
+  filter: invert(100%) hue-rotate(180deg) brightness(85%) contrast(125%) grayscale(35%) !important;
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* ═══ SMOOTH 60FPS MOBILE SCROLLING UTILITIES ═══ */
+.scroll-smooth-mobile {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  will-change: scroll-position;
+  transform: translateZ(0);
+}
+
+/* ═══ SCROLLBAR HIDE ═══ */
+.no-scrollbar::-webkit-scrollbar, .scrollbar-hide::-webkit-scrollbar { display: none; }
+.no-scrollbar, .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* ═══ SAFE AREA INSETS & DYNAMIC ACCENT THEME SYSTEM ═══ */
+:root {
+  --sat: max(28px, env(safe-area-inset-top, 28px));
+  --sab: max(16px, env(safe-area-inset-bottom, 16px));
+  
+  /* Dynamic Accent Theme System (Black Primary + Dynamic Accent) */
+  --accent-color: #E50914;
+  --accent-hover: #c70811;
+  --accent-rgb: 229, 9, 20;
+  --accent-glow: rgba(229, 9, 20, 0.4);
+  --accent-glow-strong: rgba(229, 9, 20, 0.75);
+  --accent-subtle: rgba(229, 9, 20, 0.12);
+  --accent-border: rgba(229, 9, 20, 0.28);
+}
+
+.pt-safe {
+  padding-top: var(--sat);
+}
+
+.pb-safe {
+  padding-bottom: var(--sab);
+}
+
+/* ═══ ACCENT THEME UTILITY CLASSES ═══ */
+.bg-accent { background-color: var(--accent-color) !important; }
+.bg-accent-hover:hover { background-color: var(--accent-hover) !important; }
+.text-accent { color: var(--accent-color) !important; }
+.border-accent { border-color: var(--accent-color) !important; }
+.shadow-accent { box-shadow: 0 0 20px var(--accent-glow) !important; }
+.shadow-accent-strong { box-shadow: 0 0 30px var(--accent-glow-strong) !important; }
+.bg-accent-subtle { background-color: var(--accent-subtle) !important; }
+.border-accent-subtle { border-color: var(--accent-border) !important; }
+
+/* ═══ SKELETON & SHIMMER SYSTEM (GPU COMPOSITED) ═══ */
+@keyframes apexShimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.apex-skeleton {
+  position: relative;
+  overflow: hidden;
+  background-color: rgba(255, 255, 255, 0.06);
+  border-radius: 0.5rem;
+}
+
+.apex-skeleton::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  transform: translateX(-100%);
+  background-image: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0,
+    rgba(255, 255, 255, 0.05) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  animation: apexShimmer 1.6s infinite;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .apex-skeleton::after {
+    animation: none;
+  }
+}
+

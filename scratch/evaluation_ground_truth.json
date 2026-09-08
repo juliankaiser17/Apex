@@ -1,0 +1,233 @@
+[
+  {
+    "test_id": "REAL_001",
+    "original_filename": "WhatsApp Image 2026-09-08 at 06.51.31.jpeg",
+    "actual_make": "Porsche",
+    "actual_model_family": "Macan",
+    "actual_generation": "95B",
+    "actual_variant": "NOT_OBSERVABLE",
+    "body_style": "Compact Luxury SUV",
+    "category": "performance_suv",
+    "notable_features": "Miami/Riviera Blue exterior, black side blades, Peninsula Hotel backdrop, Rolls-Royce Phantom behind"
+  },
+  {
+    "test_id": "REAL_002",
+    "original_filename": "WhatsApp Image 2026-09-08 at 06.51.32 (1).jpeg",
+    "actual_make": "BMW",
+    "actual_model_family": "3 Series",
+    "actual_generation": "E90",
+    "actual_variant": "NOT_OBSERVABLE",
+    "body_style": "Sedan",
+    "category": "modified_sports_sedan",
+    "notable_features": "Matte black wrap, aftermarket M3-style power bulge hood, bronze wheels, rear wing, street driving"
+  },
+  {
+    "test_id": "REAL_003",
+    "original_filename": "WhatsApp Image 2026-09-08 at 06.51.32.jpeg",
+    "actual_make": "Bentley",
+    "actual_model_family": "Continental GT",
+    "actual_generation": "2nd Generation (3W)",
+    "actual_variant": "NOT_OBSERVABLE",
+    "body_style": "Coupe",
+    "category": "grand_tourer",
+    "notable_features": "Black exterior, plate CM 3, rear 3/4 view, Volvo XC40 and KMB bus in background"
+  },
+  {
+    "test_id": "REAL_004",
+    "original_filename": "WhatsApp Image 2026-09-08 at 06.51.33 (1).jpeg",
+    "actual_make": "Rolls-Royce",
+    "actual_model_family": "Phantom",
+    "actual_generation": "Phantom VIII",
+    "actual_variant": "Phantom VIII EWB",
+    "body_style": "Ultra-Luxury Sedan",
+    "category": "ultra_luxury",
+    "notable_features": "Peninsula Green exterior, Spirit of Ecstasy, integrated Pantheon grille, plate ZY 3569, fountain backdrop"
+  },
+  {
+    "test_id": "REAL_005",
+    "original_filename": "WhatsApp Image 2026-09-08 at 06.51.33.jpeg",
+    "actual_make": "Ferrari",
+    "actual_model_family": "328",
+    "actual_generation": "328 (or 308/328 family)",
+    "actual_variant": "328 GTS",
+    "body_style": "Targa Coupe",
+    "category": "classic_sports_car",
+    "notable_features": "Rosso Corsa red exterior, pop-up lights, targa top, star five-spoke wheels, parking bay marked GTS 328"
+  },
+  {
+    "test_id": "REAL_006",
+    "original_filename": "WhatsApp Image 2026-09-08 at 06.51.34 (1).jpeg",
+    "actual_make": "Porsche",
+    "actual_model_family": "718 Boxster",
+    "actual_generation": "982",
+    "actual_variant": "718 Boxster",
+    "body_style": "Convertible / Roadster",
+    "category": "sports_car",
+    "notable_features": "Speed Yellow exterior, black soft top, plate YK 3268, parking garage bay 1541"
+  },
+  {
+    "test_id": "REAL_007",
+    "original_filename": "WhatsApp Image 2026-09-08 at 06.51.34.jpeg",
+    "actual_make": "Porsche",
+    "actual_model_family": "911",
+    "actual_generation": "991 (991.2)",
+    "actual_variant": "911 GT3",
+    "body_style": "Coupe",
+    "category": "track_sports_car",
+    "notable_features": "Carrara White, large rear wing, central dual exhaust, PORSCHE GT3 badge, plate BB 810, Victoria Harbour background"
+  },
+  {
+    "test_id": "REAL_008",
+    "original_filename": "WhatsApp Image 2026-09-08 at 06.51.35.jpeg",
+    "actual_make": "Aston Martin",
+    "actual_model_family": "DBS",
+    "actual_generation": "DBS (2007-2012)",
+    "actual_variant": "DBS V12 Coupe",
+    "body_style": "Coupe",
+    "category": "grand_tourer",
+    "notable_features": "Dark grey metallic, dual hood vents with carbon strakes, plate 25 DEC, indoor parking bay 38A"
+  },
+  {
+    "test_id": "REAL_009",
+    "original_filename": "WhatsApp Image 2026-09-08 at 06.56.54.jpeg",
+    "actual_make": "McLaren",
+    "actual_model_family": "675LT",
+    "actual_generation": "Super Series (P11)",
+    "actual_variant": "675LT Coupe / Spider",
+    "body_style": "Coupe / Spider",
+    "category": "supercar",
+    "notable_features": "McLaren Orange, carbon fiber front splitter, front hood vent, plate PP 844, pink Tesla Model X behind"
+  },
+  {
+    "test_id": "REAL_010",
+    "original_filename": "WhatsApp Image 2026-09-08 at 06.56.55 (1).jpeg",
+    "actual_make": "Maserati",
+    "actual_model_family": "GranTurismo",
+    "actual_generation": "M145",
+    "actual_variant": "GranTurismo S",
+    "body_style": "Coupe",
+    "category": "grand_tourer",
+    "notable_features": "Nero black exterior, trident oval grille, plate MONO LAB, red interior, night street outside SOYO"
+  },
+  {
+    "test_id": "REAL_011",
+    "original_filename": "WhatsApp Image 2026-09-08 at 06.56.55.jpeg",
+    "actual_make": "Nissan",
+    "actual_model_family": "Skyline",
+    "actual_generation": "R34",
+    "actual_variant": "Skyline 4-Door Sedan (ER34)",
+    "body_style": "Sedan",
+    "category": "jdm_sports_sedan",
+    "notable_features": "Bayside Blue, 4 doors, GT badge, front intercooler, black 5-spoke wheels, plate YH 4741"
+  },
+  {
+    "test_id": "REAL_012",
+    "original_filename": "WhatsApp Image 2026-09-08 at 06.56.56 (1).jpeg",
+    "actual_make": "Mercedes-Benz",
+    "actual_model_family": "S-Class",
+    "actual_generation": "W223",
+    "actual_variant": "Mercedes-Maybach S580 / S680",
+    "body_style": "Ultra-Luxury Sedan",
+    "category": "ultra_luxury",
+    "notable_features": "Two-tone / dark metallic, vertical Maybach chrome grille, plate FJ 168, night street scene with oncoming headlights"
+  },
+  {
+    "test_id": "REAL_013",
+    "original_filename": "WhatsApp Image 2026-09-08 at 06.56.56 (2).jpeg",
+    "actual_make": "Lamborghini",
+    "actual_model_family": "Huracán",
+    "actual_generation": "Huracán",
+    "actual_variant": "Huracán EVO",
+    "body_style": "Coupe",
+    "category": "supercar",
+    "notable_features": "Custom pink wrap, yellow tinted headlights, EVO front bumper winglets, hotel porte-cochere with Escalade behind"
+  },
+  {
+    "test_id": "REAL_014",
+    "original_filename": "WhatsApp Image 2026-09-08 at 06.56.56.jpeg",
+    "actual_make": "Toyota",
+    "actual_model_family": "Crown Comfort",
+    "actual_generation": "XS10",
+    "actual_variant": "Crown Comfort Hong Kong Taxi",
+    "body_style": "Sedan / Taxi",
+    "category": "commercial_taxi",
+    "notable_features": "Red/silver Hong Kong Urban Taxi (plate UP 934) in foreground right; Red Lamborghini Huracán in middle left"
+  },
+  {
+    "test_id": "REAL_015",
+    "original_filename": "WhatsApp Image 2026-09-08 at 06.56.57 (1).jpeg",
+    "actual_make": "McLaren",
+    "actual_model_family": "675LT",
+    "actual_generation": "Super Series (P11)",
+    "actual_variant": "675LT Coupe / Spider",
+    "body_style": "Coupe / Spider",
+    "category": "supercar",
+    "notable_features": "McLaren Orange, direct symmetrical front view, plate PP 844, carbon fiber front aero, street parking"
+  },
+  {
+    "test_id": "REAL_016",
+    "original_filename": "WhatsApp Image 2026-09-08 at 06.56.57 (2).jpeg",
+    "actual_make": "Ferrari",
+    "actual_model_family": "458",
+    "actual_generation": "458",
+    "actual_variant": "458 Spider",
+    "body_style": "Convertible / Spider",
+    "category": "supercar",
+    "notable_features": "Rosso Corsa red, open convertible top, plate DS 102, vertical LED headlights, street crossing at Victoria Dockside"
+  },
+  {
+    "test_id": "REAL_017",
+    "original_filename": "WhatsApp Image 2026-09-08 at 06.56.57.jpeg",
+    "actual_make": "Lamborghini",
+    "actual_model_family": "Huracán",
+    "actual_generation": "Huracán",
+    "actual_variant": "Huracán Spyder",
+    "body_style": "Convertible / Spyder",
+    "category": "supercar",
+    "notable_features": "Blu Cepheus / bright blue, black soft top, elevated rear 3/4 perspective, plate B1NGO 8, urban street"
+  },
+  {
+    "test_id": "REAL_018",
+    "original_filename": "WhatsApp Image 2026-09-08 at 06.56.58 (1).jpeg",
+    "actual_make": "Toyota",
+    "actual_model_family": "GR Supra",
+    "actual_generation": "A90 (J29/DB)",
+    "actual_variant": "GR Supra",
+    "body_style": "Sports Coupe",
+    "category": "sports_car",
+    "notable_features": "White exterior, plate R26J, double-bubble roof, underground garage at K11 Musea / Rosewood"
+  },
+  {
+    "test_id": "REAL_019",
+    "original_filename": "WhatsApp Image 2026-09-08 at 06.56.58 (2).jpeg",
+    "actual_make": "Kia",
+    "actual_model_family": "EV9",
+    "actual_generation": "EV9 (MV)",
+    "actual_variant": "EV9 AWD / GT-Line",
+    "body_style": "Electric Full-Size SUV",
+    "category": "electric_suv",
+    "notable_features": "Silver/grey EV9 foreground SUV with starmap DRLs; dark green McLaren 650S/675LT (LN 185) behind in heavy traffic"
+  },
+  {
+    "test_id": "REAL_020",
+    "original_filename": "WhatsApp Image 2026-09-08 at 06.56.58.jpeg",
+    "actual_make": "Porsche",
+    "actual_model_family": "911",
+    "actual_generation": "996 (996.1)",
+    "actual_variant": "911 Carrera Cabriolet",
+    "body_style": "Convertible / Cabriolet",
+    "category": "sports_car",
+    "notable_features": "Arctic Silver, fried-egg headlights, Turbo Twist wheels, black soft top, hotel driveway with red taxi behind"
+  },
+  {
+    "test_id": "REAL_021",
+    "original_filename": "WhatsApp Image 2026-09-08 at 06.56.59.jpeg",
+    "actual_make": "Porsche",
+    "actual_model_family": "911",
+    "actual_generation": "997 (997.2)",
+    "actual_variant": "911 Carrera / Carrera S",
+    "body_style": "Coupe",
+    "category": "sports_car",
+    "notable_features": "Seal Grey metallic, dual projector headlights, LED bumper strips, plate NN 511, underground parking B4"
+  }
+]
