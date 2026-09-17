@@ -171,7 +171,7 @@ function getTrustedClientIp(req: VercelRequest): string {
   if (typeof forwarded === 'string' && forwarded.trim()) {
     return forwarded.split(',')[0].trim();
   }
-  return req.socket.remoteAddress || '127.0.0.1';
+  return req.socket?.remoteAddress || (req as any)?.connection?.remoteAddress || '127.0.0.1';
 }
 
 function formatScanResponse(r: any) {

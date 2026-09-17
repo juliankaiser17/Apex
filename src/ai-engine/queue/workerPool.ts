@@ -34,6 +34,7 @@ export class WorkerPool {
     this.intervalId = setInterval(() => {
       this.tick();
     }, 50);
+    (this.intervalId as any)?.unref?.();
   }
 
   public setConcurrency(concurrency: number) {
