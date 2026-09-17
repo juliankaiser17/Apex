@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build:api": "esbuild src/api/analyze.ts --bundle --platform=node --format=esm --packages=external --outfile=api/analyze.js",
+    "build": "tsc -b && vite build && npm run build:api",
     "lint": "oxlint",
     "test": "tsx scripts/test_sha256_verification.ts && tsx scripts/test_cross_scan_independence.ts && tsx scripts/test_cloudflare_provider.ts && tsx src/ai-engine/evaluation/evaluate_accuracy.ts",
     "preview": "vite preview"

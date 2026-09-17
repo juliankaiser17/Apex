@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
-import { apexEngine } from '../src/ai-engine/engine';
+import { apexEngine } from '../ai-engine/engine';
 
 export const config = {
   api: {
@@ -394,7 +394,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         latestStatus = current.status;
         latestQueuePos = current.queuePosition;
 
-        if (current.status === 'completed' || current.status === 'needs_review' || current.status === 'abstained' || current.status === 'rejected' || current.status === 'uncertain') {
+        if (current.status === 'completed' || current.status === 'needs_review' || current.status === 'abstained' || current.status === 'uncertain') {
           finalResult = current.result;
           break;
         }
