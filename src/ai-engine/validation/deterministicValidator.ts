@@ -4,12 +4,14 @@
  * Rejects impossible make/model/generation/year/trim combinations.
  */
 
-import type { ModelIdentificationOutput } from '../types';
+import type { ModelIdentificationOutput, OpenCanonicalIdentity } from '../types';
 import { canonicalVehicleRegistry, type CanonicalVehicleRecord } from '../canonical/canonicalVehicleRegistry';
 
 export interface ValidationReport {
   isValid: boolean;
   canonicalRecord: CanonicalVehicleRecord | null;
+  canonicalIdentity?: OpenCanonicalIdentity;
+  isVerifiedUnregistered?: boolean;
   resolvedMake: string;
   resolvedModel: string;
   resolvedGeneration: string;
@@ -75,13 +77,24 @@ export class DeterministicValidator {
       canonicalRecord = canonicalVehicleRegistry.lookupByTextOrAlias(query);
     }
 
-    // 3. Fallback candidates search (requires model family alignment)
+    // 3. Fallback candidates search (requires strict model family alignment)
     if (!canonicalRecord && output.make && output.model) {
       const matches = canonicalVehicleRegistry.findMatchingCandidates(output.make, output.model, output.generation || '');
+      const normOut = (output.model || '').toLowerCase().replace(/[^a-z0-9]/g, '');
       const modelMatch = matches.find((m) => {
         const normM = (m.model || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-        const normOut = (output.model || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-        return normM.length > 0 && (normM === normOut || normM.includes(normOut) || normOut.includes(normM));
+        if (!normM) return false;
+        // Exact match
+        if (normM === normOut) return true;
+        // If output.model is longer and includes canonical model (e.g. output="911 Carrera", canon="911")
+        if (normOut.includes(normM)) return true;
+        // If canonical model is longer (e.g. canon="911 GT3 RS", output="911"), only match if no specialty track tokens were added
+        if (normM.includes(normOut)) {
+          const extra = normM.replace(normOut, '');
+          const trackTokens = ['gt3', 'gt2', 'gt4', 'rs', 'sto', 'csl', 'svj', 'blackseries', 'nismo', 'turbo'];
+          return !trackTokens.some((t) => extra.includes(t));
+        }
+        return false;
       });
       if (modelMatch) {
         canonicalRecord = modelMatch;
@@ -108,13 +121,60 @@ export class DeterministicValidator {
         warnings.push(`Claimed horsepower (${output.horsepower} HP) differs significantly from canonical baseline (${canonicalRecord.horsepower} HP).`);
       }
 
+      // Determine model name: Do not escalate a base model to a specialty track model
+      let finalResolvedModel = canonicalRecord.model;
+      const normOutModel = (output.model || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+      const normCanonModel = (canonicalRecord.model || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+      if (normOutModel && normCanonModel !== normOutModel) {
+        const extraTokens = normCanonModel.replace(normOutModel, '');
+        const trackKeywords = ['gt3', 'gt2', 'gt4', 'rs', 'sto', 'csl', 'svj', 'blackseries', 'nismo', 'turbo'];
+        const hasTrackKeywordInCanon = trackKeywords.some((kw) => extraTokens.includes(kw));
+        const hasTrackKeywordInOutput = trackKeywords.some(
+          (kw) => normOutModel.includes(kw) || (output.trim && output.trim.toLowerCase().includes(kw))
+        );
+        if (hasTrackKeywordInCanon && !hasTrackKeywordInOutput) {
+          finalResolvedModel = output.model || canonicalRecord.model;
+        }
+      }
+
+      // Determine generation: Preserve upstream generation if provided and distinct
+      let finalResolvedGeneration = canonicalRecord.generation;
+      const outGen = (output.generation || '').trim();
+      if (outGen && outGen.toLowerCase() !== 'unknown' && outGen.toLowerCase() !== 'current') {
+        const normOutGen = outGen.toLowerCase().replace(/[^a-z0-9]/g, '');
+        const normCanonGen = (canonicalRecord.generation || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+        if (!normCanonGen.includes(normOutGen) && !normOutGen.includes(normCanonGen)) {
+          finalResolvedGeneration = outGen;
+        }
+      }
+
+      // Determine trim: NEVER backfill canonical trim if upstream left trim unobserved/null
+      const hasExplicitTrim = Boolean(
+        output.trim &&
+        output.trim.trim().length > 0 &&
+        output.trim.toLowerCase() !== 'null' &&
+        output.trim.toLowerCase() !== 'undefined'
+      );
+      const finalResolvedTrim = hasExplicitTrim ? output.trim! : undefined;
+
+      const registeredIdentity = canonicalVehicleRegistry.resolveCanonicalIdentity({
+        vehicleId: canonicalRecord.vehicleId,
+        make: canonicalRecord.make,
+        model: finalResolvedModel,
+        generation: finalResolvedGeneration,
+        variant: finalResolvedTrim,
+        source: 'registry'
+      });
+
       return {
         isValid: true,
         canonicalRecord,
+        canonicalIdentity: registeredIdentity,
+        isVerifiedUnregistered: false,
         resolvedMake: canonicalRecord.make,
-        resolvedModel: canonicalRecord.model,
-        resolvedGeneration: canonicalRecord.generation,
-        resolvedTrim: output.trim || canonicalRecord.trim,
+        resolvedModel: finalResolvedModel,
+        resolvedGeneration: finalResolvedGeneration,
+        resolvedTrim: finalResolvedTrim,
         resolvedYear: output.yearEstimate || String(canonicalRecord.yearStart),
         resolvedRarity: canonicalRecord.baselineRarity,
         resolvedEngine: canonicalRecord.engine,
@@ -131,11 +191,38 @@ export class DeterministicValidator {
       };
     }
 
-    // 5. If no canonical record exists, validate generic bounds
+    // 5. If no canonical record exists in seed database:
+    // REGISTRY ABSENCE != VEHICLE INVALIDITY.
+    // Preserve valid upstream vision identity as VERIFIED_UNREGISTERED.
     if (output.make && output.model) {
+      const openIdentity = canonicalVehicleRegistry.resolveCanonicalIdentity({
+        vehicleId: output.vehicleId,
+        make: output.make,
+        model: output.model,
+        generation: output.generation,
+        variant: output.trim,
+        source: 'gemini',
+        specs: {
+          horsepower: output.horsepower,
+          torqueNm: output.torqueNm,
+          topSpeedKmH: output.topSpeedKmH,
+          zeroToHundredSec: output.zeroToHundredSec,
+          kerbWeightKg: output.kerbWeightKg,
+          engine: output.engine,
+          productionYears: output.productionYears,
+          originCountry: output.originCountry,
+          bodyStyle: output.bodyStyle,
+          baselineRarity: output.rarity
+        }
+      });
+
+      const isConfidentUnregistered = (output.modelConfidence || 0) >= 0.70;
+
       return {
         isValid: true,
         canonicalRecord: null,
+        canonicalIdentity: openIdentity,
+        isVerifiedUnregistered: true,
         resolvedMake: output.make,
         resolvedModel: output.model,
         resolvedGeneration: output.generation || 'Current',
@@ -151,8 +238,8 @@ export class DeterministicValidator {
         resolvedProductionYears: output.productionYears || '2020–Present',
         resolvedOriginCountry: output.originCountry || 'Global',
         resolvedBodyStyle: output.bodyStyle || 'Coupe',
-        validationWarnings: ['Vehicle not registered in canonical database. Using validated generic values.'],
-        requiresHumanReview: true
+        validationWarnings: ['Vehicle not registered in canonical database. Using validated open canonical identity.'],
+        requiresHumanReview: output.needsReview || !isConfidentUnregistered
       };
     }
 

@@ -7,6 +7,7 @@ import { ApexCollectibleCard } from '../card/ApexCollectibleCard';
 import { PostComposer } from './PostComposer';
 import { sounds } from '../../utils/audio';
 import { useApexStore } from '../../store/useApexStore';
+import { featureFlags } from '../../utils/featureFlags';
 
 interface DiscoveryRevealProps {
   card: CarCard;
@@ -150,6 +151,57 @@ export const DiscoveryReveal: React.FC<DiscoveryRevealProps> = ({
                 card={card}
                 size="md"
               />
+
+              {/* Local Rarity Engine Sighting Context */}
+              {featureFlags.isLocalRarityEnabled() && card.localRarity && card.localRarity.confidenceState !== 'LOCAL_UNKNOWN' && (
+                <motion.div
+                  initial={{ opacity: 0, y: 4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mt-2.5 w-full rounded-xl p-2.5 bg-gradient-to-r from-red-950/30 via-zinc-950/60 to-black border border-red-500/25 text-left space-y-1.5 shadow-lg"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-white/50">Local Sighting Rarity</span>
+                      <span className="text-[10px] text-white/20">•</span>
+                      <span className="text-[10px] font-semibold text-white/80">{card.localRarity.coarseAreaName}</span>
+                    </div>
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${RARITY_CONFIG[card.localRarity.localRarityTier]?.badgeBg || 'bg-white/10 text-white/80'}`}>
+                      {RARITY_CONFIG[card.localRarity.localRarityTier]?.label || card.localRarity.localRarityTier.toUpperCase()}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between text-[11px]">
+                    <span className="text-white/60">
+                      Global Rarity: <span className="text-white/90 font-medium">{RARITY_CONFIG[card.rarity]?.label}</span>
+                    </span>
+                    {card.localRarity.localXpModifier > 1.0 && (
+                      <span className="font-semibold text-emerald-400">
+                        +{Math.round((card.localRarity.localXpModifier - 1.0) * 100)}% Local Area Bonus
+                      </span>
+                    )}
+                  </div>
+
+                  <p className="text-[10px] text-white/40 leading-tight">
+                    {card.localRarity.explanation}
+                  </p>
+                </motion.div>
+              )}
+
+              {card.localRarity && card.localRarity.confidenceState === 'LOCAL_UNKNOWN' && (
+                <div className="mt-2.5 w-full rounded-xl p-2.5 bg-gradient-to-r from-sky-950/30 via-zinc-950/60 to-black border border-sky-500/25 text-left space-y-1 shadow-lg">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-sky-400">
+                      ESTABLISHING LOCAL CENSUS • UNIVERSAL RARITY
+                    </span>
+                    <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-sky-500/15 border border-sky-500/30 text-sky-300">
+                      INITIAL CENSUS
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-white/50 leading-tight">
+                    First observations in this sector. Baseline anchored to global rarity while establishing local prevalence prior.
+                  </p>
+                </div>
+              )}
             </motion.div>
           )}
         </AnimatePresence>

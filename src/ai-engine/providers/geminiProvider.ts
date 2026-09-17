@@ -14,12 +14,20 @@ import type { AIProvider, AIProviderRequest, AIProviderResponse } from './types'
 import type {
   CandidateComparison,
   CanonicalScanResult,
+  EvidenceProvenance,
+  ImmutableUpstreamEvidence,
   ModelIdentificationOutput,
+  OpenCanonicalIdentity,
   ViewpointType,
   VisualEvidence
 } from '../types';
 import { hierarchicalClassifier } from '../validation/hierarchicalClassifier';
 import { confidenceEngine } from '../validation/confidenceEngine';
+import { getEstimatedMarketValue } from '../../utils/marketValuation';
+
+declare const process: any;
+
+export const MAX_GEMINI_REQUESTS_PER_SCAN = 2;
 
 export class GeminiProvider implements AIProvider {
   public name = 'GeminiProvider';
@@ -27,17 +35,26 @@ export class GeminiProvider implements AIProvider {
   private apiKey: string;
 
   constructor(apiKey?: string) {
-    let key = apiKey || '';
-    if (!key && typeof globalThis !== 'undefined' && (globalThis as any).process?.env) {
-      key = (globalThis as any).process.env.GEMINI_API_KEY || '';
-    }
-    this.apiKey = key;
+    this.apiKey = apiKey || this.resolveApiKey();
+  }
+
+  private resolveApiKey(): string {
+    // Server-side process.env tokens only (never bundled into client)
+    try {
+      if (typeof process !== 'undefined' && process.env?.GEMINI_API_KEY) {
+        return process.env.GEMINI_API_KEY.trim();
+      }
+    } catch {}
+
+    return '';
   }
 
   private getApiKey(): string {
     if (this.apiKey && this.apiKey.length > 5) return this.apiKey;
-    if (typeof globalThis !== 'undefined' && (globalThis as any).process?.env?.GEMINI_API_KEY) {
-      return (globalThis as any).process.env.GEMINI_API_KEY;
+    const resolved = this.resolveApiKey();
+    if (resolved && resolved.length > 5) {
+      this.apiKey = resolved;
+      return resolved;
     }
     return '';
   }
@@ -105,6 +122,15 @@ RULES:
    - Any candidate whose architectural requirements contradict observed visual evidence (e.g., manufacturer front fascia, engine placement, door count) MUST be penalized or eliminated.
 6. ABSTENTION MANDATE:
    - When evidence is insufficient, ambiguous, or contradictory, APEX strictly prefers returning "status": "uncertain" with model_family identified and variant: null, over guessing an unverified specific trim.
+7. MULTI-VEHICLE & TRAFFIC SCENE RESOLUTION:
+   - If multiple vehicles appear in the scene:
+     a. Primary Focal Subject: You must identify and isolate the single dominant vehicle occupying the foreground / central frame. Focus ALL visual evidence, identification, and candidates EXCLUSIVELY on that single primary subject vehicle.
+     b. NEVER return combined or concatenated multi-vehicle strings in make, model, or generation (e.g. NEVER output "Multiple (Zeekr, McLaren, Mercedes-Benz)" or "Multiple (...)"). make and model_family MUST each be a single string or null.
+     c. If two or more vehicles compete equally in the foreground (e.g. a taxi and a sports car side-by-side) with no obvious primary subject, or if the view of the foreground vehicle is too partial/occluded to identify reliably:
+        Set "status": "uncertain", set "identification.make": null, "identification.model_family": null, "identification.variant": null, and describe the competing vehicles in "reason" and "visual_evidence". Honest abstention is required over fabricating precision.
+8. GROUNDED MARKET VALUATION & PRIVACY REDACTION:
+   - Ground "market_value_low_usd" and "market_value_high_usd" realistic to the identified vehicle (e.g. consumer hatch/sedan: $15,000–$35,000; sports sedan: $45,000–$90,000; exotic supercar: $200,000–$450,000; hypercar: $1.5M–$4M). NEVER assign supercar valuations to ordinary consumer vehicles.
+   - Detect any visible license plates or human faces. For each, output normalized bounding box coordinates [ymin, xmin, ymax, xmax] (0.0 to 1.0) in "privacy_redactions".
 
 RETURN STRICT JSON ONLY MATCHING THIS SCHEMA:
 {
@@ -116,6 +142,9 @@ RETURN STRICT JSON ONLY MATCHING THIS SCHEMA:
     "score": 0.85,
     "issues": []
   },
+  "privacy_redactions": [
+    { "type": "plate | face", "box_2d": [0.72, 0.44, 0.78, 0.56] }
+  ],
   "viewpoint": "front_3q | front | rear | side | rear_3q | interior | partial | unknown",
   "visual_evidence": {
     "body_style": "<e.g. Coupe, Sedan, SUV, Convertible, Hatchback, Wagon, Truck>",
@@ -170,6 +199,8 @@ RETURN STRICT JSON ONLY MATCHING THIS SCHEMA:
     "color": "<observable vehicle exterior color>",
     "year_estimate": "<estimated model year>",
     "rarity": "common | uncommon | rare | epic | legendary | mythic",
+    "market_value_low_usd": 35000,
+    "market_value_high_usd": 48000,
     "body_style": "<body style>",
     "engine": "<engine description>",
     "horsepower": 300,
@@ -185,8 +216,10 @@ RETURN STRICT JSON ONLY MATCHING THIS SCHEMA:
 }`;
 
     let tokensConsumed = { promptTokens: 0, outputTokens: 0, totalTokens: 0 };
+    let geminiCallsInScan = 0;
 
     try {
+      geminiCallsInScan += 1;
       const pass1Result = await this.executeGeminiRequest(model, pass1Prompt, base64Data, mimeType, 35000);
       tokensConsumed.promptTokens += pass1Result.tokens.promptTokens;
       tokensConsumed.outputTokens += pass1Result.tokens.outputTokens;
@@ -261,39 +294,71 @@ RETURN STRICT JSON ONLY MATCHING THIS SCHEMA:
           }))
         : [];
 
+      let rawMake: string | null = parsed1.identification?.make || null;
+      let rawModel: string | null = parsed1.identification?.model_family || null;
+      let rawGen: string | null = parsed1.identification?.generation || null;
+      let rawVariant: string | null = parsed1.identification?.variant || null;
+
+      // Defensively sanitize concatenated multi-vehicle outputs (e.g. "Multiple (Zeekr, McLaren...)")
+      if (rawMake && (rawMake.toLowerCase().includes('multiple') || rawMake.includes(';'))) {
+        rawMake = null;
+        rawModel = null;
+        rawGen = null;
+        rawVariant = null;
+      }
+      if (rawModel && (rawModel.toLowerCase().includes('multiple') || rawModel.includes(';'))) {
+        rawModel = null;
+        rawGen = null;
+        rawVariant = null;
+      }
+
       // Initial Classification & Contradiction Filter
       let classResult = hierarchicalClassifier.classify({
         visual_evidence: visualEvidence,
         viewpoint,
-        raw_make: parsed1.identification?.make || null,
-        raw_model: parsed1.identification?.model_family || null,
-        raw_generation: parsed1.identification?.generation || null,
-        raw_variant: parsed1.identification?.variant || null,
+        raw_make: rawMake,
+        raw_model: rawModel,
+        raw_generation: rawGen,
+        raw_variant: rawVariant,
         raw_candidates: rawCandidates
       });
 
-      // ─── PASS 2: ADVERSARIAL VERIFICATION PASS (WHEN JUSTIFIED) ───
+      // ─── PASS 2: ADVERSARIAL VERIFICATION PASS (WHEN JUSTIFIED & ENABLED) ───
       let adversarialResult: { verified: boolean; demote_to?: string | null; reason?: string } | undefined;
+      const isVerificationEnabled = typeof process !== 'undefined' && process.env?.EXPENSIVE_VERIFICATION_ENABLED !== 'false';
 
-      if (classResult.needs_adversarial_verification && classResult.top_candidate) {
+      if (
+        geminiCallsInScan < MAX_GEMINI_REQUESTS_PER_SCAN &&
+        isVerificationEnabled &&
+        classResult.needs_adversarial_verification &&
+        classResult.top_candidate
+      ) {
+        geminiCallsInScan += 1;
         const topCand = classResult.top_candidate;
-        const runnerUp = classResult.calibrated_candidates[1] || { name: 'Standard base model' };
+        // Restrict alternative to intra-manufacturer candidate or standard base trim (Never cross-brand!)
+        const winnerMake = (classResult.identification.make || '').toLowerCase();
+        let candidateAlternative = 'Standard base trim';
+        const secondCandidate = classResult.calibrated_candidates[1];
+        if (secondCandidate && winnerMake && secondCandidate.name.toLowerCase().includes(winnerMake)) {
+          candidateAlternative = secondCandidate.name;
+        }
 
-        const pass2Prompt = `You are the APEX Master Forensic Automotive Adversary.
-A scan proposed: "${topCand.name}".
-Alternative candidate: "${runnerUp.name}".
+        const pass2Prompt = `You are the APEX Forensic Automotive Adversary.
+A scan proposed the candidate: "${topCand.name}".
 
-CHALLENGE TASK:
-1. Examine this vehicle critically. Try to DISPROVE that it is a "${topCand.name}".
-2. Could it actually be "${runnerUp.name}" or standard trim with aftermarket cosmetics?
-3. Are mandatory factory distinguishing features of "${topCand.name}" clearly verifiable in this image?
-4. If there is ANY visual uncertainty or missing required aero/badging proof, set "verified": false and "demote_to": "${runnerUp.name}".
+VERIFICATION TASK (VERIFY, DO NOT ARBITRARILY REPLACE):
+1. What observable physical evidence in this photo would directly CONTRADICT that this is a "${topCand.name}"?
+2. Examine the visible bodywork, aero, proportions, lighting, and badging. Are the distinctive factory features of "${topCand.name}" present or contradicted?
+3. If specific variant-level trim features (e.g. specialized track package, rare limited-edition aero) cannot be verified from this viewpoint, note which features are unobservable.
+4. Set "verified": true if the visual evidence is consistent with "${topCand.name}".
+5. If there is direct contradictory physical evidence against this specific trim, set "verified": false and "demote_to": "${candidateAlternative}". DO NOT suggest a vehicle from an unrelated manufacturer.
 
 OUTPUT STRICT JSON ONLY:
 {
   "verified": true,
   "demote_to": null,
   "contradictory_evidence": [],
+  "unobservable_features": [],
   "adversarial_notes": "All specific aero and badging verified without contradiction."
 }`;
 
@@ -304,9 +369,13 @@ OUTPUT STRICT JSON ONLY:
           tokensConsumed.totalTokens += pass2.tokens.totalTokens;
 
           const p2Json = pass2.json;
+          let safeDemoteTo: string | null = null;
+          if (p2Json.demote_to && winnerMake && p2Json.demote_to.toLowerCase().includes(winnerMake)) {
+            safeDemoteTo = p2Json.demote_to;
+          }
           adversarialResult = {
             verified: Boolean(p2Json.verified),
-            demote_to: p2Json.demote_to || null,
+            demote_to: safeDemoteTo,
             reason: p2Json.adversarial_notes || ''
           };
 
@@ -327,15 +396,79 @@ OUTPUT STRICT JSON ONLY:
       }
 
       // ─── CONFIDENCE ENGINE SCORING & STATE ASSIGNMENT ───
+      // Winner candidate is scored strictly on its OWN evidence and contradictions;
+      // runner-up rejection notes are NEVER penalized against the winner.
+      const winnerContradictions = classResult.top_candidate?.contradictions || [];
+      const globalContradictions = classResult.contradictions.filter((c) =>
+        c.includes('public transit') || c.includes('taxi livery') || c.includes('Severe vehicle-type')
+      );
+
       const calibConf = confidenceEngine.computeHierarchicalConfidence({
         image_quality_score: parsed1.image_quality?.score || 0.90,
         evidence_strength: visualEvidence.distinctive_details ? 0.85 : 0.65,
         candidate_separation: classResult.candidate_separation,
-        contradiction_count: classResult.contradictions.length,
+        top_candidate_contradictions: winnerContradictions,
+        global_contradictions: globalContradictions,
+        contradiction_count: winnerContradictions.length + globalContradictions.length,
         top_candidate_score: classResult.top_candidate?.score || 0.75,
         specificity_level: classResult.specificity_level,
         has_vehicle: true
       });
+
+      // ─── IMMUTABLE UPSTREAM EVIDENCE OBJECT ───
+      const upstreamEvidence: ImmutableUpstreamEvidence = Object.freeze({
+        provider: this.name,
+        model: model,
+        raw_identity: `${parsed1.identification?.make || ''} ${parsed1.identification?.model_family || ''} ${parsed1.identification?.variant || ''}`.trim(),
+        make: parsed1.identification?.make || null,
+        model_family: parsed1.identification?.model_family || null,
+        generation: parsed1.identification?.generation || null,
+        variant: parsed1.identification?.variant || null,
+        confidence: calibConf.confidence.overall_score,
+        visual_evidence: visualEvidence,
+        textual_evidence: visualEvidence.distinctive_details || [],
+        viewpoint,
+        image_quality: {
+          usable: Boolean(parsed1.image_quality?.usable ?? true),
+          score: parsed1.image_quality?.score || 0.90,
+          issues: parsed1.image_quality?.issues || []
+        },
+        candidate_hypotheses: classResult.calibrated_candidates,
+        timestamp: Date.now()
+      });
+
+      // ─── EVIDENCE PROVENANCE ───
+      const provenance: EvidenceProvenance = {
+        visual_evidence: [
+          visualEvidence.body_style ? `Body: ${visualEvidence.body_style}` : '',
+          visualEvidence.grille ? `Grille: ${visualEvidence.grille}` : '',
+          visualEvidence.headlights ? `Headlights: ${visualEvidence.headlights}` : '',
+          visualEvidence.taillights ? `Taillights: ${visualEvidence.taillights}` : '',
+          visualEvidence.aero ? `Aero: ${visualEvidence.aero}` : '',
+          ...(visualEvidence.distinctive_details || [])
+        ].filter(Boolean),
+        text_evidence: visualEvidence.text ? [visualEvidence.text] : [],
+        registry_metadata: [],
+        candidate_retrieval: (classResult.calibrated_candidates || []).map((c) => c.name),
+        deterministic_validation: []
+      };
+
+      // ─── OPEN CANONICAL IDENTITY ───
+      const canonicalId = `${classResult.identification.make || 'unknown'}-${classResult.identification.model_family || 'vehicle'}`
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '');
+
+      const openCanonicalIdentity: OpenCanonicalIdentity = {
+        canonicalId,
+        make: classResult.identification.make || 'Unknown Make',
+        modelFamily: classResult.identification.model_family || 'Unknown Model',
+        generation: classResult.identification.generation,
+        variant: classResult.identification.variant,
+        registryStatus: 'VERIFIED_UNREGISTERED',
+        source: 'gemini',
+        specs: parsed1.specs
+      };
 
       // Construct Canonical Scan Result
       const canonicalResult: CanonicalScanResult = {
@@ -355,11 +488,23 @@ OUTPUT STRICT JSON ONLY:
         specificity_level: classResult.specificity_level,
         reason: classResult.reason,
         needs_retake: calibConf.needs_retake,
-        specs: parsed1.specs
+        specs: parsed1.specs,
+        privacy_redactions: Array.isArray(parsed1.privacy_redactions) ? parsed1.privacy_redactions : [],
+        upstream_evidence: upstreamEvidence,
+        provenance,
+        canonical_identity: openCanonicalIdentity
       };
 
-      // Construct compatible ModelIdentificationOutput
+      // Construct compatible ModelIdentificationOutput with grounded market valuation
       const specs = parsed1.specs || {};
+      const valuation = getEstimatedMarketValue({
+        make: classResult.identification.make,
+        model: classResult.identification.model_family,
+        rarity: specs.rarity,
+        marketValueLowUsd: specs.market_value_low_usd,
+        marketValueHighUsd: specs.market_value_high_usd
+      });
+
       const output: ModelIdentificationOutput = {
         vehicleId: null,
         make: classResult.identification.make || 'Unknown Make',
@@ -382,6 +527,14 @@ OUTPUT STRICT JSON ONLY:
         interestingFacts: specs.interesting_facts || 'Engineered with aerodynamic precision.',
         aftermarketPartsDetected: [],
         modelConfidence: calibConf.confidence.overall_score,
+        marketValueLowUsd: valuation.lowUsd,
+        marketValueHighUsd: valuation.highUsd,
+        privacyRedactions: Array.isArray(parsed1.privacy_redactions)
+          ? parsed1.privacy_redactions.map((p: any) => ({
+              type: p.type === 'face' ? 'face' : 'plate',
+              box2d: Array.isArray(p.box_2d) ? p.box_2d : [0, 0, 0, 0]
+            }))
+          : [],
         evidence: [
           ...(visualEvidence.distinctive_details || []),
           classResult.reason
@@ -404,11 +557,24 @@ OUTPUT STRICT JSON ONLY:
         durationMs: Date.now() - startTime
       };
     } catch (err: any) {
-      const isTimeout = err?.name === 'AbortError';
+      const isTimeout = err?.name === 'AbortError' || err?.message?.includes('timed out');
+      const is429 = 
+        err?.message?.includes('429') || 
+        err?.message?.includes('RESOURCE_EXHAUSTED') || 
+        err?.message?.includes('quota') || 
+        err?.message?.includes('Quota');
+
+      const errorType = isTimeout ? 'TIMEOUT' : is429 ? '429' : '5xx';
+      const errorMessage = isTimeout
+        ? 'Gemini request timed out.'
+        : is429
+        ? 'Gemini API quota exhausted (HTTP 429).'
+        : err?.message || 'Network error during Gemini request.';
+
       return {
         success: false,
-        error: isTimeout ? 'Gemini request timed out.' : err?.message || 'Network error during Gemini request.',
-        errorType: isTimeout ? 'TIMEOUT' : '5xx',
+        error: errorMessage,
+        errorType,
         providerName: this.name,
         modelUsed: model,
         tokensConsumed,

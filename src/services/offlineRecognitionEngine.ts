@@ -134,16 +134,15 @@ export class OfflineRecognitionEngine {
 
     for (const vehicle of APEX_LOCAL_VEHICLE_DATABASE) {
       const aspectDiff = Math.abs(currentAspect - vehicle.visualSignature.aspectRatio);
-      const aspectScore = Math.max(0, 1 - aspectDiff / 1.5);
+      const aspectScore = Math.max(0, 1 - aspectDiff / 0.8);
 
+      // Balanced silhouette calculation: Never inflate specific sports cars (e.g. GT-R or M4 CSL)
       let silhouetteScore = 0.50;
-      if (vehicle.visualSignature.silhouetteClass === 'widebody_supercar' && currentEdges > 0.4) {
-        silhouetteScore = 0.85;
-      } else if (vehicle.visualSignature.silhouetteClass === 'low_slung_coupe') {
-        silhouetteScore = 0.75;
+      if (currentEdges > 0.15 && currentEdges < 0.65) {
+        silhouetteScore = 0.55;
       }
 
-      const totalScore = aspectScore * 0.55 + silhouetteScore * 0.45;
+      const totalScore = aspectScore * 0.70 + silhouetteScore * 0.30;
 
       if (totalScore > bestScore) {
         bestScore = totalScore;
@@ -151,20 +150,23 @@ export class OfflineRecognitionEngine {
       }
     }
 
-    // Do NOT force a match if confidence is too low (e.g. non-car, taxi, bus, or ambiguous crop)
-    if (!bestMatch || bestScore < 0.60) {
+    // Conservative offline guard:
+    // Basic 2D aspect ratio and edge density CANNOT reliably identify a specific performance trim.
+    // Return null (abstention) unless optical alignment is exceptionally high.
+    if (!bestMatch || bestScore < 0.85) {
       return null;
     }
 
-    const confidence = Math.min(0.95, Math.max(0.40, bestScore));
+    // Conservative confidence for degraded offline mode
+    const confidence = Math.min(0.55, Math.max(0.30, bestScore * 0.60));
 
     return {
       vehicle: bestMatch,
       confidence,
-      makeConfidence: Math.min(0.95, confidence + 0.05),
+      makeConfidence: confidence,
       modelConfidence: confidence,
-      generationConfidence: confidence > 0.8 ? confidence - 0.05 : 0.55,
-      trimConfidence: confidence > 0.9 ? confidence - 0.08 : 0.40,
+      generationConfidence: 0.40,
+      trimConfidence: 0.20,
       matchedColor: features.estimatedColor,
       isOffline: typeof navigator !== 'undefined' ? !navigator.onLine : false
     };

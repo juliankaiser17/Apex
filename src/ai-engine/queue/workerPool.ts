@@ -4,7 +4,7 @@
  * retries with jitter, and updates job state.
  */
 
-import type { IdentificationResult, ScanJob } from '../types';
+import type { IdentificationResult, ScanJob, ScanJobStatus, ScanQualityMetrics } from '../types';
 import { jobQueue } from './jobQueue';
 import { deadLetterQueue } from './deadLetterQueue';
 import { qualityGate } from '../quality/qualityGate';
@@ -22,6 +22,10 @@ export class WorkerPool {
   private activeWorkers: number = 0;
   private intervalId: any = null;
 
+  constructor(concurrency: number = 8) {
+    this.concurrency = concurrency;
+  }
+
   public start(concurrency: number = 8) {
     if (this.isRunning) return;
     this.concurrency = concurrency;
@@ -30,6 +34,10 @@ export class WorkerPool {
     this.intervalId = setInterval(() => {
       this.tick();
     }, 50);
+  }
+
+  public setConcurrency(concurrency: number) {
+    this.concurrency = concurrency;
   }
 
   public stop() {
@@ -57,7 +65,7 @@ export class WorkerPool {
 
       this.activeWorkers += 1;
       this.processJob(job)
-        .catch(() => {
+        .catch((_err) => {
           // Rejection is already handled and recorded on jobQueue
         })
         .finally(() => {
@@ -72,6 +80,7 @@ export class WorkerPool {
   public async processJob(job: ScanJob): Promise<IdentificationResult> {
     const startTime = Date.now();
     job.attempts += 1;
+    let quality: ScanQualityMetrics | null = null;
 
     try {
       // ─── STAGE 1: CACHE LOOKUP ───
@@ -86,9 +95,15 @@ export class WorkerPool {
           image_hash: job.imageHash,
           image_size_bytes: job.imageDataUrl.length,
           provider_model: 'identification-cache',
+          provider: 'cache',
+          model: 'sha256-perceptual-cache',
           latency_ms: Date.now() - startTime,
+          latency: Date.now() - startTime,
+          status: 'completed',
           cache_hit: true,
           cache_key: job.imageHash,
+          retry_count: Math.max(0, job.attempts - 1),
+          error_code: null,
           fallback_used: false,
           abstention_reason: null,
           candidate_set: [],
@@ -102,7 +117,7 @@ export class WorkerPool {
       }
 
       // ─── STAGE 2: PRE-AI QUALITY GATING ───
-      const quality = await qualityGate.evaluateImageQuality(job.imageDataUrl, job.fileName);
+      quality = await qualityGate.evaluateImageQuality(job.imageDataUrl, job.fileName);
       if (!quality.isUsable) {
         const abstainedResult: IdentificationResult = {
           scanId: job.id,
@@ -211,7 +226,7 @@ export class WorkerPool {
         idempotencyKey: job.idempotencyKey,
         userId: job.userId,
         status: finalStatus,
-        canonicalVehicleId: validationReport.canonicalRecord?.vehicleId,
+        canonicalVehicleId: validationReport.canonicalRecord?.vehicleId || validationReport.canonicalIdentity?.canonicalId,
         make: validationReport.resolvedMake,
         model: validationReport.resolvedModel,
         generation: validationReport.resolvedGeneration,
@@ -256,9 +271,15 @@ export class WorkerPool {
         image_hash: job.imageHash,
         image_size_bytes: job.imageDataUrl.length,
         provider_model: aiResponse.modelUsed,
+        provider: aiResponse.providerName || 'gemini',
+        model: aiResponse.modelUsed,
         latency_ms: Date.now() - startTime,
+        latency: Date.now() - startTime,
+        status: finalStatus,
         cache_hit: false,
         cache_key: job.imageHash,
+        retry_count: Math.max(0, job.attempts - 1),
+        error_code: null,
         fallback_used: aiResponse.modelUsed.includes('fallback') || aiResponse.modelUsed.includes('embedded'),
         abstention_reason: confidence.shouldAbstain ? (confidence.abstentionReason || 'Low confidence abstention') : null,
         candidate_set: candidates.map(c => `${c.make} ${c.model}`),
@@ -291,10 +312,61 @@ export class WorkerPool {
           jobQueue.enqueue(job);
         }, jitterDelayMs);
       } else {
-        // Exceeded retries or fatal quota/policy error -> Fail immediately
-        jobQueue.completeJob(job.id, 'failed');
+        // Exceeded retries or fatal quota/policy error -> Set explicit provider-unavailable status
+        const isUnavailable = isQuotaOrPolicyError || err?.message?.includes('unavailable');
+        const finalJobStatus: ScanJobStatus = isUnavailable ? 'uncertain' : 'failed';
         const errMessage = err?.message || 'Processing failed after maximum retry attempts.';
+        
         job.error = errMessage;
+        job.result = {
+          scanId: job.id,
+          idempotencyKey: job.idempotencyKey,
+          userId: job.userId,
+          status: finalJobStatus,
+          make: 'Unknown Make',
+          model: 'Unknown Model',
+          generation: 'Unknown',
+          yearEstimate: 'Unknown',
+          color: 'Unknown',
+          rarity: 'common',
+          engine: 'Unknown',
+          horsepower: 0,
+          torqueNm: 0,
+          topSpeedKmH: 0,
+          zeroToHundredSec: 0,
+          kerbWeightKg: 0,
+          productionYears: 'Unknown',
+          originCountry: 'Global',
+          bodyStyle: 'Coupe',
+          historicalInformation: '',
+          interestingFacts: '',
+          aftermarketPartsDetected: [],
+          confidence: {
+            totalScore: 0.0,
+            isConfident: false,
+            shouldAbstain: true,
+            abstentionReason: isUnavailable ? 'vision_provider_unavailable' : errMessage,
+            breakdown: {
+              visualSimilarityWeight: 0,
+              modelAgreementWeight: 0,
+              candidateMarginWeight: 0,
+              frameAgreementWeight: 0,
+              databaseConsistencyWeight: 0,
+              qualityPenalty: 1.0
+            }
+          },
+          quality: quality || { isUsable: false, blurScore: 0, luminanceScore: 0, contrastScore: 0, aspectRatio: 1, vehicleBoundingEstimated: false },
+          topCandidates: [],
+          processedAt: new Date().toISOString(),
+          processingDurationMs: Date.now() - startTime,
+          modelVersion: 'provider-unavailable',
+          promptVersion: 'apex-prompt-v2',
+          pipelineVersion: job.pipelineVersion,
+          cached: false,
+          traceId: job.traceId
+        };
+
+        jobQueue.completeJob(job.id, finalJobStatus);
         deadLetterQueue.push(job, errMessage);
       }
 

@@ -87,6 +87,20 @@ export function runStreakTests() {
     assert(res.reward.xp === 2500, 'Day 6 -> 7: awards 2500 XP');
   }
 
+  // 7. Missed 1 day (diffDays === 2) with Streak Freeze Active -> streak preserved!
+  {
+    const twoDaysAgo = new Date('2026-09-04T12:00:00Z');
+    // Without freeze: resets to 1
+    const resNoFreeze = getAuthoritativeStreak(4, twoDaysAgo.toISOString(), now, { hasStreakFreeze: false });
+    assert(resNoFreeze.targetStreak === 1, 'Missed day without freeze: targetStreak resets to 1');
+    assert(resNoFreeze.streakFreezeUsed === false, 'Streak freeze was not used');
+
+    // With freeze: preserves streak and consumes freeze
+    const resWithFreeze = getAuthoritativeStreak(4, twoDaysAgo.toISOString(), now, { hasStreakFreeze: true });
+    assert(resWithFreeze.targetStreak === 5, 'Missed day with freeze: targetStreak preserves to 5');
+    assert(resWithFreeze.streakFreezeUsed === true, 'Streak freeze was consumed');
+  }
+
   console.log('\n=== ALL STREAK TESTS PASSED SUCCESSFULLY ===\n');
 }
 

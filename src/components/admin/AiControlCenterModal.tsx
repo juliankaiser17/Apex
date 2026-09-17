@@ -156,27 +156,33 @@ export const AiControlCenterModal: React.FC<AiControlCenterModalProps> = ({ isOp
             {/* Core Metrics 2x2 Grid */}
             <div className="grid grid-cols-2 gap-2">
               <div className="p-3 rounded-2xl bg-[#181818] border border-white/[0.06] space-y-1">
-                <span className="text-[10px] font-semibold text-white/40 uppercase tracking-wider block">LATENCY</span>
+                <span className="text-[10px] font-semibold text-white/40 uppercase tracking-wider block">LATENCY (P50)</span>
                 <span className="text-lg font-bold text-white font-data">
-                  {telemetry.p50LatencyMs > 0 ? `${telemetry.p50LatencyMs} ms` : '320 ms'}
+                  {telemetry.totalScansProcessed > 0 ? `${telemetry.p50LatencyMs} ms` : '--'}
                 </span>
-                <span className="text-[10px] text-emerald-400 font-data block">P95: {telemetry.p95LatencyMs || 480}ms</span>
+                <span className="text-[10px] text-emerald-400 font-data block">
+                  {telemetry.totalScansProcessed > 0 ? `P95: ${telemetry.p95LatencyMs} ms` : 'Awaiting live scans'}
+                </span>
               </div>
 
               <div className="p-3 rounded-2xl bg-[#181818] border border-white/[0.06] space-y-1">
                 <span className="text-[10px] font-semibold text-white/40 uppercase tracking-wider block">CACHE HIT RATE</span>
                 <span className="text-lg font-bold text-white font-data">
-                  {telemetry.cacheHitRatio ? `${Math.round(telemetry.cacheHitRatio * 100)}%` : '85%'}
+                  {telemetry.totalScansProcessed > 0 ? `${Math.round((telemetry.cacheHitRatio || 0) * 100)}%` : '--'}
                 </span>
-                <span className="text-[10px] text-white/50 font-data block">Instant Cache</span>
+                <span className="text-[10px] text-white/50 font-data block">
+                  {telemetry.cacheHitCount ? `${telemetry.cacheHitCount} hits` : 'Instant Cache'}
+                </span>
               </div>
 
               <div className="p-3 rounded-2xl bg-[#181818] border border-white/[0.06] space-y-1">
                 <span className="text-[10px] font-semibold text-white/40 uppercase tracking-wider block">SUCCESS RATE</span>
                 <span className="text-lg font-bold text-emerald-400 font-data">
-                  {telemetry.topAccuracyEstimate ? `${Math.round(telemetry.topAccuracyEstimate * 100)}%` : '99.8%'}
+                  {telemetry.totalScansProcessed > 0 ? `${telemetry.topAccuracyEstimate}%` : '--'}
                 </span>
-                <span className="text-[10px] text-white/50 font-data block">Quality Gate Pass</span>
+                <span className="text-[10px] text-white/50 font-data block">
+                  {telemetry.successfulScans} of {telemetry.totalScansProcessed} passed
+                </span>
               </div>
 
               <div className="p-3 rounded-2xl bg-[#181818] border border-white/[0.06] space-y-1">
@@ -184,7 +190,7 @@ export const AiControlCenterModal: React.FC<AiControlCenterModalProps> = ({ isOp
                 <span className="text-lg font-bold text-white font-data">
                   {telemetry.totalScansProcessed.toLocaleString()}
                 </span>
-                <span className="text-[10px] text-white/50 font-data block">Processed Today</span>
+                <span className="text-[10px] text-white/50 font-data block">Processed Session</span>
               </div>
             </div>
 

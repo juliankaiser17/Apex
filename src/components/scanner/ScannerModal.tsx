@@ -3,20 +3,24 @@ import { Camera as CapCamera, CameraResultType, CameraSource } from '@capacitor/
 import { Capacitor } from '@capacitor/core';
 import { AlertTriangle, SwitchCamera, X, RotateCcw, RefreshCw } from 'lucide-react';
 import { useApexStore } from '../../store/useApexStore';
-import type { CarCard } from '../../types/apex';
+import type { CarCard, RarityTier, LocalRarityInfo } from '../../types/apex';
 import { sounds } from '../../utils/audio';
 import { applySpatialOffset } from '../../utils/privacyPipeline';
-import { calculateRegionalRarity } from '../../utils/regionalRarityEngine';
-import { identifyVehicleWithAi } from '../../services/aiVisionService';
+import { calculateLocalRarity, localRarityCache } from '../../utils/localRarityEngine';
+import { useLocalRarity } from '../../hooks/useLocalRarity';
+import { identifyVehicleWithAi, getAuthoritativeAccessToken } from '../../services/aiVisionService';
 import { hunterSceneEngine } from '../../services/hunterSceneEngine';
 import { offlineRecognitionEngine } from '../../services/offlineRecognitionEngine';
 import { useScannerStateMachine } from '../../hooks/useScannerStateMachine';
 import { HunterOverlay } from './HunterOverlay';
 import { ProgressiveAnalysisOverlay } from './ProgressiveAnalysisOverlay';
 import { DiscoveryReveal } from './DiscoveryReveal';
+import { computeImageSha256 } from '../../ai-engine/crypto/sha256';
+import { getEstimatedMarketValue } from '../../utils/marketValuation';
 
 export const ScannerModal: React.FC = () => {
   const { scannerOpen, setScannerOpen, user } = useApexStore();
+  const { sampleCoarseLocation } = useLocalRarity();
   const [shutterFlash, setShutterFlash] = useState(false);
   const [facingMode, setFacingMode] = useState<'environment' | 'user'>('environment');
   const [zoomLevel, setZoomLevel] = useState<number>(1);
@@ -146,6 +150,15 @@ export const ScannerModal: React.FC = () => {
   useEffect(() => {
     if (scannerOpen) {
       initHardwareCamera(facingMode);
+      // Phase 5: Proactive Auth Readiness Preflight on scanner open
+      getAuthoritativeAccessToken(false).then((auth) => {
+        if (!auth.hasSession) {
+          console.log('[Scanner Preflight] User is guest / unauthenticated');
+        } else if (auth.expiresAtSec && (auth.expiresAtSec - Math.floor(Date.now() / 1000) <= 120)) {
+          console.log('[Scanner Preflight] Session near expiry, proactively refreshing in background...');
+          getAuthoritativeAccessToken(true).catch(() => {});
+        }
+      }).catch(() => {});
     } else {
       stopCameraStream();
     }
@@ -165,20 +178,16 @@ export const ScannerModal: React.FC = () => {
       try {
         const img = new Image();
         img.onload = () => {
-          try {
-            const offscreenCanvas = document.createElement('canvas');
-            offscreenCanvas.width = 64;
-            offscreenCanvas.height = 36;
-            const ctx = offscreenCanvas.getContext('2d');
-            if (ctx) {
-              ctx.drawImage(img, 0, 0, 64, 36);
-              const features = offlineRecognitionEngine.extractFeatures(offscreenCanvas, ctx, 64, 36);
-              const result = offlineRecognitionEngine.matchVehicle(features);
-              resolve(result);
-              return;
-            }
-          } catch (e) {
-            console.warn('[Apex Scanner] Optical extraction canvas error:', e);
+          const offCanvas = document.createElement('canvas');
+          offCanvas.width = 64;
+          offCanvas.height = 36;
+          const offCtx = offCanvas.getContext('2d');
+          if (offCtx) {
+            offCtx.drawImage(img, 0, 0, 64, 36);
+            const features = offlineRecognitionEngine.extractFeatures(offCanvas, offCtx, 64, 36);
+            const match = offlineRecognitionEngine.matchVehicle(features, true);
+            resolve(match);
+            return;
           }
           resolve(null);
         };
@@ -190,13 +199,71 @@ export const ScannerModal: React.FC = () => {
     });
   };
 
+  // Helper: Fast Client-Side Image Downscaler (Prevents massive 15MB mobile photos from timing out)
+  const optimizeScanImage = async (dataUrl: string, maxDimension = 1280, quality = 0.85): Promise<string> => {
+    return new Promise((resolve) => {
+      if (!dataUrl || !dataUrl.startsWith('data:image')) {
+        resolve(dataUrl);
+        return;
+      }
+      const img = new Image();
+      img.onload = () => {
+        try {
+          let { width, height } = img;
+          if (width <= maxDimension && height <= maxDimension && dataUrl.length < 800000) {
+            resolve(dataUrl);
+            return;
+          }
+          if (width > height) {
+            if (width > maxDimension) {
+              height = Math.round((height * maxDimension) / width);
+              width = maxDimension;
+            }
+          } else {
+            if (height > maxDimension) {
+              width = Math.round((width * maxDimension) / height);
+              height = maxDimension;
+            }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            resolve(dataUrl);
+            return;
+          }
+          ctx.drawImage(img, 0, 0, width, height);
+          resolve(canvas.toDataURL('image/jpeg', quality));
+        } catch {
+          resolve(dataUrl);
+        }
+      };
+      img.onerror = () => resolve(dataUrl);
+      img.src = dataUrl;
+    });
+  };
+
   // 3. Fast Optical Feature Extraction & Progressive Verification Pipeline
   const executeInferencePipeline = async (photoDataUrl: string, fileName?: string, captureMs: number = 0) => {
+    // Fast pre-compression to prevent heavy mobile uploads
+    const readyPhotoDataUrl = await optimizeScanImage(photoDataUrl);
+
+    // Phase 5: Preflight auth check before analysis if online
+    const isDeviceOnline = typeof navigator !== 'undefined' ? Boolean(navigator.onLine) : true;
+    if (isDeviceOnline) {
+      const preflight = await getAuthoritativeAccessToken(false);
+      if (!preflight.hasSession && useApexStore.getState().authStatus === 'GUEST') {
+        onIdentificationFailed('Please sign in to scan and collect vehicles.');
+        return;
+      }
+    }
+
     // 0. Ensure fresh isolated state and unique scan ID per scan
     const currentScanId = `scan_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
     activeScanIdRef.current = currentScanId;
     offlineRecognitionEngine.reset();
-    submitForAnalysis(photoDataUrl);
+    submitForAnalysis(readyPhotoDataUrl);
     const tAiStart = performance.now();
 
     onAnalysisStageResolved(0, 'Visual Geometry Captured');
@@ -204,7 +271,7 @@ export const ScannerModal: React.FC = () => {
 
     try {
       // 1. Perform AI vehicle vision analysis first
-      const aiPromise = identifyVehicleWithAi(photoDataUrl, false, fileName);
+      const aiPromise = identifyVehicleWithAi(readyPhotoDataUrl, false, fileName);
       const timeoutPromise = new Promise<null>((_, reject) => 
         setTimeout(() => reject(new Error('Analysis timed out. Please check network connection and retry.')), 25000)
       );
@@ -234,6 +301,35 @@ export const ScannerModal: React.FC = () => {
       });
 
       // ── STRICT HIERARCHICAL PRECEDENCE GATES ──
+      // Gate 0: Infrastructure / Network / Auth / Provider Errors (Intercepted FIRST with truthful UI)
+      const infraReason = (aiResult?.rejection_reason || '').toUpperCase();
+      if (aiResult && (
+        infraReason === 'BACKEND_UNREACHABLE' ||
+        infraReason === 'BACKEND_ERROR' ||
+        infraReason === 'SERVICE_UNAVAILABLE' ||
+        infraReason === 'RATE_LIMIT_EXCEEDED' ||
+        infraReason === 'NETWORK_TIMEOUT' ||
+        infraReason === 'RATE_LIMITED' ||
+        infraReason === 'AUTH_REQUIRED' ||
+        infraReason === 'AUTH_SESSION_EXPIRED' ||
+        infraReason === 'AUTH_REFRESH_FAILED' ||
+        infraReason === 'VISION_PROVIDER_UNAVAILABLE' ||
+        aiResult.rejection_reason === 'actual_device_offline' ||
+        (aiResult.status as string) === 'provider_unavailable'
+      )) {
+        onIdentificationFailed(
+          aiResult.reason ||
+          (infraReason === 'AUTH_REQUIRED' ? 'Please sign in to scan and collect vehicles.' :
+           infraReason === 'AUTH_SESSION_EXPIRED' ? 'Authentication session expired. Please sign in to scan.' :
+           infraReason === 'AUTH_REFRESH_FAILED' ? 'Unable to refresh authentication session. Please sign in.' :
+           (infraReason === 'RATE_LIMITED' || infraReason === 'RATE_LIMIT_EXCEEDED') ? 'Apex is temporarily rate-limited. Please try again shortly.' :
+           infraReason === 'NETWORK_TIMEOUT' ? 'The vision request timed out. Please retry.' :
+           aiResult.rejection_reason === 'actual_device_offline' ? 'You’re offline, so Apex is using offline identification.' :
+           'Apex’s vision service is temporarily unreachable. Please retry.')
+        );
+        return;
+      }
+
       // Gate A: REMOTE REJECTED / NOT A CAR -> Respect rejection immediately (Never force local guess!)
       if (aiResult && (aiResult.status === 'rejected' || aiResult.is_car === false)) {
         onIdentificationFailed(
@@ -244,43 +340,54 @@ export const ScannerModal: React.FC = () => {
         return;
       }
 
-      // Gate B: REMOTE FAILURE (Network down / offline) -> Optional local optical fallback
+      // Gate B: NO RESULT & OFFLINE ONLY -> Optional conservative local optical fallback
       if (!aiResult) {
-        let localResult: any = null;
-        if (canvasRef.current && canvasRef.current.width > 0) {
-          const ctx = canvasRef.current.getContext('2d');
-          if (ctx) {
-            const features = offlineRecognitionEngine.extractFeatures(canvasRef.current, ctx, 64, 36);
-            localResult = offlineRecognitionEngine.matchVehicle(features, true);
+        const isDeviceOffline = typeof navigator !== 'undefined' && !navigator.onLine;
+        if (isDeviceOffline) {
+          let localResult: any = null;
+          if (canvasRef.current && canvasRef.current.width > 0) {
+            const ctx = canvasRef.current.getContext('2d');
+            if (ctx) {
+              const features = offlineRecognitionEngine.extractFeatures(canvasRef.current, ctx, 64, 36);
+              localResult = offlineRecognitionEngine.matchVehicle(features, true);
+            }
+          }
+          if (!localResult) {
+            localResult = await extractOpticalFeaturesFromDataUrl(readyPhotoDataUrl);
+          }
+
+          if (localResult && localResult.vehicle && localResult.confidence >= 0.80) {
+            console.log('[Apex Scanner] Offline optical fallback match:', localResult.vehicle.model);
+            aiResult = {
+              is_car: true,
+              status: 'probable',
+              make: localResult.vehicle.manufacturer,
+              model: localResult.vehicle.model,
+              generation: localResult.vehicle.generation,
+              trim: localResult.vehicle.trim || null,
+              horsepower: localResult.vehicle.horsepower,
+              top_speed_kmh: localResult.vehicle.topSpeedKmH,
+              engine: localResult.vehicle.engine,
+              zero_to_hundred_seconds: localResult.vehicle.zeroToHundredSec,
+              production_years: localResult.vehicle.productionYears,
+              origin_country: localResult.vehicle.originCountry,
+              body_style: localResult.vehicle.bodyStyle,
+              color: localResult.matchedColor || 'Silver',
+              rarity: localResult.vehicle.baselineRarity
+            };
           }
         }
-        if (!localResult) {
-          localResult = await extractOpticalFeaturesFromDataUrl(photoDataUrl);
-        }
 
-        if (localResult && localResult.vehicle && localResult.confidence >= 0.65) {
-          console.log('[Apex Scanner] Offline optical fallback match:', localResult.vehicle.model);
-          aiResult = {
-            is_car: true,
-            status: 'probable',
-            make: localResult.vehicle.manufacturer,
-            model: localResult.vehicle.model,
-            generation: localResult.vehicle.generation,
-            trim: localResult.vehicle.trim || null,
-            horsepower: localResult.vehicle.horsepower,
-            top_speed_kmh: localResult.vehicle.topSpeedKmH,
-            engine: localResult.vehicle.engine,
-            zero_to_hundred_seconds: localResult.vehicle.zeroToHundredSec,
-            production_years: localResult.vehicle.productionYears,
-            origin_country: localResult.vehicle.originCountry,
-            body_style: localResult.vehicle.bodyStyle,
-            color: localResult.matchedColor || 'Silver',
-            rarity: localResult.vehicle.baselineRarity
-          };
-        } else {
-          onIdentificationFailed(
-            'Connection unavailable and vehicle could not be recognized offline. Please connect to internet or try another angle.'
-          );
+        if (!aiResult) {
+          if (isDeviceOffline) {
+            onIdentificationFailed(
+              'You’re offline, so Apex is using offline identification. Please capture closer framing or connect to internet.'
+            );
+          } else {
+            onIdentificationFailed(
+              'Apex’s vision service is temporarily unreachable. Please retry.'
+            );
+          }
           return;
         }
       }
@@ -326,14 +433,47 @@ export const ScannerModal: React.FC = () => {
         : 'Model Family Architecture Confirmed';
       onAnalysisStageResolved(3, candidateSummary);
 
+      const locationSample = await sampleCoarseLocation();
       const userLat = user.latitude || 35.6762;
       const userLng = user.longitude || 139.6503;
       const offset = applySpatialOffset(userLat, userLng);
-      const rarityEngineResult = calculateRegionalRarity({
+
+      const canonicalVehicleId = (aiResult?.canonical_vehicle_id || `${make}-${model}`)
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-');
+      const globalRarityTier: RarityTier = (aiResult?.rarity || 'legendary') as RarityTier;
+
+      const cachedCalc = localRarityCache.get(canonicalVehicleId, locationSample.geoBucket || 'global');
+      const localCalc = cachedCalc || calculateLocalRarity({
+        canonicalVehicleId,
+        globalRarity: globalRarityTier,
+        localObservationMass: 0,
+        bucketTotalMass: 0,
+        uniqueContributors: 0,
+        geographyBucketId: locationSample.geoBucket || undefined,
+        coarseAreaName: locationSample.coarseAreaName
+      });
+
+      const localRarityData: LocalRarityInfo = {
+        localRarityTier: localCalc.localRarityTier,
+        localRarityScore: localCalc.localRarityScore,
+        globalRarityTier: localCalc.globalRarityTier,
+        globalRarityScore: localCalc.globalRarityScore,
+        confidenceState: localCalc.confidenceState,
+        coarseAreaName: locationSample.coarseAreaName,
+        localXpModifier: localCalc.localXpModifier,
+        localBonusXp: 0,
+        explanation: localCalc.explanation,
+        explanationDebug: localCalc.debug
+      };
+
+      const imageHash = computeImageSha256(photoDataUrl);
+      const valuation = getEstimatedMarketValue({
         make,
         model,
-        city: user.city || 'Tokyo',
-        country: user.country || 'Japan'
+        rarity: globalRarityTier,
+        marketValueLowUsd: aiResult?.market_value_low_usd,
+        marketValueHighUsd: aiResult?.market_value_high_usd
       });
 
       const newCard: CarCard = {
@@ -349,8 +489,8 @@ export const ScannerModal: React.FC = () => {
         discontinuedStatus: productionYears.includes('Present') ? 'ACTIVE PRODUCTION' : 'DISCONTINUED',
         color,
         bodyStyle: (bodyStyle as any) || 'Coupe',
-        rarity: rarityEngineResult.rarity || aiResult?.rarity || 'legendary',
-        rarityScore: rarityEngineResult.rarityScore || 88,
+        rarity: globalRarityTier,
+        rarityScore: localCalc.globalRarityScore,
         topSpeedKmH: topSpeed,
         horsepower,
         engine,
@@ -362,13 +502,14 @@ export const ScannerModal: React.FC = () => {
         briefHistory: aiResult?.brief_history || 'Iconic sports car heritage.',
         modsDetected: aiResult?.mods_detected || [],
         imageUrl: photoDataUrl,
+        imageHash,
         latApprox: offset.latApprox,
         lngApprox: offset.lngApprox,
         city: user.city || 'Tokyo',
         country: user.country || 'Japan',
-        xpEarned: calculateRegionalRarity({ make, model, city: user.city || 'Tokyo', country: user.country || 'Japan' }).rarityScore * 10,
-        marketValueLowUsd: aiResult?.market_value_low_usd || 120000,
-        marketValueHighUsd: aiResult?.market_value_high_usd || 180000,
+        xpEarned: Math.round(localCalc.globalRarityScore * 10 * localCalc.localXpModifier),
+        marketValueLowUsd: valuation.lowUsd,
+        marketValueHighUsd: valuation.highUsd,
         scanValidated: true,
         isPublic: true,
         huntTriggered: false,
@@ -379,8 +520,11 @@ export const ScannerModal: React.FC = () => {
         identificationReason: aiResult?.reason || (aiResult?.status === 'uncertain' ? 'Variant uncertain. Try another angle.' : undefined),
         createdAt: new Date().toISOString(),
         isFirstGlobalScan: aiResult?.is_first_global || false,
-        isFirstCityScan: aiResult?.is_first_city || false
+        isFirstCityScan: aiResult?.is_first_city || false,
+        localRarity: localRarityData
       };
+      (newCard as any).geoBucket = locationSample.geoBucket;
+      (newCard as any).canonicalVehicleId = canonicalVehicleId;
 
       onAnalysisStageResolved(4, `Certainty: ${(newCard.identificationStatus || 'identified').toUpperCase()}`);
       onIdentificationSuccess(newCard, false);
@@ -398,15 +542,45 @@ export const ScannerModal: React.FC = () => {
     setShutterFlash(true);
     setTimeout(() => setShutterFlash(false), 70);
     startCapturing();
-
     let photoDataUrl: string | null = null;
 
-    // 1. Native Capacitor Camera attempt
-    if (Capacitor.isNativePlatform()) {
+    // 1. Primary: Instant In-Viewfinder Canvas Frame Capture with Zoom Crop (Zero Latency)
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    if (video && canvas && video.videoWidth > 0) {
+      const maxDim = 1280;
+      let fullW = video.videoWidth;
+      let fullH = video.videoHeight;
+
+      // Calculate zoomed crop box matching the visible reticle
+      const cropW = fullW / zoomLevel;
+      const cropH = fullH / zoomLevel;
+      const startX = (fullW - cropW) / 2;
+      const startY = (fullH - cropH) / 2;
+
+      let targetW = maxDim;
+      let targetH = Math.round((cropH * maxDim) / cropW);
+
+      canvas.width = targetW;
+      canvas.height = targetH;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(video, startX, startY, cropW, cropH, 0, 0, targetW, targetH);
+        photoDataUrl = canvas.toDataURL('image/jpeg', 0.82);
+      }
+    }
+
+    // 2. Secondary: Native Capacitor Camera attempt with bounded dimensions
+    if (!photoDataUrl && Capacitor.isNativePlatform()) {
       try {
         const image = await CapCamera.getPhoto({
-          quality: 88,
+          quality: 80,
+          width: 1280,
+          height: 1280,
           allowEditing: false,
+          correctOrientation: true,
           resultType: CameraResultType.DataUrl,
           source: CameraSource.Camera
         });
@@ -417,34 +591,6 @@ export const ScannerModal: React.FC = () => {
         if (err.message && err.message.toLowerCase().includes('cancel')) {
           startSearching();
           return;
-        }
-      }
-    }
-
-    // 2. Web / Canvas Capture with Zoom Crop
-    if (!photoDataUrl) {
-      const video = videoRef.current;
-      const canvas = canvasRef.current;
-      if (video && canvas && video.videoWidth > 0) {
-        const maxDim = 800;
-        let fullW = video.videoWidth;
-        let fullH = video.videoHeight;
-
-        // Calculate zoomed crop box
-        const cropW = fullW / zoomLevel;
-        const cropH = fullH / zoomLevel;
-        const startX = (fullW - cropW) / 2;
-        const startY = (fullH - cropH) / 2;
-
-        let targetW = maxDim;
-        let targetH = Math.round((cropH * maxDim) / cropW);
-
-        canvas.width = targetW;
-        canvas.height = targetH;
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-          ctx.drawImage(video, startX, startY, cropW, cropH, 0, 0, targetW, targetH);
-          photoDataUrl = canvas.toDataURL('image/jpeg', 0.85);
         }
       }
     }

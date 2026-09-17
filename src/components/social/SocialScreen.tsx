@@ -27,7 +27,9 @@ import { PaperThrowFeed } from './PaperThrowFeed';
 import { MediaPostComposerModal } from './MediaPostComposerModal';
 import { PublicProfileModal } from '../profile/PublicProfileModal';
 import { DirectMessageModal } from './DirectMessageModal';
+import { SpatialCreationSheet } from './SpatialCreationSheet';
 import { sounds } from '../../utils/audio';
+import { hapticImpact } from '../../utils/haptics';
 import { getProgressToNextLevel } from '../../utils/mastery';
 
 export const SocialScreen: React.FC = () => {
@@ -46,6 +48,7 @@ export const SocialScreen: React.FC = () => {
   const acceptFriendRequest = useApexStore(s => s.acceptFriendRequest);
   const denyFriendRequest = useApexStore(s => s.denyFriendRequest);
   const cancelFriendRequest = useApexStore(s => s.cancelFriendRequest);
+  const setSelectedCardForDetail = useApexStore(s => s.setSelectedCardForDetail);
 
   const [subTab, setSubTab] = useState<'activity' | 'leaderboard' | 'friends' | 'profile'>('activity');
   const [selectedCard, setSelectedCard] = useState<CarCard | null>(null);
@@ -54,7 +57,9 @@ export const SocialScreen: React.FC = () => {
   const [friendSearch, setFriendSearch] = useState('');
   
   // New Social Flow States
+  const [isCreationSheetOpen, setIsCreationSheetOpen] = useState(false);
   const [isMediaComposerOpen, setIsMediaComposerOpen] = useState(false);
+  const [composerInitialPhoto, setComposerInitialPhoto] = useState<string | null>(null);
   const [selectedUserForProfile, setSelectedUserForProfile] = useState<{ userId?: string; username?: string } | null>(null);
   const [activeConversationUser, setActiveConversationUser] = useState<{ id: string; username: string; displayName: string; avatarUrl: string; level: number } | null>(null);
 
@@ -131,124 +136,88 @@ export const SocialScreen: React.FC = () => {
     }
   };
 
-  // ─── 1. FULL-SCREEN DISCOVERY FEED (SUB-TAB: ACTIVITY) ───
-  if (subTab === 'activity') {
-    const activeFeedPosts = (feedPosts && feedPosts.length > 0) ? feedPosts : SAMPLE_FEED_POSTS;
-    return (
-      <div className="fixed inset-0 top-[calc(var(--sat,28px)+54px)] bottom-[74px] z-10 w-full bg-black overflow-hidden select-none font-sans">
-        {/* Floating Top 4-Way Segmented Navigation Bar + New Post + Button */}
-        <div className="absolute top-2.5 left-3 right-3 z-50 max-w-sm mx-auto flex items-center gap-2">
-          <div className="flex-1 flex bg-black/85 backdrop-blur-2xl p-1 rounded-2xl border border-white/20 shadow-2xl">
-            {[
-              { id: 'activity', label: 'Activity', icon: Flame, badge: 0 },
-              { id: 'leaderboard', label: 'Ranks', icon: Trophy, badge: 0 },
-              { id: 'friends', label: 'Friends', icon: Users, badge: incomingRequests.length },
-              { id: 'profile', label: 'Profile', icon: User, badge: 0 },
-            ].map((tab) => {
-              const Icon = tab.icon;
-              const isActive = subTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => {
-                    sounds.playTargetLock();
-                    setSubTab(tab.id as any);
-                  }}
-                  className={`flex-1 py-1.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all relative active:scale-95 ${
-                    isActive
-                      ? 'text-white shadow-lg font-bold'
-                      : 'text-white/60 hover:text-white'
-                  }`}
-                  style={isActive ? {
-                    backgroundColor: 'var(--accent-color)',
-                    boxShadow: '0 2px 12px var(--accent-glow)'
-                  } : undefined}
-                >
-                  <Icon className="w-3.5 h-3.5" />
-                  <span>{tab.label}</span>
-                  {tab.badge > 0 && (
-                    <span 
-                      className="w-4 h-4 rounded-full bg-white text-[9px] font-bold flex items-center justify-center"
-                      style={{ color: 'var(--accent-color)' }}
-                    >
-                      {tab.badge}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
+  const activeFeedPosts = (feedPosts && feedPosts.length > 0) ? feedPosts : SAMPLE_FEED_POSTS;
+
+  return (
+    <>
+      {subTab === 'activity' ? (
+        <div className="fixed inset-0 top-[calc(var(--sat,28px)+54px)] bottom-[74px] z-10 w-full bg-black overflow-hidden select-none font-sans">
+          {/* Floating Top 4-Way Segmented Navigation Bar + New Post + Button */}
+          <div className="absolute top-2.5 left-3 right-3 z-50 max-w-sm mx-auto flex items-center gap-2">
+            <div className="flex-1 flex bg-black/85 backdrop-blur-2xl p-1 rounded-2xl border border-white/20 shadow-2xl">
+              {[
+                { id: 'activity', label: 'Activity', icon: Flame, badge: 0 },
+                { id: 'leaderboard', label: 'Ranks', icon: Trophy, badge: 0 },
+                { id: 'friends', label: 'Friends', icon: Users, badge: incomingRequests.length },
+                { id: 'profile', label: 'Profile', icon: User, badge: 0 },
+              ].map((tab) => {
+                const Icon = tab.icon;
+                const isActive = subTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => {
+                      sounds.playTargetLock();
+                      setSubTab(tab.id as any);
+                    }}
+                    className={`flex-1 py-1.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all relative active:scale-95 ${
+                      isActive
+                        ? 'text-white shadow-lg font-bold'
+                        : 'text-white/60 hover:text-white'
+                    }`}
+                    style={isActive ? {
+                      backgroundColor: 'var(--accent-color)',
+                      boxShadow: '0 2px 12px var(--accent-glow)'
+                    } : undefined}
+                  >
+                    <Icon className="w-3.5 h-3.5" />
+                    <span>{tab.label}</span>
+                    {tab.badge > 0 && (
+                      <span 
+                        className="w-4 h-4 rounded-full bg-white text-[9px] font-bold flex items-center justify-center"
+                        style={{ color: 'var(--accent-color)' }}
+                      >
+                        {tab.badge}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* + Button for Standalone Media Post Creation */}
+            <button
+              onClick={() => {
+                hapticImpact('medium');
+                sounds.playTargetLock();
+                setIsCreationSheetOpen(true);
+              }}
+              aria-label="Create Post"
+              className="w-10 h-10 rounded-2xl flex items-center justify-center text-white shadow-xl active:scale-90 transition-all border border-white/20 shrink-0 hover:scale-105"
+              style={{
+                backgroundColor: 'var(--accent-color)',
+                boxShadow: '0 2px 14px var(--accent-glow)'
+              }}
+              title="Create Post"
+            >
+              <Plus className="w-5 h-5" />
+            </button>
           </div>
 
-          {/* + Button for Standalone Media Post Creation */}
-          <button
-            onClick={() => {
-              sounds.playTargetLock();
-              setIsMediaComposerOpen(true);
+          {/* Full-Screen Reels Discovery Feed */}
+          <PaperThrowFeed
+            posts={activeFeedPosts}
+            onOpenCardDetail={(card) => {
+              setSelectedCard(card);
+              setSelectedCardForDetail(card);
             }}
-            aria-label="Create Post"
-            className="w-10 h-10 rounded-2xl flex items-center justify-center text-white shadow-xl active:scale-90 transition-all border border-white/20 shrink-0 hover:scale-105"
-            style={{
-              backgroundColor: 'var(--accent-color)',
-              boxShadow: '0 2px 14px var(--accent-glow)'
-            }}
-            title="Create Post"
-          >
-            <Plus className="w-5 h-5" />
-          </button>
+            onOpenComments={(post) => setSelectedPostForComments(post)}
+            onOpenProfile={(userId, username) => setSelectedUserForProfile({ userId, username })}
+            onOpenScanner={() => setScannerOpen(true)}
+          />
         </div>
-
-        {/* Full-Screen Reels Discovery Feed */}
-        <PaperThrowFeed
-          posts={activeFeedPosts}
-          onOpenCardDetail={(card) => setSelectedCard(card)}
-          onOpenComments={(post) => setSelectedPostForComments(post)}
-          onOpenProfile={(userId, username) => setSelectedUserForProfile({ userId, username })}
-          onOpenScanner={() => setScannerOpen(true)}
-        />
-
-        {/* Global 3D Detail Modal */}
-        <Card3DDetail
-          card={selectedCard}
-          onClose={() => setSelectedCard(null)}
-        />
-
-        {/* Global Comments Modal */}
-        <CommentsModal
-          post={selectedPostForComments}
-          onClose={() => setSelectedPostForComments(null)}
-          onOpenProfile={(userId, username) => setSelectedUserForProfile({ userId, username })}
-        />
-
-        {/* Media Post Composer Modal */}
-        <MediaPostComposerModal
-          isOpen={isMediaComposerOpen}
-          onClose={() => setIsMediaComposerOpen(false)}
-        />
-
-        {/* Public Profile Modal */}
-        <PublicProfileModal
-          userId={selectedUserForProfile?.userId}
-          username={selectedUserForProfile?.username}
-          isOpen={Boolean(selectedUserForProfile)}
-          onClose={() => setSelectedUserForProfile(null)}
-          onOpenConversation={(recipient) => setActiveConversationUser(recipient)}
-          onOpenCardDetail={(card) => setSelectedCard(card)}
-        />
-
-        {/* Direct Message Modal */}
-        <DirectMessageModal
-          recipient={activeConversationUser}
-          isOpen={Boolean(activeConversationUser)}
-          onClose={() => setActiveConversationUser(null)}
-          onOpenProfile={(userId, username) => setSelectedUserForProfile({ userId, username })}
-        />
-      </div>
-    );
-  }
-
-  // ─── 2. STANDARD SCROLLABLE VIEW (LEADERBOARD / FRIENDS / PROFILE) ───
-  return (
-    <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 pb-28 font-sans max-w-md mx-auto">
+      ) : (
+        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 pb-28 font-sans max-w-md mx-auto">
       {/* Top 4-Way Segmented Tabs + New Post Button */}
       <div className="flex items-center gap-2">
         <div className="flex-1 flex bg-[#141414] p-1 rounded-2xl border border-white/[0.08]">
@@ -292,8 +261,9 @@ export const SocialScreen: React.FC = () => {
         {/* + Button for Standalone Media Post Creation */}
         <button
           onClick={() => {
+            hapticImpact('medium');
             sounds.playTargetLock();
-            setIsMediaComposerOpen(true);
+            setIsCreationSheetOpen(true);
           }}
           aria-label="Create Post"
           className="w-10 h-10 rounded-2xl flex items-center justify-center text-white shadow-xl active:scale-90 transition-all border border-white/20 shrink-0 hover:scale-105"
@@ -419,9 +389,9 @@ export const SocialScreen: React.FC = () => {
                 sounds.playTargetLock();
                 setIsAddFriendModalOpen(true);
               }}
-              className="px-4 py-2.5 rounded-xl bg-[#FF4500] text-white font-data text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-[0_0_12px_rgba(255,69,0,0.3)] hover:bg-[#FF5500] transition-colors shrink-0"
+              className="px-3.5 py-2 rounded-xl bg-[#FF4500] text-white font-sans text-xs font-semibold uppercase tracking-wider flex items-center gap-1.5 shadow-[0_0_12px_rgba(255,69,0,0.3)] hover:bg-[#FF5500] transition-all active:scale-95 shrink-0"
             >
-              <UserPlus className="w-4 h-4" /> ADD FRIEND
+              <UserPlus className="w-3.5 h-3.5" /> ADD FRIEND
             </button>
           </div>
 
@@ -601,9 +571,9 @@ export const SocialScreen: React.FC = () => {
                     sounds.playTargetLock();
                     setIsAddFriendModalOpen(true);
                   }}
-                  className="py-3 px-8 rounded-xl bg-[#FF4500] text-[#F0EBE3] font-display text-lg tracking-wider shadow-[0_0_15px_rgba(255,69,0,0.4)] inline-flex items-center gap-2"
+                  className="px-4 py-2 rounded-xl bg-[#FF4500] text-white font-sans text-xs font-semibold shadow-md inline-flex items-center gap-1.5 hover:bg-[#FF5500] active:scale-95 transition-all"
                 >
-                  <UserPlus className="w-5 h-5" /> + SEND FRIEND REQUEST
+                  <UserPlus className="w-3.5 h-3.5" /> Send Friend Request
                 </button>
               </div>
             )}
@@ -796,9 +766,17 @@ export const SocialScreen: React.FC = () => {
         </div>
       );
     })()}
+        </div>
+      )}
 
       {/* 3D Card Detail Modal */}
-      <Card3DDetail card={selectedCard} onClose={() => setSelectedCard(null)} />
+      <Card3DDetail 
+        card={selectedCard} 
+        onClose={() => {
+          setSelectedCard(null);
+          setSelectedCardForDetail(null);
+        }} 
+      />
 
       {/* Comments Discussion Modal */}
       <CommentsModal
@@ -807,10 +785,25 @@ export const SocialScreen: React.FC = () => {
         onOpenProfile={(userId, username) => setSelectedUserForProfile({ userId, username })}
       />
 
+      {/* Spatial Creation Action Sheet */}
+      <SpatialCreationSheet
+        isOpen={isCreationSheetOpen}
+        onClose={() => setIsCreationSheetOpen(false)}
+        onOpenScanner={() => setScannerOpen(true)}
+        onOpenMediaComposer={(initialPhoto) => {
+          setComposerInitialPhoto(initialPhoto || null);
+          setIsMediaComposerOpen(true);
+        }}
+      />
+
       {/* Media Post Composer Modal */}
       <MediaPostComposerModal
         isOpen={isMediaComposerOpen}
-        onClose={() => setIsMediaComposerOpen(false)}
+        initialPhotoUrl={composerInitialPhoto}
+        onClose={() => {
+          setIsMediaComposerOpen(false);
+          setComposerInitialPhoto(null);
+        }}
       />
 
       {/* Public Profile Modal */}
@@ -899,7 +892,7 @@ export const SocialScreen: React.FC = () => {
                 <button
                   type="submit"
                   disabled={isSearchingFriend || !targetUsernameInput.trim()}
-                  className="w-full h-12 rounded-xl bg-[#FF4500] hover:bg-[#FF5500] disabled:opacity-50 text-white font-sans font-semibold text-sm shadow-[0_4px_20px_rgba(255,69,0,0.4)] flex items-center justify-center gap-2 transition-all"
+                  className="w-full h-10 rounded-xl bg-[#FF4500] hover:bg-[#FF5500] disabled:opacity-40 text-white font-sans font-medium text-xs shadow-md flex items-center justify-center gap-2 transition-all active:scale-[0.99]"
                 >
                   <UserCheck className="w-4 h-4" />
                   <span>{isSearchingFriend ? 'Sending Request...' : 'Send Friend Request'}</span>
@@ -909,6 +902,6 @@ export const SocialScreen: React.FC = () => {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 };

@@ -15,11 +15,19 @@ import type {
   FriendRequest,
   NotificationItem,
   AuthStatus,
-  AuthUser
+  AuthUser,
+  LocalRarityInfo,
+  RarityExplanationDebug,
+  EconomyLedgerEntry
 } from '../types/apex';
 import { calculateDiscoveryXp, processXpGain } from '../utils/mastery';
 import { sounds } from '../utils/audio';
 import { supabase } from '../lib/supabase';
+import { computeImageSha256 } from '../ai-engine/crypto/sha256';
+import { localRarityTracer } from '../ai-engine/observability/localRarityTracer';
+import { featureFlags } from '../utils/featureFlags';
+import { localRarityCache } from '../utils/localRarityCache';
+import { LOCAL_RARITY_CONFIG } from '../utils/localRarityEngine';
 import { persistItem, removeItem } from '../lib/capacitorStorage';
 import { logAuthTransition } from '../utils/authLogger';
 import { getAuthoritativeStreak } from '../utils/streak';
@@ -58,6 +66,10 @@ interface ApexState {
   selectedCardForDetail: CarCard | null;
   locationDisplayMode: 'exact' | 'radius' | 'hidden';
   setLocationDisplayMode: (mode: 'exact' | 'radius' | 'hidden') => void;
+  localRarityEnabled: boolean;
+  setLocalRarityEnabled: (enabled: boolean) => void;
+  localRarityXpEnabled: boolean;
+  setLocalRarityXpEnabled: (enabled: boolean) => void;
   levelUpLevel: number | null;
   user: UserProfile;
 
@@ -113,6 +125,7 @@ interface ApexState {
       privacyMode?: 'exact_delayed_15' | 'approx_delayed_5' | 'private_hidden';
       allowComments?: boolean;
       allowHunts?: boolean;
+      geoBucket?: string | null;
     }
   ) => Promise<void>;
   deletePost: (postId: string) => Promise<void>;
@@ -135,6 +148,15 @@ interface ApexState {
   cancelCardDeletion: (cardId: string) => Promise<void>;
   purgeExpiredDeletedCards: () => Promise<void>;
   resetDevelopmentState: () => void;
+  economyLedger: EconomyLedgerEntry[];
+  awardCoins: (amount: number, reason: string, metadata?: any) => void;
+  purchaseStreakFreeze: () => { success: boolean; error?: string };
+  purchaseHuntBooster: () => { success: boolean; error?: string };
+  purchaseCardFoil: (cardId: string) => { success: boolean; error?: string };
+  purchaseReScan: () => { success: boolean; error?: string };
+  updateCardInGarage: (cardId: string, updates: Partial<CarCard>) => void;
+  blockUser: (targetUserId: string) => void;
+  unblockUser: (targetUserId: string) => void;
 }
 
 export const createFreshUser = (): UserProfile => ({
@@ -149,6 +171,10 @@ export const createFreshUser = (): UserProfile => ({
   coins: 0,
   streakDays: 0,
   streakLastAt: undefined,
+  streakFreezes: 0,
+  activeHuntBoosterUntil: undefined,
+  rescanTokens: 0,
+  blockedUsers: [],
   rankGlobal: 1,
   rankCountry: 1,
   rankCity: 1,
@@ -177,8 +203,8 @@ const INITIAL_USER: UserProfile = createFreshUser();
 
 export const INITIAL_HUNTS: Hunt[] = [];
 
-const INITIAL_QUESTS: DailyQuest[] = [
-  {
+export function generatePersonaQuests(persona: Persona = 'unspecified'): DailyQuest[] {
+  const baseSpotlight: DailyQuest = {
     id: 'quest-daily-spotlight',
     title: 'Daily Spotlight: 3 Vehicle Scans',
     description: 'Spot and photograph 3 real vehicles in the wild today.',
@@ -191,92 +217,145 @@ const INITIAL_QUESTS: DailyQuest[] = [
     expiresAtTimestamp: GLOBAL_QUEST_EXPIRES_AT,
     allowedMakes: [],
     isCompleted: false
-  },
-  {
-    id: 'quest-german-precision',
-    title: 'German Engineering: 2 Sports Cars',
-    description: 'Spot 2 German performance cars (Porsche, BMW, Mercedes, or Audi).',
-    targetCount: 2,
-    currentCount: 0,
-    xpReward: 400,
-    coinReward: 80,
-    badgeName: 'Autobahn Scout',
-    expiresInSeconds: 86400,
-    expiresAtTimestamp: GLOBAL_QUEST_EXPIRES_AT,
-    allowedMakes: ['Porsche', 'BMW', 'Mercedes-Benz', 'Mercedes', 'Audi'],
-    isCompleted: false
-  },
-  {
-    id: 'quest-jdm-royalty',
-    title: 'JDM Legend: Japanese Icon',
-    description: 'Spot a Japanese performance icon (Toyota, Nissan, Honda, Mazda, or Subaru).',
-    targetCount: 1,
-    currentCount: 0,
-    xpReward: 350,
-    coinReward: 70,
-    badgeName: 'Tokyo Drifter',
-    expiresInSeconds: 86400,
-    expiresAtTimestamp: GLOBAL_QUEST_EXPIRES_AT,
-    allowedMakes: ['Toyota', 'Nissan', 'Honda', 'Mazda', 'Subaru', 'Lexus'],
-    isCompleted: false
-  },
-  {
-    id: 'quest-powerhouse',
-    title: '500+ Horsepower Club',
-    description: 'Photograph any supercar or sports car pushing 500+ horsepower.',
-    targetCount: 1,
-    currentCount: 0,
-    xpReward: 450,
-    coinReward: 90,
-    badgeName: 'Power Hunter',
-    expiresInSeconds: 86400,
-    expiresAtTimestamp: GLOBAL_QUEST_EXPIRES_AT,
-    allowedMakes: [],
-    isCompleted: false
-  },
-  {
-    id: 'quest-italian-stallion',
-    title: 'Italian Thoroughbred',
-    description: 'Spot an exotic Italian vehicle (Ferrari, Lamborghini, Maserati, or Alfa Romeo).',
-    targetCount: 1,
-    currentCount: 0,
-    xpReward: 600,
-    coinReward: 150,
-    badgeName: 'Tifosi Legend',
-    expiresInSeconds: 86400,
-    expiresAtTimestamp: GLOBAL_QUEST_EXPIRES_AT,
-    allowedMakes: ['Ferrari', 'Lamborghini', 'Maserati', 'Alfa Romeo'],
-    isCompleted: false
-  },
-  {
-    id: 'quest-v8-muscle',
-    title: 'American Muscle & V8s',
-    description: 'Spot a Ford Mustang, Chevrolet Corvette, Camaro, or Dodge V8.',
-    targetCount: 1,
-    currentCount: 0,
-    xpReward: 350,
-    coinReward: 70,
-    badgeName: 'Muscle Scout',
-    expiresInSeconds: 86400,
-    expiresAtTimestamp: GLOBAL_QUEST_EXPIRES_AT,
-    allowedMakes: ['Ford', 'Chevrolet', 'Dodge'],
-    isCompleted: false
-  },
-  {
-    id: 'quest-electric-future',
-    title: 'Electric Revolution',
-    description: 'Spot a high-performance EV (Tesla, Porsche Taycan, Audi e-tron, or Rimac).',
-    targetCount: 1,
-    currentCount: 0,
-    xpReward: 300,
-    coinReward: 60,
-    badgeName: 'Volt Spotter',
-    expiresInSeconds: 86400,
-    expiresAtTimestamp: GLOBAL_QUEST_EXPIRES_AT,
-    allowedMakes: ['Tesla', 'Porsche', 'Audi', 'Rivian', 'Lucid'],
-    isCompleted: false
+  };
+
+  if (persona === 'finder') {
+    return [
+      baseSpotlight,
+      {
+        id: 'quest-hunter-supercar',
+        title: 'Predator: 500+ HP Exotic',
+        description: 'Track down and verify a vehicle pushing 500+ horsepower or Epic/Legendary rarity.',
+        targetCount: 1,
+        currentCount: 0,
+        xpReward: 600,
+        coinReward: 120,
+        badgeName: 'Apex Predator',
+        expiresInSeconds: 86400,
+        expiresAtTimestamp: GLOBAL_QUEST_EXPIRES_AT,
+        allowedMakes: ['Ferrari', 'Lamborghini', 'Porsche', 'McLaren', 'Aston Martin'],
+        isCompleted: false
+      },
+      {
+        id: 'quest-hunter-time-attack',
+        title: 'Speed Hunt: High-Performance Coupe',
+        description: 'Spot an aggressive performance coupe before tonight’s radar reset.',
+        targetCount: 2,
+        currentCount: 0,
+        xpReward: 450,
+        coinReward: 90,
+        badgeName: 'Time Attack',
+        expiresInSeconds: 86400,
+        expiresAtTimestamp: GLOBAL_QUEST_EXPIRES_AT,
+        allowedBodyStyles: ['Coupe'],
+        isCompleted: false
+      }
+    ];
   }
-];
+
+  if (persona === 'spotter') {
+    return [
+      baseSpotlight,
+      {
+        id: 'quest-spotter-diversity',
+        title: 'Sector Survey: 2 Different Body Styles',
+        description: 'Document at least 2 distinct vehicle body styles (e.g. Sedan & SUV).',
+        targetCount: 2,
+        currentCount: 0,
+        xpReward: 400,
+        coinReward: 80,
+        badgeName: 'Field Scout',
+        expiresInSeconds: 86400,
+        expiresAtTimestamp: GLOBAL_QUEST_EXPIRES_AT,
+        allowedMakes: [],
+        isCompleted: false
+      },
+      {
+        id: 'quest-spotter-global',
+        title: 'Continental Scout: German & Japanese Pair',
+        description: 'Photograph 1 German and 1 Japanese vehicle in your city today.',
+        targetCount: 2,
+        currentCount: 0,
+        xpReward: 450,
+        coinReward: 90,
+        badgeName: 'Global Eye',
+        expiresInSeconds: 86400,
+        expiresAtTimestamp: GLOBAL_QUEST_EXPIRES_AT,
+        allowedMakes: ['Toyota', 'Nissan', 'Honda', 'BMW', 'Porsche', 'Audi', 'Mercedes-Benz'],
+        isCompleted: false
+      }
+    ];
+  }
+
+  if (persona === 'love_of_cars') {
+    return [
+      baseSpotlight,
+      {
+        id: 'quest-love-heritage',
+        title: 'Heritage Preservation: Naturally Aspirated Icon',
+        description: 'Spot a heritage naturally aspirated or iconic high-revving sports car.',
+        targetCount: 1,
+        currentCount: 0,
+        xpReward: 500,
+        coinReward: 100,
+        badgeName: 'Purist',
+        expiresInSeconds: 86400,
+        expiresAtTimestamp: GLOBAL_QUEST_EXPIRES_AT,
+        allowedMakes: ['Porsche', 'Ferrari', 'Mazda', 'Honda', 'BMW'],
+        isCompleted: false
+      },
+      {
+        id: 'quest-love-oem',
+        title: 'Factory Specimen: Clean OEM Build',
+        description: 'Photograph an authentic, unmodified factory production vehicle.',
+        targetCount: 2,
+        currentCount: 0,
+        xpReward: 400,
+        coinReward: 80,
+        badgeName: 'Connoisseur',
+        expiresInSeconds: 86400,
+        expiresAtTimestamp: GLOBAL_QUEST_EXPIRES_AT,
+        allowedMakes: [],
+        isCompleted: false
+      }
+    ];
+  }
+
+  // Safe fallback for 'unspecified'
+  return [
+    baseSpotlight,
+    {
+      id: 'quest-german-precision',
+      title: 'German Engineering: 2 Sports Cars',
+      description: 'Spot 2 German performance cars (Porsche, BMW, Mercedes, or Audi).',
+      targetCount: 2,
+      currentCount: 0,
+      xpReward: 400,
+      coinReward: 80,
+      badgeName: 'Autobahn Scout',
+      expiresInSeconds: 86400,
+      expiresAtTimestamp: GLOBAL_QUEST_EXPIRES_AT,
+      allowedMakes: ['Porsche', 'BMW', 'Mercedes-Benz', 'Mercedes', 'Audi'],
+      isCompleted: false
+    },
+    {
+      id: 'quest-jdm-royalty',
+      title: 'JDM Legend: Japanese Icon',
+      description: 'Spot a Japanese performance icon (Toyota, Nissan, Honda, Mazda, or Subaru).',
+      targetCount: 1,
+      currentCount: 0,
+      xpReward: 350,
+      coinReward: 70,
+      badgeName: 'Tokyo Drifter',
+      expiresInSeconds: 86400,
+      expiresAtTimestamp: GLOBAL_QUEST_EXPIRES_AT,
+      allowedMakes: ['Toyota', 'Nissan', 'Honda', 'Mazda', 'Subaru', 'Lexus'],
+      isCompleted: false
+    }
+  ];
+}
+
+const INITIAL_QUESTS: DailyQuest[] = generatePersonaQuests('unspecified');
 
 const INITIAL_MISSIONS: Mission[] = [
   { id: 'm1', title: 'Scan 1 car today', xpReward: 50, completed: false, type: 'scan' },
@@ -484,7 +563,35 @@ export const SAMPLE_FEED_POSTS: FeedPost[] = [
     }),
     caption: 'Weissach Package GT3 RS rolling through Daikoku Futo at sunset — Massive active DRS wing in person is insane.',
     likesCount: 142,
-    commentsCount: 28,
+    commentsCount: 2,
+    comments: [
+      {
+        id: 'cmt-sample-1',
+        user: {
+          id: 'usr-milan-1',
+          username: 'tifosi_scout',
+          avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=400&auto=format&fit=crop',
+          level: 9
+        },
+        text: 'That Weissach DRS wing looks even wilder in person 🔥',
+        createdAt: '1h ago',
+        likesCount: 12,
+        isLiked: false
+      },
+      {
+        id: 'cmt-sample-2',
+        user: {
+          id: 'usr-cali-1',
+          username: 'cali_apex',
+          avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=400&auto=format&fit=crop',
+          level: 16
+        },
+        text: 'Daikoku Futo at sunset is peak car culture. Great spot!',
+        createdAt: '45m ago',
+        likesCount: 8,
+        isLiked: true
+      }
+    ],
     isLiked: false,
     createdAt: '2h ago'
   },
@@ -520,7 +627,8 @@ export const SAMPLE_FEED_POSTS: FeedPost[] = [
     }),
     caption: 'Twin-turbo V6 hybrid screaming through the streets of Milan. Sounds like a mini V12.',
     likesCount: 98,
-    commentsCount: 14,
+    commentsCount: 0,
+    comments: [],
     isLiked: false,
     createdAt: '5h ago'
   },
@@ -556,7 +664,8 @@ export const SAMPLE_FEED_POSTS: FeedPost[] = [
     }),
     caption: 'Track weapon parked on Sunset Blvd. The roof snorkel and carbon cofango are wild.',
     likesCount: 215,
-    commentsCount: 39,
+    commentsCount: 0,
+    comments: [],
     isLiked: true,
     createdAt: '1d ago'
   },
@@ -592,7 +701,8 @@ export const SAMPLE_FEED_POSTS: FeedPost[] = [
     }),
     caption: '1 of 1,000 worldwide. Yellow laserlights and the carbon ducktail in the Munich rain.',
     likesCount: 76,
-    commentsCount: 9,
+    commentsCount: 0,
+    comments: [],
     isLiked: false,
     createdAt: '1d ago'
   },
@@ -628,7 +738,8 @@ export const SAMPLE_FEED_POSTS: FeedPost[] = [
     }),
     caption: 'Godzilla spotted outside the Nismo Omori Factory. The dry carbon hood is art.',
     likesCount: 189,
-    commentsCount: 22,
+    commentsCount: 0,
+    comments: [],
     isLiked: false,
     createdAt: '2d ago'
   }
@@ -683,6 +794,22 @@ export const useApexStore = create<ApexState>((set, get) => ({
   activeHuntModal: null,
   selectedCardForDetail: null,
   locationDisplayMode: 'radius',
+  localRarityEnabled: typeof localStorage !== 'undefined' ? localStorage.getItem('apex_local_rarity_enabled') !== 'false' : true,
+  setLocalRarityEnabled: (enabled: boolean) => {
+    try {
+      localStorage.setItem('apex_local_rarity_enabled', String(enabled));
+    } catch {}
+    featureFlags.setLocalRarityEnabled(enabled);
+    set({ localRarityEnabled: enabled });
+  },
+  localRarityXpEnabled: typeof localStorage !== 'undefined' ? localStorage.getItem('apex_local_rarity_xp_enabled') !== 'false' : true,
+  setLocalRarityXpEnabled: (enabled: boolean) => {
+    try {
+      localStorage.setItem('apex_local_rarity_xp_enabled', String(enabled));
+    } catch {}
+    featureFlags.setLocalRarityXpEnabled(enabled);
+    set({ localRarityXpEnabled: enabled });
+  },
 
   user: initialSavedUser,
   garage: getSavedGarage(initialSavedUser.id),
@@ -692,6 +819,7 @@ export const useApexStore = create<ApexState>((set, get) => ({
   dailyMissions: INITIAL_MISSIONS,
   badges: INITIAL_BADGES,
   feedPosts: getSavedPosts(),
+  economyLedger: [],
   leaderboards: computeLeaderboard(initialSavedUser),
   liveEventExpiresAt: GLOBAL_EVENT_EXPIRES_AT,
 
@@ -991,6 +1119,12 @@ export const useApexStore = create<ApexState>((set, get) => ({
   },
 
   resetDevelopmentState: async () => {
+    const isDev = Boolean((import.meta as any)?.env?.DEV) ||
+      (typeof (globalThis as any).process !== 'undefined' && (globalThis as any).process?.env?.NODE_ENV !== 'production');
+    if (!isDev) {
+      console.warn('[Security] resetDevelopmentState is forbidden in production environments.');
+      return;
+    }
     try {
       localStorage.clear();
     } catch (e) {}
@@ -1007,6 +1141,7 @@ export const useApexStore = create<ApexState>((set, get) => ({
       outgoingRequests: [],
       activeHunts: [],
       feedPosts: [],
+      economyLedger: [],
       leaderboards: computeLeaderboard(freshUser),
       dailyQuests: INITIAL_QUESTS,
       dailyMissions: INITIAL_MISSIONS,
@@ -1017,11 +1152,186 @@ export const useApexStore = create<ApexState>((set, get) => ({
     } catch (e) {}
   },
 
+  awardCoins: (amount: number, reason: string, metadata?: any) => {
+    const currentUser = get().user;
+    const newBalance = Math.max(0, (currentUser.coins || 0) + amount);
+    const entry: EconomyLedgerEntry = {
+      id: `ledg_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+      timestamp: new Date().toISOString(),
+      userId: currentUser.id,
+      type: 'credit',
+      amount,
+      balanceAfter: newBalance,
+      item: metadata?.item || 'quest_reward',
+      description: reason,
+      metadata
+    };
+    set((state) => ({
+      user: { ...state.user, coins: newBalance },
+      economyLedger: [entry, ...(state.economyLedger || []).slice(0, 99)]
+    }));
+  },
+
+  purchaseStreakFreeze: () => {
+    const COST = 250;
+    const user = get().user;
+    if ((user.coins || 0) < COST) {
+      return { success: false, error: `Insufficient coins. Streak Freeze costs ${COST} coins (you have ${user.coins || 0}).` };
+    }
+    const newBalance = user.coins - COST;
+    const currentFreezes = user.streakFreezes || 0;
+    const entry: EconomyLedgerEntry = {
+      id: `ledg_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+      timestamp: new Date().toISOString(),
+      userId: user.id,
+      type: 'debit',
+      amount: COST,
+      balanceAfter: newBalance,
+      item: 'streak_freeze',
+      description: 'Purchased Streak Freeze (+1 protection)',
+      metadata: { previousFreezes: currentFreezes, newFreezes: currentFreezes + 1 }
+    };
+    set((state) => ({
+      user: { ...state.user, coins: newBalance, streakFreezes: currentFreezes + 1 },
+      economyLedger: [entry, ...(state.economyLedger || []).slice(0, 99)]
+    }));
+    return { success: true };
+  },
+
+  purchaseHuntBooster: () => {
+    const COST = 500;
+    const user = get().user;
+    if ((user.coins || 0) < COST) {
+      return { success: false, error: `Insufficient coins. Radar Booster costs ${COST} coins (you have ${user.coins || 0}).` };
+    }
+    const newBalance = user.coins - COST;
+    const boostExpiry = new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString();
+    const entry: EconomyLedgerEntry = {
+      id: `ledg_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+      timestamp: new Date().toISOString(),
+      userId: user.id,
+      type: 'debit',
+      amount: COST,
+      balanceAfter: newBalance,
+      item: 'hunt_booster',
+      description: 'Activated 2-Hour Radar Hunt Booster',
+      metadata: { activeUntil: boostExpiry }
+    };
+    set((state) => ({
+      user: { ...state.user, coins: newBalance, activeHuntBoosterUntil: boostExpiry },
+      economyLedger: [entry, ...(state.economyLedger || []).slice(0, 99)]
+    }));
+    return { success: true };
+  },
+
+  purchaseCardFoil: (cardId: string) => {
+    const COST = 1000;
+    const user = get().user;
+    if ((user.coins || 0) < COST) {
+      return { success: false, error: `Insufficient coins. Custom Foil costs ${COST} coins (you have ${user.coins || 0}).` };
+    }
+    const targetCard = get().garage.find((c) => c.id === cardId);
+    if (!targetCard) {
+      return { success: false, error: 'Vehicle card not found in garage.' };
+    }
+    if (targetCard.customFoil) {
+      return { success: false, error: 'This vehicle card already has Custom Foil applied.' };
+    }
+    const newBalance = user.coins - COST;
+    const entry: EconomyLedgerEntry = {
+      id: `ledg_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+      timestamp: new Date().toISOString(),
+      userId: user.id,
+      type: 'debit',
+      amount: COST,
+      balanceAfter: newBalance,
+      item: 'card_foil',
+      description: `Applied Custom Holographic Foil to ${targetCard.make} ${targetCard.model}`,
+      metadata: { cardId }
+    };
+    set((state) => {
+      const updatedGarage = state.garage.map((c) =>
+        c.id === cardId ? { ...c, customFoil: true } : c
+      );
+      try {
+        localStorage.setItem('apex_garage_cards', JSON.stringify(updatedGarage));
+      } catch (e) {}
+      return {
+        user: { ...state.user, coins: newBalance },
+        garage: updatedGarage,
+        economyLedger: [entry, ...(state.economyLedger || []).slice(0, 99)]
+      };
+    });
+    return { success: true };
+  },
+
+  purchaseReScan: () => {
+    const COST = 100;
+    const user = get().user;
+    if ((user.coins || 0) < COST) {
+      return { success: false, error: `Insufficient coins. Re-Scan token costs ${COST} coins (you have ${user.coins || 0}).` };
+    }
+    const newBalance = user.coins - COST;
+    const currentTokens = user.rescanTokens || 0;
+    const entry: EconomyLedgerEntry = {
+      id: `ledg_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+      timestamp: new Date().toISOString(),
+      userId: user.id,
+      type: 'debit',
+      amount: COST,
+      balanceAfter: newBalance,
+      item: 'rescan_token',
+      description: 'Purchased Neural Re-Scan Token (+1)',
+      metadata: { newTokens: currentTokens + 1 }
+    };
+    set((state) => ({
+      user: { ...state.user, coins: newBalance, rescanTokens: currentTokens + 1 },
+      economyLedger: [entry, ...(state.economyLedger || []).slice(0, 99)]
+    }));
+    return { success: true };
+  },
+
+  updateCardInGarage: (cardId: string, updates: Partial<CarCard>) => {
+    set((state) => {
+      const updatedGarage = state.garage.map((c) =>
+        c.id === cardId ? { ...c, ...updates } : c
+      );
+      try {
+        localStorage.setItem('apex_garage_cards', JSON.stringify(updatedGarage));
+      } catch (e) {}
+      return { garage: updatedGarage };
+    });
+  },
+
+  blockUser: (targetUserId: string) => {
+    set((state) => {
+      const currentBlocked = state.user.blockedUsers || [];
+      if (currentBlocked.includes(targetUserId)) return state;
+      const updatedBlocked = [...currentBlocked, targetUserId];
+      return {
+        user: { ...state.user, blockedUsers: updatedBlocked },
+        feedPosts: state.feedPosts.filter((p) => p.user.id !== targetUserId)
+      };
+    });
+  },
+
+  unblockUser: (targetUserId: string) => {
+    set((state) => ({
+      user: {
+        ...state.user,
+        blockedUsers: (state.user.blockedUsers || []).filter((id) => id !== targetUserId)
+      }
+    }));
+  },
+
   setActiveTab: (tab) => set({ activeTab: tab }),
 
   setScannerOpen: (open) => set({ scannerOpen: open }),
 
-  setPersona: (persona) => set((state) => ({ user: { ...state.user, persona } })),
+  setPersona: (persona) => set((state) => ({
+    user: { ...state.user, persona },
+    dailyQuests: generatePersonaQuests(persona)
+  })),
   
   initializeSession: async (userId: string, authEmail?: string, provider?: string, userMetadata?: any) => {
     logAuthTransition('PROFILE_LOADING', userId, authEmail);
@@ -1417,8 +1727,13 @@ export const useApexStore = create<ApexState>((set, get) => ({
       isPublicCard = true;
     }
 
+    let localRarityData: LocalRarityInfo | undefined = newCard.localRarity;
+
     // Invoke Authoritative Server-Side PostgreSQL RPC if connected
     try {
+      const canonicalId = (newCard as any).canonicalVehicleId || 
+        `${newCard.make}-${newCard.model}`.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+
       const { data: rpcResult, error: rpcError } = await supabase.rpc('record_car_scan', {
         p_make: newCard.make,
         p_model: newCard.model,
@@ -1432,13 +1747,109 @@ export const useApexStore = create<ApexState>((set, get) => ({
         p_horsepower: newCard.horsepower || 0,
         p_top_speed_kmh: newCard.topSpeedKmH || 0,
         p_caption: postCaption,
-        p_image_hash: `hash_${Date.now()}_${newCard.make}_${newCard.model}`
+        p_image_hash: newCard.imageHash || computeImageSha256(newCard.imageUrl) || `hash_${newCard.make}_${newCard.model}_${newCard.id}`,
+        p_canonical_vehicle_id: canonicalId,
+        p_geography_bucket: options?.geoBucket || (newCard as any).geoBucket || (newCard.localRarity as any)?.geographyBucket || null,
+        p_scanner_status: newCard.identificationStatus || 'identified',
+        p_ai_confidence: newCard.aiConfidence || 0.95,
+        p_local_rarity_enabled: featureFlags.isLocalRarityEnabled() && get().localRarityEnabled !== false
       });
 
       if (!rpcError && rpcResult?.success) {
         authoritativeXp = rpcResult.xp_earned || authoritativeXp;
-        authoritativeRarity = rpcResult.rarity || authoritativeRarity;
+        authoritativeRarity = rpcResult.global_rarity || rpcResult.rarity || authoritativeRarity;
         serverCardId = rpcResult.card_id || serverCardId;
+
+        if (rpcResult.local_rarity_tier && rpcResult.confidence_state && featureFlags.isLocalRarityEnabled()) {
+          const isXpEnabled = featureFlags.isLocalRarityXpEnabled() && get().localRarityXpEnabled !== false;
+          const xpModifier = isXpEnabled ? (rpcResult.local_xp_modifier || 1.0) : 1.0;
+          const bonusXp = isXpEnabled ? (rpcResult.local_bonus_xp || 0) : 0;
+          const coarseName = rpcResult.coarse_area_name || newCard.city || 'Your Area';
+          const geoBucketId = options?.geoBucket || (newCard as any).geoBucket || (newCard.localRarity as any)?.geographyBucket || 'global';
+
+          const isDev = Boolean((import.meta as any)?.env?.DEV) || 
+            (typeof (globalThis as any).process !== 'undefined' && (globalThis as any).process?.env?.NODE_ENV !== 'production');
+          let explanationDebug: RarityExplanationDebug | undefined;
+
+          if (isDev) {
+            explanationDebug = {
+              canonicalVehicleId: canonicalId,
+              coarseAreaName: coarseName,
+              geographyBucketId: geoBucketId,
+              globalRarityTier: rpcResult.global_rarity || authoritativeRarity,
+              globalRarityScore: rpcResult.global_rarity_score || 50,
+              globalPrevalencePrior: 0.05,
+              localObservationMass: rpcResult.local_observation_mass || 0,
+              bucketTotalMass: rpcResult.bucket_total_mass || 0,
+              uniqueContributors: rpcResult.unique_contributors || 0,
+              bucketTotalContributors: rpcResult.bucket_unique_contributors || 0,
+              confidenceState: rpcResult.confidence_state,
+              confidenceWeight: rpcResult.confidence_weight || 0,
+              localSightingPrevalence: rpcResult.local_prevalence || 0,
+              prevalenceRatio: rpcResult.prevalence_ratio || 1.0,
+              rawLocalScore: rpcResult.raw_local_score || rpcResult.local_rarity_score || 50,
+              blendedScore: rpcResult.local_rarity_score || 50,
+              localRarityTier: rpcResult.local_rarity_tier,
+              localXpModifier: xpModifier,
+              localBonusXp: bonusXp,
+              modelVersion: rpcResult.model_version || LOCAL_RARITY_CONFIG.MODEL_VERSION,
+              priorWeightAlpha: LOCAL_RARITY_CONFIG.BAYESIAN_PRIOR_WEIGHT_ALPHA,
+              decisionReason: rpcResult.confidence_state === 'LOCAL_UNKNOWN'
+                ? 'Sparse local data: universal rarity baseline applied'
+                : 'Empirical local prevalence calculated with Bayesian Dirichlet shrinkage',
+              calculatedAt: new Date().toISOString()
+            };
+          }
+
+          localRarityData = {
+            localRarityTier: rpcResult.local_rarity_tier,
+            localRarityScore: rpcResult.local_rarity_score || 50,
+            globalRarityTier: rpcResult.global_rarity || authoritativeRarity,
+            globalRarityScore: rpcResult.global_rarity_score || 50,
+            confidenceState: rpcResult.confidence_state,
+            coarseAreaName: coarseName,
+            localXpModifier: xpModifier,
+            localBonusXp: bonusXp,
+            explanation: rpcResult.confidence_state === 'LOCAL_UNKNOWN'
+              ? 'Not enough local sighting data in your broader area yet. Universal rarity applies.'
+              : `Local prevalence in ${coarseName}: ${rpcResult.local_rarity_tier.toUpperCase()}`,
+            explanationDebug
+          };
+
+          // Cache authoritative server response with model version key
+          localRarityCache.set(canonicalId, geoBucketId, {
+            localRarityTier: localRarityData.localRarityTier,
+            localRarityScore: localRarityData.localRarityScore,
+            globalRarityTier: localRarityData.globalRarityTier,
+            globalRarityScore: localRarityData.globalRarityScore,
+            confidenceState: localRarityData.confidenceState,
+            confidenceWeight: rpcResult.confidence_weight || 0,
+            localPrevalence: rpcResult.local_prevalence || 0,
+            globalPrevalencePrior: 0.05,
+            prevalenceRatio: rpcResult.prevalence_ratio || 1.0,
+            localXpModifier: localRarityData.localXpModifier,
+            explanation: localRarityData.explanation,
+            coarseAreaName: localRarityData.coarseAreaName,
+            modelVersion: LOCAL_RARITY_CONFIG.MODEL_VERSION,
+            debug: explanationDebug
+          }, undefined, LOCAL_RARITY_CONFIG.MODEL_VERSION);
+
+          localRarityTracer.recordCalculation({
+            durationMs: 45,
+            geographyBucket: geoBucketId,
+            coarseAreaName: localRarityData.coarseAreaName,
+            confidenceState: localRarityData.confidenceState,
+            globalTier: localRarityData.globalRarityTier,
+            localTier: localRarityData.localRarityTier,
+            xpModifier: localRarityData.localXpModifier,
+            bonusXp: localRarityData.localBonusXp
+          });
+        }
+      } else if (rpcResult && !rpcResult.success) {
+        localRarityTracer.recordAbuseRejection(
+          rpcResult.error || 'Scan validation failed',
+          options?.geoBucket || (newCard as any).geoBucket
+        );
       }
     } catch (dbErr) {
       console.warn('RPC record_car_scan execution fallback:', dbErr);
@@ -1450,7 +1861,9 @@ export const useApexStore = create<ApexState>((set, get) => ({
       rarity: authoritativeRarity,
       xpEarned: authoritativeXp,
       isPublic: isPublicCard,
-      privacyLevel: cardPrivacyLevel
+      privacyLevel: cardPrivacyLevel,
+      localRarity: localRarityData,
+      explanationDebug: localRarityData?.explanationDebug
     };
 
     // Trigger Hunt if requested and allowed

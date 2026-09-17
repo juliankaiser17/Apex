@@ -19,6 +19,7 @@ import { LevelUpModal } from './components/common/LevelUpModal';
 import { DailyStreakModal } from './components/common/DailyStreakModal';
 import { NotificationCenterModal } from './components/common/NotificationCenterModal';
 import { AuthDiagnosticPanel } from './components/admin/AuthDiagnosticPanel';
+import { ModuleErrorBoundary } from './components/common/ModuleErrorBoundary';
 
 import { requestRealLocationPermission } from './utils/geolocation';
 import { applyAppTheme } from './utils/theme';
@@ -38,7 +39,10 @@ export const App: React.FC = () => {
       if (session?.user) {
         logAuthTransition('SESSION_RESOLVED', session.user.id, session.user.email);
         
-        // Authoritatively verify with Supabase server
+        // Fast unlock: show cached state immediately to eliminate startup lag
+        setIsAuthReady(true);
+
+        // Authoritatively verify with Supabase server in background
         const authUser = (await getAuthoritativeUser()) || session.user;
         const provider = authUser.app_metadata?.provider || (authUser.email?.includes('gmail') ? 'google' : 'email');
         
@@ -66,7 +70,6 @@ export const App: React.FC = () => {
         if (typeof window !== 'undefined' && window.location.hash && window.location.hash.includes('access_token=')) {
           window.history.replaceState(null, '', window.location.pathname);
         }
-        setIsAuthReady(true);
       } else {
         // No Supabase session: Authoritatively transition to GUEST
         useApexStore.getState().setAuthStatus('GUEST', null);
@@ -214,24 +217,50 @@ export const App: React.FC = () => {
 
       {/* Main Tab Viewport */}
       <main className="flex-1 flex flex-col">
-        {activeTab === 'home' && <HomeScreen />}
-        {activeTab === 'map' && <MapScreen />}
-        {activeTab === 'garage' && <GarageScreen />}
-        {activeTab === 'social' && <SocialScreen />}
-        {activeTab === 'profile' && <SocialScreen />}
+        {activeTab === 'home' && (
+          <ModuleErrorBoundary moduleName="Dashboard">
+            <HomeScreen />
+          </ModuleErrorBoundary>
+        )}
+        {activeTab === 'map' && (
+          <ModuleErrorBoundary moduleName="Radar Map">
+            <MapScreen />
+          </ModuleErrorBoundary>
+        )}
+        {activeTab === 'garage' && (
+          <ModuleErrorBoundary moduleName="Garage Vault">
+            <GarageScreen />
+          </ModuleErrorBoundary>
+        )}
+        {activeTab === 'social' && (
+          <ModuleErrorBoundary moduleName="Spotter Feed">
+            <SocialScreen />
+          </ModuleErrorBoundary>
+        )}
+        {activeTab === 'profile' && (
+          <ModuleErrorBoundary moduleName="Spotter Profile">
+            <SocialScreen />
+          </ModuleErrorBoundary>
+        )}
       </main>
 
       {/* Fixed Bottom 5-Tab Bar */}
       <TabBar />
 
       {/* Global 3D Card Detail Modal (accessible from Map, Home, Garage & Social) */}
-      <Card3DDetail
-        card={selectedCardForDetail}
-        onClose={() => setSelectedCardForDetail(null)}
-      />
+      {selectedCardForDetail && (
+        <ModuleErrorBoundary moduleName="3D Card Viewer">
+          <Card3DDetail
+            card={selectedCardForDetail}
+            onClose={() => setSelectedCardForDetail(null)}
+          />
+        </ModuleErrorBoundary>
+      )}
 
       {/* Modals & Overlays */}
-      <ScannerModal />
+      <ModuleErrorBoundary moduleName="Vision Scanner">
+        <ScannerModal />
+      </ModuleErrorBoundary>
       <ActiveHuntNotification />
       <EnthusiastModal />
 

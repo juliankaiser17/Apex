@@ -17,7 +17,7 @@ import React, { useRef, useEffect } from 'react';
 import { getPerformanceToggle } from '../../utils/performanceToggles';
 
 const CONFETTI_COLORS = ['#E50914', '#FF5722', '#F59E0B', '#10B981', '#06B6D4', '#FFFFFF'];
-const PARTICLE_COUNT = 18;
+const PARTICLE_COUNT = 14;
 
 export interface ConfettiCelebrationRef {
   trigger: () => void;
@@ -41,8 +41,8 @@ export const ConfettiCelebration = React.forwardRef<ConfettiCelebrationRef, Conf
       }
 
       const now = Date.now();
-      // Reentrant debounce: drop rapid spam clicks within 1500ms
-      if (isPlayingRef.current || now - lastTriggerRef.current < 1500) {
+      // Reentrant debounce: drop rapid spam clicks within 1000ms
+      if (isPlayingRef.current || now - lastTriggerRef.current < 1000) {
         return;
       }
       lastTriggerRef.current = now;
@@ -69,14 +69,14 @@ export const ConfettiCelebration = React.forwardRef<ConfettiCelebrationRef, Conf
         
         // Compute burst trajectory
         const angle = -Math.PI / 2 + (Math.random() - 0.5) * (Math.PI * 0.85); // Upward cone
-        const distance = 100 + Math.random() * 160;
+        const distance = 80 + Math.random() * 120;
         const tx = Math.cos(angle) * distance;
-        const ty = Math.sin(angle) * distance + 50; // gravity drift
-        const rot = (Math.random() - 0.5) * 540;
+        const ty = Math.sin(angle) * distance + 40; // gravity drift
+        const rot = (Math.random() - 0.5) * 450;
         const color = CONFETTI_COLORS[i % CONFETTI_COLORS.length];
-        const width = 6 + Math.floor(Math.random() * 5);
-        const height = 10 + Math.floor(Math.random() * 6);
-        const delayMs = Math.floor(Math.random() * 60);
+        const width = 6 + Math.floor(Math.random() * 4);
+        const height = 9 + Math.floor(Math.random() * 5);
+        const delayMs = Math.floor(Math.random() * 40);
 
         span.className = 'apex-confetti-piece';
         span.style.setProperty('--tx', `${Math.round(tx)}px`);
@@ -92,7 +92,7 @@ export const ConfettiCelebration = React.forwardRef<ConfettiCelebrationRef, Conf
 
       container.appendChild(fragment);
 
-      // Clean up after animation finishes (1100ms)
+      // Clean up after animation finishes (800ms)
       if (timerRef.current) clearTimeout(timerRef.current);
       timerRef.current = setTimeout(() => {
         if (containerRef.current) {
@@ -100,7 +100,7 @@ export const ConfettiCelebration = React.forwardRef<ConfettiCelebrationRef, Conf
         }
         isPlayingRef.current = false;
         onComplete?.();
-      }, 1150);
+      }, 850);
     };
 
     React.useImperativeHandle(ref, () => ({

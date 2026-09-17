@@ -39,18 +39,21 @@ export interface AuthoritativeStreakInfo {
   canClaim: boolean;           // Whether user can claim right now
   reward: StreakReward;        // Exact reward for targetStreak
   diffDays: number;            // Difference in calendar days between now and last claim
+  streakFreezeUsed?: boolean;  // Whether a streak freeze was consumed to preserve streak
 }
 
 export function getAuthoritativeStreak(
   streakDays: number = 0,
   streakLastAt: string | null = null,
-  now: Date = new Date()
+  now: Date = new Date(),
+  options?: { hasStreakFreeze?: boolean; serverTimestamp?: number }
 ): AuthoritativeStreakInfo {
   const currentStreak = Math.max(0, streakDays || 0);
   const lastClaim = streakLastAt ? new Date(streakLastAt) : null;
 
   let isClaimedToday = false;
   let diffDays = 999;
+  let streakFreezeUsed = false;
 
   if (lastClaim && !isNaN(lastClaim.getTime()) && currentStreak > 0) {
     // Check both local date and UTC date to prevent timezone shift false negatives
@@ -73,7 +76,7 @@ export function getAuthoritativeStreak(
       const midnightLast = new Date(lastClaim.getFullYear(), lastClaim.getMonth(), lastClaim.getDate()).getTime();
       diffDays = Math.round((midnightNow - midnightLast) / (1000 * 60 * 60 * 24));
       
-      // If negative diff (clock skew), treat as claimed today
+      // If negative diff (clock skew / spoofing backward), clamp to claimed today
       if (diffDays <= 0) {
         isClaimedToday = true;
         diffDays = 0;
@@ -89,6 +92,10 @@ export function getAuthoritativeStreak(
     if (diffDays === 1) {
       // Claimed yesterday -> eligible for next day in streak
       targetStreak = currentStreak + 1;
+    } else if (diffDays === 2 && options?.hasStreakFreeze) {
+      // Missed 1 day but has active Streak Freeze -> preserve streak!
+      targetStreak = currentStreak + 1;
+      streakFreezeUsed = true;
     } else {
       // Missed more than 1 day -> reset to Day 1
       targetStreak = 1;
@@ -112,6 +119,7 @@ export function getAuthoritativeStreak(
     isClaimedToday,
     canClaim: !isClaimedToday,
     reward,
-    diffDays
+    diffDays,
+    streakFreezeUsed
   };
 }

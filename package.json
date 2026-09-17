@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
-    "test": "tsx scripts/test_sha256_verification.ts && tsx scripts/test_cross_scan_independence.ts && tsx src/ai-engine/evaluation/evaluate_accuracy.ts",
+    "test": "tsx scripts/test_sha256_verification.ts && tsx scripts/test_cross_scan_independence.ts && tsx scripts/test_cloudflare_provider.ts && tsx src/ai-engine/evaluation/evaluate_accuracy.ts",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -16,8 +16,10 @@
     "@capacitor/cli": "^8.5.0",
     "@capacitor/core": "^8.5.0",
     "@capacitor/geolocation": "^8.2.2",
+    "@capacitor/haptics": "^8.0.2",
     "@capacitor/preferences": "^8.0.1",
     "@capacitor/push-notifications": "^8.1.2",
+    "@capacitor/share": "^8.0.1",
     "@capacitor/status-bar": "^8.0.3",
     "@capawesome/capacitor-google-sign-in": "^0.1.2",
     "@supabase/supabase-js": "^2.112.0",
@@ -45,6 +47,7 @@
     "@vitejs/plugin-react": "^6.0.4",
     "oxlint": "^1.71.0",
     "playwright": "^1.63.0",
+    "sharp": "^0.35.4",
     "tailwindcss": "^4.3.3",
     "typescript": "~6.0.2",
     "vite": "^8.1.1"

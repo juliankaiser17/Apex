@@ -5,6 +5,8 @@ import { getProgressToNextLevel } from '../../utils/mastery';
 import { sounds } from '../../utils/audio';
 import { AiControlCenterModal } from '../admin/AiControlCenterModal';
 
+import { hapticTap } from '../../utils/haptics';
+
 export const HeaderBar: React.FC = React.memo(() => {
   // Fine-grained atomic store selectors (Shields HeaderBar from coordinate / garage churn)
   const userCity = useApexStore(s => s.user.city);
@@ -30,13 +32,14 @@ export const HeaderBar: React.FC = React.memo(() => {
 
   return (
     <>
-      {/* Top Sleek Mobile Header (Solid high-performance dark surface, zero live blur convolution) */}
-      <header className="sticky top-0 z-30 w-full pt-safe border-b border-white/[0.07] bg-[#0c0c0c]/96 select-none font-sans" style={{ willChange: 'transform' }}>
+      {/* Top Sleek Mobile Header with subtle spatial glass styling */}
+      <header className="sticky top-0 z-30 w-full pt-safe border-b border-white/[0.08] bg-[#0c0c0c]/92 backdrop-blur-xl select-none font-sans" style={{ willChange: 'transform' }}>
         <div className="px-4 py-2.5">
           <div className="flex items-center justify-between">
             {/* Left: APEX Logo */}
             <div 
               onClick={() => {
+                hapticTap();
                 sounds.playTargetLock();
                 setActiveTab('home');
               }} 
@@ -59,10 +62,11 @@ export const HeaderBar: React.FC = React.memo(() => {
               {/* Daily Streak Button */}
               <button
                 onClick={() => {
+                  hapticTap();
                   sounds.playTargetLock();
                   setStreakModalOpen(true);
                 }}
-                className="flex items-center gap-1 px-2.5 py-1 rounded-full transition-all active:scale-95 group border"
+                className="flex items-center gap-1 px-2.5 py-1 rounded-full transition-all active:scale-95 group border cursor-pointer"
                 style={{
                   backgroundColor: 'var(--accent-subtle)',
                   borderColor: 'var(--accent-border)'
@@ -81,10 +85,11 @@ export const HeaderBar: React.FC = React.memo(() => {
               {/* Notifications Button with Unread Badge */}
               <button
                 onClick={() => {
+                  hapticTap();
                   sounds.playTargetLock();
                   setNotificationModalOpen(true);
                 }}
-                className="relative w-8 h-8 rounded-full bg-white/[0.06] hover:bg-white/[0.12] border border-white/[0.08] flex items-center justify-center text-white/70 hover:text-white transition-colors active:scale-95"
+                className="relative w-8 h-8 rounded-full bg-white/[0.06] hover:bg-white/[0.12] border border-white/[0.08] flex items-center justify-center text-white/70 hover:text-white transition-colors active:scale-95 cursor-pointer"
                 title="Notifications & Hunts"
               >
                 <Bell className="w-3.5 h-3.5" />
@@ -115,10 +120,11 @@ export const HeaderBar: React.FC = React.memo(() => {
               {/* AI Fleet Control Center Button */}
               <button
                 onClick={() => {
+                  hapticTap();
                   sounds.playTargetLock();
                   setIsAiControlOpen(true);
                 }}
-                className="w-8 h-8 rounded-full border flex items-center justify-center transition-colors active:scale-95 shadow-sm"
+                className="w-8 h-8 rounded-full border flex items-center justify-center transition-colors active:scale-95 shadow-sm cursor-pointer"
                 style={{
                   backgroundColor: 'var(--accent-subtle)',
                   borderColor: 'var(--accent-border)',
@@ -132,10 +138,11 @@ export const HeaderBar: React.FC = React.memo(() => {
               {/* Profile & Privacy Settings Button */}
               <button
                 onClick={() => {
+                  hapticTap();
                   sounds.playTargetLock();
                   setSettingsModalOpen(true);
                 }}
-                className="w-8 h-8 rounded-full bg-white/[0.06] hover:bg-white/[0.12] border border-white/[0.08] flex items-center justify-center text-white/70 hover:text-white transition-colors active:scale-95"
+                className="w-8 h-8 rounded-full bg-white/[0.06] hover:bg-white/[0.12] border border-white/[0.08] flex items-center justify-center text-white/70 hover:text-white transition-colors active:scale-95 cursor-pointer"
                 title="Settings & Privacy"
               >
                 <Settings className="w-3.5 h-3.5" />

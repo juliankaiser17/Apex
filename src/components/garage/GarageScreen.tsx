@@ -18,6 +18,7 @@ import type { CarCard, RarityTier } from '../../types/apex';
 import { RARITY_CONFIG } from '../../utils/rarity';
 import { sounds } from '../../utils/audio';
 import { getOptimizedImageUrl } from '../../utils/imageUrl';
+import { hapticTap, hapticImpact } from '../../utils/haptics';
 
 const INITIAL_RENDER_LIMIT = 24;
 
@@ -33,8 +34,8 @@ const GarageGridCard = React.memo<{ card: CarCard; onClick: (card: CarCard) => v
   return (
     <div
       onClick={() => onClick(card)}
-      className={`relative rounded-2xl overflow-hidden bg-[#121212] border hover:border-white/[0.25] active:scale-[0.98] transition-all cursor-pointer group flex flex-col shadow-lg ${
-        card.pendingDeletionUntil ? 'border-amber-500/50 ring-1 ring-amber-500/30' : 'border-white/[0.08]'
+      className={`relative rounded-2xl overflow-hidden glass-card-spatial border hover:border-white/[0.25] active:scale-[0.97] transition-all cursor-pointer group flex flex-col shadow-xl ${
+        card.pendingDeletionUntil ? 'border-amber-500/50 ring-1 ring-amber-500/30' : 'border-white/[0.09]'
       }`}
     >
       {/* Vehicle Image Container */}
@@ -46,11 +47,11 @@ const GarageGridCard = React.memo<{ card: CarCard; onClick: (card: CarCard) => v
           decoding="async"
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#121212] via-transparent to-transparent opacity-80" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#101010] via-transparent to-transparent opacity-90" />
 
         {/* Floating Rarity Badge */}
         <div className="absolute top-2 left-2">
-          <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full border shadow-md ${rarityConf.badgeBg}`}>
+          <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full border shadow-lg backdrop-blur-md ${rarityConf.badgeBg}`}>
             {rarityConf.label}
           </span>
         </div>
@@ -64,10 +65,9 @@ const GarageGridCard = React.memo<{ card: CarCard; onClick: (card: CarCard) => v
           </div>
         )}
 
-
         {card.generation && (
           <div className="absolute top-2 right-2">
-            <span className="text-[9px] font-data bg-black/60 backdrop-blur-md text-white/80 px-1.5 py-0.5 rounded border border-white/10">
+            <span className="text-[9px] font-data bg-black/70 backdrop-blur-md text-white/80 px-1.5 py-0.5 rounded border border-white/10">
               {card.generation}
             </span>
           </div>
@@ -75,7 +75,7 @@ const GarageGridCard = React.memo<{ card: CarCard; onClick: (card: CarCard) => v
       </div>
 
       {/* Vehicle Details */}
-      <div className="p-3 bg-[#121212] space-y-1.5 flex-1 flex flex-col justify-between">
+      <div className="p-3 bg-gradient-to-b from-[#141414] to-[#0d0d0d] space-y-1.5 flex-1 flex flex-col justify-between">
         <div>
           <span className="text-[10px] font-semibold text-white/50 uppercase tracking-wider block truncate">
             {card.make}
@@ -88,7 +88,7 @@ const GarageGridCard = React.memo<{ card: CarCard; onClick: (card: CarCard) => v
         {/* Key Performance Indicators */}
         <div className="pt-2 border-t border-white/[0.06] flex items-center justify-between text-[10px] text-white/70 font-data">
           <span className="font-semibold text-white/90">{hp} HP</span>
-          <div className="w-1 h-1 rounded-full bg-white/20" />
+          <div className="w-1 h-1 rounded-full bg-white/30" />
           <span>{topSpeed} KM/H</span>
         </div>
       </div>
@@ -108,8 +108,8 @@ const GarageListCard = React.memo<{ card: CarCard; onClick: (card: CarCard) => v
   return (
     <div
       onClick={() => onClick(card)}
-      className={`p-3 rounded-2xl bg-[#121212] border hover:border-white/[0.2] active:scale-[0.99] flex items-center justify-between transition-all cursor-pointer group shadow-md ${
-        card.pendingDeletionUntil ? 'border-amber-500/50 ring-1 ring-amber-500/30' : 'border-white/[0.08]'
+      className={`p-3 rounded-2xl glass-panel border hover:border-white/[0.2] active:scale-[0.98] flex items-center justify-between transition-all cursor-pointer group shadow-lg ${
+        card.pendingDeletionUntil ? 'border-amber-500/50 ring-1 ring-amber-500/30' : 'border-white/[0.09]'
       }`}
     >
       <div className="flex items-center gap-3.5 min-w-0">
@@ -118,11 +118,11 @@ const GarageListCard = React.memo<{ card: CarCard; onClick: (card: CarCard) => v
           alt={card.model} 
           loading="lazy"
           decoding="async"
-          className="w-16 h-16 rounded-xl object-cover border border-white/[0.08] bg-black shrink-0"
+          className="w-16 h-16 rounded-xl object-cover border border-white/[0.1] bg-black shrink-0 shadow-md"
         />
         <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full border ${rarityConf.badgeBg}`}>
+            <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full border backdrop-blur-md ${rarityConf.badgeBg}`}>
               {rarityConf.label}
             </span>
             {card.generation && (
@@ -220,11 +220,13 @@ export const GarageScreen: React.FC = () => {
   }, [filteredGarage, visibleCount]);
 
   const handleCardClick = useCallback((card: CarCard) => {
+    hapticTap();
     sounds.playTargetLock();
     setSelectedCardForDetail(card);
   }, [setSelectedCardForDetail]);
 
   const handleLoadMore = () => {
+    hapticTap();
     sounds.playTargetLock();
     setVisibleCount(prev => prev + 24);
   };
@@ -242,20 +244,24 @@ export const GarageScreen: React.FC = () => {
             />
             <div>
               <h1 className="text-2xl font-bold text-white tracking-tight leading-none">
-                My Garage
+                Showroom Vault
               </h1>
               <p className="text-[11px] text-white/50 font-data mt-1 uppercase tracking-wider">
-                {garage.length} Vehicles Spotted
+                {garage.length} Vehicles Collected
               </p>
             </div>
           </div>
 
           {/* View Mode Switcher + Add Button */}
           <div className="flex items-center gap-2">
-            <div className="flex items-center bg-[#141414] p-1 rounded-xl border border-white/[0.08]">
+            <div className="flex items-center bg-black/50 p-1 rounded-2xl border border-white/[0.08] backdrop-blur-md">
               <button
-                onClick={() => { sounds.playTargetLock(); setViewMode('grid'); }}
-                className={`p-1.5 rounded-lg transition-all ${
+                onClick={() => { 
+                  hapticImpact('light');
+                  sounds.playTargetLock(); 
+                  setViewMode('grid'); 
+                }}
+                className={`p-1.5 rounded-xl transition-all cursor-pointer ${
                   viewMode === 'grid' 
                     ? 'text-white shadow-md' 
                     : 'text-white/40 hover:text-white'
@@ -266,8 +272,12 @@ export const GarageScreen: React.FC = () => {
                 <Grid className="w-4 h-4" />
               </button>
               <button
-                onClick={() => { sounds.playTargetLock(); setViewMode('list'); }}
-                className={`p-1.5 rounded-lg transition-all ${
+                onClick={() => { 
+                  hapticImpact('light');
+                  sounds.playTargetLock(); 
+                  setViewMode('list'); 
+                }}
+                className={`p-1.5 rounded-xl transition-all cursor-pointer ${
                   viewMode === 'list' 
                     ? 'text-white shadow-md' 
                     : 'text-white/40 hover:text-white'
@@ -280,11 +290,15 @@ export const GarageScreen: React.FC = () => {
             </div>
 
             <button
-              onClick={() => { sounds.playTargetLock(); setScannerOpen(true); }}
-              className="p-2 rounded-xl text-white shadow-lg active:scale-95 transition-all"
+              onClick={() => { 
+                hapticImpact('medium');
+                sounds.playTargetLock(); 
+                setScannerOpen(true); 
+              }}
+              className="p-2.5 rounded-2xl text-white shadow-xl active:scale-95 transition-all cursor-pointer border border-white/15"
               style={{
                 backgroundColor: 'var(--accent-color)',
-                boxShadow: '0 4px 14px var(--accent-glow)'
+                boxShadow: '0 4px 16px var(--accent-glow)'
               }}
               title="Scan New Vehicle"
             >
@@ -294,8 +308,8 @@ export const GarageScreen: React.FC = () => {
         </div>
 
         {/* Dynamic Telemetry Stats Pill Bar */}
-        <div className="grid grid-cols-3 gap-2 p-2.5 rounded-2xl bg-[#121212] border border-white/[0.08]">
-          <div className="text-center p-1.5 rounded-xl bg-white/[0.02]">
+        <div className="glass-panel grid grid-cols-3 gap-2 p-2.5 rounded-3xl border border-white/[0.09] shadow-xl">
+          <div className="text-center p-2 rounded-2xl bg-black/40 border border-white/[0.05]">
             <span className="text-[9px] font-data text-white/40 uppercase block">HIGHEST TIER</span>
             <span 
               className="text-xs font-bold flex items-center justify-center gap-1 mt-0.5"
@@ -306,7 +320,7 @@ export const GarageScreen: React.FC = () => {
             </span>
           </div>
 
-          <div className="text-center p-1.5 rounded-xl bg-white/[0.02]">
+          <div className="text-center p-2 rounded-2xl bg-black/40 border border-white/[0.05]">
             <span className="text-[9px] font-data text-white/40 uppercase block">TOP SPEED</span>
             <span className="text-xs font-bold text-white flex items-center justify-center gap-1 mt-0.5">
               <Gauge className="w-3 h-3 text-white/50" />
@@ -314,7 +328,7 @@ export const GarageScreen: React.FC = () => {
             </span>
           </div>
 
-          <div className="text-center p-1.5 rounded-xl bg-white/[0.02]">
+          <div className="text-center p-2 rounded-2xl bg-black/40 border border-white/[0.05]">
             <span className="text-[9px] font-data text-white/40 uppercase block">TOTAL POWER</span>
             <span className="text-xs font-bold text-white flex items-center justify-center gap-1 mt-0.5">
               <Zap className="w-3 h-3 text-yellow-400" />
@@ -333,11 +347,14 @@ export const GarageScreen: React.FC = () => {
             placeholder="Search make, model, or year..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-[#141414] border border-white/[0.08] rounded-2xl pl-10 pr-9 py-2.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-[#E50914] transition-colors"
+            className="w-full bg-[#141414]/90 backdrop-blur-md border border-white/[0.09] rounded-2xl pl-10 pr-9 py-2.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-white/30 transition-colors shadow-inner"
           />
           {searchQuery && (
             <button
-              onClick={() => setSearchQuery('')}
+              onClick={() => {
+                hapticTap();
+                setSearchQuery('');
+              }}
               className="absolute right-3 p-1 text-white/40 hover:text-white"
             >
               <X className="w-3.5 h-3.5" />
@@ -348,11 +365,15 @@ export const GarageScreen: React.FC = () => {
         {/* Scrollable Rarity Filter Chips */}
         <div className="flex gap-1.5 overflow-x-auto no-scrollbar py-0.5">
           <button
-            onClick={() => { sounds.playTargetLock(); setSelectedRarity('all'); }}
-            className={`flex-shrink-0 px-3 py-1.5 rounded-xl text-xs transition-all border whitespace-nowrap active:scale-95 ${
+            onClick={() => { 
+              hapticTap();
+              sounds.playTargetLock(); 
+              setSelectedRarity('all'); 
+            }}
+            className={`flex-shrink-0 px-3 py-1.5 rounded-xl text-xs transition-all border whitespace-nowrap active:scale-95 cursor-pointer ${
               selectedRarity === 'all' 
                 ? 'text-white font-semibold shadow-md' 
-                : 'bg-[#141414] text-white/60 border-white/[0.08] hover:border-white/20'
+                : 'bg-black/40 text-white/60 border-white/[0.08] hover:border-white/20'
             }`}
             style={selectedRarity === 'all' ? {
               backgroundColor: 'var(--accent-color)',
@@ -369,11 +390,15 @@ export const GarageScreen: React.FC = () => {
             return (
               <button
                 key={r}
-                onClick={() => { sounds.playTargetLock(); setSelectedRarity(r); }}
-                className={`flex-shrink-0 px-3 py-1.5 rounded-xl text-xs transition-all border whitespace-nowrap active:scale-95 ${
+                onClick={() => { 
+                  hapticTap();
+                  sounds.playTargetLock(); 
+                  setSelectedRarity(r); 
+                }}
+                className={`flex-shrink-0 px-3 py-1.5 rounded-xl text-xs transition-all border whitespace-nowrap active:scale-95 cursor-pointer ${
                   isSelected 
                     ? 'text-white font-semibold shadow-md' 
-                    : 'bg-[#141414] text-white/60 border-white/[0.08] hover:border-white/20'
+                    : 'bg-black/40 text-white/60 border-white/[0.08] hover:border-white/20'
                 }`}
                 style={isSelected ? {
                   backgroundColor: 'var(--accent-color)',
@@ -417,7 +442,7 @@ export const GarageScreen: React.FC = () => {
           {visibleCards.length < filteredGarage.length && (
             <button
               onClick={handleLoadMore}
-              className="w-full py-3 rounded-2xl bg-[#141414] border border-white/[0.08] hover:border-white/20 text-white/80 hover:text-white font-medium text-xs flex items-center justify-center gap-1.5 transition-all shadow-md active:scale-[0.99]"
+              className="w-full py-3 rounded-2xl glass-panel border border-white/[0.09] hover:border-white/20 text-white/80 hover:text-white font-medium text-xs flex items-center justify-center gap-1.5 transition-all shadow-md active:scale-[0.99] cursor-pointer"
             >
               <span>Show More Vehicles ({filteredGarage.length - visibleCards.length} remaining)</span>
               <ChevronDown className="w-3.5 h-3.5" />
@@ -426,7 +451,7 @@ export const GarageScreen: React.FC = () => {
         </div>
       ) : (
         /* Empty State */
-        <div className="text-center py-16 space-y-4 bg-[#121212] border border-white/[0.08] rounded-3xl p-6 shadow-2xl">
+        <div className="text-center py-16 space-y-4 glass-panel border border-white/[0.09] rounded-3xl p-6 shadow-2xl">
           <div className="w-14 h-14 rounded-2xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center mx-auto shadow-inner">
             <Sparkles className="w-6 h-6" style={{ color: 'var(--accent-color)' }} />
           </div>
@@ -443,11 +468,12 @@ export const GarageScreen: React.FC = () => {
           
           <button
             onClick={() => {
+              hapticImpact('medium');
               sounds.playTargetLock();
               if (searchQuery) setSearchQuery('');
               else setScannerOpen(true);
             }}
-            className="px-6 py-3 rounded-2xl text-white font-semibold text-xs transition-all shadow-lg active:scale-95 inline-flex items-center gap-2"
+            className="px-6 py-3 rounded-2xl text-white font-semibold text-xs transition-all shadow-xl active:scale-95 inline-flex items-center gap-2 cursor-pointer border border-white/10"
             style={{
               backgroundColor: 'var(--accent-color)',
               boxShadow: '0 4px 16px var(--accent-glow)'

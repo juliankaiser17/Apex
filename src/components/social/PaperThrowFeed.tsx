@@ -15,13 +15,15 @@ import {
   Sparkles,
   ChevronUp,
   ChevronDown,
-  MapPin
+  MapPin,
+  Flag
 } from 'lucide-react';
 import { useApexStore } from '../../store/useApexStore';
 import type { FeedPost, CarCard } from '../../types/apex';
 import { RARITY_CONFIG } from '../../utils/rarity';
 import { sounds } from '../../utils/audio';
 import { getOptimizedImageUrl, imagePrefetchCache } from '../../utils/imageUrl';
+import { ModerationModal } from '../moderation/ModerationModal';
 
 interface PaperThrowFeedProps {
   posts: FeedPost[];
@@ -48,6 +50,7 @@ export const PaperThrowFeed: React.FC<PaperThrowFeedProps> = ({
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [likeBurst, setLikeBurst] = useState<{ id: string; x: number; y: number } | null>(null);
+  const [moderationPost, setModerationPost] = useState<FeedPost | null>(null);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const prevLayerRef = useRef<HTMLDivElement>(null);
@@ -402,7 +405,9 @@ export const PaperThrowFeed: React.FC<PaperThrowFeedProps> = ({
     }
   };
 
-  const effectivePosts = (posts && posts.length > 0) ? posts : [];
+  const effectivePosts = ((posts && posts.length > 0) ? posts : []).filter(
+    p => !(user?.blockedUsers || []).includes(p.user.id)
+  );
   if (effectivePosts.length === 0) {
     return (
       <div className="text-center py-24 px-6 space-y-5 bg-[#111111] rounded-3xl border border-white/10 shadow-2xl max-w-sm mx-auto my-12">
@@ -470,6 +475,7 @@ export const PaperThrowFeed: React.FC<PaperThrowFeedProps> = ({
             deletePost={deletePost}
             sendFriendRequest={sendFriendRequest}
             isFriend={friends.some(f => f.username.toLowerCase() === prevPost.user.username.toLowerCase())}
+            onReportPost={setModerationPost}
           />
         </div>
       )}
@@ -501,6 +507,7 @@ export const PaperThrowFeed: React.FC<PaperThrowFeedProps> = ({
           deletePost={deletePost}
           sendFriendRequest={sendFriendRequest}
           isFriend={friends.some(f => f.username.toLowerCase() === currentPost.user.username.toLowerCase())}
+          onReportPost={setModerationPost}
         />
       </div>
 
@@ -533,6 +540,7 @@ export const PaperThrowFeed: React.FC<PaperThrowFeedProps> = ({
             deletePost={deletePost}
             sendFriendRequest={sendFriendRequest}
             isFriend={friends.some(f => f.username.toLowerCase() === nextPost.user.username.toLowerCase())}
+            onReportPost={setModerationPost}
           />
         </div>
       )}
@@ -552,6 +560,18 @@ export const PaperThrowFeed: React.FC<PaperThrowFeedProps> = ({
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* ─── MODERATION REPORT & BLOCK MODAL ─── */}
+      {moderationPost && (
+        <ModerationModal
+          isOpen={true}
+          targetType="post"
+          targetId={moderationPost.id}
+          targetUserId={moderationPost.user.id}
+          targetUsername={moderationPost.user.username}
+          onClose={() => setModerationPost(null)}
+        />
+      )}
     </div>
   );
 };
@@ -574,6 +594,7 @@ interface DiscoverySheetContentProps {
   deletePost: (postId: string) => void;
   sendFriendRequest: (username: string) => Promise<any>;
   isFriend: boolean;
+  onReportPost?: (post: FeedPost) => void;
 }
 
 const DiscoverySheetContent = React.memo<DiscoverySheetContentProps>(({
@@ -589,7 +610,8 @@ const DiscoverySheetContent = React.memo<DiscoverySheetContentProps>(({
   toggleLikePost,
   deletePost,
   sendFriendRequest,
-  isFriend
+  isFriend,
+  onReportPost
 }) => {
   const rarityConf = (post.card && RARITY_CONFIG[post.card.rarity]) || RARITY_CONFIG.rare;
   const isMe = post.user.id === user?.id || post.user.username === user?.username;
@@ -681,7 +703,7 @@ const DiscoverySheetContent = React.memo<DiscoverySheetContentProps>(({
       <div 
         onClick={(e) => e.stopPropagation()} 
         onPointerDown={(e) => e.stopPropagation()}
-        className="absolute right-3.5 bottom-6 z-30 flex flex-col items-center gap-3.5 pointer-events-auto"
+        className="absolute right-3.5 bottom-24 z-30 flex flex-col items-center gap-2.5 pointer-events-auto"
       >
         {/* Avatar + Follow/Add Friend Button (Clickable to open profile) */}
         <div className="relative flex flex-col items-center">
@@ -744,7 +766,7 @@ const DiscoverySheetContent = React.memo<DiscoverySheetContentProps>(({
             <MessageSquare className="w-5 h-5" />
           </div>
           <span className="text-[10px] font-bold text-white drop-shadow mt-1">
-            {post.commentsCount}
+            {post.comments ? post.comments.length : (post.commentsCount || 0)}
           </span>
         </button>
 
@@ -798,12 +820,26 @@ const DiscoverySheetContent = React.memo<DiscoverySheetContentProps>(({
             <Trash2 className="w-4 h-4" />
           </button>
         )}
+
+        {/* Report / Moderation Button (Non-Author) */}
+        {!isMe && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onReportPost?.(post);
+            }}
+            className="w-10 h-10 rounded-full bg-[#161616]/90 border border-white/15 flex items-center justify-center text-white/60 hover:text-amber-400 hover:border-amber-400/30 transition-all active:scale-90 mt-1"
+            title="Report or Block"
+          >
+            <Flag className="w-4 h-4" />
+          </button>
+        )}
       </div>
 
       {/* ─── 5. BOTTOM-LEFT DISCOVERY HIERARCHY ─── */}
       <div 
         onClick={(e) => e.stopPropagation()}
-        className="absolute bottom-5 left-4 right-20 z-20 space-y-1.5 pointer-events-auto"
+        className="absolute bottom-24 left-4 right-20 z-20 space-y-1.5 pointer-events-auto"
       >
         {/* User Identity Line (Clickable Username -> Public Profile) */}
         <div className="flex items-center gap-2">

@@ -20,11 +20,13 @@ import type { FeedPost } from '../../types/apex';
 interface MediaPostComposerModalProps {
   isOpen: boolean;
   onClose: () => void;
+  initialPhotoUrl?: string | null;
 }
 
 export const MediaPostComposerModal: React.FC<MediaPostComposerModalProps> = ({
   isOpen,
-  onClose
+  onClose,
+  initialPhotoUrl
 }) => {
   const user = useApexStore(s => s.user);
 
@@ -37,6 +39,15 @@ export const MediaPostComposerModal: React.FC<MediaPostComposerModalProps> = ({
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Sync initial photo passed from creation sheet
+  React.useEffect(() => {
+    if (initialPhotoUrl) {
+      setPreviewUrl(initialPhotoUrl);
+      setMediaType('image');
+      setSelectedFile(null);
+    }
+  }, [initialPhotoUrl]);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const isSubmittingRef = useRef(false);
@@ -149,6 +160,12 @@ export const MediaPostComposerModal: React.FC<MediaPostComposerModalProps> = ({
   const handleTakeCameraPhoto = async () => {
     try {
       sounds.playShutter();
+      const permStatus = await CapCamera.requestPermissions();
+      if (permStatus.camera !== 'granted' && permStatus.camera !== 'prompt-with-rationale') {
+        setErrorMessage('Camera permission is required to take vehicle photos directly. Please allow camera access in device settings.');
+        return;
+      }
+
       const photo = await CapCamera.getPhoto({
         quality: 90,
         allowEditing: false,
@@ -157,14 +174,25 @@ export const MediaPostComposerModal: React.FC<MediaPostComposerModalProps> = ({
       });
 
       if (photo.dataUrl) {
-        // Convert DataUrl to File
-        const res = await fetch(photo.dataUrl);
-        const blob = await res.blob();
-        const file = new File([blob], `apex_capture_${Date.now()}.jpg`, { type: 'image/jpeg' });
-        processSelectedFile(file);
+        setMediaType('image');
+        setPreviewUrl(photo.dataUrl);
+        setThumbnailDataUrl(null);
+        setErrorMessage(null);
+        try {
+          const res = await fetch(photo.dataUrl);
+          const blob = await res.blob();
+          const file = new File([blob], `apex_capture_${Date.now()}.jpg`, { type: 'image/jpeg' });
+          setSelectedFile(file);
+        } catch (fileErr) {
+          console.warn('Could not construct file from photo dataUrl:', fileErr);
+        }
       }
-    } catch (err) {
-      console.warn('Camera capture cancelled or failed:', err);
+    } catch (e: any) {
+      const msg = e?.message || String(e);
+      if (!msg.toLowerCase().includes('cancel') && !msg.toLowerCase().includes('user cancelled')) {
+        console.warn('Camera photo error:', e);
+        setErrorMessage('Could not open camera. Please ensure permissions are granted.');
+      }
     }
   };
 
@@ -374,40 +402,45 @@ export const MediaPostComposerModal: React.FC<MediaPostComposerModalProps> = ({
             {/* Media Selector or Preview Area */}
             {!previewUrl ? (
               <div className="space-y-3">
+                {/* Primary Card: Direct Camera Capture */}
                 <div 
-                  onClick={() => fileInputRef.current?.click()}
-                  className="w-full h-56 rounded-2xl border-2 border-dashed border-white/20 hover:border-[#E50914] bg-[#161616] flex flex-col items-center justify-center p-6 text-center cursor-pointer transition-all active:scale-[0.99] group"
+                  onClick={handleTakeCameraPhoto}
+                  className="w-full p-5 rounded-2xl border border-[#E50914]/40 hover:border-[#E50914] bg-gradient-to-r from-[#E50914]/20 via-[#E50914]/10 to-transparent flex items-center gap-4 cursor-pointer transition-all active:scale-[0.98] group shadow-lg shadow-red-950/20"
                 >
-                  <div className="w-14 h-14 rounded-2xl bg-white/5 group-hover:bg-[#E50914]/20 border border-white/10 group-hover:border-[#E50914] flex items-center justify-center text-white/70 group-hover:text-[#E50914] transition-all mb-3">
-                    <Upload className="w-6 h-6" />
+                  <div className="w-13 h-13 rounded-2xl bg-[#E50914] flex items-center justify-center text-white shadow-lg shadow-red-950/50 shrink-0 group-hover:scale-105 transition-transform">
+                    <CameraIcon className="w-6 h-6" />
                   </div>
-                  <h4 className="font-bold text-sm text-white mb-1">Choose Photo or Video</h4>
-                  <p className="text-xs text-white/50 max-w-xs leading-relaxed">
-                    Select a car photograph, rolling shot, or video edit from your device
-                  </p>
-                  <span className="text-[10px] text-white/30 font-mono mt-3">
-                    MP4, MOV, WebM (up to 50MB) · JPEG, PNG (up to 15MB)
-                  </span>
+                  <div className="flex-1 min-w-0 text-left">
+                    <div className="flex items-center gap-2">
+                      <h4 className="font-display text-sm font-bold text-white tracking-wide">
+                        TAKE VEHICLE PHOTO
+                      </h4>
+                      <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-[#E50914] text-white uppercase">
+                        CAMERA
+                      </span>
+                    </div>
+                    <p className="text-xs text-white/70 leading-snug mt-0.5">
+                      Prompts camera permission & opens native camera
+                    </p>
+                  </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="py-3 px-4 rounded-xl bg-[#1c1c1c] border border-white/10 hover:border-white/25 active:scale-95 flex items-center justify-center gap-2 text-xs font-semibold text-white/90 transition-all"
-                  >
-                    <ImageIcon className="w-4 h-4 text-[#E50914]" />
-                    <span>Media Library</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={handleTakeCameraPhoto}
-                    className="py-3 px-4 rounded-xl bg-[#1c1c1c] border border-white/10 hover:border-white/25 active:scale-95 flex items-center justify-center gap-2 text-xs font-semibold text-white/90 transition-all"
-                  >
-                    <CameraIcon className="w-4 h-4 text-[#E50914]" />
-                    <span>Take Photo</span>
-                  </button>
+                {/* Secondary Card: Choose from Library */}
+                <div 
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-full p-5 rounded-2xl border border-white/15 hover:border-white/30 bg-[#161616] flex items-center gap-4 cursor-pointer transition-all active:scale-[0.98] group"
+                >
+                  <div className="w-13 h-13 rounded-2xl bg-white/10 flex items-center justify-center text-white/90 border border-white/10 shrink-0 group-hover:border-white/25 transition-colors">
+                    <Upload className="w-6 h-6" />
+                  </div>
+                  <div className="flex-1 min-w-0 text-left">
+                    <h4 className="font-display text-sm font-bold text-white tracking-wide">
+                      SELECT FROM GALLERY
+                    </h4>
+                    <p className="text-xs text-white/50 leading-snug mt-0.5">
+                      Upload photo or rolling video (up to 50MB)
+                    </p>
+                  </div>
                 </div>
               </div>
             ) : (

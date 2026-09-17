@@ -25,13 +25,16 @@ export const PostComposer: React.FC<PostComposerProps> = ({
 }) => {
   const handleExit = onClose || onBack || (() => {});
   const handleFinished = onPosted || onPostComplete || (() => {});
-  const { addCardToGarage, setActiveTab, setScannerOpen } = useApexStore();
+  const { addCardToGarage, setActiveTab, setScannerOpen, friends } = useApexStore();
   
   const [caption, setCaption] = useState('');
   const [privacyMode, setPrivacyMode] = useState<LocationPrivacyOption>('approx_delayed_5');
   const [allowComments, setAllowComments] = useState(true);
   const [startHunt, setStartHunt] = useState(true);
   const [uploadState, setUploadState] = useState<'idle' | 'uploading' | 'success'>('idle');
+
+  const activeSpottersInCity = (friends || []).filter(f => f.city && card.city && f.city.toLowerCase() === card.city.toLowerCase()).length;
+  const isSoloHunt = activeSpottersInCity < 2;
 
   const rarityConf = RARITY_CONFIG[card.rarity] || RARITY_CONFIG.rare;
   const charCount = caption.length;
@@ -211,28 +214,45 @@ export const PostComposer: React.FC<PostComposerProps> = ({
             </div>
           </div>
 
-          {/* COMMUNITY HUNT TOGGLE */}
-          <div className="bg-[#141414] border border-white/[0.08] p-4 rounded-2xl flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-red-500/10 border border-red-500/20 text-[#E50914]">
-                <Flame className="w-4 h-4" />
+          {/* HUNT MODE TOGGLE */}
+          <div className="bg-[#141414] border border-white/[0.08] p-4 rounded-2xl space-y-2.5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-xl bg-red-500/10 border border-red-500/20 text-[#E50914]">
+                  <Flame className="w-4 h-4" />
+                </div>
+                <div>
+                  <span className="text-sm font-semibold text-white block">
+                    {isSoloHunt ? 'Start Solo Time-Attack Hunt' : 'Start Community Hunt'}
+                  </span>
+                  <span className="text-xs text-white/50">
+                    {isSoloHunt ? '15-min personal challenge with +50% XP bonus' : 'Launches a 7-minute radar hunt with tiered XP'}
+                  </span>
+                </div>
               </div>
-              <div>
-                <span className="text-sm font-semibold text-white block">Start Community Hunt</span>
-                <span className="text-xs text-white/50">Launches a 7-minute radar hunt with tiered XP</span>
-              </div>
+
+              <button
+                onClick={() => setStartHunt(!startHunt)}
+                className={`w-11 h-6 rounded-full transition-colors relative ${
+                  startHunt ? 'bg-[#E50914]' : 'bg-white/20'
+                }`}
+              >
+                <div className={`w-4 h-4 rounded-full bg-white absolute top-1 transition-all ${
+                  startHunt ? 'left-6' : 'left-1'
+                }`} />
+              </button>
             </div>
 
-            <button
-              onClick={() => setStartHunt(!startHunt)}
-              className={`w-11 h-6 rounded-full transition-colors relative ${
-                startHunt ? 'bg-[#E50914]' : 'bg-white/20'
-              }`}
-            >
-              <div className={`w-4 h-4 rounded-full bg-white absolute top-1 transition-all ${
-                startHunt ? 'left-6' : 'left-1'
-              }`} />
-            </button>
+            {startHunt && isSoloHunt && (
+              <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-left space-y-1">
+                <span className="text-[11px] font-bold text-amber-300 block">
+                  ⚡ Low Spotter Density in {card.city || 'Sector'}
+                </span>
+                <p className="text-[10px] text-white/60 leading-snug">
+                  Fewer than 2 spotters active nearby. A 15-minute <strong>Solo Time-Attack Hunt</strong> will be initiated with +50% XP bonus instead of an unjoinable multiplayer lobby.
+                </p>
+              </div>
+            )}
           </div>
 
           {/* COMMENTS TOGGLE */}

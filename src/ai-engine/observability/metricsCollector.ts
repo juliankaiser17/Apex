@@ -11,7 +11,7 @@ import { aiProviderRouter } from '../providers/providerRouter';
 import { workerPool } from '../queue/workerPool';
 
 export class MetricsCollector {
-  private latencySamples: number[] = [320, 450, 480, 520, 610, 750, 890, 1100];
+  private latencySamples: number[] = [];
   private totalScansProcessed: number = 0;
   private successfulScans: number = 0;
   private abstainedScans: number = 0;
@@ -20,6 +20,17 @@ export class MetricsCollector {
   private serverErrors: number = 0;
 
   private rpsWindow: number[] = [];
+
+  public reset() {
+    this.latencySamples = [];
+    this.totalScansProcessed = 0;
+    this.successfulScans = 0;
+    this.abstainedScans = 0;
+    this.failedScans = 0;
+    this.rateLimitErrors = 0;
+    this.serverErrors = 0;
+    this.rpsWindow = [];
+  }
 
   public recordScanComplete(durationMs: number, status: string, errorType?: string) {
     this.totalScansProcessed += 1;
@@ -56,7 +67,7 @@ export class MetricsCollector {
     const costEstimate = Number((this.successfulScans * routerConfig.costPerScanUsd).toFixed(4));
 
     const totalEvals = this.successfulScans + this.abstainedScans;
-    const accuracy = totalEvals > 0 ? Number(((this.successfulScans / totalEvals) * 100).toFixed(1)) : 98.4;
+    const accuracy = totalEvals > 0 ? Number(((this.successfulScans / totalEvals) * 100).toFixed(1)) : 0;
 
     return {
       activeWorkers: workerPool.getActiveWorkerCount(),

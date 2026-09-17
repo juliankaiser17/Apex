@@ -18,7 +18,7 @@ export const normalizeUsername = (username: string): string => {
  */
 export const getRegisteredUsers = (): UserProfile[] => {
   try {
-    const raw = capacitorStorage.getItem(REGISTERED_USERS_KEY);
+    const raw = capacitorStorage.getItemSync(REGISTERED_USERS_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed)) return parsed;

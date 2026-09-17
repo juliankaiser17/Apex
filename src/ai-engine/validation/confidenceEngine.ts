@@ -45,7 +45,9 @@ export class ConfidenceEngine {
     image_quality_score: number;
     evidence_strength: number;
     candidate_separation: number;
-    contradiction_count: number;
+    contradiction_count?: number;
+    top_candidate_contradictions?: string[];
+    global_contradictions?: string[];
     top_candidate_score: number;
     specificity_level: SpecificityLevel;
     has_vehicle: boolean;
@@ -54,11 +56,15 @@ export class ConfidenceEngine {
       image_quality_score,
       evidence_strength,
       candidate_separation,
-      contradiction_count,
       top_candidate_score,
       specificity_level,
       has_vehicle
     } = params;
+
+    // Calculate effective contradiction count strictly from winner's contradictions + global contradictions
+    const activeContradictionsCount = params.top_candidate_contradictions !== undefined
+      ? (params.top_candidate_contradictions.length + (params.global_contradictions?.length || 0))
+      : (params.contradiction_count || 0);
 
     // Reject immediately if no vehicle or unusable image
     if (!has_vehicle || image_quality_score < 0.30) {
@@ -94,7 +100,8 @@ export class ConfidenceEngine {
     const qualityFactor = Math.min(1.0, Math.max(0.2, image_quality_score));
     const evidenceFactor = Math.min(1.0, Math.max(0.2, evidence_strength));
     const separationFactor = Math.min(1.0, Math.max(0, candidate_separation * 2.5));
-    const contradictionPenalty = Math.min(0.8, contradiction_count * 0.25);
+    // Scoped contradiction penalty: ONLY penalizes for winner's contradictions or scene-level contradictions
+    const contradictionPenalty = Math.min(0.8, activeContradictionsCount * 0.25);
 
     // Tier 1: Make Confidence
     const rawMakeScore =
@@ -144,7 +151,7 @@ export class ConfidenceEngine {
     let reason = 'Vehicle identified with moderate confidence; variant unverified.';
     let needs_retake = false;
 
-    if (overall_score >= 0.78 && candidate_separation >= 0.15 && contradiction_count === 0) {
+    if (overall_score >= 0.78 && candidate_separation >= 0.15 && activeContradictionsCount === 0) {
       status = 'identified';
       reason = 'Definitive identification with distinctive aerodynamic and styling features.';
       needs_retake = false;
@@ -227,14 +234,19 @@ export class ConfidenceEngine {
     // 4. Multi-Frame Agreement Signal
     const frameSignal = Math.max(0, Math.min(1.0, frameAgreementRatio));
 
-    // 5. Database Consistency Signal
-    const dbSignal = validationReport.canonicalRecord ? 1.0 : 0.6;
+    // 5. Database Consistency Signal: Registered or verified-unregistered vehicles get full consistency signal
+    const isVerifiedUnregistered = Boolean((validationReport as any).isVerifiedUnregistered || (validationReport as any).canonicalIdentity?.registryStatus === 'VERIFIED_UNREGISTERED');
+    const dbSignal = (validationReport.canonicalRecord || isVerifiedUnregistered) ? 1.0 : 0.6;
 
     // 6. Quality Penalties
     let qualityPenalty = 0;
     if (qualityMetrics.blurScore < 0.6) qualityPenalty += 0.15;
     if (qualityMetrics.luminanceScore < 0.5 || qualityMetrics.luminanceScore > 0.95) qualityPenalty += 0.10;
-    if (validationReport.validationWarnings.length > 0) qualityPenalty += 0.10;
+    const hasUnregisteredOnlyWarning = validationReport.validationWarnings.length === 1 &&
+      validationReport.validationWarnings[0].includes('not registered in canonical database');
+    if (validationReport.validationWarnings.length > 0 && !hasUnregisteredOnlyWarning) {
+      qualityPenalty += 0.10;
+    }
 
     // Compute Weighted Score
     const rawScore =

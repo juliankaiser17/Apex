@@ -1,12 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { X, RotateCw, Trash2, Undo2, Clock } from 'lucide-react';
+import { X, RotateCw, Trash2, Undo2, Clock, ArrowLeft, Edit3, Sparkles } from 'lucide-react';
 import type { CarCard } from '../../types/apex';
 import { RARITY_CONFIG } from '../../utils/rarity';
 import { ApexCollectibleCard } from '../card/ApexCollectibleCard';
 import { sounds } from '../../utils/audio';
 import { useApexStore } from '../../store/useApexStore';
 import { DeleteCardConfirmModal } from './DeleteCardConfirmModal';
+import { CorrectionModal } from './CorrectionModal';
+import { getEstimatedMarketValue } from '../../utils/marketValuation';
 
 interface Card3DDetailProps {
   card: CarCard | null;
@@ -17,14 +19,45 @@ export const Card3DDetail: React.FC<Card3DDetailProps> = ({ card, onClose }) => 
   const [isFlipped, setIsFlipped] = useState(false);
   const [activeTab, setActiveTab] = useState<'overview' | 'mods' | 'history' | 'specs'>('overview');
   const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false);
+  const [isCorrectionOpen, setIsCorrectionOpen] = useState(false);
 
   const scheduleCardDeletion = useApexStore(s => s.scheduleCardDeletion);
   const cancelCardDeletion = useApexStore(s => s.cancelCardDeletion);
+  const purchaseCardFoil = useApexStore(s => s.purchaseCardFoil);
+
+  useEffect(() => {
+    if (!card) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+
+    // Push dummy history entry so Android hardware back button closes this modal
+    window.history.pushState({ modal: 'card-detail' }, '');
+    const handlePopState = () => {
+      onClose();
+    };
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [card, onClose]);
 
   if (!card) return null;
 
   const rarityConf = RARITY_CONFIG[card.rarity] || RARITY_CONFIG.rare;
   const serialStr = card.cardNumber || 'APX-001';
+
+  const valuation = getEstimatedMarketValue({
+    make: card.make,
+    model: card.model,
+    rarity: card.rarity,
+    marketValueLowUsd: card.marketValueLowUsd,
+    marketValueHighUsd: card.marketValueHighUsd
+  });
 
   const handleFlip = () => {
     sounds.playCardFlip();
@@ -47,19 +80,39 @@ export const Card3DDetail: React.FC<Card3DDetailProps> = ({ card, onClose }) => 
   );
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl flex flex-col items-center justify-between p-4 overflow-y-auto select-none font-sans">
-      {/* Top Bar */}
-      <div className="w-full max-w-sm flex items-center justify-between z-10 pt-2 pb-3 border-b border-white/[0.06]">
+    <div 
+      className="fixed inset-0 z-[120] bg-black/95 backdrop-blur-2xl flex flex-col items-center justify-between overflow-y-auto select-none font-sans"
+      style={{
+        paddingTop: 'max(env(safe-area-inset-top), 12px)',
+        paddingBottom: 'max(env(safe-area-inset-bottom), 12px)'
+      }}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      {/* Sticky Top Bar with High-Visibility Back & Close Navigation */}
+      <div className="sticky top-0 z-40 w-full max-w-sm bg-black/90 backdrop-blur-xl px-4 py-2.5 border-b border-white/10 flex items-center justify-between shadow-xl">
+        <button
+          onClick={onClose}
+          className="px-3.5 py-1.5 rounded-full bg-white/15 hover:bg-white/25 border border-white/25 flex items-center gap-1.5 text-white text-xs font-bold active:scale-95 transition-all shadow-md"
+          title="Return to feed"
+        >
+          <ArrowLeft className="w-4 h-4 text-white" />
+          <span>BACK</span>
+        </button>
+
+        <span className="text-xs font-semibold text-white/70 tracking-wider uppercase">
+          CARD DETAILS
+        </span>
+
         <div className="flex items-center gap-2">
-          <div 
-            className="w-1.5 h-4 rounded-full" 
-            style={{ backgroundColor: 'var(--accent-color)' }}
-          />
-          <span className="text-base font-bold text-white tracking-tight">
-            Vehicle Specs
-          </span>
-        </div>
-        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setIsCorrectionOpen(true)}
+            className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 flex items-center justify-center text-white/80 hover:text-white transition-colors"
+            title="Suggest Identification Correction"
+          >
+            <Edit3 className="w-4 h-4" />
+          </button>
           {isPendingDeletion ? (
             <button
               onClick={() => cancelCardDeletion(card.id)}
@@ -71,17 +124,18 @@ export const Card3DDetail: React.FC<Card3DDetailProps> = ({ card, onClose }) => 
           ) : (
             <button
               onClick={() => setIsConfirmDeleteOpen(true)}
-              className="w-8 h-8 rounded-full bg-red-500/10 hover:bg-red-500/20 border border-red-500/25 flex items-center justify-center text-red-400 hover:text-red-300 transition-colors"
+              className="w-9 h-9 rounded-full bg-red-500/10 hover:bg-red-500/20 border border-red-500/25 flex items-center justify-center text-red-400 hover:text-red-300 transition-colors"
               title="Schedule Card for Deletion (3-day grace period)"
             >
-              <Trash2 className="w-3.5 h-3.5" />
+              <Trash2 className="w-4 h-4" />
             </button>
           )}
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-white/[0.08] hover:bg-white/[0.15] border border-white/[0.08] flex items-center justify-center text-white/70 hover:text-white transition-colors"
+            className="w-9 h-9 rounded-full bg-white/15 hover:bg-white/25 border border-white/25 flex items-center justify-center text-white active:scale-95 transition-all shadow-md"
+            aria-label="Close vehicle inspection"
           >
-            <X className="w-4 h-4" />
+            <X className="w-5 h-5" />
           </button>
         </div>
       </div>
@@ -215,8 +269,29 @@ export const Card3DDetail: React.FC<Card3DDetailProps> = ({ card, onClose }) => 
                   </div>
                   <div className="p-3 rounded-xl bg-white/[0.04] border border-white/[0.06] space-y-1">
                     <span className="text-white/40 block text-[10px]">Estimated Market Value</span>
-                    <p className="text-[#E50914] text-sm font-bold">${(card.marketValueLowUsd || 240000).toLocaleString()} – ${(card.marketValueHighUsd || 310000).toLocaleString()} USD</p>
+                    <p className="text-[#E50914] text-sm font-bold">${valuation.lowUsd.toLocaleString()} – ${valuation.highUsd.toLocaleString()} USD</p>
+                    <span className="text-[10px] text-white/40 block">Est. Market Value Range</span>
                   </div>
+
+                  {!card.customFoil && (
+                    <div className="pt-2">
+                      <button
+                        onClick={() => {
+                          if (purchaseCardFoil) {
+                            const res = purchaseCardFoil(card.id);
+                            if (!res.success) {
+                              alert(res.error || 'Insufficient coins to apply foil (1,000 Coins required).');
+                            } else {
+                              sounds.playUnlock();
+                            }
+                          }
+                        }}
+                        className="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500/20 via-orange-500/20 to-yellow-500/20 border border-amber-500/30 text-amber-300 text-xs font-bold flex items-center justify-center gap-1.5 hover:border-amber-400/50 transition-all shadow-md active:scale-98"
+                      >
+                        <Sparkles className="w-3.5 h-3.5" /> Apply Custom Holographic Foil (1,000 Coins)
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -247,13 +322,13 @@ export const Card3DDetail: React.FC<Card3DDetailProps> = ({ card, onClose }) => 
         </div>
       </div>
 
-      {/* Footer Action */}
-      <div className="w-full max-w-sm pb-4 pt-2 border-t border-white/[0.06]">
+      {/* Sticky Bottom Action */}
+      <div className="sticky bottom-0 z-40 w-full max-w-sm bg-black/90 backdrop-blur-xl px-4 py-3 border-t border-white/10 shadow-2xl">
         <button
           onClick={onClose}
-          className="w-full py-3 rounded-xl bg-white/[0.08] hover:bg-white/[0.14] text-white font-medium text-sm transition-colors border border-white/[0.08]"
+          className="w-full py-3 rounded-2xl bg-gradient-to-r from-[#FF4500] to-[#E50914] text-white font-bold text-sm tracking-wide shadow-[0_4px_24px_rgba(255,69,0,0.45)] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
         >
-          Close
+          <ArrowLeft className="w-4 h-4" /> CLOSE CARD & RETURN
         </button>
       </div>
 
@@ -266,6 +341,13 @@ export const Card3DDetail: React.FC<Card3DDetailProps> = ({ card, onClose }) => 
           setIsConfirmDeleteOpen(false);
         }}
         onClose={() => setIsConfirmDeleteOpen(false)}
+      />
+
+      {/* User Correction Modal */}
+      <CorrectionModal
+        isOpen={isCorrectionOpen}
+        card={card}
+        onClose={() => setIsCorrectionOpen(false)}
       />
     </div>
   );

@@ -8,6 +8,9 @@ import type { BodyStyle, RarityTier } from '../types/apex';
 import { offlineRecognitionEngine } from './offlineRecognitionEngine';
 import type { NormalizedVehicle } from '../data/vehicleDatabase';
 import { supabase } from '../lib/supabase';
+import { apexEngine } from '../ai-engine/engine';
+import type { IdentificationResult } from '../ai-engine/types';
+import { Capacitor } from '@capacitor/core';
 
 export interface AftermarketPart {
   part_name: string;
@@ -60,7 +63,7 @@ export interface AiIdentificationPayload {
 }
 
 const getApiBaseUrl = (): string => {
-  if (typeof window !== 'undefined') {
+  if (typeof window !== 'undefined' && window.location?.hostname) {
     const host = window.location.hostname;
     // If running directly on the deployed web origin, use relative paths
     if (host === 'apex-spotter.vercel.app') {
@@ -116,7 +119,15 @@ export function mapNormalizedVehicleToPayload(
 export async function identifyVehicleOffline(photoDataUrl: string): Promise<AiIdentificationPayload> {
   return new Promise((resolve) => {
     if (typeof window === 'undefined') {
-      resolve(createRejection('Offline identification unavailable in server runtime.'));
+      resolve({
+        ...getEmptyPayload(),
+        status: 'uncertain',
+        is_car: true,
+        needs_better_angle: false,
+        reason: "You’re offline, so Apex is using offline identification.",
+        rejection_reason: 'actual_device_offline',
+        confidence: 0
+      });
       return;
     }
 
@@ -141,20 +152,235 @@ export async function identifyVehicleOffline(photoDataUrl: string): Promise<AiId
         console.warn('[Apex Offline Recognition] Extraction error:', err);
       }
       // Never force a guess on unknown silhouettes
-      resolve(createRejection('Vehicle could not be recognized offline. Please capture closer framing or connect to network.'));
+      resolve({
+        ...getEmptyPayload(),
+        status: 'uncertain',
+        is_car: true,
+        needs_better_angle: false,
+        reason: "You’re offline, so Apex is using offline identification. Please capture closer framing or connect to internet.",
+        rejection_reason: 'actual_device_offline',
+        confidence: 0
+      });
     };
     img.onerror = () => {
-      resolve(createRejection('Failed to process image offline.'));
+      resolve({
+        ...getEmptyPayload(),
+        status: 'uncertain',
+        is_car: true,
+        needs_better_angle: false,
+        reason: "Failed to process image offline.",
+        rejection_reason: 'actual_device_offline',
+        confidence: 0
+      });
     };
     img.src = photoDataUrl;
   });
 }
 
+let activeTokenResolutionPromise: Promise<AuthoritativeTokenResult> | null = null;
+
+export interface AuthoritativeTokenResult {
+  accessToken: string | null;
+  userId?: string;
+  errorClassification?: 'AUTH_REQUIRED' | 'AUTH_SESSION_EXPIRED' | 'AUTH_REFRESH_FAILED';
+  hasSession: boolean;
+  hasAccessToken: boolean;
+  tokenAgeSec?: number;
+  expiresAtSec?: number;
+}
+
 /**
- * Submits a car photo to the Apex Backend API for AI verification.
- * Adheres strictly to:
- * Mobile App -> Apex Backend API (/api/analyze) -> Gemini Provider
- * With seamless automatic fallback to local vehicle intelligence if offline or backend is unreachable.
+ * Authoritatively obtains a valid, unexpired Supabase access token.
+ * Single-flight deduplication: concurrent callers share the exact same resolution & refresh promise.
+ */
+export async function getAuthoritativeAccessToken(forceRefresh = false): Promise<AuthoritativeTokenResult> {
+  // If resolution is already in flight and not forcing refresh, share the in-flight promise
+  if (!forceRefresh && activeTokenResolutionPromise) {
+    return await activeTokenResolutionPromise;
+  }
+
+  const resolutionTask = (async (): Promise<AuthoritativeTokenResult> => {
+    try {
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+
+      if (sessionError || !session) {
+        return {
+          accessToken: null,
+          errorClassification: 'AUTH_REQUIRED',
+          hasSession: false,
+          hasAccessToken: false
+        };
+      }
+
+      const nowSec = Math.floor(Date.now() / 1000);
+      const expiresAt = session.expires_at || 0;
+      const isExpiringSoon = expiresAt > 0 && (expiresAt - nowSec) <= 60; // within 60s of expiry
+
+      if (!forceRefresh && !isExpiringSoon && session.access_token) {
+        return {
+          accessToken: session.access_token,
+          userId: session.user?.id,
+          hasSession: true,
+          hasAccessToken: true,
+          tokenAgeSec: expiresAt > 0 ? Math.max(0, 3600 - (expiresAt - nowSec)) : 0,
+          expiresAtSec: expiresAt
+        };
+      }
+
+      // Token is expired, expiring soon, or refresh forced: execute single-flight refresh
+      console.log('[Apex Auth Telemetry] Refreshing Supabase auth session (single-flight)...');
+      const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+
+      if (refreshError || !refreshData.session?.access_token) {
+        console.warn('[Apex Auth Telemetry] Session refresh failed:', refreshError?.message);
+        return {
+          accessToken: null,
+          userId: session.user?.id,
+          errorClassification: 'AUTH_SESSION_EXPIRED' as const,
+          hasSession: false,
+          hasAccessToken: false
+        };
+      }
+
+      return {
+        accessToken: refreshData.session.access_token,
+        userId: refreshData.session.user?.id,
+        errorClassification: undefined,
+        hasSession: true,
+        hasAccessToken: true,
+        tokenAgeSec: 0,
+        expiresAtSec: refreshData.session.expires_at || 0
+      };
+    } catch (err: any) {
+      console.warn('[Apex Auth Telemetry] Session refresh exception:', err?.message);
+      return {
+        accessToken: null,
+        errorClassification: 'AUTH_REFRESH_FAILED' as const,
+        hasSession: false,
+        hasAccessToken: false
+      };
+    }
+  })();
+
+  if (!forceRefresh) {
+    activeTokenResolutionPromise = resolutionTask;
+    resolutionTask.finally(() => {
+      if (activeTokenResolutionPromise === resolutionTask) {
+        activeTokenResolutionPromise = null;
+      }
+    });
+  }
+
+  return await resolutionTask;
+}
+
+function formatEngineResult(r: IdentificationResult): any {
+  const canon = r.canonicalResult;
+  return {
+    status: canon?.status || (r.status === 'completed' ? 'identified' : r.status),
+    confidence: r.confidence?.totalScore ?? 0.95,
+    visual_evidence: canon?.visual_evidence || null,
+    viewpoint: canon?.viewpoint || 'unknown',
+    candidates: (canon?.candidates || []).map(c => ({
+      name: c.name,
+      score: c.score,
+      supporting_evidence: c.supporting_evidence,
+      contradictions: c.contradictions || []
+    })),
+    contradictions: canon?.contradictions || [],
+    specificity_level: canon?.specificity_level || (r.trim ? 'variant' : 'model_family'),
+    reason: canon?.reason || (r.confidence?.abstentionReason || 'Vehicle successfully identified.'),
+    needs_retake: canon ? canon.needs_retake : (r.confidence?.shouldAbstain ?? false),
+    is_car: canon ? canon.vehicle_present : (r.status !== 'failed'),
+    scan_id: r.scanId,
+    make: canon?.identification?.make || r.make,
+    model: canon?.identification?.model_family || r.model,
+    generation: canon?.identification?.generation || r.generation,
+    trim: canon?.identification?.variant ?? (r.trim || null),
+    year_estimate: r.yearEstimate,
+    color: r.color,
+    rarity: r.rarity,
+    engine: r.engine,
+    horsepower: r.horsepower,
+    torque_nm: r.torqueNm,
+    top_speed_kmh: r.topSpeedKmH,
+    zero_to_hundred_seconds: r.zeroToHundredSec,
+    kerb_weight_kg: r.kerbWeightKg,
+    production_years: r.productionYears,
+    origin_country: r.originCountry,
+    body_style: r.bodyStyle,
+    historical_information: r.historicalInformation,
+    interesting_facts: r.interestingFacts,
+    aftermarket_parts_detected: r.aftermarketPartsDetected,
+    legacy_confidence: r.confidence?.totalScore ?? 0.95,
+    needs_better_angle: canon ? (canon.status === 'uncertain' || canon.needs_retake) : (r.confidence?.shouldAbstain ?? false),
+    angle_instruction: canon?.reason || r.confidence?.abstentionReason || null,
+    upstream_evidence: canon?.upstream_evidence,
+    canonical_identity: canon?.canonical_identity,
+    provenance: canon?.provenance,
+    cached: r.cached,
+    trace_id: r.traceId
+  };
+}
+
+export async function runDirectApexEngine(
+  photoDataUrl: string,
+  fileName?: string,
+  onProgress?: (msg: string, pct: number) => void
+): Promise<AiIdentificationPayload> {
+  console.log('[Apex AI Vision Telemetry] Executing direct embedded Apex Vision Engine...');
+  onProgress?.('Analyzing vehicle with Apex Vision AI…', 15);
+
+  const idempotencyKey = `direct_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+  const ingest = await apexEngine.ingestScan({
+    imageDataUrl: photoDataUrl,
+    fileName: fileName || 'scan.jpg',
+    userId: 'mobile_user',
+    priority: 'HIGH',
+    idempotencyKey
+  });
+
+  if (ingest.status === 'completed' && ingest.result) {
+    return parseBackendResponse(formatEngineResult(ingest.result));
+  }
+
+  // Poll local worker pool
+  const scanId = ingest.scanId;
+  const pollStart = performance.now();
+  const maxTimeoutMs = 35000;
+
+  while (performance.now() - pollStart < maxTimeoutMs) {
+    await new Promise(r => setTimeout(r, 200));
+    const status = apexEngine.getScanStatus(scanId);
+
+    if (status.status === 'completed' && status.result) {
+      return parseBackendResponse(formatEngineResult(status.result));
+    }
+
+    if (status.status === 'needs_review' || status.status === 'abstained' || status.status === 'uncertain' || status.status === 'failed') {
+      if (status.result) {
+        return parseBackendResponse(formatEngineResult(status.result));
+      }
+      if (status.status === 'failed') break;
+    }
+  }
+
+  return {
+    ...getEmptyPayload(),
+    status: 'uncertain',
+    is_car: true,
+    needs_better_angle: true,
+    reason: 'Could not achieve definitive vehicle identification.',
+    rejection_reason: 'low_confidence',
+    confidence: 0
+  };
+}
+
+/**
+ * Submits a car photo to the Apex Vision Pipeline.
+ * 1. If native mobile platform (Android APK), directly uses the embedded Apex Vision Engine with Gemini
+ * 2. If online and authenticated web, attempts remote Apex Backend API (/api/analyze)
+ * 3. Seamlessly falls back to direct embedded Apex Vision Engine on any network or auth error
  */
 export async function identifyVehicleWithAi(
   photoDataUrl: string,
@@ -166,35 +392,59 @@ export async function identifyVehicleWithAi(
     return createRejection('Invalid image data provided.');
   }
 
+  // 1. Detect actual device network state
+  const isDeviceOnline = typeof navigator !== 'undefined' ? Boolean(navigator.onLine) : true;
+
+  // 2. Genuinely Offline Path: Only invoke offline recognition when disconnected
+  if (!isDeviceOnline) {
+    console.log('[Apex AI Vision Telemetry]', {
+      network_state_before_scan: 'offline',
+      api_analyze_attempted: false,
+      http_status: null,
+      response_classification: 'actual_device_offline',
+      offline_engine_invoked: true
+    });
+    return await identifyVehicleOffline(photoDataUrl);
+  }
+
+  // 3. Online Scan Path: Route through server-side /api/analyze backend
+  // Cloudflare credentials remain strictly server-side; client never invokes AI models directly
+  const authResolution = await getAuthoritativeAccessToken(false);
+
   const baseUrl = getApiBaseUrl();
   const analyzeEndpoint = `${baseUrl}/api/analyze`;
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 12000); // 12s timeout for fast response
+  const timeoutId = setTimeout(() => controller.abort(), 35000); // 35s bounded timeout for vision inference
+  const tRequestStart = performance.now();
 
-  // Check for active Supabase user session token
-  let authHeader = '';
-  try {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session?.access_token) {
-      authHeader = `Bearer ${session.access_token}`;
-    }
-  } catch {
-    // Guest or offline mode
-  }
+  console.log('[Apex AI Vision Telemetry]', {
+    network_state_before_scan: 'online',
+    isNative: Capacitor.isNativePlatform(),
+    hasSession: authResolution.hasSession,
+    hasAccessToken: authResolution.hasAccessToken,
+    tokenAgeSec: authResolution.tokenAgeSec ?? 0,
+    expiresAtSec: authResolution.expiresAtSec ?? 0,
+    userId: authResolution.userId || 'anon',
+    authState: authResolution.hasSession ? 'AUTHENTICATED' : 'GUEST',
+    api_analyze_attempted: true,
+    request_start_timestamp: new Date().toISOString(),
+    endpoint: analyzeEndpoint
+  });
 
-  try {
-    onProgress?.('Contacting Apex AI backend…', 0);
+  // 4. Stable scanId and idempotencyKey across any 1-shot auth retry (prevents duplicate jobs/XP)
+  const idempotencyKey = `scan_${Date.now()}_${Math.random().toString(36).substring(7)}`;
 
+  const executePost = async (token?: string | null): Promise<Response> => {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
       'apikey': (import.meta as any).env?.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im54cnRuZXhoeWllaXN6Z2dsaGJuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU5MTExNTQsImV4cCI6MjEwMTQ4NzE1NH0.DJDskHmSI8BOTi9icFi8SP7EotGYhjgXQHIXcFJr-Ek'
     };
-    if (authHeader) {
-      headers['Authorization'] = authHeader;
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
     }
 
-    const res = await fetch(analyzeEndpoint, {
+    return await fetch(analyzeEndpoint, {
       method: 'POST',
       headers,
       signal: controller.signal,
@@ -202,25 +452,86 @@ export async function identifyVehicleWithAi(
         imageBase64: photoDataUrl,
         mimeType: photoDataUrl.substring(photoDataUrl.indexOf(':') + 1, photoDataUrl.indexOf(';')) || 'image/jpeg',
         fileName: fileName || 'scan.jpg',
-        idempotencyKey: `scan_${Date.now()}_${Math.random().toString(36).substring(7)}`
+        userId: authResolution.userId || 'anon_user',
+        idempotencyKey
       })
     });
+  };
+
+  try {
+    onProgress?.('Contacting Apex AI backend…', 0);
+
+    let res = await executePost(authResolution.accessToken);
+
+    // ── Phase 4: One-Shot 401 Recovery ──
+    // If backend returns 401, refresh session and retry EXACTLY ONCE with the same idempotencyKey
+    if (res.status === 401) {
+      console.warn('[Apex AI Vision Telemetry] HTTP 401 received. Attempting single-flight session refresh...');
+      const refreshResult = await getAuthoritativeAccessToken(true);
+
+      if (refreshResult.accessToken) {
+        console.log('[Apex AI Vision Telemetry] Refresh succeeded. Retrying scan request once with fresh token...');
+        res = await executePost(refreshResult.accessToken);
+      }
+    }
 
     clearTimeout(timeoutId);
+    const tRequestEnd = performance.now();
+    const durationMs = Math.round(tRequestEnd - tRequestStart);
 
-    // If unauthorized (401), method not allowed (405 CORS), rate-limited (429), or server error (500+)
+    if (res.status === 429) {
+      const data = await res.json().catch(() => ({}));
+      return {
+        ...getEmptyPayload(),
+        status: 'uncertain',
+        is_car: true,
+        needs_better_angle: false,
+        reason: data.error || 'Scan rate limit reached. Please wait a few moments before scanning again.',
+        rejection_reason: 'rate_limit_exceeded',
+        confidence: 0
+      };
+    }
+
+    if (res.status === 503) {
+      const data = await res.json().catch(() => ({}));
+      return {
+        ...getEmptyPayload(),
+        status: 'uncertain',
+        is_car: true,
+        needs_better_angle: false,
+        reason: data.error || 'AI Vehicle Scanning is temporarily paused for maintenance.',
+        rejection_reason: 'service_unavailable',
+        confidence: 0
+      };
+    }
+
     if (!res.ok) {
-      console.warn(`[Apex AI Vision] Remote endpoint returned status ${res.status}. Falling back to local intelligence.`);
-      return await identifyVehicleOffline(photoDataUrl);
+      const errData = await res.json().catch(() => ({}));
+      console.warn(`[Apex AI Vision Telemetry] Remote analyze returned HTTP ${res.status}:`, errData);
+      return {
+        ...getEmptyPayload(),
+        status: 'uncertain',
+        is_car: true,
+        needs_better_angle: false,
+        reason: errData.error || `Vision backend error (HTTP ${res.status}). Please try again.`,
+        rejection_reason: 'backend_error',
+        confidence: 0
+      };
     }
 
     const data = await res.json();
 
+    console.log('[Apex AI Vision Telemetry]', {
+      network_state_before_scan: 'online',
+      api_analyze_attempted: true,
+      http_status: res.status,
+      duration_ms: durationMs,
+      response_classification: data.status || 'identified',
+      offline_engine_invoked: false,
+      final_client_status: data.status || 'identified'
+    });
+
     // Immediate Result (200 OK)
-    // Strictly respect the remote classification hierarchy:
-    // REMOTE IDENTIFIED -> use remote result
-    // REMOTE UNCERTAIN   -> respect uncertainty
-    // REMOTE REJECTED    -> respect rejection (NEVER pick a vehicle from local database)
     if (res.status === 200) {
       return parseBackendResponse(data);
     }
@@ -233,8 +544,19 @@ export async function identifyVehicleWithAi(
     return parseBackendResponse(data);
   } catch (err: any) {
     clearTimeout(timeoutId);
-    console.warn('[Apex AI Vision] Remote request unavailable or timed out, executing seamless local recognition:', err?.message || err);
-    return await identifyVehicleOffline(photoDataUrl);
+    const isTimeout = err?.name === 'AbortError' || err?.message?.includes('timed out');
+    console.warn(`[Apex AI Vision Telemetry] Remote analyze request failed (timeout=${isTimeout}):`, err?.message);
+    return {
+      ...getEmptyPayload(),
+      status: 'uncertain',
+      is_car: true,
+      needs_better_angle: false,
+      reason: isTimeout
+        ? 'Scanning timed out. Please ensure you have a stable network connection.'
+        : 'Could not connect to Apex vision service. Please verify your connection.',
+      rejection_reason: isTimeout ? 'timeout' : 'network_error',
+      confidence: 0
+    };
   }
 }
 
@@ -245,7 +567,7 @@ async function pollScanStatus(
   baseUrl: string,
   scanId: string,
   onProgress?: (status: string, queuePos: number) => void,
-  photoDataUrl?: string
+  _photoDataUrl?: string
 ): Promise<AiIdentificationPayload> {
   const statusEndpoint = `${baseUrl}/api/scans/status?scanId=${encodeURIComponent(scanId)}`;
   const maxAttempts = 30; // up to ~15 seconds
@@ -271,20 +593,30 @@ async function pollScanStatus(
       }
 
       if (body.status === 'failed') {
-        if (photoDataUrl) {
-          return await identifyVehicleOffline(photoDataUrl);
-        }
-        return createRejection(body.error || 'AI identification failed. Please try again.');
+        return {
+          ...getEmptyPayload(),
+          status: 'uncertain',
+          is_car: true,
+          needs_better_angle: false,
+          reason: body.error || 'Cloud vision processing encountered an issue.',
+          rejection_reason: 'vision_provider_unavailable',
+          confidence: 0
+        };
       }
     } catch {
       // Continue polling until timeout
     }
   }
 
-  if (photoDataUrl) {
-    return await identifyVehicleOffline(photoDataUrl);
-  }
-  return createRejection('Identification is taking longer than expected due to server traffic.');
+  return {
+    ...getEmptyPayload(),
+    status: 'uncertain',
+    is_car: true,
+    needs_better_angle: false,
+    reason: 'Identification timed out due to server queue depth. Please retry shortly.',
+    rejection_reason: 'vision_provider_unavailable',
+    confidence: 0
+  };
 }
 
 function parseBackendResponse(r: any): AiIdentificationPayload {
@@ -389,11 +721,12 @@ function parseBackendResponse(r: any): AiIdentificationPayload {
   };
 }
 
-function createRejection(reason: string): AiIdentificationPayload {
+function createRejection(reason: string, rejectionReason?: string): AiIdentificationPayload {
   return {
     ...getEmptyPayload(),
     is_car: false,
-    rejection_reason: reason
+    rejection_reason: rejectionReason || reason,
+    reason
   };
 }
 

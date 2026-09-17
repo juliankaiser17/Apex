@@ -18,7 +18,54 @@ export type ScanJobStatus =
   | 'dead_letter';
 
 // ─── CANONICAL PRODUCTION RESULT CONTRACT ───
-export type IdentificationStatus = 'identified' | 'probable' | 'uncertain' | 'rejected';
+export type IdentificationStatus = 'identified' | 'probable' | 'uncertain' | 'rejected' | 'provider_unavailable';
+
+export type VisionPipelineStatus =
+  | 'VISION_IDENTIFIED'
+  | 'VISION_PROBABLE'
+  | 'VISION_UNCERTAIN'
+  | 'VISION_REJECTED'
+  | 'VISION_PROVIDER_UNAVAILABLE';
+
+export type CanonicalRegistryStatus = 'REGISTERED' | 'VERIFIED_UNREGISTERED' | 'UNVERIFIED';
+
+export type ContradictionScope =
+  | 'GLOBAL_OBSERVATION_CONTRADICTION'
+  | 'CANDIDATE_SPECIFIC_CONTRADICTION'
+  | 'CANDIDATE_VARIANT_CONTRADICTION';
+
+export interface ScopedContradiction {
+  scope: ContradictionScope;
+  targetCandidate?: string;
+  description: string;
+  confidence: number;
+}
+
+export interface CandidateAssessment {
+  candidate: string;
+  supportingEvidence: string[];
+  contradictions: string[];
+  candidateScore: number;
+}
+
+export interface EvidenceProvenance {
+  visual_evidence: string[];
+  text_evidence: string[];
+  registry_metadata: string[];
+  candidate_retrieval: string[];
+  deterministic_validation: string[];
+}
+
+export interface OpenCanonicalIdentity {
+  canonicalId: string;
+  make: string;
+  modelFamily: string;
+  generation?: string | null;
+  variant?: string | null;
+  registryStatus: CanonicalRegistryStatus;
+  source: 'gemini' | 'registry' | 'offline_model' | 'ensemble';
+  specs?: Record<string, any>;
+}
 
 export type ViewpointType =
   | 'front'
@@ -71,6 +118,29 @@ export interface CandidateComparison {
   unobservable_features?: string[];
 }
 
+export interface VisionEvidence {
+  provider: string;
+  model: string;
+  raw_identity: string;
+  make: string | null;
+  model_family: string | null;
+  generation: string | null;
+  variant: string | null;
+  confidence: number;
+  visual_evidence: VisualEvidence;
+  textual_evidence: string[];
+  viewpoint: ViewpointType;
+  image_quality: {
+    usable: boolean;
+    score: number;
+    issues: string[];
+  };
+  candidate_hypotheses: CandidateComparison[];
+  timestamp: number;
+}
+
+export type ImmutableUpstreamEvidence = Readonly<VisionEvidence>;
+
 export type SpecificityLevel = 'make' | 'model_family' | 'generation' | 'variant';
 
 export interface CanonicalScanResult {
@@ -91,6 +161,9 @@ export interface CanonicalScanResult {
   reason: string;
   needs_retake: boolean;
   needs_review?: boolean;
+  upstream_evidence?: ImmutableUpstreamEvidence;
+  provenance?: EvidenceProvenance;
+  canonical_identity?: OpenCanonicalIdentity;
   specs?: {
     color?: string;
     rarity?: RarityTier;
@@ -106,7 +179,10 @@ export interface CanonicalScanResult {
     body_style?: BodyStyle;
     historical_information?: string;
     interesting_facts?: string;
+    market_value_low_usd?: number;
+    market_value_high_usd?: number;
   };
+  privacy_redactions?: Array<{ type: 'plate' | 'face'; box_2d: [number, number, number, number] }>;
   scan_id?: string;
   trace_id?: string;
   processing_ms?: number;
@@ -172,6 +248,9 @@ export interface ModelIdentificationOutput {
   alternatives: Array<{ vehicleId: string; score: number; reason: string }>;
   needsReview: boolean;
   abstentionReason?: string;
+  marketValueLowUsd?: number;
+  marketValueHighUsd?: number;
+  privacyRedactions?: Array<{ type: 'plate' | 'face'; box2d: [number, number, number, number] }>;
 }
 
 export interface ApexConfidenceScore {

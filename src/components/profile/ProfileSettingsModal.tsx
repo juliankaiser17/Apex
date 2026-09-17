@@ -35,6 +35,7 @@ import { sounds } from '../../utils/audio';
 import { supabase } from '../../lib/supabase';
 import { ImageCropModal } from './ImageCropModal';
 import { applyAppTheme } from '../../utils/theme';
+import { useLocalRarity } from '../../hooks/useLocalRarity';
 
 interface ProfileSettingsModalProps {
   isOpen: boolean;
@@ -103,6 +104,11 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ isOp
   const garage = useApexStore(s => s.garage);
   const locationDisplayMode = useApexStore(s => s.locationDisplayMode);
   const setLocationDisplayMode = useApexStore(s => s.setLocationDisplayMode);
+  const localRarityEnabled = useApexStore(s => s.localRarityEnabled);
+  const setLocalRarityEnabled = useApexStore(s => s.setLocalRarityEnabled);
+  const localRarityXpEnabled = useApexStore(s => s.localRarityXpEnabled);
+  const setLocalRarityXpEnabled = useApexStore(s => s.setLocalRarityXpEnabled);
+  const { permissionState } = useLocalRarity();
   const authStatus = useApexStore(s => s.authStatus);
   const authUser = useApexStore(s => s.authUser);
 
@@ -887,6 +893,75 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ isOp
                         {mode.label}
                       </button>
                     ))}
+                  </div>
+                </div>
+
+                {/* Local Sighting Rarity (Coarse Prevalence) */}
+                <div className="p-3 rounded-2xl bg-[#181818] border border-white/[0.06] space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[11px] font-semibold text-white/90 flex items-center gap-1.5">
+                          <Compass className="w-3.5 h-3.5 text-[#E50914]" /> Local Sighting Rarity
+                        </span>
+                        <span className={`text-[9px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider ${
+                          permissionState === 'granted' 
+                            ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                            : permissionState === 'denied'
+                            ? 'bg-red-500/20 text-red-400 border border-red-500/30'
+                            : 'bg-white/[0.06] text-white/50 border border-white/10'
+                        }`}>
+                          {permissionState === 'granted' ? 'Location Ready' : permissionState === 'denied' ? 'Permission Denied' : 'Coarse Prompt'}
+                        </span>
+                      </div>
+                      <p className="text-[10px] text-white/40 leading-relaxed">
+                        Evaluates vehicle rarity and awards XP based on verified local sightings within your broader area (5-character Geohash, ~12–25 km²). Exact coordinates are never stored in sighting aggregates or shared with other spotters.
+                      </p>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        sounds.playTargetLock();
+                        setLocalRarityEnabled(!localRarityEnabled);
+                      }}
+                      className={`px-3 py-1.5 rounded-xl text-[11px] font-bold uppercase tracking-wider transition-all ${
+                        localRarityEnabled
+                          ? 'bg-[#E50914] text-white shadow-lg shadow-[#E50914]/20'
+                          : 'bg-white/[0.06] text-white/40 border border-white/[0.08] hover:text-white/60'
+                      }`}
+                    >
+                      {localRarityEnabled ? 'Active' : 'Off'}
+                    </button>
+                  </div>
+
+                  {/* Independent Local XP Economy Modifier Sub-Toggle */}
+                  {localRarityEnabled && (
+                    <div className="pt-2 border-t border-white/[0.04] flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <span className="text-[10px] font-semibold text-white/80 block">Local XP Modifier</span>
+                        <span className="text-[9px] text-white/40 block">Applies bounded local XP bonuses (up to +50%)</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          sounds.playTargetLock();
+                          setLocalRarityXpEnabled(!localRarityXpEnabled);
+                        }}
+                        className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${
+                          localRarityXpEnabled
+                            ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                            : 'bg-white/[0.04] text-white/40 border border-white/[0.06]'
+                        }`}
+                      >
+                        {localRarityXpEnabled ? 'XP Active' : 'XP Pinned (1.0x)'}
+                      </button>
+                    </div>
+                  )}
+
+                  <div className="pt-2 border-t border-white/[0.04] flex items-center justify-between text-[9px] text-white/40">
+                    <span>Privacy: 5-char Geohash (no street GPS stored)</span>
+                    <span>Fallback: Global Rarity</span>
                   </div>
                 </div>
               </form>

@@ -5,8 +5,11 @@
 
 import type { AIProvider, AIProviderRequest, AIProviderResponse } from './types';
 import { GeminiProvider } from './geminiProvider';
+import { CloudflareVisionProvider } from './cloudflareVisionProvider';
 import { MockFallbackProvider } from './mockFallbackProvider';
 import type { CircuitBreakerState, ProviderCapacityConfig } from '../types';
+
+declare const process: any;
 
 export class AIProviderRouter {
   private primaryProvider: AIProvider;
@@ -21,27 +24,46 @@ export class AIProviderRouter {
 
   // Concurrency & Rate Limit Management
   private activeConcurrency: number = 0;
-  private maxConcurrency: number = 30;
+  private maxConcurrency: number = 20; // Internal application concurrency guard
   private dailyScansCount: number = 0;
   private dailyCostEstimateUsd: number = 0;
 
-  // Provider configuration
+  // Provider configuration (Cloudflare Workers AI reference & application guard)
   private config: ProviderCapacityConfig = {
-    providerName: 'Google Gemini',
-    primaryModel: 'gemini-2.5-flash',
-    secondaryModel: 'gemini-2.5-pro',
-    rpmLimit: 120,
+    providerName: 'Cloudflare Workers AI',
+    primaryModel: '@cf/meta/llama-3.2-11b-vision-instruct',
+    secondaryModel: 'gemini-2.5-flash',
+    rpmLimit: 720, // Cloudflare platform Image-to-Text reference limit
     tpmLimit: 100000,
-    maxConcurrency: 30,
-    timeoutMs: 25000,
-    costPerScanUsd: 0.0015,
-    dailyBudgetUsd: 250.0,
-    monthlyBudgetUsd: 7500.0,
+    maxConcurrency: 20,
+    timeoutMs: 35000,
+    costPerScanUsd: 0.0003,
+    dailyBudgetUsd: 25.0,
+    monthlyBudgetUsd: 750.0,
     enabled: true
   };
 
   constructor(primaryProvider?: AIProvider, fallbackProvider?: AIProvider) {
-    this.primaryProvider = primaryProvider || new GeminiProvider();
+    if (primaryProvider) {
+      this.primaryProvider = primaryProvider;
+    } else {
+      const rawProvider = (typeof process !== 'undefined' && process.env?.VISION_PROVIDER) || 'cloudflare';
+      const requestedProvider = rawProvider.toLowerCase().trim();
+      if (requestedProvider === 'cloudflare') {
+        this.primaryProvider = new CloudflareVisionProvider();
+        this.config.providerName = 'Cloudflare Workers AI';
+        this.config.primaryModel = '@cf/meta/llama-3.2-11b-vision-instruct';
+      } else if (requestedProvider === 'gemini') {
+        this.primaryProvider = new GeminiProvider();
+        this.config.providerName = 'Google Gemini';
+        this.config.primaryModel = 'gemini-2.5-flash';
+      } else {
+        throw new Error(
+          `[AIProviderRouter Configuration Error] Invalid VISION_PROVIDER="${rawProvider}". ` +
+          `Supported values are "cloudflare" or "gemini". Application fails closed to prevent unintended fallback.`
+        );
+      }
+    }
     this.fallbackProvider = fallbackProvider || new MockFallbackProvider();
   }
 
@@ -72,7 +94,7 @@ export class AIProviderRouter {
 
   public async getActiveProviderName(): Promise<string> {
     const isPrimary = await this.primaryProvider.isAvailable();
-    return (this.config.enabled && isPrimary && this.getCircuitState() !== 'OPEN') ? 'GeminiProvider' : 'MockFallbackProvider';
+    return (this.config.enabled && isPrimary && this.getCircuitState() !== 'OPEN') ? this.primaryProvider.name : 'MockFallbackProvider';
   }
 
   public updateConfig(newConfig: Partial<ProviderCapacityConfig>) {
@@ -124,20 +146,33 @@ export class AIProviderRouter {
     const isFallbackDisabled = !this.fallbackEnabled || Boolean(request.options?.disableFallback);
     const providerAttempted = this.primaryProvider.name;
 
-    // 1. Check if circuit is OPEN or Concurrency is Saturated
+    // 1. Check if circuit is OPEN, Concurrency is Saturated, or Budget/Killswitch is Active
     const isPrimaryAvailable = await this.primaryProvider.isAvailable();
+    const isScanningEnabled = typeof process !== 'undefined'
+      ? (this.primaryProvider.name === 'CloudflareVisionProvider'
+          ? process.env?.CLOUDFLARE_SCANNING_ENABLED !== 'false' && process.env?.VISION_SCANNING_ENABLED !== 'false'
+          : process.env?.GEMINI_SCANNING_ENABLED !== 'false' && process.env?.VISION_SCANNING_ENABLED !== 'false')
+      : true;
+    const isBudgetExceeded = this.dailyCostEstimateUsd >= this.config.dailyBudgetUsd;
+
     const canAttemptPrimary =
       this.config.enabled &&
+      isScanningEnabled &&
+      !isBudgetExceeded &&
       isPrimaryAvailable &&
       currentState !== 'OPEN' &&
       this.activeConcurrency < this.maxConcurrency;
 
     if (!canAttemptPrimary) {
       if (isFallbackDisabled) {
+        let failureReason = `Primary vision provider unavailable (isAvailable=${isPrimaryAvailable}, circuitState=${currentState}).`;
+        if (!isScanningEnabled) failureReason = `${this.primaryProvider.name} scanning is disabled via emergency kill switch.`;
+        if (isBudgetExceeded) failureReason = `Daily ${this.primaryProvider.name} budget exceeded ($${this.dailyCostEstimateUsd.toFixed(2)} >= $${this.config.dailyBudgetUsd.toFixed(2)}).`;
+
         return {
           success: false,
-          error: `Primary vision provider unavailable (isAvailable=${isPrimaryAvailable}, circuitState=${currentState}). Fallback disabled by test policy.`,
-          errorType: !isPrimaryAvailable ? 'AUTH_ERROR' : currentState === 'OPEN' ? '429' : 'PROVIDER_UNAVAILABLE',
+          error: `${failureReason} Fallback disabled by test policy.`,
+          errorType: !isScanningEnabled ? 'PROVIDER_UNAVAILABLE' : isBudgetExceeded ? 'PROVIDER_UNAVAILABLE' : !isPrimaryAvailable ? 'AUTH_ERROR' : currentState === 'OPEN' ? '429' : 'PROVIDER_UNAVAILABLE',
           providerName: this.primaryProvider.name,
           modelUsed: 'none',
           providerAttempted,

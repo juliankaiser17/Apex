@@ -317,6 +317,68 @@ export const DirectMessageModal: React.FC<DirectMessageModalProps> = ({
     }
   }, [messageInput, conversationId, currentUser.id, recipient?.id, isSending]);
 
+  // 1-Tap Retry Handler for Failed Messages
+  const handleRetrySend = useCallback(async (failedMessage: DirectMessage) => {
+    if (!conversationId || !currentUser.id) return;
+    
+    // Set message back to optimistic sending
+    setMessages(prev =>
+      prev.map(m =>
+        m.id === failedMessage.id || (m.clientNonce && m.clientNonce === failedMessage.clientNonce)
+          ? { ...m, hasFailed: false, isOptimistic: true }
+          : m
+      )
+    );
+
+    try {
+      if (conversationId.startsWith('local_conv_')) {
+        const stored = localStorage.getItem(`apex_dm_${recipient?.id}`);
+        const existing = stored ? JSON.parse(stored) : [];
+        const confirmedMsg = { ...failedMessage, hasFailed: false, isOptimistic: false };
+        localStorage.setItem(`apex_dm_${recipient?.id}`, JSON.stringify([...existing, confirmedMsg]));
+        setMessages(prev =>
+          prev.map(m =>
+            m.id === failedMessage.id ? confirmedMsg : m
+          )
+        );
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('messages')
+        .insert([{
+          conversation_id: conversationId,
+          sender_id: currentUser.id,
+          content: failedMessage.content,
+          client_nonce: failedMessage.clientNonce || `nonce_${Date.now()}`
+        }])
+        .select('id, created_at')
+        .single();
+
+      if (error) throw error;
+
+      if (data) {
+        seenMessageIdsRef.current.add(data.id);
+        setMessages(prev =>
+          prev.map(m =>
+            (m.id === failedMessage.id || (m.clientNonce && m.clientNonce === failedMessage.clientNonce))
+              ? { ...m, id: data.id, createdAt: data.created_at, isOptimistic: false, hasFailed: false }
+              : m
+          )
+        );
+      }
+    } catch (err) {
+      console.error('Retry failed:', err);
+      setMessages(prev =>
+        prev.map(m =>
+          (m.id === failedMessage.id || (m.clientNonce && m.clientNonce === failedMessage.clientNonce))
+            ? { ...m, hasFailed: true, isOptimistic: false }
+            : m
+        )
+      );
+    }
+  }, [conversationId, currentUser.id, recipient?.id]);
+
   if (!isOpen || !recipient) return null;
 
   return createPortal(
@@ -441,9 +503,13 @@ export const DirectMessageModal: React.FC<DirectMessageModalProps> = ({
                         m.isOptimistic ? (
                           <Clock className="w-2.5 h-2.5 text-white/40" />
                         ) : m.hasFailed ? (
-                          <span className="text-red-400 font-semibold flex items-center gap-0.5">
-                            <AlertCircle className="w-2.5 h-2.5" /> Failed
-                          </span>
+                          <button
+                            onClick={() => handleRetrySend(m)}
+                            className="text-red-400 hover:text-red-300 font-semibold flex items-center gap-1 cursor-pointer underline underline-offset-2 ml-1"
+                            title="Retry sending message"
+                          >
+                            <AlertCircle className="w-2.5 h-2.5" /> Failed · Tap to Retry
+                          </button>
                         ) : (
                           <CheckCheck className="w-3 h-3 text-white/70" />
                         )

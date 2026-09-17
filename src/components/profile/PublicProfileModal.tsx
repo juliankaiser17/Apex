@@ -11,13 +11,15 @@ import {
   Calendar, 
   Grid, 
   ShieldCheck, 
-  Check
+  Check,
+  ShieldAlert
 } from 'lucide-react';
 import { useApexStore } from '../../store/useApexStore';
 import { supabase } from '../../lib/supabase';
 import { sounds } from '../../utils/audio';
 import { RARITY_CONFIG } from '../../utils/rarity';
 import { ProfileDossierSkeleton } from '../common/Skeleton';
+import { ModerationModal } from '../moderation/ModerationModal';
 import type { CarCard } from '../../types/apex';
 
 interface PublicProfileModalProps {
@@ -60,6 +62,7 @@ export const PublicProfileModal: React.FC<PublicProfileModalProps> = ({
   const [friendStatus, setFriendStatus] = useState<'none' | 'pending_sent' | 'pending_received' | 'friends'>('none');
   const [pendingRequestId, setPendingRequestId] = useState<string | null>(null);
   const [actionInProgress, setActionInProgress] = useState(false);
+  const [showModeration, setShowModeration] = useState(false);
 
   const isSelf = Boolean(
     currentUser.id && profile?.id && currentUser.id === profile.id
@@ -464,13 +467,25 @@ export const PublicProfileModal: React.FC<PublicProfileModalProps> = ({
                 Spotter Dossier
               </span>
             </div>
-            <button
-              onClick={onClose}
-              className="w-10 h-10 rounded-full bg-white/10 text-white/60 hover:text-white transition-colors flex items-center justify-center min-h-[44px] min-w-[44px]"
-              aria-label="Close dossier"
-            >
-              <X className="w-5 h-5" />
-            </button>
+            <div className="flex items-center gap-1.5">
+              {!isSelf && profile && (
+                <button
+                  onClick={() => setShowModeration(true)}
+                  className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 text-white/50 hover:text-amber-400 transition-colors flex items-center justify-center"
+                  title="Report or Block Spotter"
+                  aria-label="Report or Block Spotter"
+                >
+                  <ShieldAlert className="w-4 h-4" />
+                </button>
+              )}
+              <button
+                onClick={onClose}
+                className="w-10 h-10 rounded-full bg-white/10 text-white/60 hover:text-white transition-colors flex items-center justify-center min-h-[44px] min-w-[44px]"
+                aria-label="Close dossier"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
           </div>
 
           {/* Profile Body */}
@@ -688,6 +703,21 @@ export const PublicProfileModal: React.FC<PublicProfileModalProps> = ({
           </div>
         </motion.div>
       </div>
+
+      {showModeration && profile && (
+        <ModerationModal
+          isOpen={true}
+          targetType="user"
+          targetId={profile.id}
+          targetUserId={profile.id}
+          targetUsername={profile.username}
+          onClose={() => setShowModeration(false)}
+          onActionComplete={() => {
+            setShowModeration(false);
+            onClose();
+          }}
+        />
+      )}
     </AnimatePresence>,
     document.body
   );

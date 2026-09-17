@@ -12,7 +12,19 @@ class SoundSystem {
       }
     }
     if (this.ctx && this.ctx.state === 'suspended') {
-      this.ctx.resume();
+      this.ctx.resume().catch(() => {});
+    }
+  }
+
+  public async unlock(): Promise<void> {
+    if (typeof window === 'undefined') return;
+    this.initCtx();
+    if (this.ctx && this.ctx.state === 'suspended') {
+      try {
+        await this.ctx.resume();
+      } catch (e) {
+        console.warn('AudioContext unlock failed:', e);
+      }
     }
   }
 
@@ -215,6 +227,10 @@ class SoundSystem {
     });
   }
 
+  public playUnlock() {
+    this.playXpPop();
+  }
+
   public playCardFlip() {
     if (!this.enabled) return;
     this.initCtx();
@@ -300,3 +316,12 @@ class SoundSystem {
 }
 
 export const sounds = new SoundSystem();
+
+// Automatically unlock Web Audio on first user interaction (pointer down or key down)
+if (typeof window !== 'undefined') {
+  const unlockAudioOnGesture = () => {
+    sounds.unlock();
+  };
+  window.addEventListener('pointerdown', unlockAudioOnGesture, { once: true, passive: true });
+  window.addEventListener('keydown', unlockAudioOnGesture, { once: true, passive: true });
+}

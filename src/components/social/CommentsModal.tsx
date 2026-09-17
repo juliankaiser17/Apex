@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Send, Heart, MessageSquare } from 'lucide-react';
+import { X, Send, Heart, MessageSquare, Flag } from 'lucide-react';
 import { useApexStore } from '../../store/useApexStore';
 import type { FeedPost, PostComment } from '../../types/apex';
 import { RARITY_CONFIG } from '../../utils/rarity';
 import { sounds } from '../../utils/audio';
 import { supabase } from '../../lib/supabase';
 import { CommentRowSkeleton } from '../common/Skeleton';
+import { ModerationModal } from '../moderation/ModerationModal';
 
 interface CommentsModalProps {
   post: FeedPost | null;
@@ -29,6 +30,7 @@ export const CommentsModal: React.FC<CommentsModalProps> = ({
   const [remoteComments, setRemoteComments] = useState<PostComment[]>([]);
   const [isLoadingComments, setIsLoadingComments] = useState(false);
   const [keyboardOffset, setKeyboardOffset] = useState(0);
+  const [moderatingComment, setModeratingComment] = useState<PostComment | null>(null);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const commentsEndRef = useRef<HTMLDivElement>(null);
@@ -185,18 +187,23 @@ export const CommentsModal: React.FC<CommentsModalProps> = ({
   useEffect(() => {
     if (!post) return;
 
+    let rafId: number | null = null;
     const handleViewportChange = () => {
-      if (!window.visualViewport) return;
-      const vv = window.visualViewport;
-      // Calculate how much the keyboard is pushing up
-      const offset = window.innerHeight - (vv.height + vv.offsetTop);
-      setKeyboardOffset(Math.max(0, offset));
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => {
+        if (!window.visualViewport) return;
+        const vv = window.visualViewport;
+        // Calculate how much the keyboard is pushing up
+        const offset = window.innerHeight - (vv.height + vv.offsetTop);
+        setKeyboardOffset(Math.max(0, offset));
+      });
     };
 
-    window.visualViewport?.addEventListener('resize', handleViewportChange);
-    window.visualViewport?.addEventListener('scroll', handleViewportChange);
+    window.visualViewport?.addEventListener('resize', handleViewportChange, { passive: true });
+    window.visualViewport?.addEventListener('scroll', handleViewportChange, { passive: true });
 
     return () => {
+      if (rafId) cancelAnimationFrame(rafId);
       window.visualViewport?.removeEventListener('resize', handleViewportChange);
       window.visualViewport?.removeEventListener('scroll', handleViewportChange);
     };
@@ -320,14 +327,15 @@ export const CommentsModal: React.FC<CommentsModalProps> = ({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
+          transition={{ duration: 0.15 }}
           onClick={() => {
             if (document.activeElement === inputRef.current) {
               inputRef.current?.blur();
             }
             onClose();
           }}
-          className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+          className="absolute inset-0 bg-black/85"
+          style={{ willChange: 'opacity' }}
         />
 
         {/* Bottom Sheet Container */}
@@ -335,13 +343,14 @@ export const CommentsModal: React.FC<CommentsModalProps> = ({
           initial={{ y: '100%' }}
           animate={{ y: 0 }}
           exit={{ y: '100%' }}
-          transition={{ type: 'spring', damping: 28, stiffness: 320, mass: 0.8 }}
+          transition={{ type: 'spring', damping: 32, stiffness: 350, mass: 0.7 }}
           className="relative z-10 w-full max-w-lg mx-auto bg-[#101010] border-t border-x border-white/10 rounded-t-[28px] flex flex-col shadow-2xl overflow-hidden"
           style={{
             height: '90dvh',
             maxHeight: '92dvh',
             marginBottom: `${keyboardOffset}px`,
-            transition: keyboardOffset > 0 ? 'none' : 'margin-bottom 0.25s cubic-bezier(0.16, 1, 0.3, 1)'
+            willChange: 'transform',
+            transition: keyboardOffset > 0 ? 'none' : 'margin-bottom 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
           }}
         >
           {/* Top Drag Indicator Notch */}
@@ -410,24 +419,31 @@ export const CommentsModal: React.FC<CommentsModalProps> = ({
             className="flex-1 min-h-0 p-4 overflow-y-auto space-y-3 overscroll-contain no-scrollbar"
             tabIndex={0}
           >
-            {isLoadingComments && remoteComments.length === 0 ? (
-              <div className="space-y-4 py-2">
-                <CommentRowSkeleton />
-                <CommentRowSkeleton />
-                <CommentRowSkeleton />
-              </div>
-            ) : remoteComments.length === 0 ? (
-              <div className="text-center py-16 text-white/40 space-y-2.5">
-                <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mx-auto text-white/30">
-                  <MessageSquare className="w-5 h-5" />
-                </div>
-                <div>
-                  <p className="font-display text-sm font-bold text-white tracking-wide">NO DISCUSSION YET</p>
-                  <p className="text-xs text-white/50 max-w-xs mx-auto mt-0.5">Start the conversation on this spot.</p>
-                </div>
-              </div>
-            ) : (
-              remoteComments.map((c) => (
+            {(() => {
+              const visibleComments = remoteComments.filter(c => !(user?.blockedUsers || []).includes(c.user.id));
+              if (isLoadingComments && visibleComments.length === 0) {
+                return (
+                  <div className="space-y-4 py-2">
+                    <CommentRowSkeleton />
+                    <CommentRowSkeleton />
+                    <CommentRowSkeleton />
+                  </div>
+                );
+              }
+              if (visibleComments.length === 0) {
+                return (
+                  <div className="text-center py-16 text-white/40 space-y-2.5">
+                    <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mx-auto text-white/30">
+                      <MessageSquare className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <p className="font-display text-sm font-bold text-white tracking-wide">NO DISCUSSION YET</p>
+                      <p className="text-xs text-white/50 max-w-xs mx-auto mt-0.5">Start the conversation on this spot.</p>
+                    </div>
+                  </div>
+                );
+              }
+              return visibleComments.map((c) => (
                 <div 
                   key={c.id} 
                   className="p-3 rounded-2xl bg-[#181818] border border-white/[0.06] space-y-2 transition-all"
@@ -465,6 +481,15 @@ export const CommentsModal: React.FC<CommentsModalProps> = ({
                         <Heart className={`w-3.5 h-3.5 ${c.isLiked ? 'fill-current' : ''}`} />
                         {c.likesCount > 0 && <span>{c.likesCount}</span>}
                       </button>
+                      {c.user.id !== user?.id && (
+                        <button
+                          onClick={() => setModeratingComment(c)}
+                          className="p-1 rounded text-white/30 hover:text-amber-400 transition-colors"
+                          title="Report comment"
+                        >
+                          <Flag className="w-3 h-3" />
+                        </button>
+                      )}
                     </div>
                   </div>
 
@@ -472,8 +497,8 @@ export const CommentsModal: React.FC<CommentsModalProps> = ({
                     {c.text}
                   </p>
                 </div>
-              ))
-            )}
+              ));
+            })()}
             <div ref={commentsEndRef} />
           </div>
 
@@ -513,6 +538,17 @@ export const CommentsModal: React.FC<CommentsModalProps> = ({
           </form>
         </motion.div>
       </div>
+
+      {moderatingComment && (
+        <ModerationModal
+          isOpen={true}
+          targetType="comment"
+          targetId={moderatingComment.id}
+          targetUserId={moderatingComment.user.id}
+          targetUsername={moderatingComment.user.username}
+          onClose={() => setModeratingComment(null)}
+        />
+      )}
     </AnimatePresence>
   );
 

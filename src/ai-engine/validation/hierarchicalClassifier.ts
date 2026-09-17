@@ -138,28 +138,53 @@ export class HierarchicalClassifier {
       else if (candNameLower.includes('nissan')) candidateMake = 'nissan';
 
       // ── CONTRADICTION ENGINE RULE 0: BUS / COMMERCIAL FLEET ELIMINATION ──
-      const isBusOrHeavyVehicle = 
-        evidenceText.includes('bus') || 
-        evidenceText.includes('transit') || 
-        evidenceText.includes('coach') || 
-        evidenceText.includes('semi-truck') ||
-        (visual_evidence.body_style || '').toLowerCase().includes('bus');
+      // Check structured vehicle_classification first if present
+      const structuredClass = (visual_evidence as any)?.vehicle_classification;
+      const isStructuredBus = structuredClass === 'commercial_bus' || structuredClass === 'commercial_truck';
+
+      // Fallback word-boundary checks on evidence text (prevents 'rhombus' matching 'bus', 'coachline' matching 'coach')
+      const isWordBoundaryBus = 
+        /\bbus(es)?\b/i.test(evidenceText) || 
+        /\b(public\s+transit|transit\s+bus|metro\s+bus|city\s+bus)\b/i.test(evidenceText) || 
+        /\bcoach(?!built|line)\b/i.test(evidenceText) || 
+        /\b(semi-truck|heavy\s+truck|lorry)\b/i.test(evidenceText) ||
+        /\bbus\b/i.test((visual_evidence.body_style || '').toLowerCase());
+
+      const isBusOrHeavyVehicle = isStructuredBus || isWordBoundaryBus;
 
       if (isBusOrHeavyVehicle) {
         // Commercial bus evidence strictly eliminates all sports car, hypercar, and consumer coupe candidates
         candContradictions.push(
           `Severe vehicle-type mismatch: Observed subject is public transit/bus, which completely contradicts automobile candidate ${candidate.name}`
         );
+        if (!globalContradictions.includes('Observed subject is public transit/heavy vehicle, not a consumer automobile.')) {
+          globalContradictions.push('Observed subject is public transit/heavy vehicle, not a consumer automobile.');
+        }
+        score -= 0.95;
+      }
+
+      // ── CONTRADICTION ENGINE RULE 0B: COMMERCIAL TAXI / LIVERY CONTRADICTION ──
+      const isStructuredTaxi = structuredClass === 'taxi_livery';
+      const isWordBoundaryTaxi = /\b(taxi|urban\s+taxi|crown\s+comfort|cab\s+livery)\b/i.test(evidenceText);
+      const isTaxiLivery = isStructuredTaxi || isWordBoundaryTaxi;
+      const isExoticSupercar = candNameLower.includes('hurac') || candNameLower.includes('lamborghini') || candNameLower.includes('ferrari') || candNameLower.includes('mclaren') || candNameLower.includes('chiron') || candNameLower.includes('bugatti');
+      if (isTaxiLivery && isExoticSupercar) {
+        candContradictions.push(
+          `Severe vehicle-type mismatch: Observed subject has commercial taxi livery/architecture, which contradicts exotic sports car candidate ${candidate.name}`
+        );
+        if (!globalContradictions.includes('Observed subject displays commercial taxi livery/features.')) {
+          globalContradictions.push('Observed subject displays commercial taxi livery/features.');
+        }
         score -= 0.95;
       }
 
       // ── CONTRADICTION ENGINE RULE A: CROSS-MANUFACTURER BRAND EVIDENCE CONTRADICTION ──
       // If evidence clearly displays distinctive manufacturer brand cues, eliminate incompatible makes
-      const hasBmwCues = evidenceText.includes('kidney') || evidenceText.includes('hofmeister') || evidenceText.includes('bmw');
-      const hasMercedesCues = evidenceText.includes('panamericana') || evidenceText.includes('three-pointed star') || evidenceText.includes('mercedes') || evidenceText.includes('amg grille');
-      const hasFerrariCues = evidenceText.includes('prancing horse') || evidenceText.includes('ferrari') || evidenceText.includes('shark nose') || evidenceText.includes('strakes');
-      const hasPorscheCues = evidenceText.includes('porsche') || evidenceText.includes('sloping flyline') || evidenceText.includes('teardrop roofline') || evidenceText.includes('bulbous front fender');
-      const hasToyotaCues = evidenceText.includes('toyota') || evidenceText.includes('gr supra') || evidenceText.includes('gr badge');
+      const hasBmwCues = /\b(kidney|hofmeister|bmw)\b/i.test(evidenceText);
+      const hasMercedesCues = /\b(panamericana|three-pointed\s+star|mercedes|amg\s+grille)\b/i.test(evidenceText);
+      const hasFerrariCues = /\b(prancing\s+horse|ferrari|shark\s+nose|side\s+strakes|testarossa)\b/i.test(evidenceText);
+      const hasPorscheCues = /\b(porsche|sloping\s+flyline|teardrop\s+roofline|bulbous\s+front\s+fender)\b/i.test(evidenceText);
+      const hasToyotaCues = (/\b(toyota|gr\s+supra|gr\s+badge)\b/i.test(evidenceText)) || isTaxiLivery;
 
       if (hasMercedesCues && candidateMake && candidateMake !== 'mercedes') {
         candContradictions.push(
@@ -218,6 +243,31 @@ export class HierarchicalClassifier {
           candUnobservable.push('CSL-specific ducktail spoiler and laser taillights are unobservable from front viewpoint');
           score -= 0.20;
         }
+        // McLaren P11 platform (650S vs 675LT) - rear active Longtail airbrake unobservable
+        if (candNameLower.includes('675lt')) {
+          const hasFrontLtProof = evidenceText.includes('675lt') || evidenceText.includes('front fender louver') || evidenceText.includes('carbon endplate');
+          if (!hasFrontLtProof) {
+            candUnobservable.push('675LT active rear Longtail airbrake and dual top-exit titanium exhausts are unobservable from front viewpoint');
+            score -= 0.25;
+          }
+        }
+        // Porsche 911 GT3 / GT3 RS - rear wing unobservable from front without nostril ducts
+        if (candNameLower.includes('gt3')) {
+          const hasFrontGt3Proof = evidenceText.includes('gt3') || evidenceText.includes('drs') || evidenceText.includes('hood nostril') || evidenceText.includes('fender vent');
+          if (!hasFrontGt3Proof) {
+            candUnobservable.push('GT3 high-mounted rear wing is unobservable from front viewpoint and front fascia lacks GT3 air extractor');
+            score -= 0.25;
+          }
+        }
+      }
+
+      // If viewpoint is rear or rear_3q, check rear architecture
+      if (viewpoint === 'rear' || viewpoint === 'rear_3q') {
+        // Huracán STO requires prominent roof air scoop/snorkel and giant swan-neck rear wing
+        if (candNameLower.includes('sto') && !evidenceText.includes('sto') && !evidenceText.includes('swan-neck') && !evidenceText.includes('snorkel')) {
+          candContradictions.push('Huracán STO requires prominent roof air scoop/snorkel and giant swan-neck wing, absent from observed rear');
+          score -= 0.60;
+        }
       }
 
       // ── CONTRADICTION ENGINE RULE D: SPECIFIC VARIANT EVIDENCE CHECK ──
@@ -271,21 +321,48 @@ export class HierarchicalClassifier {
 
     // Check adversarial verification feedback
     if (adversarial_result && !adversarial_result.verified) {
-      if (adversarial_result.demote_to) {
-        resolvedVariant = null;
+      // Invariant: Adversarial verification verifies, never arbitrarily substitutes.
+      // Variant is reduced to null (base model) upon contradiction or lack of verified aero/badging proof.
+      resolvedVariant = null;
+      if (adversarial_result.demote_to && resolvedMake) {
+        const demoteLower = adversarial_result.demote_to.toLowerCase();
+        const makeLower = resolvedMake.toLowerCase();
+        // Strict Cross-Brand Demotion Prohibition:
+        // A runner-up or adversarial candidate from a DIFFERENT manufacturer MUST NEVER replace the winner.
+        if (!demoteLower.includes(makeLower)) {
+          // Discard cross-brand demote_to; preserve verified make & model family, drop variant.
+        }
       }
     }
 
-    // 5. Determine Maximum Defensible Specificity
-    // Hierarchical rule:
-    // If variant-specific cues are absent, or candidate margin is low, stop at generation or model_family!
+    // ── CONTRADICTION DEADLOCK RESOLUTION ──
+    // If all candidates suffer severe manufacturer/type contradictions, or top candidate is contradicted by observable brand cues:
+    const allHaveSevereMismatch = calibratedCandidates.length > 0 && calibratedCandidates.every((c) =>
+      c.contradictions.some((ct) => ct.includes('Severe manufacturer mismatch') || ct.includes('Severe vehicle-type mismatch'))
+    );
+    const topHasSevereMismatch = Boolean(
+      topCandidate && topCandidate.contradictions.some((ct) =>
+        ct.includes('Severe manufacturer mismatch') || ct.includes('Severe vehicle-type mismatch')
+      )
+    );
+
     let specificity: SpecificityLevel = 'make';
     let reason = 'Vehicle manufacturer identified with high visual confidence.';
 
-    if (topCandidate && topCandidate.score >= 0.50) {
+    if (allHaveSevereMismatch || (topHasSevereMismatch && (topCandidate?.score || 0) < 0.50)) {
+      resolvedMake = null;
+      resolvedModelFamily = null;
+      resolvedGeneration = null;
+      resolvedVariant = null;
+      specificity = 'make';
+      reason = 'Severe architectural contradiction detected: observed visual cues directly contradict proposed candidates.';
+    } else if (topCandidate && topCandidate.score >= 0.50) {
       // Clean make & model from top candidate if available
       const parts = topCandidate.name.split(' ');
       if (!resolvedMake && parts.length > 0) resolvedMake = parts[0];
+      if (!resolvedModelFamily && parts.length > 1) {
+        resolvedModelFamily = parts.slice(1).join(' ').replace(/\s*\([^)]*\)/g, '').trim();
+      }
 
       specificity = 'model_family';
       reason = `Model family confirmed based on characteristic architecture: ${resolvedMake} ${resolvedModelFamily || ''}.`;
@@ -301,7 +378,16 @@ export class HierarchicalClassifier {
                                  separation >= 0.15 &&
                                  topCandidate.score >= 0.78;
 
-      if (resolvedVariant && hasVariantEvidence) {
+      // P11 McLaren Specificity Rule: From front view without rear airbrake, cap at generation P11
+      const isMcLarenP11 = topCandidate.name.toLowerCase().includes('650s') || topCandidate.name.toLowerCase().includes('675lt');
+      const isFrontView = viewpoint === 'front' || viewpoint === 'front_3q';
+
+      if (isMcLarenP11 && isFrontView) {
+        resolvedVariant = null;
+        specificity = 'generation';
+        if (!resolvedGeneration || resolvedGeneration === 'Current') resolvedGeneration = 'P11';
+        reason = `Identified as McLaren Super Series (${resolvedGeneration}). Specific trim (650S vs 675LT) unconfirmed without observable rear Longtail airbrake and exhaust.`;
+      } else if (resolvedVariant && hasVariantEvidence) {
         specificity = 'variant';
         reason = `Exact variant confirmed with distinctive visual evidence: ${topCandidate.name}.`;
       } else {
@@ -315,12 +401,15 @@ export class HierarchicalClassifier {
       }
     }
 
-    // Collect all contradiction notes
-    calibratedCandidates.forEach((c) => {
-      c.contradictions.forEach((ct) => {
-        if (!globalContradictions.includes(ct)) globalContradictions.push(ct);
+    // ── SCOPED CONTRADICTION ENGINE: ISOLATE WINNER FROM RUNNER-UP CONTRADICTIONS ──
+    // Winner candidate is ONLY penalized by its OWN contradictions and scene-level global contradictions.
+    // Runner-up rejection notes (why runner-up was NOT selected) MUST NEVER leak into the winner's score or active contradictions.
+    const activeContradictions: string[] = [...globalContradictions];
+    if (topCandidate && topCandidate.contradictions) {
+      topCandidate.contradictions.forEach((ct) => {
+        if (!activeContradictions.includes(ct)) activeContradictions.push(ct);
       });
-    });
+    }
 
     // Check if adversarial verification is required
     const isExoticOrHighVariant = (topCandidate?.name.toLowerCase() || '').match(/(csl|gt3|gt2|svj|sto|sp3|senna|p1|laferrari|chiron|revuelto)/i);
@@ -342,7 +431,7 @@ export class HierarchicalClassifier {
       calibrated_candidates: calibratedCandidates,
       top_candidate: topCandidate,
       candidate_separation: separation,
-      contradictions: globalContradictions,
+      contradictions: activeContradictions,
       reason,
       needs_adversarial_verification: needsAdversarial
     };

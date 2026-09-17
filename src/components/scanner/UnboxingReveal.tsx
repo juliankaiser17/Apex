@@ -6,6 +6,7 @@ import { ApexCollectibleCard } from '../card/ApexCollectibleCard';
 import { PostComposer } from './PostComposer';
 import { sounds } from '../../utils/audio';
 import confetti from 'canvas-confetti';
+import { shouldReduceMotion, isLowEndDevice } from '../../utils/performanceMode';
 
 interface UnboxingRevealProps {
   card: CarCard;
@@ -34,15 +35,17 @@ export const UnboxingReveal: React.FC<UnboxingRevealProps> = ({ card, onComplete
   const rarityConf = RARITY_CONFIG[card.rarity];
   const isMythic = card.rarity === 'mythic';
   const isLegendary = card.rarity === 'legendary';
+  const reducesMotion = shouldReduceMotion();
+  const isLowEnd = isLowEndDevice();
 
-  // Tier-specific streak counts & lengths
+  // Tier-specific streak counts & lengths (halved on low-end devices)
   const streakSpecs: Record<RarityTier, { count: number; color: string; reach: number; width: number }> = {
-    common: { count: 14, color: '#787878', reach: 140, width: 1.5 },
-    uncommon: { count: 20, color: '#3DAA6A', reach: 220, width: 2.0 },
-    rare: { count: 26, color: '#E8A020', reach: 300, width: 2.5 },
-    epic: { count: 32, color: '#C85000', reach: 380, width: 3.0 },
-    legendary: { count: 38, color: '#FFA500', reach: 460, width: 3.5 },
-    mythic: { count: 44, color: '#FF2200', reach: 520, width: 4.0 }
+    common: { count: isLowEnd ? 7 : 14, color: '#787878', reach: 140, width: 1.5 },
+    uncommon: { count: isLowEnd ? 10 : 20, color: '#3DAA6A', reach: 220, width: 2.0 },
+    rare: { count: isLowEnd ? 13 : 26, color: '#E8A020', reach: 300, width: 2.5 },
+    epic: { count: isLowEnd ? 16 : 32, color: '#C85000', reach: 380, width: 3.0 },
+    legendary: { count: isLowEnd ? 19 : 38, color: '#FFA500', reach: 460, width: 3.5 },
+    mythic: { count: isLowEnd ? 22 : 44, color: '#FF2200', reach: 520, width: 4.0 }
   };
 
   const currentStreak = streakSpecs[card.rarity];
@@ -88,17 +91,20 @@ export const UnboxingReveal: React.FC<UnboxingRevealProps> = ({ card, onComplete
       safePlay(() => sounds.playRarityReveal(card.rarity));
       setPhase(10);
 
-      try {
-        confetti({
-          particleCount: isMythic ? 120 : isLegendary ? 80 : 50,
-          spread: 80,
-          origin: { y: 0.5 },
-          colors: isMythic
-            ? ['#FF2200', '#FFA500', '#C85000', '#E8A020', '#3DAA6A']
-            : [rarityConf.color, '#F0EBE3', '#FF4500']
-        });
-      } catch (e) {
-        console.warn('Confetti error:', e);
+      if (!reducesMotion) {
+        try {
+          const countMultiplier = isLowEnd ? 0.5 : 1.0;
+          confetti({
+            particleCount: Math.round((isMythic ? 120 : isLegendary ? 80 : 50) * countMultiplier),
+            spread: 80,
+            origin: { y: 0.5 },
+            colors: isMythic
+              ? ['#FF2200', '#FFA500', '#C85000', '#E8A020', '#3DAA6A']
+              : [rarityConf.color, '#F0EBE3', '#FF4500']
+          });
+        } catch (e) {
+          console.warn('Confetti error:', e);
+        }
       }
     }, 4850);
 
@@ -111,13 +117,15 @@ export const UnboxingReveal: React.FC<UnboxingRevealProps> = ({ card, onComplete
     return () => {
       timeoutsRef.current.forEach(clearTimeout);
     };
-  }, [card, isMythic, isLegendary, rarityConf]);
+  }, [card, isMythic, isLegendary, rarityConf, reducesMotion, isLowEnd]);
 
-  // Fireworks generator during Phases 6 to 11
+  // Fireworks generator during Phases 6 to 11 (bypassed if reduced motion)
   useEffect(() => {
-    if (phase < 6) return;
+    if (phase < 6 || reducesMotion) return;
+    const count = isLowEnd ? 4 : 8;
+    const intervalMs = isLowEnd ? 600 : 380;
     const interval = setInterval(() => {
-      const newParticles = Array.from({ length: 8 }).map((_, i) => ({
+      const newParticles = Array.from({ length: count }).map((_, i) => ({
         id: Date.now() + i,
         x: (Math.random() - 0.5) * 260,
         y: (Math.random() - 0.5) * 340,
@@ -127,10 +135,10 @@ export const UnboxingReveal: React.FC<UnboxingRevealProps> = ({ card, onComplete
           : rarityConf.color
       }));
       setFireworkParticles(newParticles);
-    }, 380);
+    }, intervalMs);
 
     return () => clearInterval(interval);
-  }, [phase, isMythic, rarityConf]);
+  }, [phase, isMythic, rarityConf, reducesMotion, isLowEnd]);
 
   const handleSavePrivately = () => {
     sounds.playTargetLock();
@@ -146,22 +154,39 @@ export const UnboxingReveal: React.FC<UnboxingRevealProps> = ({ card, onComplete
           
           if (phase < 10) {
             try { sounds.playRarityReveal(card.rarity); } catch (e) {}
-            try {
-              confetti({
-                particleCount: isMythic ? 120 : isLegendary ? 80 : 50,
-                spread: 80,
-                origin: { y: 0.5 },
-                colors: isMythic
-                  ? ['#FF2200', '#FFA500', '#C85000', '#E8A020', '#3DAA6A']
-                  : [rarityConf.color, '#F0EBE3', '#FF4500']
-              });
-            } catch (e) {}
+            if (!reducesMotion) {
+              try {
+                const countMultiplier = isLowEnd ? 0.5 : 1.0;
+                confetti({
+                  particleCount: Math.round((isMythic ? 120 : isLegendary ? 80 : 50) * countMultiplier),
+                  spread: 80,
+                  origin: { y: 0.5 },
+                  colors: isMythic
+                    ? ['#FF2200', '#FFA500', '#C85000', '#E8A020', '#3DAA6A']
+                    : [rarityConf.color, '#F0EBE3', '#FF4500']
+                });
+              } catch (e) {}
+            }
           }
         }
       }}
       className="fixed inset-0 z-50 bg-[#080808] flex flex-col items-center justify-center overflow-hidden select-none cursor-pointer"
       style={{ fontFamily: 'DM Sans' }}
     >
+      {/* SKIP REVEAL BUTTON */}
+      {phase < 11 && !showPostComposer && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            timeoutsRef.current.forEach(clearTimeout);
+            setPhase(11);
+          }}
+          className="absolute top-5 right-5 z-50 px-3.5 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white/90 text-xs font-bold tracking-wider uppercase border border-white/15 transition-all backdrop-blur-md shadow-lg active:scale-95"
+          aria-label="Skip unboxing animation"
+        >
+          Skip Reveal ⏭
+        </button>
+      )}
       
       {/* PHASE 9: PURE WHITE FLASH (55ms on, 100ms hold, 340ms fade) */}
       <AnimatePresence>
@@ -296,7 +321,7 @@ export const UnboxingReveal: React.FC<UnboxingRevealProps> = ({ card, onComplete
                 phase === 1
                   ? { scale: 1.0, opacity: 1, y: 0 }
                   : phase === 4
-                  ? { x: [6, -6, 4, -4, 2, 0], scale: 1.0, opacity: 1, y: 0 }
+                  ? (reducesMotion ? { scale: 1.0, opacity: 1, y: 0 } : { x: [6, -6, 4, -4, 2, 0], scale: 1.0, opacity: 1, y: 0 })
                   : { scale: 1.0, opacity: 1, y: 0 }
               }
               transition={

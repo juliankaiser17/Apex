@@ -16,7 +16,37 @@ export interface AIProviderRequest {
     temperature?: number;
     timeoutMs?: number;
     disableFallback?: boolean;
+    format?: 'messages' | 'inst';
+    schema?: 'minimal' | 'monolithic';
+    maxTokens?: number;
+    stream?: boolean;
+    seed?: number;
+    isColdStart?: boolean;
+    idleBeforeRequestMs?: number;
+    imagePreprocessingMs?: number;
+    imageDimensions?: [number, number];
   };
+}
+
+export interface VisionStageTelemetry {
+  isColdStart: boolean;
+  warmState: boolean;
+  idleBeforeRequestMs?: number;
+  timeToFirstByteMs?: number;
+  imagePreprocessingMs?: number;
+  encodedImageBytes?: number;
+  imageDimensions?: [number, number];
+  uploadStartTimestamp: string;
+  cloudflareRequestDurationMs: number;
+  timeToFirstTokenMs?: number | null;
+  totalModelResponseDurationMs: number;
+  jsonParsingMs: number;
+  deterministicValidationMs: number;
+  totalEndToEndMs: number;
+  neurons?: number;
+  promptTokens?: number;
+  completionTokens?: number;
+  totalTokens?: number;
 }
 
 export interface AIProviderResponse {
@@ -34,6 +64,8 @@ export interface AIProviderResponse {
     outputTokens: number;
     totalTokens: number;
   };
+  neuronsConsumed?: number;
+  telemetry?: VisionStageTelemetry;
   durationMs: number;
 }
 

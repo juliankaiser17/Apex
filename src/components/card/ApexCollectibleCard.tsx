@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import type { CarCard } from '../../types/apex';
 import { RARITY_CONFIG } from '../../utils/rarity';
 import { getOptimizedImageUrl } from '../../utils/imageUrl';
+import { getEstimatedMarketValue } from '../../utils/marketValuation';
 
 interface ApexCollectibleCardProps {
   card: CarCard;
@@ -43,9 +44,16 @@ export const ApexCollectibleCard: React.FC<ApexCollectibleCardProps> = React.mem
   const torqueNum = card.torqueNm || 465;
   const weightNum = card.kerbWeightKg || 1450;
   
-  // Market Value
-  const valLow = card.marketValueLowUsd ? `$${Math.round(card.marketValueLowUsd / 1000)}k` : '$240k';
-  const valHigh = card.marketValueHighUsd ? `$${Math.round(card.marketValueHighUsd / 1000)}k` : '$310k';
+  // Grounded Market Value
+  const valuation = useMemo(() => {
+    return getEstimatedMarketValue({
+      make: card.make,
+      model: card.model,
+      rarity: card.rarity,
+      marketValueLowUsd: card.marketValueLowUsd,
+      marketValueHighUsd: card.marketValueHighUsd
+    });
+  }, [card.make, card.model, card.rarity, card.marketValueLowUsd, card.marketValueHighUsd]);
 
   const formattedSerial = useMemo(() => {
     const raw = card.cardNumber || getDeterministicSerial(card.id);
@@ -63,11 +71,16 @@ export const ApexCollectibleCard: React.FC<ApexCollectibleCardProps> = React.mem
 
   const widthClass = size === 'sm' ? 'w-[280px]' : size === 'lg' ? 'w-[360px]' : 'w-[325px]';
   const optimizedUrl = getOptimizedImageUrl(card.imageUrl, 'card');
+  const isCustomFoil = Boolean(card.customFoil);
 
   return (
     <div
       onClick={onClick}
-      className={`relative ${widthClass} rounded-2xl overflow-hidden bg-[#121212] select-none flex flex-col cursor-pointer border border-white/[0.08] hover:border-white/[0.18] transition-all group ${className}`}
+      className={`relative ${widthClass} rounded-2xl overflow-hidden bg-[#121212] select-none flex flex-col cursor-pointer border ${
+        isCustomFoil
+          ? 'border-amber-400/40 ring-1 ring-amber-400/30 shadow-[0_0_24px_rgba(245,158,11,0.2)]'
+          : 'border-white/[0.08] hover:border-white/[0.18]'
+      } transition-all group ${className}`}
     >
       {/* 1. TOP HEADER: Make, Model & Serial */}
       <div className="px-4 py-3 flex items-center justify-between bg-[#141414] border-b border-white/[0.06]">
@@ -81,10 +94,22 @@ export const ApexCollectibleCard: React.FC<ApexCollectibleCardProps> = React.mem
           </span>
         </div>
 
-        {/* Sleek Rarity Pill */}
-        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${rarityConf.badgeBg}`}>
-          {rarityConf.label}
-        </span>
+        {/* Sleek Rarity Pill & Badges */}
+        <div className="flex items-center gap-1.5">
+          {isCustomFoil && (
+            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-gradient-to-r from-amber-500/20 via-pink-500/20 to-indigo-500/20 border border-amber-400/40 text-amber-300">
+              ✨ FOIL
+            </span>
+          )}
+          {card.localRarity?.confidenceState === 'LOCAL_UNKNOWN' && (
+            <span className="text-[8px] font-bold px-1.5 py-0.5 rounded-md bg-sky-500/10 border border-sky-500/20 text-sky-300 uppercase">
+              CENSUS
+            </span>
+          )}
+          <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${rarityConf.badgeBg}`}>
+            {rarityConf.label}
+          </span>
+        </div>
       </div>
 
       {/* 2. HERO VEHICLE PHOTOGRAPH CONTAINER */}
@@ -188,7 +213,7 @@ export const ApexCollectibleCard: React.FC<ApexCollectibleCardProps> = React.mem
         <div className="pt-2 border-t border-white/[0.06] flex items-center justify-between text-xs">
           <span className="text-white/50 text-[11px]">Est. Market Value</span>
           <span className="font-data font-bold text-white tracking-wide">
-            {valLow} – {valHigh}
+            {valuation.formattedRange}
           </span>
         </div>
       </div>

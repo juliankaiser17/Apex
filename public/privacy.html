@@ -1,0 +1,186 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy — Apex</title>
+  <style>
+    :root {
+      --bg: #0A0A0A;
+      --card-bg: #141414;
+      --border: rgba(255, 255, 255, 0.08);
+      --accent: #E50914;
+      --text: #F0EBE3;
+      --muted: #9A9088;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.65;
+      padding: 24px 16px 60px;
+    }
+    .container {
+      max-width: 760px;
+      margin: 0 auto;
+    }
+    header {
+      margin-bottom: 32px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+    }
+    .badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+    h1 {
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+    }
+    .effective-date {
+      font-size: 13px;
+      color: var(--muted);
+    }
+    section {
+      margin-bottom: 28px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+    }
+    h2 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: #FFF;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    p {
+      font-size: 14px;
+      color: #D1CBC4;
+      margin-bottom: 12px;
+    }
+    p:last-child {
+      margin-bottom: 0;
+    }
+    ul {
+      margin: 12px 0 12px 20px;
+      color: #D1CBC4;
+      font-size: 14px;
+    }
+    li {
+      margin-bottom: 6px;
+    }
+    strong {
+      color: #FFF;
+    }
+    a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    .footer {
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 40px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="badge">APEX SECURITY & LEGAL</div>
+      <h1>Privacy Policy</h1>
+      <div class="effective-date">Effective Date: September 1, 2026 | Version 1.0</div>
+    </header>
+
+    <section>
+      <h2>1. Overview</h2>
+      <p>
+        Apex ("we," "our," or "us") provides a mobile car-spotting and automotive enthusiast platform. We are committed to safeguarding your privacy and ensuring transparent handling of your data. This Privacy Policy outlines what information we collect, how it is processed, and your rights under applicable privacy laws, including the European General Data Protection Regulation (GDPR) and California Consumer Privacy Act (CCPA).
+      </p>
+    </section>
+
+    <section>
+      <h2>2. Information We Collect</h2>
+      <p>We collect only the data necessary to provide and secure Apex services:</p>
+      <ul>
+        <li><strong>Account Information:</strong> When registering, we collect your email address, display name, and chosen username. Authentication is securely managed through Supabase Auth.</li>
+        <li><strong>Camera & Vehicle Photographs:</strong> Photos captured via the in-app scanner are processed to identify the make, model, generation, and specifications of motor vehicles.</li>
+        <li><strong>Location Data (Optional):</strong> If permission is granted, approximate or precise location coordinates are used to determine regional vehicle rarity and display local spotting radar. You can choose among three privacy tiers: <em>Exact Pin</em>, <em>1km Zone</em> (fuzzy offset), or <em>Hidden</em>.</li>
+        <li><strong>Garage & Progression:</strong> Your virtual garage of collected vehicles, spots, XP, levels, and achievements are stored in our secure database.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>3. AI Processing & Third-Party Services</h2>
+      <p>
+        Apex utilizes server-side Artificial Intelligence to analyze vehicle imagery:
+      </p>
+      <ul>
+        <li><strong>Secure Proxy Architecture:</strong> Vehicle photos are transmitted over encrypted HTTPS/TLS connections to the Apex Backend API (hosted on Vercel). Mobile clients never communicate directly with AI provider APIs or hold private provider credentials.</li>
+        <li><strong>Google Gemini Vision:</strong> Image payloads are processed by Google Cloud Generative AI (Gemini) solely for identifying vehicle makes, models, and specifications. Vehicle photos are not used by Apex or Google to train publicly available models or sold to data brokers.</li>
+        <li><strong>No Third-Party Advertising:</strong> Apex does not integrate third-party ad networks, tracking pixels, or data brokers. We do not sell or rent your personal data.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>4. Data Storage & Security</h2>
+      <p>
+        All data transmitted between your device and Apex is encrypted in transit using Transport Layer Security (TLS 1.3 / HTTPS). Database records are protected with PostgreSQL Row Level Security (RLS) policies, ensuring users can only modify their own data. Private API keys and administrative credentials remain strictly isolated on serverless backends.
+      </p>
+    </section>
+
+    <section>
+      <h2>5. Account Deletion & Data Rights</h2>
+      <p>
+        You have the unconditional right to access, rectify, or permanently delete your account and associated personal data at any time:
+      </p>
+      <ul>
+        <li><strong>In-App Deletion:</strong> Navigate to <em>Profile &rarr; Settings &rarr; Delete Account & Personal Data</em>. Confirming deletion immediately purges your profile, garage collection, spotting history, and Supabase authentication identity.</li>
+        <li><strong>Manual Requests:</strong> You may also request deletion by contacting us at <a href="mailto:privacy@apex-spotter.app">privacy@apex-spotter.app</a>. Requests will be executed within 30 days.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>6. Children's Privacy</h2>
+      <p>
+        Apex is not directed to children under the age of 13. We do not knowingly collect personal information from children under 13. If you believe a child has provided us with personal data, please contact us immediately for removal.
+      </p>
+    </section>
+
+    <section>
+      <h2>7. Contact Us</h2>
+      <p>
+        If you have questions or concerns regarding this Privacy Policy or your data, please contact our Data Protection team at:
+      </p>
+      <p>
+        <strong>Apex Automotive Technologies</strong><br>
+        Email: <a href="mailto:privacy@apex-spotter.app">privacy@apex-spotter.app</a><br>
+        Website: <a href="https://apex-spotter.vercel.app">https://apex-spotter.vercel.app</a>
+      </p>
+    </section>
+
+    <div class="footer">
+      &copy; 2026 Apex. All rights reserved. Built for automotive enthusiasts worldwide.
+    </div>
+  </div>
+</body>
+</html>

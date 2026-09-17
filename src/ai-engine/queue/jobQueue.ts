@@ -15,14 +15,17 @@ export class JobQueue {
   private idempotencyIndex: Map<string, string> = new Map(); // idempotencyKey -> jobId
   private userActiveCount: Map<string, number> = new Map(); // userId -> active in-flight count
 
+  private inFlightImageHashes: Map<string, string> = new Map(); // imageHash -> jobId
+
   private readonly maxQueueCapacity = 250000;
-  private readonly maxPerUserConcurrent = 5;
+  private readonly maxPerUserConcurrent = 2;
+  private readonly maxPerUserInFlight = 5;
 
   /**
-   * Enqueue a new scan job with idempotency check
+   * Enqueue a new scan job with idempotency and in-flight image deduplication
    */
   public enqueue(job: ScanJob): { job: ScanJob; isDuplicate: boolean; queuePosition: number } {
-    // 1. Idempotency Check
+    // 1. Idempotency Check (by idempotencyKey)
     if (job.idempotencyKey && this.idempotencyIndex.has(job.idempotencyKey)) {
       const existingJobId = this.idempotencyIndex.get(job.idempotencyKey)!;
       const existing = this.jobsById.get(existingJobId);
@@ -35,20 +38,43 @@ export class JobQueue {
       }
     }
 
-    // 2. Capacity Guard
+    // 2. In-Flight Exact Image Hash Deduplication
+    if (job.imageHash && this.inFlightImageHashes.has(job.imageHash)) {
+      const existingJobId = this.inFlightImageHashes.get(job.imageHash)!;
+      const existing = this.jobsById.get(existingJobId);
+      if (existing && (existing.status === 'queued' || existing.status === 'processing' || existing.status === 'completed')) {
+        return {
+          job: existing,
+          isDuplicate: true,
+          queuePosition: this.getQueuePosition(existing.id)
+        };
+      }
+    }
+
+    // 3. Capacity & Per-User Pending Scan Guard
+    const userInFlight = this.userActiveCount.get(job.userId) || 0;
+    if (userInFlight >= this.maxPerUserInFlight) {
+      job.status = 'failed';
+      job.error = 'User in-flight scan quota reached. Please wait for active scans to complete.';
+      return { job, isDuplicate: false, queuePosition: -1 };
+    }
+
     if (this.size() >= this.maxQueueCapacity) {
       job.status = 'failed';
       job.error = 'Queue capacity saturated during high-load traffic spike. Try again in 30 seconds.';
       return { job, isDuplicate: false, queuePosition: -1 };
     }
 
-    // 3. Register Job
+    // 4. Register Job
     this.jobsById.set(job.id, job);
     if (job.idempotencyKey) {
       this.idempotencyIndex.set(job.idempotencyKey, job.id);
     }
+    if (job.imageHash) {
+      this.inFlightImageHashes.set(job.imageHash, job.id);
+    }
 
-    // 4. Place into priority tier
+    // 5. Place into priority tier
     if (job.priority === 'HIGH') {
       this.highQueue.push(job);
     } else if (job.priority === 'NORMAL') {
@@ -97,14 +123,8 @@ export class JobQueue {
       }
     }
 
-    // If all top candidates exceeded fair limit, allow the first one anyway
-    if (queue.length > 0) {
-      const fallback = queue.shift()!;
-      fallback.status = 'processing';
-      fallback.startedAt = Date.now();
-      return fallback;
-    }
-
+    // Strict per-user concurrency: if all eligible candidates have active jobs >= maxPerUserConcurrent,
+    // wait for an active worker to complete rather than overloading provider quotas.
     return null;
   }
 
@@ -115,7 +135,25 @@ export class JobQueue {
       job.completedAt = Date.now();
       const currentActive = this.userActiveCount.get(job.userId) || 1;
       this.userActiveCount.set(job.userId, Math.max(0, currentActive - 1));
+
+      if (job.imageHash && this.inFlightImageHashes.get(job.imageHash) === jobId) {
+        this.inFlightImageHashes.delete(job.imageHash);
+      }
     }
+  }
+
+  public getInFlightCount(): number {
+    return this.inFlightImageHashes.size;
+  }
+
+  public clear() {
+    this.highQueue = [];
+    this.normalQueue = [];
+    this.lowQueue = [];
+    this.jobsById.clear();
+    this.idempotencyIndex.clear();
+    this.inFlightImageHashes.clear();
+    this.userActiveCount.clear();
   }
 
   public getJob(jobId: string): ScanJob | null {

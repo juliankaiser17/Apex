@@ -24,9 +24,15 @@ export interface DevScanTrace {
   image_hash: string;
   image_size_bytes: number;
   provider_model: string;
+  provider?: string;
+  model?: string;
   latency_ms: number;
+  latency?: number;
+  status?: string;
   cache_hit: boolean;
   cache_key: string;
+  retry_count?: number;
+  error_code?: string | null;
   fallback_used: boolean;
   abstention_reason: string | null;
   candidate_set: string[];

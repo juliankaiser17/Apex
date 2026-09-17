@@ -99,7 +99,7 @@ export class ApexVehicleIdentificationEngine {
       status: 'queued',
       createdAt: Date.now(),
       attempts: 0,
-      maxAttempts: 3,
+      maxAttempts: 2,
       imageDataUrl: payload.imageDataUrl,
       imageHash,
       fileName: payload.fileName,
@@ -117,7 +117,7 @@ export class ApexVehicleIdentificationEngine {
       status: enqueued.job.status,
       queuePosition: enqueued.queuePosition,
       estimatedWaitMs: estWait,
-      isCachedHit: false,
+      isCachedHit: Boolean(enqueued.job.result && enqueued.job.status === 'completed'),
       result: enqueued.job.result,
       traceId
     };

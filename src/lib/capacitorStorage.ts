@@ -42,7 +42,40 @@ export async function preloadAuthStorage(): Promise<void> {
  * Supports both async Supabase v2 calls and sync fallback.
  */
 export const capacitorStorage = {
-  getItem: (key: string): string | null => {
+  getItem: async (key: string): Promise<string | null> => {
+    // 1. In-memory cache
+    const mem = memoryCache.get(key);
+    if (mem !== undefined) return mem;
+
+    // 2. Native Preferences on Android / iOS
+    if (Capacitor.isNativePlatform()) {
+      try {
+        const { value } = await Preferences.get({ key });
+        if (value !== null) {
+          memoryCache.set(key, value);
+          try {
+            localStorage.setItem(key, value);
+          } catch (_) {}
+          return value;
+        }
+      } catch (err) {
+        console.warn('[capacitorStorage] Native Preferences.get error:', err);
+      }
+    }
+
+    // 3. Fallback to WebView localStorage
+    try {
+      const localVal = localStorage.getItem(key);
+      if (localVal !== null) {
+        memoryCache.set(key, localVal);
+      }
+      return localVal;
+    } catch (_) {
+      return null;
+    }
+  },
+
+  getItemSync: (key: string): string | null => {
     const mem = memoryCache.get(key);
     if (mem !== undefined) return mem;
     try {

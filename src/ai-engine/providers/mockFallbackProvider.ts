@@ -19,12 +19,13 @@ export class MockFallbackProvider implements AIProvider {
     return true;
   }
 
-  public async identify(request: AIProviderRequest): Promise<AIProviderResponse> {
+  public async identify(_request: AIProviderRequest): Promise<AIProviderResponse> {
     const startTime = Date.now();
 
     // Explicit abstention: no genuine local optical model is currently loaded.
     // We strictly refuse to guess or default to any registry vehicle.
     const output: ModelIdentificationOutput = {
+      vehicleId: null,
       make: 'Unknown Make',
       model: 'Unknown Model',
       generation: 'Unknown',

@@ -20,6 +20,51 @@ export type Persona = 'spotter' | 'finder' | 'love_of_cars' | 'unspecified';
 
 export type RarityTier = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary' | 'mythic';
 
+export type LocalConfidenceState = 
+  | 'LOCAL_UNKNOWN' 
+  | 'LOCAL_EMERGING' 
+  | 'LOCAL_ESTABLISHED' 
+  | 'LOCAL_HIGH_CONFIDENCE';
+
+export interface RarityExplanationDebug {
+  canonicalVehicleId: string;
+  coarseAreaName: string;
+  geographyBucketId?: string;
+  globalRarityTier: RarityTier;
+  globalRarityScore: number;
+  globalPrevalencePrior: number;
+  localObservationMass: number;
+  bucketTotalMass: number;
+  uniqueContributors: number;
+  bucketTotalContributors: number;
+  confidenceState: LocalConfidenceState;
+  confidenceWeight: number;
+  localSightingPrevalence: number;
+  prevalenceRatio: number;
+  rawLocalScore: number;
+  blendedScore: number;
+  localRarityTier: RarityTier;
+  localXpModifier: number;
+  localBonusXp: number;
+  modelVersion: number;
+  priorWeightAlpha: number;
+  decisionReason: string;
+  calculatedAt: string;
+}
+
+export interface LocalRarityInfo {
+  localRarityTier: RarityTier;
+  localRarityScore: number;
+  globalRarityTier: RarityTier;
+  globalRarityScore: number;
+  confidenceState: LocalConfidenceState;
+  coarseAreaName: string;
+  localXpModifier: number; // e.g. 1.25
+  localBonusXp: number; // e.g. 38
+  explanation: string;
+  explanationDebug?: RarityExplanationDebug;
+}
+
 export type BodyStyle = 
   | 'Sedan' 
   | 'Coupe' 
@@ -88,8 +133,23 @@ export interface CarCard {
   specificityLevel?: 'make' | 'model_family' | 'generation' | 'variant';
   identificationReason?: string;
   pendingDeletionUntil?: string; // ISO string 3 days in the future for deletion grace period
+  localRarity?: LocalRarityInfo;
+  explanationDebug?: RarityExplanationDebug;
+  imageHash?: string;
+  customFoil?: boolean;
 }
 
+export interface EconomyLedgerEntry {
+  id: string;
+  timestamp: string;
+  userId: string;
+  type: 'credit' | 'debit';
+  amount: number;
+  balanceAfter: number;
+  item: 'streak_freeze' | 'hunt_booster' | 'card_foil' | 'rescan_token' | 'quest_reward' | 'streak_reward' | 'scan_reward' | 'admin_grant';
+  description: string;
+  metadata?: Record<string, any>;
+}
 
 export interface UserProfile {
   id: string;
@@ -103,6 +163,10 @@ export interface UserProfile {
   coins: number;
   streakDays: number;
   streakLastAt?: string;
+  streakFreezes?: number;
+  activeHuntBoosterUntil?: string;
+  rescanTokens?: number;
+  blockedUsers?: string[];
   rankGlobal: number;
   rankCountry: number;
   rankCity: number;

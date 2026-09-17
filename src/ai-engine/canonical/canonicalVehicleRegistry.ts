@@ -4,6 +4,7 @@
  */
 
 import type { BodyStyle, RarityTier } from '../../types/apex';
+import type { OpenCanonicalIdentity } from '../types';
 import { APEX_LOCAL_VEHICLE_DATABASE } from '../../data/vehicleDatabase';
 
 export interface CanonicalVehicleRecord {
@@ -111,6 +112,60 @@ class CanonicalVehicleRegistry {
       'gtr nismo',
       'r35 gtr'
     ]);
+
+    this.registerAliases('porsche-911-carrera-996', [
+      '996',
+      '996 carrera',
+      'porsche 996',
+      '996.1',
+      '996.2',
+      '996 cabriolet'
+    ]);
+
+    this.registerAliases('porsche-911-carrera-997', [
+      '997',
+      '997 carrera',
+      'porsche 997',
+      '997.1',
+      '997.2'
+    ]);
+
+    this.registerAliases('lamborghini-huracan-lp610-4', [
+      'huracan',
+      'huracán',
+      'huracan coupe',
+      'huracan spyder',
+      'lp610',
+      'lp610-4'
+    ]);
+
+    this.registerAliases('mclaren-650s', [
+      '650s',
+      'mclaren 650s spider',
+      '650s coupe'
+    ]);
+
+    this.registerAliases('mclaren-675lt', [
+      '675lt',
+      'mclaren 675lt spider',
+      '675lt coupe',
+      '675 lt'
+    ]);
+
+    this.registerAliases('toyota-crown-comfort-taxi', [
+      'crown comfort',
+      'hong kong taxi',
+      'hk taxi',
+      'urban taxi',
+      'toyota taxi'
+    ]);
+
+    this.registerAliases('kia-ev9', [
+      'ev9',
+      'kia ev 9',
+      'ev9 gt-line',
+      'ev9 awd'
+    ]);
   }
 
   public registerVehicle(record: CanonicalVehicleRecord) {
@@ -170,7 +225,7 @@ class CanonicalVehicleRegistry {
   }
 
   public findMatchingCandidates(make?: string, model?: string, generation?: string): CanonicalVehicleRecord[] {
-    const results: CanonicalVehicleRecord[] = [];
+    const scoredResults: { record: CanonicalVehicleRecord; score: number }[] = [];
     const normMake = make ? this.normalize(make) : '';
     const normModel = model ? this.normalize(model) : '';
     const normGen = generation ? this.normalize(generation) : '';
@@ -186,11 +241,83 @@ class CanonicalVehicleRegistry {
       if (normGen && (recGen.includes(normGen) || normGen.includes(recGen))) score += 4;
 
       if (score > 0) {
-        results.push(record);
+        scoredResults.push({ record, score });
       }
     }
 
-    return results;
+    scoredResults.sort((a, b) => b.score - a.score);
+    return scoredResults.map((s) => s.record);
+  }
+
+  public resolveCanonicalIdentity(params: {
+    vehicleId?: string | null;
+    make?: string | null;
+    model?: string | null;
+    generation?: string | null;
+    variant?: string | null;
+    source?: string;
+    specs?: Record<string, any>;
+  }): OpenCanonicalIdentity {
+    const { vehicleId, make, model, generation, variant, source = 'gemini', specs } = params;
+
+    // 1. Try vehicleId
+    let record: CanonicalVehicleRecord | null = null;
+    if (vehicleId) {
+      record = this.getById(vehicleId);
+    }
+
+    // 2. Try text / alias query
+    if (!record && make && model) {
+      const query = `${make} ${model} ${generation || ''}`;
+      record = this.lookupByTextOrAlias(query);
+    }
+
+    // If registered record found:
+    if (record) {
+      return {
+        canonicalId: record.vehicleId,
+        make: record.make,
+        modelFamily: record.model,
+        generation: record.generation,
+        variant: record.trim || variant || null,
+        registryStatus: 'REGISTERED',
+        source: 'registry',
+        specs: {
+          horsepower: record.horsepower,
+          torqueNm: record.torqueNm,
+          topSpeedKmH: record.topSpeedKmH,
+          zeroToHundredSec: record.zeroToHundredSec,
+          kerbWeightKg: record.kerbWeightKg,
+          engine: record.engine,
+          productionYears: record.productionYears,
+          originCountry: record.originCountry,
+          bodyStyle: record.bodyStyle,
+          baselineRarity: record.baselineRarity,
+          ...specs
+        }
+      };
+    }
+
+    // 3. Open World / Unregistered but Verified Identity:
+    // If make and model are provided with evidence from upstream vision,
+    // preserve them with VERIFIED_UNREGISTERED status rather than substituting another vehicle!
+    const safeMake = (make || 'Unknown Make').trim();
+    const safeModel = (model || 'Unknown Model').trim();
+    const generatedId = `${this.normalize(safeMake)}-${this.normalize(safeModel)}`
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '');
+
+    return {
+      canonicalId: generatedId || 'unverified-vehicle',
+      make: safeMake,
+      modelFamily: safeModel,
+      generation: generation || null,
+      variant: variant || null,
+      registryStatus: safeMake !== 'Unknown Make' && safeModel !== 'Unknown Model' ? 'VERIFIED_UNREGISTERED' : 'UNVERIFIED',
+      source: (source as any) || 'gemini',
+      specs: specs || {}
+    };
   }
 
   public getAll(): CanonicalVehicleRecord[] {
