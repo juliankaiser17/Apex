@@ -199,8 +199,8 @@ export const ScannerModal: React.FC = () => {
     });
   };
 
-  // Helper: Fast Client-Side Image Downscaler (Prevents massive 15MB mobile photos from timing out)
-  const optimizeScanImage = async (dataUrl: string, maxDimension = 1280, quality = 0.85): Promise<string> => {
+  // Helper: Fast Client-Side Image Downscaler (Downscales to 768px for optimal Cloudflare vision latency)
+  const optimizeScanImage = async (dataUrl: string, maxDimension = 768, quality = 0.82): Promise<string> => {
     return new Promise((resolve) => {
       if (!dataUrl || !dataUrl.startsWith('data:image')) {
         resolve(dataUrl);
@@ -248,16 +248,6 @@ export const ScannerModal: React.FC = () => {
   const executeInferencePipeline = async (photoDataUrl: string, fileName?: string, captureMs: number = 0) => {
     // Fast pre-compression to prevent heavy mobile uploads
     const readyPhotoDataUrl = await optimizeScanImage(photoDataUrl);
-
-    // Phase 5: Preflight auth check before analysis if online
-    const isDeviceOnline = typeof navigator !== 'undefined' ? Boolean(navigator.onLine) : true;
-    if (isDeviceOnline) {
-      const preflight = await getAuthoritativeAccessToken(false);
-      if (!preflight.hasSession && useApexStore.getState().authStatus === 'GUEST') {
-        onIdentificationFailed('Please sign in to scan and collect vehicles.');
-        return;
-      }
-    }
 
     // 0. Ensure fresh isolated state and unique scan ID per scan
     const currentScanId = `scan_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;

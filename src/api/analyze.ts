@@ -93,10 +93,52 @@ async function checkSingleTier(
   return isRateLimitedInMemory(identifier, maxRequests, windowSec * 1000);
 }
 
+async function checkGlobalVisionBudgetAtomic(): Promise<{ allowed: boolean; remaining: number; resetSeconds: number }> {
+  const budget = RATE_LIMITS.GLOBAL_DAILY_BUDGET;
+  const identifier = `global_budget:${budget.name}`;
+
+  if (supabase) {
+    try {
+      const { data, error } = await supabase.rpc('check_and_consume_rate_limit', {
+        p_identifier: identifier,
+        p_max_requests: budget.max,
+        p_window_seconds: budget.windowSec
+      });
+
+      if (!error && data && typeof data.allowed === 'boolean') {
+        return {
+          allowed: data.allowed,
+          remaining: Number(data.remaining ?? 0),
+          resetSeconds: Number(data.reset_seconds ?? budget.windowSec)
+        };
+      }
+      if (error) {
+        console.warn('[api/analyze] Supabase global budget RPC error:', error.message);
+      }
+    } catch (err: any) {
+      console.warn('[api/analyze] Supabase global budget exception:', err?.message);
+    }
+  }
+
+  return isRateLimitedInMemory(identifier, budget.max, budget.windowSec * 1000);
+}
+
 async function checkRateLimit(
   identifier: string,
   isGuest: boolean
 ): Promise<{ allowed: boolean; remaining: number; resetSeconds: number; tierExceeded?: string }> {
+  // 1. ATOMIC GLOBAL DAILY VISION BUDGET (Must be enforced first for guest requests)
+  if (isGuest) {
+    const budgetCheck = await checkGlobalVisionBudgetAtomic();
+    if (!budgetCheck.allowed) {
+      return {
+        ...budgetCheck,
+        tierExceeded: 'global_daily_budget'
+      };
+    }
+  }
+
+  // 2. ATOMIC SLIDING-WINDOW PER-IP / PER-USER TIERS
   const tiers = [
     RATE_LIMITS.PER_MINUTE,
     RATE_LIMITS.PER_HOUR,
@@ -114,18 +156,6 @@ async function checkRateLimit(
     }
   }
 
-  // Global daily vision budget check for guest requests
-  if (isGuest) {
-    const budget = RATE_LIMITS.GLOBAL_DAILY_BUDGET;
-    const budgetCheck = await checkSingleTier(`global_budget:${budget.name}`, budget.max, budget.windowSec);
-    if (!budgetCheck.allowed) {
-      return {
-        ...budgetCheck,
-        tierExceeded: 'global_daily_budget'
-      };
-    }
-  }
-
   // If all tiers pass, report minute tier remaining
   const minuteKey = `${identifier}:${RATE_LIMITS.PER_MINUTE.name}`;
   const minuteRecord = rateLimitMap.get(minuteKey);
@@ -138,18 +168,24 @@ async function checkRateLimit(
 const ALLOWED_ORIGINS = new Set([
   'https://apex-spotter.vercel.app',
   'capacitor://localhost',
+  'https://localhost',
   'http://localhost',
   'http://localhost:5173',
   'http://localhost:4173'
 ]);
 
 function setCorsHeaders(req: VercelRequest, res: VercelResponse) {
-  const origin = req.headers.origin as string | undefined;
+  const rawOrigin = req.headers.origin as string | undefined;
+  const origin = typeof rawOrigin === 'string' ? rawOrigin.trim() : undefined;
+  console.log(`[api/analyze] CORS incoming: Origin="${origin ?? '<none>'}", Method="${req.method}", UserAgent="${req.headers['user-agent'] ?? '<none>'}"`);
+
   if (origin && ALLOWED_ORIGINS.has(origin)) {
     res.setHeader('Access-Control-Allow-Origin', origin);
   } else if (!origin) {
     // Native mobile HTTP bridge or direct service call
     res.setHeader('Access-Control-Allow-Origin', 'https://apex-spotter.vercel.app');
+  } else {
+    console.warn(`[api/analyze] CORS disallowed origin: "${origin}"`);
   }
   res.setHeader('Vary', 'Origin');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');

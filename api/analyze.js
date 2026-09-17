@@ -5426,7 +5426,42 @@ async function checkSingleTier(identifier, maxRequests, windowSec) {
   }
   return isRateLimitedInMemory(identifier, maxRequests, windowSec * 1e3);
 }
+async function checkGlobalVisionBudgetAtomic() {
+  const budget = RATE_LIMITS.GLOBAL_DAILY_BUDGET;
+  const identifier = `global_budget:${budget.name}`;
+  if (supabase) {
+    try {
+      const { data, error } = await supabase.rpc("check_and_consume_rate_limit", {
+        p_identifier: identifier,
+        p_max_requests: budget.max,
+        p_window_seconds: budget.windowSec
+      });
+      if (!error && data && typeof data.allowed === "boolean") {
+        return {
+          allowed: data.allowed,
+          remaining: Number(data.remaining ?? 0),
+          resetSeconds: Number(data.reset_seconds ?? budget.windowSec)
+        };
+      }
+      if (error) {
+        console.warn("[api/analyze] Supabase global budget RPC error:", error.message);
+      }
+    } catch (err) {
+      console.warn("[api/analyze] Supabase global budget exception:", err?.message);
+    }
+  }
+  return isRateLimitedInMemory(identifier, budget.max, budget.windowSec * 1e3);
+}
 async function checkRateLimit(identifier, isGuest) {
+  if (isGuest) {
+    const budgetCheck = await checkGlobalVisionBudgetAtomic();
+    if (!budgetCheck.allowed) {
+      return {
+        ...budgetCheck,
+        tierExceeded: "global_daily_budget"
+      };
+    }
+  }
   const tiers = [
     RATE_LIMITS.PER_MINUTE,
     RATE_LIMITS.PER_HOUR,
@@ -5442,16 +5477,6 @@ async function checkRateLimit(identifier, isGuest) {
       };
     }
   }
-  if (isGuest) {
-    const budget = RATE_LIMITS.GLOBAL_DAILY_BUDGET;
-    const budgetCheck = await checkSingleTier(`global_budget:${budget.name}`, budget.max, budget.windowSec);
-    if (!budgetCheck.allowed) {
-      return {
-        ...budgetCheck,
-        tierExceeded: "global_daily_budget"
-      };
-    }
-  }
   const minuteKey = `${identifier}:${RATE_LIMITS.PER_MINUTE.name}`;
   const minuteRecord = rateLimitMap.get(minuteKey);
   const remaining = minuteRecord ? Math.max(0, RATE_LIMITS.PER_MINUTE.max - minuteRecord.count) : RATE_LIMITS.PER_MINUTE.max;
@@ -5460,16 +5485,21 @@ async function checkRateLimit(identifier, isGuest) {
 var ALLOWED_ORIGINS = /* @__PURE__ */ new Set([
   "https://apex-spotter.vercel.app",
   "capacitor://localhost",
+  "https://localhost",
   "http://localhost",
   "http://localhost:5173",
   "http://localhost:4173"
 ]);
 function setCorsHeaders(req, res) {
-  const origin = req.headers.origin;
+  const rawOrigin = req.headers.origin;
+  const origin = typeof rawOrigin === "string" ? rawOrigin.trim() : void 0;
+  console.log(`[api/analyze] CORS incoming: Origin="${origin ?? "<none>"}", Method="${req.method}", UserAgent="${req.headers["user-agent"] ?? "<none>"}"`);
   if (origin && ALLOWED_ORIGINS.has(origin)) {
     res.setHeader("Access-Control-Allow-Origin", origin);
   } else if (!origin) {
     res.setHeader("Access-Control-Allow-Origin", "https://apex-spotter.vercel.app");
+  } else {
+    console.warn(`[api/analyze] CORS disallowed origin: "${origin}"`);
   }
   res.setHeader("Vary", "Origin");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
