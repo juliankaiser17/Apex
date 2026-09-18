@@ -647,9 +647,14 @@ function parseBackendResponse(r: any): AiIdentificationPayload {
         is_car: true,
         make: r.make || 'Unknown',
         model: r.model || 'Unknown',
-        rejection_reason: r.reason || 'Vision provider unavailable. Explicit abstention enforced.',
+        rejection_reason: (machineReason === 'VISION_QUOTA_EXHAUSTED' || r.reason?.includes('VISION_QUOTA_EXHAUSTED'))
+          ? 'Vehicle identification temporarily unavailable. Vision quota has been reached. Please try again later.'
+          : (r.reason || 'Vision provider unavailable. Explicit abstention enforced.'),
         needs_better_angle: true,
-        angle_instruction: r.angle_instruction || r.reason || 'Vision provider unavailable. Please retry shortly.',
+        angle_instruction: r.angle_instruction ||
+          ((machineReason === 'VISION_QUOTA_EXHAUSTED' || r.reason?.includes('VISION_QUOTA_EXHAUSTED'))
+            ? 'Vehicle identification temporarily unavailable. Vision quota has been reached. Please try again later.'
+            : (r.reason || 'Vision provider unavailable. Please retry shortly.')),
         confidence: 0,
         scan_id: r.scan_id,
         trace_id: r.trace_id,

@@ -390,11 +390,15 @@ export const ScannerModal: React.FC = () => {
       const isMakeUnknown = !make || make.trim() === '' || make.toLowerCase().includes('unknown');
       const isModelUnknown = !model || model.trim() === '' || model.toLowerCase().includes('unknown');
       if (isMakeUnknown && isModelUnknown) {
-        onIdentificationFailed(
-          aiResult?.reason ||
-          aiResult?.rejection_reason ||
-          'Vehicle could not be clearly identified. Please retake the photo with better lighting or vehicle angle.'
-        );
+        const isQuota = aiResult?.reason?.includes('VISION_QUOTA_EXHAUSTED') ||
+          aiResult?.rejection_reason?.includes('VISION_QUOTA_EXHAUSTED') ||
+          aiResult?.angle_instruction?.includes('Vision quota');
+        const userFacingMessage = isQuota
+          ? 'Vehicle identification temporarily unavailable. Vision quota has been reached. Please try again later.'
+          : (aiResult?.angle_instruction ||
+             aiResult?.rejection_reason ||
+             'Vehicle could not be clearly identified. Please retake the photo with better lighting or vehicle angle.');
+        onIdentificationFailed(userFacingMessage);
         return;
       }
 

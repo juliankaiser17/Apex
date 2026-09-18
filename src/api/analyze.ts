@@ -290,7 +290,9 @@ function formatScanResponse(r: any) {
     aftermarket_parts_detected: r.aftermarketPartsDetected,
     legacy_confidence: r.confidence?.totalScore ?? 0.95,
     needs_better_angle: canon ? (canon.status === 'uncertain' || canon.needs_retake) : (r.confidence?.shouldAbstain ?? false),
-    angle_instruction: canon?.reason || r.confidence?.abstentionReason || null,
+    angle_instruction: (r.confidence?.abstentionReason === 'VISION_QUOTA_EXHAUSTED' || canon?.confidence?.abstentionReason === 'VISION_QUOTA_EXHAUSTED' || canon?.reason?.includes('VISION_QUOTA_EXHAUSTED'))
+      ? 'Vehicle identification temporarily unavailable. Vision quota has been reached. Please try again later.'
+      : (canon?.reason || r.confidence?.abstentionReason || null),
     upstream_evidence: canon?.upstream_evidence,
     canonical_identity: canon?.canonical_identity,
     provenance: canon?.provenance,
