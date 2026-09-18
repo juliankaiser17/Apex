@@ -640,17 +640,20 @@ function parseBackendResponse(r: any): AiIdentificationPayload {
 
   if (isMakeUnknown && isModelUnknown) {
     if (r.status === 'uncertain') {
+      const machineReason = r.confidence?.abstentionReason || r.abstention_reason || 'VISION_QUOTA_EXHAUSTED';
       return {
         ...getEmptyPayload(),
         status: 'uncertain',
         is_car: true,
+        make: r.make || 'Unknown',
+        model: r.model || 'Unknown',
         rejection_reason: r.reason || 'Vision provider unavailable. Explicit abstention enforced.',
         needs_better_angle: true,
-        angle_instruction: 'Vision provider unavailable. Please retry shortly.',
+        angle_instruction: r.angle_instruction || r.reason || 'Vision provider unavailable. Please retry shortly.',
         confidence: 0,
         scan_id: r.scan_id,
         trace_id: r.trace_id,
-        reason: r.reason || 'vision_provider_unavailable'
+        reason: r.reason || machineReason
       };
     }
     return {

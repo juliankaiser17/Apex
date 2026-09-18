@@ -94,7 +94,11 @@ export class AIProviderRouter {
 
   public async getActiveProviderName(): Promise<string> {
     const isPrimary = await this.primaryProvider.isAvailable();
-    return (this.config.enabled && isPrimary && this.getCircuitState() !== 'OPEN') ? this.primaryProvider.name : 'MockFallbackProvider';
+    const allowMockFallback = typeof process !== 'undefined' && process.env?.ALLOW_MOCK_FALLBACK === 'true';
+    if (this.config.enabled && isPrimary && this.getCircuitState() !== 'OPEN') {
+      return this.primaryProvider.name;
+    }
+    return (allowMockFallback && this.fallbackEnabled) ? this.fallbackProvider.name : 'none';
   }
 
   public updateConfig(newConfig: Partial<ProviderCapacityConfig>) {
@@ -104,7 +108,7 @@ export class AIProviderRouter {
     }
   }
 
-  private fallbackEnabled: boolean = true;
+  private fallbackEnabled: boolean = false;
 
   public setFallbackEnabled(enabled: boolean): void {
     this.fallbackEnabled = enabled;
@@ -143,8 +147,21 @@ export class AIProviderRouter {
    */
   public async routeIdentification(request: AIProviderRequest): Promise<AIProviderResponse> {
     const currentState = this.getCircuitState();
-    const isFallbackDisabled = !this.fallbackEnabled || Boolean(request.options?.disableFallback);
     const providerAttempted = this.primaryProvider.name;
+
+    // Safe Diagnostic Logging (Never log secrets or token values)
+    console.log('[AIProviderRouter] Diagnostics:', {
+      provider: (typeof process !== 'undefined' && process.env?.VISION_PROVIDER) || 'cloudflare',
+      cloudflareAccountConfigured: Boolean(typeof process !== 'undefined' && process.env?.CLOUDFLARE_ACCOUNT_ID),
+      cloudflareTokenConfigured: Boolean(typeof process !== 'undefined' && process.env?.CLOUDFLARE_AUTH_TOKEN),
+      scanningEnabled: typeof process !== 'undefined' ? process.env?.CLOUDFLARE_SCANNING_ENABLED !== 'false' : true,
+      visionScanningEnabled: typeof process !== 'undefined' ? process.env?.VISION_SCANNING_ENABLED !== 'false' : true,
+      allowMockFallback: typeof process !== 'undefined' && process.env?.ALLOW_MOCK_FALLBACK === 'true'
+    });
+
+    // In production, ALLOW_MOCK_FALLBACK defaults to false; MockFallbackProvider never runs silently
+    const allowMockFallback = typeof process !== 'undefined' && process.env?.ALLOW_MOCK_FALLBACK === 'true';
+    const isFallbackPermitted = allowMockFallback && this.fallbackEnabled && !request.options?.disableFallback;
 
     // 1. Check if circuit is OPEN, Concurrency is Saturated, or Budget/Killswitch is Active
     const isPrimaryAvailable = await this.primaryProvider.isAvailable();
@@ -164,24 +181,28 @@ export class AIProviderRouter {
       this.activeConcurrency < this.maxConcurrency;
 
     if (!canAttemptPrimary) {
-      if (isFallbackDisabled) {
-        let failureReason = `Primary vision provider unavailable (isAvailable=${isPrimaryAvailable}, circuitState=${currentState}).`;
-        if (!isScanningEnabled) failureReason = `${this.primaryProvider.name} scanning is disabled via emergency kill switch.`;
-        if (isBudgetExceeded) failureReason = `Daily ${this.primaryProvider.name} budget exceeded ($${this.dailyCostEstimateUsd.toFixed(2)} >= $${this.config.dailyBudgetUsd.toFixed(2)}).`;
+      let failureReason = `Primary vision provider unavailable (isAvailable=${isPrimaryAvailable}, circuitState=${currentState}).`;
+      if (!isScanningEnabled) failureReason = `${this.primaryProvider.name} scanning is disabled via emergency kill switch.`;
+      if (isBudgetExceeded) failureReason = `Daily ${this.primaryProvider.name} budget exceeded ($${this.dailyCostEstimateUsd.toFixed(2)} >= $${this.config.dailyBudgetUsd.toFixed(2)}).`;
 
+      if (!isFallbackPermitted) {
         return {
           success: false,
-          error: `${failureReason} Fallback disabled by test policy.`,
+          error: failureReason,
           errorType: !isScanningEnabled ? 'PROVIDER_UNAVAILABLE' : isBudgetExceeded ? 'PROVIDER_UNAVAILABLE' : !isPrimaryAvailable ? 'AUTH_ERROR' : currentState === 'OPEN' ? '429' : 'PROVIDER_UNAVAILABLE',
+          providerStatus: !isPrimaryAvailable ? 401 : !isScanningEnabled ? 503 : 500,
+          providerErrorCode: !isPrimaryAvailable ? 'MISSING_CREDENTIALS' : undefined,
           providerName: this.primaryProvider.name,
           modelUsed: 'none',
           providerAttempted,
           fallbackUsed: false,
+          retriesAttempted: 0,
+          retryConsumed: false,
           tokensConsumed: { promptTokens: 0, outputTokens: 0, totalTokens: 0 },
           durationMs: 0
         };
       }
-      // Degrade gracefully to high-performance local fallback
+      // Only runs if explicitly enabled via ALLOW_MOCK_FALLBACK=true
       const fallbackResponse = await this.fallbackProvider.identify(request);
       return {
         ...fallbackResponse,
@@ -206,18 +227,19 @@ export class AIProviderRouter {
         };
       }
 
-      // Handle Provider Failures (429 / 5xx / Timeout)
+      // Handle Provider Failures (429 / 5xx / Timeout / Quota / Agreement)
       this.onFailure(response.errorType);
 
-      if (isFallbackDisabled) {
+      if (!isFallbackPermitted) {
         return {
           ...response,
+          providerName: this.primaryProvider.name,
           providerAttempted,
           fallbackUsed: false
         };
       }
 
-      // Fallback immediately so user never suffers a failed scan
+      // Explicit dev fallback
       const fallbackResponse = await this.fallbackProvider.identify(request);
       return {
         ...fallbackResponse,
@@ -227,11 +249,15 @@ export class AIProviderRouter {
       };
     } catch (err: any) {
       this.onFailure('5xx');
-      if (isFallbackDisabled) {
+      if (!isFallbackPermitted) {
         return {
           success: false,
           error: err?.message || 'Primary provider threw exception',
           errorType: '5xx',
+          providerStatus: err?.status || 500,
+          providerErrorCode: err?.errorCode,
+          retriesAttempted: 0,
+          retryConsumed: false,
           providerName: this.primaryProvider.name,
           modelUsed: 'none',
           providerAttempted,

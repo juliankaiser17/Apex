@@ -14,7 +14,7 @@
  * - Meta License Detection: Identifies unaccepted terms and provides exact setup command.
  */
 
-import type { AIProvider, AIProviderRequest, AIProviderResponse, VisionStageTelemetry } from './types';
+import type { AIProvider, AIProviderErrorType, AIProviderRequest, AIProviderResponse, VisionStageTelemetry } from './types';
 import type {
   CandidateComparison,
   CanonicalScanResult,
@@ -98,6 +98,161 @@ export class CloudflareVisionProvider implements AIProvider {
     return accountId.length > 3 && token.length > 5;
   }
 
+  public classifyError(err: any): {
+    errorType: AIProviderErrorType;
+    isTransient: boolean;
+    status?: number;
+    errorCode?: number | string;
+    message: string;
+  } {
+    const status = err?.status;
+    const errorCode = err?.errorCode;
+    const errMsg = err?.message || '';
+
+    // Specific provider code / message FIRST (avoid false HTTP-level classification)
+    const isLicense =
+      errorCode === 5016 ||
+      /meta license|acceptable use policy|terms/i.test(errMsg) ||
+      (status === 403 && /agree|license|terms/i.test(errMsg));
+
+    const isQuota =
+      errorCode === 3036 ||
+      errorCode === 4006 ||
+      errMsg.includes('3036') ||
+      errMsg.includes('4006') ||
+      /daily free allocation|10,000 neurons|neuron daily limit/i.test(errMsg);
+
+    const isCapacity =
+      errorCode === 3040 ||
+      /capacity|out of capacity/i.test(errMsg);
+
+    const isInvalidModel =
+      errorCode === 5007 ||
+      (status === 400 && /model/i.test(errMsg));
+
+    const isRequestTooLarge =
+      errorCode === 3006 ||
+      status === 413 ||
+      /too large|payload/i.test(errMsg);
+
+    const isTimeout =
+      err?.name === 'AbortError' ||
+      status === 408 ||
+      /timed out|timeout/i.test(errMsg);
+
+    const isAuth =
+      status === 401 ||
+      status === 403;
+
+    if (isLicense) {
+      return {
+        errorType: 'MODEL_AGREEMENT_REQUIRED',
+        isTransient: false,
+        status: status || 403,
+        errorCode: errorCode || 5016,
+        message: 'Meta License agreement required for @cf/meta/llama-3.2-11b-vision-instruct. Accept terms in Cloudflare dashboard or execute prompt agreement.'
+      };
+    }
+
+    if (isQuota) {
+      return {
+        errorType: 'VISION_QUOTA_EXHAUSTED',
+        isTransient: false,
+        status: status || 429,
+        errorCode: errorCode || 4006,
+        message: errMsg || 'Cloudflare daily free allocation of 10,000 neurons exhausted (Error 4006/3036). Daily quota resets at 00:00 UTC.'
+      };
+    }
+
+    if (isCapacity) {
+      return {
+        errorType: 'PROVIDER_CAPACITY',
+        isTransient: true,
+        status: status || 429,
+        errorCode: errorCode || 3040,
+        message: 'Cloudflare Workers AI temporarily out of capacity (Error 3040).'
+      };
+    }
+
+    if (isInvalidModel) {
+      return {
+        errorType: 'INVALID_MODEL',
+        isTransient: false,
+        status: status || 400,
+        errorCode: errorCode || 5007,
+        message: errMsg || 'Cloudflare model not found or invalid.'
+      };
+    }
+
+    if (isRequestTooLarge) {
+      return {
+        errorType: 'REQUEST_TOO_LARGE',
+        isTransient: false,
+        status: status || 413,
+        errorCode: errorCode || 3006,
+        message: errMsg || 'Image payload exceeds Cloudflare Workers AI maximum request size.'
+      };
+    }
+
+    if (isTimeout) {
+      return {
+        errorType: 'TIMEOUT',
+        isTransient: true,
+        status: 408,
+        errorCode,
+        message: 'Cloudflare Workers AI request timed out.'
+      };
+    }
+
+    if (isAuth) {
+      return {
+        errorType: 'AUTH_ERROR',
+        isTransient: false,
+        status: status || 401,
+        errorCode,
+        message: errMsg || `Cloudflare API authentication failed (HTTP ${status}). Verify CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_AUTH_TOKEN.`
+      };
+    }
+
+    if (status === 429) {
+      return {
+        errorType: '429',
+        isTransient: true,
+        status: 429,
+        errorCode,
+        message: errMsg || 'Cloudflare Workers AI rate limit exceeded (HTTP 429).'
+      };
+    }
+
+    if (status && status >= 500 && status < 600) {
+      return {
+        errorType: '5xx',
+        isTransient: true,
+        status,
+        errorCode,
+        message: errMsg || `Cloudflare Workers AI server error (HTTP ${status}).`
+      };
+    }
+
+    if (/fetch failed|network|econnreset|enotfound/i.test(errMsg)) {
+      return {
+        errorType: 'NETWORK_ERROR',
+        isTransient: true,
+        status,
+        errorCode,
+        message: errMsg || 'Network error communicating with Cloudflare Workers AI.'
+      };
+    }
+
+    return {
+      errorType: '5xx',
+      isTransient: false,
+      status: status || 500,
+      errorCode,
+      message: errMsg || 'Unexpected Cloudflare Workers AI error.'
+    };
+  }
+
   public async identify(request: AIProviderRequest): Promise<AIProviderResponse> {
     const startTime = Date.now();
     const model = request.options?.modelOverride || this.defaultModel;
@@ -115,7 +270,13 @@ export class CloudflareVisionProvider implements AIProvider {
         success: false,
         error: 'Cloudflare credentials (CLOUDFLARE_ACCOUNT_ID or CLOUDFLARE_AUTH_TOKEN) not configured on server.',
         errorType: 'AUTH_ERROR',
+        providerStatus: 401,
+        providerErrorCode: 'MISSING_CREDENTIALS',
+        retriesAttempted: 0,
+        retryConsumed: false,
         providerName: this.name,
+        providerAttempted: this.name,
+        fallbackUsed: false,
         modelUsed: model,
         tokensConsumed: { promptTokens: 0, outputTokens: 0, totalTokens: 0 },
         durationMs: Date.now() - startTime
@@ -266,6 +427,9 @@ Output only the JSON object starting with { and ending with } without any conver
     const effectiveTemperature = request.options?.temperature ?? this.temperature;
     const effectiveSeed = request.options?.seed ?? this.seed;
 
+    let retriesAttempted = 0;
+    let retryConsumed = false;
+
     try {
       const execParams: any = {
         accountId,
@@ -288,7 +452,32 @@ Output only the JSON object starting with { and ending with } without any conver
         ];
       }
 
-      const execResult = await this.executeCloudflareRequest(execParams);
+      let execResult: any = null;
+      let lastErr: any = null;
+
+      for (let attempt = 0; attempt < 2; attempt++) {
+        try {
+          execResult = await this.executeCloudflareRequest(execParams);
+          lastErr = null;
+          break;
+        } catch (err: any) {
+          lastErr = err;
+          const classified = this.classifyError(err);
+          if (attempt === 0 && classified.isTransient) {
+            retriesAttempted += 1;
+            retryConsumed = true;
+            console.warn(`[CloudflareVisionProvider] Transient error on attempt 1 (${classified.errorType}), retrying once:`, err?.message);
+            await new Promise((r) => setTimeout(r, 400));
+            continue;
+          }
+          // Terminal or already retried once -> halt immediately
+          break;
+        }
+      }
+
+      if (!execResult && lastErr) {
+        throw lastErr;
+      }
 
       const parseStart = Date.now();
       let parsed = execResult.json;
@@ -348,6 +537,10 @@ Output only the JSON object starting with { and ending with } without any conver
           output: this.createRejectionOutput(rejectionReason, qualityScore),
           canonicalResult,
           providerName: this.name,
+          providerAttempted: this.name,
+          fallbackUsed: false,
+          retriesAttempted,
+          retryConsumed,
           modelUsed: model,
           tokensConsumed: execResult.tokens || { promptTokens: 0, outputTokens: 0, totalTokens: 0 },
           neuronsConsumed: execResult.neurons,
@@ -616,6 +809,10 @@ Output only the JSON object starting with { and ending with } without any conver
         output,
         canonicalResult,
         providerName: this.name,
+        providerAttempted: this.name,
+        fallbackUsed: false,
+        retriesAttempted,
+        retryConsumed,
         modelUsed: model,
         tokensConsumed: execResult.tokens || { promptTokens: 0, outputTokens: 0, totalTokens: 0 },
         neuronsConsumed: execResult.neurons,
@@ -623,38 +820,7 @@ Output only the JSON object starting with { and ending with } without any conver
         durationMs: totalEndToEndMs
       };
     } catch (err: any) {
-      const errStatus = err?.status;
-      const errMsg = err?.message || '';
-
-      const isTimeout = err?.name === 'AbortError' || errMsg.includes('timed out');
-      const isDailyQuota = err?.errorCode === 3036 || errMsg.includes('3036') || errMsg.includes('daily free allocation') || errMsg.includes('Neuron daily limit');
-      const isCapacity = err?.errorCode === 3040 || errMsg.includes('3040') || errMsg.includes('out of capacity') || errMsg.includes('capacity exceeded');
-      const isLicenseRequired = errMsg.includes('Meta License') || errMsg.includes('Acceptable Use Policy') || errMsg.includes('terms') || errMsg.includes('agree');
-      const isAuthError = errStatus === 401 || errStatus === 403;
-
-      let errorType: '429' | '5xx' | 'TIMEOUT' | 'INVALID_OUTPUT' | 'AUTH_ERROR' | 'PROVIDER_UNAVAILABLE' = '5xx';
-      let errorDesc = errMsg || 'Network error during Cloudflare Workers AI request.';
-
-      if (isTimeout) {
-        errorType = 'TIMEOUT';
-        errorDesc = 'Cloudflare Workers AI request timed out.';
-      } else if (isDailyQuota) {
-        errorType = '429';
-        errorDesc = 'Cloudflare 10,000-Neuron daily free allocation exhausted (Error 3036). Daily quota resets at 00:00 UTC.';
-      } else if (isCapacity) {
-        errorType = 'PROVIDER_UNAVAILABLE';
-        errorDesc = 'Cloudflare Workers AI temporarily out of capacity (Error 3040). Please retry shortly.';
-      } else if (errStatus === 429) {
-        errorType = '429';
-        errorDesc = 'Cloudflare Workers AI rate limit exceeded (HTTP 429).';
-      } else if (isLicenseRequired) {
-        errorType = 'AUTH_ERROR';
-        errorDesc = 'Meta License acceptance required for @cf/meta/llama-3.2-11b-vision-instruct. Run: curl -X POST https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/ai/run/@cf/meta/llama-3.2-11b-vision-instruct -H "Authorization: Bearer $CLOUDFLARE_AUTH_TOKEN" -d \'{"prompt": "agree"}\'';
-      } else if (isAuthError) {
-        errorType = 'AUTH_ERROR';
-        errorDesc = `Cloudflare API authentication failed (HTTP ${errStatus}). Verify CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_AUTH_TOKEN.`;
-      }
-
+      const classified = this.classifyError(err);
       const totalEndToEndMs = Date.now() - startTime;
       const telemetry: VisionStageTelemetry = {
         isColdStart,
@@ -673,9 +839,15 @@ Output only the JSON object starting with { and ending with } without any conver
 
       return {
         success: false,
-        error: errorDesc,
-        errorType,
+        error: classified.message,
+        errorType: classified.errorType,
+        providerStatus: classified.status,
+        providerErrorCode: classified.errorCode,
+        retriesAttempted,
+        retryConsumed,
         providerName: this.name,
+        providerAttempted: this.name,
+        fallbackUsed: false,
         modelUsed: model,
         tokensConsumed: { promptTokens: 0, outputTokens: 0, totalTokens: 0 },
         telemetry,

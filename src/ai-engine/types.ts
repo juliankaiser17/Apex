@@ -274,10 +274,10 @@ export interface IdentificationResult {
   userId: string;
   status: ScanJobStatus;
   canonicalVehicleId?: string;
-  make: string;
-  model: string;
-  generation: string;
-  trim?: string;
+  make: string | null;
+  model: string | null;
+  generation: string | null;
+  trim?: string | null;
   yearEstimate: string;
   color: string;
   rarity: RarityTier;

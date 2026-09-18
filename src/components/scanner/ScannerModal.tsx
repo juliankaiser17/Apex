@@ -391,6 +391,8 @@ export const ScannerModal: React.FC = () => {
       const isModelUnknown = !model || model.trim() === '' || model.toLowerCase().includes('unknown');
       if (isMakeUnknown && isModelUnknown) {
         onIdentificationFailed(
+          aiResult?.reason ||
+          aiResult?.rejection_reason ||
           'Vehicle could not be clearly identified. Please retake the photo with better lighting or vehicle angle.'
         );
         return;

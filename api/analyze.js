@@ -3261,6 +3261,115 @@ var CloudflareVisionProvider = class {
     const token = this.getApiToken();
     return accountId.length > 3 && token.length > 5;
   }
+  classifyError(err) {
+    const status = err?.status;
+    const errorCode = err?.errorCode;
+    const errMsg = err?.message || "";
+    const isLicense = errorCode === 5016 || /meta license|acceptable use policy|terms/i.test(errMsg) || status === 403 && /agree|license|terms/i.test(errMsg);
+    const isQuota = errorCode === 3036 || errorCode === 4006 || errMsg.includes("3036") || errMsg.includes("4006") || /daily free allocation|10,000 neurons|neuron daily limit/i.test(errMsg);
+    const isCapacity = errorCode === 3040 || /capacity|out of capacity/i.test(errMsg);
+    const isInvalidModel = errorCode === 5007 || status === 400 && /model/i.test(errMsg);
+    const isRequestTooLarge = errorCode === 3006 || status === 413 || /too large|payload/i.test(errMsg);
+    const isTimeout = err?.name === "AbortError" || status === 408 || /timed out|timeout/i.test(errMsg);
+    const isAuth = status === 401 || status === 403;
+    if (isLicense) {
+      return {
+        errorType: "MODEL_AGREEMENT_REQUIRED",
+        isTransient: false,
+        status: status || 403,
+        errorCode: errorCode || 5016,
+        message: "Meta License agreement required for @cf/meta/llama-3.2-11b-vision-instruct. Accept terms in Cloudflare dashboard or execute prompt agreement."
+      };
+    }
+    if (isQuota) {
+      return {
+        errorType: "VISION_QUOTA_EXHAUSTED",
+        isTransient: false,
+        status: status || 429,
+        errorCode: errorCode || 4006,
+        message: errMsg || "Cloudflare daily free allocation of 10,000 neurons exhausted (Error 4006/3036). Daily quota resets at 00:00 UTC."
+      };
+    }
+    if (isCapacity) {
+      return {
+        errorType: "PROVIDER_CAPACITY",
+        isTransient: true,
+        status: status || 429,
+        errorCode: errorCode || 3040,
+        message: "Cloudflare Workers AI temporarily out of capacity (Error 3040)."
+      };
+    }
+    if (isInvalidModel) {
+      return {
+        errorType: "INVALID_MODEL",
+        isTransient: false,
+        status: status || 400,
+        errorCode: errorCode || 5007,
+        message: errMsg || "Cloudflare model not found or invalid."
+      };
+    }
+    if (isRequestTooLarge) {
+      return {
+        errorType: "REQUEST_TOO_LARGE",
+        isTransient: false,
+        status: status || 413,
+        errorCode: errorCode || 3006,
+        message: errMsg || "Image payload exceeds Cloudflare Workers AI maximum request size."
+      };
+    }
+    if (isTimeout) {
+      return {
+        errorType: "TIMEOUT",
+        isTransient: true,
+        status: 408,
+        errorCode,
+        message: "Cloudflare Workers AI request timed out."
+      };
+    }
+    if (isAuth) {
+      return {
+        errorType: "AUTH_ERROR",
+        isTransient: false,
+        status: status || 401,
+        errorCode,
+        message: errMsg || `Cloudflare API authentication failed (HTTP ${status}). Verify CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_AUTH_TOKEN.`
+      };
+    }
+    if (status === 429) {
+      return {
+        errorType: "429",
+        isTransient: true,
+        status: 429,
+        errorCode,
+        message: errMsg || "Cloudflare Workers AI rate limit exceeded (HTTP 429)."
+      };
+    }
+    if (status && status >= 500 && status < 600) {
+      return {
+        errorType: "5xx",
+        isTransient: true,
+        status,
+        errorCode,
+        message: errMsg || `Cloudflare Workers AI server error (HTTP ${status}).`
+      };
+    }
+    if (/fetch failed|network|econnreset|enotfound/i.test(errMsg)) {
+      return {
+        errorType: "NETWORK_ERROR",
+        isTransient: true,
+        status,
+        errorCode,
+        message: errMsg || "Network error communicating with Cloudflare Workers AI."
+      };
+    }
+    return {
+      errorType: "5xx",
+      isTransient: false,
+      status: status || 500,
+      errorCode,
+      message: errMsg || "Unexpected Cloudflare Workers AI error."
+    };
+  }
   async identify(request) {
     const startTime = Date.now();
     const model = request.options?.modelOverride || this.defaultModel;
@@ -3276,7 +3385,13 @@ var CloudflareVisionProvider = class {
         success: false,
         error: "Cloudflare credentials (CLOUDFLARE_ACCOUNT_ID or CLOUDFLARE_AUTH_TOKEN) not configured on server.",
         errorType: "AUTH_ERROR",
+        providerStatus: 401,
+        providerErrorCode: "MISSING_CREDENTIALS",
+        retriesAttempted: 0,
+        retryConsumed: false,
         providerName: this.name,
+        providerAttempted: this.name,
+        fallbackUsed: false,
         modelUsed: model,
         tokensConsumed: { promptTokens: 0, outputTokens: 0, totalTokens: 0 },
         durationMs: Date.now() - startTime
@@ -3415,6 +3530,8 @@ Output only the JSON object starting with { and ending with } without any conver
     const effectiveMaxTokens = request.options?.maxTokens ?? defaultTokensForSchema;
     const effectiveTemperature = request.options?.temperature ?? this.temperature;
     const effectiveSeed = request.options?.seed ?? this.seed;
+    let retriesAttempted = 0;
+    let retryConsumed = false;
     try {
       const execParams = {
         accountId,
@@ -3439,7 +3556,29 @@ ${userPrompt} [/INST]`;
           { role: "user", content: userPrompt }
         ];
       }
-      const execResult = await this.executeCloudflareRequest(execParams);
+      let execResult = null;
+      let lastErr = null;
+      for (let attempt = 0; attempt < 2; attempt++) {
+        try {
+          execResult = await this.executeCloudflareRequest(execParams);
+          lastErr = null;
+          break;
+        } catch (err) {
+          lastErr = err;
+          const classified = this.classifyError(err);
+          if (attempt === 0 && classified.isTransient) {
+            retriesAttempted += 1;
+            retryConsumed = true;
+            console.warn(`[CloudflareVisionProvider] Transient error on attempt 1 (${classified.errorType}), retrying once:`, err?.message);
+            await new Promise((r) => setTimeout(r, 400));
+            continue;
+          }
+          break;
+        }
+      }
+      if (!execResult && lastErr) {
+        throw lastErr;
+      }
       const parseStart = Date.now();
       let parsed = execResult.json;
       if (parsed && typeof parsed.response === "object" && parsed.response !== null) {
@@ -3493,6 +3632,10 @@ ${userPrompt} [/INST]`;
           output: this.createRejectionOutput(rejectionReason, qualityScore),
           canonicalResult: canonicalResult2,
           providerName: this.name,
+          providerAttempted: this.name,
+          fallbackUsed: false,
+          retriesAttempted,
+          retryConsumed,
           modelUsed: model,
           tokensConsumed: execResult.tokens || { promptTokens: 0, outputTokens: 0, totalTokens: 0 },
           neuronsConsumed: execResult.neurons,
@@ -3726,6 +3869,10 @@ ${userPrompt} [/INST]`;
         output,
         canonicalResult,
         providerName: this.name,
+        providerAttempted: this.name,
+        fallbackUsed: false,
+        retriesAttempted,
+        retryConsumed,
         modelUsed: model,
         tokensConsumed: execResult.tokens || { promptTokens: 0, outputTokens: 0, totalTokens: 0 },
         neuronsConsumed: execResult.neurons,
@@ -3733,34 +3880,7 @@ ${userPrompt} [/INST]`;
         durationMs: totalEndToEndMs
       };
     } catch (err) {
-      const errStatus = err?.status;
-      const errMsg = err?.message || "";
-      const isTimeout = err?.name === "AbortError" || errMsg.includes("timed out");
-      const isDailyQuota = err?.errorCode === 3036 || errMsg.includes("3036") || errMsg.includes("daily free allocation") || errMsg.includes("Neuron daily limit");
-      const isCapacity = err?.errorCode === 3040 || errMsg.includes("3040") || errMsg.includes("out of capacity") || errMsg.includes("capacity exceeded");
-      const isLicenseRequired = errMsg.includes("Meta License") || errMsg.includes("Acceptable Use Policy") || errMsg.includes("terms") || errMsg.includes("agree");
-      const isAuthError = errStatus === 401 || errStatus === 403;
-      let errorType = "5xx";
-      let errorDesc = errMsg || "Network error during Cloudflare Workers AI request.";
-      if (isTimeout) {
-        errorType = "TIMEOUT";
-        errorDesc = "Cloudflare Workers AI request timed out.";
-      } else if (isDailyQuota) {
-        errorType = "429";
-        errorDesc = "Cloudflare 10,000-Neuron daily free allocation exhausted (Error 3036). Daily quota resets at 00:00 UTC.";
-      } else if (isCapacity) {
-        errorType = "PROVIDER_UNAVAILABLE";
-        errorDesc = "Cloudflare Workers AI temporarily out of capacity (Error 3040). Please retry shortly.";
-      } else if (errStatus === 429) {
-        errorType = "429";
-        errorDesc = "Cloudflare Workers AI rate limit exceeded (HTTP 429).";
-      } else if (isLicenseRequired) {
-        errorType = "AUTH_ERROR";
-        errorDesc = `Meta License acceptance required for @cf/meta/llama-3.2-11b-vision-instruct. Run: curl -X POST https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/ai/run/@cf/meta/llama-3.2-11b-vision-instruct -H "Authorization: Bearer $CLOUDFLARE_AUTH_TOKEN" -d '{"prompt": "agree"}'`;
-      } else if (isAuthError) {
-        errorType = "AUTH_ERROR";
-        errorDesc = `Cloudflare API authentication failed (HTTP ${errStatus}). Verify CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_AUTH_TOKEN.`;
-      }
+      const classified = this.classifyError(err);
       const totalEndToEndMs = Date.now() - startTime;
       const telemetry = {
         isColdStart,
@@ -3778,9 +3898,15 @@ ${userPrompt} [/INST]`;
       };
       return {
         success: false,
-        error: errorDesc,
-        errorType,
+        error: classified.message,
+        errorType: classified.errorType,
+        providerStatus: classified.status,
+        providerErrorCode: classified.errorCode,
+        retriesAttempted,
+        retryConsumed,
         providerName: this.name,
+        providerAttempted: this.name,
+        fallbackUsed: false,
         modelUsed: model,
         tokensConsumed: { promptTokens: 0, outputTokens: 0, totalTokens: 0 },
         telemetry,
@@ -4168,7 +4294,11 @@ var AIProviderRouter = class {
   }
   async getActiveProviderName() {
     const isPrimary = await this.primaryProvider.isAvailable();
-    return this.config.enabled && isPrimary && this.getCircuitState() !== "OPEN" ? this.primaryProvider.name : "MockFallbackProvider";
+    const allowMockFallback = typeof process !== "undefined" && process.env?.ALLOW_MOCK_FALLBACK === "true";
+    if (this.config.enabled && isPrimary && this.getCircuitState() !== "OPEN") {
+      return this.primaryProvider.name;
+    }
+    return allowMockFallback && this.fallbackEnabled ? this.fallbackProvider.name : "none";
   }
   updateConfig(newConfig) {
     this.config = { ...this.config, ...newConfig };
@@ -4176,7 +4306,7 @@ var AIProviderRouter = class {
       this.maxConcurrency = newConfig.maxConcurrency;
     }
   }
-  fallbackEnabled = true;
+  fallbackEnabled = false;
   setFallbackEnabled(enabled) {
     this.fallbackEnabled = enabled;
   }
@@ -4203,25 +4333,38 @@ var AIProviderRouter = class {
    */
   async routeIdentification(request) {
     const currentState = this.getCircuitState();
-    const isFallbackDisabled = !this.fallbackEnabled || Boolean(request.options?.disableFallback);
     const providerAttempted = this.primaryProvider.name;
+    console.log("[AIProviderRouter] Diagnostics:", {
+      provider: typeof process !== "undefined" && process.env?.VISION_PROVIDER || "cloudflare",
+      cloudflareAccountConfigured: Boolean(typeof process !== "undefined" && process.env?.CLOUDFLARE_ACCOUNT_ID),
+      cloudflareTokenConfigured: Boolean(typeof process !== "undefined" && process.env?.CLOUDFLARE_AUTH_TOKEN),
+      scanningEnabled: typeof process !== "undefined" ? process.env?.CLOUDFLARE_SCANNING_ENABLED !== "false" : true,
+      visionScanningEnabled: typeof process !== "undefined" ? process.env?.VISION_SCANNING_ENABLED !== "false" : true,
+      allowMockFallback: typeof process !== "undefined" && process.env?.ALLOW_MOCK_FALLBACK === "true"
+    });
+    const allowMockFallback = typeof process !== "undefined" && process.env?.ALLOW_MOCK_FALLBACK === "true";
+    const isFallbackPermitted = allowMockFallback && this.fallbackEnabled && !request.options?.disableFallback;
     const isPrimaryAvailable = await this.primaryProvider.isAvailable();
     const isScanningEnabled = typeof process !== "undefined" ? this.primaryProvider.name === "CloudflareVisionProvider" ? process.env?.CLOUDFLARE_SCANNING_ENABLED !== "false" && process.env?.VISION_SCANNING_ENABLED !== "false" : process.env?.GEMINI_SCANNING_ENABLED !== "false" && process.env?.VISION_SCANNING_ENABLED !== "false" : true;
     const isBudgetExceeded = this.dailyCostEstimateUsd >= this.config.dailyBudgetUsd;
     const canAttemptPrimary = this.config.enabled && isScanningEnabled && !isBudgetExceeded && isPrimaryAvailable && currentState !== "OPEN" && this.activeConcurrency < this.maxConcurrency;
     if (!canAttemptPrimary) {
-      if (isFallbackDisabled) {
-        let failureReason = `Primary vision provider unavailable (isAvailable=${isPrimaryAvailable}, circuitState=${currentState}).`;
-        if (!isScanningEnabled) failureReason = `${this.primaryProvider.name} scanning is disabled via emergency kill switch.`;
-        if (isBudgetExceeded) failureReason = `Daily ${this.primaryProvider.name} budget exceeded ($${this.dailyCostEstimateUsd.toFixed(2)} >= $${this.config.dailyBudgetUsd.toFixed(2)}).`;
+      let failureReason = `Primary vision provider unavailable (isAvailable=${isPrimaryAvailable}, circuitState=${currentState}).`;
+      if (!isScanningEnabled) failureReason = `${this.primaryProvider.name} scanning is disabled via emergency kill switch.`;
+      if (isBudgetExceeded) failureReason = `Daily ${this.primaryProvider.name} budget exceeded ($${this.dailyCostEstimateUsd.toFixed(2)} >= $${this.config.dailyBudgetUsd.toFixed(2)}).`;
+      if (!isFallbackPermitted) {
         return {
           success: false,
-          error: `${failureReason} Fallback disabled by test policy.`,
+          error: failureReason,
           errorType: !isScanningEnabled ? "PROVIDER_UNAVAILABLE" : isBudgetExceeded ? "PROVIDER_UNAVAILABLE" : !isPrimaryAvailable ? "AUTH_ERROR" : currentState === "OPEN" ? "429" : "PROVIDER_UNAVAILABLE",
+          providerStatus: !isPrimaryAvailable ? 401 : !isScanningEnabled ? 503 : 500,
+          providerErrorCode: !isPrimaryAvailable ? "MISSING_CREDENTIALS" : void 0,
           providerName: this.primaryProvider.name,
           modelUsed: "none",
           providerAttempted,
           fallbackUsed: false,
+          retriesAttempted: 0,
+          retryConsumed: false,
           tokensConsumed: { promptTokens: 0, outputTokens: 0, totalTokens: 0 },
           durationMs: 0
         };
@@ -4247,9 +4390,10 @@ var AIProviderRouter = class {
         };
       }
       this.onFailure(response.errorType);
-      if (isFallbackDisabled) {
+      if (!isFallbackPermitted) {
         return {
           ...response,
+          providerName: this.primaryProvider.name,
           providerAttempted,
           fallbackUsed: false
         };
@@ -4263,11 +4407,15 @@ var AIProviderRouter = class {
       };
     } catch (err) {
       this.onFailure("5xx");
-      if (isFallbackDisabled) {
+      if (!isFallbackPermitted) {
         return {
           success: false,
           error: err?.message || "Primary provider threw exception",
           errorType: "5xx",
+          providerStatus: err?.status || 500,
+          providerErrorCode: err?.errorCode,
+          retriesAttempted: 0,
+          retryConsumed: false,
           providerName: this.primaryProvider.name,
           modelUsed: "none",
           providerAttempted,
@@ -4803,7 +4951,117 @@ var WorkerPool = class {
         }
       });
       if (!aiResponse.success || !aiResponse.output) {
-        throw new Error(aiResponse.error || "AI Provider returned invalid output.");
+        const errorType = aiResponse.errorType || "PROVIDER_FAILURE";
+        const abstentionReason = errorType === "VISION_QUOTA_EXHAUSTED" ? "VISION_QUOTA_EXHAUSTED" : errorType;
+        const truthfulReason = errorType === "VISION_QUOTA_EXHAUSTED" ? `[${aiResponse.providerName || "CloudflareVisionProvider"}] VISION_QUOTA_EXHAUSTED: ${aiResponse.error || "Cloudflare daily free allocation of 10,000 neurons exhausted."}` : aiResponse.error || `[${aiResponse.providerName || "CloudflareVisionProvider"}] AI inference failed.`;
+        const finalStatus2 = "uncertain";
+        const finalResult2 = {
+          scanId: job.id,
+          idempotencyKey: job.idempotencyKey,
+          userId: job.userId,
+          status: finalStatus2,
+          canonicalVehicleId: void 0,
+          make: null,
+          model: null,
+          generation: null,
+          trim: null,
+          yearEstimate: "Unknown",
+          color: "Unknown",
+          rarity: "common",
+          engine: "Unknown",
+          horsepower: 0,
+          torqueNm: 0,
+          topSpeedKmH: 0,
+          zeroToHundredSec: 0,
+          kerbWeightKg: 0,
+          productionYears: "Unknown",
+          originCountry: "Global",
+          bodyStyle: "Sedan",
+          historicalInformation: "",
+          interestingFacts: "",
+          aftermarketPartsDetected: [],
+          confidence: {
+            totalScore: 0,
+            isConfident: false,
+            shouldAbstain: true,
+            abstentionReason,
+            breakdown: {
+              visualSimilarityWeight: 0,
+              modelAgreementWeight: 0,
+              candidateMarginWeight: 0,
+              frameAgreementWeight: 0,
+              databaseConsistencyWeight: 0,
+              qualityPenalty: 1
+            }
+          },
+          quality: quality || { isUsable: false, blurScore: 0, luminanceScore: 0, contrastScore: 0, aspectRatio: 1, vehicleBoundingEstimated: false },
+          topCandidates: [],
+          processedAt: (/* @__PURE__ */ new Date()).toISOString(),
+          processingDurationMs: Date.now() - startTime,
+          modelVersion: aiResponse.modelUsed || "none",
+          promptVersion: "apex-master-v2.5",
+          pipelineVersion: job.pipelineVersion,
+          cached: false,
+          traceId: job.traceId,
+          canonicalResult: {
+            status: "uncertain",
+            vehicle_present: true,
+            image_quality: { usable: false, score: 0, issues: [truthfulReason] },
+            viewpoint: "unknown",
+            visual_evidence: {
+              body_style: null,
+              grille: null,
+              headlights: null,
+              taillights: null,
+              hood: null,
+              roofline: null,
+              windows: null,
+              wheels: null,
+              exhaust: null,
+              aero: null,
+              badges: null,
+              text: null,
+              body_proportions: null,
+              distinctive_details: null
+            },
+            identification: { make: null, model_family: null, generation: null, variant: null },
+            confidence: { make_score: 0, model_score: 0, generation_score: 0, variant_score: 0, overall_score: 0 },
+            candidates: [],
+            contradictions: [truthfulReason],
+            specificity_level: "make",
+            reason: truthfulReason,
+            needs_retake: true,
+            needs_review: true
+          }
+        };
+        tracer.recordScanTrace({
+          scan_id: job.id,
+          request_id: job.traceId,
+          timestamp: (/* @__PURE__ */ new Date()).toISOString(),
+          image_hash: job.imageHash,
+          image_size_bytes: job.imageDataUrl.length,
+          provider_model: aiResponse.fallbackUsed ? aiResponse.modelUsed || "apex-local-embedded" : aiResponse.providerName || "CloudflareVisionProvider",
+          provider: aiResponse.providerName || "CloudflareVisionProvider",
+          model: aiResponse.modelUsed || "@cf/meta/llama-3.2-11b-vision-instruct",
+          latency_ms: Date.now() - startTime,
+          latency: Date.now() - startTime,
+          status: finalStatus2,
+          cache_hit: false,
+          cache_key: job.imageHash,
+          retry_count: aiResponse.retriesAttempted ?? 0,
+          error_code: aiResponse.providerErrorCode ? String(aiResponse.providerErrorCode) : aiResponse.errorType || null,
+          fallback_used: Boolean(aiResponse.fallbackUsed),
+          abstention_reason: truthfulReason,
+          candidate_set: candidates.map((c) => `${c.make} ${c.model}`),
+          retrieved_references: candidates.slice(0, 5).map((c) => c.vehicleId),
+          prompt_summary: "APEX Evidence-First Hierarchical Multi-Candidate Prompt (Abstract Schema)",
+          raw_model_response: null,
+          classifier_output: finalResult2.canonicalResult,
+          final_result: finalResult2
+        });
+        jobQueue.completeJob(job.id, finalStatus2);
+        job.result = finalResult2;
+        return finalResult2;
       }
       const validationReport = deterministicValidator.validate(aiResponse.output);
       const confidence = confidenceEngine.computeConfidence({
@@ -4859,17 +5117,17 @@ var WorkerPool = class {
         timestamp: (/* @__PURE__ */ new Date()).toISOString(),
         image_hash: job.imageHash,
         image_size_bytes: job.imageDataUrl.length,
-        provider_model: aiResponse.modelUsed,
-        provider: aiResponse.providerName || "gemini",
+        provider_model: aiResponse.fallbackUsed ? aiResponse.modelUsed || "apex-local-embedded" : aiResponse.providerName || "CloudflareVisionProvider",
+        provider: aiResponse.providerName || "CloudflareVisionProvider",
         model: aiResponse.modelUsed,
         latency_ms: Date.now() - startTime,
         latency: Date.now() - startTime,
         status: finalStatus,
         cache_hit: false,
         cache_key: job.imageHash,
-        retry_count: Math.max(0, job.attempts - 1),
+        retry_count: aiResponse.retriesAttempted ?? 0,
         error_code: null,
-        fallback_used: aiResponse.modelUsed.includes("fallback") || aiResponse.modelUsed.includes("embedded"),
+        fallback_used: Boolean(aiResponse.fallbackUsed),
         abstention_reason: confidence.shouldAbstain ? confidence.abstentionReason || "Low confidence abstention" : null,
         candidate_set: candidates.map((c) => `${c.make} ${c.model}`),
         retrieved_references: candidates.slice(0, 5).map((c) => c.vehicleId),
@@ -4883,68 +5141,63 @@ var WorkerPool = class {
       return finalResult;
     } catch (err) {
       console.warn(`Job ${job.id} failed on attempt ${job.attempts}:`, err);
-      const isQuotaOrPolicyError = err?.message?.includes("429") || err?.message?.includes("quota") || err?.message?.includes("Quota") || err?.message?.includes("RESOURCE_EXHAUSTED") || err?.message?.includes("Fallback disabled by test policy");
-      if (job.attempts < job.maxAttempts && !isQuotaOrPolicyError) {
-        const jitterDelayMs = Math.floor(Math.pow(2, job.attempts) * 300 + Math.random() * 200);
-        setTimeout(() => {
-          jobQueue.enqueue(job);
-        }, jitterDelayMs);
-      } else {
-        const isUnavailable = isQuotaOrPolicyError || err?.message?.includes("unavailable");
-        const finalJobStatus = isUnavailable ? "uncertain" : "failed";
-        const errMessage = err?.message || "Processing failed after maximum retry attempts.";
-        job.error = errMessage;
-        job.result = {
-          scanId: job.id,
-          idempotencyKey: job.idempotencyKey,
-          userId: job.userId,
-          status: finalJobStatus,
-          make: "Unknown Make",
-          model: "Unknown Model",
-          generation: "Unknown",
-          yearEstimate: "Unknown",
-          color: "Unknown",
-          rarity: "common",
-          engine: "Unknown",
-          horsepower: 0,
-          torqueNm: 0,
-          topSpeedKmH: 0,
-          zeroToHundredSec: 0,
-          kerbWeightKg: 0,
-          productionYears: "Unknown",
-          originCountry: "Global",
-          bodyStyle: "Coupe",
-          historicalInformation: "",
-          interestingFacts: "",
-          aftermarketPartsDetected: [],
-          confidence: {
-            totalScore: 0,
-            isConfident: false,
-            shouldAbstain: true,
-            abstentionReason: isUnavailable ? "vision_provider_unavailable" : errMessage,
-            breakdown: {
-              visualSimilarityWeight: 0,
-              modelAgreementWeight: 0,
-              candidateMarginWeight: 0,
-              frameAgreementWeight: 0,
-              databaseConsistencyWeight: 0,
-              qualityPenalty: 1
-            }
-          },
-          quality: quality || { isUsable: false, blurScore: 0, luminanceScore: 0, contrastScore: 0, aspectRatio: 1, vehicleBoundingEstimated: false },
-          topCandidates: [],
-          processedAt: (/* @__PURE__ */ new Date()).toISOString(),
-          processingDurationMs: Date.now() - startTime,
-          modelVersion: "provider-unavailable",
-          promptVersion: "apex-prompt-v2",
-          pipelineVersion: job.pipelineVersion,
-          cached: false,
-          traceId: job.traceId
-        };
-        jobQueue.completeJob(job.id, finalJobStatus);
-        deadLetterQueue.push(job, errMessage);
-      }
-      throw err;
+      const isQuota = err?.message?.includes("429") || err?.message?.includes("quota") || err?.message?.includes("Quota") || err?.message?.includes("4006") || err?.message?.includes("3036") || err?.message?.includes("RESOURCE_EXHAUSTED");
+      const finalJobStatus = "uncertain";
+      const errMessage = err?.message || "Processing failed.";
+      const abstentionReason = isQuota ? "VISION_QUOTA_EXHAUSTED" : errMessage;
+      job.error = errMessage;
+      const errorResult = {
+        scanId: job.id,
+        idempotencyKey: job.idempotencyKey,
+        userId: job.userId,
+        status: finalJobStatus,
+        make: null,
+        model: null,
+        generation: null,
+        trim: null,
+        yearEstimate: "Unknown",
+        color: "Unknown",
+        rarity: "common",
+        engine: "Unknown",
+        horsepower: 0,
+        torqueNm: 0,
+        topSpeedKmH: 0,
+        zeroToHundredSec: 0,
+        kerbWeightKg: 0,
+        productionYears: "Unknown",
+        originCountry: "Global",
+        bodyStyle: "Sedan",
+        historicalInformation: "",
+        interestingFacts: "",
+        aftermarketPartsDetected: [],
+        confidence: {
+          totalScore: 0,
+          isConfident: false,
+          shouldAbstain: true,
+          abstentionReason,
+          breakdown: {
+            visualSimilarityWeight: 0,
+            modelAgreementWeight: 0,
+            candidateMarginWeight: 0,
+            frameAgreementWeight: 0,
+            databaseConsistencyWeight: 0,
+            qualityPenalty: 1
+          }
+        },
+        quality: quality || { isUsable: false, blurScore: 0, luminanceScore: 0, contrastScore: 0, aspectRatio: 1, vehicleBoundingEstimated: false },
+        topCandidates: [],
+        processedAt: (/* @__PURE__ */ new Date()).toISOString(),
+        processingDurationMs: Date.now() - startTime,
+        modelVersion: "provider-failed",
+        promptVersion: "apex-prompt-v2",
+        pipelineVersion: job.pipelineVersion,
+        cached: false,
+        traceId: job.traceId
+      };
+      job.result = errorResult;
+      jobQueue.completeJob(job.id, finalJobStatus);
+      deadLetterQueue.push(job, errMessage);
+      return errorResult;
     }
   }
 };
@@ -5555,12 +5808,15 @@ function formatScanResponse(r) {
       generation: r.generation,
       variant: r.trim || null
     },
-    confidence: canon?.confidence || {
-      make_score: r.confidence?.totalScore ?? 0.95,
-      model_score: r.confidence?.totalScore ?? 0.95,
-      generation_score: Number(((r.confidence?.totalScore ?? 0.95) * 0.85).toFixed(3)),
-      variant_score: r.trim ? Number(((r.confidence?.totalScore ?? 0.95) * 0.75).toFixed(3)) : 0.2,
-      overall_score: r.confidence?.totalScore ?? 0.95
+    confidence: {
+      ...canon?.confidence || {
+        make_score: r.confidence?.totalScore ?? 0.95,
+        model_score: r.confidence?.totalScore ?? 0.95,
+        generation_score: Number(((r.confidence?.totalScore ?? 0.95) * 0.85).toFixed(3)),
+        variant_score: r.trim ? Number(((r.confidence?.totalScore ?? 0.95) * 0.75).toFixed(3)) : 0.2,
+        overall_score: r.confidence?.totalScore ?? 0.95
+      },
+      abstentionReason: r.confidence?.abstentionReason || canon?.confidence?.abstentionReason || null
     },
     candidates: canon?.candidates || (r.topCandidates || []).map((c) => ({
       name: `${c.make} ${c.model}`,
@@ -5612,6 +5868,14 @@ async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed: Must be POST." });
   }
+  console.log("[api/analyze] Diagnostics:", {
+    provider: (process.env.VISION_PROVIDER || "cloudflare").toLowerCase().trim(),
+    cloudflareAccountConfigured: Boolean(process.env.CLOUDFLARE_ACCOUNT_ID),
+    cloudflareTokenConfigured: Boolean(process.env.CLOUDFLARE_AUTH_TOKEN),
+    scanningEnabled: process.env.CLOUDFLARE_SCANNING_ENABLED !== "false",
+    visionScanningEnabled: process.env.VISION_SCANNING_ENABLED !== "false",
+    allowMockFallback: process.env.ALLOW_MOCK_FALLBACK === "true"
+  });
   const rawProvider = (process.env.VISION_PROVIDER || "cloudflare").toLowerCase().trim();
   if (rawProvider !== "cloudflare" && rawProvider !== "gemini") {
     return res.status(500).json({

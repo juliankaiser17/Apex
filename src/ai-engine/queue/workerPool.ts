@@ -200,7 +200,116 @@ export class WorkerPool {
       });
 
       if (!aiResponse.success || !aiResponse.output) {
-        throw new Error(aiResponse.error || 'AI Provider returned invalid output.');
+        // Provider failure is terminal at the worker layer: CloudflareVisionProvider owns retry authority.
+        // workerPool MUST NOT re-enqueue, retry, or multiply inference requests.
+        const errorType = aiResponse.errorType || 'PROVIDER_FAILURE';
+        const abstentionReason = errorType === 'VISION_QUOTA_EXHAUSTED'
+          ? 'VISION_QUOTA_EXHAUSTED'
+          : errorType;
+
+        const truthfulReason = errorType === 'VISION_QUOTA_EXHAUSTED'
+          ? `[${aiResponse.providerName || 'CloudflareVisionProvider'}] VISION_QUOTA_EXHAUSTED: ${aiResponse.error || 'Cloudflare daily free allocation of 10,000 neurons exhausted.'}`
+          : (aiResponse.error || `[${aiResponse.providerName || 'CloudflareVisionProvider'}] AI inference failed.`);
+
+        const finalStatus: ScanJobStatus = 'uncertain';
+        const finalResult: IdentificationResult = {
+          scanId: job.id,
+          idempotencyKey: job.idempotencyKey,
+          userId: job.userId,
+          status: finalStatus,
+          canonicalVehicleId: undefined,
+          make: null,
+          model: null,
+          generation: null,
+          trim: null,
+          yearEstimate: 'Unknown',
+          color: 'Unknown',
+          rarity: 'common',
+          engine: 'Unknown',
+          horsepower: 0,
+          torqueNm: 0,
+          topSpeedKmH: 0,
+          zeroToHundredSec: 0,
+          kerbWeightKg: 0,
+          productionYears: 'Unknown',
+          originCountry: 'Global',
+          bodyStyle: 'Sedan',
+          historicalInformation: '',
+          interestingFacts: '',
+          aftermarketPartsDetected: [],
+          confidence: {
+            totalScore: 0.0,
+            isConfident: false,
+            shouldAbstain: true,
+            abstentionReason,
+            breakdown: {
+              visualSimilarityWeight: 0,
+              modelAgreementWeight: 0,
+              candidateMarginWeight: 0,
+              frameAgreementWeight: 0,
+              databaseConsistencyWeight: 0,
+              qualityPenalty: 1.0
+            }
+          },
+          quality: quality || { isUsable: false, blurScore: 0, luminanceScore: 0, contrastScore: 0, aspectRatio: 1, vehicleBoundingEstimated: false },
+          topCandidates: [],
+          processedAt: new Date().toISOString(),
+          processingDurationMs: Date.now() - startTime,
+          modelVersion: aiResponse.modelUsed || 'none',
+          promptVersion: 'apex-master-v2.5',
+          pipelineVersion: job.pipelineVersion,
+          cached: false,
+          traceId: job.traceId,
+          canonicalResult: {
+            status: 'uncertain',
+            vehicle_present: true,
+            image_quality: { usable: false, score: 0, issues: [truthfulReason] },
+            viewpoint: 'unknown',
+            visual_evidence: {
+              body_style: null, grille: null, headlights: null, taillights: null, hood: null,
+              roofline: null, windows: null, wheels: null, exhaust: null, aero: null, badges: null,
+              text: null, body_proportions: null, distinctive_details: null
+            },
+            identification: { make: null, model_family: null, generation: null, variant: null },
+            confidence: { make_score: 0, model_score: 0, generation_score: 0, variant_score: 0, overall_score: 0 },
+            candidates: [],
+            contradictions: [truthfulReason],
+            specificity_level: 'make',
+            reason: truthfulReason,
+            needs_retake: true,
+            needs_review: true
+          }
+        };
+
+        tracer.recordScanTrace({
+          scan_id: job.id,
+          request_id: job.traceId,
+          timestamp: new Date().toISOString(),
+          image_hash: job.imageHash,
+          image_size_bytes: job.imageDataUrl.length,
+          provider_model: aiResponse.fallbackUsed ? (aiResponse.modelUsed || 'apex-local-embedded') : (aiResponse.providerName || 'CloudflareVisionProvider'),
+          provider: aiResponse.providerName || 'CloudflareVisionProvider',
+          model: aiResponse.modelUsed || '@cf/meta/llama-3.2-11b-vision-instruct',
+          latency_ms: Date.now() - startTime,
+          latency: Date.now() - startTime,
+          status: finalStatus,
+          cache_hit: false,
+          cache_key: job.imageHash,
+          retry_count: aiResponse.retriesAttempted ?? 0,
+          error_code: aiResponse.providerErrorCode ? String(aiResponse.providerErrorCode) : (aiResponse.errorType || null),
+          fallback_used: Boolean(aiResponse.fallbackUsed),
+          abstention_reason: truthfulReason,
+          candidate_set: candidates.map((c) => `${c.make} ${c.model}`),
+          retrieved_references: candidates.slice(0, 5).map((c) => c.vehicleId),
+          prompt_summary: 'APEX Evidence-First Hierarchical Multi-Candidate Prompt (Abstract Schema)',
+          raw_model_response: null,
+          classifier_output: finalResult.canonicalResult,
+          final_result: finalResult
+        });
+
+        jobQueue.completeJob(job.id, finalStatus);
+        job.result = finalResult;
+        return finalResult;
       }
 
       // ─── STAGE 5: DETERMINISTIC VALIDATION ───
@@ -271,17 +380,17 @@ export class WorkerPool {
         timestamp: new Date().toISOString(),
         image_hash: job.imageHash,
         image_size_bytes: job.imageDataUrl.length,
-        provider_model: aiResponse.modelUsed,
-        provider: aiResponse.providerName || 'gemini',
+        provider_model: aiResponse.fallbackUsed ? (aiResponse.modelUsed || 'apex-local-embedded') : (aiResponse.providerName || 'CloudflareVisionProvider'),
+        provider: aiResponse.providerName || 'CloudflareVisionProvider',
         model: aiResponse.modelUsed,
         latency_ms: Date.now() - startTime,
         latency: Date.now() - startTime,
         status: finalStatus,
         cache_hit: false,
         cache_key: job.imageHash,
-        retry_count: Math.max(0, job.attempts - 1),
+        retry_count: aiResponse.retriesAttempted ?? 0,
         error_code: null,
-        fallback_used: aiResponse.modelUsed.includes('fallback') || aiResponse.modelUsed.includes('embedded'),
+        fallback_used: Boolean(aiResponse.fallbackUsed),
         abstention_reason: confidence.shouldAbstain ? (confidence.abstentionReason || 'Low confidence abstention') : null,
         candidate_set: candidates.map(c => `${c.make} ${c.model}`),
         retrieved_references: candidates.slice(0, 5).map(c => c.vehicleId),
@@ -297,81 +406,75 @@ export class WorkerPool {
     } catch (err: any) {
       console.warn(`Job ${job.id} failed on attempt ${job.attempts}:`, err);
 
-      // If error is 429 quota exhaustion or disableFallback policy, do not waste retries
-      const isQuotaOrPolicyError = 
+      // INVARIANT: Provider failure is terminal at the worker layer.
+      // workerPool MUST NOT call enqueue(), setTimeout(), retry(), or equivalent for any failure.
+      // All retry decisions belong exclusively to CloudflareVisionProvider.
+      const isQuota = 
         err?.message?.includes('429') || 
         err?.message?.includes('quota') || 
         err?.message?.includes('Quota') || 
-        err?.message?.includes('RESOURCE_EXHAUSTED') ||
-        err?.message?.includes('Fallback disabled by test policy');
+        err?.message?.includes('4006') ||
+        err?.message?.includes('3036') ||
+        err?.message?.includes('RESOURCE_EXHAUSTED');
 
-      // Handle retries with exponential jitter
-      if (job.attempts < job.maxAttempts && !isQuotaOrPolicyError) {
-        // Re-enqueue with jitter delay
-        const jitterDelayMs = Math.floor(Math.pow(2, job.attempts) * 300 + Math.random() * 200);
-        setTimeout(() => {
-          jobQueue.enqueue(job);
-        }, jitterDelayMs);
-      } else {
-        // Exceeded retries or fatal quota/policy error -> Set explicit provider-unavailable status
-        const isUnavailable = isQuotaOrPolicyError || err?.message?.includes('unavailable');
-        const finalJobStatus: ScanJobStatus = isUnavailable ? 'uncertain' : 'failed';
-        const errMessage = err?.message || 'Processing failed after maximum retry attempts.';
-        
-        job.error = errMessage;
-        job.result = {
-          scanId: job.id,
-          idempotencyKey: job.idempotencyKey,
-          userId: job.userId,
-          status: finalJobStatus,
-          make: 'Unknown Make',
-          model: 'Unknown Model',
-          generation: 'Unknown',
-          yearEstimate: 'Unknown',
-          color: 'Unknown',
-          rarity: 'common',
-          engine: 'Unknown',
-          horsepower: 0,
-          torqueNm: 0,
-          topSpeedKmH: 0,
-          zeroToHundredSec: 0,
-          kerbWeightKg: 0,
-          productionYears: 'Unknown',
-          originCountry: 'Global',
-          bodyStyle: 'Coupe',
-          historicalInformation: '',
-          interestingFacts: '',
-          aftermarketPartsDetected: [],
-          confidence: {
-            totalScore: 0.0,
-            isConfident: false,
-            shouldAbstain: true,
-            abstentionReason: isUnavailable ? 'vision_provider_unavailable' : errMessage,
-            breakdown: {
-              visualSimilarityWeight: 0,
-              modelAgreementWeight: 0,
-              candidateMarginWeight: 0,
-              frameAgreementWeight: 0,
-              databaseConsistencyWeight: 0,
-              qualityPenalty: 1.0
-            }
-          },
-          quality: quality || { isUsable: false, blurScore: 0, luminanceScore: 0, contrastScore: 0, aspectRatio: 1, vehicleBoundingEstimated: false },
-          topCandidates: [],
-          processedAt: new Date().toISOString(),
-          processingDurationMs: Date.now() - startTime,
-          modelVersion: 'provider-unavailable',
-          promptVersion: 'apex-prompt-v2',
-          pipelineVersion: job.pipelineVersion,
-          cached: false,
-          traceId: job.traceId
-        };
+      const finalJobStatus: ScanJobStatus = 'uncertain';
+      const errMessage = err?.message || 'Processing failed.';
+      const abstentionReason = isQuota ? 'VISION_QUOTA_EXHAUSTED' : errMessage;
+      
+      job.error = errMessage;
+      const errorResult: IdentificationResult = {
+        scanId: job.id,
+        idempotencyKey: job.idempotencyKey,
+        userId: job.userId,
+        status: finalJobStatus,
+        make: null,
+        model: null,
+        generation: null,
+        trim: null,
+        yearEstimate: 'Unknown',
+        color: 'Unknown',
+        rarity: 'common',
+        engine: 'Unknown',
+        horsepower: 0,
+        torqueNm: 0,
+        topSpeedKmH: 0,
+        zeroToHundredSec: 0,
+        kerbWeightKg: 0,
+        productionYears: 'Unknown',
+        originCountry: 'Global',
+        bodyStyle: 'Sedan',
+        historicalInformation: '',
+        interestingFacts: '',
+        aftermarketPartsDetected: [],
+        confidence: {
+          totalScore: 0.0,
+          isConfident: false,
+          shouldAbstain: true,
+          abstentionReason,
+          breakdown: {
+            visualSimilarityWeight: 0,
+            modelAgreementWeight: 0,
+            candidateMarginWeight: 0,
+            frameAgreementWeight: 0,
+            databaseConsistencyWeight: 0,
+            qualityPenalty: 1.0
+          }
+        },
+        quality: quality || { isUsable: false, blurScore: 0, luminanceScore: 0, contrastScore: 0, aspectRatio: 1, vehicleBoundingEstimated: false },
+        topCandidates: [],
+        processedAt: new Date().toISOString(),
+        processingDurationMs: Date.now() - startTime,
+        modelVersion: 'provider-failed',
+        promptVersion: 'apex-prompt-v2',
+        pipelineVersion: job.pipelineVersion,
+        cached: false,
+        traceId: job.traceId
+      };
 
-        jobQueue.completeJob(job.id, finalJobStatus);
-        deadLetterQueue.push(job, errMessage);
-      }
-
-      throw err;
+      job.result = errorResult;
+      jobQueue.completeJob(job.id, finalJobStatus);
+      deadLetterQueue.push(job, errMessage);
+      return errorResult;
     }
   }
 }

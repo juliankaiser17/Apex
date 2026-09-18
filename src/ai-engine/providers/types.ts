@@ -49,12 +49,30 @@ export interface VisionStageTelemetry {
   totalTokens?: number;
 }
 
+export type AIProviderErrorType =
+  | '429'
+  | '5xx'
+  | 'TIMEOUT'
+  | 'INVALID_OUTPUT'
+  | 'AUTH_ERROR'
+  | 'PROVIDER_UNAVAILABLE'
+  | 'VISION_QUOTA_EXHAUSTED'
+  | 'MODEL_AGREEMENT_REQUIRED'
+  | 'PROVIDER_CAPACITY'
+  | 'INVALID_MODEL'
+  | 'REQUEST_TOO_LARGE'
+  | 'NETWORK_ERROR';
+
 export interface AIProviderResponse {
   success: boolean;
   output?: ModelIdentificationOutput;
   canonicalResult?: CanonicalScanResult;
   error?: string;
-  errorType?: '429' | '5xx' | 'TIMEOUT' | 'INVALID_OUTPUT' | 'AUTH_ERROR' | 'PROVIDER_UNAVAILABLE';
+  errorType?: AIProviderErrorType | string;
+  providerStatus?: number;
+  providerErrorCode?: number | string;
+  retriesAttempted?: number;
+  retryConsumed?: boolean;
   providerName: string;
   modelUsed: string;
   providerAttempted?: string;

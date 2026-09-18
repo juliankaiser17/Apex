@@ -245,12 +245,15 @@ function formatScanResponse(r: any) {
       generation: r.generation,
       variant: r.trim || null
     },
-    confidence: canon?.confidence || {
-      make_score: r.confidence?.totalScore ?? 0.95,
-      model_score: r.confidence?.totalScore ?? 0.95,
-      generation_score: Number(((r.confidence?.totalScore ?? 0.95) * 0.85).toFixed(3)),
-      variant_score: r.trim ? Number(((r.confidence?.totalScore ?? 0.95) * 0.75).toFixed(3)) : 0.2,
-      overall_score: r.confidence?.totalScore ?? 0.95
+    confidence: {
+      ...(canon?.confidence || {
+        make_score: r.confidence?.totalScore ?? 0.95,
+        model_score: r.confidence?.totalScore ?? 0.95,
+        generation_score: Number(((r.confidence?.totalScore ?? 0.95) * 0.85).toFixed(3)),
+        variant_score: r.trim ? Number(((r.confidence?.totalScore ?? 0.95) * 0.75).toFixed(3)) : 0.2,
+        overall_score: r.confidence?.totalScore ?? 0.95
+      }),
+      abstentionReason: r.confidence?.abstentionReason || canon?.confidence?.abstentionReason || null
     },
     candidates: canon?.candidates || (r.topCandidates || []).map((c: any) => ({
       name: `${c.make} ${c.model}`,
@@ -308,6 +311,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed: Must be POST.' });
   }
+
+  // Safe Diagnostic Logging (Never log token or secret values)
+  console.log('[api/analyze] Diagnostics:', {
+    provider: (process.env.VISION_PROVIDER || 'cloudflare').toLowerCase().trim(),
+    cloudflareAccountConfigured: Boolean(process.env.CLOUDFLARE_ACCOUNT_ID),
+    cloudflareTokenConfigured: Boolean(process.env.CLOUDFLARE_AUTH_TOKEN),
+    scanningEnabled: process.env.CLOUDFLARE_SCANNING_ENABLED !== 'false',
+    visionScanningEnabled: process.env.VISION_SCANNING_ENABLED !== 'false',
+    allowMockFallback: process.env.ALLOW_MOCK_FALLBACK === 'true'
+  });
 
   // 1.1 Server-Side Provider Validation & Emergency AI Kill Switch
   const rawProvider = (process.env.VISION_PROVIDER || 'cloudflare').toLowerCase().trim();
