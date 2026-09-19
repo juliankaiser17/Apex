@@ -28,6 +28,8 @@ import type {
 import { hierarchicalClassifier } from '../validation/hierarchicalClassifier';
 import { confidenceEngine } from '../validation/confidenceEngine';
 import { getEstimatedMarketValue } from '../../utils/marketValuation';
+import { resolveCanonicalVehicleSpecs } from '../../utils/vehicleSpecs';
+import { APEX_LOCAL_VEHICLE_DATABASE } from '../../data/vehicleDatabase';
 
 declare const process: any;
 declare const Buffer: any;
@@ -58,7 +60,7 @@ export class CloudflareVisionProvider implements AIProvider {
     this.defaultModel = config?.model || (typeof process !== 'undefined' && process.env?.CLOUDFLARE_MODEL) || this.defaultModel;
     this.seed = config?.seed ?? 42;
     this.temperature = config?.temperature ?? 0.1;
-    this.maxTokens = config?.maxTokens ?? 150;
+    this.maxTokens = config?.maxTokens ?? 384;
     this.timeoutMs = config?.timeoutMs ?? 35000;
   }
 
@@ -291,138 +293,70 @@ export class CloudflareVisionProvider implements AIProvider {
     const encodedImageBytes = typeof Buffer !== 'undefined' ? Buffer.byteLength(fullDataUrl, 'utf8') : fullDataUrl.length;
 
     // ─── APEX EVIDENTIARY VEHICLE PERCEPTION PROMPTS ───
-    // Minimal perception schema yields ~90 tokens and ~20 Neurons vs ~330 tokens and ~51 Neurons for monolithic.
-    const isMonolithic = request.options?.schema === 'monolithic';
+    // ─── APEX EVIDENTIARY VEHICLE PERCEPTION PROMPTS ───
+    // Clean Image-Grounded Prompts (Zero concrete vehicle names, colors, or years)
+    const cleanSystemPrompt = `You are the APEX Automotive Perception Vision Engine.
+Your sole job is rigorous visual perception of the vehicle in the supplied photo following strict evidentiary discipline.
+The supplied photo is your ONLY source of truth.
 
-    const minimalSystemPrompt = `You are the APEX Automotive Perception Vision Engine.
-Your sole job is visual perception of the vehicle in this photo following strict evidentiary discipline.
-You must output ONLY flat valid JSON starting with '{' and ending with '}'.
-Do NOT write any conversational intro, outro, markdown prose, or bullet points.
+CRITICAL INVARIANTS:
+1. NO PROMPT INHERITANCE: Never copy or assume any vehicle make, model, year, body style, or color from instructions or schema placeholders.
+2. OBSERVABLE EVIDENCE ONLY: Every piece of evidence must correspond to directly visible features in the image.
+   If a feature is occluded, out of frame, or ambiguous, leave it null.
+3. HIERARCHICAL IDENTIFICATION:
+   - Identify Make from visible badging, emblem geometry, or unmistakable design language.
+   - Identify Model Family from vehicle architecture, proportions, lighting/grille signatures, and specific design cues.
+   - Ground Model Family strictly in the specific morphological features observed in Pass 1. Do not default to high-volume production models when distinctive prototype styling, horizontal louvers/strakes, headlight eyelid covers, or wraparound visor greenhouse are present.
+   - Variant/Trim MUST be null unless explicit exterior badging or verified package aero is visibly confirmed.
+4. NON-CAR REJECTION:
+   If no passenger motor vehicle is visible (person, pet, building, heavy commercial transit/bus/semi), set "vehicle_present": false, "status": "rejected".
+5. OUTPUT FORMAT: Raw valid JSON only starting with { and ending with }. No markdown, no prose, no conversational text.`;
 
-RULES:
-1. OBSERVABLE EVIDENCE ONLY: Describe only visible features. Occluded or unobservable features MUST be null.
-2. VIEWPOINT: "front", "rear", "side", "front_3q", "rear_3q", "interior", "partial", "multiple_vehicles", or "unknown".
-3. NON-CAR & COMMERCIAL VEHICLE REJECTION:
-   - If not a motor vehicle: set "vehicle_present": false, "status": "rejected", "make": null, "model": null, "generation": null, "variant": null.
-   - If public transit bus, coach, semi-truck, or heavy equipment: set "vehicle_present": false, "status": "rejected", "make": null, "model": null, "generation": null, "variant": null.
-4. HIERARCHICAL IDENTIFICATION:
-   - Identify Make.
-   - Identify Model Family.
-   - Generation: identify chassis/generation code (e.g. XV70, E210, G82) only if verifiable from visible lights/bodywork. Else null.
-   - Variant: ONLY identify exact performance trim/variant if distinct visual proof exists (e.g. badging, verified aero). Else variant MUST be null.
-5. NO HALLUCINATION:
-   - Never invent a trim. Variant must be null unless confirmed.`;
+    const cleanUserPrompt = `Analyze the vehicle in this image following evidentiary discipline.
+Examine morphological details carefully in Pass 1:
+- Greenhouse & windshield curvature (e.g. wraparound visor canopy vs conventional pillars)
+- Headlight structure (e.g. horizontal partial covers/eyelids vs open modern C-shape)
+- Front bumper and intakes (e.g. horizontal strakes/slats vs open mesh)
+- Mirror position (e.g. fender/door tops vs A-pillar base)
+- Hood aerodynamic extractors
 
-    const minimalUserPrompt = `Analyze this vehicle. Return flat JSON:
+In Pass 2, determine the exact model family that corresponds precisely to the observed design cues.
+
+Output flat valid JSON with this exact structure:
 {
   "status": "identified",
   "vehicle_present": true,
   "viewpoint": "front_3q",
-  "make": "Toyota",
-  "model": "Camry",
-  "generation": "XV70",
-  "variant": null,
-  "confidence": 0.90,
-  "body_style": "Sedan",
-  "evidence": ["spindle grille"],
-  "color": "Silver",
-  "year": "2020"
-}
-Rules:
-- status: "identified", "uncertain", or "rejected".
-- variant MUST be null unless badging is confirmed.
-- evidence: maximum 2 concise visual cues.
-Output only the JSON object starting with { and ending with } without any conversational intro, prose, or explanation.`;
-
-    const monolithicSystemPrompt = `You are the APEX Automotive Perception Vision Engine.
-Your sole job is visual perception of the vehicle in this photo following strict evidentiary discipline.
-You must output ONLY raw valid JSON starting with '{' and ending with '}'.
-Do NOT write any conversational intro, outro, markdown prose, or bullet points.
-
-RULES:
-1. OBSERVABLE EVIDENCE ONLY: Describe only visible features. Occluded or unobservable features MUST be null.
-   Never hallucinate rear exhausts from a front photo or front grilles from a rear photo.
-2. VIEWPOINT: "front", "rear", "side", "front_3q", "rear_3q", "interior", "partial", "multiple_vehicles", or "unknown".
-3. NON-CAR & COMMERCIAL VEHICLE REJECTION:
-   - If not a motor vehicle (person, pet, food, screenshot, scenery): set "vehicle_present": false, "status": "rejected", "rejection_reason": "No motor vehicle detected in frame."
-   - If public transit bus, coach, semi-truck, or heavy equipment: set "vehicle_present": false, "status": "rejected", "rejection_reason": "Commercial public transport or heavy vehicle detected; not a consumer passenger automobile."
-4. HIERARCHICAL IDENTIFICATION:
-   - Identify Make.
-   - Identify Model Family.
-   - Identify Generation/Chassis code only if verifiable from visible lights/bodywork.
-   - Variant: ONLY identify exact performance trim/variant if distinct visual proof exists (e.g. verified aero package, badging). Else variant MUST be null.
-5. NO HALLUCINATION / ABSTENTION MANDATE:
-   - If evidence is ambiguous, prefer "status": "uncertain" with model_family identified and variant: null, over guessing.
-   - Never invent a trim. Never substitute an unrelated manufacturer.`;
-
-    const monolithicUserPrompt = `Analyze the vehicle in this image and return a JSON object with this exact structure:
-{
-  "status": "identified",
-  "vehicle_present": true,
-  "rejection_reason": null,
-  "image_quality": {
-    "usable": true,
-    "score": 0.90,
-    "issues": []
+  "pass1_observations": {
+    "body_silhouette": "observable body shape",
+    "dominant_color": "observable dominant exterior color",
+    "lighting_cues": "observable headlight or taillight design",
+    "intake_and_grille_cues": "observable intake or grille design",
+    "distinctive_design_cues": ["observable cue 1", "observable cue 2"]
   },
-  "viewpoint": "front_3q",
-  "visual_evidence": {
-    "body_style": "Sedan",
-    "grille": null,
-    "headlights": null,
-    "taillights": null,
-    "hood": null,
-    "roofline": null,
-    "windows": null,
-    "wheels": null,
-    "exhaust": null,
-    "aero": null,
-    "badges": null,
-    "text": null,
-    "body_proportions": null,
-    "distinctive_details": []
-  },
-  "identification": {
-    "make": "Manufacturer",
-    "model_family": "Model",
-    "generation": "Generation",
-    "variant": null
-  },
-  "confidence": {
-    "make_score": 0.95,
-    "model_score": 0.90,
-    "generation_score": 0.80,
-    "variant_score": 0.30,
-    "overall_score": 0.90
-  },
-  "candidates": [
-    {
-      "name": "Full Name",
-      "score": 0.90,
-      "supporting_evidence": [],
-      "contradictions": [],
-      "unobservable_features": []
-    }
-  ],
-  "contradictions": [],
-  "specificity_level": "model_family",
-  "reason": "Observable evidence reasoning",
-  "privacy_redactions": [],
-  "specs": {
-    "color": "Silver",
-    "year_estimate": "2020",
-    "body_style": "Sedan"
+  "pass2_identification": {
+    "make": "Dominant vehicle manufacturer",
+    "model": "Exact model family name",
+    "generation": null,
+    "variant": null,
+    "confidence": 0.90,
+    "evidence": ["observable cue 1", "observable cue 2"]
   }
 }
-Output only the JSON object starting with { and ending with } without any conversational intro, prose, or explanation.`;
+Rules:
+- status must be "identified", "uncertain", or "rejected".
+- Ground all observations and identity strictly in the provided photograph.
+- NEVER copy placeholder text. Do not invent unobservable features.
+- If not a passenger motor vehicle, set vehicle_present: false, status: "rejected".
+- Output only the JSON object starting with { and ending with } without any markdown prose or explanation.`;
 
-    const systemPrompt = isMonolithic ? monolithicSystemPrompt : minimalSystemPrompt;
-    const userPrompt = isMonolithic ? monolithicUserPrompt : minimalUserPrompt;
+    const systemPrompt = cleanSystemPrompt;
+    const userPrompt = cleanUserPrompt;
 
     const format = request.options?.format || 'messages';
     const stream = request.options?.stream ?? false;
     const effectiveTimeoutMs = request.options?.timeoutMs || this.timeoutMs;
-    const defaultTokensForSchema = isMonolithic ? 512 : this.maxTokens;
+    const defaultTokensForSchema = request.options?.schema === 'monolithic' ? 512 : this.maxTokens;
     const effectiveMaxTokens = request.options?.maxTokens ?? defaultTokensForSchema;
     const effectiveTemperature = request.options?.temperature ?? this.temperature;
     const effectiveSeed = request.options?.seed ?? this.seed;
@@ -549,45 +483,172 @@ Output only the JSON object starting with { and ending with } without any conver
         };
       }
 
-      // Extract viewpoint and visual evidence (supports both minimal flat and legacy nested schemas)
+      // Extract Pass 1 Observations & Pass 2 Identification (support both two-pass and flat schemas)
+      const pass1 = parsed.pass1_observations || parsed.visual_evidence || {};
+      const pass2 = parsed.pass2_identification || parsed.identification || {};
+
       const viewpoint: ViewpointType = parsed.viewpoint || 'unknown';
-      const evidenceList: string[] = Array.isArray(parsed.evidence)
-        ? parsed.evidence
-        : (Array.isArray(parsed.visual_evidence?.distinctive_details) ? parsed.visual_evidence.distinctive_details : []);
+      const pass1Cues = [
+        pass1.lighting_cues,
+        pass1.headlight_and_drl_signature,
+        pass1.intake_and_grille_cues,
+        pass1.front_fascia_and_intakes,
+        pass1.windshield_and_mirrors,
+        pass1.greenhouse_and_roofline,
+        pass1.hood_aerodynamics,
+        pass1.aero_and_bodywork,
+        pass1.grille,
+        pass1.headlights,
+        pass1.taillights,
+        pass1.hood,
+        pass1.roofline,
+        pass1.windows,
+        pass1.wheels,
+        pass1.aero,
+        pass1.badges,
+        pass1.text,
+        ...(Array.isArray(pass1.distinctive_design_cues) ? pass1.distinctive_design_cues : []),
+        ...(Array.isArray(pass1.distinctive_details) ? pass1.distinctive_details : [])
+      ].filter(Boolean);
+
+      const pass2Cues = Array.isArray(pass2.evidence) ? pass2.evidence : [];
+      const evidenceList: string[] = Array.from(new Set([...pass1Cues, ...pass2Cues, ...(Array.isArray(parsed.evidence) ? parsed.evidence : [])]));
 
       const visualEvidence: VisualEvidence = {
-        body_style: parsed.body_style || parsed.visual_evidence?.body_style || null,
-        grille: parsed.visual_evidence?.grille || (evidenceList.find((e: string) => /grille/i.test(e)) ?? null),
-        headlights: parsed.visual_evidence?.headlights || (evidenceList.find((e: string) => /headlight|lamp|drl/i.test(e)) ?? null),
-        taillights: parsed.visual_evidence?.taillights || (evidenceList.find((e: string) => /taillight/i.test(e)) ?? null),
-        hood: parsed.visual_evidence?.hood || null,
-        roofline: parsed.visual_evidence?.roofline || null,
-        windows: parsed.visual_evidence?.windows || null,
-        wheels: parsed.visual_evidence?.wheels || null,
-        exhaust: parsed.visual_evidence?.exhaust || null,
-        aero: parsed.visual_evidence?.aero || (evidenceList.find((e: string) => /spoiler|wing|splitter|diffuser/i.test(e)) ?? null),
-        badges: parsed.visual_evidence?.badges || (evidenceList.find((e: string) => /badge|emblem|roundel/i.test(e)) ?? null),
-        text: parsed.visual_evidence?.text || null,
-        body_proportions: parsed.visual_evidence?.body_proportions || null,
+        body_style: pass1.body_silhouette || parsed.body_style || pass1.body_style || null,
+        grille: pass1.grille || pass1.intake_and_grille_cues || pass1.front_fascia_and_intakes || (evidenceList.find((e: string) => /grille|intake|splitter|strake/i.test(e)) ?? null),
+        headlights: pass1.headlights || pass1.lighting_cues || pass1.headlight_and_drl_signature || (evidenceList.find((e: string) => /headlight|lamp|drl|eyelid/i.test(e)) ?? null),
+        taillights: pass1.taillights || pass1.lighting_cues || (evidenceList.find((e: string) => /taillight/i.test(e)) ?? null),
+        hood: pass1.hood || pass1.hood_aerodynamics || null,
+        roofline: pass1.roofline || pass1.greenhouse_and_roofline || pass1.windshield_and_mirrors || null,
+        windows: pass1.windows || pass1.greenhouse_and_roofline || pass1.windshield_and_mirrors || null,
+        wheels: pass1.wheels || pass1.mirror_and_wheel_cues || pass1.windshield_and_mirrors || null,
+        exhaust: pass1.exhaust || null,
+        aero: pass1.aero || pass1.aero_and_bodywork || (evidenceList.find((e: string) => /spoiler|wing|splitter|diffuser|strake/i.test(e)) ?? null),
+        badges: pass1.badges || pass1.badges_and_text || (evidenceList.find((e: string) => /badge|emblem|roundel|script/i.test(e)) ?? null),
+        text: pass1.text || pass1.badges_and_text || null,
+        body_proportions: pass1.body_proportions || pass1.body_silhouette || null,
         distinctive_details: evidenceList.length > 0 ? evidenceList : null
       };
 
-      let rawMake: string | null = parsed.make || parsed.identification?.make || null;
-      let rawModel: string | null = parsed.model || parsed.identification?.model_family || null;
-      let rawGen: string | null = parsed.generation || parsed.identification?.generation || null;
-      let rawVariant: string | null = parsed.variant || parsed.identification?.variant || null;
+      let rawMake: string | null = pass2.make || parsed.make || parsed.identification?.make || null;
+      let rawModel: string | null = pass2.model || parsed.model || parsed.identification?.model_family || null;
+      let rawGen: string | null = pass2.generation || parsed.generation || parsed.identification?.generation || null;
+      let rawVariant: string | null = pass2.variant || parsed.variant || parsed.identification?.variant || null;
 
-      // Sanitize multi-vehicle string concatenations
+      // Sanitize placeholder token echoes or multi-vehicle concatenations
+      const placeholderTokens = ['observable', 'dominant', 'manufacturer', 'specific model', 'model family', 'chassis', 'performance trim', '<string>'];
+      if (rawMake && placeholderTokens.some(p => rawMake!.toLowerCase().includes(p))) rawMake = null;
+      if (rawModel && placeholderTokens.some(p => rawModel!.toLowerCase().includes(p))) rawModel = null;
       if (rawMake && (rawMake.toLowerCase().includes('multiple') || rawMake.includes(';'))) {
-        rawMake = null;
-        rawModel = null;
-        rawGen = null;
-        rawVariant = null;
+        rawMake = null; rawModel = null; rawGen = null; rawVariant = null;
       }
       if (rawModel && (rawModel.toLowerCase().includes('multiple') || rawModel.includes(';'))) {
-        rawModel = null;
-        rawGen = null;
-        rawVariant = null;
+        rawMake = null; rawModel = null; rawGen = null; rawVariant = null;
+      }
+
+      // Generic Contamination & Contradiction Guard (Constraint 4 & 5)
+      const isSuspicious = (() => {
+        if (!rawMake || !rawModel) return true;
+        const makeL = rawMake.toLowerCase();
+        const modelL = rawModel.toLowerCase();
+        const silhouetteL = (pass1.body_silhouette || parsed.body_style || '').toLowerCase();
+        const evL = evidenceList.join(' ').toLowerCase();
+
+        // 1. Placeholder echo
+        if (placeholderTokens.some(p => makeL.includes(p) || modelL.includes(p))) return true;
+
+        // 2. Extreme silhouette mismatch: low-slung/mid-engine supercar vs commuter sedan
+        const isExoticSilhouette = silhouetteL.includes('supercar') || silhouetteL.includes('hypercar') ||
+                                   silhouetteL.includes('low-slung') || silhouetteL.includes('mid-engine') ||
+                                   silhouetteL.includes('targa') || silhouetteL.includes('spider');
+        const isCommuterFamily = (makeL === 'toyota' && modelL.includes('camry')) ||
+                                 (makeL === 'toyota' && modelL.includes('corolla')) ||
+                                 (makeL === 'honda' && modelL.includes('civic')) ||
+                                 (makeL === 'nissan' && modelL.includes('altima'));
+        if (isExoticSilhouette && isCommuterFamily) return true;
+
+        // 3. Toyota Camry / spindle grille prompt-copying artifact
+        if (makeL === 'toyota' && modelL.includes('camry') && evL.includes('spindle grille')) {
+          return true;
+        }
+
+        // 4. Spindle grille on non-Lexus / non-Toyota
+        if (evL.includes('spindle grille') && !makeL.includes('lexus') && !makeL.includes('toyota')) return true;
+
+        return false;
+      })();
+
+      // Optional Independent Clean Verification Pass (Max 1 additional request, no candidate anchoring)
+      if (isSuspicious) {
+        console.warn('[CloudflareVisionProvider] Suspicious classification or contradiction detected. Invoking clean independent verification pass...');
+        try {
+          const verifyPrompt = `Inspect the focal vehicle in this photo with independent forensic scrutiny.
+Base your answer exclusively on the visible features in this image.
+Output flat valid JSON only:
+{
+  "vehicle_present": true,
+  "status": "identified",
+  "body_style": "observable body style",
+  "dominant_color": "observable dominant exterior paint color",
+  "make": "Dominant vehicle manufacturer identified from visible emblem, badging, or design language",
+  "model": "Specific model family name identified from visible bodywork",
+  "generation": null,
+  "variant": null,
+  "confidence": 0.88,
+  "evidence": ["observable cue 1", "observable cue 2"]
+}
+Rules:
+- Do not copy placeholder text.
+- Ground make and model in observable headlights, badges, grille, and silhouette.
+- Output only JSON starting with { and ending with }.`;
+
+          const verifyParams: any = {
+            accountId,
+            token,
+            model,
+            imageDataUrl: fullDataUrl,
+            timeoutMs: effectiveTimeoutMs,
+            temperature: 0.1,
+            seed: 42,
+            maxTokens: effectiveMaxTokens,
+            stream: false
+          };
+
+          if (format === 'inst') {
+            verifyParams.prompt = `[INST] <<SYS>>\n${cleanSystemPrompt}\n<</SYS>>\n\n${verifyPrompt} [/INST]`;
+          } else {
+            verifyParams.messages = [
+              { role: 'system', content: cleanSystemPrompt },
+              { role: 'user', content: verifyPrompt }
+            ];
+          }
+
+          const verifyResult = await this.executeCloudflareRequest(verifyParams);
+          let verifyJson = verifyResult.json;
+          if (verifyJson && typeof verifyJson.response === 'object' && verifyJson.response !== null) {
+            verifyJson = verifyJson.response;
+          }
+
+          if (verifyJson && verifyJson.make && verifyJson.model && !placeholderTokens.some(p => verifyJson.make.toLowerCase().includes(p))) {
+            console.log('[CloudflareVisionProvider] Independent verification resolved:', verifyJson.make, verifyJson.model);
+            rawMake = verifyJson.make;
+            rawModel = verifyJson.model;
+            rawGen = verifyJson.generation || null;
+            rawVariant = verifyJson.variant || null;
+            if (Array.isArray(verifyJson.evidence) && verifyJson.evidence.length > 0) {
+              evidenceList.length = 0;
+              evidenceList.push(...verifyJson.evidence);
+              visualEvidence.distinctive_details = evidenceList;
+            }
+          }
+        } catch (verifyErr: any) {
+          console.warn('[CloudflareVisionProvider] Verification pass skipped or non-fatal:', verifyErr?.message);
+        }
+      }
+
+      if (rawMake && rawModel && rawModel.toLowerCase().startsWith(rawMake.toLowerCase() + ' ')) {
+        rawModel = rawModel.slice(rawMake.length + 1).trim();
       }
 
       let rawCandidates: CandidateComparison[] = [];
@@ -600,10 +661,12 @@ Output only the JSON object starting with { and ending with } without any conver
           unobservable_features: Array.isArray(c.unobservable_features) ? c.unobservable_features : []
         }));
       } else if (rawMake && rawModel) {
-        const candidateName = [rawMake, rawModel, rawGen, rawVariant].filter(Boolean).join(' ');
-        const candidateScore = typeof parsed.confidence === 'number'
-          ? parsed.confidence
-          : (parsed.confidence?.overall_score || 0.90);
+        const candidateName = rawGen
+          ? `${rawMake} ${rawModel} (${rawGen})`
+          : `${rawMake} ${rawModel}`;
+        const candidateScore = typeof pass2.confidence === 'number'
+          ? pass2.confidence
+          : (typeof parsed.confidence === 'number' ? parsed.confidence : 0.88);
         rawCandidates = [
           {
             name: candidateName,
@@ -613,6 +676,22 @@ Output only the JSON object starting with { and ending with } without any conver
             unobservable_features: []
           }
         ];
+
+        // Seed peer models for the verified manufacturer from canonical database for contradiction cross-examination
+        const normMake = rawMake.toLowerCase();
+        const peerVehicles = APEX_LOCAL_VEHICLE_DATABASE.filter(v => v.manufacturer.toLowerCase() === normMake);
+        for (const peer of peerVehicles) {
+          const peerName = `${peer.manufacturer} ${peer.model}`;
+          if (!rawCandidates.some(c => c.name.toLowerCase() === peerName.toLowerCase())) {
+            rawCandidates.push({
+              name: peerName,
+              score: 0.50,
+              supporting_evidence: [],
+              contradictions: [],
+              unobservable_features: []
+            });
+          }
+        }
       }
 
       // Hierarchical Classification & Contradiction Filter
@@ -645,6 +724,22 @@ Output only the JSON object starting with { and ending with } without any conver
         has_vehicle: true
       });
       const deterministicValidationMs = Date.now() - valStart;
+
+      // Resolve Grounded Engineering Specifications (Constraint 7 & 8: Never Fabricate!)
+      let finalMake = classResult.identification.make || rawMake || 'Unknown Make';
+      let finalModel = classResult.identification.model_family || rawModel || 'Unknown Model';
+      if (finalMake && finalModel && finalModel.toLowerCase().startsWith(finalMake.toLowerCase() + ' ')) {
+        finalModel = finalModel.slice(finalMake.length + 1).trim();
+      }
+      const finalGen = classResult.identification.generation || rawGen || undefined;
+      const finalVariant = classResult.identification.variant || rawVariant || undefined;
+
+      const specResolution = resolveCanonicalVehicleSpecs({
+        make: finalMake,
+        model: finalModel,
+        generation: finalGen,
+        trim: finalVariant
+      });
 
       // Immutable Upstream Evidence Object
       const upstreamEvidence: ImmutableUpstreamEvidence = Object.freeze({
@@ -692,11 +787,11 @@ Output only the JSON object starting with { and ending with } without any conver
 
       const openCanonicalIdentity: OpenCanonicalIdentity = {
         canonicalId,
-        make: classResult.identification.make || 'Unknown Make',
-        modelFamily: classResult.identification.model_family || 'Unknown Model',
-        generation: classResult.identification.generation,
-        variant: classResult.identification.variant,
-        registryStatus: 'VERIFIED_UNREGISTERED',
+        make: finalMake,
+        modelFamily: finalModel,
+        generation: finalGen,
+        variant: finalVariant,
+        registryStatus: specResolution.isVerified ? 'REGISTERED' : 'VERIFIED_UNREGISTERED',
         source: 'ensemble',
         specs: parsed.specs
       };
@@ -726,40 +821,36 @@ Output only the JSON object starting with { and ending with } without any conver
         canonical_identity: openCanonicalIdentity
       };
 
-      // Construct compatible ModelIdentificationOutput
-      const specs = parsed.specs || {
-        color: parsed.color || 'Silver',
-        year_estimate: parsed.year || '2020',
-        body_style: parsed.body_style || 'Sedan'
-      };
       const valuation = getEstimatedMarketValue({
-        make: classResult.identification.make,
-        model: classResult.identification.model_family,
-        rarity: specs.rarity,
-        marketValueLowUsd: specs.market_value_low_usd,
-        marketValueHighUsd: specs.market_value_high_usd
+        make: finalMake,
+        model: finalModel,
+        rarity: specResolution.rarity,
+        marketValueLowUsd: parsed.specs?.market_value_low_usd,
+        marketValueHighUsd: parsed.specs?.market_value_high_usd
       });
 
       const output: ModelIdentificationOutput = {
-        vehicleId: null,
-        make: classResult.identification.make || 'Unknown Make',
-        model: classResult.identification.model_family || 'Unknown Model',
-        generation: classResult.identification.generation || 'Current',
-        trim: classResult.identification.variant || null,
-        yearEstimate: String(specs.year_estimate || '2023'),
-        color: specs.color || 'Silver',
-        rarity: specs.rarity || 'rare',
-        engine: specs.engine || 'Standard Engine',
-        horsepower: Number(specs.horsepower) || 300,
-        torqueNm: Number(specs.torque_nm) || 400,
-        topSpeedKmH: Number(specs.top_speed_kmh) || 250,
-        zeroToHundredSec: Number(specs.zero_to_hundred_seconds) || 4.5,
-        kerbWeightKg: Number(specs.kerb_weight_kg) || 1500,
-        productionYears: specs.production_years || '2020–Present',
-        originCountry: specs.origin_country || 'Global',
-        bodyStyle: specs.body_style || 'Coupe',
-        historicalInformation: specs.historical_information || classResult.reason,
-        interestingFacts: specs.interesting_facts || 'Engineered with precision.',
+        vehicleId: specResolution.canonicalId || null,
+        make: finalMake,
+        model: finalModel,
+        generation: finalGen || specResolution.generation || 'Current',
+        trim: finalVariant || null,
+        yearEstimate: specResolution.productionYears && specResolution.productionYears !== 'N/A'
+          ? specResolution.productionYears.split('–')[0]
+          : String(parsed.year || '2023'),
+        color: pass1.dominant_color || parsed.color || 'Unknown',
+        rarity: specResolution.rarity || 'rare',
+        engine: specResolution.engine || 'Standard Engine',
+        horsepower: specResolution.horsepower ?? 0,
+        torqueNm: specResolution.torqueNm ?? 0,
+        topSpeedKmH: specResolution.topSpeedKmH ?? 0,
+        zeroToHundredSec: specResolution.zeroToHundredSec ?? 0,
+        kerbWeightKg: specResolution.kerbWeightKg ?? 0,
+        productionYears: specResolution.productionYears || 'N/A',
+        originCountry: specResolution.originCountry || 'Global',
+        bodyStyle: (specResolution.bodyStyle as any) || (visualEvidence.body_style as any) || 'Coupe',
+        historicalInformation: specResolution.briefHistory || classResult.reason,
+        interestingFacts: specResolution.interestingFact || 'Engineered with precision.',
         aftermarketPartsDetected: [],
         modelConfidence: calibConf.confidence.overall_score,
         marketValueLowUsd: valuation.lowUsd,
@@ -1036,7 +1127,17 @@ Output only the JSON object starting with { and ending with } without any conver
       try {
         parsedOutput = JSON.parse(jsonCandidate);
       } catch (parseErr: any) {
-        throw new Error(`Cloudflare response could not be parsed as JSON: ${parseErr.message}. Raw: ${rawText.slice(0, 300)}`);
+        let recovered = false;
+        for (const suffix of ['}', '}}', '"}}', 'null}}', ']}', '"]}}']) {
+          try {
+            parsedOutput = JSON.parse(jsonCandidate + suffix);
+            recovered = true;
+            break;
+          } catch {}
+        }
+        if (!recovered) {
+          throw new Error(`Cloudflare response could not be parsed as JSON: ${parseErr.message}. Raw: ${rawText.slice(0, 300)}`);
+        }
       }
 
       const finalPromptTokens = promptTokens || (Math.round((params.prompt || JSON.stringify(params.messages) || '').length / 4) + 6400);

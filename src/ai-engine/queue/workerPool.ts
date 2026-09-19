@@ -13,7 +13,7 @@ import { hardNegativesEngine } from '../canonical/hardNegativesRegistry';
 import { aiProviderRouter } from '../providers/providerRouter';
 import { deterministicValidator } from '../validation/deterministicValidator';
 import { confidenceEngine } from '../validation/confidenceEngine';
-import { identificationCache } from '../caching/identificationCache';
+import { identificationCache, buildCacheKey } from '../caching/identificationCache';
 import { tracer } from '../observability/tracer';
 
 export class WorkerPool {
@@ -102,7 +102,7 @@ export class WorkerPool {
           latency: Date.now() - startTime,
           status: 'completed',
           cache_hit: true,
-          cache_key: job.imageHash,
+          cache_key: buildCacheKey(job.imageHash),
           retry_count: Math.max(0, job.attempts - 1),
           error_code: null,
           fallback_used: false,
@@ -371,7 +371,12 @@ export class WorkerPool {
 
       // ─── STAGE 7: CACHE & FINALIZE ───
       if (confidence.isConfident && validationReport.isValid) {
-        identificationCache.setResult(job.imageHash, finalResult);
+        identificationCache.setResult(
+          job.imageHash,
+          finalResult,
+          aiResponse.providerName || 'CloudflareVisionProvider',
+          aiResponse.modelUsed || '@cf/meta/llama-3.2-11b-vision-instruct'
+        );
       }
 
       tracer.recordScanTrace({
@@ -387,7 +392,7 @@ export class WorkerPool {
         latency: Date.now() - startTime,
         status: finalStatus,
         cache_hit: false,
-        cache_key: job.imageHash,
+        cache_key: buildCacheKey(job.imageHash, aiResponse.providerName, aiResponse.modelUsed),
         retry_count: aiResponse.retriesAttempted ?? 0,
         error_code: null,
         fallback_used: Boolean(aiResponse.fallbackUsed),

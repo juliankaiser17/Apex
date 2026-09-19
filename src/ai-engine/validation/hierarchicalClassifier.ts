@@ -295,6 +295,21 @@ export class HierarchicalClassifier {
         }
       }
 
+      // ── CONTRADICTION ENGINE RULE E: FERRARI MODEL-FAMILY DISAMBIGUATION ──
+      // Distinctive Icona / Prototype design language (horizontal strakes, headlight eyelids, wraparound visor)
+      const hasDaytonaIconaCues = 
+        /\b(horizontal\s+strakes?|strakes?|horizontal\s+slats?|eyelids?|partial\s+covers?|wraparound\s+visor|visor\s+canopy|fender-mounted\s+mirrors?|door\s+tops?\s+mirrors?|icona)\b/i.test(evidenceText);
+
+      if (hasDaytonaIconaCues) {
+        if (candNameLower.includes('daytona') || candNameLower.includes('sp3')) {
+          candSupporting.push('Observed horizontal strakes, headlight eyelids, and wraparound visor canopy uniquely match Ferrari Daytona SP3 Icona design');
+          score += 0.20;
+        } else if (candidateMake === 'ferrari' && (candNameLower.includes('sf90') || candNameLower.includes('296') || candNameLower.includes('f8') || candNameLower.includes('roma') || candNameLower.includes('portofino') || candNameLower.includes('488'))) {
+          candContradictions.push(`Observed horizontal strakes, headlight eyelids, and wraparound canopy contradict ${candidate.name} architecture`);
+          score -= 0.40;
+        }
+      }
+
       const boundedScore = Math.max(0.01, Math.min(0.99, Number(score.toFixed(3))));
 
       return {
@@ -357,11 +372,38 @@ export class HierarchicalClassifier {
       specificity = 'make';
       reason = 'Severe architectural contradiction detected: observed visual cues directly contradict proposed candidates.';
     } else if (topCandidate && topCandidate.score >= 0.50) {
-      // Clean make & model from top candidate if available
-      const parts = topCandidate.name.split(' ');
-      if (!resolvedMake && parts.length > 0) resolvedMake = parts[0];
-      if (!resolvedModelFamily && parts.length > 1) {
-        resolvedModelFamily = parts.slice(1).join(' ').replace(/\s*\([^)]*\)/g, '').trim();
+      // 1. Maintain or set resolvedMake
+      if (!resolvedMake) {
+        const parts = topCandidate.name.split(' ');
+        if (parts.length > 0) resolvedMake = parts[0];
+      }
+
+      // 2. Derive resolvedModelFamily from topCandidate if candidate belongs to the same manufacturer
+      const candLower = topCandidate.name.toLowerCase();
+      const currentMakeLower = (resolvedMake || '').toLowerCase();
+      const currentModelLower = (resolvedModelFamily || '').toLowerCase();
+
+      // Only re-derive model family if current model family is empty or contradicted/different from winning candidate
+      const modelAlreadyMatches = Boolean(currentModelLower && candLower.includes(currentModelLower));
+
+      if (!modelAlreadyMatches) {
+        if (resolvedMake && candLower.startsWith(currentMakeLower + ' ')) {
+          resolvedModelFamily = topCandidate.name
+            .slice(resolvedMake.length + 1)
+            .replace(/\s*\([^)]*\)/g, '')
+            .trim();
+        } else if (resolvedMake === 'Mercedes-Benz' && candLower.startsWith('mercedes-amg ')) {
+          // Handle Mercedes-AMG sub-brand while keeping canonical make intact
+          resolvedModelFamily = topCandidate.name
+            .slice('mercedes-amg '.length)
+            .replace(/\s*\([^)]*\)/g, '')
+            .trim();
+        } else if (!resolvedModelFamily) {
+          const parts = topCandidate.name.split(' ');
+          if (parts.length > 1) {
+            resolvedModelFamily = parts.slice(1).join(' ').replace(/\s*\([^)]*\)/g, '').trim();
+          }
+        }
       }
 
       specificity = 'model_family';

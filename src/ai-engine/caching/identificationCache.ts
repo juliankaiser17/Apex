@@ -6,6 +6,19 @@
 
 import type { IdentificationResult } from '../types';
 
+export const VISION_PIPELINE_VERSION = 'v2.6.0-clean-forensics';
+
+export function buildCacheKey(
+  imageHash: string,
+  provider: string = 'cloudflare',
+  model: string = '@cf/meta/llama-3.2-11b-vision-instruct'
+): string {
+  const cleanHash = (imageHash || '').toLowerCase().trim();
+  const cleanProvider = (provider || 'cloudflare').toLowerCase().trim();
+  const cleanModel = (model || '@cf/meta/llama-3.2-11b-vision-instruct').toLowerCase().trim();
+  return `vision:${VISION_PIPELINE_VERSION}:${cleanProvider}:${cleanModel}:${cleanHash}`;
+}
+
 export class IdentificationCache {
   private resultCache: Map<string, { result: IdentificationResult; expiresAt: number }> = new Map();
   private candidateCache: Map<string, { candidates: any[]; expiresAt: number }> = new Map();
@@ -15,60 +28,79 @@ export class IdentificationCache {
   private missCount: number = 0;
 
   /**
-   * Validate that the hash is an authentic 64-character lowercase hexadecimal SHA-256 digest
+   * Resolve an authoritative namespaced cache key.
+   * Enforces: vision:<pipelineVersion>:<provider>:<model>:<sha256>
    */
-  private isValidHash(imageHash: string): boolean {
-    if (!imageHash || typeof imageHash !== 'string') return false;
-    return /^[0-9a-f]{64}$/i.test(imageHash);
+  private resolveKey(keyOrHash: string, provider?: string, model?: string): string | null {
+    if (!keyOrHash || typeof keyOrHash !== 'string') return null;
+    if (keyOrHash.startsWith(`vision:${VISION_PIPELINE_VERSION}:`)) {
+      return keyOrHash;
+    }
+    // If raw SHA-256 hash or legacy key, construct canonical namespaced key
+    const rawHash = keyOrHash.includes(':') ? keyOrHash.split(':').pop()! : keyOrHash;
+    if (!/^[0-9a-f]{64}$/i.test(rawHash)) {
+      return null;
+    }
+    return buildCacheKey(rawHash, provider, model);
   }
 
-  public getResult(imageHash: string): IdentificationResult | null {
-    if (!this.isValidHash(imageHash)) {
+  public getResult(keyOrHash: string, provider?: string, model?: string): IdentificationResult | null {
+    const key = this.resolveKey(keyOrHash, provider, model);
+    if (!key) {
       this.missCount += 1;
       return null;
     }
 
-    const entry = this.resultCache.get(imageHash);
+    const entry = this.resultCache.get(key);
 
     if (entry) {
       if (Date.now() < entry.expiresAt) {
-        this.hitCount += 1;
-        // Return structured clone to prevent object reference leakage between scans
-        return {
-          ...JSON.parse(JSON.stringify(entry.result)),
-          cached: true
-        };
+        // Enforce strict version equality
+        if (entry.result.pipelineVersion === VISION_PIPELINE_VERSION) {
+          this.hitCount += 1;
+          return {
+            ...JSON.parse(JSON.stringify(entry.result)),
+            cached: true
+          };
+        }
       }
-      this.resultCache.delete(imageHash);
+      this.resultCache.delete(key);
     }
 
     this.missCount += 1;
     return null;
   }
 
-  public setResult(imageHash: string, result: IdentificationResult) {
-    if (!this.isValidHash(imageHash) || !result) return;
+  public setResult(keyOrHash: string, result: IdentificationResult, provider?: string, model?: string) {
+    const key = this.resolveKey(keyOrHash, provider, model);
+    if (!key || !result) return;
     
+    // Stamp pipelineVersion on result
+    result.pipelineVersion = VISION_PIPELINE_VERSION;
+
     // Store deep clone to guarantee cache immutability
-    this.resultCache.set(imageHash, {
+    this.resultCache.set(key, {
       result: JSON.parse(JSON.stringify(result)),
       expiresAt: Date.now() + this.ttlMs
     });
   }
 
-  public has(imageHash: string): boolean {
-    if (!this.isValidHash(imageHash)) return false;
-    const entry = this.resultCache.get(imageHash);
+  public has(keyOrHash: string, provider?: string, model?: string): boolean {
+    const key = this.resolveKey(keyOrHash, provider, model);
+    if (!key) return false;
+    const entry = this.resultCache.get(key);
     if (!entry) return false;
-    if (Date.now() >= entry.expiresAt) {
-      this.resultCache.delete(imageHash);
+    if (Date.now() >= entry.expiresAt || entry.result.pipelineVersion !== VISION_PIPELINE_VERSION) {
+      this.resultCache.delete(key);
       return false;
     }
     return true;
   }
 
-  public delete(imageHash: string): boolean {
-    return this.resultCache.delete(imageHash);
+  public delete(keyOrHash: string, provider?: string, model?: string): boolean {
+    const key = this.resolveKey(keyOrHash, provider, model);
+    if (!key) return false;
+    return this.resultCache.delete(key);
   }
 
   public getStats(): { hitCount: number; missCount: number; hitRatio: number; size: number } {

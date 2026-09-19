@@ -17,6 +17,7 @@ import { ProgressiveAnalysisOverlay } from './ProgressiveAnalysisOverlay';
 import { DiscoveryReveal } from './DiscoveryReveal';
 import { computeImageSha256 } from '../../ai-engine/crypto/sha256';
 import { getEstimatedMarketValue } from '../../utils/marketValuation';
+import { resolveCanonicalVehicleSpecs } from '../../utils/vehicleSpecs';
 
 export const ScannerModal: React.FC = () => {
   const { scannerOpen, setScannerOpen, user } = useApexStore();
@@ -384,7 +385,10 @@ export const ScannerModal: React.FC = () => {
 
       // 3. Bind to resolved vehicle specifications
       const make = aiResult?.make || 'Unknown Make';
-      const model = aiResult?.model || 'Unknown Model';
+      let model = aiResult?.model || 'Unknown Model';
+      if (make && model && model.toLowerCase().startsWith(make.toLowerCase() + ' ')) {
+        model = model.slice(make.length + 1).trim();
+      }
 
       // Guard: Reject non-vehicles or obscure scans resulting in unknown make & model
       const isMakeUnknown = !make || make.trim() === '' || make.toLowerCase().includes('unknown');
@@ -402,22 +406,33 @@ export const ScannerModal: React.FC = () => {
         return;
       }
 
-      const generation = aiResult?.generation || 'Current';
-      const trim = aiResult?.trim || undefined;
-      const horsepower = aiResult?.horsepower || 300;
-      const topSpeed = aiResult?.top_speed_kmh || 250;
-      const engine = aiResult?.engine || 'High-Output Engine';
-      const zeroToHundred = aiResult?.zero_to_hundred_seconds || 4.2;
-      const productionYears = aiResult?.production_years || '2023';
-      const originCountry = aiResult?.origin_country || 'Global';
-      const bodyStyle = aiResult?.body_style || 'Coupe';
-      const color = aiResult?.color || 'Silver';
+      const specResolution = resolveCanonicalVehicleSpecs({
+        make,
+        model,
+        generation: aiResult?.generation,
+        trim: aiResult?.trim
+      });
+
+      const generation = specResolution.generation || aiResult?.generation || 'Current';
+      const trim = specResolution.trim || aiResult?.trim || undefined;
+      const horsepower = specResolution.horsepower ?? (aiResult?.horsepower || undefined);
+      const topSpeed = specResolution.topSpeedKmH ?? (aiResult?.top_speed_kmh || undefined);
+      const engine = specResolution.engine || aiResult?.engine || (specResolution.isVerified ? 'Verified Engine' : 'Uncatalogued');
+      const zeroToHundred = specResolution.zeroToHundredSec ?? (aiResult?.zero_to_hundred_seconds || undefined);
+      const torqueNm = specResolution.torqueNm ?? (aiResult?.torque_nm || undefined);
+      const kerbWeightKg = specResolution.kerbWeightKg ?? (aiResult?.kerb_weight_kg || undefined);
+      const productionYears = specResolution.productionYears !== 'N/A' ? specResolution.productionYears : (aiResult?.production_years || 'N/A');
+      const originCountry = specResolution.originCountry !== 'Global' ? specResolution.originCountry : (aiResult?.origin_country || 'Global');
+      const bodyStyle = specResolution.bodyStyle || aiResult?.body_style || 'Coupe';
+      const color = aiResult?.color || 'Unknown';
 
       onAnalysisStageResolved(0, 'Framing & Viewpoint Confirmed');
 
       const featuresSummary = aiResult?.visual_evidence?.grille 
         ? `${aiResult.visual_evidence.grille.slice(0, 32)}…`
-        : `${horsepower} HP • ${bodyStyle} Silhouette`;
+        : horsepower
+        ? `${horsepower} HP • ${bodyStyle} Silhouette`
+        : `${bodyStyle} Silhouette`;
       onAnalysisStageResolved(1, featuresSummary);
 
       onAnalysisStageResolved(2, `${make} ${model} Confirmed`);
@@ -434,10 +449,10 @@ export const ScannerModal: React.FC = () => {
       const userLng = user.longitude || 139.6503;
       const offset = applySpatialOffset(userLat, userLng);
 
-      const canonicalVehicleId = (aiResult?.canonical_vehicle_id || `${make}-${model}`)
+      const canonicalVehicleId = (aiResult?.canonical_vehicle_id || specResolution.canonicalId || `${make}-${model}`)
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, '-');
-      const globalRarityTier: RarityTier = (aiResult?.rarity || 'legendary') as RarityTier;
+      const globalRarityTier: RarityTier = (specResolution.rarity || aiResult?.rarity || 'rare') as RarityTier;
 
       const cachedCalc = localRarityCache.get(canonicalVehicleId, locationSample.geoBucket || 'global');
       const localCalc = cachedCalc || calculateLocalRarity({
@@ -479,8 +494,12 @@ export const ScannerModal: React.FC = () => {
         model,
         generation,
         trim,
-        yearEstimate: String(aiResult?.year_estimate || 2023),
-        releasedYear: String(aiResult?.year_estimate || 2023),
+        yearEstimate: specResolution.productionYears && specResolution.productionYears !== 'N/A'
+          ? specResolution.productionYears.split('–')[0]
+          : String(aiResult?.year_estimate || 2023),
+        releasedYear: specResolution.productionYears && specResolution.productionYears !== 'N/A'
+          ? specResolution.productionYears.split('–')[0]
+          : String(aiResult?.year_estimate || 2023),
         productionYears,
         discontinuedStatus: productionYears.includes('Present') ? 'ACTIVE PRODUCTION' : 'DISCONTINUED',
         color,
@@ -491,11 +510,11 @@ export const ScannerModal: React.FC = () => {
         horsepower,
         engine,
         zeroToHundredSec: zeroToHundred,
-        torqueNm: aiResult?.torque_nm || 465,
-        kerbWeightKg: aiResult?.kerb_weight_kg || 1450,
+        torqueNm,
+        kerbWeightKg,
         originCountry,
-        interestingFact: aiResult?.interesting_facts || 'Engineered for precision performance.',
-        briefHistory: aiResult?.brief_history || 'Iconic sports car heritage.',
+        interestingFact: specResolution.interestingFact || aiResult?.interesting_facts || 'Engineered with precision.',
+        briefHistory: specResolution.briefHistory || aiResult?.brief_history || `${make} ${model}`,
         modsDetected: aiResult?.mods_detected || [],
         imageUrl: photoDataUrl,
         imageHash,
@@ -521,6 +540,16 @@ export const ScannerModal: React.FC = () => {
       };
       (newCard as any).geoBucket = locationSample.geoBucket;
       (newCard as any).canonicalVehicleId = canonicalVehicleId;
+
+      if (import.meta.env.DEV) {
+        console.log('[Apex Diagnostic Log] Scan Pipeline:', {
+          requestId: currentScanId,
+          traceId: aiResult?.trace_id || 'none',
+          canonicalId: canonicalVehicleId,
+          imageAssetId: imageHash,
+          renderedCanonicalId: (newCard as any).canonicalVehicleId
+        });
+      }
 
       onAnalysisStageResolved(4, `Certainty: ${(newCard.identificationStatus || 'identified').toUpperCase()}`);
       onIdentificationSuccess(newCard, false);

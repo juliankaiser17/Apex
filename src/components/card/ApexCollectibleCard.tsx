@@ -9,7 +9,7 @@ interface ApexCollectibleCardProps {
   className?: string;
   onClick?: () => void;
   showHolo?: boolean;
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'sm' | 'md' | 'lg' | 'full';
   interactive3D?: boolean;
   showSpecs?: boolean;
   showHolographic?: boolean;
@@ -34,6 +34,7 @@ export const ApexCollectibleCard: React.FC<ApexCollectibleCardProps> = React.mem
   className = '',
   onClick,
   size = 'md',
+  showSpecs = true,
 }) => {
   const rarityConf = RARITY_CONFIG[card.rarity] || RARITY_CONFIG.rare;
 
@@ -69,7 +70,7 @@ export const ApexCollectibleCard: React.FC<ApexCollectibleCardProps> = React.mem
     weightPct: Math.min(100, Math.max(15, ((2200 - Math.min(2200, weightNum)) / 1400) * 100)),
   }), [topSpeedNum, hpNum, zeroToHundredNum, torqueNum, weightNum]);
 
-  const widthClass = size === 'sm' ? 'w-[280px]' : size === 'lg' ? 'w-[360px]' : 'w-[325px]';
+  const widthClass = size === 'sm' ? 'w-[280px]' : size === 'lg' ? 'w-[360px]' : size === 'full' ? 'w-full' : 'w-full max-w-[350px]';
   const optimizedUrl = getOptimizedImageUrl(card.imageUrl, 'card');
   const isCustomFoil = Boolean(card.customFoil);
 
@@ -135,88 +136,90 @@ export const ApexCollectibleCard: React.FC<ApexCollectibleCardProps> = React.mem
       </div>
 
       {/* 3. LOWER SPECIFICATIONS & TELEMETRY SECTION */}
-      <div className="p-4 bg-[#121212] flex flex-col space-y-2.5">
-        {/* 5 Minimalist Progress Stat Rows */}
-        <div className="space-y-2 pt-1">
-          {/* Top Speed */}
-          <div className="flex items-center justify-between text-xs">
-            <span className="w-16 text-white/50 font-medium">Top Speed</span>
-            <div className="flex-1 mx-3 h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
-              <div 
-                style={{ width: `${speedPct}%` }}
-                className="h-full bg-white/90 rounded-full transition-all duration-500"
-              />
+      {showSpecs && (
+        <div className="p-4 bg-[#121212] flex flex-col space-y-2.5">
+          {/* 5 Minimalist Progress Stat Rows */}
+          <div className="space-y-2 pt-1">
+            {/* Top Speed */}
+            <div className="flex items-center justify-between text-xs">
+              <span className="w-16 text-white/50 font-medium">Top Speed</span>
+              <div className="flex-1 mx-3 h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
+                <div 
+                  style={{ width: `${speedPct}%` }}
+                  className="h-full bg-white/90 rounded-full transition-all duration-500"
+                />
+              </div>
+              <span className="w-14 text-right font-data font-semibold text-white">
+                {topSpeedNum} <span className="text-[10px] text-white/50 font-normal">km/h</span>
+              </span>
             </div>
-            <span className="w-14 text-right font-data font-semibold text-white">
-              {topSpeedNum} <span className="text-[10px] text-white/50 font-normal">km/h</span>
-            </span>
+
+            {/* Horsepower */}
+            <div className="flex items-center justify-between text-xs">
+              <span className="w-16 text-white/50 font-medium">Power</span>
+              <div className="flex-1 mx-3 h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
+                <div 
+                  style={{ width: `${hpPct}%` }}
+                  className="h-full bg-[#E50914] rounded-full transition-all duration-500"
+                />
+              </div>
+              <span className="w-14 text-right font-data font-semibold text-white">
+                {hpNum} <span className="text-[10px] text-white/50 font-normal">hp</span>
+              </span>
+            </div>
+
+            {/* Acceleration 0-100 */}
+            <div className="flex items-center justify-between text-xs">
+              <span className="w-16 text-white/50 font-medium">0–100</span>
+              <div className="flex-1 mx-3 h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
+                <div 
+                  style={{ width: `${accelPct}%` }}
+                  className="h-full bg-emerald-500 rounded-full transition-all duration-500"
+                />
+              </div>
+              <span className="w-14 text-right font-data font-semibold text-white">
+                {zeroToHundredNum.toFixed(1)} <span className="text-[10px] text-white/50 font-normal">s</span>
+              </span>
+            </div>
+
+            {/* Torque */}
+            <div className="flex items-center justify-between text-xs">
+              <span className="w-16 text-white/50 font-medium">Torque</span>
+              <div className="flex-1 mx-3 h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
+                <div 
+                  style={{ width: `${torquePct}%` }}
+                  className="h-full bg-amber-500 rounded-full transition-all duration-500"
+                />
+              </div>
+              <span className="w-14 text-right font-data font-semibold text-white">
+                {torqueNum} <span className="text-[10px] text-white/50 font-normal">Nm</span>
+              </span>
+            </div>
+
+            {/* Weight */}
+            <div className="flex items-center justify-between text-xs">
+              <span className="w-16 text-white/50 font-medium">Weight</span>
+              <div className="flex-1 mx-3 h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
+                <div 
+                  style={{ width: `${weightPct}%` }}
+                  className="h-full bg-sky-500 rounded-full transition-all duration-500"
+                />
+              </div>
+              <span className="w-14 text-right font-data font-semibold text-white">
+                {weightNum} <span className="text-[10px] text-white/50 font-normal">kg</span>
+              </span>
+            </div>
           </div>
 
-          {/* Horsepower */}
-          <div className="flex items-center justify-between text-xs">
-            <span className="w-16 text-white/50 font-medium">Power</span>
-            <div className="flex-1 mx-3 h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
-              <div 
-                style={{ width: `${hpPct}%` }}
-                className="h-full bg-[#E50914] rounded-full transition-all duration-500"
-              />
-            </div>
-            <span className="w-14 text-right font-data font-semibold text-white">
-              {hpNum} <span className="text-[10px] text-white/50 font-normal">hp</span>
-            </span>
-          </div>
-
-          {/* Acceleration 0-100 */}
-          <div className="flex items-center justify-between text-xs">
-            <span className="w-16 text-white/50 font-medium">0–100</span>
-            <div className="flex-1 mx-3 h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
-              <div 
-                style={{ width: `${accelPct}%` }}
-                className="h-full bg-emerald-500 rounded-full transition-all duration-500"
-              />
-            </div>
-            <span className="w-14 text-right font-data font-semibold text-white">
-              {zeroToHundredNum.toFixed(1)} <span className="text-[10px] text-white/50 font-normal">s</span>
-            </span>
-          </div>
-
-          {/* Torque */}
-          <div className="flex items-center justify-between text-xs">
-            <span className="w-16 text-white/50 font-medium">Torque</span>
-            <div className="flex-1 mx-3 h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
-              <div 
-                style={{ width: `${torquePct}%` }}
-                className="h-full bg-amber-500 rounded-full transition-all duration-500"
-              />
-            </div>
-            <span className="w-14 text-right font-data font-semibold text-white">
-              {torqueNum} <span className="text-[10px] text-white/50 font-normal">Nm</span>
-            </span>
-          </div>
-
-          {/* Weight */}
-          <div className="flex items-center justify-between text-xs">
-            <span className="w-16 text-white/50 font-medium">Weight</span>
-            <div className="flex-1 mx-3 h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
-              <div 
-                style={{ width: `${weightPct}%` }}
-                className="h-full bg-sky-500 rounded-full transition-all duration-500"
-              />
-            </div>
-            <span className="w-14 text-right font-data font-semibold text-white">
-              {weightNum} <span className="text-[10px] text-white/50 font-normal">kg</span>
+          {/* Market Value Range Bar */}
+          <div className="pt-2 border-t border-white/[0.06] flex items-center justify-between text-xs">
+            <span className="text-white/50 text-[11px]">Est. Market Value</span>
+            <span className="font-data font-bold text-white tracking-wide">
+              {valuation.formattedRange}
             </span>
           </div>
         </div>
-
-        {/* Market Value Range Bar */}
-        <div className="pt-2 border-t border-white/[0.06] flex items-center justify-between text-xs">
-          <span className="text-white/50 text-[11px]">Est. Market Value</span>
-          <span className="font-data font-bold text-white tracking-wide">
-            {valuation.formattedRange}
-          </span>
-        </div>
-      </div>
+      )}
     </div>
   );
 });

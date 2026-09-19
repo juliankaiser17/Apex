@@ -1,6 +1,105 @@
 // src/api/analyze.ts
 import { createClient } from "@supabase/supabase-js";
 
+// src/ai-engine/caching/identificationCache.ts
+var VISION_PIPELINE_VERSION = "v2.6.0-clean-forensics";
+function buildCacheKey(imageHash, provider = "cloudflare", model = "@cf/meta/llama-3.2-11b-vision-instruct") {
+  const cleanHash = (imageHash || "").toLowerCase().trim();
+  const cleanProvider = (provider || "cloudflare").toLowerCase().trim();
+  const cleanModel = (model || "@cf/meta/llama-3.2-11b-vision-instruct").toLowerCase().trim();
+  return `vision:${VISION_PIPELINE_VERSION}:${cleanProvider}:${cleanModel}:${cleanHash}`;
+}
+var IdentificationCache = class {
+  resultCache = /* @__PURE__ */ new Map();
+  candidateCache = /* @__PURE__ */ new Map();
+  ttlMs = 12 * 60 * 60 * 1e3;
+  // 12 hours
+  hitCount = 0;
+  missCount = 0;
+  /**
+   * Resolve an authoritative namespaced cache key.
+   * Enforces: vision:<pipelineVersion>:<provider>:<model>:<sha256>
+   */
+  resolveKey(keyOrHash, provider, model) {
+    if (!keyOrHash || typeof keyOrHash !== "string") return null;
+    if (keyOrHash.startsWith(`vision:${VISION_PIPELINE_VERSION}:`)) {
+      return keyOrHash;
+    }
+    const rawHash = keyOrHash.includes(":") ? keyOrHash.split(":").pop() : keyOrHash;
+    if (!/^[0-9a-f]{64}$/i.test(rawHash)) {
+      return null;
+    }
+    return buildCacheKey(rawHash, provider, model);
+  }
+  getResult(keyOrHash, provider, model) {
+    const key = this.resolveKey(keyOrHash, provider, model);
+    if (!key) {
+      this.missCount += 1;
+      return null;
+    }
+    const entry = this.resultCache.get(key);
+    if (entry) {
+      if (Date.now() < entry.expiresAt) {
+        if (entry.result.pipelineVersion === VISION_PIPELINE_VERSION) {
+          this.hitCount += 1;
+          return {
+            ...JSON.parse(JSON.stringify(entry.result)),
+            cached: true
+          };
+        }
+      }
+      this.resultCache.delete(key);
+    }
+    this.missCount += 1;
+    return null;
+  }
+  setResult(keyOrHash, result, provider, model) {
+    const key = this.resolveKey(keyOrHash, provider, model);
+    if (!key || !result) return;
+    result.pipelineVersion = VISION_PIPELINE_VERSION;
+    this.resultCache.set(key, {
+      result: JSON.parse(JSON.stringify(result)),
+      expiresAt: Date.now() + this.ttlMs
+    });
+  }
+  has(keyOrHash, provider, model) {
+    const key = this.resolveKey(keyOrHash, provider, model);
+    if (!key) return false;
+    const entry = this.resultCache.get(key);
+    if (!entry) return false;
+    if (Date.now() >= entry.expiresAt || entry.result.pipelineVersion !== VISION_PIPELINE_VERSION) {
+      this.resultCache.delete(key);
+      return false;
+    }
+    return true;
+  }
+  delete(keyOrHash, provider, model) {
+    const key = this.resolveKey(keyOrHash, provider, model);
+    if (!key) return false;
+    return this.resultCache.delete(key);
+  }
+  getStats() {
+    const total = this.hitCount + this.missCount;
+    const hitRatio = total > 0 ? Number((this.hitCount / total).toFixed(3)) : 0;
+    return {
+      hitCount: this.hitCount,
+      missCount: this.missCount,
+      hitRatio,
+      size: this.resultCache.size
+    };
+  }
+  /**
+   * Completely flushes all cache entries (used for clean sequential test isolation)
+   */
+  clear() {
+    this.resultCache.clear();
+    this.candidateCache.clear();
+    this.hitCount = 0;
+    this.missCount = 0;
+  }
+};
+var identificationCache = new IdentificationCache();
+
 // src/ai-engine/queue/jobQueue.ts
 var JobQueue = class {
   highQueue = [];
@@ -12,7 +111,7 @@ var JobQueue = class {
   userActiveCount = /* @__PURE__ */ new Map();
   // userId -> active in-flight count
   inFlightImageHashes = /* @__PURE__ */ new Map();
-  // imageHash -> jobId
+  // versionedImageKey -> jobId
   maxQueueCapacity = 25e4;
   maxPerUserConcurrent = 2;
   maxPerUserInFlight = 5;
@@ -20,21 +119,28 @@ var JobQueue = class {
    * Enqueue a new scan job with idempotency and in-flight image deduplication
    */
   enqueue(job) {
+    job.pipelineVersion = VISION_PIPELINE_VERSION;
     if (job.idempotencyKey && this.idempotencyIndex.has(job.idempotencyKey)) {
       const existingJobId = this.idempotencyIndex.get(job.idempotencyKey);
       const existing = this.jobsById.get(existingJobId);
       if (existing) {
-        return {
-          job: existing,
-          isDuplicate: true,
-          queuePosition: this.getQueuePosition(existing.id)
-        };
+        if (existing.pipelineVersion === VISION_PIPELINE_VERSION) {
+          return {
+            job: existing,
+            isDuplicate: true,
+            queuePosition: this.getQueuePosition(existing.id)
+          };
+        } else {
+          this.jobsById.delete(existingJobId);
+          this.idempotencyIndex.delete(job.idempotencyKey);
+        }
       }
     }
-    if (job.imageHash && this.inFlightImageHashes.has(job.imageHash)) {
-      const existingJobId = this.inFlightImageHashes.get(job.imageHash);
+    const versionedImageKey = `${VISION_PIPELINE_VERSION}:${job.imageHash}`;
+    if (job.imageHash && this.inFlightImageHashes.has(versionedImageKey)) {
+      const existingJobId = this.inFlightImageHashes.get(versionedImageKey);
       const existing = this.jobsById.get(existingJobId);
-      if (existing && (existing.status === "queued" || existing.status === "processing" || existing.status === "completed")) {
+      if (existing && existing.pipelineVersion === VISION_PIPELINE_VERSION && (existing.status === "queued" || existing.status === "processing" || existing.status === "completed")) {
         return {
           job: existing,
           isDuplicate: true,
@@ -58,7 +164,7 @@ var JobQueue = class {
       this.idempotencyIndex.set(job.idempotencyKey, job.id);
     }
     if (job.imageHash) {
-      this.inFlightImageHashes.set(job.imageHash, job.id);
+      this.inFlightImageHashes.set(versionedImageKey, job.id);
     }
     if (job.priority === "HIGH") {
       this.highQueue.push(job);
@@ -106,8 +212,14 @@ var JobQueue = class {
       job.completedAt = Date.now();
       const currentActive = this.userActiveCount.get(job.userId) || 1;
       this.userActiveCount.set(job.userId, Math.max(0, currentActive - 1));
-      if (job.imageHash && this.inFlightImageHashes.get(job.imageHash) === jobId) {
-        this.inFlightImageHashes.delete(job.imageHash);
+      if (job.imageHash) {
+        const versionedImageKey = `${VISION_PIPELINE_VERSION}:${job.imageHash}`;
+        if (this.inFlightImageHashes.get(versionedImageKey) === jobId) {
+          this.inFlightImageHashes.delete(versionedImageKey);
+        }
+        if (this.inFlightImageHashes.get(job.imageHash) === jobId) {
+          this.inFlightImageHashes.delete(job.imageHash);
+        }
       }
     }
   }
@@ -494,7 +606,63 @@ var APEX_LOCAL_VEHICLE_DATABASE = [
     baselineRarity: "uncommon",
     visualSignature: { aspectRatio: 2.12, silhouetteClass: "low_slung_coupe", prominentColors: ["Seal Grey", "Carrara White", "Basalt Black", "Midnight Blue"] }
   },
+  {
+    id: "porsche-macan",
+    manufacturer: "Porsche",
+    model: "Macan",
+    generation: "Type 95B",
+    yearStart: 2014,
+    trim: "GTS",
+    bodyStyle: "SUV",
+    engine: "2.9L Twin-Turbo V6",
+    displacementCc: 2894,
+    aspiration: "Twin-Turbo",
+    cylinders: 6,
+    drivetrain: "AWD",
+    transmission: "7-Speed Dual-Clutch (PDK)",
+    horsepower: 434,
+    torqueNm: 550,
+    zeroToHundredSec: 4.3,
+    zeroToSixtyMphSec: 4.1,
+    topSpeedKmH: 272,
+    curbWeightKg: 1960,
+    fuelType: "Gasoline",
+    productionYears: "2014\u2013Present",
+    originCountry: "Germany",
+    notableFacts: "Compact luxury performance crossover blending sports car dynamics with everyday utility, featuring Porsche active all-wheel drive.",
+    baselineRarity: "rare",
+    visualSignature: { aspectRatio: 1.75, silhouetteClass: "high_rider_suv", prominentColors: ["Miami Blue", "Volcano Grey Metallic", "Carrara White", "Night Blue Metallic"] }
+  },
   // --- FERRARI ---
+  {
+    id: "ferrari-daytona-sp3",
+    manufacturer: "Ferrari",
+    model: "Daytona SP3",
+    generation: "Icona",
+    yearStart: 2022,
+    yearEnd: 2024,
+    trim: "Icona Series",
+    bodyStyle: "Targa",
+    engine: "6.5L Naturally Aspirated V12 (F140HC)",
+    displacementCc: 6496,
+    aspiration: "Naturally Aspirated",
+    cylinders: 12,
+    drivetrain: "RWD",
+    transmission: "7-Speed Dual-Clutch (F1)",
+    horsepower: 829,
+    torqueNm: 697,
+    zeroToHundredSec: 2.85,
+    zeroToSixtyMphSec: 2.7,
+    topSpeedKmH: 340,
+    curbWeightKg: 1485,
+    fuelType: "Gasoline",
+    productionYears: "2022\u20132024",
+    productionCount: 599,
+    originCountry: "Italy",
+    notableFacts: "Limited-edition Icona series hypercar inspired by the 1967 24 Hours of Daytona 330 P4 prototype with distinctive horizontal rear strakes and fender-mounted mirrors.",
+    baselineRarity: "mythic",
+    visualSignature: { aspectRatio: 2.15, silhouetteClass: "widebody_supercar", prominentColors: ["Rosso Corsa", "Rosso Magma", "Giallo Modena"] }
+  },
   {
     id: "ferrari-sf90-stradale",
     manufacturer: "Ferrari",
@@ -1189,6 +1357,34 @@ var APEX_LOCAL_VEHICLE_DATABASE = [
     visualSignature: { aspectRatio: 2, silhouetteClass: "low_slung_coupe", prominentColors: ["Nitro Yellow", "Renaissance Red 2.0", "Phantom Matte Grey", "Downshift Blue"] }
   },
   {
+    id: "toyota-camry",
+    manufacturer: "Toyota",
+    model: "Camry",
+    generation: "XV70",
+    yearStart: 2017,
+    yearEnd: 2024,
+    trim: "SE / XSE",
+    bodyStyle: "Sedan",
+    engine: "2.5L Dynamic Force Inline-4 / 3.5L V6",
+    displacementCc: 2487,
+    aspiration: "Naturally Aspirated",
+    cylinders: 4,
+    drivetrain: "FWD",
+    transmission: "8-Speed Direct-Shift Automatic",
+    horsepower: 203,
+    torqueNm: 250,
+    zeroToHundredSec: 7.6,
+    zeroToSixtyMphSec: 7.3,
+    topSpeedKmH: 210,
+    curbWeightKg: 1530,
+    fuelType: "Gasoline",
+    productionYears: "2017\u20132024",
+    originCountry: "Japan",
+    notableFacts: "Eighth-generation global midsize sedan riding on TNGA-K platform, known for everyday reliability, sharp front fascia, and global ubiquity.",
+    baselineRarity: "common",
+    visualSignature: { aspectRatio: 1.88, silhouetteClass: "grand_tourer", prominentColors: ["Celestial Silver Metallic", "Midnight Black Metallic", "Wind Chill Pearl", "Supersonic Red"] }
+  },
+  {
     id: "toyota-crown-comfort-taxi",
     manufacturer: "Toyota",
     model: "Crown Comfort",
@@ -1471,6 +1667,13 @@ var CanonicalVehicleRegistry = class {
       "992 gt3",
       "porsche 992 gt3",
       "911 gt3 touring"
+    ]);
+    this.registerAliases("ferrari-daytona-sp3", [
+      "daytona sp3",
+      "ferrari daytona",
+      "daytona sp3 icona",
+      "ferrari daytona sp3",
+      "ferrari daytona sp3 icona"
     ]);
     this.registerAliases("bmw-m3-competition-g80", [
       "g80 m3",
@@ -1946,6 +2149,16 @@ var HierarchicalClassifier = class {
           score -= 0.25;
         }
       }
+      const hasDaytonaIconaCues = /\b(horizontal\s+strakes?|strakes?|horizontal\s+slats?|eyelids?|partial\s+covers?|wraparound\s+visor|visor\s+canopy|fender-mounted\s+mirrors?|door\s+tops?\s+mirrors?|icona)\b/i.test(evidenceText);
+      if (hasDaytonaIconaCues) {
+        if (candNameLower.includes("daytona") || candNameLower.includes("sp3")) {
+          candSupporting.push("Observed horizontal strakes, headlight eyelids, and wraparound visor canopy uniquely match Ferrari Daytona SP3 Icona design");
+          score += 0.2;
+        } else if (candidateMake === "ferrari" && (candNameLower.includes("sf90") || candNameLower.includes("296") || candNameLower.includes("f8") || candNameLower.includes("roma") || candNameLower.includes("portofino") || candNameLower.includes("488"))) {
+          candContradictions.push(`Observed horizontal strakes, headlight eyelids, and wraparound canopy contradict ${candidate.name} architecture`);
+          score -= 0.4;
+        }
+      }
       const boundedScore = Math.max(0.01, Math.min(0.99, Number(score.toFixed(3))));
       return {
         name: candidate.name,
@@ -1990,10 +2203,25 @@ var HierarchicalClassifier = class {
       specificity = "make";
       reason = "Severe architectural contradiction detected: observed visual cues directly contradict proposed candidates.";
     } else if (topCandidate && topCandidate.score >= 0.5) {
-      const parts = topCandidate.name.split(" ");
-      if (!resolvedMake && parts.length > 0) resolvedMake = parts[0];
-      if (!resolvedModelFamily && parts.length > 1) {
-        resolvedModelFamily = parts.slice(1).join(" ").replace(/\s*\([^)]*\)/g, "").trim();
+      if (!resolvedMake) {
+        const parts = topCandidate.name.split(" ");
+        if (parts.length > 0) resolvedMake = parts[0];
+      }
+      const candLower = topCandidate.name.toLowerCase();
+      const currentMakeLower = (resolvedMake || "").toLowerCase();
+      const currentModelLower = (resolvedModelFamily || "").toLowerCase();
+      const modelAlreadyMatches = Boolean(currentModelLower && candLower.includes(currentModelLower));
+      if (!modelAlreadyMatches) {
+        if (resolvedMake && candLower.startsWith(currentMakeLower + " ")) {
+          resolvedModelFamily = topCandidate.name.slice(resolvedMake.length + 1).replace(/\s*\([^)]*\)/g, "").trim();
+        } else if (resolvedMake === "Mercedes-Benz" && candLower.startsWith("mercedes-amg ")) {
+          resolvedModelFamily = topCandidate.name.slice("mercedes-amg ".length).replace(/\s*\([^)]*\)/g, "").trim();
+        } else if (!resolvedModelFamily) {
+          const parts = topCandidate.name.split(" ");
+          if (parts.length > 1) {
+            resolvedModelFamily = parts.slice(1).join(" ").replace(/\s*\([^)]*\)/g, "").trim();
+          }
+        }
       }
       specificity = "model_family";
       reason = `Model family confirmed based on characteristic architecture: ${resolvedMake} ${resolvedModelFamily || ""}.`;
@@ -3211,6 +3439,123 @@ OUTPUT STRICT JSON ONLY:
   }
 };
 
+// src/utils/vehicleSpecs.ts
+function normalizeKey(str) {
+  if (!str) return "";
+  return str.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+}
+function resolveCanonicalVehicleSpecs(params) {
+  const normMake = normalizeKey(params.make);
+  const normModel = normalizeKey(params.model);
+  const normGen = normalizeKey(params.generation);
+  const normTrim = normalizeKey(params.trim);
+  const canonicalId = (params.canonicalVehicleId || `${params.make || "unknown"}-${params.model || "unknown"}`).toLowerCase().replace(/[^a-z0-9]+/g, "-");
+  let bestMatch = null;
+  let bestScore = 0;
+  for (const v of APEX_LOCAL_VEHICLE_DATABASE) {
+    const vMake = normalizeKey(v.manufacturer);
+    const vModel = normalizeKey(v.model);
+    const vGen = normalizeKey(v.generation);
+    const vTrim = normalizeKey(v.trim);
+    const makeMatches = vMake === normMake || normMake.includes(vMake) || vMake.includes(normMake);
+    if (!makeMatches && normMake !== "") continue;
+    let score = 0;
+    if (vModel === normModel) {
+      score += 10;
+    } else if (normModel.includes(vModel) || vModel.includes(normModel)) {
+      score += 7;
+    } else {
+      const modelTokens = normModel.split(" ");
+      const vTokens = vModel.split(" ");
+      const matchCount = modelTokens.filter((t) => t.length > 1 && vTokens.includes(t)).length;
+      if (matchCount > 0) score += matchCount * 3;
+    }
+    if (score > 0) {
+      if (normGen && vGen && (normGen === vGen || normGen.includes(vGen) || vGen.includes(normGen))) {
+        score += 3;
+      }
+      if (normTrim && vTrim && (normTrim === vTrim || normTrim.includes(vTrim) || vTrim.includes(normTrim))) {
+        score += 2;
+      }
+      if (v.id === canonicalId) {
+        score += 15;
+      }
+      if (score > bestScore) {
+        bestScore = score;
+        bestMatch = v;
+      }
+    }
+  }
+  if (bestMatch && bestScore >= 7) {
+    return {
+      isVerified: true,
+      canonicalId: bestMatch.id,
+      make: bestMatch.manufacturer,
+      model: bestMatch.model,
+      generation: bestMatch.generation,
+      trim: bestMatch.trim || void 0,
+      bodyStyle: bestMatch.bodyStyle,
+      engine: bestMatch.engine,
+      horsepower: bestMatch.horsepower,
+      torqueNm: bestMatch.torqueNm,
+      topSpeedKmH: bestMatch.topSpeedKmH,
+      zeroToHundredSec: bestMatch.zeroToHundredSec,
+      kerbWeightKg: bestMatch.curbWeightKg,
+      productionYears: bestMatch.productionYears,
+      originCountry: bestMatch.originCountry,
+      rarity: bestMatch.baselineRarity,
+      interestingFact: bestMatch.notableFacts,
+      briefHistory: `${bestMatch.manufacturer} ${bestMatch.model} (${bestMatch.productionYears})`
+    };
+  }
+  for (const p of CAR_PRESETS) {
+    const pMake = normalizeKey(p.make);
+    const pModel = normalizeKey(p.model);
+    if ((pMake === normMake || normMake.includes(pMake)) && (pModel === normModel || normModel.includes(pModel) || pModel.includes(normModel))) {
+      return {
+        isVerified: true,
+        canonicalId: `preset-${p.make.toLowerCase()}-${p.model.toLowerCase()}`.replace(/[^a-z0-9]+/g, "-"),
+        make: p.make,
+        model: p.model,
+        generation: p.generation || void 0,
+        trim: p.trim || void 0,
+        bodyStyle: p.bodyStyle,
+        engine: p.engine,
+        horsepower: p.horsepower,
+        torqueNm: p.torqueNm,
+        topSpeedKmH: p.topSpeedKmH,
+        zeroToHundredSec: p.zeroToHundredSec,
+        kerbWeightKg: p.kerbWeightKg,
+        productionYears: p.releasedYear || p.yearEstimate || "N/A",
+        originCountry: p.originCountry,
+        rarity: p.rarity,
+        interestingFact: p.interestingFact,
+        briefHistory: p.briefHistory
+      };
+    }
+  }
+  return {
+    isVerified: false,
+    canonicalId,
+    make: params.make || "Unknown Make",
+    model: params.model || "Unknown Model",
+    generation: params.generation || void 0,
+    trim: params.trim || void 0,
+    bodyStyle: "Coupe",
+    engine: "Verified Specs Unavailable",
+    horsepower: null,
+    torqueNm: null,
+    topSpeedKmH: null,
+    zeroToHundredSec: null,
+    kerbWeightKg: null,
+    productionYears: "N/A",
+    originCountry: "Global",
+    rarity: "rare",
+    interestingFact: "Vehicle specifications being indexed in Apex catalog.",
+    briefHistory: void 0
+  };
+}
+
 // src/ai-engine/providers/cloudflareVisionProvider.ts
 var CloudflareVisionProvider = class {
   name = "CloudflareVisionProvider";
@@ -3227,7 +3572,7 @@ var CloudflareVisionProvider = class {
     this.defaultModel = config2?.model || typeof process !== "undefined" && process.env?.CLOUDFLARE_MODEL || this.defaultModel;
     this.seed = config2?.seed ?? 42;
     this.temperature = config2?.temperature ?? 0.1;
-    this.maxTokens = config2?.maxTokens ?? 150;
+    this.maxTokens = config2?.maxTokens ?? 384;
     this.timeoutMs = config2?.timeoutMs ?? 35e3;
   }
   resolveAccountId() {
@@ -3402,131 +3747,65 @@ var CloudflareVisionProvider = class {
       fullDataUrl = `data:image/jpeg;base64,${request.imageDataUrl}`;
     }
     const encodedImageBytes = typeof Buffer !== "undefined" ? Buffer.byteLength(fullDataUrl, "utf8") : fullDataUrl.length;
-    const isMonolithic = request.options?.schema === "monolithic";
-    const minimalSystemPrompt = `You are the APEX Automotive Perception Vision Engine.
-Your sole job is visual perception of the vehicle in this photo following strict evidentiary discipline.
-You must output ONLY flat valid JSON starting with '{' and ending with '}'.
-Do NOT write any conversational intro, outro, markdown prose, or bullet points.
+    const cleanSystemPrompt = `You are the APEX Automotive Perception Vision Engine.
+Your sole job is rigorous visual perception of the vehicle in the supplied photo following strict evidentiary discipline.
+The supplied photo is your ONLY source of truth.
 
-RULES:
-1. OBSERVABLE EVIDENCE ONLY: Describe only visible features. Occluded or unobservable features MUST be null.
-2. VIEWPOINT: "front", "rear", "side", "front_3q", "rear_3q", "interior", "partial", "multiple_vehicles", or "unknown".
-3. NON-CAR & COMMERCIAL VEHICLE REJECTION:
-   - If not a motor vehicle: set "vehicle_present": false, "status": "rejected", "make": null, "model": null, "generation": null, "variant": null.
-   - If public transit bus, coach, semi-truck, or heavy equipment: set "vehicle_present": false, "status": "rejected", "make": null, "model": null, "generation": null, "variant": null.
-4. HIERARCHICAL IDENTIFICATION:
-   - Identify Make.
-   - Identify Model Family.
-   - Generation: identify chassis/generation code (e.g. XV70, E210, G82) only if verifiable from visible lights/bodywork. Else null.
-   - Variant: ONLY identify exact performance trim/variant if distinct visual proof exists (e.g. badging, verified aero). Else variant MUST be null.
-5. NO HALLUCINATION:
-   - Never invent a trim. Variant must be null unless confirmed.`;
-    const minimalUserPrompt = `Analyze this vehicle. Return flat JSON:
+CRITICAL INVARIANTS:
+1. NO PROMPT INHERITANCE: Never copy or assume any vehicle make, model, year, body style, or color from instructions or schema placeholders.
+2. OBSERVABLE EVIDENCE ONLY: Every piece of evidence must correspond to directly visible features in the image.
+   If a feature is occluded, out of frame, or ambiguous, leave it null.
+3. HIERARCHICAL IDENTIFICATION:
+   - Identify Make from visible badging, emblem geometry, or unmistakable design language.
+   - Identify Model Family from vehicle architecture, proportions, lighting/grille signatures, and specific design cues.
+   - Ground Model Family strictly in the specific morphological features observed in Pass 1. Do not default to high-volume production models when distinctive prototype styling, horizontal louvers/strakes, headlight eyelid covers, or wraparound visor greenhouse are present.
+   - Variant/Trim MUST be null unless explicit exterior badging or verified package aero is visibly confirmed.
+4. NON-CAR REJECTION:
+   If no passenger motor vehicle is visible (person, pet, building, heavy commercial transit/bus/semi), set "vehicle_present": false, "status": "rejected".
+5. OUTPUT FORMAT: Raw valid JSON only starting with { and ending with }. No markdown, no prose, no conversational text.`;
+    const cleanUserPrompt = `Analyze the vehicle in this image following evidentiary discipline.
+Examine morphological details carefully in Pass 1:
+- Greenhouse & windshield curvature (e.g. wraparound visor canopy vs conventional pillars)
+- Headlight structure (e.g. horizontal partial covers/eyelids vs open modern C-shape)
+- Front bumper and intakes (e.g. horizontal strakes/slats vs open mesh)
+- Mirror position (e.g. fender/door tops vs A-pillar base)
+- Hood aerodynamic extractors
+
+In Pass 2, determine the exact model family that corresponds precisely to the observed design cues.
+
+Output flat valid JSON with this exact structure:
 {
   "status": "identified",
   "vehicle_present": true,
   "viewpoint": "front_3q",
-  "make": "Toyota",
-  "model": "Camry",
-  "generation": "XV70",
-  "variant": null,
-  "confidence": 0.90,
-  "body_style": "Sedan",
-  "evidence": ["spindle grille"],
-  "color": "Silver",
-  "year": "2020"
-}
-Rules:
-- status: "identified", "uncertain", or "rejected".
-- variant MUST be null unless badging is confirmed.
-- evidence: maximum 2 concise visual cues.
-Output only the JSON object starting with { and ending with } without any conversational intro, prose, or explanation.`;
-    const monolithicSystemPrompt = `You are the APEX Automotive Perception Vision Engine.
-Your sole job is visual perception of the vehicle in this photo following strict evidentiary discipline.
-You must output ONLY raw valid JSON starting with '{' and ending with '}'.
-Do NOT write any conversational intro, outro, markdown prose, or bullet points.
-
-RULES:
-1. OBSERVABLE EVIDENCE ONLY: Describe only visible features. Occluded or unobservable features MUST be null.
-   Never hallucinate rear exhausts from a front photo or front grilles from a rear photo.
-2. VIEWPOINT: "front", "rear", "side", "front_3q", "rear_3q", "interior", "partial", "multiple_vehicles", or "unknown".
-3. NON-CAR & COMMERCIAL VEHICLE REJECTION:
-   - If not a motor vehicle (person, pet, food, screenshot, scenery): set "vehicle_present": false, "status": "rejected", "rejection_reason": "No motor vehicle detected in frame."
-   - If public transit bus, coach, semi-truck, or heavy equipment: set "vehicle_present": false, "status": "rejected", "rejection_reason": "Commercial public transport or heavy vehicle detected; not a consumer passenger automobile."
-4. HIERARCHICAL IDENTIFICATION:
-   - Identify Make.
-   - Identify Model Family.
-   - Identify Generation/Chassis code only if verifiable from visible lights/bodywork.
-   - Variant: ONLY identify exact performance trim/variant if distinct visual proof exists (e.g. verified aero package, badging). Else variant MUST be null.
-5. NO HALLUCINATION / ABSTENTION MANDATE:
-   - If evidence is ambiguous, prefer "status": "uncertain" with model_family identified and variant: null, over guessing.
-   - Never invent a trim. Never substitute an unrelated manufacturer.`;
-    const monolithicUserPrompt = `Analyze the vehicle in this image and return a JSON object with this exact structure:
-{
-  "status": "identified",
-  "vehicle_present": true,
-  "rejection_reason": null,
-  "image_quality": {
-    "usable": true,
-    "score": 0.90,
-    "issues": []
+  "pass1_observations": {
+    "body_silhouette": "observable body shape",
+    "dominant_color": "observable dominant exterior color",
+    "lighting_cues": "observable headlight or taillight design",
+    "intake_and_grille_cues": "observable intake or grille design",
+    "distinctive_design_cues": ["observable cue 1", "observable cue 2"]
   },
-  "viewpoint": "front_3q",
-  "visual_evidence": {
-    "body_style": "Sedan",
-    "grille": null,
-    "headlights": null,
-    "taillights": null,
-    "hood": null,
-    "roofline": null,
-    "windows": null,
-    "wheels": null,
-    "exhaust": null,
-    "aero": null,
-    "badges": null,
-    "text": null,
-    "body_proportions": null,
-    "distinctive_details": []
-  },
-  "identification": {
-    "make": "Manufacturer",
-    "model_family": "Model",
-    "generation": "Generation",
-    "variant": null
-  },
-  "confidence": {
-    "make_score": 0.95,
-    "model_score": 0.90,
-    "generation_score": 0.80,
-    "variant_score": 0.30,
-    "overall_score": 0.90
-  },
-  "candidates": [
-    {
-      "name": "Full Name",
-      "score": 0.90,
-      "supporting_evidence": [],
-      "contradictions": [],
-      "unobservable_features": []
-    }
-  ],
-  "contradictions": [],
-  "specificity_level": "model_family",
-  "reason": "Observable evidence reasoning",
-  "privacy_redactions": [],
-  "specs": {
-    "color": "Silver",
-    "year_estimate": "2020",
-    "body_style": "Sedan"
+  "pass2_identification": {
+    "make": "Dominant vehicle manufacturer",
+    "model": "Exact model family name",
+    "generation": null,
+    "variant": null,
+    "confidence": 0.90,
+    "evidence": ["observable cue 1", "observable cue 2"]
   }
 }
-Output only the JSON object starting with { and ending with } without any conversational intro, prose, or explanation.`;
-    const systemPrompt = isMonolithic ? monolithicSystemPrompt : minimalSystemPrompt;
-    const userPrompt = isMonolithic ? monolithicUserPrompt : minimalUserPrompt;
+Rules:
+- status must be "identified", "uncertain", or "rejected".
+- Ground all observations and identity strictly in the provided photograph.
+- NEVER copy placeholder text. Do not invent unobservable features.
+- If not a passenger motor vehicle, set vehicle_present: false, status: "rejected".
+- Output only the JSON object starting with { and ending with } without any markdown prose or explanation.`;
+    const systemPrompt = cleanSystemPrompt;
+    const userPrompt = cleanUserPrompt;
     const format = request.options?.format || "messages";
     const stream = request.options?.stream ?? false;
     const effectiveTimeoutMs = request.options?.timeoutMs || this.timeoutMs;
-    const defaultTokensForSchema = isMonolithic ? 512 : this.maxTokens;
+    const defaultTokensForSchema = request.options?.schema === "monolithic" ? 512 : this.maxTokens;
     const effectiveMaxTokens = request.options?.maxTokens ?? defaultTokensForSchema;
     const effectiveTemperature = request.options?.temperature ?? this.temperature;
     const effectiveSeed = request.options?.seed ?? this.seed;
@@ -3643,28 +3922,56 @@ ${userPrompt} [/INST]`;
           durationMs: totalEndToEndMs2
         };
       }
+      const pass1 = parsed.pass1_observations || parsed.visual_evidence || {};
+      const pass2 = parsed.pass2_identification || parsed.identification || {};
       const viewpoint = parsed.viewpoint || "unknown";
-      const evidenceList = Array.isArray(parsed.evidence) ? parsed.evidence : Array.isArray(parsed.visual_evidence?.distinctive_details) ? parsed.visual_evidence.distinctive_details : [];
+      const pass1Cues = [
+        pass1.lighting_cues,
+        pass1.headlight_and_drl_signature,
+        pass1.intake_and_grille_cues,
+        pass1.front_fascia_and_intakes,
+        pass1.windshield_and_mirrors,
+        pass1.greenhouse_and_roofline,
+        pass1.hood_aerodynamics,
+        pass1.aero_and_bodywork,
+        pass1.grille,
+        pass1.headlights,
+        pass1.taillights,
+        pass1.hood,
+        pass1.roofline,
+        pass1.windows,
+        pass1.wheels,
+        pass1.aero,
+        pass1.badges,
+        pass1.text,
+        ...Array.isArray(pass1.distinctive_design_cues) ? pass1.distinctive_design_cues : [],
+        ...Array.isArray(pass1.distinctive_details) ? pass1.distinctive_details : []
+      ].filter(Boolean);
+      const pass2Cues = Array.isArray(pass2.evidence) ? pass2.evidence : [];
+      const evidenceList = Array.from(/* @__PURE__ */ new Set([...pass1Cues, ...pass2Cues, ...Array.isArray(parsed.evidence) ? parsed.evidence : []]));
       const visualEvidence = {
-        body_style: parsed.body_style || parsed.visual_evidence?.body_style || null,
-        grille: parsed.visual_evidence?.grille || (evidenceList.find((e) => /grille/i.test(e)) ?? null),
-        headlights: parsed.visual_evidence?.headlights || (evidenceList.find((e) => /headlight|lamp|drl/i.test(e)) ?? null),
-        taillights: parsed.visual_evidence?.taillights || (evidenceList.find((e) => /taillight/i.test(e)) ?? null),
-        hood: parsed.visual_evidence?.hood || null,
-        roofline: parsed.visual_evidence?.roofline || null,
-        windows: parsed.visual_evidence?.windows || null,
-        wheels: parsed.visual_evidence?.wheels || null,
-        exhaust: parsed.visual_evidence?.exhaust || null,
-        aero: parsed.visual_evidence?.aero || (evidenceList.find((e) => /spoiler|wing|splitter|diffuser/i.test(e)) ?? null),
-        badges: parsed.visual_evidence?.badges || (evidenceList.find((e) => /badge|emblem|roundel/i.test(e)) ?? null),
-        text: parsed.visual_evidence?.text || null,
-        body_proportions: parsed.visual_evidence?.body_proportions || null,
+        body_style: pass1.body_silhouette || parsed.body_style || pass1.body_style || null,
+        grille: pass1.grille || pass1.intake_and_grille_cues || pass1.front_fascia_and_intakes || (evidenceList.find((e) => /grille|intake|splitter|strake/i.test(e)) ?? null),
+        headlights: pass1.headlights || pass1.lighting_cues || pass1.headlight_and_drl_signature || (evidenceList.find((e) => /headlight|lamp|drl|eyelid/i.test(e)) ?? null),
+        taillights: pass1.taillights || pass1.lighting_cues || (evidenceList.find((e) => /taillight/i.test(e)) ?? null),
+        hood: pass1.hood || pass1.hood_aerodynamics || null,
+        roofline: pass1.roofline || pass1.greenhouse_and_roofline || pass1.windshield_and_mirrors || null,
+        windows: pass1.windows || pass1.greenhouse_and_roofline || pass1.windshield_and_mirrors || null,
+        wheels: pass1.wheels || pass1.mirror_and_wheel_cues || pass1.windshield_and_mirrors || null,
+        exhaust: pass1.exhaust || null,
+        aero: pass1.aero || pass1.aero_and_bodywork || (evidenceList.find((e) => /spoiler|wing|splitter|diffuser|strake/i.test(e)) ?? null),
+        badges: pass1.badges || pass1.badges_and_text || (evidenceList.find((e) => /badge|emblem|roundel|script/i.test(e)) ?? null),
+        text: pass1.text || pass1.badges_and_text || null,
+        body_proportions: pass1.body_proportions || pass1.body_silhouette || null,
         distinctive_details: evidenceList.length > 0 ? evidenceList : null
       };
-      let rawMake = parsed.make || parsed.identification?.make || null;
-      let rawModel = parsed.model || parsed.identification?.model_family || null;
-      let rawGen = parsed.generation || parsed.identification?.generation || null;
-      let rawVariant = parsed.variant || parsed.identification?.variant || null;
+      let rawMake = pass2.make || parsed.make || parsed.identification?.make || null;
+      let rawModel = pass2.model || parsed.model || parsed.identification?.model_family || null;
+      let rawGen = pass2.generation || parsed.generation || parsed.identification?.generation || null;
+      let rawVariant = pass2.variant || parsed.variant || parsed.identification?.variant || null;
+      const placeholderTokens = ["observable", "dominant", "manufacturer", "specific model", "model family", "chassis", "performance trim", "<string>"];
+      if (rawMake && placeholderTokens.some((p) => rawMake.toLowerCase().includes(p))) rawMake = null;
+      if (rawModel && placeholderTokens.some((p) => rawModel.toLowerCase().includes(p))) rawModel = null;
       if (rawMake && (rawMake.toLowerCase().includes("multiple") || rawMake.includes(";"))) {
         rawMake = null;
         rawModel = null;
@@ -3672,9 +3979,95 @@ ${userPrompt} [/INST]`;
         rawVariant = null;
       }
       if (rawModel && (rawModel.toLowerCase().includes("multiple") || rawModel.includes(";"))) {
+        rawMake = null;
         rawModel = null;
         rawGen = null;
         rawVariant = null;
+      }
+      const isSuspicious = (() => {
+        if (!rawMake || !rawModel) return true;
+        const makeL = rawMake.toLowerCase();
+        const modelL = rawModel.toLowerCase();
+        const silhouetteL = (pass1.body_silhouette || parsed.body_style || "").toLowerCase();
+        const evL = evidenceList.join(" ").toLowerCase();
+        if (placeholderTokens.some((p) => makeL.includes(p) || modelL.includes(p))) return true;
+        const isExoticSilhouette = silhouetteL.includes("supercar") || silhouetteL.includes("hypercar") || silhouetteL.includes("low-slung") || silhouetteL.includes("mid-engine") || silhouetteL.includes("targa") || silhouetteL.includes("spider");
+        const isCommuterFamily = makeL === "toyota" && modelL.includes("camry") || makeL === "toyota" && modelL.includes("corolla") || makeL === "honda" && modelL.includes("civic") || makeL === "nissan" && modelL.includes("altima");
+        if (isExoticSilhouette && isCommuterFamily) return true;
+        if (makeL === "toyota" && modelL.includes("camry") && evL.includes("spindle grille")) {
+          return true;
+        }
+        if (evL.includes("spindle grille") && !makeL.includes("lexus") && !makeL.includes("toyota")) return true;
+        return false;
+      })();
+      if (isSuspicious) {
+        console.warn("[CloudflareVisionProvider] Suspicious classification or contradiction detected. Invoking clean independent verification pass...");
+        try {
+          const verifyPrompt = `Inspect the focal vehicle in this photo with independent forensic scrutiny.
+Base your answer exclusively on the visible features in this image.
+Output flat valid JSON only:
+{
+  "vehicle_present": true,
+  "status": "identified",
+  "body_style": "observable body style",
+  "dominant_color": "observable dominant exterior paint color",
+  "make": "Dominant vehicle manufacturer identified from visible emblem, badging, or design language",
+  "model": "Specific model family name identified from visible bodywork",
+  "generation": null,
+  "variant": null,
+  "confidence": 0.88,
+  "evidence": ["observable cue 1", "observable cue 2"]
+}
+Rules:
+- Do not copy placeholder text.
+- Ground make and model in observable headlights, badges, grille, and silhouette.
+- Output only JSON starting with { and ending with }.`;
+          const verifyParams = {
+            accountId,
+            token,
+            model,
+            imageDataUrl: fullDataUrl,
+            timeoutMs: effectiveTimeoutMs,
+            temperature: 0.1,
+            seed: 42,
+            maxTokens: effectiveMaxTokens,
+            stream: false
+          };
+          if (format === "inst") {
+            verifyParams.prompt = `[INST] <<SYS>>
+${cleanSystemPrompt}
+<</SYS>>
+
+${verifyPrompt} [/INST]`;
+          } else {
+            verifyParams.messages = [
+              { role: "system", content: cleanSystemPrompt },
+              { role: "user", content: verifyPrompt }
+            ];
+          }
+          const verifyResult = await this.executeCloudflareRequest(verifyParams);
+          let verifyJson = verifyResult.json;
+          if (verifyJson && typeof verifyJson.response === "object" && verifyJson.response !== null) {
+            verifyJson = verifyJson.response;
+          }
+          if (verifyJson && verifyJson.make && verifyJson.model && !placeholderTokens.some((p) => verifyJson.make.toLowerCase().includes(p))) {
+            console.log("[CloudflareVisionProvider] Independent verification resolved:", verifyJson.make, verifyJson.model);
+            rawMake = verifyJson.make;
+            rawModel = verifyJson.model;
+            rawGen = verifyJson.generation || null;
+            rawVariant = verifyJson.variant || null;
+            if (Array.isArray(verifyJson.evidence) && verifyJson.evidence.length > 0) {
+              evidenceList.length = 0;
+              evidenceList.push(...verifyJson.evidence);
+              visualEvidence.distinctive_details = evidenceList;
+            }
+          }
+        } catch (verifyErr) {
+          console.warn("[CloudflareVisionProvider] Verification pass skipped or non-fatal:", verifyErr?.message);
+        }
+      }
+      if (rawMake && rawModel && rawModel.toLowerCase().startsWith(rawMake.toLowerCase() + " ")) {
+        rawModel = rawModel.slice(rawMake.length + 1).trim();
       }
       let rawCandidates = [];
       if (Array.isArray(parsed.candidates) && parsed.candidates.length > 0) {
@@ -3686,8 +4079,8 @@ ${userPrompt} [/INST]`;
           unobservable_features: Array.isArray(c.unobservable_features) ? c.unobservable_features : []
         }));
       } else if (rawMake && rawModel) {
-        const candidateName = [rawMake, rawModel, rawGen, rawVariant].filter(Boolean).join(" ");
-        const candidateScore = typeof parsed.confidence === "number" ? parsed.confidence : parsed.confidence?.overall_score || 0.9;
+        const candidateName = rawGen ? `${rawMake} ${rawModel} (${rawGen})` : `${rawMake} ${rawModel}`;
+        const candidateScore = typeof pass2.confidence === "number" ? pass2.confidence : typeof parsed.confidence === "number" ? parsed.confidence : 0.88;
         rawCandidates = [
           {
             name: candidateName,
@@ -3697,6 +4090,20 @@ ${userPrompt} [/INST]`;
             unobservable_features: []
           }
         ];
+        const normMake = rawMake.toLowerCase();
+        const peerVehicles = APEX_LOCAL_VEHICLE_DATABASE.filter((v) => v.manufacturer.toLowerCase() === normMake);
+        for (const peer of peerVehicles) {
+          const peerName = `${peer.manufacturer} ${peer.model}`;
+          if (!rawCandidates.some((c) => c.name.toLowerCase() === peerName.toLowerCase())) {
+            rawCandidates.push({
+              name: peerName,
+              score: 0.5,
+              supporting_evidence: [],
+              contradictions: [],
+              unobservable_features: []
+            });
+          }
+        }
       }
       const valStart = Date.now();
       const classResult = hierarchicalClassifier.classify({
@@ -3724,6 +4131,19 @@ ${userPrompt} [/INST]`;
         has_vehicle: true
       });
       const deterministicValidationMs = Date.now() - valStart;
+      let finalMake = classResult.identification.make || rawMake || "Unknown Make";
+      let finalModel = classResult.identification.model_family || rawModel || "Unknown Model";
+      if (finalMake && finalModel && finalModel.toLowerCase().startsWith(finalMake.toLowerCase() + " ")) {
+        finalModel = finalModel.slice(finalMake.length + 1).trim();
+      }
+      const finalGen = classResult.identification.generation || rawGen || void 0;
+      const finalVariant = classResult.identification.variant || rawVariant || void 0;
+      const specResolution = resolveCanonicalVehicleSpecs({
+        make: finalMake,
+        model: finalModel,
+        generation: finalGen,
+        trim: finalVariant
+      });
       const upstreamEvidence = Object.freeze({
         provider: this.name,
         model,
@@ -3761,11 +4181,11 @@ ${userPrompt} [/INST]`;
       const canonicalId = `${classResult.identification.make || "unknown"}-${classResult.identification.model_family || "vehicle"}`.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
       const openCanonicalIdentity = {
         canonicalId,
-        make: classResult.identification.make || "Unknown Make",
-        modelFamily: classResult.identification.model_family || "Unknown Model",
-        generation: classResult.identification.generation,
-        variant: classResult.identification.variant,
-        registryStatus: "VERIFIED_UNREGISTERED",
+        make: finalMake,
+        modelFamily: finalModel,
+        generation: finalGen,
+        variant: finalVariant,
+        registryStatus: specResolution.isVerified ? "REGISTERED" : "VERIFIED_UNREGISTERED",
         source: "ensemble",
         specs: parsed.specs
       };
@@ -3792,38 +4212,33 @@ ${userPrompt} [/INST]`;
         provenance,
         canonical_identity: openCanonicalIdentity
       };
-      const specs = parsed.specs || {
-        color: parsed.color || "Silver",
-        year_estimate: parsed.year || "2020",
-        body_style: parsed.body_style || "Sedan"
-      };
       const valuation = getEstimatedMarketValue({
-        make: classResult.identification.make,
-        model: classResult.identification.model_family,
-        rarity: specs.rarity,
-        marketValueLowUsd: specs.market_value_low_usd,
-        marketValueHighUsd: specs.market_value_high_usd
+        make: finalMake,
+        model: finalModel,
+        rarity: specResolution.rarity,
+        marketValueLowUsd: parsed.specs?.market_value_low_usd,
+        marketValueHighUsd: parsed.specs?.market_value_high_usd
       });
       const output = {
-        vehicleId: null,
-        make: classResult.identification.make || "Unknown Make",
-        model: classResult.identification.model_family || "Unknown Model",
-        generation: classResult.identification.generation || "Current",
-        trim: classResult.identification.variant || null,
-        yearEstimate: String(specs.year_estimate || "2023"),
-        color: specs.color || "Silver",
-        rarity: specs.rarity || "rare",
-        engine: specs.engine || "Standard Engine",
-        horsepower: Number(specs.horsepower) || 300,
-        torqueNm: Number(specs.torque_nm) || 400,
-        topSpeedKmH: Number(specs.top_speed_kmh) || 250,
-        zeroToHundredSec: Number(specs.zero_to_hundred_seconds) || 4.5,
-        kerbWeightKg: Number(specs.kerb_weight_kg) || 1500,
-        productionYears: specs.production_years || "2020\u2013Present",
-        originCountry: specs.origin_country || "Global",
-        bodyStyle: specs.body_style || "Coupe",
-        historicalInformation: specs.historical_information || classResult.reason,
-        interestingFacts: specs.interesting_facts || "Engineered with precision.",
+        vehicleId: specResolution.canonicalId || null,
+        make: finalMake,
+        model: finalModel,
+        generation: finalGen || specResolution.generation || "Current",
+        trim: finalVariant || null,
+        yearEstimate: specResolution.productionYears && specResolution.productionYears !== "N/A" ? specResolution.productionYears.split("\u2013")[0] : String(parsed.year || "2023"),
+        color: pass1.dominant_color || parsed.color || "Unknown",
+        rarity: specResolution.rarity || "rare",
+        engine: specResolution.engine || "Standard Engine",
+        horsepower: specResolution.horsepower ?? 0,
+        torqueNm: specResolution.torqueNm ?? 0,
+        topSpeedKmH: specResolution.topSpeedKmH ?? 0,
+        zeroToHundredSec: specResolution.zeroToHundredSec ?? 0,
+        kerbWeightKg: specResolution.kerbWeightKg ?? 0,
+        productionYears: specResolution.productionYears || "N/A",
+        originCountry: specResolution.originCountry || "Global",
+        bodyStyle: specResolution.bodyStyle || visualEvidence.body_style || "Coupe",
+        historicalInformation: specResolution.briefHistory || classResult.reason,
+        interestingFacts: specResolution.interestingFact || "Engineered with precision.",
         aftermarketPartsDetected: [],
         modelConfidence: calibConf.confidence.overall_score,
         marketValueLowUsd: valuation.lowUsd,
@@ -4055,7 +4470,18 @@ ${userPrompt} [/INST]`;
       try {
         parsedOutput = JSON.parse(jsonCandidate);
       } catch (parseErr) {
-        throw new Error(`Cloudflare response could not be parsed as JSON: ${parseErr.message}. Raw: ${rawText.slice(0, 300)}`);
+        let recovered = false;
+        for (const suffix of ["}", "}}", '"}}', "null}}", "]}", '"]}}']) {
+          try {
+            parsedOutput = JSON.parse(jsonCandidate + suffix);
+            recovered = true;
+            break;
+          } catch {
+          }
+        }
+        if (!recovered) {
+          throw new Error(`Cloudflare response could not be parsed as JSON: ${parseErr.message}. Raw: ${rawText.slice(0, 300)}`);
+        }
       }
       const finalPromptTokens = promptTokens || Math.round((params.prompt || JSON.stringify(params.messages) || "").length / 4) + 6400;
       const finalOutputTokens = outputTokens || Math.round(jsonCandidate.length / 4);
@@ -4650,82 +5076,6 @@ var DeterministicValidator = class {
 };
 var deterministicValidator = new DeterministicValidator();
 
-// src/ai-engine/caching/identificationCache.ts
-var IdentificationCache = class {
-  resultCache = /* @__PURE__ */ new Map();
-  candidateCache = /* @__PURE__ */ new Map();
-  ttlMs = 12 * 60 * 60 * 1e3;
-  // 12 hours
-  hitCount = 0;
-  missCount = 0;
-  /**
-   * Validate that the hash is an authentic 64-character lowercase hexadecimal SHA-256 digest
-   */
-  isValidHash(imageHash) {
-    if (!imageHash || typeof imageHash !== "string") return false;
-    return /^[0-9a-f]{64}$/i.test(imageHash);
-  }
-  getResult(imageHash) {
-    if (!this.isValidHash(imageHash)) {
-      this.missCount += 1;
-      return null;
-    }
-    const entry = this.resultCache.get(imageHash);
-    if (entry) {
-      if (Date.now() < entry.expiresAt) {
-        this.hitCount += 1;
-        return {
-          ...JSON.parse(JSON.stringify(entry.result)),
-          cached: true
-        };
-      }
-      this.resultCache.delete(imageHash);
-    }
-    this.missCount += 1;
-    return null;
-  }
-  setResult(imageHash, result) {
-    if (!this.isValidHash(imageHash) || !result) return;
-    this.resultCache.set(imageHash, {
-      result: JSON.parse(JSON.stringify(result)),
-      expiresAt: Date.now() + this.ttlMs
-    });
-  }
-  has(imageHash) {
-    if (!this.isValidHash(imageHash)) return false;
-    const entry = this.resultCache.get(imageHash);
-    if (!entry) return false;
-    if (Date.now() >= entry.expiresAt) {
-      this.resultCache.delete(imageHash);
-      return false;
-    }
-    return true;
-  }
-  delete(imageHash) {
-    return this.resultCache.delete(imageHash);
-  }
-  getStats() {
-    const total = this.hitCount + this.missCount;
-    const hitRatio = total > 0 ? Number((this.hitCount / total).toFixed(3)) : 0;
-    return {
-      hitCount: this.hitCount,
-      missCount: this.missCount,
-      hitRatio,
-      size: this.resultCache.size
-    };
-  }
-  /**
-   * Completely flushes all cache entries (used for clean sequential test isolation)
-   */
-  clear() {
-    this.resultCache.clear();
-    this.candidateCache.clear();
-    this.hitCount = 0;
-    this.missCount = 0;
-  }
-};
-var identificationCache = new IdentificationCache();
-
 // src/ai-engine/observability/tracer.ts
 var Tracer = class {
   spans = [];
@@ -4863,7 +5213,7 @@ var WorkerPool = class {
           latency: Date.now() - startTime,
           status: "completed",
           cache_hit: true,
-          cache_key: job.imageHash,
+          cache_key: buildCacheKey(job.imageHash),
           retry_count: Math.max(0, job.attempts - 1),
           error_code: null,
           fallback_used: false,
@@ -5109,7 +5459,12 @@ var WorkerPool = class {
         canonicalResult: aiResponse.canonicalResult
       };
       if (confidence.isConfident && validationReport.isValid) {
-        identificationCache.setResult(job.imageHash, finalResult);
+        identificationCache.setResult(
+          job.imageHash,
+          finalResult,
+          aiResponse.providerName || "CloudflareVisionProvider",
+          aiResponse.modelUsed || "@cf/meta/llama-3.2-11b-vision-instruct"
+        );
       }
       tracer.recordScanTrace({
         scan_id: job.id,
@@ -5124,7 +5479,7 @@ var WorkerPool = class {
         latency: Date.now() - startTime,
         status: finalStatus,
         cache_hit: false,
-        cache_key: job.imageHash,
+        cache_key: buildCacheKey(job.imageHash, aiResponse.providerName, aiResponse.modelUsed),
         retry_count: aiResponse.retriesAttempted ?? 0,
         error_code: null,
         fallback_used: Boolean(aiResponse.fallbackUsed),
@@ -5478,7 +5833,7 @@ function computeImageSha256(dataUrlOrBase64) {
 
 // src/ai-engine/engine.ts
 var ApexVehicleIdentificationEngine = class {
-  pipelineVersion = "2.5.0-prod";
+  pipelineVersion = VISION_PIPELINE_VERSION;
   constructor() {
     workerPool.start(12);
   }
@@ -5855,9 +6210,12 @@ function formatScanResponse(r) {
     angle_instruction: r.confidence?.abstentionReason === "VISION_QUOTA_EXHAUSTED" || canon?.confidence?.abstentionReason === "VISION_QUOTA_EXHAUSTED" || canon?.reason?.includes("VISION_QUOTA_EXHAUSTED") ? "Vehicle identification temporarily unavailable. Vision quota has been reached. Please try again later." : canon?.reason || r.confidence?.abstentionReason || null,
     upstream_evidence: canon?.upstream_evidence,
     canonical_identity: canon?.canonical_identity,
+    canonical_vehicle_id: canon?.canonical_identity?.canonicalId || canon?.canonical_vehicle_id || r.vehicleId || null,
     provenance: canon?.provenance,
     cached: r.cached,
-    trace_id: r.traceId
+    trace_id: r.traceId,
+    analysisVersion: VISION_PIPELINE_VERSION,
+    providerRevision: (process.env.VISION_PROVIDER || "cloudflare").toLowerCase().trim()
   };
 }
 async function handler(req, res) {
@@ -5936,13 +6294,15 @@ async function handler(req, res) {
   }
   if (idempotencyKey && typeof idempotencyKey === "string") {
     const cleanKey = idempotencyKey.trim();
-    const idemCheck = await checkSingleTier(`idem:${cleanKey}`, 1, 3600);
+    const versionedIdemKey = `idem:${VISION_PIPELINE_VERSION}:${cleanKey}`;
+    const idemCheck = await checkSingleTier(versionedIdemKey, 1, 3600);
     if (!idemCheck.allowed) {
-      console.log(`[api/analyze] Idempotency deduplication triggered across instances for: ${cleanKey}`);
+      console.log(`[api/analyze] Idempotency deduplication triggered across instances for: ${versionedIdemKey}`);
       return res.status(409).json({
         error: "Duplicate scan request: this scan job is already processing or completed.",
         code: "IDEMPOTENCY_CONFLICT",
-        idempotencyKey: cleanKey
+        idempotencyKey: cleanKey,
+        analysisVersion: VISION_PIPELINE_VERSION
       });
     }
   }
@@ -5975,13 +6335,32 @@ async function handler(req, res) {
         if (current.status === "failed") {
           return res.status(500).json({
             error: current.error || "Vehicle identification failed.",
-            scan_id: ingestion.scanId
+            scan_id: ingestion.scanId,
+            analysisVersion: VISION_PIPELINE_VERSION
           });
         }
       }
     }
     if (finalResult) {
-      return res.status(200).json(formatScanResponse(finalResult));
+      const responsePayload = formatScanResponse(finalResult);
+      console.log("[api/analyze] Production Debug Trace:", {
+        requestId: req.headers["x-vercel-id"] || ingestion.traceId,
+        traceId: ingestion.traceId,
+        analysisVersion: VISION_PIPELINE_VERSION,
+        provider: rawProvider,
+        model: isCloudflare ? "@cf/meta/llama-3.2-11b-vision-instruct" : "gemini-2.5-flash",
+        imageSha256Short: ingestion.scanId?.substring(0, 12),
+        cacheHit: Boolean(ingestion.isCachedHit),
+        cacheVersion: VISION_PIPELINE_VERSION,
+        idempotencyHit: Boolean(ingestion.isCachedHit),
+        rawMake: finalResult.canonicalResult?.identification?.make || finalResult.make,
+        rawModel: finalResult.canonicalResult?.identification?.model_family || finalResult.model,
+        normalizedMake: responsePayload.make,
+        normalizedModel: responsePayload.model,
+        canonicalVehicleId: responsePayload.canonical_vehicle_id,
+        specRecordId: responsePayload.canonical_vehicle_id || "default"
+      });
+      return res.status(200).json(responsePayload);
     }
     return res.status(202).json({
       scan_id: ingestion.scanId,

@@ -5,6 +5,7 @@
  */
 
 import type { ScanJob, ScanJobStatus } from '../types';
+import { VISION_PIPELINE_VERSION } from '../caching/identificationCache';
 
 export class JobQueue {
   private highQueue: ScanJob[] = [];
@@ -15,7 +16,7 @@ export class JobQueue {
   private idempotencyIndex: Map<string, string> = new Map(); // idempotencyKey -> jobId
   private userActiveCount: Map<string, number> = new Map(); // userId -> active in-flight count
 
-  private inFlightImageHashes: Map<string, string> = new Map(); // imageHash -> jobId
+  private inFlightImageHashes: Map<string, string> = new Map(); // versionedImageKey -> jobId
 
   private readonly maxQueueCapacity = 250000;
   private readonly maxPerUserConcurrent = 2;
@@ -25,24 +26,36 @@ export class JobQueue {
    * Enqueue a new scan job with idempotency and in-flight image deduplication
    */
   public enqueue(job: ScanJob): { job: ScanJob; isDuplicate: boolean; queuePosition: number } {
+    // Enforce active pipeline version
+    job.pipelineVersion = VISION_PIPELINE_VERSION;
+
     // 1. Idempotency Check (by idempotencyKey)
     if (job.idempotencyKey && this.idempotencyIndex.has(job.idempotencyKey)) {
       const existingJobId = this.idempotencyIndex.get(job.idempotencyKey)!;
       const existing = this.jobsById.get(existingJobId);
       if (existing) {
-        return {
-          job: existing,
-          isDuplicate: true,
-          queuePosition: this.getQueuePosition(existing.id)
-        };
+        // Enforce version compatibility: never replay a job from an incompatible pipeline version
+        if (existing.pipelineVersion === VISION_PIPELINE_VERSION) {
+          return {
+            job: existing,
+            isDuplicate: true,
+            queuePosition: this.getQueuePosition(existing.id)
+          };
+        } else {
+          // Discard stale incompatible job
+          this.jobsById.delete(existingJobId);
+          this.idempotencyIndex.delete(job.idempotencyKey);
+        }
       }
     }
 
-    // 2. In-Flight Exact Image Hash Deduplication
-    if (job.imageHash && this.inFlightImageHashes.has(job.imageHash)) {
-      const existingJobId = this.inFlightImageHashes.get(job.imageHash)!;
+    // 2. In-Flight Exact Image Hash Deduplication (scoped by pipeline version)
+    const versionedImageKey = `${VISION_PIPELINE_VERSION}:${job.imageHash}`;
+    if (job.imageHash && this.inFlightImageHashes.has(versionedImageKey)) {
+      const existingJobId = this.inFlightImageHashes.get(versionedImageKey)!;
       const existing = this.jobsById.get(existingJobId);
-      if (existing && (existing.status === 'queued' || existing.status === 'processing' || existing.status === 'completed')) {
+      if (existing && existing.pipelineVersion === VISION_PIPELINE_VERSION &&
+          (existing.status === 'queued' || existing.status === 'processing' || existing.status === 'completed')) {
         return {
           job: existing,
           isDuplicate: true,
@@ -71,7 +84,7 @@ export class JobQueue {
       this.idempotencyIndex.set(job.idempotencyKey, job.id);
     }
     if (job.imageHash) {
-      this.inFlightImageHashes.set(job.imageHash, job.id);
+      this.inFlightImageHashes.set(versionedImageKey, job.id);
     }
 
     // 5. Place into priority tier
@@ -136,8 +149,14 @@ export class JobQueue {
       const currentActive = this.userActiveCount.get(job.userId) || 1;
       this.userActiveCount.set(job.userId, Math.max(0, currentActive - 1));
 
-      if (job.imageHash && this.inFlightImageHashes.get(job.imageHash) === jobId) {
-        this.inFlightImageHashes.delete(job.imageHash);
+      if (job.imageHash) {
+        const versionedImageKey = `${VISION_PIPELINE_VERSION}:${job.imageHash}`;
+        if (this.inFlightImageHashes.get(versionedImageKey) === jobId) {
+          this.inFlightImageHashes.delete(versionedImageKey);
+        }
+        if (this.inFlightImageHashes.get(job.imageHash) === jobId) {
+          this.inFlightImageHashes.delete(job.imageHash);
+        }
       }
     }
   }

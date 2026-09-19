@@ -100,6 +100,14 @@ class CanonicalVehicleRegistry {
       '911 gt3 touring'
     ]);
 
+    this.registerAliases('ferrari-daytona-sp3', [
+      'daytona sp3',
+      'ferrari daytona',
+      'daytona sp3 icona',
+      'ferrari daytona sp3',
+      'ferrari daytona sp3 icona'
+    ]);
+
     this.registerAliases('bmw-m3-competition-g80', [
       'g80 m3',
       'm3 competition',

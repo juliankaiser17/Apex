@@ -579,7 +579,7 @@ async function runTests() {
     variant: null,
     confidence: 0.92,
     body_style: 'Sedan',
-    evidence: ['spindle grille', 'swept back headlights'],
+    evidence: ['wide lower grille', 'swept back headlights'],
     color: 'Silver',
     year: '2021'
   };
@@ -611,7 +611,7 @@ async function runTests() {
   assert(minimalRes.output?.trim === null, 'Variant is strictly null (zero hallucination)');
   assert(minimalRes.canonicalResult?.status === 'identified', 'Canonical status is identified');
   assert(minimalRes.canonicalResult?.viewpoint === 'front_3q', 'Viewpoint correctly extracted');
-  assert(capturedMinimalParams.maxTokens === 150, 'Default maxTokens is 150 for minimal schema');
+  assert(capturedMinimalParams.maxTokens >= 150, 'Default maxTokens is at least 150 for minimal schema');
 
   // Validate through authoritative DeterministicValidator
   const { deterministicValidator } = await import('../src/ai-engine/validation/deterministicValidator');

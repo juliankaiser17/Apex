@@ -10,7 +10,7 @@ import { workerPool } from './queue/workerPool';
 import { tracer } from './observability/tracer';
 import { metricsCollector } from './observability/metricsCollector';
 import { capacityPlanner, type CapacityPlanModel } from './observability/capacityPlanner';
-import { identificationCache } from './caching/identificationCache';
+import { identificationCache, VISION_PIPELINE_VERSION } from './caching/identificationCache';
 import { canonicalVehicleRegistry } from './canonical/canonicalVehicleRegistry';
 import { computeImageSha256 } from './crypto/sha256';
 
@@ -60,7 +60,7 @@ export interface BenchmarkReport {
 }
 
 export class ApexVehicleIdentificationEngine {
-  private pipelineVersion = '2.5.0-prod';
+  private pipelineVersion = VISION_PIPELINE_VERSION;
 
   constructor() {
     workerPool.start(12);

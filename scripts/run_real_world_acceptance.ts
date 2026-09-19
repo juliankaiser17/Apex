@@ -242,7 +242,14 @@ async function runLiveAcceptanceSuite() {
   // Load Inventory and Checkpoint Manager
   const inventoryPath = path.resolve('scratch/cars_inventory.json');
   const inventory: InventoryItem[] = JSON.parse(fs.readFileSync(inventoryPath, 'utf8'));
-  const checkpointMgr = new CheckpointManager();
+  const cpArgIndex = process.argv.indexOf('--checkpoint');
+  const cliCpPath = cpArgIndex !== -1 && process.argv[cpArgIndex + 1] ? process.argv[cpArgIndex + 1] : undefined;
+  const checkpointFilePath = cliCpPath
+    ? path.resolve(cliCpPath)
+    : process.env.APEX_CHECKPOINT_FILE
+    ? path.resolve(process.env.APEX_CHECKPOINT_FILE)
+    : undefined;
+  const checkpointMgr = new CheckpointManager(checkpointFilePath);
   checkpointMgr.initializeWithInventory(inventory);
 
   const completed = checkpointMgr.getCompletedScans();
@@ -329,6 +336,11 @@ async function runLiveAcceptanceSuite() {
         } catch (err: any) {
           const errMsg = err?.message || String(err);
           if (errMsg.includes('429') || errMsg.includes('Quota') || errMsg.includes('RESOURCE_EXHAUSTED')) {
+            if (attempt <= maxRetries && (errMsg.includes('Please retry in') || errMsg.includes('retryDelay'))) {
+              console.warn(`\n[RATE LIMIT COOLING] Transient RPM window limit on ${item.test_id}. Cooling down 36s before retry ${attempt}/${maxRetries}...`);
+              await sleep(36000);
+              continue;
+            }
             checkpointMgr.markQuotaBlocked(item.test_id, errMsg);
             console.warn(`\n[QUOTA EXHAUSTED] Gemini API rate limit hit on ${item.test_id}: ${errMsg}`);
             console.warn('Pausing acceptance test cleanly. Checkpoint preserved. Ready to resume once quota resets.');

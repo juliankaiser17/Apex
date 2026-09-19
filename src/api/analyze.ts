@@ -1,6 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 import { apexEngine } from '../ai-engine/engine';
+import { VISION_PIPELINE_VERSION } from '../ai-engine/caching/identificationCache';
 
 export const config = {
   api: {
@@ -295,9 +296,12 @@ function formatScanResponse(r: any) {
       : (canon?.reason || r.confidence?.abstentionReason || null),
     upstream_evidence: canon?.upstream_evidence,
     canonical_identity: canon?.canonical_identity,
+    canonical_vehicle_id: canon?.canonical_identity?.canonicalId || (canon as any)?.canonical_vehicle_id || r.vehicleId || null,
     provenance: canon?.provenance,
     cached: r.cached,
-    trace_id: r.traceId
+    trace_id: r.traceId,
+    analysisVersion: VISION_PIPELINE_VERSION,
+    providerRevision: (process.env.VISION_PROVIDER || 'cloudflare').toLowerCase().trim()
   };
 }
 
@@ -402,15 +406,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   // 4. Cross-Instance Distributed Idempotency Protection
   if (idempotencyKey && typeof idempotencyKey === 'string') {
     const cleanKey = idempotencyKey.trim();
-    // Atomic check: max 1 consumption per idempotency key for 1 hour
-    const idemCheck = await checkSingleTier(`idem:${cleanKey}`, 1, 3600);
+    // Atomic check: max 1 consumption per version-scoped idempotency key for 1 hour
+    const versionedIdemKey = `idem:${VISION_PIPELINE_VERSION}:${cleanKey}`;
+    const idemCheck = await checkSingleTier(versionedIdemKey, 1, 3600);
     if (!idemCheck.allowed) {
-      console.log(`[api/analyze] Idempotency deduplication triggered across instances for: ${cleanKey}`);
-      // Return 200 with cached result or conflict message
+      console.log(`[api/analyze] Idempotency deduplication triggered across instances for: ${versionedIdemKey}`);
+      // Return 409 with version info or conflict message
       return res.status(409).json({
         error: 'Duplicate scan request: this scan job is already processing or completed.',
         code: 'IDEMPOTENCY_CONFLICT',
-        idempotencyKey: cleanKey
+        idempotencyKey: cleanKey,
+        analysisVersion: VISION_PIPELINE_VERSION
       });
     }
   }
@@ -452,7 +458,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         if (current.status === 'failed') {
           return res.status(500).json({
             error: current.error || 'Vehicle identification failed.',
-            scan_id: ingestion.scanId
+            scan_id: ingestion.scanId,
+            analysisVersion: VISION_PIPELINE_VERSION
           });
         }
       }
@@ -460,7 +467,28 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Return immediate or awaited completed result
     if (finalResult) {
-      return res.status(200).json(formatScanResponse(finalResult));
+      const responsePayload = formatScanResponse(finalResult);
+
+      // Non-sensitive production debug trace (never logs secrets, auth tokens, or base64)
+      console.log('[api/analyze] Production Debug Trace:', {
+        requestId: (req.headers['x-vercel-id'] as string) || ingestion.traceId,
+        traceId: ingestion.traceId,
+        analysisVersion: VISION_PIPELINE_VERSION,
+        provider: rawProvider,
+        model: isCloudflare ? '@cf/meta/llama-3.2-11b-vision-instruct' : 'gemini-2.5-flash',
+        imageSha256Short: ingestion.scanId?.substring(0, 12),
+        cacheHit: Boolean(ingestion.isCachedHit),
+        cacheVersion: VISION_PIPELINE_VERSION,
+        idempotencyHit: Boolean(ingestion.isCachedHit),
+        rawMake: finalResult.canonicalResult?.identification?.make || finalResult.make,
+        rawModel: finalResult.canonicalResult?.identification?.model_family || finalResult.model,
+        normalizedMake: responsePayload.make,
+        normalizedModel: responsePayload.model,
+        canonicalVehicleId: responsePayload.canonical_vehicle_id,
+        specRecordId: responsePayload.canonical_vehicle_id || 'default'
+      });
+
+      return res.status(200).json(responsePayload);
     }
 
     // Return Asynchronous Job Response if queue wait exceeded
