@@ -14,6 +14,7 @@ import type {
   ViewpointType,
   VisualEvidence
 } from '../types';
+import { fineGrainedModelDiscriminator } from './fineGrainedModelDiscriminator';
 
 export interface HierarchicalClassificationInput {
   visual_evidence: VisualEvidence;
@@ -39,6 +40,8 @@ export interface HierarchicalClassificationResult {
   contradictions: string[];
   reason: string;
   needs_adversarial_verification: boolean;
+  discriminator_identity?: string;
+  evidence_grounded?: boolean;
 }
 
 // Known architectural signatures for contradiction enforcement
@@ -321,6 +324,59 @@ export class HierarchicalClassifier {
       };
     });
 
+    // 2b. Generalized Fine-Grained Model Discrimination (Reusable Morphological Traits + Visibility Matrix)
+    const fgResult = fineGrainedModelDiscriminator.discriminate({
+      visualEvidence: visual_evidence,
+      viewpoint,
+      evidenceList: [
+        ...(visual_evidence.distinctive_details || []),
+        visual_evidence.headlights || '',
+        visual_evidence.grille || '',
+        visual_evidence.roofline || '',
+        visual_evidence.aero || '',
+        visual_evidence.exhaust || ''
+      ].filter(Boolean),
+      candidates: calibratedCandidates.map((c) => ({ name: c.name, score: c.score })),
+      fallbackMake: input.raw_make || undefined,
+      fallbackModel: input.raw_model || undefined
+    });
+
+    if (fgResult.scoredCandidates.length > 0) {
+      for (const fgCand of fgResult.scoredCandidates) {
+        const existingIdx = calibratedCandidates.findIndex(
+          (c) =>
+            c.name.toLowerCase() === fgCand.displayName.toLowerCase() ||
+            c.name.toLowerCase() === `${fgCand.make} ${fgCand.model}`.toLowerCase() ||
+            c.name.toLowerCase().includes(fgCand.model.toLowerCase())
+        );
+
+        if (existingIdx >= 0) {
+          const existing = calibratedCandidates[existingIdx];
+          existing.score = fgCand.calibratedScore;
+          if (!existing.supporting_evidence) existing.supporting_evidence = [];
+          if (!existing.contradictions) existing.contradictions = [];
+          if (!existing.unobservable_features) existing.unobservable_features = [];
+          fgCand.supportingEvidence.forEach((s) => {
+            if (!existing.supporting_evidence.includes(s)) existing.supporting_evidence.push(s);
+          });
+          fgCand.contradictions.forEach((c) => {
+            if (!existing.contradictions.includes(c)) existing.contradictions.push(c);
+          });
+          fgCand.unobservableTraits.forEach((u) => {
+            if (!existing.unobservable_features!.includes(u)) existing.unobservable_features!.push(u);
+          });
+        } else {
+          calibratedCandidates.push({
+            name: fgCand.displayName,
+            score: fgCand.calibratedScore,
+            supporting_evidence: fgCand.supportingEvidence,
+            contradictions: fgCand.contradictions,
+            unobservable_features: fgCand.unobservableTraits
+          });
+        }
+      }
+    }
+
     // 3. Sort candidates descending by calibrated score
     calibratedCandidates.sort((a, b) => b.score - a.score);
 
@@ -475,7 +531,18 @@ export class HierarchicalClassifier {
       candidate_separation: separation,
       contradictions: activeContradictions,
       reason,
-      needs_adversarial_verification: needsAdversarial
+      needs_adversarial_verification: needsAdversarial,
+      discriminator_identity: (() => {
+        if (fgResult.topCandidate) {
+          const fgModel = fgResult.topCandidate.model.toLowerCase();
+          const topLower = (topCandidate?.name || '').toLowerCase();
+          if (topLower.includes(fgModel) || fgResult.topCandidate.displayName.toLowerCase().includes(topLower)) {
+            return fgResult.topCandidate.displayName;
+          }
+        }
+        return topCandidate?.name || undefined;
+      })(),
+      evidence_grounded: fgResult.scoredCandidates.length > 0 ? fgResult.evidenceGrounded : Boolean(topCandidate && (topCandidate.supporting_evidence?.length || 0) > 0)
     };
   }
 }

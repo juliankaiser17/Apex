@@ -174,6 +174,44 @@ class CanonicalVehicleRegistry {
       'ev9 gt-line',
       'ev9 awd'
     ]);
+
+    this.registerAliases('maserati-mc20', [
+      'mc20',
+      'maserati mc 20',
+      'mc 20',
+      'mc20 coupe',
+      'mc20 cielo'
+    ]);
+
+    this.registerAliases('maserati-granturismo', [
+      'granturismo',
+      'gran turismo',
+      'maserati gran turismo',
+      'granturismo s',
+      'granturismo sport',
+      'granturismo mc'
+    ]);
+
+    this.registerAliases('mclaren-570s', [
+      '570s',
+      'mclaren 570',
+      '570s coupe',
+      '570s spider',
+      '570gt'
+    ]);
+
+    this.registerAliases('mclaren-artura', [
+      'artura',
+      'mclaren artura',
+      'artura spider'
+    ]);
+
+    this.registerAliases('koenigsegg-gemera', [
+      'gemera',
+      'koenigsegg gemera',
+      'gemera hv8',
+      'gemera tfg'
+    ]);
   }
 
   public registerVehicle(record: CanonicalVehicleRecord) {

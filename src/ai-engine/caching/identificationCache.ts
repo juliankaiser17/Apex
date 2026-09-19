@@ -6,7 +6,7 @@
 
 import type { IdentificationResult } from '../types';
 
-export const VISION_PIPELINE_VERSION = 'v2.6.0-clean-forensics';
+export const VISION_PIPELINE_VERSION = 'v2.7.0-fine-grained-discriminator';
 
 export function buildCacheKey(
   imageHash: string,

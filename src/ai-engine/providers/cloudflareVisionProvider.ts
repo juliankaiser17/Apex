@@ -547,6 +547,9 @@ Rules:
         rawMake = null; rawModel = null; rawGen = null; rawVariant = null;
       }
 
+      const initialRawProviderIdentity = `${rawMake || ''} ${rawModel || ''}`.trim();
+      let verificationConsumed = false;
+
       // Generic Contamination & Contradiction Guard (Constraint 4 & 5)
       const isSuspicious = (() => {
         if (!rawMake || !rawModel) return true;
@@ -582,6 +585,7 @@ Rules:
       // Optional Independent Clean Verification Pass (Max 1 additional request, no candidate anchoring)
       if (isSuspicious) {
         console.warn('[CloudflareVisionProvider] Suspicious classification or contradiction detected. Invoking clean independent verification pass...');
+        verificationConsumed = true;
         try {
           const verifyPrompt = `Inspect the focal vehicle in this photo with independent forensic scrutiny.
 Base your answer exclusively on the visible features in this image.
@@ -731,8 +735,90 @@ Rules:
       if (finalMake && finalModel && finalModel.toLowerCase().startsWith(finalMake.toLowerCase() + ' ')) {
         finalModel = finalModel.slice(finalMake.length + 1).trim();
       }
-      const finalGen = classResult.identification.generation || rawGen || undefined;
-      const finalVariant = classResult.identification.variant || rawVariant || undefined;
+      let finalGen = classResult.identification.generation || rawGen || undefined;
+      let finalVariant = classResult.identification.variant || rawVariant || undefined;
+
+      // Optional Neutral Pairwise Verification Pass (Hard Amendment 4 & 7: Max 1 additional call, ceiling 2 total)
+      if (!verificationConsumed && classResult.candidate_separation < 0.15 && classResult.calibrated_candidates.length >= 2) {
+        const candA = classResult.calibrated_candidates[0].name;
+        const candB = classResult.calibrated_candidates[1].name;
+        console.log(`[CloudflareVisionProvider] Close candidate margin (${classResult.candidate_separation}). Invoking neutral pairwise verification between "${candA}" and "${candB}"...`);
+        verificationConsumed = true;
+        try {
+          const neutralVerifyPrompt = `Inspect the focal vehicle in this photo with rigorous neutral forensic scrutiny.
+Compare Candidate A: "${candA}" and Candidate B: "${candB}" against the visible exterior features in the image.
+
+CRITICAL INVARIANTS:
+1. Do NOT assume either candidate is correct.
+2. Ground analysis exclusively in visible exterior features (headlights, grille, side air scoops/tendons, roofline/greenhouse, door architecture, rear exhaust).
+3. If a feature is occluded or not visible from this viewpoint, it contributes ZERO evidence and ZERO penalty.
+4. Identify which candidate has stronger positive evidence and which has stronger contradictions.
+
+Output flat valid JSON only:
+{
+  "selected_winner": "Candidate A" | "Candidate B" | "neither",
+  "winner_name": "${candA}" | "${candB}" | null,
+  "confidence": 0.88,
+  "margin": 0.20,
+  "candidate_a_matches": ["visible trait 1"],
+  "candidate_a_contradictions": [],
+  "candidate_b_matches": [],
+  "candidate_b_contradictions": ["visible trait contradicted"],
+  "evidence": ["observable cue 1", "observable cue 2"],
+  "reason": "Neutral comparison rationale"
+}`;
+
+          const verifyParams: any = {
+            accountId,
+            token,
+            model,
+            imageDataUrl: fullDataUrl,
+            timeoutMs: effectiveTimeoutMs,
+            temperature: 0.1,
+            seed: 42,
+            maxTokens: effectiveMaxTokens,
+            stream: false
+          };
+
+          if (format === 'inst') {
+            verifyParams.prompt = `[INST] <<SYS>>\n${cleanSystemPrompt}\n<</SYS>>\n\n${neutralVerifyPrompt} [/INST]`;
+          } else {
+            verifyParams.messages = [
+              { role: 'system', content: cleanSystemPrompt },
+              { role: 'user', content: neutralVerifyPrompt }
+            ];
+          }
+
+          const verifyResult = await this.executeCloudflareRequest(verifyParams);
+          let verifyJson = verifyResult.json;
+          if (verifyJson && typeof verifyJson.response === 'object' && verifyJson.response !== null) {
+            verifyJson = verifyJson.response;
+          }
+
+          if (verifyJson && (verifyJson.selected_winner || verifyJson.winner_name)) {
+            const winner = verifyJson.selected_winner || verifyJson.winner_name;
+            if (winner === 'Candidate A' || winner === candA) {
+              classResult.calibrated_candidates[0].score = Math.min(0.99, classResult.calibrated_candidates[0].score + 0.20);
+            } else if (winner === 'Candidate B' || winner === candB) {
+              classResult.calibrated_candidates[1].score = Math.min(0.99, classResult.calibrated_candidates[1].score + 0.20);
+            }
+            classResult.calibrated_candidates.sort((a, b) => b.score - a.score);
+            classResult.top_candidate = classResult.calibrated_candidates[0] || null;
+            classResult.candidate_separation = classResult.top_candidate
+              ? Number((classResult.top_candidate.score - (classResult.calibrated_candidates[1]?.score || 0)).toFixed(3))
+              : 0;
+            if (classResult.top_candidate) {
+              const topParts = classResult.top_candidate.name.split(' ');
+              if (topParts.length > 1) {
+                finalMake = topParts[0];
+                finalModel = topParts.slice(1).join(' ').replace(/\s*\([^)]*\)/g, '').trim();
+              }
+            }
+          }
+        } catch (neutralErr: any) {
+          console.warn('[CloudflareVisionProvider] Neutral verification skipped or non-fatal:', neutralErr?.message);
+        }
+      }
 
       const specResolution = resolveCanonicalVehicleSpecs({
         make: finalMake,
@@ -814,6 +900,8 @@ Rules:
         specificity_level: classResult.specificity_level,
         reason: classResult.reason,
         needs_retake: calibConf.needs_retake,
+        raw_provider_identity: initialRawProviderIdentity || `${rawMake || ''} ${rawModel || ''}`.trim() || 'Unknown',
+        discriminator_identity: classResult.discriminator_identity || `${finalMake} ${finalModel}`,
         specs: parsed.specs,
         privacy_redactions: Array.isArray(parsed.privacy_redactions) ? parsed.privacy_redactions : [],
         upstream_evidence: upstreamEvidence,

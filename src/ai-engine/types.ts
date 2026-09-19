@@ -161,6 +161,8 @@ export interface CanonicalScanResult {
   reason: string;
   needs_retake: boolean;
   needs_review?: boolean;
+  raw_provider_identity?: string;
+  discriminator_identity?: string;
   upstream_evidence?: ImmutableUpstreamEvidence;
   provenance?: EvidenceProvenance;
   canonical_identity?: OpenCanonicalIdentity;
