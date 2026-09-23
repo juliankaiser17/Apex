@@ -469,6 +469,78 @@ class CanonicalVehicleRegistry {
       'gemera hv8',
       'gemera tfg'
     ]);
+
+    // ── ASTON MARTIN ──
+    this.registerAliases('aston-martin-dbs', [
+      'aston martin dbs',
+      'dbs',
+      'dbs v12',
+      'dbs coupe',
+      'aston martin dbs coupe',
+      'aston martin dbs v12 coupe',
+      'dbs v12 coupe'
+    ]);
+
+    this.registerAliases('aston-martin-db9', [
+      'aston martin db9',
+      'db9',
+      'db9 coupe',
+      'aston martin db9 coupe'
+    ]);
+
+    this.registerAliases('aston-martin-db7', [
+      'aston martin db7',
+      'db7',
+      'db7 coupe',
+      'db7 vantage'
+    ]);
+
+    // ── MERCEDES-BENZ S-CLASS & MAYBACH ──
+    this.registerAliases('mercedes-s-class-w223', [
+      'mercedes-benz s-class',
+      'mercedes s-class',
+      's-class',
+      's580',
+      's500',
+      'w223',
+      'mercedes w223',
+      's-class w223',
+      'mercedes s class'
+    ]);
+
+    this.registerAliases('mercedes-maybach-s-class', [
+      'mercedes-maybach',
+      'maybach s-class',
+      'maybach',
+      'mercedes-maybach s580',
+      'mercedes-maybach s680',
+      'maybach s580',
+      'maybach s680',
+      'z223',
+      'mercedes maybach'
+    ]);
+
+    // ── BMW 7 SERIES ──
+    this.registerAliases('bmw-7-series-g70', [
+      'bmw 7 series',
+      '7 series',
+      'bmw 7-series',
+      '740i',
+      '760i',
+      'g70',
+      'bmw g70',
+      '7 series sedan'
+    ]);
+
+    // ── LAMBORGHINI HURACÁN EVO ──
+    this.registerAliases('lamborghini-huracan-evo', [
+      'huracan evo',
+      'lamborghini huracan evo',
+      'huracán evo',
+      'lamborghini huracán evo',
+      'huracan evo coupe',
+      'huracan evo spyder'
+    ]);
   }
 
   public registerVehicle(record: CanonicalVehicleRecord) {
@@ -689,7 +761,8 @@ class CanonicalVehicleRegistry {
         make: record.make,
         modelFamily: record.model,
         generation: record.generation,
-        variant: record.trim || variant || null,
+        // INVARIANT: Never backfill trim from catalog record. Variant requires direct visual corroboration.
+        variant: variant || null,
         registryStatus: 'REGISTERED',
         source: 'registry',
         displayName: record.displayName || `${record.make} ${record.model}`,

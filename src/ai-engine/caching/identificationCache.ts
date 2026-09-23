@@ -6,14 +6,16 @@
 
 import type { IdentificationResult } from '../types';
 
-// v2.9.0 — exact-model release:
+// v3.0.0 — production stabilization release:
 //   * generalized fine-grained model discriminator & exact model discrimination
 //   * conjunctive negation detection for compound phrases (e.g. without hood vents or nostrils)
 //   * raw-provider overwrite prevention and viewpoint-gated candidate consistency
 //   * authoritative canonical vehicle registry and verified specs binding
-// Bumping the version retires every identification cached under the previous pipeline so stale
+//   * strict visible-absence contradiction gating
+//   * dual-mode repeatability hardening (cold vs persistent)
+// Bumping the version retires every identification cached under previous pipelines so stale
 // wrong answers cannot be served.
-export const VISION_PIPELINE_VERSION = 'v2.9.0-exact-model-release';
+export const VISION_PIPELINE_VERSION = 'v3.0.0-production-stabilization';
 
 export function buildCacheKey(
   imageHash: string,
@@ -78,17 +80,19 @@ export class IdentificationCache {
     return null;
   }
 
-  public setResult(keyOrHash: string, result: IdentificationResult, provider?: string, model?: string) {
+  public setResult(keyOrHash: string, result: IdentificationResult, provider?: string, model?: string, customTtlMs?: number) {
     const key = this.resolveKey(keyOrHash, provider, model);
     if (!key || !result) return;
     
     // Stamp pipelineVersion on result
     result.pipelineVersion = VISION_PIPELINE_VERSION;
 
+    const ttl = (typeof customTtlMs === 'number' && customTtlMs > 0) ? customTtlMs : this.ttlMs;
+
     // Store deep clone to guarantee cache immutability
     this.resultCache.set(key, {
       result: JSON.parse(JSON.stringify(result)),
-      expiresAt: Date.now() + this.ttlMs
+      expiresAt: Date.now() + ttl
     });
   }
 

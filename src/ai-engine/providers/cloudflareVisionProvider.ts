@@ -841,9 +841,12 @@ Output flat valid JSON only:
               const verifiedMatch = canonicalVehicleRegistry.lookupByTextOrAlias(classResult.top_candidate.name, finalMake);
               if (verifiedMatch) {
                 finalMake = verifiedMatch.make;
-                finalModel = verifiedMatch.model;
                 if (verifiedMatch.generation) finalGen = verifiedMatch.generation;
-                if (verifiedMatch.trim) finalVariant = verifiedMatch.trim;
+                if (verifiedMatch.trim && (classResult.top_candidate.name.toLowerCase().includes(verifiedMatch.trim.toLowerCase()) || (finalVariant && finalVariant.toLowerCase() === verifiedMatch.trim.toLowerCase()))) {
+                  finalVariant = verifiedMatch.trim;
+                } else if (!finalVariant || !classResult.top_candidate.name.toLowerCase().includes(finalVariant.toLowerCase())) {
+                  finalVariant = undefined;
+                }
                 classResult.canonical_vehicle_id = verifiedMatch.vehicleId;
                 classResult.canonical_display_name = verifiedMatch.displayName;
               } else {

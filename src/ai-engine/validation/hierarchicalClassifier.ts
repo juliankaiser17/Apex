@@ -133,6 +133,24 @@ export const ARCHITECTURAL_SIGNATURES: Record<
     proportions: ['mid-engine', 'wraparound fighter-jet canopy', 'dihedral synchro-helix doors'],
     signature_grilles: ['wide low front oval intake'],
     disallowed_features: ['tall sedan', 'twin kidney grille']
+  },
+  aston_martin: {
+    typical_body_styles: ['coupe', 'convertible'],
+    proportions: ['front-engine', 'long-hood', 'short-deck', 'grand tourer proportions'],
+    signature_grilles: ['traditional aston inverted trapezoid grille', 'horizontal mesh grille', 'carbon front splitter'],
+    disallowed_features: ['twin kidney grille', 'panamericana grille', 'mid-engine wedge', 'rear-engine flat-six']
+  },
+  rolls_royce: {
+    typical_body_styles: ['sedan', 'coupe', 'convertible', 'suv'],
+    proportions: ['front-engine', 'monolithic formal upright greenhouse', 'coach doors'],
+    signature_grilles: ['pantheon grille', 'upright polished chrome vertical slats', 'spirit of ecstasy'],
+    disallowed_features: ['twin kidney grille', 'mid-engine wedge', 'active rear airbrake', 'carbon front splitter']
+  },
+  bentley: {
+    typical_body_styles: ['coupe', 'convertible', 'sedan', 'suv'],
+    proportions: ['front-engine', 'muscular rear haunches', 'grand tourer silhouette'],
+    signature_grilles: ['large rectangular matrix mesh grille', 'dual twin round headlights'],
+    disallowed_features: ['twin kidney grille', 'vertical slit headlights', 'extreme cab-forward wedge']
   }
 };
 
@@ -165,20 +183,6 @@ export class HierarchicalClassifier {
     // 1b. AMENDMENT 1: Corroborated Visual Manufacturer Evidence Detection
     // Raw make alone is NOT authoritative. Hard lock requires corroborated visual evidence
     // or high independent manufacturer confidence (>= 0.70).
-    //
-    // INVARIANT — MANUFACTURER LOCK REQUIRES MANUFACTURER IDENTITY:
-    // Only evidence that identifies the MANUFACTURER may lock a manufacturer:
-    //   (a) the manufacturer nameplate / wordmark, or
-    //   (b) a manufacturer-exclusive emblem geometry (crest, roundel, star, bull, trident, horse).
-    // Model names, generation codes, and generic body features must NEVER lock a manufacturer,
-    // because a generic feature (e.g. "horizontal strakes", "sloping roofline", "dihedral doors")
-    // can legitimately appear on several manufacturers and would otherwise hard-exclude the true
-    // make from every downstream comparison.
-    // A cue may corroborate a manufacturer only when it is IDENTITY-BEARING: a manufacturer
-    // nameplate/emblem, or a design signature that is effectively exclusive to that manufacturer.
-    // Purely generic active-aero / body vocabulary must NOT corroborate a manufacturer — a phrase
-    // such as "horizontal strakes" is shared across marques, and letting it lock a manufacturer
-    // hard-excludes the true make from every downstream comparison (proven cross-brand failure).
     const brandVisualEvidence: Record<string, boolean> = {
       nissan: /\b(nissan|skyline|gt-?r|gtr|nismo|v-?spec|r32|r33|r34|r35|twin\s+round\s+tail|quad\s+round\s+tail|circular\s+tail)\b/i.test(evidenceText),
       honda: /\b(honda|integra|type-?r|vtec|dc2|dc5|nsx|civic|s2000)\b/i.test(evidenceText),
@@ -189,15 +193,27 @@ export class HierarchicalClassifier {
       ferrari: /\b(ferrari|prancing\s+horse|458|488|f8|sf90|daytona\s+sp3|icona|mustache\s+aero)\b/i.test(evidenceText),
       lamborghini: /\b(lamborghini|hurac[aá]n|gallardo|aventador|revuelto|bull\s+emblem|y-shaped\s+drl|hexagonal\s+intakes?)\b/i.test(evidenceText),
       bmw: /\b(kidney|hofmeister|bmw|m3|m4|m5|m8)\b/i.test(evidenceText),
-      mercedes: /\b(panamericana|three-pointed\s+star|mercedes|amg\s+grille)\b/i.test(evidenceText),
-      audi: /\b(singleframe|quattro|audi)\b/i.test(evidenceText)
+      mercedes: /\b(panamericana|three-pointed\s+star|mercedes(?:-benz)?|amg\s+grille|maybach|vertical\s+chrome\s+(?:pinstripe\s+)?grille|s-class|s\s*class)\b/i.test(evidenceText),
+      audi: /\b(singleframe|quattro|audi)\b/i.test(evidenceText),
+      aston_martin: /\b(aston\s+martin|dbs|db9|db7|db11|db12|vantage|vanquish|valkyrie|swan\s+doors?|aeroblade|curlicue)\b/i.test(evidenceText),
+      rolls_royce: /\b(rolls[- ]royce|phantom|ghost|cullinan|wraith|spirit\s+of\s+ecstasy|pantheon)\b/i.test(evidenceText),
+      bentley: /\b(bentley|continental\s+gt|flying\s+spur|bentayga|flying\s+b|matrix\s+grille)\b/i.test(evidenceText)
+    };
+
+    const normalizeBrandKey = (make: string): string => {
+      const m = (make || '').toLowerCase().trim();
+      if (m.includes('mercedes')) return 'mercedes';
+      if (m.includes('aston')) return 'aston_martin';
+      if (m.includes('rolls')) return 'rolls_royce';
+      if (m.includes('bentley')) return 'bentley';
+      return m;
     };
 
     const visuallyCorroboratedMakes = Object.entries(brandVisualEvidence)
       .filter(([_, hasCues]) => hasCues)
       .map(([make]) => make);
 
-    const rawMakeNorm = (input.raw_make || '').toLowerCase().trim();
+    const rawMakeNorm = normalizeBrandKey(input.raw_make || '');
 
     // Permit manufacturer locking only for manufacturers this engine actually models.
     const KNOWN_MANUFACTURERS = new Set(Object.keys(brandVisualEvidence));
@@ -215,11 +231,7 @@ export class HierarchicalClassifier {
         lockedManufacturer = null;
       }
     } else {
-      // No manufacturer-identity cue was observed. Fall back to the raw provider's manufacturer
-      // HYPOTHESIS, which is the weakest defensible authority (it is never derived from generic
-      // body-feature vocabulary). This preserves foreign-candidate exclusion without allowing a
-      // generic feature word to override the true manufacturer.
-      // A high independent manufacturer confidence is additionally accepted when supplied.
+      // Fall back to normalized raw provider make if recognized
       if (rawMakeNorm && KNOWN_MANUFACTURERS.has(rawMakeNorm)) {
         lockedManufacturer = rawMakeNorm;
       }
@@ -261,6 +273,9 @@ export class HierarchicalClassifier {
       else if (candNameLower.includes('nissan')) candidateMake = 'nissan';
       else if (candNameLower.includes('maserati')) candidateMake = 'maserati';
       else if (candNameLower.includes('koenigsegg')) candidateMake = 'koenigsegg';
+      else if (candNameLower.includes('aston')) candidateMake = 'aston_martin';
+      else if (candNameLower.includes('rolls')) candidateMake = 'rolls_royce';
+      else if (candNameLower.includes('bentley')) candidateMake = 'bentley';
 
       // ── CONTRADICTION ENGINE RULE 0: BUS / COMMERCIAL FLEET ELIMINATION ──
       const structuredClass = (visual_evidence as any)?.vehicle_classification;
@@ -566,14 +581,14 @@ export class HierarchicalClassifier {
         visual_evidence.exhaust || ''
       ].filter(Boolean),
       candidates: calibratedCandidates.filter((c) => !c.invalid).map((c) => ({ name: c.name, score: c.score })),
-      fallbackMake: lockedManufacturer || input.raw_make || undefined,
+      fallbackMake: (lockedManufacturer === 'mercedes' ? 'Mercedes-Benz' : lockedManufacturer === 'aston_martin' ? 'Aston Martin' : lockedManufacturer === 'rolls_royce' ? 'Rolls-Royce' : lockedManufacturer) || input.raw_make || undefined,
       fallbackModel: input.raw_model || undefined
     });
 
     if (fgResult.scoredCandidates.length > 0) {
       for (const fgCand of fgResult.scoredCandidates) {
-        const fgMakeLower = fgCand.make.toLowerCase();
-        if (lockedManufacturer && fgMakeLower !== lockedManufacturer) {
+        const fgMakeNorm = normalizeBrandKey(fgCand.make);
+        if (lockedManufacturer && fgMakeNorm !== lockedManufacturer) {
           continue; // Exclude candidates outside locked manufacturer
         }
 
@@ -676,7 +691,12 @@ export class HierarchicalClassifier {
 
     // 3. Extract initial resolved make
     let resolvedMake = lockedManufacturer
-      ? (lockedManufacturer === 'mercedes' ? 'Mercedes-Benz' : lockedManufacturer === 'bmw' ? 'BMW' : lockedManufacturer.charAt(0).toUpperCase() + lockedManufacturer.slice(1))
+      ? (lockedManufacturer === 'mercedes' ? 'Mercedes-Benz'
+        : lockedManufacturer === 'bmw' ? 'BMW'
+        : lockedManufacturer === 'aston_martin' ? 'Aston Martin'
+        : lockedManufacturer === 'rolls_royce' ? 'Rolls-Royce'
+        : lockedManufacturer === 'bentley' ? 'Bentley'
+        : lockedManufacturer.charAt(0).toUpperCase() + lockedManufacturer.slice(1))
       : input.raw_make;
 
     // INVARIANT 2: CANDIDATE COMPLETENESS GATE
@@ -809,9 +829,16 @@ export class HierarchicalClassifier {
         canonicalRecord = canonMatch;
         resolvedMake = canonMatch.make;
         resolvedModelFamily = canonMatch.model;
-        if (canonMatch.generation) resolvedGeneration = canonMatch.generation;
-        if (canonMatch.trim) resolvedVariant = canonMatch.trim;
-        numericSpecificity = canonMatch.specificityLevel ?? 2;
+        if (!resolvedGeneration && canonMatch.generation) {
+          resolvedGeneration = canonMatch.generation;
+        }
+        // INVARIANT: Variant/package requires direct evidence; do NOT backfill absent trims from canonical database
+        if (canonMatch.trim && (topCandidate.name.toLowerCase().includes(canonMatch.trim.toLowerCase()) || (resolvedVariant && resolvedVariant.toLowerCase() === canonMatch.trim.toLowerCase()))) {
+          resolvedVariant = canonMatch.trim;
+        } else if (!topCandidate.name.toLowerCase().includes(String(resolvedVariant || '').toLowerCase())) {
+          resolvedVariant = resolvedVariant || null;
+        }
+        numericSpecificity = canonMatch.specificityLevel ?? (resolvedVariant ? 4 : resolvedGeneration ? 2 : 1);
       } else {
         const parts = topCandidate.name.split(' ');
         if (!resolvedMake && parts.length > 0) resolvedMake = parts[0];

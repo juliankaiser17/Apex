@@ -2,7 +2,7 @@
 import { createClient } from "@supabase/supabase-js";
 
 // src/ai-engine/caching/identificationCache.ts
-var VISION_PIPELINE_VERSION = "v2.9.0-exact-model-release";
+var VISION_PIPELINE_VERSION = "v3.0.0-production-stabilization";
 function buildCacheKey(imageHash, provider = "cloudflare", model = "@cf/meta/llama-3.2-11b-vision-instruct") {
   const cleanHash = (imageHash || "").toLowerCase().trim();
   const cleanProvider = (provider || "cloudflare").toLowerCase().trim();
@@ -53,13 +53,14 @@ var IdentificationCache = class {
     this.missCount += 1;
     return null;
   }
-  setResult(keyOrHash, result, provider, model) {
+  setResult(keyOrHash, result, provider, model, customTtlMs) {
     const key = this.resolveKey(keyOrHash, provider, model);
     if (!key || !result) return;
     result.pipelineVersion = VISION_PIPELINE_VERSION;
+    const ttl = typeof customTtlMs === "number" && customTtlMs > 0 ? customTtlMs : this.ttlMs;
     this.resultCache.set(key, {
       result: JSON.parse(JSON.stringify(result)),
-      expiresAt: Date.now() + this.ttlMs
+      expiresAt: Date.now() + ttl
     });
   }
   has(keyOrHash, provider, model) {
@@ -446,7 +447,6 @@ var APEX_LOCAL_VEHICLE_DATABASE = [
     model: "911 GT3 RS",
     generation: "992",
     yearStart: 2022,
-    trim: "Weissach Package",
     bodyStyle: "Coupe",
     engine: "4.0L Naturally Aspirated Boxer-6",
     displacementCc: 3996,
@@ -552,7 +552,6 @@ var APEX_LOCAL_VEHICLE_DATABASE = [
     generation: "918",
     yearStart: 2013,
     yearEnd: 2015,
-    trim: "Weissach Package",
     bodyStyle: "Targa",
     engine: "4.6L Naturally Aspirated V8 + Dual Electric Motors",
     displacementCc: 4593,
@@ -2142,6 +2141,271 @@ var APEX_LOCAL_VEHICLE_DATABASE = [
     notableFacts: "Front-mid engine grand tourer sports car featuring Panamericana vertical grille, aluminum spaceframe, and hot-inside-V twin-turbo V8.",
     baselineRarity: "rare",
     visualSignature: { aspectRatio: 2.1, silhouetteClass: "widebody_supercar", prominentColors: ["Solarbeam Yellow", "Designo Selenite Grey Magno", "Iridium Silver"] }
+  },
+  {
+    id: "porsche-718-boxster",
+    manufacturer: "Porsche",
+    model: "718 Boxster",
+    generation: "982",
+    yearStart: 2016,
+    bodyStyle: "Convertible",
+    engine: "2.0L Turbocharged Boxer-4",
+    displacementCc: 1988,
+    aspiration: "Turbocharged",
+    cylinders: 4,
+    drivetrain: "RWD",
+    transmission: "7-Speed Dual-Clutch (PDK) / 6-Speed Manual",
+    horsepower: 300,
+    torqueNm: 380,
+    zeroToHundredSec: 4.9,
+    zeroToSixtyMphSec: 4.7,
+    topSpeedKmH: 275,
+    curbWeightKg: 1335,
+    fuelType: "Gasoline",
+    productionYears: "2016\u2013Present",
+    originCountry: "Germany",
+    notableFacts: "Mid-engine roadster featuring lateral air scoops, low center of gravity, and fabric folding soft top.",
+    baselineRarity: "rare",
+    visualSignature: { aspectRatio: 2.1, silhouetteClass: "low_slung_coupe", prominentColors: ["Racing Yellow", "Guards Red", "Miami Blue", "White"] }
+  },
+  {
+    id: "porsche-911-carrera-cabriolet-996",
+    manufacturer: "Porsche",
+    model: "911 Carrera Cabriolet",
+    generation: "996",
+    yearStart: 1998,
+    yearEnd: 2004,
+    bodyStyle: "Convertible",
+    engine: "3.4L Naturally Aspirated Boxer-6",
+    displacementCc: 3387,
+    aspiration: "Naturally Aspirated",
+    cylinders: 6,
+    drivetrain: "RWD",
+    transmission: "6-Speed Manual / 5-Speed Tiptronic",
+    horsepower: 296,
+    torqueNm: 350,
+    zeroToHundredSec: 5.4,
+    zeroToSixtyMphSec: 5.2,
+    topSpeedKmH: 280,
+    curbWeightKg: 1395,
+    fuelType: "Gasoline",
+    productionYears: "1998\u20132004",
+    originCountry: "Germany",
+    notableFacts: "First water-cooled 911 convertible, distinguished by fried-egg headlights, Turbo Twist wheels, and fabric soft top.",
+    baselineRarity: "rare",
+    visualSignature: { aspectRatio: 2.15, silhouetteClass: "low_slung_coupe", prominentColors: ["Arctic Silver", "Basalt Black", "Guards Red"] }
+  },
+  {
+    id: "porsche-911-turbo",
+    manufacturer: "Porsche",
+    model: "911 Turbo",
+    generation: "992",
+    yearStart: 2020,
+    bodyStyle: "Coupe",
+    engine: "3.7L Twin-Turbo Boxer-6",
+    displacementCc: 3745,
+    aspiration: "Twin-Turbo",
+    cylinders: 6,
+    drivetrain: "AWD",
+    transmission: "8-Speed Dual-Clutch (PDK)",
+    horsepower: 572,
+    torqueNm: 750,
+    zeroToHundredSec: 2.8,
+    zeroToSixtyMphSec: 2.7,
+    topSpeedKmH: 320,
+    curbWeightKg: 1640,
+    fuelType: "Gasoline",
+    productionYears: "2020\u2013Present",
+    originCountry: "Germany",
+    notableFacts: "Supercar everyday icon with rear-fender intercooler scoops, active front aero, and deployable rear wing without towering swan-neck struts.",
+    baselineRarity: "legendary",
+    visualSignature: { aspectRatio: 2.15, silhouetteClass: "widebody_supercar", prominentColors: ["GT Silver", "Night Blue", "Agate Grey"] }
+  },
+  {
+    id: "aston-martin-dbs",
+    manufacturer: "Aston Martin",
+    model: "DBS",
+    generation: "2007\u20132012",
+    yearStart: 2007,
+    yearEnd: 2012,
+    bodyStyle: "Coupe",
+    engine: "5.9L Naturally Aspirated V12",
+    displacementCc: 5935,
+    aspiration: "Naturally Aspirated",
+    cylinders: 12,
+    drivetrain: "RWD",
+    transmission: "6-Speed Manual / 6-Speed Touchtronic 2",
+    horsepower: 510,
+    torqueNm: 570,
+    zeroToHundredSec: 4.3,
+    zeroToSixtyMphSec: 4.1,
+    topSpeedKmH: 307,
+    curbWeightKg: 1695,
+    fuelType: "Gasoline",
+    productionYears: "2007\u20132012",
+    originCountry: "United Kingdom",
+    notableFacts: "Flagship V12 grand tourer made famous as James Bond\u2019s car in Casino Royale, featuring carbon fiber hood with dual strakes and deep front carbon splitter.",
+    baselineRarity: "legendary",
+    visualSignature: { aspectRatio: 2.2, silhouetteClass: "grand_tourer", prominentColors: ["Casino Ice", "Quantum Silver", "Storm Black"] }
+  },
+  {
+    id: "aston-martin-db9",
+    manufacturer: "Aston Martin",
+    model: "DB9",
+    generation: "VH Platform",
+    yearStart: 2004,
+    yearEnd: 2016,
+    bodyStyle: "Coupe",
+    engine: "5.9L Naturally Aspirated V12",
+    displacementCc: 5935,
+    aspiration: "Naturally Aspirated",
+    cylinders: 12,
+    drivetrain: "RWD",
+    transmission: "6-Speed Touchtronic",
+    horsepower: 450,
+    torqueNm: 570,
+    zeroToHundredSec: 4.7,
+    zeroToSixtyMphSec: 4.5,
+    topSpeedKmH: 299,
+    curbWeightKg: 1760,
+    fuelType: "Gasoline",
+    productionYears: "2004\u20132016",
+    originCountry: "United Kingdom",
+    notableFacts: "Iconic Henrik Fisker designed British grand tourer with extruded aluminum VH platform and swan-wing doors.",
+    baselineRarity: "rare",
+    visualSignature: { aspectRatio: 2.2, silhouetteClass: "grand_tourer", prominentColors: ["Onyx Black", "Titanium Silver", "Tungsten Silver"] }
+  },
+  {
+    id: "aston-martin-db7",
+    manufacturer: "Aston Martin",
+    model: "DB7",
+    generation: "DB7",
+    yearStart: 1994,
+    yearEnd: 2004,
+    bodyStyle: "Coupe",
+    engine: "3.2L Supercharged Inline-6 / 5.9L V12",
+    displacementCc: 5935,
+    aspiration: "Naturally Aspirated",
+    cylinders: 12,
+    drivetrain: "RWD",
+    transmission: "5-Speed Automatic / 6-Speed Manual",
+    horsepower: 420,
+    torqueNm: 540,
+    zeroToHundredSec: 5,
+    zeroToSixtyMphSec: 4.9,
+    topSpeedKmH: 298,
+    curbWeightKg: 1725,
+    fuelType: "Gasoline",
+    productionYears: "1994\u20132004",
+    originCountry: "United Kingdom",
+    notableFacts: "Ian Callum designed modern classic credited with saving Aston Martin, featuring curved oval grille and classic 1990s GT proportions.",
+    baselineRarity: "rare",
+    visualSignature: { aspectRatio: 2.15, silhouetteClass: "grand_tourer", prominentColors: ["Mendip Blue", "Antrim Blue", "Solent Silver"] }
+  },
+  {
+    id: "mercedes-s-class-w223",
+    manufacturer: "Mercedes-Benz",
+    model: "S-Class",
+    generation: "W223",
+    yearStart: 2020,
+    bodyStyle: "Sedan",
+    engine: "3.0L Turbocharged Inline-6 / 4.0L Biturbo V8",
+    displacementCc: 2999,
+    aspiration: "Twin-Turbo",
+    cylinders: 6,
+    drivetrain: "AWD",
+    transmission: "9-Speed 9G-TRONIC",
+    horsepower: 429,
+    torqueNm: 520,
+    zeroToHundredSec: 4.9,
+    zeroToSixtyMphSec: 4.8,
+    topSpeedKmH: 250,
+    curbWeightKg: 2065,
+    fuelType: "Hybrid",
+    productionYears: "2020\u2013Present",
+    originCountry: "Germany",
+    notableFacts: "The global benchmark luxury flagship saloon featuring flush door handles, Digital Light projector headlamps, and rear-axle steering.",
+    baselineRarity: "uncommon",
+    visualSignature: { aspectRatio: 2.3, silhouetteClass: "grand_tourer", prominentColors: ["Obsidian Black", "High-Tech Silver", "Selenite Grey"] }
+  },
+  {
+    id: "mercedes-maybach-s-class",
+    manufacturer: "Mercedes-Benz",
+    model: "Mercedes-Maybach S-Class",
+    generation: "Z223",
+    yearStart: 2021,
+    bodyStyle: "Sedan",
+    engine: "4.0L Biturbo V8 (S580) / 6.0L Biturbo V12 (S680)",
+    displacementCc: 3982,
+    aspiration: "Twin-Turbo",
+    cylinders: 8,
+    drivetrain: "AWD",
+    transmission: "9-Speed 9G-TRONIC",
+    horsepower: 496,
+    torqueNm: 700,
+    zeroToHundredSec: 4.8,
+    zeroToSixtyMphSec: 4.7,
+    topSpeedKmH: 250,
+    curbWeightKg: 2275,
+    fuelType: "Hybrid",
+    productionYears: "2021\u2013Present",
+    originCountry: "Germany",
+    notableFacts: "Pinnacle luxury limousine distinguished by vertical chrome Maybach pinstripe grille, optional two-tone paintwork, and extended wheelbase.",
+    baselineRarity: "legendary",
+    visualSignature: { aspectRatio: 2.35, silhouetteClass: "grand_tourer", prominentColors: ["Two-Tone Obsidian Black/Kalahari Gold", "Designo Diamond White", "Nautical Blue"] }
+  },
+  {
+    id: "bmw-7-series-g70",
+    manufacturer: "BMW",
+    model: "7 Series",
+    generation: "G70",
+    yearStart: 2022,
+    bodyStyle: "Sedan",
+    engine: "3.0L Turbocharged Inline-6 / 4.4L Biturbo V8",
+    displacementCc: 2998,
+    aspiration: "Turbocharged",
+    cylinders: 6,
+    drivetrain: "RWD",
+    transmission: "8-Speed Steptronic",
+    horsepower: 375,
+    torqueNm: 520,
+    zeroToHundredSec: 5.2,
+    zeroToSixtyMphSec: 5,
+    topSpeedKmH: 250,
+    curbWeightKg: 2150,
+    fuelType: "Hybrid",
+    productionYears: "2022\u2013Present",
+    originCountry: "Germany",
+    notableFacts: "Monolithic luxury sedan featuring massive illuminated kidney grille, split crystal headlights, and 31.3-inch Theatre Screen.",
+    baselineRarity: "rare",
+    visualSignature: { aspectRatio: 2.25, silhouetteClass: "grand_tourer", prominentColors: ["Black Sapphire", "Mineral White", "Dravit Grey"] }
+  },
+  {
+    id: "lamborghini-huracan-evo",
+    manufacturer: "Lamborghini",
+    model: "Hurac\xE1n EVO",
+    generation: "Hurac\xE1n",
+    yearStart: 2019,
+    yearEnd: 2024,
+    bodyStyle: "Coupe",
+    engine: "5.2L Naturally Aspirated V10",
+    displacementCc: 5204,
+    aspiration: "Naturally Aspirated",
+    cylinders: 10,
+    drivetrain: "AWD",
+    transmission: "7-Speed Dual-Clutch (LDF)",
+    horsepower: 631,
+    torqueNm: 600,
+    zeroToHundredSec: 2.9,
+    zeroToSixtyMphSec: 2.8,
+    topSpeedKmH: 325,
+    curbWeightKg: 1422,
+    fuelType: "Gasoline",
+    productionYears: "2019\u20132024",
+    originCountry: "Italy",
+    notableFacts: "Facelifted Hurac\xE1n with Performante engine output, front bumper with Y-shaped aerodynamic winglets, integrated slotted rear spoiler, and dual elevated central exhausts.",
+    baselineRarity: "legendary",
+    visualSignature: { aspectRatio: 2.1, silhouetteClass: "angular_wedge", prominentColors: ["Arancio Xanto", "Verde Mantis", "Bianco Monocerus", "Rosso Bia"] }
   }
 ];
 
@@ -2504,6 +2768,67 @@ var CanonicalVehicleRegistry = class {
       "gemera hv8",
       "gemera tfg"
     ]);
+    this.registerAliases("aston-martin-dbs", [
+      "aston martin dbs",
+      "dbs",
+      "dbs v12",
+      "dbs coupe",
+      "aston martin dbs coupe",
+      "aston martin dbs v12 coupe",
+      "dbs v12 coupe"
+    ]);
+    this.registerAliases("aston-martin-db9", [
+      "aston martin db9",
+      "db9",
+      "db9 coupe",
+      "aston martin db9 coupe"
+    ]);
+    this.registerAliases("aston-martin-db7", [
+      "aston martin db7",
+      "db7",
+      "db7 coupe",
+      "db7 vantage"
+    ]);
+    this.registerAliases("mercedes-s-class-w223", [
+      "mercedes-benz s-class",
+      "mercedes s-class",
+      "s-class",
+      "s580",
+      "s500",
+      "w223",
+      "mercedes w223",
+      "s-class w223",
+      "mercedes s class"
+    ]);
+    this.registerAliases("mercedes-maybach-s-class", [
+      "mercedes-maybach",
+      "maybach s-class",
+      "maybach",
+      "mercedes-maybach s580",
+      "mercedes-maybach s680",
+      "maybach s580",
+      "maybach s680",
+      "z223",
+      "mercedes maybach"
+    ]);
+    this.registerAliases("bmw-7-series-g70", [
+      "bmw 7 series",
+      "7 series",
+      "bmw 7-series",
+      "740i",
+      "760i",
+      "g70",
+      "bmw g70",
+      "7 series sedan"
+    ]);
+    this.registerAliases("lamborghini-huracan-evo", [
+      "huracan evo",
+      "lamborghini huracan evo",
+      "hurac\xE1n evo",
+      "lamborghini hurac\xE1n evo",
+      "huracan evo coupe",
+      "huracan evo spyder"
+    ]);
   }
   registerVehicle(record) {
     this.registry.set(record.vehicleId, record);
@@ -2668,7 +2993,8 @@ var CanonicalVehicleRegistry = class {
         make: record.make,
         modelFamily: record.model,
         generation: record.generation,
-        variant: record.trim || variant || null,
+        // INVARIANT: Never backfill trim from catalog record. Variant requires direct visual corroboration.
+        variant: variant || null,
         registryStatus: "REGISTERED",
         source: "registry",
         displayName: record.displayName || `${record.make} ${record.model}`,
@@ -3610,7 +3936,7 @@ var MORPHOLOGICAL_FINGERPRINTS = [
     model: "911 GT3 RS",
     generation: "992",
     proportionsDescription: "Extreme motorsport-derived track car with prominent swan-neck active DRS wing, dual front hood extractor nostrils, and front fender pressure louvers",
-    confusableWith: ["porsche-911-turbo", "porsche-911-carrera-997", "porsche-911-carrera-996"],
+    confusableWith: ["porsche-911-turbo", "porsche-911-carrera-997", "porsche-911-carrera-996", "porsche-718-boxster"],
     traits: {
       headlight_shape: {
         name: "round_oval_projector_headlights_4point_drl",
@@ -3619,18 +3945,21 @@ var MORPHOLOGICAL_FINGERPRINTS = [
       },
       hood_geometry: {
         name: "dual_carbon_fiber_hood_air_extractor_nostrils",
+        requiresMandatoryAeroPresence: true,
         positiveKeywords: ["hood nostril", "hood extractor", "carbon hood vents", "dual nostrils", "radiator extractor", "hood vents", "extractor ducts", "cooling nostrils", "nostrils"],
         incompatibleKeywords: ["smooth hood without vents", "clean hood without nostrils", "power bulge without nostrils", "flat smooth luggage lid", "smooth front hood", "smooth contoured front", "without hood vents"]
       },
       fender_architecture: {
         name: "front_fender_top_louvers_wheel_arch_cutouts",
+        requiresMandatoryAeroPresence: true,
         positiveKeywords: ["fender louver", "fender louvers", "wheel arch vents", "pressure louvers", "fender cutouts", "slatted fender", "fender slats", "louvers"],
         incompatibleKeywords: ["smooth front fenders without vents", "unvented fenders", "triple gills only"]
       },
       wing_and_spoiler_architecture: {
         name: "towering_swan_neck_top_mount_active_drs_wing",
+        requiresMandatoryAeroPresence: true,
         positiveKeywords: ["swan neck", "swan-neck", "massive rear wing", "tall rear wing", "drs wing", "active drs", "top-mount wing", "towering wing", "gt3 rs wing", "high-mounted wing"],
-        incompatibleKeywords: ["integrated active spoiler", "low ducktail only", "clean decklid without wing", "no fixed rear wing", "retractable spoiler flush with body"]
+        incompatibleKeywords: ["integrated active spoiler", "low ducktail only", "clean decklid without wing", "no fixed rear wing", "retractable spoiler flush with body", "distinctive rear spoiler"]
       },
       front_intake_grille: {
         name: "motorsport_wide_mouth_with_side_air_blades",
@@ -3647,10 +3976,15 @@ var MORPHOLOGICAL_FINGERPRINTS = [
         positiveKeywords: ["central dual exhaust", "center exhaust", "titanium exhaust", "central twin pipes", "underbody diffuser"],
         incompatibleKeywords: ["quad rectangular exhaust", "quad outer exhaust", "dual outer oval exhaust"]
       },
+      roofline_greenhouse: {
+        name: "coupe_flyline_with_aerodynamic_roof_fins",
+        positiveKeywords: ["roof fins", "carbon roof", "coupe flyline"],
+        incompatibleKeywords: ["roadster", "soft top", "speedster haunches", "two-seat convertible", "boxster roofline", "convertible roof", "canvas roof"]
+      },
       proportions: {
         name: "widebody_track_focused_911_supercar",
         positiveKeywords: ["sloping flyline", "rear-engine", "wide rear track", "track-focused", "aerodynamic guide fins", "roof fins", "center-lock"],
-        incompatibleKeywords: ["front-engine gt", "suv", "sedan"]
+        incompatibleKeywords: ["front-engine gt", "suv", "sedan", "mid-engine roadster", "compact roadster", "mid-engine"]
       }
     }
   },
@@ -3661,7 +3995,7 @@ var MORPHOLOGICAL_FINGERPRINTS = [
     model: "911 Turbo",
     generation: "992",
     proportionsDescription: "Widebody rear-engine everyday supercar with rear fender side air intake ducts, clean front hood, and low integrated active rear spoiler",
-    confusableWith: ["porsche-911-gt3-rs", "porsche-911-carrera-997", "porsche-911-carrera-996"],
+    confusableWith: ["porsche-911-gt3-rs", "porsche-911-carrera-997", "porsche-911-carrera-996", "porsche-718-boxster"],
     traits: {
       headlight_shape: {
         name: "round_oval_projector_headlights_4point_drl",
@@ -3699,10 +4033,15 @@ var MORPHOLOGICAL_FINGERPRINTS = [
         positiveKeywords: ["quad rectangular exhaust", "outer exhaust tips", "dual oval exhaust", "quad exhaust tips", "wide rear bumper air vents"],
         incompatibleKeywords: ["central dual exhaust", "central twin round pipes in center of diffuser"]
       },
+      roofline_greenhouse: {
+        name: "coupe_flyline_rear_quarter_windows",
+        positiveKeywords: ["sloping flyline", "coupe flyline", "rearward coupe cabin", "rear quarter window", "coupe roofline"],
+        incompatibleKeywords: ["roadster", "soft top", "speedster haunches", "two-seat convertible", "boxster roofline", "convertible roof", "canvas roof"]
+      },
       proportions: {
         name: "widebody_rear_engine_supercar_proportions",
         positiveKeywords: ["sloping flyline", "rear-engine", "wide rear haunches", "911 silhouette", "all-wheel drive stance"],
-        incompatibleKeywords: ["front-engine gt", "suv", "sedan"]
+        incompatibleKeywords: ["front-engine gt", "suv", "sedan", "mid-engine roadster", "compact roadster", "mid-engine"]
       }
     }
   },
@@ -4098,7 +4437,7 @@ var MORPHOLOGICAL_FINGERPRINTS = [
     traits: {
       headlight_shape: {
         name: "fried_egg_integrated_cluster",
-        positiveKeywords: ["fried egg", "fried-egg", "integrated turn signal", "irregular ovoid", "teardrop cutout", "integrated headlight turn"],
+        positiveKeywords: ["fried egg", "fried-egg", "integrated turn signal", "irregular ovoid", "teardrop cutout", "integrated headlight turn", "teardrop", "teardrop headlights", "911 oval headlights", "oval headlights"],
         incompatibleKeywords: ["traditional round", "circular bug eye", "separate indicator strip", "vertical slit", "four-point led"]
       },
       front_intake_grille: {
@@ -4108,7 +4447,7 @@ var MORPHOLOGICAL_FINGERPRINTS = [
       },
       roofline_greenhouse: {
         name: "soft_top_convertible_flyline",
-        positiveKeywords: ["soft top", "canvas roof", "convertible roof", "cabriolet", "black soft top", "folding fabric roof"],
+        positiveKeywords: ["soft top", "canvas roof", "convertible roof", "cabriolet", "black soft top", "folding fabric roof", "sloping rear flyline", "convertible soft top"],
         incompatibleKeywords: ["fixed coupe roof", "coupe", "hardtop coupe", "glass engine cover", "wraparound visor canopy"]
       },
       rear_architecture_and_exhaust: {
@@ -4118,8 +4457,8 @@ var MORPHOLOGICAL_FINGERPRINTS = [
       },
       proportions: {
         name: "rear_engine_convertible_flyline",
-        positiveKeywords: ["rear engine", "convertible flyline", "sloping rear soft top", "bulbous front fenders"],
-        incompatibleKeywords: ["mid-engine cab forward", "front engine gt"]
+        positiveKeywords: ["rear engine", "rear-engine", "convertible flyline", "sloping rear soft top", "bulbous front fenders", "sloping rear-engine flyline", "rear engine deck", "wide rear haunches over rear engine deck"],
+        incompatibleKeywords: ["mid-engine", "mid-engine roadster", "mid-engine cab forward", "front engine gt"]
       }
     }
   },
@@ -4129,38 +4468,53 @@ var MORPHOLOGICAL_FINGERPRINTS = [
     make: "Porsche",
     model: "718 Boxster",
     generation: "982",
-    proportionsDescription: "Mid-engine two-seater roadster with lateral side air scoops, 4-point LED DRLs, and fabric roadster top",
-    confusableWith: ["porsche-911-carrera-cabriolet-996", "porsche-911-carrera-996", "porsche-911-carrera-997"],
+    proportionsDescription: "Mid-engine two-seater roadster with lateral side air scoops, 4-point LED DRLs, clean front hood without nostrils, and fabric roadster top",
+    confusableWith: ["porsche-911-carrera-cabriolet-996", "porsche-911-carrera-996", "porsche-911-carrera-997", "porsche-911-gt3-rs", "porsche-911-turbo"],
     traits: {
       headlight_shape: {
-        name: "four_point_led_cluster",
-        positiveKeywords: ["four-point led", "4-point led", "four point led", "bi-xenon projector", "compact modern porsche headlight"],
-        incompatibleKeywords: ["fried egg", "fried-egg", "classic bug eye with separate lower strip"]
+        name: "compact_projector_four_point_led_cluster",
+        positiveKeywords: ["four-point led", "4-point led", "four point led", "bi-xenon projector", "compact modern porsche headlight", "horizontal led strip", "oval headlight"],
+        incompatibleKeywords: ["fried egg", "fried-egg", "classic bug eye with separate lower strip", "vertical slit"]
       },
       front_intake_grille: {
-        name: "lateral_bumper_cooling_ducts",
-        positiveKeywords: ["lateral intake", "horizontal cooling fins", "718 front bumper", "wide lower air ducts"],
-        incompatibleKeywords: ["kidney grille", "concave oval"]
+        name: "lateral_bumper_cooling_ducts_with_horizontal_fins",
+        positiveKeywords: ["lateral intake", "horizontal cooling fins", "718 front bumper", "wide lower air ducts", "lateral bumper ducts", "horizontal slats", "tripartite", "tripartite front intakes", "wide lower tripartite front intakes"],
+        incompatibleKeywords: ["kidney grille", "concave oval", "hood nostrils"]
+      },
+      hood_geometry: {
+        name: "smooth_unvented_front_luggage_lid",
+        positiveKeywords: ["smooth hood", "clean front hood", "unvented hood", "smooth luggage compartment lid", "without hood vents", "clean bonnet"],
+        incompatibleKeywords: ["hood nostril", "hood extractor", "carbon hood vents", "dual nostrils", "radiator extractor", "cooling nostrils", "nostrils"]
+      },
+      fender_architecture: {
+        name: "smooth_front_fenders_without_louvers",
+        positiveKeywords: ["smooth front fender", "unvented front fender", "smooth arches", "fender without louvers"],
+        incompatibleKeywords: ["fender louver", "fender louvers", "wheel arch vents", "pressure louvers", "slatted fender"]
+      },
+      wing_and_spoiler_architecture: {
+        name: "retractable_rear_spoiler_flush_with_body",
+        positiveKeywords: ["retractable spoiler flush with body", "integrated active spoiler", "low ducktail", "retractable rear spoiler", "clean decklid without fixed wing", "no fixed rear wing"],
+        incompatibleKeywords: ["towering swan neck", "swan-neck", "massive rear wing", "tall rear wing", "drs wing", "high-mounted wing", "fixed giant swan neck wing"]
       },
       side_intake_type: {
         name: "prominent_mid_engine_side_scoop",
-        positiveKeywords: ["side intake", "side air scoop", "lateral intake behind door", "door intake scoop", "mid-engine intake"],
+        positiveKeywords: ["side intake", "side air scoop", "lateral intake behind door", "door intake scoop", "mid-engine intake", "side scoop", "mid-engine side air intakes on rear fenders", "mid-engine side air intakes", "side air intakes on rear fenders", "intakes on rear fenders"],
         incompatibleKeywords: ["smooth rear haunch without scoop", "no side intake", "smooth 911 rear quarter"]
       },
       roofline_greenhouse: {
         name: "roadster_soft_top_two_seater",
-        positiveKeywords: ["roadster", "soft top", "speedster haunches", "two-seat convertible", "boxster roofline"],
-        incompatibleKeywords: ["rear-engine 2+2 flyline", "fixed coupe roof", "coupe flyline"]
+        positiveKeywords: ["roadster", "soft top", "speedster haunches", "two-seat convertible", "boxster roofline", "convertible roof", "canvas roof", "fabric roadster soft top", "fabric roadster soft top with mid-engine side air intakes", "roadster soft top"],
+        incompatibleKeywords: ["rear-engine 2+2 flyline", "fixed coupe roof", "coupe flyline", "sloping rear-engine flyline", "rear-engine flyline", "rear-engine", "rear engine"]
       },
       rear_architecture_and_exhaust: {
         name: "central_trapezoidal_or_twin_exhaust_porsche_accent_strip",
-        positiveKeywords: ["central exhaust", "black accent strip between taillights", "three-dimensional porsche badge", "compact rear deck"],
+        positiveKeywords: ["central exhaust", "black accent strip between taillights", "three-dimensional porsche badge", "compact rear deck", "porsche accent strip", "718 badge", "porsche accent strip between rear taillights with 718 badge"],
         incompatibleKeywords: ["full width strakes", "top-exit titanium"]
       },
       proportions: {
         name: "mid_engine_roadster_proportions",
-        positiveKeywords: ["mid-engine roadster", "compact roadster", "short wheelbase sports car"],
-        incompatibleKeywords: ["rear-engine 911 2+2 proportions", "front-engine gt", "sedan"]
+        positiveKeywords: ["mid-engine roadster", "compact roadster", "short wheelbase sports car", "roadster proportions", "mid-engine"],
+        incompatibleKeywords: ["rear-engine 911 2+2 proportions", "front-engine gt", "sedan", "rear-engine", "rear engine", "rear-engine flyline"]
       }
     }
   },
@@ -4171,7 +4525,7 @@ var MORPHOLOGICAL_FINGERPRINTS = [
     model: "Gallardo",
     generation: "L140",
     proportionsDescription: "Mid-engine V10 wedge supercar with upright trapezoidal headlights and angular side radiator scoops",
-    confusableWith: ["lamborghini-huracan-lp610-4"],
+    confusableWith: ["lamborghini-huracan-lp610-4", "lamborghini-huracan-evo"],
     traits: {
       headlight_shape: {
         name: "upright_trapezoidal_lens",
@@ -4212,7 +4566,7 @@ var MORPHOLOGICAL_FINGERPRINTS = [
     model: "Hurac\xE1n LP 610-4",
     generation: "Hurac\xE1n",
     proportionsDescription: "Modern mid-engine V10 supercar featuring signature dual Y-shaped LED daytime running lights and hexagonal styling",
-    confusableWith: ["lamborghini-gallardo"],
+    confusableWith: ["lamborghini-gallardo", "lamborghini-huracan-evo"],
     traits: {
       headlight_shape: {
         name: "dual_y_shaped_led_drl",
@@ -4242,6 +4596,52 @@ var MORPHOLOGICAL_FINGERPRINTS = [
       proportions: {
         name: "modern_hexagonal_wedge_supercar",
         positiveKeywords: ["hexagonal wedge", "low slung supercar", "cab forward v10"],
+        incompatibleKeywords: ["front-engine gt", "suv", "sedan"]
+      }
+    }
+  },
+  // ── LAMBORGHINI HURACÁN EVO (LP 640-4) ──
+  {
+    vehicleId: "lamborghini-huracan-evo",
+    make: "Lamborghini",
+    model: "Hurac\xE1n EVO",
+    generation: "Hurac\xE1n",
+    proportionsDescription: "Mid-engine V10 supercar with Y-shaped front bumper winglets, elevated twin center exhausts flanking license plate, and integrated slotted rear spoiler",
+    confusableWith: ["lamborghini-gallardo", "lamborghini-huracan-lp610-4"],
+    traits: {
+      headlight_shape: {
+        name: "dual_y_shaped_led_drl",
+        positiveKeywords: ["y-shaped led", "y-signature", "dual y led", "slanted full led headlights", "sharp angular led drl"],
+        incompatibleKeywords: ["upright trapezoidal lens", "vertical rectangular lens", "round bug eye", "fried egg"]
+      },
+      front_intake_grille: {
+        name: "front_bumper_y_winglets_and_splitter",
+        positiveKeywords: ["y-shaped winglet", "y-winglet", "evo front bumper", "integrated front splitter with winglets", "ypsilon intake", "aerodynamic front nostrils"],
+        incompatibleKeywords: ["dual rectangular front intakes", "twin kidney", "singleframe"]
+      },
+      side_intake_type: {
+        name: "hexagonal_side_air_intakes_and_lower_sill",
+        positiveKeywords: ["lower sill intake", "shoulder intake scoop", "hexagonal side intake", "evo side intake"],
+        incompatibleKeywords: ["triangular side scoop", "triple fender gills"]
+      },
+      wing_and_spoiler_architecture: {
+        name: "integrated_slotted_rear_spoiler",
+        positiveKeywords: ["slotted spoiler", "integrated rear spoiler", "evo ducktail", "slotted ducktail", "integrated aerodynamic spoiler"],
+        incompatibleKeywords: ["massive swan neck wing", "tall fixed track wing", "no rear spoiler"]
+      },
+      rear_architecture_and_exhaust: {
+        name: "elevated_twin_sports_exhausts_high_bumper",
+        positiveKeywords: ["elevated exhaust", "high-mounted exhaust", "twin exhaust flanking license plate", "performante style exhaust", "high exit twin exhaust", "high diffuser"],
+        incompatibleKeywords: ["quad lower exhaust tips", "outer lower bumper exhaust", "single center exhaust"]
+      },
+      roofline_greenhouse: {
+        name: "fastback_wedge_hexagon_windows",
+        positiveKeywords: ["sloping fastback", "hexagonal side glass", "louvers or glass engine cover"],
+        incompatibleKeywords: ["wraparound visor canopy", "upright sedan"]
+      },
+      proportions: {
+        name: "modern_hexagonal_wedge_supercar",
+        positiveKeywords: ["hexagonal wedge", "low slung supercar", "cab forward v10", "huracan evo"],
         incompatibleKeywords: ["front-engine gt", "suv", "sedan"]
       }
     }
@@ -4392,6 +4792,257 @@ var MORPHOLOGICAL_FINGERPRINTS = [
         name: "front_engine_four_door_passenger_sedan",
         positiveKeywords: ["four-door sedan", "sedan", "mid-size sedan", "three-box sedan", "front-wheel drive proportions"],
         incompatibleKeywords: ["cab-forward mid-engine", "low slung supercar", "two-seat sports coupe", "open-top spider"]
+      }
+    }
+  },
+  // ── ASTON MARTIN DBS (SUPERLEGGERA) ──
+  {
+    vehicleId: "aston-martin-dbs",
+    make: "Aston Martin",
+    model: "DBS",
+    generation: "DBS Superleggera",
+    proportionsDescription: "Aggressive flagship grand tourer with massive hexagonal mouth grille, dual carbon hood strakes, and curlicue side fender vents",
+    confusableWith: ["aston-martin-db9", "aston-martin-db7"],
+    traits: {
+      headlight_shape: {
+        name: "elongated_swept_back_led_cluster",
+        positiveKeywords: ["swept-back led", "elongated headlight", "teardrop swept back", "modern led cluster", "dbs headlights"],
+        incompatibleKeywords: ["round headlamp", "trapezoidal lens", "fried egg"]
+      },
+      front_intake_grille: {
+        name: "enlarged_honeycomb_inverted_trapezoid_grille",
+        positiveKeywords: ["massive front grille", "enlarged grille", "honeycomb grille", "inverted trapezoid grille", "black hexagonal open mouth", "wide open grille", "aggressive front mouth"],
+        incompatibleKeywords: ["slatted aluminum grille", "small oval mouth", "twin kidney", "panamericana"]
+      },
+      hood_geometry: {
+        name: "deeply_sculpted_hood_with_carbon_strakes",
+        positiveKeywords: ["carbon hood strakes", "hood vents", "extractor strakes", "sculpted bonnet", "dual hood vents", "dbs hood"],
+        incompatibleKeywords: ["smooth hood without vents", "flat smooth luggage lid"]
+      },
+      fender_architecture: {
+        name: "curlicue_front_fender_air_extractors",
+        positiveKeywords: ["curlicue vent", "side strake extractor", "fender air extractor", "deep fender cutout behind wheel"],
+        incompatibleKeywords: ["unvented front fenders", "triple round gills"]
+      },
+      wing_and_spoiler_architecture: {
+        name: "aeroblade_ii_carbon_lip_spoiler",
+        positiveKeywords: ["aeroblade", "carbon lip spoiler", "integrated decklid spoiler", "carbon aeroblade"],
+        incompatibleKeywords: ["massive swan neck wing", "tall fixed track wing"]
+      },
+      rear_architecture_and_exhaust: {
+        name: "quad_exhaust_tailpipes_double_diffuser",
+        positiveKeywords: ["quad exhaust", "double diffuser", "deep carbon diffuser", "slim horizontal blade taillights", "blade taillight"],
+        incompatibleKeywords: ["dual round exhaust tips in bumper", "central twin round pipes"]
+      },
+      proportions: {
+        name: "muscular_front_engine_v12_super_gt",
+        positiveKeywords: ["long hood short deck", "muscular rear haunches", "super gt proportions", "wide aggressive stance"],
+        incompatibleKeywords: ["mid-engine cab forward", "sedan proportions"]
+      }
+    }
+  },
+  // ── ASTON MARTIN DB9 ──
+  {
+    vehicleId: "aston-martin-db9",
+    make: "Aston Martin",
+    model: "DB9",
+    generation: "VH",
+    proportionsDescription: "Classic elegant grand tourer with slatted aluminum inverted-trapezoid grille, horizontal fender strake, and dual round exhausts",
+    confusableWith: ["aston-martin-dbs", "aston-martin-db7"],
+    traits: {
+      headlight_shape: {
+        name: "sweeping_elongated_bi_xenon_lenses",
+        positiveKeywords: ["sweeping headlight", "elongated lens", "flowing headlight", "bi-xenon projector"],
+        incompatibleKeywords: ["round headlamp under glass", "vertical slit", "fried egg"]
+      },
+      front_intake_grille: {
+        name: "classic_horizontal_slatted_aluminum_grille",
+        positiveKeywords: ["slatted grille", "horizontal slats", "aluminum slatted grille", "classic aston martin grille", "5-vane grille", "traditional inverted trapezoid"],
+        incompatibleKeywords: ["massive black honeycomb grille", "massive open mouth", "enlarged honeycomb", "twin kidney"]
+      },
+      hood_geometry: {
+        name: "clean_bonnet_with_subtle_creases",
+        positiveKeywords: ["clean hood", "clean bonnet", "subtle hood creases", "dual subtle bonnet vents"],
+        incompatibleKeywords: ["massive carbon hood extractors", "dual nostrils", "nostrils"]
+      },
+      fender_architecture: {
+        name: "horizontal_side_strake_with_led_indicator",
+        positiveKeywords: ["side strake", "horizontal strake", "fender strake with indicator", "metal strake on fender"],
+        incompatibleKeywords: ["curlicue vent", "fender louvers"]
+      },
+      rear_architecture_and_exhaust: {
+        name: "dual_round_exhaust_tips_integrated_bumper",
+        positiveKeywords: ["dual exhaust", "dual round exhaust", "clear swan-neck taillights", "swan-neck taillights", "c-shaped taillights"],
+        incompatibleKeywords: ["quad exhaust tailpipes", "double diffuser", "deep carbon diffuser"]
+      },
+      proportions: {
+        name: "timeless_grand_tourer_coupe_flyline",
+        positiveKeywords: ["long hood", "short rear deck", "swan wing doors", "grand tourer proportions", "flowing roofline"],
+        incompatibleKeywords: ["mid-engine cab forward", "sedan"]
+      }
+    }
+  },
+  // ── ASTON MARTIN DB7 ──
+  {
+    vehicleId: "aston-martin-db7",
+    make: "Aston Martin",
+    model: "DB7",
+    generation: "NP",
+    proportionsDescription: "1990s Ian Callum design with rounded mouth grille, glass-covered round headlights, and soft curved fastback",
+    confusableWith: ["aston-martin-dbs", "aston-martin-db9"],
+    traits: {
+      headlight_shape: {
+        name: "rounded_headlamps_under_aerodynamic_glass",
+        positiveKeywords: ["glass-covered headlight", "round headlights under glass", "separate round fog lights", "90s composite headlight"],
+        incompatibleKeywords: ["sharp angular led", "swept-back led", "elongated modern led"]
+      },
+      front_intake_grille: {
+        name: "rounded_oval_mouth_mesh_grille",
+        positiveKeywords: ["rounded mouth grille", "oval mouth", "classic oval grille", "chrome surround oval", "mesh mouth grille"],
+        incompatibleKeywords: ["massive black honeycomb", "sharp inverted trapezoid", "twin kidney"]
+      },
+      hood_geometry: {
+        name: "smooth_curved_bonnet_with_power_bulge",
+        positiveKeywords: ["smooth curved bonnet", "power bulge", "classic curved hood"],
+        incompatibleKeywords: ["carbon hood strakes", "dual nostrils", "deep extractor vents"]
+      },
+      fender_architecture: {
+        name: "classic_side_flute_vent",
+        positiveKeywords: ["side flute", "classic fender vent", "small side strake"],
+        incompatibleKeywords: ["curlicue vent", "fender louvers"]
+      },
+      rear_architecture_and_exhaust: {
+        name: "rounded_wraparound_taillights_dual_exhaust",
+        positiveKeywords: ["wraparound taillights", "90s taillight clusters", "dual exhaust tips"],
+        incompatibleKeywords: ["slim horizontal blade taillights", "quad exhaust with double diffuser"]
+      },
+      proportions: {
+        name: "1990s_curved_grand_tourer",
+        positiveKeywords: ["90s grand tourer", "softer rounded edges", "curved fastback"],
+        incompatibleKeywords: ["sharp aggressive creases", "widebody track"]
+      }
+    }
+  },
+  // ── MERCEDES-BENZ S-CLASS (W223) ──
+  {
+    vehicleId: "mercedes-s-class-w223",
+    make: "Mercedes-Benz",
+    model: "S-Class",
+    generation: "W223",
+    proportionsDescription: "Flagship executive full-size luxury sedan with three horizontal twin-slat chrome grille, flush pop-out door handles, and triangular LED taillights",
+    confusableWith: ["mercedes-maybach-s-class"],
+    traits: {
+      headlight_shape: {
+        name: "digital_light_led_with_eyebrow_drl",
+        positiveKeywords: ["digital light", "single eyebrow drl", "multibeam led", "three-dot led", "sleek horizontal headlight"],
+        incompatibleKeywords: ["split headlights", "two-tier headlights", "swarovski crystal drl", "vertical slit"]
+      },
+      front_intake_grille: {
+        name: "horizontal_twin_chrome_slats_with_radar_shield",
+        positiveKeywords: ["three chrome slats", "horizontal chrome slats", "radar shield", "upright three-pointed star", "s-class chrome grille", "classic mercedes grille"],
+        incompatibleKeywords: ["vertical pinstripe grille", "maybach vertical slats", "giant double kidney", "panamericana vertical slats"]
+      },
+      door_architecture: {
+        name: "flush_fitting_motorized_pop_out_handles",
+        positiveKeywords: ["flush door handles", "pop-out handles", "retractable door handles", "smooth door surface"],
+        incompatibleKeywords: ["conventional pull handles", "butterfly door", "swan wing door"]
+      },
+      roofline_greenhouse: {
+        name: "flagship_three_box_executive_sedan",
+        positiveKeywords: ["executive sedan", "three-box sedan", "long rear passenger doors", "standard c-pillar", "generous greenhouse"],
+        incompatibleKeywords: ["two-tone upper paint divider", "maybach c-pillar fixed window", "coupe flyline", "hatchback"]
+      },
+      rear_architecture_and_exhaust: {
+        name: "triangular_horizontal_led_taillights",
+        positiveKeywords: ["two-piece triangular taillights", "horizontal led taillights", "chrome trim connecting taillights", "integrated dual chrome exhaust"],
+        incompatibleKeywords: ["full width strakes", "quad circular titanium exhaust", "round taillights"]
+      },
+      proportions: {
+        name: "full_size_executive_luxury_sedan",
+        positiveKeywords: ["flagship sedan", "long wheelbase sedan", "executive luxury stance", "stately profile"],
+        incompatibleKeywords: ["compact roadster", "mid-engine supercar", "monolithic giant upright kidney"]
+      }
+    }
+  },
+  // ── MERCEDES-MAYBACH S-CLASS (Z223) ──
+  {
+    vehicleId: "mercedes-maybach-s-class",
+    make: "Mercedes-Benz",
+    model: "Maybach S-Class",
+    generation: "Z223",
+    proportionsDescription: "Ultra-luxury limousine with vertical chrome pinstripe Maybach grille, dedicated C-pillar quarter window with double-M emblem, and optional two-tone finish",
+    confusableWith: ["mercedes-s-class-w223"],
+    traits: {
+      headlight_shape: {
+        name: "digital_light_led_high_resolution",
+        positiveKeywords: ["digital light", "multibeam led", "sleek horizontal headlight", "eyebrow drl"],
+        incompatibleKeywords: ["split headlights", "two-tier headlights"]
+      },
+      front_intake_grille: {
+        name: "maybach_vertical_chrome_pinstripe_grille",
+        positiveKeywords: ["maybach grille", "vertical chrome pinstripes", "vertical slats with maybach lettering", "fine vertical chrome", "maybach front grille"],
+        incompatibleKeywords: ["horizontal twin chrome slats", "standard s-class grille", "giant double kidney", "honeycomb"]
+      },
+      roofline_greenhouse: {
+        name: "extended_limousine_with_c_pillar_quarter_window",
+        positiveKeywords: ["maybach c-pillar", "fixed c-pillar quarter window", "double-m emblem", "maybach logo on c-pillar", "extended rear door", "ultra-long wheelbase"],
+        incompatibleKeywords: ["standard sedan c-pillar without quarter window", "coupe", "roadster"]
+      },
+      door_architecture: {
+        name: "two_tone_paint_finish_and_chrome_b_pillar",
+        positiveKeywords: ["two-tone paint", "two-tone finish", "chrome b-pillar", "flush door handles"],
+        incompatibleKeywords: ["sports livery", "carbon race doors"]
+      },
+      rear_architecture_and_exhaust: {
+        name: "maybach_divided_exhaust_trim",
+        positiveKeywords: ["maybach exhaust trim", "horizontal divider in exhaust", "chrome rear strip", "triangular taillights"],
+        incompatibleKeywords: ["central exhaust", "quad round race exhaust"]
+      },
+      proportions: {
+        name: "ultra_long_wheelbase_presidential_limousine",
+        positiveKeywords: ["maybach limousine", "ultra-luxury long wheelbase", "presidential proportions", "extended passenger cabin"],
+        incompatibleKeywords: ["standard wheelbase", "sports car", "suv"]
+      }
+    }
+  },
+  // ── BMW 7 SERIES (G70) ──
+  {
+    vehicleId: "bmw-7-series-g70",
+    make: "BMW",
+    model: "7 Series",
+    generation: "G70",
+    proportionsDescription: "Towering monolithic luxury sedan with two-tier split headlights featuring Swarovski crystal DRLs and massive upright illuminated double kidney grille",
+    confusableWith: [],
+    traits: {
+      headlight_shape: {
+        name: "two_tier_split_headlights_with_crystal_drl",
+        positiveKeywords: ["split headlight", "two-tier headlight", "slim upper drl", "swarovski crystal drl", "upper led strip", "dark recessed lower headlight", "split lighting"],
+        incompatibleKeywords: ["single piece headlight", "round bug eye", "fried egg", "horizontal twin chrome slats"]
+      },
+      front_intake_grille: {
+        name: "monolithic_oversized_upright_double_kidney_grille",
+        positiveKeywords: ["oversized kidney grille", "massive double kidney", "upright kidney", "illuminated kidney", "iconic glow", "giant vertical kidney", "monolithic front grille"],
+        incompatibleKeywords: ["three horizontal chrome slats", "maybach vertical pinstripe", "singleframe", "horizontal low mouth"]
+      },
+      roofline_greenhouse: {
+        name: "monolithic_upright_executive_roofline",
+        positiveKeywords: ["upright executive roofline", "modern hofmeister kink", "flush glass greenhouse", "tall monolithic cabin"],
+        incompatibleKeywords: ["coupe flyline", "soft top", "speedster haunches"]
+      },
+      door_architecture: {
+        name: "flush_integrated_electronic_door_openers",
+        positiveKeywords: ["flush door openers", "electronic push button handles", "automatic doors"],
+        incompatibleKeywords: ["butterfly doors", "vertical scissor doors"]
+      },
+      rear_architecture_and_exhaust: {
+        name: "ultra_slim_horizontal_led_taillights_clean_apron",
+        positiveKeywords: ["slim horizontal taillights", "clean minimalist rear apron", "hidden exhaust", "concealed tailpipes"],
+        incompatibleKeywords: ["triangular taillights", "quad outer exhaust tips", "central exhaust"]
+      },
+      proportions: {
+        name: "towering_monolithic_full_size_executive_sedan",
+        positiveKeywords: ["tall upright front fascia", "blunt vertical nose", "monolithic luxury sedan", "high hoodline"],
+        incompatibleKeywords: ["sloping sports car flyline", "low slung supercar", "two-seat roadster"]
       }
     }
   }
@@ -4644,6 +5295,20 @@ ${graphValidation.errors.join("\n")}`);
             scoreDelta: delta,
             reason: `Direct contradiction observed in visible area (${delta.toFixed(2)})`
           });
+        } else if (expectedTrait.requiresMandatoryAeroPresence && visibility === "VISIBLE" && categoryText.length >= 10) {
+          contradictionCount += 1;
+          const delta = -0.3;
+          score += delta;
+          contradictions.push(`Mandatory distinguishing feature (${expectedTrait.name}) is absent from confirmed visible ${categoryKey.replace(/_/g, " ")}`);
+          evaluations.push({
+            category: categoryKey,
+            visibility,
+            expectedTraitName: expectedTrait.name,
+            matched: false,
+            contradicted: true,
+            scoreDelta: delta,
+            reason: `Confirmed absence of mandatory feature in visible zone (${delta.toFixed(2)})`
+          });
         } else {
           evaluations.push({
             category: categoryKey,
@@ -4807,11 +5472,22 @@ var HierarchicalClassifier = class {
       ferrari: /\b(ferrari|prancing\s+horse|458|488|f8|sf90|daytona\s+sp3|icona|mustache\s+aero)\b/i.test(evidenceText),
       lamborghini: /\b(lamborghini|hurac[aá]n|gallardo|aventador|revuelto|bull\s+emblem|y-shaped\s+drl|hexagonal\s+intakes?)\b/i.test(evidenceText),
       bmw: /\b(kidney|hofmeister|bmw|m3|m4|m5|m8)\b/i.test(evidenceText),
-      mercedes: /\b(panamericana|three-pointed\s+star|mercedes|amg\s+grille)\b/i.test(evidenceText),
-      audi: /\b(singleframe|quattro|audi)\b/i.test(evidenceText)
+      mercedes: /\b(panamericana|three-pointed\s+star|mercedes(?:-benz)?|amg\s+grille|maybach|vertical\s+chrome\s+(?:pinstripe\s+)?grille|s-class|s\s*class)\b/i.test(evidenceText),
+      audi: /\b(singleframe|quattro|audi)\b/i.test(evidenceText),
+      aston_martin: /\b(aston\s+martin|dbs|db9|db7|db11|db12|vantage|vanquish|valkyrie|swan\s+doors?|aeroblade|curlicue)\b/i.test(evidenceText),
+      rolls_royce: /\b(rolls[- ]royce|phantom|ghost|cullinan|wraith|spirit\s+of\s+ecstasy|pantheon)\b/i.test(evidenceText),
+      bentley: /\b(bentley|continental\s+gt|flying\s+spur|bentayga|flying\s+b|matrix\s+grille)\b/i.test(evidenceText)
+    };
+    const normalizeBrandKey = (make) => {
+      const m = (make || "").toLowerCase().trim();
+      if (m.includes("mercedes")) return "mercedes";
+      if (m.includes("aston")) return "aston_martin";
+      if (m.includes("rolls")) return "rolls_royce";
+      if (m.includes("bentley")) return "bentley";
+      return m;
     };
     const visuallyCorroboratedMakes = Object.entries(brandVisualEvidence).filter(([_, hasCues]) => hasCues).map(([make]) => make);
-    const rawMakeNorm = (input.raw_make || "").toLowerCase().trim();
+    const rawMakeNorm = normalizeBrandKey(input.raw_make || "");
     const KNOWN_MANUFACTURERS = new Set(Object.keys(brandVisualEvidence));
     let lockedManufacturer = null;
     if (visuallyCorroboratedMakes.length === 1) {
@@ -4850,6 +5526,9 @@ var HierarchicalClassifier = class {
       else if (candNameLower.includes("nissan")) candidateMake = "nissan";
       else if (candNameLower.includes("maserati")) candidateMake = "maserati";
       else if (candNameLower.includes("koenigsegg")) candidateMake = "koenigsegg";
+      else if (candNameLower.includes("aston")) candidateMake = "aston_martin";
+      else if (candNameLower.includes("rolls")) candidateMake = "rolls_royce";
+      else if (candNameLower.includes("bentley")) candidateMake = "bentley";
       const structuredClass = visual_evidence?.vehicle_classification;
       const isStructuredBus = structuredClass === "commercial_bus" || structuredClass === "commercial_truck";
       const isWordBoundaryBus = /\bbus(es)?\b/i.test(evidenceText) || /\b(public\s+transit|transit\s+bus|metro\s+bus|city\s+bus)\b/i.test(evidenceText) || /\bcoach(?!built|line)\b/i.test(evidenceText) || /\b(semi-truck|heavy\s+truck|lorry)\b/i.test(evidenceText) || /\bbus\b/i.test((visual_evidence.body_style || "").toLowerCase());
@@ -5085,13 +5764,13 @@ var HierarchicalClassifier = class {
         visual_evidence.exhaust || ""
       ].filter(Boolean),
       candidates: calibratedCandidates.filter((c) => !c.invalid).map((c) => ({ name: c.name, score: c.score })),
-      fallbackMake: lockedManufacturer || input.raw_make || void 0,
+      fallbackMake: (lockedManufacturer === "mercedes" ? "Mercedes-Benz" : lockedManufacturer === "aston_martin" ? "Aston Martin" : lockedManufacturer === "rolls_royce" ? "Rolls-Royce" : lockedManufacturer) || input.raw_make || void 0,
       fallbackModel: input.raw_model || void 0
     });
     if (fgResult.scoredCandidates.length > 0) {
       for (const fgCand of fgResult.scoredCandidates) {
-        const fgMakeLower = fgCand.make.toLowerCase();
-        if (lockedManufacturer && fgMakeLower !== lockedManufacturer) {
+        const fgMakeNorm = normalizeBrandKey(fgCand.make);
+        if (lockedManufacturer && fgMakeNorm !== lockedManufacturer) {
           continue;
         }
         if (isServiceLiveryScene && !isDocumentedServiceVehicle(fgCand.displayName.toLowerCase())) {
@@ -5165,7 +5844,7 @@ var HierarchicalClassifier = class {
         rawHypothesisDemoted.add(cand.name);
       }
     }
-    let resolvedMake = lockedManufacturer ? lockedManufacturer === "mercedes" ? "Mercedes-Benz" : lockedManufacturer === "bmw" ? "BMW" : lockedManufacturer.charAt(0).toUpperCase() + lockedManufacturer.slice(1) : input.raw_make;
+    let resolvedMake = lockedManufacturer ? lockedManufacturer === "mercedes" ? "Mercedes-Benz" : lockedManufacturer === "bmw" ? "BMW" : lockedManufacturer === "aston_martin" ? "Aston Martin" : lockedManufacturer === "rolls_royce" ? "Rolls-Royce" : lockedManufacturer === "bentley" ? "Bentley" : lockedManufacturer.charAt(0).toUpperCase() + lockedManufacturer.slice(1) : input.raw_make;
     const isCompleteCandidate = (cand) => {
       const canon = canonicalVehicleRegistry.lookupByTextOrAlias(cand.name, resolvedMake || void 0);
       if (!canon) return false;
@@ -5240,9 +5919,15 @@ var HierarchicalClassifier = class {
         canonicalRecord = canonMatch;
         resolvedMake = canonMatch.make;
         resolvedModelFamily = canonMatch.model;
-        if (canonMatch.generation) resolvedGeneration = canonMatch.generation;
-        if (canonMatch.trim) resolvedVariant = canonMatch.trim;
-        numericSpecificity = canonMatch.specificityLevel ?? 2;
+        if (!resolvedGeneration && canonMatch.generation) {
+          resolvedGeneration = canonMatch.generation;
+        }
+        if (canonMatch.trim && (topCandidate.name.toLowerCase().includes(canonMatch.trim.toLowerCase()) || resolvedVariant && resolvedVariant.toLowerCase() === canonMatch.trim.toLowerCase())) {
+          resolvedVariant = canonMatch.trim;
+        } else if (!topCandidate.name.toLowerCase().includes(String(resolvedVariant || "").toLowerCase())) {
+          resolvedVariant = resolvedVariant || null;
+        }
+        numericSpecificity = canonMatch.specificityLevel ?? (resolvedVariant ? 4 : resolvedGeneration ? 2 : 1);
       } else {
         const parts = topCandidate.name.split(" ");
         if (!resolvedMake && parts.length > 0) resolvedMake = parts[0];
@@ -7347,9 +8032,12 @@ ${neutralVerifyPrompt} [/INST]`;
               const verifiedMatch = canonicalVehicleRegistry.lookupByTextOrAlias(classResult.top_candidate.name, finalMake);
               if (verifiedMatch) {
                 finalMake = verifiedMatch.make;
-                finalModel = verifiedMatch.model;
                 if (verifiedMatch.generation) finalGen = verifiedMatch.generation;
-                if (verifiedMatch.trim) finalVariant = verifiedMatch.trim;
+                if (verifiedMatch.trim && (classResult.top_candidate.name.toLowerCase().includes(verifiedMatch.trim.toLowerCase()) || finalVariant && finalVariant.toLowerCase() === verifiedMatch.trim.toLowerCase())) {
+                  finalVariant = verifiedMatch.trim;
+                } else if (!finalVariant || !classResult.top_candidate.name.toLowerCase().includes(finalVariant.toLowerCase())) {
+                  finalVariant = void 0;
+                }
                 classResult.canonical_vehicle_id = verifiedMatch.vehicleId;
                 classResult.canonical_display_name = verifiedMatch.displayName;
               } else {
@@ -8690,12 +9378,26 @@ var WorkerPool = class {
         traceId: job.traceId,
         canonicalResult: aiResponse.canonicalResult
       };
-      if (confidence.isConfident && validationReport.isValid) {
+      const canonicalId = validationReport.canonicalRecord?.vehicleId || validationReport.canonicalIdentity?.canonicalId || finalResult.canonicalResult?.canonical_identity?.canonicalId;
+      const hasResolvedCanonicalId = Boolean(canonicalId);
+      const isValidationPassed = validationReport.isValid;
+      const canonicalStatus = aiResponse.canonicalResult?.status || (confidence.isConfident ? "identified" : "probable");
+      const canDurableCache = finalStatus === "completed" && canonicalStatus === "identified" && confidence.isConfident && isValidationPassed && hasResolvedCanonicalId;
+      const canTemporaryCache = !canDurableCache && finalStatus === "completed" && canonicalStatus === "probable" && isValidationPassed && hasResolvedCanonicalId && confidence.totalScore >= 0.6;
+      if (canDurableCache) {
         identificationCache.setResult(
           job.imageHash,
           finalResult,
           aiResponse.providerName || "CloudflareVisionProvider",
           aiResponse.modelUsed || "@cf/meta/llama-3.2-11b-vision-instruct"
+        );
+      } else if (canTemporaryCache) {
+        identificationCache.setResult(
+          job.imageHash,
+          finalResult,
+          aiResponse.providerName || "CloudflareVisionProvider",
+          aiResponse.modelUsed || "@cf/meta/llama-3.2-11b-vision-instruct",
+          5 * 60 * 1e3
         );
       }
       tracer.recordScanTrace({

@@ -52,6 +52,9 @@ export interface TraitDescriptor {
   // the family-shared set) are demoted to generic weight. Used where every positive keyword
   // is individually family-shared but co-occurrence of several is still discriminative.
   familySharedAlone?: boolean;
+  // Amendment 3: Strict Visible-Absence Gating. When true, if the zone is strictly VISIBLE
+  // (NOT partial) and lacks expected signature while describing normal geometry, applies absence penalty.
+  requiresMandatoryAeroPresence?: boolean;
 }
 
 export interface ModelMorphologicalFingerprint {
@@ -921,7 +924,7 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
     model: '911 GT3 RS',
     generation: '992',
     proportionsDescription: 'Extreme motorsport-derived track car with prominent swan-neck active DRS wing, dual front hood extractor nostrils, and front fender pressure louvers',
-    confusableWith: ['porsche-911-turbo', 'porsche-911-carrera-997', 'porsche-911-carrera-996'],
+    confusableWith: ['porsche-911-turbo', 'porsche-911-carrera-997', 'porsche-911-carrera-996', 'porsche-718-boxster'],
     traits: {
       headlight_shape: {
         name: 'round_oval_projector_headlights_4point_drl',
@@ -930,18 +933,21 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       },
       hood_geometry: {
         name: 'dual_carbon_fiber_hood_air_extractor_nostrils',
+        requiresMandatoryAeroPresence: true,
         positiveKeywords: ['hood nostril', 'hood extractor', 'carbon hood vents', 'dual nostrils', 'radiator extractor', 'hood vents', 'extractor ducts', 'cooling nostrils', 'nostrils'],
         incompatibleKeywords: ['smooth hood without vents', 'clean hood without nostrils', 'power bulge without nostrils', 'flat smooth luggage lid', 'smooth front hood', 'smooth contoured front', 'without hood vents']
       },
       fender_architecture: {
         name: 'front_fender_top_louvers_wheel_arch_cutouts',
+        requiresMandatoryAeroPresence: true,
         positiveKeywords: ['fender louver', 'fender louvers', 'wheel arch vents', 'pressure louvers', 'fender cutouts', 'slatted fender', 'fender slats', 'louvers'],
         incompatibleKeywords: ['smooth front fenders without vents', 'unvented fenders', 'triple gills only']
       },
       wing_and_spoiler_architecture: {
         name: 'towering_swan_neck_top_mount_active_drs_wing',
+        requiresMandatoryAeroPresence: true,
         positiveKeywords: ['swan neck', 'swan-neck', 'massive rear wing', 'tall rear wing', 'drs wing', 'active drs', 'top-mount wing', 'towering wing', 'gt3 rs wing', 'high-mounted wing'],
-        incompatibleKeywords: ['integrated active spoiler', 'low ducktail only', 'clean decklid without wing', 'no fixed rear wing', 'retractable spoiler flush with body']
+        incompatibleKeywords: ['integrated active spoiler', 'low ducktail only', 'clean decklid without wing', 'no fixed rear wing', 'retractable spoiler flush with body', 'distinctive rear spoiler']
       },
       front_intake_grille: {
         name: 'motorsport_wide_mouth_with_side_air_blades',
@@ -958,10 +964,15 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
         positiveKeywords: ['central dual exhaust', 'center exhaust', 'titanium exhaust', 'central twin pipes', 'underbody diffuser'],
         incompatibleKeywords: ['quad rectangular exhaust', 'quad outer exhaust', 'dual outer oval exhaust']
       },
+      roofline_greenhouse: {
+        name: 'coupe_flyline_with_aerodynamic_roof_fins',
+        positiveKeywords: ['roof fins', 'carbon roof', 'coupe flyline'],
+        incompatibleKeywords: ['roadster', 'soft top', 'speedster haunches', 'two-seat convertible', 'boxster roofline', 'convertible roof', 'canvas roof']
+      },
       proportions: {
         name: 'widebody_track_focused_911_supercar',
         positiveKeywords: ['sloping flyline', 'rear-engine', 'wide rear track', 'track-focused', 'aerodynamic guide fins', 'roof fins', 'center-lock'],
-        incompatibleKeywords: ['front-engine gt', 'suv', 'sedan']
+        incompatibleKeywords: ['front-engine gt', 'suv', 'sedan', 'mid-engine roadster', 'compact roadster', 'mid-engine']
       }
     }
   },
@@ -973,7 +984,7 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
     model: '911 Turbo',
     generation: '992',
     proportionsDescription: 'Widebody rear-engine everyday supercar with rear fender side air intake ducts, clean front hood, and low integrated active rear spoiler',
-    confusableWith: ['porsche-911-gt3-rs', 'porsche-911-carrera-997', 'porsche-911-carrera-996'],
+    confusableWith: ['porsche-911-gt3-rs', 'porsche-911-carrera-997', 'porsche-911-carrera-996', 'porsche-718-boxster'],
     traits: {
       headlight_shape: {
         name: 'round_oval_projector_headlights_4point_drl',
@@ -1011,10 +1022,15 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
         positiveKeywords: ['quad rectangular exhaust', 'outer exhaust tips', 'dual oval exhaust', 'quad exhaust tips', 'wide rear bumper air vents'],
         incompatibleKeywords: ['central dual exhaust', 'central twin round pipes in center of diffuser']
       },
+      roofline_greenhouse: {
+        name: 'coupe_flyline_rear_quarter_windows',
+        positiveKeywords: ['sloping flyline', 'coupe flyline', 'rearward coupe cabin', 'rear quarter window', 'coupe roofline'],
+        incompatibleKeywords: ['roadster', 'soft top', 'speedster haunches', 'two-seat convertible', 'boxster roofline', 'convertible roof', 'canvas roof']
+      },
       proportions: {
         name: 'widebody_rear_engine_supercar_proportions',
         positiveKeywords: ['sloping flyline', 'rear-engine', 'wide rear haunches', '911 silhouette', 'all-wheel drive stance'],
-        incompatibleKeywords: ['front-engine gt', 'suv', 'sedan']
+        incompatibleKeywords: ['front-engine gt', 'suv', 'sedan', 'mid-engine roadster', 'compact roadster', 'mid-engine']
       }
     }
   },
@@ -1421,7 +1437,7 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
     traits: {
       headlight_shape: {
         name: 'fried_egg_integrated_cluster',
-        positiveKeywords: ['fried egg', 'fried-egg', 'integrated turn signal', 'irregular ovoid', 'teardrop cutout', 'integrated headlight turn'],
+        positiveKeywords: ['fried egg', 'fried-egg', 'integrated turn signal', 'irregular ovoid', 'teardrop cutout', 'integrated headlight turn', 'teardrop', 'teardrop headlights', '911 oval headlights', 'oval headlights'],
         incompatibleKeywords: ['traditional round', 'circular bug eye', 'separate indicator strip', 'vertical slit', 'four-point led']
       },
       front_intake_grille: {
@@ -1431,7 +1447,7 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       },
       roofline_greenhouse: {
         name: 'soft_top_convertible_flyline',
-        positiveKeywords: ['soft top', 'canvas roof', 'convertible roof', 'cabriolet', 'black soft top', 'folding fabric roof'],
+        positiveKeywords: ['soft top', 'canvas roof', 'convertible roof', 'cabriolet', 'black soft top', 'folding fabric roof', 'sloping rear flyline', 'convertible soft top'],
         incompatibleKeywords: ['fixed coupe roof', 'coupe', 'hardtop coupe', 'glass engine cover', 'wraparound visor canopy']
       },
       rear_architecture_and_exhaust: {
@@ -1441,8 +1457,8 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       },
       proportions: {
         name: 'rear_engine_convertible_flyline',
-        positiveKeywords: ['rear engine', 'convertible flyline', 'sloping rear soft top', 'bulbous front fenders'],
-        incompatibleKeywords: ['mid-engine cab forward', 'front engine gt']
+        positiveKeywords: ['rear engine', 'rear-engine', 'convertible flyline', 'sloping rear soft top', 'bulbous front fenders', 'sloping rear-engine flyline', 'rear engine deck', 'wide rear haunches over rear engine deck'],
+        incompatibleKeywords: ['mid-engine', 'mid-engine roadster', 'mid-engine cab forward', 'front engine gt']
       }
     }
   },
@@ -1453,38 +1469,53 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
     make: 'Porsche',
     model: '718 Boxster',
     generation: '982',
-    proportionsDescription: 'Mid-engine two-seater roadster with lateral side air scoops, 4-point LED DRLs, and fabric roadster top',
-    confusableWith: ['porsche-911-carrera-cabriolet-996', 'porsche-911-carrera-996', 'porsche-911-carrera-997'],
+    proportionsDescription: 'Mid-engine two-seater roadster with lateral side air scoops, 4-point LED DRLs, clean front hood without nostrils, and fabric roadster top',
+    confusableWith: ['porsche-911-carrera-cabriolet-996', 'porsche-911-carrera-996', 'porsche-911-carrera-997', 'porsche-911-gt3-rs', 'porsche-911-turbo'],
     traits: {
       headlight_shape: {
-        name: 'four_point_led_cluster',
-        positiveKeywords: ['four-point led', '4-point led', 'four point led', 'bi-xenon projector', 'compact modern porsche headlight'],
-        incompatibleKeywords: ['fried egg', 'fried-egg', 'classic bug eye with separate lower strip']
+        name: 'compact_projector_four_point_led_cluster',
+        positiveKeywords: ['four-point led', '4-point led', 'four point led', 'bi-xenon projector', 'compact modern porsche headlight', 'horizontal led strip', 'oval headlight'],
+        incompatibleKeywords: ['fried egg', 'fried-egg', 'classic bug eye with separate lower strip', 'vertical slit']
       },
       front_intake_grille: {
-        name: 'lateral_bumper_cooling_ducts',
-        positiveKeywords: ['lateral intake', 'horizontal cooling fins', '718 front bumper', 'wide lower air ducts'],
-        incompatibleKeywords: ['kidney grille', 'concave oval']
+        name: 'lateral_bumper_cooling_ducts_with_horizontal_fins',
+        positiveKeywords: ['lateral intake', 'horizontal cooling fins', '718 front bumper', 'wide lower air ducts', 'lateral bumper ducts', 'horizontal slats', 'tripartite', 'tripartite front intakes', 'wide lower tripartite front intakes'],
+        incompatibleKeywords: ['kidney grille', 'concave oval', 'hood nostrils']
+      },
+      hood_geometry: {
+        name: 'smooth_unvented_front_luggage_lid',
+        positiveKeywords: ['smooth hood', 'clean front hood', 'unvented hood', 'smooth luggage compartment lid', 'without hood vents', 'clean bonnet'],
+        incompatibleKeywords: ['hood nostril', 'hood extractor', 'carbon hood vents', 'dual nostrils', 'radiator extractor', 'cooling nostrils', 'nostrils']
+      },
+      fender_architecture: {
+        name: 'smooth_front_fenders_without_louvers',
+        positiveKeywords: ['smooth front fender', 'unvented front fender', 'smooth arches', 'fender without louvers'],
+        incompatibleKeywords: ['fender louver', 'fender louvers', 'wheel arch vents', 'pressure louvers', 'slatted fender']
+      },
+      wing_and_spoiler_architecture: {
+        name: 'retractable_rear_spoiler_flush_with_body',
+        positiveKeywords: ['retractable spoiler flush with body', 'integrated active spoiler', 'low ducktail', 'retractable rear spoiler', 'clean decklid without fixed wing', 'no fixed rear wing'],
+        incompatibleKeywords: ['towering swan neck', 'swan-neck', 'massive rear wing', 'tall rear wing', 'drs wing', 'high-mounted wing', 'fixed giant swan neck wing']
       },
       side_intake_type: {
         name: 'prominent_mid_engine_side_scoop',
-        positiveKeywords: ['side intake', 'side air scoop', 'lateral intake behind door', 'door intake scoop', 'mid-engine intake'],
+        positiveKeywords: ['side intake', 'side air scoop', 'lateral intake behind door', 'door intake scoop', 'mid-engine intake', 'side scoop', 'mid-engine side air intakes on rear fenders', 'mid-engine side air intakes', 'side air intakes on rear fenders', 'intakes on rear fenders'],
         incompatibleKeywords: ['smooth rear haunch without scoop', 'no side intake', 'smooth 911 rear quarter']
       },
       roofline_greenhouse: {
         name: 'roadster_soft_top_two_seater',
-        positiveKeywords: ['roadster', 'soft top', 'speedster haunches', 'two-seat convertible', 'boxster roofline'],
-        incompatibleKeywords: ['rear-engine 2+2 flyline', 'fixed coupe roof', 'coupe flyline']
+        positiveKeywords: ['roadster', 'soft top', 'speedster haunches', 'two-seat convertible', 'boxster roofline', 'convertible roof', 'canvas roof', 'fabric roadster soft top', 'fabric roadster soft top with mid-engine side air intakes', 'roadster soft top'],
+        incompatibleKeywords: ['rear-engine 2+2 flyline', 'fixed coupe roof', 'coupe flyline', 'sloping rear-engine flyline', 'rear-engine flyline', 'rear-engine', 'rear engine']
       },
       rear_architecture_and_exhaust: {
         name: 'central_trapezoidal_or_twin_exhaust_porsche_accent_strip',
-        positiveKeywords: ['central exhaust', 'black accent strip between taillights', 'three-dimensional porsche badge', 'compact rear deck'],
+        positiveKeywords: ['central exhaust', 'black accent strip between taillights', 'three-dimensional porsche badge', 'compact rear deck', 'porsche accent strip', '718 badge', 'porsche accent strip between rear taillights with 718 badge'],
         incompatibleKeywords: ['full width strakes', 'top-exit titanium']
       },
       proportions: {
         name: 'mid_engine_roadster_proportions',
-        positiveKeywords: ['mid-engine roadster', 'compact roadster', 'short wheelbase sports car'],
-        incompatibleKeywords: ['rear-engine 911 2+2 proportions', 'front-engine gt', 'sedan']
+        positiveKeywords: ['mid-engine roadster', 'compact roadster', 'short wheelbase sports car', 'roadster proportions', 'mid-engine'],
+        incompatibleKeywords: ['rear-engine 911 2+2 proportions', 'front-engine gt', 'sedan', 'rear-engine', 'rear engine', 'rear-engine flyline']
       }
     }
   },
@@ -1496,7 +1527,7 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
     model: 'Gallardo',
     generation: 'L140',
     proportionsDescription: 'Mid-engine V10 wedge supercar with upright trapezoidal headlights and angular side radiator scoops',
-    confusableWith: ['lamborghini-huracan-lp610-4'],
+    confusableWith: ['lamborghini-huracan-lp610-4', 'lamborghini-huracan-evo'],
     traits: {
       headlight_shape: {
         name: 'upright_trapezoidal_lens',
@@ -1538,7 +1569,7 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
     model: 'Huracán LP 610-4',
     generation: 'Huracán',
     proportionsDescription: 'Modern mid-engine V10 supercar featuring signature dual Y-shaped LED daytime running lights and hexagonal styling',
-    confusableWith: ['lamborghini-gallardo'],
+    confusableWith: ['lamborghini-gallardo', 'lamborghini-huracan-evo'],
     traits: {
       headlight_shape: {
         name: 'dual_y_shaped_led_drl',
@@ -1568,6 +1599,53 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       proportions: {
         name: 'modern_hexagonal_wedge_supercar',
         positiveKeywords: ['hexagonal wedge', 'low slung supercar', 'cab forward v10'],
+        incompatibleKeywords: ['front-engine gt', 'suv', 'sedan']
+      }
+    }
+  },
+
+  // ── LAMBORGHINI HURACÁN EVO (LP 640-4) ──
+  {
+    vehicleId: 'lamborghini-huracan-evo',
+    make: 'Lamborghini',
+    model: 'Huracán EVO',
+    generation: 'Huracán',
+    proportionsDescription: 'Mid-engine V10 supercar with Y-shaped front bumper winglets, elevated twin center exhausts flanking license plate, and integrated slotted rear spoiler',
+    confusableWith: ['lamborghini-gallardo', 'lamborghini-huracan-lp610-4'],
+    traits: {
+      headlight_shape: {
+        name: 'dual_y_shaped_led_drl',
+        positiveKeywords: ['y-shaped led', 'y-signature', 'dual y led', 'slanted full led headlights', 'sharp angular led drl'],
+        incompatibleKeywords: ['upright trapezoidal lens', 'vertical rectangular lens', 'round bug eye', 'fried egg']
+      },
+      front_intake_grille: {
+        name: 'front_bumper_y_winglets_and_splitter',
+        positiveKeywords: ['y-shaped winglet', 'y-winglet', 'evo front bumper', 'integrated front splitter with winglets', 'ypsilon intake', 'aerodynamic front nostrils'],
+        incompatibleKeywords: ['dual rectangular front intakes', 'twin kidney', 'singleframe']
+      },
+      side_intake_type: {
+        name: 'hexagonal_side_air_intakes_and_lower_sill',
+        positiveKeywords: ['lower sill intake', 'shoulder intake scoop', 'hexagonal side intake', 'evo side intake'],
+        incompatibleKeywords: ['triangular side scoop', 'triple fender gills']
+      },
+      wing_and_spoiler_architecture: {
+        name: 'integrated_slotted_rear_spoiler',
+        positiveKeywords: ['slotted spoiler', 'integrated rear spoiler', 'evo ducktail', 'slotted ducktail', 'integrated aerodynamic spoiler'],
+        incompatibleKeywords: ['massive swan neck wing', 'tall fixed track wing', 'no rear spoiler']
+      },
+      rear_architecture_and_exhaust: {
+        name: 'elevated_twin_sports_exhausts_high_bumper',
+        positiveKeywords: ['elevated exhaust', 'high-mounted exhaust', 'twin exhaust flanking license plate', 'performante style exhaust', 'high exit twin exhaust', 'high diffuser'],
+        incompatibleKeywords: ['quad lower exhaust tips', 'outer lower bumper exhaust', 'single center exhaust']
+      },
+      roofline_greenhouse: {
+        name: 'fastback_wedge_hexagon_windows',
+        positiveKeywords: ['sloping fastback', 'hexagonal side glass', 'louvers or glass engine cover'],
+        incompatibleKeywords: ['wraparound visor canopy', 'upright sedan']
+      },
+      proportions: {
+        name: 'modern_hexagonal_wedge_supercar',
+        positiveKeywords: ['hexagonal wedge', 'low slung supercar', 'cab forward v10', 'huracan evo'],
         incompatibleKeywords: ['front-engine gt', 'suv', 'sedan']
       }
     }
@@ -1722,6 +1800,263 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
         name: 'front_engine_four_door_passenger_sedan',
         positiveKeywords: ['four-door sedan', 'sedan', 'mid-size sedan', 'three-box sedan', 'front-wheel drive proportions'],
         incompatibleKeywords: ['cab-forward mid-engine', 'low slung supercar', 'two-seat sports coupe', 'open-top spider']
+      }
+    }
+  },
+
+  // ── ASTON MARTIN DBS (SUPERLEGGERA) ──
+  {
+    vehicleId: 'aston-martin-dbs',
+    make: 'Aston Martin',
+    model: 'DBS',
+    generation: 'DBS Superleggera',
+    proportionsDescription: 'Aggressive flagship grand tourer with massive hexagonal mouth grille, dual carbon hood strakes, and curlicue side fender vents',
+    confusableWith: ['aston-martin-db9', 'aston-martin-db7'],
+    traits: {
+      headlight_shape: {
+        name: 'elongated_swept_back_led_cluster',
+        positiveKeywords: ['swept-back led', 'elongated headlight', 'teardrop swept back', 'modern led cluster', 'dbs headlights'],
+        incompatibleKeywords: ['round headlamp', 'trapezoidal lens', 'fried egg']
+      },
+      front_intake_grille: {
+        name: 'enlarged_honeycomb_inverted_trapezoid_grille',
+        positiveKeywords: ['massive front grille', 'enlarged grille', 'honeycomb grille', 'inverted trapezoid grille', 'black hexagonal open mouth', 'wide open grille', 'aggressive front mouth'],
+        incompatibleKeywords: ['slatted aluminum grille', 'small oval mouth', 'twin kidney', 'panamericana']
+      },
+      hood_geometry: {
+        name: 'deeply_sculpted_hood_with_carbon_strakes',
+        positiveKeywords: ['carbon hood strakes', 'hood vents', 'extractor strakes', 'sculpted bonnet', 'dual hood vents', 'dbs hood'],
+        incompatibleKeywords: ['smooth hood without vents', 'flat smooth luggage lid']
+      },
+      fender_architecture: {
+        name: 'curlicue_front_fender_air_extractors',
+        positiveKeywords: ['curlicue vent', 'side strake extractor', 'fender air extractor', 'deep fender cutout behind wheel'],
+        incompatibleKeywords: ['unvented front fenders', 'triple round gills']
+      },
+      wing_and_spoiler_architecture: {
+        name: 'aeroblade_ii_carbon_lip_spoiler',
+        positiveKeywords: ['aeroblade', 'carbon lip spoiler', 'integrated decklid spoiler', 'carbon aeroblade'],
+        incompatibleKeywords: ['massive swan neck wing', 'tall fixed track wing']
+      },
+      rear_architecture_and_exhaust: {
+        name: 'quad_exhaust_tailpipes_double_diffuser',
+        positiveKeywords: ['quad exhaust', 'double diffuser', 'deep carbon diffuser', 'slim horizontal blade taillights', 'blade taillight'],
+        incompatibleKeywords: ['dual round exhaust tips in bumper', 'central twin round pipes']
+      },
+      proportions: {
+        name: 'muscular_front_engine_v12_super_gt',
+        positiveKeywords: ['long hood short deck', 'muscular rear haunches', 'super gt proportions', 'wide aggressive stance'],
+        incompatibleKeywords: ['mid-engine cab forward', 'sedan proportions']
+      }
+    }
+  },
+
+  // ── ASTON MARTIN DB9 ──
+  {
+    vehicleId: 'aston-martin-db9',
+    make: 'Aston Martin',
+    model: 'DB9',
+    generation: 'VH',
+    proportionsDescription: 'Classic elegant grand tourer with slatted aluminum inverted-trapezoid grille, horizontal fender strake, and dual round exhausts',
+    confusableWith: ['aston-martin-dbs', 'aston-martin-db7'],
+    traits: {
+      headlight_shape: {
+        name: 'sweeping_elongated_bi_xenon_lenses',
+        positiveKeywords: ['sweeping headlight', 'elongated lens', 'flowing headlight', 'bi-xenon projector'],
+        incompatibleKeywords: ['round headlamp under glass', 'vertical slit', 'fried egg']
+      },
+      front_intake_grille: {
+        name: 'classic_horizontal_slatted_aluminum_grille',
+        positiveKeywords: ['slatted grille', 'horizontal slats', 'aluminum slatted grille', 'classic aston martin grille', '5-vane grille', 'traditional inverted trapezoid'],
+        incompatibleKeywords: ['massive black honeycomb grille', 'massive open mouth', 'enlarged honeycomb', 'twin kidney']
+      },
+      hood_geometry: {
+        name: 'clean_bonnet_with_subtle_creases',
+        positiveKeywords: ['clean hood', 'clean bonnet', 'subtle hood creases', 'dual subtle bonnet vents'],
+        incompatibleKeywords: ['massive carbon hood extractors', 'dual nostrils', 'nostrils']
+      },
+      fender_architecture: {
+        name: 'horizontal_side_strake_with_led_indicator',
+        positiveKeywords: ['side strake', 'horizontal strake', 'fender strake with indicator', 'metal strake on fender'],
+        incompatibleKeywords: ['curlicue vent', 'fender louvers']
+      },
+      rear_architecture_and_exhaust: {
+        name: 'dual_round_exhaust_tips_integrated_bumper',
+        positiveKeywords: ['dual exhaust', 'dual round exhaust', 'clear swan-neck taillights', 'swan-neck taillights', 'c-shaped taillights'],
+        incompatibleKeywords: ['quad exhaust tailpipes', 'double diffuser', 'deep carbon diffuser']
+      },
+      proportions: {
+        name: 'timeless_grand_tourer_coupe_flyline',
+        positiveKeywords: ['long hood', 'short rear deck', 'swan wing doors', 'grand tourer proportions', 'flowing roofline'],
+        incompatibleKeywords: ['mid-engine cab forward', 'sedan']
+      }
+    }
+  },
+
+  // ── ASTON MARTIN DB7 ──
+  {
+    vehicleId: 'aston-martin-db7',
+    make: 'Aston Martin',
+    model: 'DB7',
+    generation: 'NP',
+    proportionsDescription: '1990s Ian Callum design with rounded mouth grille, glass-covered round headlights, and soft curved fastback',
+    confusableWith: ['aston-martin-dbs', 'aston-martin-db9'],
+    traits: {
+      headlight_shape: {
+        name: 'rounded_headlamps_under_aerodynamic_glass',
+        positiveKeywords: ['glass-covered headlight', 'round headlights under glass', 'separate round fog lights', '90s composite headlight'],
+        incompatibleKeywords: ['sharp angular led', 'swept-back led', 'elongated modern led']
+      },
+      front_intake_grille: {
+        name: 'rounded_oval_mouth_mesh_grille',
+        positiveKeywords: ['rounded mouth grille', 'oval mouth', 'classic oval grille', 'chrome surround oval', 'mesh mouth grille'],
+        incompatibleKeywords: ['massive black honeycomb', 'sharp inverted trapezoid', 'twin kidney']
+      },
+      hood_geometry: {
+        name: 'smooth_curved_bonnet_with_power_bulge',
+        positiveKeywords: ['smooth curved bonnet', 'power bulge', 'classic curved hood'],
+        incompatibleKeywords: ['carbon hood strakes', 'dual nostrils', 'deep extractor vents']
+      },
+      fender_architecture: {
+        name: 'classic_side_flute_vent',
+        positiveKeywords: ['side flute', 'classic fender vent', 'small side strake'],
+        incompatibleKeywords: ['curlicue vent', 'fender louvers']
+      },
+      rear_architecture_and_exhaust: {
+        name: 'rounded_wraparound_taillights_dual_exhaust',
+        positiveKeywords: ['wraparound taillights', '90s taillight clusters', 'dual exhaust tips'],
+        incompatibleKeywords: ['slim horizontal blade taillights', 'quad exhaust with double diffuser']
+      },
+      proportions: {
+        name: '1990s_curved_grand_tourer',
+        positiveKeywords: ['90s grand tourer', 'softer rounded edges', 'curved fastback'],
+        incompatibleKeywords: ['sharp aggressive creases', 'widebody track']
+      }
+    }
+  },
+
+  // ── MERCEDES-BENZ S-CLASS (W223) ──
+  {
+    vehicleId: 'mercedes-s-class-w223',
+    make: 'Mercedes-Benz',
+    model: 'S-Class',
+    generation: 'W223',
+    proportionsDescription: 'Flagship executive full-size luxury sedan with three horizontal twin-slat chrome grille, flush pop-out door handles, and triangular LED taillights',
+    confusableWith: ['mercedes-maybach-s-class'],
+    traits: {
+      headlight_shape: {
+        name: 'digital_light_led_with_eyebrow_drl',
+        positiveKeywords: ['digital light', 'single eyebrow drl', 'multibeam led', 'three-dot led', 'sleek horizontal headlight'],
+        incompatibleKeywords: ['split headlights', 'two-tier headlights', 'swarovski crystal drl', 'vertical slit']
+      },
+      front_intake_grille: {
+        name: 'horizontal_twin_chrome_slats_with_radar_shield',
+        positiveKeywords: ['three chrome slats', 'horizontal chrome slats', 'radar shield', 'upright three-pointed star', 's-class chrome grille', 'classic mercedes grille'],
+        incompatibleKeywords: ['vertical pinstripe grille', 'maybach vertical slats', 'giant double kidney', 'panamericana vertical slats']
+      },
+      door_architecture: {
+        name: 'flush_fitting_motorized_pop_out_handles',
+        positiveKeywords: ['flush door handles', 'pop-out handles', 'retractable door handles', 'smooth door surface'],
+        incompatibleKeywords: ['conventional pull handles', 'butterfly door', 'swan wing door']
+      },
+      roofline_greenhouse: {
+        name: 'flagship_three_box_executive_sedan',
+        positiveKeywords: ['executive sedan', 'three-box sedan', 'long rear passenger doors', 'standard c-pillar', 'generous greenhouse'],
+        incompatibleKeywords: ['two-tone upper paint divider', 'maybach c-pillar fixed window', 'coupe flyline', 'hatchback']
+      },
+      rear_architecture_and_exhaust: {
+        name: 'triangular_horizontal_led_taillights',
+        positiveKeywords: ['two-piece triangular taillights', 'horizontal led taillights', 'chrome trim connecting taillights', 'integrated dual chrome exhaust'],
+        incompatibleKeywords: ['full width strakes', 'quad circular titanium exhaust', 'round taillights']
+      },
+      proportions: {
+        name: 'full_size_executive_luxury_sedan',
+        positiveKeywords: ['flagship sedan', 'long wheelbase sedan', 'executive luxury stance', 'stately profile'],
+        incompatibleKeywords: ['compact roadster', 'mid-engine supercar', 'monolithic giant upright kidney']
+      }
+    }
+  },
+
+  // ── MERCEDES-MAYBACH S-CLASS (Z223) ──
+  {
+    vehicleId: 'mercedes-maybach-s-class',
+    make: 'Mercedes-Benz',
+    model: 'Maybach S-Class',
+    generation: 'Z223',
+    proportionsDescription: 'Ultra-luxury limousine with vertical chrome pinstripe Maybach grille, dedicated C-pillar quarter window with double-M emblem, and optional two-tone finish',
+    confusableWith: ['mercedes-s-class-w223'],
+    traits: {
+      headlight_shape: {
+        name: 'digital_light_led_high_resolution',
+        positiveKeywords: ['digital light', 'multibeam led', 'sleek horizontal headlight', 'eyebrow drl'],
+        incompatibleKeywords: ['split headlights', 'two-tier headlights']
+      },
+      front_intake_grille: {
+        name: 'maybach_vertical_chrome_pinstripe_grille',
+        positiveKeywords: ['maybach grille', 'vertical chrome pinstripes', 'vertical slats with maybach lettering', 'fine vertical chrome', 'maybach front grille'],
+        incompatibleKeywords: ['horizontal twin chrome slats', 'standard s-class grille', 'giant double kidney', 'honeycomb']
+      },
+      roofline_greenhouse: {
+        name: 'extended_limousine_with_c_pillar_quarter_window',
+        positiveKeywords: ['maybach c-pillar', 'fixed c-pillar quarter window', 'double-m emblem', 'maybach logo on c-pillar', 'extended rear door', 'ultra-long wheelbase'],
+        incompatibleKeywords: ['standard sedan c-pillar without quarter window', 'coupe', 'roadster']
+      },
+      door_architecture: {
+        name: 'two_tone_paint_finish_and_chrome_b_pillar',
+        positiveKeywords: ['two-tone paint', 'two-tone finish', 'chrome b-pillar', 'flush door handles'],
+        incompatibleKeywords: ['sports livery', 'carbon race doors']
+      },
+      rear_architecture_and_exhaust: {
+        name: 'maybach_divided_exhaust_trim',
+        positiveKeywords: ['maybach exhaust trim', 'horizontal divider in exhaust', 'chrome rear strip', 'triangular taillights'],
+        incompatibleKeywords: ['central exhaust', 'quad round race exhaust']
+      },
+      proportions: {
+        name: 'ultra_long_wheelbase_presidential_limousine',
+        positiveKeywords: ['maybach limousine', 'ultra-luxury long wheelbase', 'presidential proportions', 'extended passenger cabin'],
+        incompatibleKeywords: ['standard wheelbase', 'sports car', 'suv']
+      }
+    }
+  },
+
+  // ── BMW 7 SERIES (G70) ──
+  {
+    vehicleId: 'bmw-7-series-g70',
+    make: 'BMW',
+    model: '7 Series',
+    generation: 'G70',
+    proportionsDescription: 'Towering monolithic luxury sedan with two-tier split headlights featuring Swarovski crystal DRLs and massive upright illuminated double kidney grille',
+    confusableWith: [],
+    traits: {
+      headlight_shape: {
+        name: 'two_tier_split_headlights_with_crystal_drl',
+        positiveKeywords: ['split headlight', 'two-tier headlight', 'slim upper drl', 'swarovski crystal drl', 'upper led strip', 'dark recessed lower headlight', 'split lighting'],
+        incompatibleKeywords: ['single piece headlight', 'round bug eye', 'fried egg', 'horizontal twin chrome slats']
+      },
+      front_intake_grille: {
+        name: 'monolithic_oversized_upright_double_kidney_grille',
+        positiveKeywords: ['oversized kidney grille', 'massive double kidney', 'upright kidney', 'illuminated kidney', 'iconic glow', 'giant vertical kidney', 'monolithic front grille'],
+        incompatibleKeywords: ['three horizontal chrome slats', 'maybach vertical pinstripe', 'singleframe', 'horizontal low mouth']
+      },
+      roofline_greenhouse: {
+        name: 'monolithic_upright_executive_roofline',
+        positiveKeywords: ['upright executive roofline', 'modern hofmeister kink', 'flush glass greenhouse', 'tall monolithic cabin'],
+        incompatibleKeywords: ['coupe flyline', 'soft top', 'speedster haunches']
+      },
+      door_architecture: {
+        name: 'flush_integrated_electronic_door_openers',
+        positiveKeywords: ['flush door openers', 'electronic push button handles', 'automatic doors'],
+        incompatibleKeywords: ['butterfly doors', 'vertical scissor doors']
+      },
+      rear_architecture_and_exhaust: {
+        name: 'ultra_slim_horizontal_led_taillights_clean_apron',
+        positiveKeywords: ['slim horizontal taillights', 'clean minimalist rear apron', 'hidden exhaust', 'concealed tailpipes'],
+        incompatibleKeywords: ['triangular taillights', 'quad outer exhaust tips', 'central exhaust']
+      },
+      proportions: {
+        name: 'towering_monolithic_full_size_executive_sedan',
+        positiveKeywords: ['tall upright front fascia', 'blunt vertical nose', 'monolithic luxury sedan', 'high hoodline'],
+        incompatibleKeywords: ['sloping sports car flyline', 'low slung supercar', 'two-seat roadster']
       }
     }
   }
@@ -2088,8 +2423,24 @@ export class FineGrainedModelDiscriminator {
             scoreDelta: delta,
             reason: `Direct contradiction observed in visible area (${delta.toFixed(2)})`
           });
+        } else if (expectedTrait.requiresMandatoryAeroPresence && visibility === 'VISIBLE' && categoryText.length >= 10) {
+          // Amendment 3: Strict Visible-Absence Penalty. Feature is expected, zone is confirmed VISIBLE,
+          // but the observed geometry lacks the mandatory signature.
+          contradictionCount += 1;
+          const delta = -0.30;
+          score += delta;
+          contradictions.push(`Mandatory distinguishing feature (${expectedTrait.name}) is absent from confirmed visible ${categoryKey.replace(/_/g, ' ')}`);
+          evaluations.push({
+            category: categoryKey,
+            visibility,
+            expectedTraitName: expectedTrait.name,
+            matched: false,
+            contradicted: true,
+            scoreDelta: delta,
+            reason: `Confirmed absence of mandatory feature in visible zone (${delta.toFixed(2)})`
+          });
         } else {
-          // Feature zone is visible, but neutral
+          // Feature zone is visible or partial, but neutral
           evaluations.push({
             category: categoryKey,
             visibility,

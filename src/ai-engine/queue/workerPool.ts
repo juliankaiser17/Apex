@@ -369,13 +369,47 @@ export class WorkerPool {
         canonicalResult: aiResponse.canonicalResult
       };
 
-      // ─── STAGE 7: CACHE & FINALIZE ───
-      if (confidence.isConfident && validationReport.isValid) {
+      // ─── STAGE 7: CACHE & FINALIZE (AMENDMENT 2: HARDENED CACHE POLICY) ───
+      const canonicalId = validationReport.canonicalRecord?.vehicleId || validationReport.canonicalIdentity?.canonicalId || finalResult.canonicalResult?.canonical_identity?.canonicalId;
+      const hasResolvedCanonicalId = Boolean(canonicalId);
+      const isValidationPassed = validationReport.isValid;
+      const canonicalStatus = aiResponse.canonicalResult?.status || (confidence.isConfident ? 'identified' : 'probable');
+
+      // Durable Cache (12 hours): only for fully identified, valid, canonical-resolved results with confidence
+      const canDurableCache = (
+        finalStatus === 'completed' &&
+        canonicalStatus === 'identified' &&
+        confidence.isConfident &&
+        isValidationPassed &&
+        hasResolvedCanonicalId
+      );
+
+      // Temporary/short-lived Cache (5 minutes): for probable results that passed validation and resolved canonical ID
+      // This prevents repeated API spam within a session, while never permanently freezing an uncertain identity
+      const canTemporaryCache = (
+        !canDurableCache &&
+        finalStatus === 'completed' &&
+        canonicalStatus === 'probable' &&
+        isValidationPassed &&
+        hasResolvedCanonicalId &&
+        confidence.totalScore >= 0.60
+      );
+
+      if (canDurableCache) {
         identificationCache.setResult(
           job.imageHash,
           finalResult,
           aiResponse.providerName || 'CloudflareVisionProvider',
           aiResponse.modelUsed || '@cf/meta/llama-3.2-11b-vision-instruct'
+        );
+      } else if (canTemporaryCache) {
+        // Short-lived temporary cache (5 minutes = 300,000 ms)
+        identificationCache.setResult(
+          job.imageHash,
+          finalResult,
+          aiResponse.providerName || 'CloudflareVisionProvider',
+          aiResponse.modelUsed || '@cf/meta/llama-3.2-11b-vision-instruct',
+          5 * 60 * 1000
         );
       }
 
