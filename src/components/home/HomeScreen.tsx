@@ -50,7 +50,7 @@ export const HomeScreen: React.FC = () => {
   const dailyMissions = useApexStore(s => s.dailyMissions);
   const setScannerOpen = useApexStore(s => s.setScannerOpen);
   const setActiveTab = useApexStore(s => s.setActiveTab);
-  const completeMission = useApexStore(s => s.completeMission);
+  const claimMissionReward = useApexStore(s => s.claimMissionReward);
   const feedPosts = useApexStore(s => s.feedPosts);
   const userLevel = useApexStore(s => s.user.level);
   const userXp = useApexStore(s => s.user.xp);
@@ -58,6 +58,8 @@ export const HomeScreen: React.FC = () => {
 
   const [activeTabSection, setActiveTabSection] = useState<'quests' | 'missions'>('quests');
   const [isTierModalOpen, setIsTierModalOpen] = useState(false);
+  const [missionClaimingId, setMissionClaimingId] = useState<string | null>(null);
+  const [missionToast, setMissionToast] = useState<{ message: string; isError: boolean } | null>(null);
   const activeQuest = dailyQuests[0];
   const sideQuests = dailyQuests.slice(1);
 
@@ -65,11 +67,28 @@ export const HomeScreen: React.FC = () => {
     return getProgressToNextLevel(userLevel, userXp);
   }, [userLevel, userXp]);
 
-  const handleMissionClick = (m: Mission) => {
-    if (m.completed) return;
-    hapticSuccess();
+  const handleMissionClick = async (m: Mission) => {
+    if (m.completed || missionClaimingId) return;
+    hapticTap();
     sounds.playTargetLock();
-    completeMission(m.id);
+    setMissionClaimingId(m.id);
+
+    const res = await claimMissionReward(m.id);
+    setMissionClaimingId(null);
+
+    if (res.success) {
+      hapticSuccess();
+      sounds.playXpPop();
+      setMissionToast({ message: `Reward Claimed! +${res.xpAwarded} XP`, isError: false });
+      setTimeout(() => setMissionToast(null), 3000);
+    } else {
+      hapticTap();
+      setMissionToast({ 
+        message: res.error || 'Mission not satisfied yet. Scan vehicles to complete requirement!', 
+        isError: true 
+      });
+      setTimeout(() => setMissionToast(null), 4000);
+    }
   };
 
   return (
@@ -392,6 +411,8 @@ export const HomeScreen: React.FC = () => {
                 <div className="flex items-center gap-3">
                   {m.completed ? (
                     <CheckCircle2 className="w-4 h-4 text-[#2ECC71]" />
+                  ) : missionClaimingId === m.id ? (
+                    <div className="w-4 h-4 rounded-full border-2 border-amber-400 border-t-transparent animate-spin" />
                   ) : (
                     <div className="w-4 h-4 rounded-full border border-white/30 transition-colors" />
                   )}
@@ -407,6 +428,24 @@ export const HomeScreen: React.FC = () => {
                 </span>
               </div>
             ))}
+
+            {missionToast && (
+              <div className={`p-2.5 rounded-xl text-xs font-semibold flex items-center justify-between border transition-all ${
+                missionToast.isError 
+                  ? 'bg-red-950/40 border-red-500/30 text-red-300' 
+                  : 'bg-emerald-950/40 border-emerald-500/30 text-emerald-300'
+              }`}>
+                <span>{missionToast.message}</span>
+                {missionToast.isError && (
+                  <button
+                    onClick={() => { setScannerOpen(true); }}
+                    className="ml-2 px-2 py-0.5 rounded-lg bg-white/10 text-[11px] font-bold text-white hover:bg-white/20 transition-colors shrink-0"
+                  >
+                    Scan →
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         )}
       </div>

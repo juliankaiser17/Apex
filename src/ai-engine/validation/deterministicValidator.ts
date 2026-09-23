@@ -71,10 +71,10 @@ export class DeterministicValidator {
       canonicalRecord = canonicalVehicleRegistry.getById(output.vehicleId);
     }
 
-    // 2. If not found by ID, attempt lookup by text / make / model / generation
+    // 2. If not found by ID, attempt lookup by text / make / model / generation with manufacturer scoping
     if (!canonicalRecord) {
       const query = `${output.make || ''} ${output.model || ''} ${output.generation || ''}`;
-      canonicalRecord = canonicalVehicleRegistry.lookupByTextOrAlias(query);
+      canonicalRecord = canonicalVehicleRegistry.lookupByTextOrAlias(query, output.make || undefined);
     }
 
     // 3. Fallback candidates search (requires strict model family alignment)

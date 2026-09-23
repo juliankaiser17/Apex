@@ -242,7 +242,7 @@ export const DiscoveryReveal: React.FC<DiscoveryRevealProps> = ({
 
               <button
                 onClick={() => {
-                  addCardToGarage(card);
+                  addCardToGarage(card, undefined, { publishToFeed: false });
                   setScannerOpen(false);
                   setActiveTab('garage');
                 }}

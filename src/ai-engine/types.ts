@@ -65,6 +65,8 @@ export interface OpenCanonicalIdentity {
   registryStatus: CanonicalRegistryStatus;
   source: 'gemini' | 'registry' | 'offline_model' | 'ensemble';
   specs?: Record<string, any>;
+  displayName?: string;
+  specificityLevel?: number;
 }
 
 export type ViewpointType =
@@ -116,6 +118,7 @@ export interface CandidateComparison {
   supporting_evidence: string[];
   contradictions: string[];
   unobservable_features?: string[];
+  invalid?: boolean;
 }
 
 export interface VisionEvidence {
@@ -158,6 +161,7 @@ export interface CanonicalScanResult {
   candidates: CandidateComparison[];
   contradictions: string[];
   specificity_level: SpecificityLevel;
+  specificity_level_numeric?: number;
   reason: string;
   needs_retake: boolean;
   needs_review?: boolean;

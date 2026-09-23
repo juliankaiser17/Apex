@@ -20,7 +20,7 @@ import { getEstimatedMarketValue } from '../../utils/marketValuation';
 import { resolveCanonicalVehicleSpecs } from '../../utils/vehicleSpecs';
 
 export const ScannerModal: React.FC = () => {
-  const { scannerOpen, setScannerOpen, user } = useApexStore();
+  const { scannerOpen, setScannerOpen, user, onScanCompleted } = useApexStore();
   const { sampleCoarseLocation } = useLocalRarity();
   const [shutterFlash, setShutterFlash] = useState(false);
   const [facingMode, setFacingMode] = useState<'environment' | 'user'>('environment');
@@ -410,9 +410,12 @@ export const ScannerModal: React.FC = () => {
         make,
         model,
         generation: aiResult?.generation,
-        trim: aiResult?.trim
+        trim: aiResult?.trim,
+        canonicalVehicleId: aiResult?.canonical_vehicle_id
       });
 
+      const finalMake = specResolution.isVerified ? specResolution.make : make;
+      const finalModel = specResolution.isVerified ? specResolution.model : model;
       const generation = specResolution.generation || aiResult?.generation || 'Current';
       const trim = specResolution.trim || aiResult?.trim || undefined;
       const horsepower = specResolution.horsepower ?? (aiResult?.horsepower || undefined);
@@ -435,7 +438,7 @@ export const ScannerModal: React.FC = () => {
         : `${bodyStyle} Silhouette`;
       onAnalysisStageResolved(1, featuresSummary);
 
-      onAnalysisStageResolved(2, `${make} ${model} Confirmed`);
+      onAnalysisStageResolved(2, `${finalMake} ${finalModel} Confirmed`);
 
       const candidateSummary = aiResult?.status === 'uncertain'
         ? 'Variant Uncertain — Preserving Base Model'
@@ -490,8 +493,8 @@ export const ScannerModal: React.FC = () => {
       const newCard: CarCard = {
         id: `card-${Date.now()}`,
         cardNumber: `#APX-${Math.floor(1000 + Math.random() * 9000)}`,
-        make,
-        model,
+        make: finalMake,
+        model: finalModel,
         generation,
         trim,
         yearEstimate: specResolution.productionYears && specResolution.productionYears !== 'N/A'
@@ -552,6 +555,7 @@ export const ScannerModal: React.FC = () => {
       }
 
       onAnalysisStageResolved(4, `Certainty: ${(newCard.identificationStatus || 'identified').toUpperCase()}`);
+      onScanCompleted(newCard);
       onIdentificationSuccess(newCard, false);
 
     } catch (err: any) {

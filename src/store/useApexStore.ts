@@ -23,6 +23,7 @@ import type {
 import { calculateDiscoveryXp, processXpGain } from '../utils/mastery';
 import { sounds } from '../utils/audio';
 import { supabase } from '../lib/supabase';
+import { cardImageStorage } from '../lib/cardImageStorage';
 import { computeImageSha256 } from '../ai-engine/crypto/sha256';
 import { localRarityTracer } from '../ai-engine/observability/localRarityTracer';
 import { featureFlags } from '../utils/featureFlags';
@@ -141,6 +142,9 @@ interface ApexState {
   abandonHunt: (huntId?: string) => void;
   triggerMockHunt: (card: CarCard) => void;
   completeMission: (missionId: string) => void;
+  claimMissionReward: (missionId: string) => Promise<{ success: boolean; error?: string; xpAwarded?: number; coinsAwarded?: number }>;
+  onScanCompleted: (card: CarCard) => void;
+  rehydrateCardImages: (cards: CarCard[]) => void;
   dismissLevelUp: () => void;
   toggleAllowHunts: () => void;
   setDefaultPrivacyLevel: (level: PrivacyLevel) => void;
@@ -355,6 +359,25 @@ export function generatePersonaQuests(persona: Persona = 'unspecified'): DailyQu
   ];
 }
 
+export const getSavedDailyQuests = (persona: Persona = 'unspecified'): DailyQuest[] => {
+  try {
+    if (typeof localStorage !== 'undefined') {
+      const today = new Date().toISOString().slice(0, 10);
+      const savedDate = localStorage.getItem('apex_daily_quests_date');
+      if (savedDate === today) {
+        const saved = localStorage.getItem('apex_daily_quests');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
+      } else {
+        localStorage.setItem('apex_daily_quests_date', today);
+      }
+    }
+  } catch (e) {}
+  return generatePersonaQuests(persona);
+};
+
 const INITIAL_QUESTS: DailyQuest[] = generatePersonaQuests('unspecified');
 
 const INITIAL_MISSIONS: Mission[] = [
@@ -366,6 +389,25 @@ const INITIAL_MISSIONS: Mission[] = [
   { id: 'm6', title: 'Spot a car with 400+ HP', xpReward: 120, completed: false, type: 'power' },
   { id: 'm7', title: 'Spot an Aero or Tuned car', xpReward: 100, completed: false, type: 'mods' }
 ];
+
+export const getSavedDailyMissions = (): Mission[] => {
+  try {
+    if (typeof localStorage !== 'undefined') {
+      const today = new Date().toISOString().slice(0, 10);
+      const savedDate = localStorage.getItem('apex_daily_missions_date');
+      if (savedDate === today) {
+        const saved = localStorage.getItem('apex_daily_missions');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
+      } else {
+        localStorage.setItem('apex_daily_missions_date', today);
+      }
+    }
+  } catch (e) {}
+  return INITIAL_MISSIONS;
+};
 
 const INITIAL_BADGES: Badge[] = [
   { id: 'b1', slug: 'first_blood', name: 'First Blood', description: 'Scanned your very first car card.', icon: 'Target', rarity: 'bronze', isUnlocked: false, xpBonus: 100 },
@@ -477,27 +519,100 @@ const getSavedUser = (): UserProfile => {
   return INITIAL_USER;
 };
 
+export const persistLightweightGarage = (userId: string | undefined, garage: CarCard[]) => {
+  try {
+    if (typeof localStorage === 'undefined') return;
+    // Strip heavy base64 strings to prevent QuotaExceededError in localStorage
+    const lightweightGarage = garage.map(c => {
+      if (c.imageUrl && c.imageUrl.startsWith('data:')) {
+        // Persist binary into IndexedDB asynchronously
+        cardImageStorage.storeImage(c.id, c.imageUrl).catch(() => {});
+        return {
+          ...c,
+          imageUrl: `indexeddb://${c.id}`
+        };
+      }
+      return c;
+    });
+
+    const json = JSON.stringify(lightweightGarage);
+    if (userId) {
+      localStorage.setItem(`apex_garage_cards_${userId}`, json);
+    }
+    localStorage.setItem('apex_garage_cards', json);
+  } catch (e) {
+    console.warn('[Storage] Failed to persist lightweight garage:', e);
+  }
+};
+
 const getSavedGarage = (userId?: string): CarCard[] => {
+  const mergedCardsMap = new Map<string, CarCard>();
   try {
     if (typeof localStorage !== 'undefined') {
+      // 1. User-scoped cards
       if (userId) {
         const userSaved = localStorage.getItem(`apex_garage_cards_${userId}`);
         if (userSaved) {
           const parsed = JSON.parse(userSaved);
-          if (Array.isArray(parsed)) return parsed;
+          if (Array.isArray(parsed)) {
+            parsed.forEach(c => { if (c?.id) mergedCardsMap.set(c.id, c); });
+          }
         }
       }
-      // Fallback to initial saved if only one account exists
+
+      // 2. Merge legacy global cards (apex_garage_cards)
       const legacySaved = localStorage.getItem('apex_garage_cards');
-      if (legacySaved && !userId) {
+      if (legacySaved) {
         const parsed = JSON.parse(legacySaved);
-        if (Array.isArray(parsed)) return parsed;
+        if (Array.isArray(parsed)) {
+          parsed.forEach(c => {
+            if (c?.id && !mergedCardsMap.has(c.id)) {
+              mergedCardsMap.set(c.id, c);
+            }
+          });
+        }
+      }
+
+      // 3. Merge legacy apex_garage_items
+      const oldItemsSaved = localStorage.getItem('apex_garage_items');
+      if (oldItemsSaved) {
+        const parsed = JSON.parse(oldItemsSaved);
+        if (Array.isArray(parsed)) {
+          parsed.forEach(c => {
+            if (c?.id && !mergedCardsMap.has(c.id)) {
+              mergedCardsMap.set(c.id, c);
+            }
+          });
+        }
       }
     }
   } catch (e) {
     console.warn('Error reading saved garage cards:', e);
   }
-  return [];
+
+  const result = Array.from(mergedCardsMap.values());
+  // Asynchronously rehydrate images from cardImageStorage for any card with indexeddb:// or missing image
+  if (typeof window !== 'undefined' && result.length > 0) {
+    setTimeout(async () => {
+      let changed = false;
+      for (const card of result) {
+        if (!card.imageUrl || card.imageUrl.startsWith('indexeddb://')) {
+          const storedUrl = await cardImageStorage.getImage(card.id);
+          if (storedUrl) {
+            card.imageUrl = storedUrl;
+            changed = true;
+          }
+        }
+      }
+      if (changed) {
+        try {
+          useApexStore.getState().rehydrateCardImages(result);
+        } catch (_) {}
+      }
+    }, 100);
+  }
+
+  return result;
 };
 
 const createSampleCard = (partial: Partial<CarCard> & { id: string; make: string; model: string; imageUrl: string }): CarCard => ({
@@ -815,8 +930,8 @@ export const useApexStore = create<ApexState>((set, get) => ({
   garage: getSavedGarage(initialSavedUser.id),
   friends: getUserFriends(initialSavedUser.username),
   activeHunts: [],
-  dailyQuests: INITIAL_QUESTS,
-  dailyMissions: INITIAL_MISSIONS,
+  dailyQuests: getSavedDailyQuests(initialSavedUser.persona),
+  dailyMissions: getSavedDailyMissions(),
   badges: INITIAL_BADGES,
   feedPosts: getSavedPosts(),
   economyLedger: [],
@@ -1351,7 +1466,7 @@ export const useApexStore = create<ApexState>((set, get) => ({
       // 1. Authoritatively fetch profile from Supabase using only valid columns
       const { data: profile } = await supabase
         .from('profiles')
-        .select('id, username, display_name, avatar_url, level, xp, coins, streak_days, last_scan_at, total_spots, rarest_find, created_at')
+        .select('id, username, display_name, avatar_url, level, xp, coins, streak_days, last_scan_at, total_spots, rarest_find, created_at, daily_scans_count, daily_scans_reset_at, last_login_at')
         .eq('id', userId)
         .maybeSingle();
 
@@ -1420,40 +1535,51 @@ export const useApexStore = create<ApexState>((set, get) => ({
           soundEffectsEnabled: userMetadata?.sound_effects_enabled !== false
         };
 
-        const hydratedGarage: CarCard[] = (garage && garage.length > 0)
-          ? garage.map(g => createSampleCard({
+        const localCards = getSavedGarage(mergedUser.id);
+        const cardMap = new Map<string, CarCard>();
+        localCards.forEach(c => { if (c?.id) cardMap.set(c.id, c); });
+
+        if (garage && garage.length > 0) {
+          garage.forEach(g => {
+            const existing = cardMap.get(g.id);
+            const remoteCard = createSampleCard({
               id: g.id,
-              cardNumber: g.card_number || `#APX-${Math.floor(100000 + Math.random() * 900000)}`,
+              cardNumber: g.card_number || existing?.cardNumber || `#APX-${Math.floor(100000 + Math.random() * 900000)}`,
               make: g.make,
               model: g.model,
-              yearEstimate: String(g.year_estimate || 2023),
-              bodyStyle: (g.body_style as any) || 'Coupe',
-              rarity: (g.rarity as any) || 'rare',
-              rarityScore: g.rarity_score || 75,
-              horsepower: g.horsepower || 400,
-              topSpeedKmH: g.top_speed_kmh || 280,
-              zeroToHundredSec: g.zero_to_hundred_sec || 3.8,
-              color: g.color || 'Standard',
-              imageUrl: g.image_url || '',
-              city: g.city || 'Tokyo',
-              country: g.country || 'Japan',
-              originCountry: g.origin_country || 'Japan',
-              interestingFact: g.interesting_fact || 'Precision engineering.',
-              briefHistory: g.brief_history || 'Performance icon.',
-              modsDetected: g.mods_detected || [],
-              createdAt: g.created_at || new Date().toISOString(),
+              yearEstimate: String(g.year_estimate || existing?.yearEstimate || 2023),
+              bodyStyle: (g.body_style as any) || existing?.bodyStyle || 'Coupe',
+              rarity: (g.rarity as any) || existing?.rarity || 'rare',
+              rarityScore: g.rarity_score || existing?.rarityScore || 75,
+              horsepower: g.horsepower || existing?.horsepower || 400,
+              topSpeedKmH: g.top_speed_kmh || existing?.topSpeedKmH || 280,
+              zeroToHundredSec: g.zero_to_hundred_sec || existing?.zeroToHundredSec || 3.8,
+              color: g.color || existing?.color || 'Standard',
+              imageUrl: g.image_url || existing?.imageUrl || '',
+              city: g.city || existing?.city || 'Tokyo',
+              country: g.country || existing?.country || 'Japan',
+              originCountry: g.origin_country || existing?.originCountry || 'Japan',
+              interestingFact: g.interesting_fact || existing?.interestingFact || 'Precision engineering.',
+              briefHistory: g.brief_history || existing?.briefHistory || 'Performance icon.',
+              modsDetected: g.mods_detected || existing?.modsDetected || [],
+              createdAt: g.created_at || existing?.createdAt || new Date().toISOString(),
               pendingDeletionUntil: g.pending_deletion_until || undefined,
               isPublic: true,
               privacyLevel: 'public_blurred',
-              xpEarned: 250,
-              aiConfidence: 0.95
-            }))
-          : getSavedGarage(mergedUser.id);
+              xpEarned: existing?.xpEarned || 250,
+              aiConfidence: existing?.aiConfidence || 0.95
+            });
+            if (existing?.imageUrl && (!remoteCard.imageUrl || remoteCard.imageUrl.startsWith('indexeddb://'))) {
+              remoteCard.imageUrl = existing.imageUrl;
+            }
+            cardMap.set(g.id, remoteCard);
+          });
+        }
+        const hydratedGarage: CarCard[] = Array.from(cardMap.values());
 
         try {
           persistItem('apex_user_session', JSON.stringify(mergedUser));
-          persistItem(`apex_garage_cards_${mergedUser.id}`, JSON.stringify(hydratedGarage));
-          persistItem('apex_garage_cards', JSON.stringify(hydratedGarage));
+          persistLightweightGarage(mergedUser.id, hydratedGarage);
           if (isOnboardingDone) {
             persistItem('apex_onboarding_v2_completed', 'true');
           }
@@ -1461,6 +1587,19 @@ export const useApexStore = create<ApexState>((set, get) => ({
 
         await registerOrUpdateUser(mergedUser);
         logAuthTransition('PROFILE_LOADED', userId, resolvedEmail);
+
+        const serverDailyScans = profile.daily_scans_count ?? 0;
+        const currentQuests = get().dailyQuests;
+        const updatedQuests = currentQuests.map(q => {
+          if (q.id === 'quest-daily-spotlight') {
+            return {
+              ...q,
+              currentCount: serverDailyScans,
+              isCompleted: serverDailyScans >= q.targetCount
+            };
+          }
+          return q;
+        });
 
         set({
           authStatus: 'AUTHENTICATED',
@@ -1471,6 +1610,7 @@ export const useApexStore = create<ApexState>((set, get) => ({
           },
           user: mergedUser,
           garage: hydratedGarage,
+          dailyQuests: updatedQuests,
           friends: getUserFriends(mergedUser.username),
           incomingRequests: getIncomingRequests(mergedUser.username),
           outgoingRequests: getOutgoingRequests(mergedUser.username),
@@ -1500,6 +1640,7 @@ export const useApexStore = create<ApexState>((set, get) => ({
           console.warn('Idempotent profile creation notice:', insertErr);
         }
 
+        const existingLocalGarage = getSavedGarage(userId);
         const newUser: UserProfile = {
           ...INITIAL_USER,
           id: userId,
@@ -1507,11 +1648,13 @@ export const useApexStore = create<ApexState>((set, get) => ({
           displayName: derivedDisplayName,
           email: resolvedEmail,
           city: userMetadata?.city || '',
-          country: userMetadata?.country || ''
+          country: userMetadata?.country || '',
+          totalSpots: existingLocalGarage.length
         };
 
         try {
           persistItem('apex_user_session', JSON.stringify(newUser));
+          persistLightweightGarage(userId, existingLocalGarage);
         } catch (e) {}
 
         await registerOrUpdateUser(newUser);
@@ -1525,7 +1668,7 @@ export const useApexStore = create<ApexState>((set, get) => ({
             provider: determinedProvider
           },
           user: newUser,
-          garage: [],
+          garage: existingLocalGarage,
           friends: [],
           incomingRequests: [],
           outgoingRequests: [],
@@ -1681,8 +1824,8 @@ export const useApexStore = create<ApexState>((set, get) => ({
 
   addCardToGarage: async (newCard, customCaption, options) => {
     sounds.playXpPop();
-    const shouldPublishToFeed = options?.publishToFeed !== false;
-    const postCaption = customCaption?.trim() || `Just discovered this ${newCard.make} ${newCard.model} in ${newCard.city}!`;
+    const shouldPublishToFeed = options?.publishToFeed === true;
+    const postCaption = shouldPublishToFeed ? (customCaption?.trim() || `Just discovered this ${newCard.make} ${newCard.model} in ${newCard.city}!`) : null;
     
     // Count previous spots of this vehicle model in current user's garage
     const previousSpotsOfModel = get().garage.filter(
@@ -1729,12 +1872,29 @@ export const useApexStore = create<ApexState>((set, get) => ({
 
     let localRarityData: LocalRarityInfo | undefined = newCard.localRarity;
 
-    // Invoke Authoritative Server-Side PostgreSQL RPC if connected
-    try {
-      const canonicalId = (newCard as any).canonicalVehicleId || 
-        `${newCard.make}-${newCard.model}`.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    // Check if scan was already recorded authoritatively during onScanCompleted
+    if ((newCard as any).serverRecorded) {
+      if ((newCard as any).serverCardId) {
+        serverCardId = (newCard as any).serverCardId;
+      }
+      if (shouldPublishToFeed && postCaption) {
+        try {
+          supabase.from('posts').insert([{
+            user_id: get().user?.id,
+            car_id: serverCardId,
+            caption: postCaption,
+            likes_count: 0,
+            comments_count: 0
+          }]);
+        } catch (_) {}
+      }
+    } else {
+      // Invoke Authoritative Server-Side PostgreSQL RPC if connected
+      try {
+        const canonicalId = (newCard as any).canonicalVehicleId || 
+          `${newCard.make}-${newCard.model}`.toLowerCase().replace(/[^a-z0-9]+/g, '-');
 
-      const { data: rpcResult, error: rpcError } = await supabase.rpc('record_car_scan', {
+        const { data: rpcResult, error: rpcError } = await supabase.rpc('record_car_scan', {
         p_make: newCard.make,
         p_model: newCard.model,
         p_year_estimate: newCard.yearEstimate || 'Unknown',
@@ -1854,6 +2014,7 @@ export const useApexStore = create<ApexState>((set, get) => ({
     } catch (dbErr) {
       console.warn('RPC record_car_scan execution fallback:', dbErr);
     }
+  }
 
     const authoritativeCard: CarCard = {
       ...newCard,
@@ -1873,10 +2034,7 @@ export const useApexStore = create<ApexState>((set, get) => ({
 
     set((state) => {
       const updatedGarage = [authoritativeCard, ...state.garage];
-      try {
-        localStorage.setItem(`apex_garage_cards_${state.user.id}`, JSON.stringify(updatedGarage));
-        localStorage.setItem('apex_garage_cards', JSON.stringify(updatedGarage));
-      } catch (e) {}
+      persistLightweightGarage(state.user.id, updatedGarage);
 
       const xpResult = processXpGain(state.user, authoritativeXp, `${authoritativeRarity.toUpperCase()} Discovery`);
       const updatedUser: UserProfile = {
@@ -1884,31 +2042,28 @@ export const useApexStore = create<ApexState>((set, get) => ({
         totalSpots: (state.user.totalSpots || 0) + 1
       };
 
-      const updatedQuests = state.dailyQuests.map(quest => {
-        if (!quest.isCompleted && (!quest.allowedMakes || quest.allowedMakes.length === 0 || quest.allowedMakes.includes(newCard.make))) {
-          const newCount = quest.currentCount + 1;
-          const isNowCompleted = newCount >= quest.targetCount;
-          return {
-            ...quest,
-            currentCount: newCount,
-            isCompleted: isNowCompleted
-          };
-        }
-        return quest;
-      });
+      // Only increment quests if not already processed in onScanCompleted
+      let updatedQuests = state.dailyQuests;
+      if (!(newCard as any).serverRecorded) {
+        updatedQuests = state.dailyQuests.map(quest => {
+          if (!quest.isCompleted && (!quest.allowedMakes || quest.allowedMakes.length === 0 || quest.allowedMakes.includes(newCard.make))) {
+            const newCount = quest.currentCount + 1;
+            const isNowCompleted = newCount >= quest.targetCount;
+            return {
+              ...quest,
+              currentCount: newCount,
+              isCompleted: isNowCompleted
+            };
+          }
+          return quest;
+        });
+      }
 
-      const updatedMissions = state.dailyMissions.map(m => {
-        if (!m.completed) {
-          if (m.type === 'scan') return { ...m, completed: true };
-          if (m.type === 'rarity' && ['rare', 'epic', 'legendary', 'mythic'].includes(newCard.rarity)) return { ...m, completed: true };
-          if (m.type === 'body' && (newCard.bodyStyle === 'SUV' || newCard.bodyStyle === 'Coupe' || newCard.bodyStyle === 'Supercar')) return { ...m, completed: true };
-          if (m.type === 'new_car') return { ...m, completed: true };
-        }
-        return m;
-      });
+      // Missions must be authoritatively verified and claimed via claimMissionReward
+      const updatedMissions = state.dailyMissions;
 
       let updatedPosts = state.feedPosts;
-      if (shouldPublishToFeed) {
+      if (shouldPublishToFeed && postCaption) {
         const newPost: FeedPost = {
           id: `post-${Date.now()}`,
           user: {
@@ -2237,27 +2392,219 @@ export const useApexStore = create<ApexState>((set, get) => ({
     }));
   },
 
-  completeMission: (missionId) => {
+  onScanCompleted: async (card: CarCard) => {
+    // 1. Authoritative Server Path: record_car_scan transaction on database
+    let authoritativeDailyScans: number | null = null;
+
+    try {
+      const canonicalId = (card as any).canonicalVehicleId || 
+        `${card.make}-${card.model}`.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      const imageHash = card.imageHash || computeImageSha256(card.imageUrl) || `hash_${card.make}_${card.model}_${card.id}`;
+
+      const { data: rpcResult, error: rpcError } = await supabase.rpc('record_car_scan', {
+        p_make: card.make,
+        p_model: card.model,
+        p_year_estimate: card.yearEstimate || 'Unknown',
+        p_color: card.color || 'Unknown',
+        p_image_url: card.imageUrl,
+        p_city: card.city || 'Local Area',
+        p_country: card.country || 'Global',
+        p_latitude: card.latApprox || null,
+        p_longitude: card.lngApprox || null,
+        p_horsepower: card.horsepower || 0,
+        p_top_speed_kmh: card.topSpeedKmH || 0,
+        p_caption: null, // Hard invariant: scan event never auto-publishes to community feed
+        p_image_hash: imageHash,
+        p_canonical_vehicle_id: canonicalId,
+        p_geography_bucket: (card as any).geoBucket || (card.localRarity as any)?.geographyBucket || null,
+        p_scanner_status: card.identificationStatus || 'identified',
+        p_ai_confidence: card.aiConfidence || 0.95,
+        p_local_rarity_enabled: featureFlags.isLocalRarityEnabled() && get().localRarityEnabled !== false
+      });
+
+      if (!rpcError && rpcResult?.success) {
+        (card as any).serverRecorded = true;
+        if (rpcResult.card_id) {
+          (card as any).serverCardId = rpcResult.card_id;
+          card.id = rpcResult.card_id;
+        }
+
+        const currentUser = get().user;
+        if (currentUser && currentUser.id) {
+          // Fetch authoritative daily_scans_count updated by record_car_scan in profiles table
+          const { data: profRow } = await supabase
+            .from('profiles')
+            .select('daily_scans_count')
+            .eq('id', currentUser.id)
+            .maybeSingle();
+
+          if (profRow && typeof profRow.daily_scans_count === 'number') {
+            authoritativeDailyScans = profRow.daily_scans_count;
+          }
+
+          const updatedUser: UserProfile = {
+            ...currentUser,
+            xp: rpcResult.new_total_xp ?? currentUser.xp,
+            level: rpcResult.new_level ?? currentUser.level,
+            totalSpots: (currentUser.totalSpots || 0) + 1
+          };
+          set({
+            user: updatedUser,
+            leaderboards: computeLeaderboard(updatedUser)
+          });
+          registerOrUpdateUser(updatedUser);
+        }
+      }
+    } catch (scanErr) {
+      console.warn('[onScanCompleted] RPC record_car_scan notice:', scanErr);
+    }
+
+    // 2. Authoritative UI Quest State Update:
+    // Uses server-returned daily_scans_count when online/authenticated, with local increment fallback for offline/guest
     set((state) => {
-      const mission = state.dailyMissions.find(m => m.id === missionId);
-      if (!mission || mission.completed) return state;
+      const updatedQuests = state.dailyQuests.map(quest => {
+        if (quest.id === 'quest-daily-spotlight') {
+          const newCount = authoritativeDailyScans !== null 
+            ? authoritativeDailyScans 
+            : (quest.currentCount + 1);
+          const isNowCompleted = newCount >= quest.targetCount;
+          return {
+            ...quest,
+            currentCount: newCount,
+            isCompleted: isNowCompleted
+          };
+        }
+        if (!quest.isCompleted && (!quest.allowedMakes || quest.allowedMakes.length === 0 || quest.allowedMakes.includes(card.make))) {
+          const newCount = quest.currentCount + 1;
+          const isNowCompleted = newCount >= quest.targetCount;
+          return {
+            ...quest,
+            currentCount: newCount,
+            isCompleted: isNowCompleted
+          };
+        }
+        return quest;
+      });
 
-      sounds.playXpPop();
-      const updatedMissions = state.dailyMissions.map(m => m.id === missionId ? { ...m, completed: true } : m);
-      const xpResult = processXpGain(state.user, mission.xpReward, 'Mission Complete');
-      const updatedUser = xpResult.updatedUser;
       try {
-        localStorage.setItem('apex_user_session', JSON.stringify(updatedUser));
+        const today = new Date().toISOString().slice(0, 10);
+        localStorage.setItem('apex_daily_quests_date', today);
+        localStorage.setItem('apex_daily_quests', JSON.stringify(updatedQuests));
       } catch (e) {}
-      registerOrUpdateUser(updatedUser);
 
-      return {
-        dailyMissions: updatedMissions,
-        user: updatedUser,
-        levelUpLevel: xpResult.leveledUp ? updatedUser.level : state.levelUpLevel,
-        leaderboards: computeLeaderboard(updatedUser)
-      };
+      return { dailyQuests: updatedQuests };
     });
+  },
+
+  rehydrateCardImages: (cards: CarCard[]) => {
+    set({ garage: cards });
+  },
+
+  claimMissionReward: async (missionId: string) => {
+    const currentUser = get().user;
+    if (!currentUser || !currentUser.id) {
+      return { success: false, error: 'Authentication required to claim rewards.' };
+    }
+
+    try {
+      // 1. Authoritative Server RPC verification
+      const { data: rpcData, error: rpcError } = await supabase.rpc('claim_mission_reward', {
+        p_mission_id: missionId
+      });
+
+      if (!rpcError && rpcData?.success) {
+        sounds.playXpPop();
+        const xpGain = rpcData.xp_awarded || 0;
+        const coinsGain = rpcData.coins_awarded || 0;
+        const updatedMissions = get().dailyMissions.map(m => 
+          m.id === missionId ? { ...m, completed: true } : m
+        );
+        const updatedUser: UserProfile = {
+          ...currentUser,
+          xp: rpcData.new_xp ?? ((currentUser.xp || 0) + xpGain),
+          coins: rpcData.new_coins ?? ((currentUser.coins || 0) + coinsGain),
+          level: rpcData.new_level ?? currentUser.level
+        };
+
+        set({
+          dailyMissions: updatedMissions,
+          user: updatedUser,
+          levelUpLevel: (updatedUser.level > currentUser.level) ? updatedUser.level : get().levelUpLevel,
+          leaderboards: computeLeaderboard(updatedUser)
+        });
+
+        try {
+          const today = new Date().toISOString().slice(0, 10);
+          localStorage.setItem('apex_daily_missions_date', today);
+          localStorage.setItem('apex_daily_missions', JSON.stringify(updatedMissions));
+          localStorage.setItem('apex_user_session', JSON.stringify(updatedUser));
+        } catch (e) {}
+
+        registerOrUpdateUser(updatedUser);
+        return { success: true, xpAwarded: xpGain, coinsAwarded: coinsGain };
+      }
+
+      if (rpcError) {
+        const notFound = rpcError.message?.includes('Could not find the function') || rpcError.code === 'PGRST202';
+        if (!notFound) {
+          return { success: false, error: rpcError.message };
+        }
+        console.warn('[claimMissionReward] RPC not in schema cache, trying /api/missions/claim fallback');
+      }
+    } catch (err: any) {
+      console.warn('[claimMissionReward] RPC exception, trying API fallback:', err);
+    }
+
+    // 2. Serverless API Fallback
+    try {
+      const apiBase = (typeof window !== 'undefined' && window.location?.origin) ? window.location.origin : '';
+      const endpoint = apiBase ? `${apiBase}/api/missions/claim` : '/api/missions/claim';
+      const session = (await supabase.auth.getSession()).data.session;
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {})
+        },
+        body: JSON.stringify({ missionId })
+      });
+      const json = await res.json();
+      if (res.ok && json.success) {
+        sounds.playXpPop();
+        const updatedMissions = get().dailyMissions.map(m => 
+          m.id === missionId ? { ...m, completed: true } : m
+        );
+        const updatedUser: UserProfile = {
+          ...currentUser,
+          xp: json.newXp ?? ((currentUser.xp || 0) + (json.xpAwarded || 0)),
+          coins: json.newCoins ?? ((currentUser.coins || 0) + (json.coinsAwarded || 0)),
+          level: json.newLevel ?? currentUser.level
+        };
+        set({
+          dailyMissions: updatedMissions,
+          user: updatedUser,
+          levelUpLevel: (updatedUser.level > currentUser.level) ? updatedUser.level : get().levelUpLevel,
+          leaderboards: computeLeaderboard(updatedUser)
+        });
+
+        try {
+          const today = new Date().toISOString().slice(0, 10);
+          localStorage.setItem('apex_daily_missions_date', today);
+          localStorage.setItem('apex_daily_missions', JSON.stringify(updatedMissions));
+          localStorage.setItem('apex_user_session', JSON.stringify(updatedUser));
+        } catch (e) {}
+
+        registerOrUpdateUser(updatedUser);
+        return { success: true, xpAwarded: json.xpAwarded, coinsAwarded: json.coinsAwarded };
+      }
+      return { success: false, error: json.error || 'Server rejected reward claim.' };
+    } catch (fallbackErr: any) {
+      return { success: false, error: fallbackErr?.message || 'Network error claiming reward.' };
+    }
+  },
+
+  completeMission: (missionId: string) => {
+    get().claimMissionReward(missionId);
   },
 
   toggleAllowHunts: () => set((state) => ({

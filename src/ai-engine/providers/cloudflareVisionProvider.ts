@@ -21,7 +21,6 @@ import type {
   EvidenceProvenance,
   ImmutableUpstreamEvidence,
   ModelIdentificationOutput,
-  OpenCanonicalIdentity,
   ViewpointType,
   VisualEvidence
 } from '../types';
@@ -30,6 +29,7 @@ import { confidenceEngine } from '../validation/confidenceEngine';
 import { getEstimatedMarketValue } from '../../utils/marketValuation';
 import { resolveCanonicalVehicleSpecs } from '../../utils/vehicleSpecs';
 import { APEX_LOCAL_VEHICLE_DATABASE } from '../../data/vehicleDatabase';
+import { canonicalVehicleRegistry } from '../canonical/canonicalVehicleRegistry';
 
 declare const process: any;
 declare const Buffer: any;
@@ -306,19 +306,25 @@ CRITICAL INVARIANTS:
 3. HIERARCHICAL IDENTIFICATION:
    - Identify Make from visible badging, emblem geometry, or unmistakable design language.
    - Identify Model Family from vehicle architecture, proportions, lighting/grille signatures, and specific design cues.
-   - Ground Model Family strictly in the specific morphological features observed in Pass 1. Do not default to high-volume production models when distinctive prototype styling, horizontal louvers/strakes, headlight eyelid covers, or wraparound visor greenhouse are present.
+   - Ground Model Family strictly in the specific morphological features observed in Pass 1.
+   - Feature vocabulary must be YOUR description of the photograph, never a copy of any wording used in these instructions. If you cannot describe a feature without reusing this instruction text, omit it.
+   - Prefer naming what you literally see (lamp outline, vent count, panel shape) over any interpretive label. Do not name a body feature the photograph does not plainly show.
    - Variant/Trim MUST be null unless explicit exterior badging or verified package aero is visibly confirmed.
 4. NON-CAR REJECTION:
    If no passenger motor vehicle is visible (person, pet, building, heavy commercial transit/bus/semi), set "vehicle_present": false, "status": "rejected".
 5. OUTPUT FORMAT: Raw valid JSON only starting with { and ending with }. No markdown, no prose, no conversational text.`;
 
     const cleanUserPrompt = `Analyze the vehicle in this image following evidentiary discipline.
-Examine morphological details carefully in Pass 1:
-- Greenhouse & windshield curvature (e.g. wraparound visor canopy vs conventional pillars)
-- Headlight structure (e.g. horizontal partial covers/eyelids vs open modern C-shape)
-- Front bumper and intakes (e.g. horizontal strakes/slats vs open mesh)
-- Mirror position (e.g. fender/door tops vs A-pillar base)
-- Hood aerodynamic extractors
+Pass 1 — Visual perception only. Record what is plainly visible. Do not attempt to identify the car yet.
+Describe each field in your own words, plainly and concretely (shape, count, position, material).
+- body_silhouette: the overall shape and number of doors
+- dominant_color: the exterior paint colour
+- lighting_cues: the outline and layout of the front and rear lamps exactly as they appear
+- intake_and_grille_cues: the openings in the front and rear bumper as they appear
+- distinctive_road_cues: any road, track, weather, or location context
+- distinctive_design_cues: up to four features that are unusual for this vehicle class
+
+IMPORTANT: Do NOT reuse any phrase from these instructions as an observation. Do NOT label a feature unless you can point to it in the photograph. It is normal and correct for a field to be null or for distinctive_design_cues to be empty.
 
 In Pass 2, determine the exact model family that corresponds precisely to the observed design cues.
 
@@ -328,11 +334,11 @@ Output flat valid JSON with this exact structure:
   "vehicle_present": true,
   "viewpoint": "front_3q",
   "pass1_observations": {
-    "body_silhouette": "observable body shape",
-    "dominant_color": "observable dominant exterior color",
-    "lighting_cues": "observable headlight or taillight design",
-    "intake_and_grille_cues": "observable intake or grille design",
-    "distinctive_design_cues": ["observable cue 1", "observable cue 2"]
+    "body_silhouette": "your own description of the body shape",
+    "dominant_color": "your own description of the exterior colour",
+    "lighting_cues": "your own description of the lamp outlines",
+    "intake_and_grille_cues": "your own description of the bumper openings",
+    "distinctive_design_cues": ["your own description of an unusual feature"]
   },
   "pass2_identification": {
     "make": "Dominant vehicle manufacturer",
@@ -346,7 +352,8 @@ Output flat valid JSON with this exact structure:
 Rules:
 - status must be "identified", "uncertain", or "rejected".
 - Ground all observations and identity strictly in the provided photograph.
-- NEVER copy placeholder text. Do not invent unobservable features.
+- NEVER copy placeholder text or instruction wording. Do not invent unobservable features.
+- An empty distinctive_design_cues array is a valid, expected answer.
 - If not a passenger motor vehicle, set vehicle_present: false, status: "rejected".
 - Output only the JSON object starting with { and ending with } without any markdown prose or explanation.`;
 
@@ -739,20 +746,33 @@ Rules:
       let finalVariant = classResult.identification.variant || rawVariant || undefined;
 
       // Optional Neutral Pairwise Verification Pass (Hard Amendment 4 & 7: Max 1 additional call, ceiling 2 total)
-      if (!verificationConsumed && classResult.candidate_separation < 0.15 && classResult.calibrated_candidates.length >= 2) {
-        const candA = classResult.calibrated_candidates[0].name;
-        const candB = classResult.calibrated_candidates[1].name;
-        console.log(`[CloudflareVisionProvider] Close candidate margin (${classResult.candidate_separation}). Invoking neutral pairwise verification between "${candA}" and "${candB}"...`);
+      // INVARIANT 5: RAW-VS-DISCRIMINATOR CONFLICT
+      // Disagreement between raw provider identity and discriminator winner MUST trigger neutral verification path, regardless of numerical margin.
+      const shouldTriggerNeutralVerification = !verificationConsumed && classResult.calibrated_candidates.length >= 2 && (
+        classResult.needs_neutral_verification ||
+        classResult.raw_conflict ||
+        classResult.candidate_separation < 0.15
+      );
+
+      if (shouldTriggerNeutralVerification) {
+        // INVARIANT 8: PAIRWISE VERIFIER
+        // Candidate A and Candidate B are completely unordered peers.
+        // Alternate presentation order to eliminate positional bias.
+        const swapPresentation = Math.random() < 0.5;
+        const candA = swapPresentation ? classResult.calibrated_candidates[1].name : classResult.calibrated_candidates[0].name;
+        const candB = swapPresentation ? classResult.calibrated_candidates[0].name : classResult.calibrated_candidates[1].name;
+        console.log(`[CloudflareVisionProvider] Invoking neutral pairwise verification between "${candA}" and "${candB}" (raw conflict: ${Boolean(classResult.raw_conflict)}, separation: ${classResult.candidate_separation})...`);
         verificationConsumed = true;
         try {
           const neutralVerifyPrompt = `Inspect the focal vehicle in this photo with rigorous neutral forensic scrutiny.
 Compare Candidate A: "${candA}" and Candidate B: "${candB}" against the visible exterior features in the image.
 
 CRITICAL INVARIANTS:
-1. Do NOT assume either candidate is correct.
-2. Ground analysis exclusively in visible exterior features (headlights, grille, side air scoops/tendons, roofline/greenhouse, door architecture, rear exhaust).
-3. If a feature is occluded or not visible from this viewpoint, it contributes ZERO evidence and ZERO penalty.
-4. Identify which candidate has stronger positive evidence and which has stronger contradictions.
+1. Candidate A and Candidate B are completely unordered peers. Neither candidate has any default priority, advantage, or baseline preference.
+2. Ground analysis exclusively in visible exterior features (headlights, front grille, hood geometry, side air scoops/tendons, fender louvers, roofline/greenhouse, rear wing/spoiler, rear exhaust).
+3. If a feature zone is NOT_VISIBLE or OCCLUDED from this viewpoint, it contributes exactly ZERO evidence, ZERO contradiction, and ZERO penalty.
+4. Model-discriminating traits (e.g. hood extractor nostrils, swan-neck wing, body-color perforated grille, horizontal eyelid covers) have high weight; generic body styles have low weight.
+5. Identify which candidate has decisive positive evidence and which has contradictions.
 
 Output flat valid JSON only:
 {
@@ -797,21 +817,44 @@ Output flat valid JSON only:
 
           if (verifyJson && (verifyJson.selected_winner || verifyJson.winner_name)) {
             const winner = verifyJson.selected_winner || verifyJson.winner_name;
-            if (winner === 'Candidate A' || winner === candA) {
-              classResult.calibrated_candidates[0].score = Math.min(0.99, classResult.calibrated_candidates[0].score + 0.20);
-            } else if (winner === 'Candidate B' || winner === candB) {
-              classResult.calibrated_candidates[1].score = Math.min(0.99, classResult.calibrated_candidates[1].score + 0.20);
+            const winningCandidateName = (winner === 'Candidate A' || winner === candA)
+              ? candA
+              : (winner === 'Candidate B' || winner === candB)
+              ? candB
+              : null;
+
+            if (winningCandidateName) {
+              const targetCand = classResult.calibrated_candidates.find((c) => c.name === winningCandidateName);
+              if (targetCand) {
+                targetCand.score = Math.min(0.99, targetCand.score + 0.20);
+              }
             }
+
             classResult.calibrated_candidates.sort((a, b) => b.score - a.score);
             classResult.top_candidate = classResult.calibrated_candidates[0] || null;
             classResult.candidate_separation = classResult.top_candidate
               ? Number((classResult.top_candidate.score - (classResult.calibrated_candidates[1]?.score || 0)).toFixed(3))
               : 0;
+
             if (classResult.top_candidate) {
-              const topParts = classResult.top_candidate.name.split(' ');
-              if (topParts.length > 1) {
-                finalMake = topParts[0];
-                finalModel = topParts.slice(1).join(' ').replace(/\s*\([^)]*\)/g, '').trim();
+              // INVARIANT 9: Update canonical record and final vehicle identity directly from verified winner
+              const verifiedMatch = canonicalVehicleRegistry.lookupByTextOrAlias(classResult.top_candidate.name, finalMake);
+              if (verifiedMatch) {
+                finalMake = verifiedMatch.make;
+                finalModel = verifiedMatch.model;
+                if (verifiedMatch.generation) finalGen = verifiedMatch.generation;
+                if (verifiedMatch.trim) finalVariant = verifiedMatch.trim;
+                classResult.canonical_vehicle_id = verifiedMatch.vehicleId;
+                classResult.canonical_display_name = verifiedMatch.displayName;
+              } else {
+                const topParts = classResult.top_candidate.name.split(' ');
+                if (topParts.length > 1) {
+                  const topMake = topParts[0];
+                  if (!finalMake || finalMake.toLowerCase() === topMake.toLowerCase() || topMake.toLowerCase().includes(finalMake.toLowerCase())) {
+                    finalMake = topMake;
+                    finalModel = topParts.slice(1).join(' ').trim();
+                  }
+                }
               }
             }
           }
@@ -824,7 +867,8 @@ Output flat valid JSON only:
         make: finalMake,
         model: finalModel,
         generation: finalGen,
-        trim: finalVariant
+        trim: finalVariant,
+        canonicalVehicleId: classResult.canonical_vehicle_id
       });
 
       // Immutable Upstream Evidence Object
@@ -866,21 +910,15 @@ Output flat valid JSON only:
       };
 
       // Open Canonical Identity
-      const canonicalId = `${classResult.identification.make || 'unknown'}-${classResult.identification.model_family || 'vehicle'}`
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/^-|-$/g, '');
-
-      const openCanonicalIdentity: OpenCanonicalIdentity = {
-        canonicalId,
+      const openCanonicalIdentity = canonicalVehicleRegistry.resolveCanonicalIdentity({
+        vehicleId: classResult.canonical_vehicle_id || specResolution.canonicalId,
         make: finalMake,
-        modelFamily: finalModel,
+        model: finalModel,
         generation: finalGen,
         variant: finalVariant,
-        registryStatus: specResolution.isVerified ? 'REGISTERED' : 'VERIFIED_UNREGISTERED',
         source: 'ensemble',
         specs: parsed.specs
-      };
+      });
 
       // Construct Canonical Scan Result
       const canonicalResult: CanonicalScanResult = {
@@ -898,10 +936,11 @@ Output flat valid JSON only:
         candidates: classResult.calibrated_candidates,
         contradictions: classResult.contradictions,
         specificity_level: classResult.specificity_level,
+        specificity_level_numeric: classResult.specificity_level_numeric ?? openCanonicalIdentity.specificityLevel,
         reason: classResult.reason,
         needs_retake: calibConf.needs_retake,
         raw_provider_identity: initialRawProviderIdentity || `${rawMake || ''} ${rawModel || ''}`.trim() || 'Unknown',
-        discriminator_identity: classResult.discriminator_identity || `${finalMake} ${finalModel}`,
+        discriminator_identity: classResult.discriminator_identity || openCanonicalIdentity.displayName || `${finalMake} ${finalModel}`,
         specs: parsed.specs,
         privacy_redactions: Array.isArray(parsed.privacy_redactions) ? parsed.privacy_redactions : [],
         upstream_evidence: upstreamEvidence,

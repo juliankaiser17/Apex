@@ -6,7 +6,14 @@
 
 import type { IdentificationResult } from '../types';
 
-export const VISION_PIPELINE_VERSION = 'v2.7.0-fine-grained-discriminator';
+// v2.9.0 — exact-model release:
+//   * generalized fine-grained model discriminator & exact model discrimination
+//   * conjunctive negation detection for compound phrases (e.g. without hood vents or nostrils)
+//   * raw-provider overwrite prevention and viewpoint-gated candidate consistency
+//   * authoritative canonical vehicle registry and verified specs binding
+// Bumping the version retires every identification cached under the previous pipeline so stale
+// wrong answers cannot be served.
+export const VISION_PIPELINE_VERSION = 'v2.9.0-exact-model-release';
 
 export function buildCacheKey(
   imageHash: string,

@@ -54,6 +54,8 @@ export interface AiIdentificationPayload {
   contradictions?: string[];
   reason?: string;
   canonical_vehicle_id?: string;
+  canonical_display_name?: string;
+  specificity_level_numeric?: number;
   scan_id?: string;
   trace_id?: string;
   timing?: {
@@ -276,6 +278,12 @@ export async function getAuthoritativeAccessToken(forceRefresh = false): Promise
 
 function formatEngineResult(r: IdentificationResult): any {
   const canon = r.canonicalResult;
+  const canonicalIdentity = canon?.canonical_identity;
+  const resolvedMake = canonicalIdentity?.make || canon?.identification?.make || r.make;
+  const resolvedModel = canonicalIdentity?.modelFamily || r.model || canon?.identification?.model_family;
+  const resolvedDisplayName = canonicalIdentity?.displayName || `${resolvedMake} ${resolvedModel}`;
+  const canonicalVehicleId = canonicalIdentity?.canonicalId || r.canonicalVehicleId || null;
+
   return {
     status: canon?.status || (r.status === 'completed' ? 'identified' : r.status),
     confidence: r.confidence?.totalScore ?? 0.95,
@@ -285,18 +293,22 @@ function formatEngineResult(r: IdentificationResult): any {
       name: c.name,
       score: c.score,
       supporting_evidence: c.supporting_evidence,
-      contradictions: c.contradictions || []
+      contradictions: c.contradictions || [],
+      invalid: c.invalid
     })),
     contradictions: canon?.contradictions || [],
     specificity_level: canon?.specificity_level || (r.trim ? 'variant' : 'model_family'),
+    specificity_level_numeric: canon?.specificity_level_numeric ?? canonicalIdentity?.specificityLevel ?? (r.trim ? 4 : r.generation ? 2 : 1),
     reason: canon?.reason || (r.confidence?.abstentionReason || 'Vehicle successfully identified.'),
     needs_retake: canon ? canon.needs_retake : (r.confidence?.shouldAbstain ?? false),
     is_car: canon ? canon.vehicle_present : (r.status !== 'failed'),
     scan_id: r.scanId,
-    make: canon?.identification?.make || r.make,
-    model: canon?.identification?.model_family || r.model,
-    generation: canon?.identification?.generation || r.generation,
-    trim: canon?.identification?.variant ?? (r.trim || null),
+    make: resolvedMake,
+    model: resolvedModel,
+    generation: canonicalIdentity?.generation || canon?.identification?.generation || r.generation,
+    trim: canonicalIdentity?.variant || canon?.identification?.variant || (r.trim || null),
+    canonical_display_name: resolvedDisplayName,
+    canonical_vehicle_id: canonicalVehicleId,
     year_estimate: r.yearEstimate,
     color: r.color,
     rarity: r.rarity,
@@ -316,7 +328,7 @@ function formatEngineResult(r: IdentificationResult): any {
     needs_better_angle: canon ? (canon.status === 'uncertain' || canon.needs_retake) : (r.confidence?.shouldAbstain ?? false),
     angle_instruction: canon?.reason || r.confidence?.abstentionReason || null,
     upstream_evidence: canon?.upstream_evidence,
-    canonical_identity: canon?.canonical_identity,
+    canonical_identity: canonicalIdentity,
     provenance: canon?.provenance,
     cached: r.cached,
     trace_id: r.traceId
@@ -724,6 +736,8 @@ function parseBackendResponse(r: any): AiIdentificationPayload {
     contradictions: Array.isArray(r.contradictions) ? r.contradictions : [],
     reason: r.reason || '',
     canonical_vehicle_id: r.canonical_vehicle_id || r.canonicalVehicleId,
+    canonical_display_name: r.canonical_display_name || (r.make && r.model ? `${r.make} ${r.model}` : undefined),
+    specificity_level_numeric: r.specificity_level_numeric,
     scan_id: r.scan_id || r.scanId,
     trace_id: r.trace_id || r.traceId
   };

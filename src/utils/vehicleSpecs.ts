@@ -56,6 +56,33 @@ export function resolveCanonicalVehicleSpecs(params: {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-');
 
+  // 0. Direct match by canonicalVehicleId
+  if (params.canonicalVehicleId) {
+    const directMatch = APEX_LOCAL_VEHICLE_DATABASE.find((v) => v.id === params.canonicalVehicleId);
+    if (directMatch) {
+      return {
+        isVerified: true,
+        canonicalId: directMatch.id,
+        make: directMatch.manufacturer,
+        model: directMatch.model,
+        generation: directMatch.generation,
+        trim: directMatch.trim || undefined,
+        bodyStyle: directMatch.bodyStyle,
+        engine: directMatch.engine,
+        horsepower: directMatch.horsepower,
+        torqueNm: directMatch.torqueNm,
+        topSpeedKmH: directMatch.topSpeedKmH,
+        zeroToHundredSec: directMatch.zeroToHundredSec,
+        kerbWeightKg: directMatch.curbWeightKg,
+        productionYears: directMatch.productionYears,
+        originCountry: directMatch.originCountry,
+        rarity: directMatch.baselineRarity,
+        interestingFact: directMatch.notableFacts,
+        briefHistory: `${directMatch.manufacturer} ${directMatch.model} (${directMatch.productionYears})`
+      };
+    }
+  }
+
   // 1. Search APEX_LOCAL_VEHICLE_DATABASE
   let bestMatch: NormalizedVehicle | null = null;
   let bestScore = 0;

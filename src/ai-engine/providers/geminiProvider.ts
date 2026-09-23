@@ -17,13 +17,13 @@ import type {
   EvidenceProvenance,
   ImmutableUpstreamEvidence,
   ModelIdentificationOutput,
-  OpenCanonicalIdentity,
   ViewpointType,
   VisualEvidence
 } from '../types';
 import { hierarchicalClassifier } from '../validation/hierarchicalClassifier';
 import { confidenceEngine } from '../validation/confidenceEngine';
 import { getEstimatedMarketValue } from '../../utils/marketValuation';
+import { canonicalVehicleRegistry } from '../canonical/canonicalVehicleRegistry';
 
 declare const process: any;
 
@@ -454,21 +454,15 @@ OUTPUT STRICT JSON ONLY:
       };
 
       // ─── OPEN CANONICAL IDENTITY ───
-      const canonicalId = `${classResult.identification.make || 'unknown'}-${classResult.identification.model_family || 'vehicle'}`
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/^-|-$/g, '');
-
-      const openCanonicalIdentity: OpenCanonicalIdentity = {
-        canonicalId,
-        make: classResult.identification.make || 'Unknown Make',
-        modelFamily: classResult.identification.model_family || 'Unknown Model',
+      const openCanonicalIdentity = canonicalVehicleRegistry.resolveCanonicalIdentity({
+        vehicleId: classResult.canonical_vehicle_id,
+        make: classResult.identification.make,
+        model: classResult.identification.model_family,
         generation: classResult.identification.generation,
         variant: classResult.identification.variant,
-        registryStatus: 'VERIFIED_UNREGISTERED',
         source: 'gemini',
         specs: parsed1.specs
-      };
+      });
 
       // Construct Canonical Scan Result
       const canonicalResult: CanonicalScanResult = {
@@ -486,8 +480,11 @@ OUTPUT STRICT JSON ONLY:
         candidates: classResult.calibrated_candidates,
         contradictions: classResult.contradictions,
         specificity_level: classResult.specificity_level,
+        specificity_level_numeric: classResult.specificity_level_numeric ?? openCanonicalIdentity.specificityLevel,
         reason: classResult.reason,
         needs_retake: calibConf.needs_retake,
+        raw_provider_identity: `${rawMake || ''} ${rawModel || ''}`.trim() || 'Unknown',
+        discriminator_identity: classResult.discriminator_identity,
         specs: parsed1.specs,
         privacy_redactions: Array.isArray(parsed1.privacy_redactions) ? parsed1.privacy_redactions : [],
         upstream_evidence: upstreamEvidence,
@@ -498,19 +495,19 @@ OUTPUT STRICT JSON ONLY:
       // Construct compatible ModelIdentificationOutput with grounded market valuation
       const specs = parsed1.specs || {};
       const valuation = getEstimatedMarketValue({
-        make: classResult.identification.make,
-        model: classResult.identification.model_family,
+        make: openCanonicalIdentity.make || classResult.identification.make,
+        model: openCanonicalIdentity.modelFamily || classResult.identification.model_family,
         rarity: specs.rarity,
         marketValueLowUsd: specs.market_value_low_usd,
         marketValueHighUsd: specs.market_value_high_usd
       });
 
       const output: ModelIdentificationOutput = {
-        vehicleId: null,
-        make: classResult.identification.make || 'Unknown Make',
-        model: classResult.identification.model_family || 'Unknown Model',
-        generation: classResult.identification.generation || 'Current',
-        trim: classResult.identification.variant || null,
+        vehicleId: openCanonicalIdentity.canonicalId || null,
+        make: openCanonicalIdentity.make || classResult.identification.make || 'Unknown Make',
+        model: openCanonicalIdentity.modelFamily || classResult.identification.model_family || 'Unknown Model',
+        generation: openCanonicalIdentity.generation || classResult.identification.generation || 'Current',
+        trim: openCanonicalIdentity.variant || classResult.identification.variant || null,
         yearEstimate: String(specs.year_estimate || '2023'),
         color: specs.color || 'Silver',
         rarity: specs.rarity || 'rare',
