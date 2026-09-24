@@ -535,7 +535,8 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       front_intake_grille: {
         name: 'carbon_splitter_with_endplates',
         positiveKeywords: ['carbon front endplate', 'front endplate', 'carbon endplate', 'splitter endplate', 'front winglet', 'front fender louver', 'fender louvers'],
-        incompatibleKeywords: ['three-segment aero blade', 'concave oval']
+        incompatibleKeywords: ['three-segment aero blade', 'concave oval'],
+        requiresMandatoryAeroPresence: true
       },
       side_intake_type: {
         name: 'carbon_side_radiator_scoop',
@@ -912,12 +913,12 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       },
       headlight_shape: {
         name: 'lamp_recessed_into_front_wing_scoop',
-        positiveKeywords: ['recessed lamp', 'headlamp recessed', 'lamp recessed into', 'recessed into the wing', 'recessed into a scoop', 'lamp set into a scoop', 'lamp sunk into the wing', 'lamp housing undercut', 'lamp inside a bodywork recess'],
+        positiveKeywords: ['recessed lamp', 'headlamp recessed', 'lamp recessed into', 'recessed into the wing', 'recessed into a scoop', 'lamp set into a scoop', 'lamp sunk into the wing', 'lamp housing undercut', 'lamp inside a bodywork recess', 'teardrop', 'teardrop headlight', 'integrated brake cooling', 'cooling duct'],
         incompatibleKeywords: ['c-shaped', 'c shaped', 'c-clamp', 'annular lamp', 'ring shaped lamp', 'elongated vertical', 'vertical lens', 'lamp bar', 'eyelid', 'partial cover', 'round bug eye', 'fried egg']
       },
       front_intake_grille: {
         name: 'low_wide_mesh_grille_with_exposed_radiators',
-        positiveKeywords: ['low wide mesh grille', 'exposed radiators', 'two large radiator openings', 'wide lower mesh without slats', 'low short nose with a wide mesh mouth'],
+        positiveKeywords: ['low wide mesh grille', 'exposed radiators', 'two large radiator openings', 'wide lower mesh without slats', 'low short nose with a wide mesh mouth', 'single opening mouth', 'mouth intake'],
         incompatibleKeywords: ['horizontal strakes', 'horizontal slats', 'body-color perforated', 'upright oval grille', 'kidney grille']
       },
       hood_geometry: {
@@ -1385,7 +1386,7 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       },
       side_intake_type: {
         name: 'large_side_radiator_scoop',
-        positiveKeywords: ['large side scoop', 'radiator intake', 'prominent side scoop', 'open side radiator', 'side radiator', 'strakes', 'side intake'],
+        positiveKeywords: ['large side scoop', 'radiator intake', 'prominent side scoop', 'open side radiator', 'side radiator', 'strakes', 'side intake', 'side air intake', 'side air scoop', 'side radiator intake', 'side intake scoop', 'large side air intakes'],
         incompatibleKeywords: ['internal door duct', 'smooth door surface', 'floating tendon']
       },
       roofline_greenhouse: {
@@ -1406,7 +1407,7 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       },
       proportions: {
         name: 'mid_engine_spider_supercar',
-        positiveKeywords: ['mid-engine spider', 'cab-forward convertible', 'open-top spider'],
+        positiveKeywords: ['mid-engine spider', 'cab-forward convertible', 'open-top spider', 'two-door convertible', 'convertible spider', 'two-door spider'],
         incompatibleKeywords: ['front-engine gt', 'suv', 'sedan']
       },
       door_architecture: {
@@ -1439,11 +1440,12 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       front_intake_grille: {
         name: 'carbon_splitter_with_endplates',
         positiveKeywords: ['carbon front endplate', 'front endplate', 'carbon endplate', 'splitter endplate', 'front winglet', 'front fender louver', 'fender louvers'],
-        incompatibleKeywords: ['three-segment aero blade', 'eye socket']
+        incompatibleKeywords: ['three-segment aero blade', 'eye socket'],
+        requiresMandatoryAeroPresence: true
       },
       side_intake_type: {
         name: 'carbon_side_radiator_scoop',
-        positiveKeywords: ['carbon side intake', 'carbon side sills', 'side sills', 'side skirts', 'extended carbon', 'carbon side scoop'],
+        positiveKeywords: ['carbon side intake', 'carbon side sills', 'carbon side skirts', 'extended carbon', 'carbon side scoop'],
         incompatibleKeywords: ['internal door duct', 'floating tendon', 'smooth door'],
         familySharedKeywords: ['large side scoop', 'radiator scoop', 'radiator intake', 'side radiator', 'strakes', 'side intake'],
         familySharedAlone: true
@@ -1473,7 +1475,7 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       },
       proportions: {
         name: 'mid_engine_longtail_spider',
-        positiveKeywords: ['mid-engine spider', 'extended rear longtail', 'low slung spider', 'convertible spider'],
+        positiveKeywords: ['extended rear longtail', 'low slung spider', 'longtail spider'],
         incompatibleKeywords: ['front-engine gt', 'sedan']
       }
     }
@@ -1558,7 +1560,7 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       roofline_greenhouse: {
         name: 'roadster_soft_top_two_seater',
         positiveKeywords: ['roadster', 'soft top', 'speedster haunches', 'two-seat convertible', 'boxster roofline', 'convertible roof', 'canvas roof', 'fabric roadster soft top', 'fabric roadster soft top with mid-engine side air intakes', 'roadster soft top', 'convertible', 'two-door convertible', 'open-top', 'open top', 'soft-top', 'fabric roof', 'black roof'],
-        incompatibleKeywords: ['rear-engine 2+2 flyline', 'fixed coupe roof', 'coupe flyline', 'sloping rear-engine flyline', 'rear-engine flyline', 'rear-engine', 'rear engine']
+        incompatibleKeywords: ['rear-engine 2+2 flyline', 'fixed coupe roof', 'coupe flyline', 'sloping rear-engine flyline', 'rear-engine flyline', 'rear-engine', 'rear engine', 'coupe']
       },
       rear_architecture_and_exhaust: {
         name: 'central_trapezoidal_or_twin_exhaust_porsche_accent_strip',
@@ -1568,7 +1570,7 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       proportions: {
         name: 'mid_engine_roadster_proportions',
         positiveKeywords: ['mid-engine roadster', 'compact roadster', 'short wheelbase sports car', 'roadster proportions', 'mid-engine'],
-        incompatibleKeywords: ['rear-engine 911 2+2 proportions', 'front-engine gt', 'sedan', 'rear-engine', 'rear engine', 'rear-engine flyline']
+        incompatibleKeywords: ['rear-engine 911 2+2 proportions', 'front-engine gt', 'sedan', 'rear-engine', 'rear engine', 'rear-engine flyline', 'coupe']
       }
     }
   },

@@ -2,7 +2,7 @@
 import { createClient } from "@supabase/supabase-js";
 
 // src/ai-engine/caching/identificationCache.ts
-var VISION_PIPELINE_VERSION = "v3.2.0-boxster-architecture-hardening";
+var VISION_PIPELINE_VERSION = "v3.2.1-production-release";
 function buildCacheKey(imageHash, provider = "cloudflare", model = "@cf/meta/llama-3.2-11b-vision-instruct") {
   const cleanHash = (imageHash || "").toLowerCase().trim();
   const cleanProvider = (provider || "cloudflare").toLowerCase().trim();
@@ -3765,7 +3765,8 @@ var MORPHOLOGICAL_FINGERPRINTS = [
       front_intake_grille: {
         name: "carbon_splitter_with_endplates",
         positiveKeywords: ["carbon front endplate", "front endplate", "carbon endplate", "splitter endplate", "front winglet", "front fender louver", "fender louvers"],
-        incompatibleKeywords: ["three-segment aero blade", "concave oval"]
+        incompatibleKeywords: ["three-segment aero blade", "concave oval"],
+        requiresMandatoryAeroPresence: true
       },
       side_intake_type: {
         name: "carbon_side_radiator_scoop",
@@ -4135,12 +4136,12 @@ var MORPHOLOGICAL_FINGERPRINTS = [
       },
       headlight_shape: {
         name: "lamp_recessed_into_front_wing_scoop",
-        positiveKeywords: ["recessed lamp", "headlamp recessed", "lamp recessed into", "recessed into the wing", "recessed into a scoop", "lamp set into a scoop", "lamp sunk into the wing", "lamp housing undercut", "lamp inside a bodywork recess"],
+        positiveKeywords: ["recessed lamp", "headlamp recessed", "lamp recessed into", "recessed into the wing", "recessed into a scoop", "lamp set into a scoop", "lamp sunk into the wing", "lamp housing undercut", "lamp inside a bodywork recess", "teardrop", "teardrop headlight", "integrated brake cooling", "cooling duct"],
         incompatibleKeywords: ["c-shaped", "c shaped", "c-clamp", "annular lamp", "ring shaped lamp", "elongated vertical", "vertical lens", "lamp bar", "eyelid", "partial cover", "round bug eye", "fried egg"]
       },
       front_intake_grille: {
         name: "low_wide_mesh_grille_with_exposed_radiators",
-        positiveKeywords: ["low wide mesh grille", "exposed radiators", "two large radiator openings", "wide lower mesh without slats", "low short nose with a wide mesh mouth"],
+        positiveKeywords: ["low wide mesh grille", "exposed radiators", "two large radiator openings", "wide lower mesh without slats", "low short nose with a wide mesh mouth", "single opening mouth", "mouth intake"],
         incompatibleKeywords: ["horizontal strakes", "horizontal slats", "body-color perforated", "upright oval grille", "kidney grille"]
       },
       hood_geometry: {
@@ -4597,7 +4598,7 @@ var MORPHOLOGICAL_FINGERPRINTS = [
       },
       side_intake_type: {
         name: "large_side_radiator_scoop",
-        positiveKeywords: ["large side scoop", "radiator intake", "prominent side scoop", "open side radiator", "side radiator", "strakes", "side intake"],
+        positiveKeywords: ["large side scoop", "radiator intake", "prominent side scoop", "open side radiator", "side radiator", "strakes", "side intake", "side air intake", "side air scoop", "side radiator intake", "side intake scoop", "large side air intakes"],
         incompatibleKeywords: ["internal door duct", "smooth door surface", "floating tendon"]
       },
       roofline_greenhouse: {
@@ -4618,7 +4619,7 @@ var MORPHOLOGICAL_FINGERPRINTS = [
       },
       proportions: {
         name: "mid_engine_spider_supercar",
-        positiveKeywords: ["mid-engine spider", "cab-forward convertible", "open-top spider"],
+        positiveKeywords: ["mid-engine spider", "cab-forward convertible", "open-top spider", "two-door convertible", "convertible spider", "two-door spider"],
         incompatibleKeywords: ["front-engine gt", "suv", "sedan"]
       },
       door_architecture: {
@@ -4650,11 +4651,12 @@ var MORPHOLOGICAL_FINGERPRINTS = [
       front_intake_grille: {
         name: "carbon_splitter_with_endplates",
         positiveKeywords: ["carbon front endplate", "front endplate", "carbon endplate", "splitter endplate", "front winglet", "front fender louver", "fender louvers"],
-        incompatibleKeywords: ["three-segment aero blade", "eye socket"]
+        incompatibleKeywords: ["three-segment aero blade", "eye socket"],
+        requiresMandatoryAeroPresence: true
       },
       side_intake_type: {
         name: "carbon_side_radiator_scoop",
-        positiveKeywords: ["carbon side intake", "carbon side sills", "side sills", "side skirts", "extended carbon", "carbon side scoop"],
+        positiveKeywords: ["carbon side intake", "carbon side sills", "carbon side skirts", "extended carbon", "carbon side scoop"],
         incompatibleKeywords: ["internal door duct", "floating tendon", "smooth door"],
         familySharedKeywords: ["large side scoop", "radiator scoop", "radiator intake", "side radiator", "strakes", "side intake"],
         familySharedAlone: true
@@ -4684,7 +4686,7 @@ var MORPHOLOGICAL_FINGERPRINTS = [
       },
       proportions: {
         name: "mid_engine_longtail_spider",
-        positiveKeywords: ["mid-engine spider", "extended rear longtail", "low slung spider", "convertible spider"],
+        positiveKeywords: ["extended rear longtail", "low slung spider", "longtail spider"],
         incompatibleKeywords: ["front-engine gt", "sedan"]
       }
     }
@@ -4767,7 +4769,7 @@ var MORPHOLOGICAL_FINGERPRINTS = [
       roofline_greenhouse: {
         name: "roadster_soft_top_two_seater",
         positiveKeywords: ["roadster", "soft top", "speedster haunches", "two-seat convertible", "boxster roofline", "convertible roof", "canvas roof", "fabric roadster soft top", "fabric roadster soft top with mid-engine side air intakes", "roadster soft top", "convertible", "two-door convertible", "open-top", "open top", "soft-top", "fabric roof", "black roof"],
-        incompatibleKeywords: ["rear-engine 2+2 flyline", "fixed coupe roof", "coupe flyline", "sloping rear-engine flyline", "rear-engine flyline", "rear-engine", "rear engine"]
+        incompatibleKeywords: ["rear-engine 2+2 flyline", "fixed coupe roof", "coupe flyline", "sloping rear-engine flyline", "rear-engine flyline", "rear-engine", "rear engine", "coupe"]
       },
       rear_architecture_and_exhaust: {
         name: "central_trapezoidal_or_twin_exhaust_porsche_accent_strip",
@@ -4777,7 +4779,7 @@ var MORPHOLOGICAL_FINGERPRINTS = [
       proportions: {
         name: "mid_engine_roadster_proportions",
         positiveKeywords: ["mid-engine roadster", "compact roadster", "short wheelbase sports car", "roadster proportions", "mid-engine"],
-        incompatibleKeywords: ["rear-engine 911 2+2 proportions", "front-engine gt", "sedan", "rear-engine", "rear engine", "rear-engine flyline"]
+        incompatibleKeywords: ["rear-engine 911 2+2 proportions", "front-engine gt", "sedan", "rear-engine", "rear engine", "rear-engine flyline", "coupe"]
       }
     }
   },
@@ -6040,6 +6042,12 @@ var HierarchicalClassifier = class {
       visual_evidence.body_proportions || "",
       ...visual_evidence.distinctive_details || []
     ].join(" ").toLowerCase();
+    const observedBody = (visual_evidence.body_style || "").toLowerCase();
+    const observedRoof = (visual_evidence.roofline || "").toLowerCase();
+    const isObservedOpenTop = /\b(convertible|spider|spyder|cabriolet|roadster|soft[\s-]?top|canvas[\s-]?roof|fabric[\s-]?roof|targa|open[\s-]?top)\b/i.test(observedBody) || /\b(convertible|spider|spyder|cabriolet|roadster|soft[\s-]?top|canvas[\s-]?roof|fabric[\s-]?roof|targa|open[\s-]?top)\b/i.test(observedRoof);
+    const isObservedCoupe = (/\b(coupe|hardtop|fixed[\s-]?roof)\b/i.test(observedBody) || /\b(coupe|fixed[\s-]?roof)\b/i.test(observedRoof)) && !isObservedOpenTop;
+    const isObservedSuv = /\b(suv|crossover)\b/i.test(observedBody);
+    const isObservedSedan = /\b(sedan|saloon)\b/i.test(observedBody);
     const brandVisualEvidence = {
       nissan: /\b(nissan|skyline|gt-?r|gtr|nismo|v-?spec|r32|r33|r34|r35|twin\s+round\s+tail|quad\s+round\s+tail|circular\s+tail)\b/i.test(evidenceText),
       honda: /\b(honda|integra|type-?r|vtec|dc2|dc5|nsx|civic|s2000)\b/i.test(evidenceText),
@@ -6054,7 +6062,8 @@ var HierarchicalClassifier = class {
       audi: /\b(singleframe|quattro|audi)\b/i.test(evidenceText),
       aston_martin: /\b(aston\s+martin|dbs|db9|db7|db11|db12|vantage|vanquish|valkyrie|swan\s+doors?|aeroblade|curlicue)\b/i.test(evidenceText),
       rolls_royce: /\b(rolls[- ]royce|phantom|ghost|cullinan|wraith|spirit\s+of\s+ecstasy|pantheon)\b/i.test(evidenceText),
-      bentley: /\b(bentley|continental\s+gt|flying\s+spur|bentayga|flying\s+b|matrix\s+grille)\b/i.test(evidenceText)
+      bentley: /\b(bentley|continental\s+gt|flying\s+spur|bentayga|flying\s+b|matrix\s+grille)\b/i.test(evidenceText),
+      koenigsegg: /\b(koenigsegg|gemera|jesko|agera|regera|cc850|ccx|synchro-helix)\b/i.test(evidenceText)
     };
     const normalizeBrandKey = (make) => {
       const m = (make || "").toLowerCase().trim();
@@ -6157,12 +6166,6 @@ var HierarchicalClassifier = class {
           invalid: true
         };
       }
-      const observedBody = (visual_evidence.body_style || "").toLowerCase();
-      const observedRoof = (visual_evidence.roofline || "").toLowerCase();
-      const isObservedOpenTop = /\b(convertible|spider|spyder|cabriolet|roadster|soft[\s-]?top|canvas[\s-]?roof|fabric[\s-]?roof|targa|open[\s-]?top)\b/i.test(observedBody) || /\b(convertible|spider|spyder|cabriolet|roadster|soft[\s-]?top|canvas[\s-]?roof|fabric[\s-]?roof|targa|open[\s-]?top)\b/i.test(observedRoof);
-      const isObservedCoupe = (/\b(coupe|hardtop|fixed[\s-]?roof)\b/i.test(observedBody) || /\b(coupe|fixed[\s-]?roof)\b/i.test(observedRoof)) && !isObservedOpenTop;
-      const isObservedSuv = /\b(suv|crossover)\b/i.test(observedBody);
-      const isObservedSedan = /\b(sedan|saloon)\b/i.test(observedBody);
       const canonCand = canonicalVehicleRegistry.lookupByTextOrAlias(candidate.name, candidateMake || void 0);
       const candBodyLower = (canonCand?.bodyStyle || "").toLowerCase();
       const isCandidateOpenTop = candBodyLower === "convertible" || candBodyLower === "targa" || candBodyLower === "roadster" || /\b(spider|spyder|cabriolet|convertible|roadster|targa|speedster|boxster|barchetta|miata|cielo)\b/i.test(candNameLower);
@@ -6429,11 +6432,26 @@ var HierarchicalClassifier = class {
             if (!existing.unobservable_features.includes(u)) existing.unobservable_features.push(u);
           });
         } else {
+          const canonCand = canonicalVehicleRegistry.lookupByTextOrAlias(fgCand.displayName, fgCand.make || void 0);
+          const candBodyLower = (canonCand?.bodyStyle || "").toLowerCase();
+          const candNameLower = fgCand.displayName.toLowerCase();
+          const isCandOpenTop = candBodyLower === "convertible" || candBodyLower === "targa" || candBodyLower === "roadster" || /\b(spider|spyder|cabriolet|convertible|roadster|targa|speedster|boxster|barchetta|miata|cielo)\b/i.test(candNameLower);
+          const isCandCoupe = (candBodyLower === "coupe" || !candBodyLower && (candNameLower.includes("coupe") || candNameLower.includes("gt3"))) && !isCandOpenTop;
+          let candScore = fgCand.calibratedScore;
+          const candContradictions = [...fgCand.contradictions];
+          const candSupporting = [...fgCand.supportingEvidence];
+          if (isObservedOpenTop && isCandCoupe) {
+            candContradictions.push(`Body style mismatch: Observed convertible/open-top architecture vs candidate fixed coupe`);
+            candScore -= 0.6;
+          } else if (isObservedCoupe && isCandOpenTop) {
+            candContradictions.push(`Body style mismatch: Observed fixed-roof coupe vs candidate open-top convertible`);
+            candScore -= 0.6;
+          }
           calibratedCandidates.push({
             name: fgCand.displayName,
-            score: fgCand.calibratedScore,
-            supporting_evidence: fgCand.supportingEvidence,
-            contradictions: fgCand.contradictions,
+            score: Math.max(0.01, Math.min(0.99, Number(candScore.toFixed(3)))),
+            supporting_evidence: candSupporting,
+            contradictions: candContradictions,
             unobservable_features: fgCand.unobservableTraits,
             invalid: false
           });

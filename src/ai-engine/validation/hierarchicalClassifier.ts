@@ -180,6 +180,17 @@ export class HierarchicalClassifier {
       ...(visual_evidence.distinctive_details || [])
     ].join(' ').toLowerCase();
 
+    const observedBody = (visual_evidence.body_style || '').toLowerCase();
+    const observedRoof = (visual_evidence.roofline || '').toLowerCase();
+    const isObservedOpenTop =
+      /\b(convertible|spider|spyder|cabriolet|roadster|soft[\s-]?top|canvas[\s-]?roof|fabric[\s-]?roof|targa|open[\s-]?top)\b/i.test(observedBody) ||
+      /\b(convertible|spider|spyder|cabriolet|roadster|soft[\s-]?top|canvas[\s-]?roof|fabric[\s-]?roof|targa|open[\s-]?top)\b/i.test(observedRoof);
+    const isObservedCoupe =
+      (/\b(coupe|hardtop|fixed[\s-]?roof)\b/i.test(observedBody) || /\b(coupe|fixed[\s-]?roof)\b/i.test(observedRoof)) &&
+      !isObservedOpenTop;
+    const isObservedSuv = /\b(suv|crossover)\b/i.test(observedBody);
+    const isObservedSedan = /\b(sedan|saloon)\b/i.test(observedBody);
+
     // 1b. AMENDMENT 1: Corroborated Visual Manufacturer Evidence Detection
     // Raw make alone is NOT authoritative. Hard lock requires corroborated visual evidence
     // or high independent manufacturer confidence (>= 0.70).
@@ -197,7 +208,8 @@ export class HierarchicalClassifier {
       audi: /\b(singleframe|quattro|audi)\b/i.test(evidenceText),
       aston_martin: /\b(aston\s+martin|dbs|db9|db7|db11|db12|vantage|vanquish|valkyrie|swan\s+doors?|aeroblade|curlicue)\b/i.test(evidenceText),
       rolls_royce: /\b(rolls[- ]royce|phantom|ghost|cullinan|wraith|spirit\s+of\s+ecstasy|pantheon)\b/i.test(evidenceText),
-      bentley: /\b(bentley|continental\s+gt|flying\s+spur|bentayga|flying\s+b|matrix\s+grille)\b/i.test(evidenceText)
+      bentley: /\b(bentley|continental\s+gt|flying\s+spur|bentayga|flying\s+b|matrix\s+grille)\b/i.test(evidenceText),
+      koenigsegg: /\b(koenigsegg|gemera|jesko|agera|regera|cc850|ccx|synchro-helix)\b/i.test(evidenceText)
     };
 
     const normalizeBrandKey = (make: string): string => {
@@ -347,17 +359,6 @@ export class HierarchicalClassifier {
       }
 
       // ── CONTRADICTION ENGINE RULE B: BODY STYLE CONTRADICTION ──
-      const observedBody = (visual_evidence.body_style || '').toLowerCase();
-      const observedRoof = (visual_evidence.roofline || '').toLowerCase();
-      const isObservedOpenTop =
-        /\b(convertible|spider|spyder|cabriolet|roadster|soft[\s-]?top|canvas[\s-]?roof|fabric[\s-]?roof|targa|open[\s-]?top)\b/i.test(observedBody) ||
-        /\b(convertible|spider|spyder|cabriolet|roadster|soft[\s-]?top|canvas[\s-]?roof|fabric[\s-]?roof|targa|open[\s-]?top)\b/i.test(observedRoof);
-      const isObservedCoupe =
-        (/\b(coupe|hardtop|fixed[\s-]?roof)\b/i.test(observedBody) || /\b(coupe|fixed[\s-]?roof)\b/i.test(observedRoof)) &&
-        !isObservedOpenTop;
-      const isObservedSuv = /\b(suv|crossover)\b/i.test(observedBody);
-      const isObservedSedan = /\b(sedan|saloon)\b/i.test(observedBody);
-
       // Determine candidate canonical body style
       const canonCand = canonicalVehicleRegistry.lookupByTextOrAlias(candidate.name, candidateMake || undefined);
       const candBodyLower = (canonCand?.bodyStyle || '').toLowerCase();
@@ -698,11 +699,35 @@ export class HierarchicalClassifier {
             if (!existing.unobservable_features!.includes(u)) existing.unobservable_features!.push(u);
           });
         } else {
+          const canonCand = canonicalVehicleRegistry.lookupByTextOrAlias(fgCand.displayName, fgCand.make || undefined);
+          const candBodyLower = (canonCand?.bodyStyle || '').toLowerCase();
+          const candNameLower = fgCand.displayName.toLowerCase();
+          const isCandOpenTop =
+            candBodyLower === 'convertible' ||
+            candBodyLower === 'targa' ||
+            candBodyLower === 'roadster' ||
+            /\b(spider|spyder|cabriolet|convertible|roadster|targa|speedster|boxster|barchetta|miata|cielo)\b/i.test(candNameLower);
+          const isCandCoupe =
+            (candBodyLower === 'coupe' || (!candBodyLower && (candNameLower.includes('coupe') || candNameLower.includes('gt3')))) &&
+            !isCandOpenTop;
+
+          let candScore = fgCand.calibratedScore;
+          const candContradictions = [...fgCand.contradictions];
+          const candSupporting = [...fgCand.supportingEvidence];
+
+          if (isObservedOpenTop && isCandCoupe) {
+            candContradictions.push(`Body style mismatch: Observed convertible/open-top architecture vs candidate fixed coupe`);
+            candScore -= 0.60;
+          } else if (isObservedCoupe && isCandOpenTop) {
+            candContradictions.push(`Body style mismatch: Observed fixed-roof coupe vs candidate open-top convertible`);
+            candScore -= 0.60;
+          }
+
           calibratedCandidates.push({
             name: fgCand.displayName,
-            score: fgCand.calibratedScore,
-            supporting_evidence: fgCand.supportingEvidence,
-            contradictions: fgCand.contradictions,
+            score: Math.max(0.01, Math.min(0.99, Number(candScore.toFixed(3)))),
+            supporting_evidence: candSupporting,
+            contradictions: candContradictions,
             unobservable_features: fgCand.unobservableTraits,
             invalid: false
           });

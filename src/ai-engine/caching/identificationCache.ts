@@ -6,13 +6,12 @@
 
 import type { IdentificationResult } from '../types';
 
-// v3.2.0 — Porsche 718 Boxster architecture hardening & candidate completeness release:
-//   * generalized body-style gating via canonical metadata (Convertible/Roadster/Coupe)
-//   * complete manufacturer candidate universe seeding
-//   * open-top/fixed-roof reciprocal architectural traits
-//   * strict generation token candidate isolation (996/997/992/982)
-//   * free-text LLM fallback & robust quote-repairing JSON recovery
-export const VISION_PIPELINE_VERSION = 'v3.2.0-boxster-architecture-hardening';
+// v3.2.1 — Production Release:
+//   * Hardened 650S Spider vs 675LT Spider trait discrimination & mandatory aero presence
+//   * Enforced body-style consistency on discriminator candidate introduction
+//   * Corroborated brand evidence detection for Koenigsegg
+//   * Teardrop brake cooling duct discrimination for Ferrari 296 GTB
+export const VISION_PIPELINE_VERSION = 'v3.2.1-production-release';
 
 export function buildCacheKey(
   imageHash: string,
