@@ -331,6 +331,60 @@ class CanonicalVehicleRegistry {
       'artura spider'
     ]);
 
+    // ── ASTON MARTIN ──
+    this.registerAliases('aston-martin-dbs', [
+      'dbs',
+      'aston martin dbs',
+      'dbs v12',
+      'dbs coupe',
+      'aston martin dbs (2007–2012)',
+      'dbs 2007'
+    ]);
+
+    this.registerAliases('aston-martin-dbs-superleggera', [
+      'dbs superleggera',
+      'aston martin dbs superleggera',
+      'aston martin dbs (2018–2024)',
+      'dbs superleggera coupe',
+      'dbs superleggera volante'
+    ]);
+
+    this.registerAliases('aston-martin-db9', [
+      'db9',
+      'aston martin db9',
+      'db9 coupe',
+      'db9 volante'
+    ]);
+
+    this.registerAliases('aston-martin-db7', [
+      'db7',
+      'aston martin db7',
+      'db7 vantage',
+      'db7 volante'
+    ]);
+
+    this.registerAliases('aston-martin-db4', [
+      'db4',
+      'aston martin db4',
+      'db4 gt',
+      'db4 series'
+    ]);
+
+    this.registerAliases('aston-martin-vanquish', [
+      'vanquish',
+      'aston martin vanquish',
+      'vanquish s',
+      'vanquish v12'
+    ]);
+
+    this.registerAliases('aston-martin-vantage', [
+      'vantage',
+      'aston martin vantage',
+      'v8 vantage',
+      'v12 vantage',
+      'vantage coupe'
+    ]);
+
     // ── MASERATI ──
     this.registerAliases('maserati-mc20', [
       'mc20',
@@ -493,6 +547,33 @@ class CanonicalVehicleRegistry {
       'db7',
       'db7 coupe',
       'db7 vantage'
+    ]);
+
+    this.registerAliases('aston-martin-db4', [
+      'aston martin db4',
+      'db4',
+      'db4 superleggera',
+      'db4 coupe',
+      'aston martin db4 coupe'
+    ]);
+
+    this.registerAliases('aston-martin-vanquish', [
+      'aston martin vanquish',
+      'vanquish',
+      'vanquish v12',
+      'vanquish coupe',
+      'aston martin vanquish coupe',
+      'v12 vanquish'
+    ]);
+
+    this.registerAliases('aston-martin-vantage', [
+      'aston martin vantage',
+      'vantage',
+      'v8 vantage',
+      'v12 vantage',
+      'aston martin v8 vantage',
+      'aston martin v12 vantage',
+      'vantage coupe'
     ]);
 
     // ── MERCEDES-BENZ S-CLASS & MAYBACH ──

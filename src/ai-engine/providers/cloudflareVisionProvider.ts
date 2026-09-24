@@ -30,6 +30,7 @@ import { getEstimatedMarketValue } from '../../utils/marketValuation';
 import { resolveCanonicalVehicleSpecs } from '../../utils/vehicleSpecs';
 import { APEX_LOCAL_VEHICLE_DATABASE } from '../../data/vehicleDatabase';
 import { canonicalVehicleRegistry } from '../canonical/canonicalVehicleRegistry';
+import { fineGrainedModelDiscriminator } from '../validation/fineGrainedModelDiscriminator';
 
 declare const process: any;
 declare const Buffer: any;
@@ -321,6 +322,8 @@ Describe each field in your own words, plainly and concretely (shape, count, pos
 - dominant_color: the exterior paint colour
 - lighting_cues: the outline and layout of the front and rear lamps exactly as they appear
 - intake_and_grille_cues: the openings in the front and rear bumper as they appear
+- hood_aerodynamics: the hood surface (cooling vents, louvers, air extractors, scoop, or smooth clean surface)
+- aero_and_bodywork: lower front splitter, side air intakes or scoops, side sills, rear wing or diffuser
 - distinctive_road_cues: any road, track, weather, or location context
 - distinctive_design_cues: up to four features that are unusual for this vehicle class
 
@@ -338,6 +341,8 @@ Output flat valid JSON with this exact structure:
     "dominant_color": "your own description of the exterior colour",
     "lighting_cues": "your own description of the lamp outlines",
     "intake_and_grille_cues": "your own description of the bumper openings",
+    "hood_aerodynamics": "your own description of the hood surface, vents, or louvers",
+    "aero_and_bodywork": "your own description of front splitter, side scoops, or spoiler",
     "distinctive_design_cues": ["your own description of an unusual feature"]
   },
   "pass2_identification": {
@@ -663,10 +668,11 @@ Rules:
       }
 
       let rawCandidates: CandidateComparison[] = [];
+      const neutralBaseline = 0.50;
       if (Array.isArray(parsed.candidates) && parsed.candidates.length > 0) {
         rawCandidates = parsed.candidates.map((c: any) => ({
           name: c.name || 'Unknown Candidate',
-          score: Number(c.score) || 0.5,
+          score: neutralBaseline,
           supporting_evidence: Array.isArray(c.supporting_evidence) ? c.supporting_evidence : [],
           contradictions: Array.isArray(c.contradictions) ? c.contradictions : [],
           unobservable_features: Array.isArray(c.unobservable_features) ? c.unobservable_features : []
@@ -675,20 +681,17 @@ Rules:
         const candidateName = rawGen
           ? `${rawMake} ${rawModel} (${rawGen})`
           : `${rawMake} ${rawModel}`;
-        const candidateScore = typeof pass2.confidence === 'number'
-          ? pass2.confidence
-          : (typeof parsed.confidence === 'number' ? parsed.confidence : 0.88);
         rawCandidates = [
           {
             name: candidateName,
-            score: candidateScore,
-            supporting_evidence: evidenceList,
+            score: neutralBaseline,
+            supporting_evidence: [],
             contradictions: [],
             unobservable_features: []
           }
         ];
 
-        // Seed peer models for the verified manufacturer from canonical database for contradiction cross-examination
+        // Seed peer models for the verified manufacturer from canonical database & fingerprints for contradiction cross-examination
         const normMake = rawMake.toLowerCase();
         const peerVehicles = APEX_LOCAL_VEHICLE_DATABASE.filter(v => v.manufacturer.toLowerCase() === normMake);
         for (const peer of peerVehicles) {
@@ -696,7 +699,22 @@ Rules:
           if (!rawCandidates.some(c => c.name.toLowerCase() === peerName.toLowerCase())) {
             rawCandidates.push({
               name: peerName,
-              score: 0.50,
+              score: neutralBaseline,
+              supporting_evidence: [],
+              contradictions: [],
+              unobservable_features: []
+            });
+          }
+        }
+
+        const fpPeers = fineGrainedModelDiscriminator.findFingerprintsByMake(rawMake);
+        for (const fp of fpPeers) {
+          const fpName = fp.generation ? `${fp.make} ${fp.model} (${fp.generation})` : `${fp.make} ${fp.model}`;
+          const simpleName = `${fp.make} ${fp.model}`;
+          if (!rawCandidates.some(c => c.name.toLowerCase() === fpName.toLowerCase() || c.name.toLowerCase() === simpleName.toLowerCase())) {
+            rawCandidates.push({
+              name: fpName,
+              score: neutralBaseline,
               supporting_evidence: [],
               contradictions: [],
               unobservable_features: []
@@ -743,7 +761,9 @@ Rules:
         finalModel = finalModel.slice(finalMake.length + 1).trim();
       }
       let finalGen = classResult.identification.generation || rawGen || undefined;
-      let finalVariant = classResult.identification.variant || rawVariant || undefined;
+      let finalVariant = classResult.specificity_level === 'variant'
+        ? (classResult.identification.variant || rawVariant || undefined)
+        : undefined;
 
       // Optional Neutral Pairwise Verification Pass (Hard Amendment 4 & 7: Max 1 additional call, ceiling 2 total)
       // INVARIANT 5: RAW-VS-DISCRIMINATOR CONFLICT
@@ -751,7 +771,7 @@ Rules:
       const shouldTriggerNeutralVerification = !verificationConsumed && classResult.calibrated_candidates.length >= 2 && (
         classResult.needs_neutral_verification ||
         classResult.raw_conflict ||
-        classResult.candidate_separation < 0.15
+        (classResult.candidate_separation < 0.15 && classResult.top_candidate && classResult.top_candidate.score > 0.50)
       );
 
       if (shouldTriggerNeutralVerification) {
@@ -841,6 +861,7 @@ Output flat valid JSON only:
               const verifiedMatch = canonicalVehicleRegistry.lookupByTextOrAlias(classResult.top_candidate.name, finalMake);
               if (verifiedMatch) {
                 finalMake = verifiedMatch.make;
+                finalModel = verifiedMatch.model;
                 if (verifiedMatch.generation) finalGen = verifiedMatch.generation;
                 if (verifiedMatch.trim && (classResult.top_candidate.name.toLowerCase().includes(verifiedMatch.trim.toLowerCase()) || (finalVariant && finalVariant.toLowerCase() === verifiedMatch.trim.toLowerCase()))) {
                   finalVariant = verifiedMatch.trim;

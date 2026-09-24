@@ -415,23 +415,33 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
     traits: {
       headlight_shape: {
         name: 'p1_crescent_c_shape',
-        positiveKeywords: ['crescent', 'c-shape', 'c shape', 'p1 style', 'blade crescent', 'curved blade', 'black crescent housing'],
-        incompatibleKeywords: ['teardrop swept cluster', 'elongated teardrop without crescent', 'vertical slit', 'round bug eye']
+        positiveKeywords: ['crescent', 'c-shape', 'c shape', 'p1 style', 'p1-inspired', 'blade crescent', 'curved blade', 'black crescent housing', 'speedmark', 'boomerang', 'mclaren logo', 'black trim headlights', 'round headlights with black trim', 'headlights with black trim', 'black headlight housing'],
+        incompatibleKeywords: ['teardrop swept cluster', 'elongated teardrop without crescent', 'vertical slit', 'round bug eye'],
+        familySharedKeywords: ['crescent', 'c-shape', 'c shape', 'p1 style', 'p1-inspired', 'blade crescent', 'curved blade', 'speedmark', 'boomerang'],
+        familySharedAlone: true
       },
       front_intake_grille: {
         name: 'p1_style_front_bumper',
-        positiveKeywords: ['p1 bumper', 'deep dual intakes', 'bumper pods', 'p1-inspired front'],
-        incompatibleKeywords: ['three-segment aero blade', 'singleframe', 'upright oval']
+        positiveKeywords: ['p1 bumper', 'deep dual intakes', 'bumper pods', 'p1-inspired front', 'front bumper with lower intakes', 'front intake nacelles', 'large air intake below grille'],
+        incompatibleKeywords: ['three-segment aero blade', 'singleframe', 'upright oval', 'carbon endplate', 'front endplate', 'splitter endplate', 'front fender louver', 'fender louvers']
       },
       side_intake_type: {
         name: 'large_side_radiator_scoop',
-        positiveKeywords: ['large side scoop', 'radiator intake behind door', 'prominent side scoop', 'deep door recess', 'open side radiator', 'side radiator scoop'],
+        positiveKeywords: ['large side scoop', 'radiator intake behind door', 'prominent side scoop', 'deep door recess', 'open side radiator', 'side radiator scoop', 'side air intake', 'side air scoop', 'side radiator intake', 'side intake scoop', 'large side air intakes'],
         incompatibleKeywords: ['floating tendon', 'tendon duct without open scoop', 'smooth door tendon', 'fender gills only']
+      },
+      door_architecture: {
+        name: 'dihedral_doors',
+        positiveKeywords: ['dihedral door', 'dihedral doors'],
+        incompatibleKeywords: ['conventional door', 'gullwing'],
+        isGeneric: true,
+        familySharedKeywords: ['dihedral door', 'dihedral doors'],
+        familySharedAlone: true
       },
       roofline_greenhouse: {
         name: 'cab_forward_mid_engine_cockpit',
         positiveKeywords: ['cab-forward', 'mid-engine cockpit', 'glass engine bay', 'compact greenhouse'],
-        incompatibleKeywords: ['flying buttress', 'wraparound visor canopy', 'long hood gt']
+        incompatibleKeywords: ['flying buttress', 'wraparound visor canopy', 'long hood gt', 'convertible', 'spider', 'spyder', 'open top', 'open-top', 'retractable hardtop', 'folding hardtop', 'spider tonneau']
       },
       rear_architecture_and_exhaust: {
         name: 'dual_central_mid_bumper_exhaust_airbrake',
@@ -440,8 +450,9 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       },
       aero_architecture: {
         name: 'active_rear_airbrake',
-        positiveKeywords: ['active airbrake', 'deployable rear wing', 'airbrake'],
-        incompatibleKeywords: ['fixed giant swan neck wing', 'fixed ducktail']
+        positiveKeywords: ['active airbrake', 'deployable rear wing', 'airbrake', '650s airbrake'],
+        incompatibleKeywords: ['fixed giant swan neck wing', 'fixed ducktail'],
+        familySharedKeywords: ['airbrake', 'deployable rear wing']
       },
       proportions: {
         name: 'mid_engine_supercar',
@@ -473,7 +484,7 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       side_intake_type: {
         name: 'dihedral_floating_tendon_intake',
         positiveKeywords: ['floating tendon', 'tendon duct', 'door channel', 'no open side scoop', 'smooth door tendon', 'floating door tendon', 'integrated door duct'],
-        incompatibleKeywords: ['side radiator', 'radiator intake', 'large side scoop', 'large open side scoop', 'radiator intake behind door', 'prominent open side scoop', 'strakes', 'side intake']
+        incompatibleKeywords: ['side radiator', 'radiator intake', 'large side scoop', 'large open side scoop', 'radiator intake behind door', 'prominent open side scoop', 'strakes', 'side intake', 'side air intake', 'side air scoop', 'side radiator intake', 'open side scoop', 'side intake scoop', 'large side air intakes']
       },
       roofline_greenhouse: {
         name: 'flying_buttress_c_pillar',
@@ -492,8 +503,10 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       },
       door_architecture: {
         name: 'dihedral_doors_with_floating_tendons',
-        positiveKeywords: ['dihedral door', 'tendon door', 'floating door'],
-        incompatibleKeywords: ['conventional door', 'gullwing']
+        positiveKeywords: ['dihedral door', 'dihedral doors', 'tendon door', 'floating door', 'floating tendon'],
+        incompatibleKeywords: ['conventional door', 'gullwing'],
+        familySharedKeywords: ['dihedral door', 'dihedral doors'],
+        familySharedAlone: true
       },
       proportions: {
         name: 'mid_engine_sports_series',
@@ -514,23 +527,36 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
     traits: {
       headlight_shape: {
         name: 'p1_crescent_c_shape',
-        positiveKeywords: ['crescent', 'c-shape', 'p1 style', 'blade crescent'],
-        incompatibleKeywords: ['teardrop swept cluster', 'vertical slit', 'round bug eye']
+        positiveKeywords: ['crescent', 'c-shape', 'c shape', 'p1 style', 'p1-inspired', 'blade crescent', 'curved blade', 'black crescent housing', 'speedmark', 'boomerang', 'mclaren logo', 'black trim headlights', 'round headlights with black trim', 'headlights with black trim', 'black headlight housing'],
+        incompatibleKeywords: ['teardrop swept cluster', 'vertical slit', 'round bug eye'],
+        familySharedKeywords: ['crescent', 'c-shape', 'c shape', 'p1 style', 'p1-inspired', 'blade crescent', 'curved blade', 'speedmark', 'boomerang'],
+        familySharedAlone: true
       },
       front_intake_grille: {
         name: 'carbon_splitter_with_endplates',
-        positiveKeywords: ['carbon front endplate', 'aggressive front splitter', 'front endplate', 'carbon endplate'],
+        positiveKeywords: ['carbon front endplate', 'front endplate', 'carbon endplate', 'splitter endplate', 'front winglet', 'front fender louver', 'fender louvers'],
         incompatibleKeywords: ['three-segment aero blade', 'concave oval']
       },
       side_intake_type: {
         name: 'carbon_side_radiator_scoop',
-        positiveKeywords: ['large side scoop', 'carbon side intake', 'radiator scoop'],
-        incompatibleKeywords: ['floating tendon', 'tendon duct', 'smooth door']
+        positiveKeywords: ['carbon side intake', 'extended carbon side sills', 'carbon side skirts', 'carbon side sills', 'extended carbon', 'carbon side scoop'],
+        incompatibleKeywords: ['floating tendon', 'tendon duct', 'smooth door'],
+        familySharedKeywords: ['large side scoop', 'radiator scoop', 'side radiator', 'side intake'],
+        familySharedAlone: true
+      },
+      door_architecture: {
+        name: 'dihedral_doors',
+        positiveKeywords: ['dihedral door', 'dihedral doors'],
+        incompatibleKeywords: ['conventional door', 'gullwing'],
+        isGeneric: true,
+        familySharedKeywords: ['dihedral door', 'dihedral doors'],
+        familySharedAlone: true
       },
       roofline_greenhouse: {
         name: 'cab_forward_cockpit',
         positiveKeywords: ['cab-forward', 'glass engine cover', 'compact cockpit'],
-        incompatibleKeywords: ['flying buttress', 'long hood gt']
+        incompatibleKeywords: ['flying buttress', 'long hood gt', 'convertible', 'spider', 'spyder', 'open top', 'open-top', 'retractable hardtop', 'folding hardtop', 'spider tonneau'],
+        isGeneric: true
       },
       rear_architecture_and_exhaust: {
         name: 'dual_circular_titanium_top_exit_exhaust',
@@ -539,7 +565,7 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       },
       aero_architecture: {
         name: 'extended_longtail_active_airbrake',
-        positiveKeywords: ['longtail airbrake', '50% larger airbrake', 'extended rear wing', 'carbon airbrake'],
+        positiveKeywords: ['longtail airbrake', 'active longtail', '50% larger airbrake', 'extended rear wing', 'carbon airbrake', 'extended longtail'],
         incompatibleKeywords: ['no airbrake', 'fixed ducktail']
       },
       proportions: {
@@ -1347,8 +1373,15 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
     traits: {
       headlight_shape: {
         name: 'p1_crescent_c_shape',
-        positiveKeywords: ['crescent', 'c-shape', 'c shape', 'p1 style', 'p1-inspired', 'blade crescent'],
-        incompatibleKeywords: ['eye socket', 'eye-socket', 'teardrop swept cluster', 'vertical slit', 'round bug eye']
+        positiveKeywords: ['crescent', 'c-shape', 'c shape', 'p1 style', 'p1-inspired', 'blade crescent', 'curved blade', 'black crescent housing', 'speedmark', 'boomerang', 'mclaren logo', 'black trim headlights', 'round headlights with black trim', 'headlights with black trim', 'black headlight housing'],
+        incompatibleKeywords: ['eye socket', 'eye-socket', 'teardrop swept cluster', 'vertical slit', 'round bug eye'],
+        familySharedKeywords: ['crescent', 'c-shape', 'c shape', 'p1 style', 'p1-inspired', 'blade crescent', 'curved blade', 'speedmark', 'boomerang'],
+        familySharedAlone: true
+      },
+      front_intake_grille: {
+        name: 'p1_style_front_bumper',
+        positiveKeywords: ['p1 bumper', 'deep dual intakes', 'bumper pods', 'p1-inspired front', 'front bumper with lower intakes', 'front intake nacelles', 'large air intake below grille'],
+        incompatibleKeywords: ['three-segment aero blade', 'singleframe', 'upright oval', 'carbon endplate', 'front endplate', 'splitter endplate', 'front fender louver', 'fender louvers']
       },
       side_intake_type: {
         name: 'large_side_radiator_scoop',
@@ -1358,7 +1391,7 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       roofline_greenhouse: {
         name: 'retractable_hardtop_spider_tonneau',
         // Same open-top discipline as the Ferrari Spider trait: roof MECHANICS or nothing.
-        positiveKeywords: ['hardtop', 'retractable roof', 'convertible roof', 'folding roof', 'soft top', 'soft-top', 'spider tonneau', 'open cockpit', 'open-top', 'open top', 'drop-top'],
+        positiveKeywords: ['hardtop', 'retractable roof', 'convertible roof', 'folding roof', 'soft top', 'soft-top', 'spider tonneau', 'open cockpit', 'open-top', 'open top', 'drop-top', 'convertible', 'spider', 'spyder'],
         incompatibleKeywords: ['monocage glass canopy', 'full glass rear hatch', 'long hood gt', 'fixed roof', 'fixed coupe roof']
       },
       rear_architecture_and_exhaust: {
@@ -1373,8 +1406,16 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       },
       proportions: {
         name: 'mid_engine_spider_supercar',
-        positiveKeywords: ['mid-engine spider', 'cab-forward convertible', 'supercar'],
+        positiveKeywords: ['mid-engine spider', 'cab-forward convertible', 'open-top spider'],
         incompatibleKeywords: ['front-engine gt', 'suv', 'sedan']
+      },
+      door_architecture: {
+        name: 'dihedral_doors',
+        positiveKeywords: ['dihedral door', 'dihedral doors'],
+        incompatibleKeywords: ['conventional door', 'gullwing'],
+        isGeneric: true,
+        familySharedKeywords: ['dihedral door', 'dihedral doors'],
+        familySharedAlone: true
       }
     }
   },
@@ -1390,23 +1431,27 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
     traits: {
       headlight_shape: {
         name: 'p1_crescent_c_shape',
-        positiveKeywords: ['crescent', 'c-shape', 'c shape', 'p1 style', 'p1-inspired', 'blade crescent'],
-        incompatibleKeywords: ['eye socket', 'eye-socket', 'teardrop swept cluster', 'vertical slit', 'round bug eye']
+        positiveKeywords: ['crescent', 'c-shape', 'c shape', 'p1 style', 'p1-inspired', 'blade crescent', 'curved blade', 'black crescent housing', 'speedmark', 'boomerang', 'mclaren logo', 'black trim headlights', 'round headlights with black trim', 'headlights with black trim', 'black headlight housing'],
+        incompatibleKeywords: ['eye socket', 'eye-socket', 'teardrop swept cluster', 'vertical slit', 'round bug eye'],
+        familySharedKeywords: ['crescent', 'c-shape', 'c shape', 'p1 style', 'p1-inspired', 'blade crescent', 'curved blade', 'speedmark', 'boomerang'],
+        familySharedAlone: true
       },
       front_intake_grille: {
         name: 'carbon_splitter_with_endplates',
-        positiveKeywords: ['carbon front endplate', 'aggressive front splitter', 'front endplate', 'carbon endplate'],
+        positiveKeywords: ['carbon front endplate', 'front endplate', 'carbon endplate', 'splitter endplate', 'front winglet', 'front fender louver', 'fender louvers'],
         incompatibleKeywords: ['three-segment aero blade', 'eye socket']
       },
       side_intake_type: {
         name: 'carbon_side_radiator_scoop',
-        positiveKeywords: ['large side scoop', 'carbon side intake', 'radiator scoop', 'radiator intake', 'side radiator', 'strakes', 'side intake', 'carbon side sills', 'side sills', 'side skirts', 'extended carbon'],
-        incompatibleKeywords: ['internal door duct', 'floating tendon', 'smooth door']
+        positiveKeywords: ['carbon side intake', 'carbon side sills', 'side sills', 'side skirts', 'extended carbon', 'carbon side scoop'],
+        incompatibleKeywords: ['internal door duct', 'floating tendon', 'smooth door'],
+        familySharedKeywords: ['large side scoop', 'radiator scoop', 'radiator intake', 'side radiator', 'strakes', 'side intake'],
+        familySharedAlone: true
       },
       roofline_greenhouse: {
         name: 'retractable_hardtop_longtail_spider',
-        positiveKeywords: ['spider tonneau', 'folding hardtop', 'retractable hardtop', 'open-top spider', 'convertible tonneau', 'flying buttress', 'flying buttresses', 'buttresses'],
-        incompatibleKeywords: ['fixed coupe roof', 'monocage glass canopy']
+        positiveKeywords: ['spider tonneau', 'folding hardtop', 'retractable hardtop', 'open-top spider', 'convertible tonneau', 'flying buttress', 'flying buttresses', 'buttresses', 'convertible', 'spider', 'spyder', 'open top', 'open-top'],
+        incompatibleKeywords: ['fixed coupe roof', 'monocage glass canopy', 'fixed roof']
       },
       rear_architecture_and_exhaust: {
         name: 'dual_circular_titanium_top_exit_exhaust',
@@ -1415,12 +1460,20 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       },
       aero_architecture: {
         name: 'extended_longtail_active_airbrake',
-        positiveKeywords: ['longtail airbrake', 'active longtail', '50% larger airbrake', 'extended rear wing', 'carbon airbrake', 'carbon side skirts', 'carbon side sills', 'extended carbon', 'airbrake'],
+        positiveKeywords: ['longtail airbrake', 'active longtail', '50% larger airbrake', 'extended rear wing', 'carbon airbrake', 'extended longtail'],
         incompatibleKeywords: ['no airbrake', 'fixed ducktail']
+      },
+      door_architecture: {
+        name: 'dihedral_doors',
+        positiveKeywords: ['dihedral door', 'dihedral doors'],
+        incompatibleKeywords: ['conventional door', 'gullwing'],
+        isGeneric: true,
+        familySharedKeywords: ['dihedral door', 'dihedral doors'],
+        familySharedAlone: true
       },
       proportions: {
         name: 'mid_engine_longtail_spider',
-        positiveKeywords: ['mid-engine spider', 'extended rear longtail', 'low slung spider', 'supercar', 'convertible', 'mid-engine'],
+        positiveKeywords: ['mid-engine spider', 'extended rear longtail', 'low slung spider', 'convertible spider'],
         incompatibleKeywords: ['front-engine gt', 'sedan']
       }
     }
@@ -1804,14 +1857,78 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
     }
   },
 
-  // ── ASTON MARTIN DBS (SUPERLEGGERA) ──
+  // ── ASTON MARTIN DBS (2007–2012 VH PLATFORM) ──
   {
     vehicleId: 'aston-martin-dbs',
     make: 'Aston Martin',
     model: 'DBS',
+    generation: '2007–2012',
+    proportionsDescription: 'Flagship V12 grand tourer (2007–2012) with 5-bar horizontal slatted aluminum grille, carbon front splitter, dual elongated hood cooling vents, horizontal carbon side strakes with clear LED repeaters, and carbon rear diffuser with dual round exhausts',
+    confusableWith: ['aston-martin-db9', 'aston-martin-db7', 'aston-martin-db4', 'aston-martin-vanquish', 'aston-martin-vantage', 'aston-martin-dbs-superleggera'],
+    traits: {
+      headlight_shape: {
+        name: 'elongated_swept_back_bi_xenon_headlights',
+        positiveKeywords: ['swept-back headlight', 'swept-back bi-xenon', 'elongated headlight', 'bi-xenon projector', 'teardrop swept back', 'clear headlight lens', 'rectangular in shape', 'led daytime running light strip', 'led strip along the bottom edge'],
+        incompatibleKeywords: ['round headlamp under glass', 'upright round headlamp', 'freestanding round lamp', 'trapezoidal lens', 'fried egg', 'split headlight']
+      },
+      front_intake_grille: {
+        name: 'slatted_aluminum_grille_with_carbon_splitter',
+        positiveKeywords: [
+          'slatted aluminum grille', 'horizontal slats', 'slatted grille', 'aluminum grille',
+          'inverted trapezoid grille', '5-bar grille', '5-vane grille', 'carbon front splitter',
+          'carbon fiber front splitter', 'lower carbon splitter', 'carbon splitter',
+          'lower mesh intake with splitter', 'horizontal grille', 'horizontal grille with vertical slats',
+          'grille with vertical slats', 'grille with slats', 'horizontal grille with slats',
+          'flanked by two air intakes', 'front splitter', 'lower splitter', 'prominent splitter', 'splitter and side strakes'
+        ],
+        incompatibleKeywords: ['massive black honeycomb grille', 'massive open mouth', 'twin kidney', 'panamericana', 'vertical waterfall grille', 'wire mesh oval grille']
+      },
+      hood_geometry: {
+        name: 'sculpted_hood_with_dual_louvered_cooling_vents',
+        positiveKeywords: [
+          'hood vents', 'dual hood vents', 'dual cooling vents', 'extractor strakes', 'louvers',
+          'vented bonnet', 'carbon hood vents', 'elongated cooling slots', 'hood louvers',
+          'louvered cooling vents', 'dual elongated hood', 'two prominent vents', 'vents on either side',
+          'hood has two prominent vents', 'cooling vents on the hood', 'bonnet vents',
+          'vents on either side of the center crease', 'two vents on either side'
+        ],
+        incompatibleKeywords: ['smooth hood without vents', 'clean hood without vents', 'flat smooth luggage lid']
+      },
+      fender_architecture: {
+        name: 'horizontal_carbon_side_strake_with_led',
+        positiveKeywords: [
+          'side strake', 'carbon side strake', 'horizontal strake', 'fender strake with indicator',
+          'metal strake on fender', 'recessed fender channel', 'side fender strake',
+          'side strakes', 'pair of raised panels', 'side strakes on the front bumper'
+        ],
+        incompatibleKeywords: ['curlicue vent', 'fender louvers']
+      },
+      wing_and_spoiler_architecture: {
+        name: 'integrated_carbon_decklid_lip_spoiler',
+        positiveKeywords: ['carbon lip spoiler', 'integrated decklid spoiler', 'carbon lip', 'subtle bootlid spoiler'],
+        incompatibleKeywords: ['massive swan neck wing', 'tall fixed track wing']
+      },
+      rear_architecture_and_exhaust: {
+        name: 'dual_round_exhaust_in_carbon_diffuser',
+        positiveKeywords: ['dual exhaust', 'dual round exhaust', 'carbon diffuser', 'clear taillights', 'white taillights', 'swan-neck taillights', 'clear lens taillights'],
+        incompatibleKeywords: ['quad exhaust tailpipes', 'central twin round pipes', 'triple central exhaust']
+      },
+      proportions: {
+        name: 'muscular_v12_grand_tourer',
+        positiveKeywords: ['long hood short deck', 'muscular rear haunches', 'super gt proportions', 'wide aggressive stance', 'swan wing doors'],
+        incompatibleKeywords: ['mid-engine cab forward', 'sedan proportions', 'suv']
+      }
+    }
+  },
+
+  // ── ASTON MARTIN DBS SUPERLEGGERA (2018–2024) ──
+  {
+    vehicleId: 'aston-martin-dbs-superleggera',
+    make: 'Aston Martin',
+    model: 'DBS Superleggera',
     generation: 'DBS Superleggera',
-    proportionsDescription: 'Aggressive flagship grand tourer with massive hexagonal mouth grille, dual carbon hood strakes, and curlicue side fender vents',
-    confusableWith: ['aston-martin-db9', 'aston-martin-db7'],
+    proportionsDescription: 'Modern flagship twin-turbo V12 super GT (2018–2024) with massive black hexagonal open-mouth honeycomb grille, curlicue fender extractors, Aeroblade II, and quad exhaust pipes',
+    confusableWith: ['aston-martin-dbs', 'aston-martin-db9', 'aston-martin-vanquish', 'aston-martin-vantage'],
     traits: {
       headlight_shape: {
         name: 'elongated_swept_back_led_cluster',
@@ -1819,12 +1936,12 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
         incompatibleKeywords: ['round headlamp', 'trapezoidal lens', 'fried egg']
       },
       front_intake_grille: {
-        name: 'enlarged_honeycomb_inverted_trapezoid_grille',
+        name: 'massive_black_hexagonal_honeycomb_mouth',
         positiveKeywords: ['massive front grille', 'enlarged grille', 'honeycomb grille', 'inverted trapezoid grille', 'black hexagonal open mouth', 'wide open grille', 'aggressive front mouth'],
-        incompatibleKeywords: ['slatted aluminum grille', 'small oval mouth', 'twin kidney', 'panamericana']
+        incompatibleKeywords: ['slatted aluminum grille', 'horizontal slats', 'small oval mouth', 'twin kidney', '5-bar grille']
       },
       hood_geometry: {
-        name: 'deeply_sculpted_hood_with_carbon_strakes',
+        name: 'deeply_sculpted_bonnet_with_carbon_extractors',
         positiveKeywords: ['carbon hood strakes', 'hood vents', 'extractor strakes', 'sculpted bonnet', 'dual hood vents', 'dbs hood'],
         incompatibleKeywords: ['smooth hood without vents', 'flat smooth luggage lid']
       },
@@ -1834,7 +1951,7 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
         incompatibleKeywords: ['unvented front fenders', 'triple round gills']
       },
       wing_and_spoiler_architecture: {
-        name: 'aeroblade_ii_carbon_lip_spoiler',
+        name: 'aeroblade_ii_carbon_spoiler',
         positiveKeywords: ['aeroblade', 'carbon lip spoiler', 'integrated decklid spoiler', 'carbon aeroblade'],
         incompatibleKeywords: ['massive swan neck wing', 'tall fixed track wing']
       },
@@ -1857,8 +1974,8 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
     make: 'Aston Martin',
     model: 'DB9',
     generation: 'VH',
-    proportionsDescription: 'Classic elegant grand tourer with slatted aluminum inverted-trapezoid grille, horizontal fender strake, and dual round exhausts',
-    confusableWith: ['aston-martin-dbs', 'aston-martin-db7'],
+    proportionsDescription: 'Classic elegant grand tourer with slatted aluminum inverted-trapezoid grille, horizontal fender strake, clean bonnet without prominent cooling extractors, and dual round exhausts',
+    confusableWith: ['aston-martin-dbs', 'aston-martin-db7', 'aston-martin-db4', 'aston-martin-vanquish', 'aston-martin-vantage', 'aston-martin-dbs-superleggera'],
     traits: {
       headlight_shape: {
         name: 'sweeping_elongated_bi_xenon_lenses',
@@ -1871,9 +1988,14 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
         incompatibleKeywords: ['massive black honeycomb grille', 'massive open mouth', 'enlarged honeycomb', 'twin kidney']
       },
       hood_geometry: {
-        name: 'clean_bonnet_with_subtle_creases',
-        positiveKeywords: ['clean hood', 'clean bonnet', 'subtle hood creases', 'dual subtle bonnet vents'],
-        incompatibleKeywords: ['massive carbon hood extractors', 'dual nostrils', 'nostrils']
+        name: 'clean_bonnet_without_prominent_extractors',
+        positiveKeywords: ['clean hood', 'clean bonnet', 'subtle hood creases', 'unvented hood', 'smooth bonnet'],
+        incompatibleKeywords: [
+          'carbon hood strakes', 'dual nostrils', 'nostrils', 'prominent hood louvers',
+          'hood air extractors', 'dual elongated vents', 'dual elongated hood', 'louvered cooling vents',
+          'hood vents', 'dual hood vents', 'cooling vents', 'two prominent vents', 'vents on either side',
+          'bonnet vents', 'cooling vents on the hood'
+        ]
       },
       fender_architecture: {
         name: 'horizontal_side_strake_with_led_indicator',
@@ -1900,22 +2022,22 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
     model: 'DB7',
     generation: 'NP',
     proportionsDescription: '1990s Ian Callum design with rounded mouth grille, glass-covered round headlights, and soft curved fastback',
-    confusableWith: ['aston-martin-dbs', 'aston-martin-db9'],
+    confusableWith: ['aston-martin-dbs', 'aston-martin-db9', 'aston-martin-db4', 'aston-martin-vanquish', 'aston-martin-vantage'],
     traits: {
       headlight_shape: {
         name: 'rounded_headlamps_under_aerodynamic_glass',
         positiveKeywords: ['glass-covered headlight', 'round headlights under glass', 'separate round fog lights', '90s composite headlight'],
-        incompatibleKeywords: ['sharp angular led', 'swept-back led', 'elongated modern led']
+        incompatibleKeywords: ['sharp angular led', 'swept-back led', 'elongated modern led', 'bi-xenon', 'swept-back bi-xenon']
       },
       front_intake_grille: {
         name: 'rounded_oval_mouth_mesh_grille',
         positiveKeywords: ['rounded mouth grille', 'oval mouth', 'classic oval grille', 'chrome surround oval', 'mesh mouth grille'],
-        incompatibleKeywords: ['massive black honeycomb', 'sharp inverted trapezoid', 'twin kidney']
+        incompatibleKeywords: ['massive black honeycomb', 'sharp inverted trapezoid', 'twin kidney', 'slatted aluminum grille', '5-bar grille', 'horizontal grille with vertical slats', 'horizontal grille with slats']
       },
       hood_geometry: {
         name: 'smooth_curved_bonnet_with_power_bulge',
         positiveKeywords: ['smooth curved bonnet', 'power bulge', 'classic curved hood'],
-        incompatibleKeywords: ['carbon hood strakes', 'dual nostrils', 'deep extractor vents']
+        incompatibleKeywords: ['carbon hood strakes', 'dual nostrils', 'deep extractor vents', 'louvered cooling vents', 'hood vents', 'dual hood vents', 'two prominent vents', 'vents on either side', 'bonnet vents']
       },
       fender_architecture: {
         name: 'classic_side_flute_vent',
@@ -1931,6 +2053,148 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
         name: '1990s_curved_grand_tourer',
         positiveKeywords: ['90s grand tourer', 'softer rounded edges', 'curved fastback'],
         incompatibleKeywords: ['sharp aggressive creases', 'widebody track']
+      }
+    }
+  },
+
+  // ── ASTON MARTIN DB4 ──
+  {
+    vehicleId: 'aston-martin-db4',
+    make: 'Aston Martin',
+    model: 'DB4',
+    generation: 'Series I–V',
+    proportionsDescription: '1950s/1960s British classic with upright covered round headlights, tall polished slatted eggcrate grille, wire wheels, and chrome bumpers',
+    confusableWith: ['aston-martin-dbs', 'aston-martin-db9', 'aston-martin-db7', 'aston-martin-vanquish', 'aston-martin-vantage'],
+    traits: {
+      headlight_shape: {
+        name: 'upright_round_headlights_under_sloping_glass',
+        positiveKeywords: ['covered round headlights', 'classic round lamps', 'upright round headlamps', 'vintage round headlamps', 'covered circular lamps'],
+        incompatibleKeywords: ['swept-back led', 'elongated bi-xenon', 'modern led cluster', 'sharp angular headlight', 'swept-back bi-xenon']
+      },
+      front_intake_grille: {
+        name: 'tall_slatted_chrome_eggcrate_grille',
+        positiveKeywords: ['tall slatted grille', 'chrome eggcrate grille', 'classic tall grille', 'polished aluminum vertical slats', 'vintage aston martin grille'],
+        incompatibleKeywords: [
+          'low wide inverted trapezoid', 'massive black honeycomb', 'carbon front splitter',
+          'modern bumper intake', 'horizontal grille', 'bumper air intakes', 'air intakes on either side', 'modern lower intake'
+        ]
+      },
+      hood_geometry: {
+        name: 'curved_hood_with_hood_scoop',
+        positiveKeywords: ['curved hood scoop', 'intake scoop on hood', 'vintage bonnet scoop'],
+        incompatibleKeywords: ['carbon hood strakes', 'dual modern cooling vents', 'deep carbon extractors', 'louvered cooling vents', 'two prominent vents', 'vents on either side']
+      },
+      fender_architecture: {
+        name: 'flowing_vintage_fenders_with_wire_wheels',
+        positiveKeywords: ['wire wheels', 'knock-off wire wheels', 'classic chrome mirror', 'flowing vintage fenders'],
+        incompatibleKeywords: ['modern carbon strake', 'curlicue vent', 'fender louvers']
+      },
+      rear_architecture_and_exhaust: {
+        name: 'upright_vertical_cat_ear_taillights_chrome_bumper',
+        positiveKeywords: ['chrome bumper', 'vertical taillights', 'cat ear taillights', 'small round taillight pods'],
+        incompatibleKeywords: ['swan-neck taillights', 'clear led lens', 'carbon diffuser', 'quad exhaust']
+      },
+      proportions: {
+        name: '1960s_carrozzeria_touring_superleggera_classic',
+        positiveKeywords: ['1960s classic', 'vintage grand tourer', 'compact classic proportions', 'thin pillars', 'chrome window surround'],
+        incompatibleKeywords: [
+          'modern supercar', 'widebody track', 'carbon aerodynamic bodywork',
+          'sloping roofline and short rear deck', 'modern sports coupe', 'super gt', 'low-slung modern'
+        ]
+      }
+    }
+  },
+
+  // ── ASTON MARTIN VANQUISH ──
+  {
+    vehicleId: 'aston-martin-vanquish',
+    make: 'Aston Martin',
+    model: 'Vanquish',
+    generation: 'VH / Carbon Body',
+    proportionsDescription: 'Flagship V12 GT with full carbon fiber bodywork, elongated swept headlights with integrated LED strakes, hollow Aeroblade spoiler, and deep front carbon aero splitter',
+    confusableWith: ['aston-martin-dbs', 'aston-martin-db9', 'aston-martin-db7', 'aston-martin-db4', 'aston-martin-vantage', 'aston-martin-dbs-superleggera'],
+    traits: {
+      headlight_shape: {
+        name: 'elongated_headlights_with_integrated_led_strakes',
+        positiveKeywords: ['swept-back headlights', 'elongated headlight', 'integrated led strake', 'bi-xenon projector'],
+        incompatibleKeywords: ['round headlamp', 'trapezoidal lens']
+      },
+      front_intake_grille: {
+        name: 'inverted_trapezoid_grille_with_prominent_carbon_splitter',
+        positiveKeywords: ['slatted grille', 'carbon front splitter', 'inverted trapezoid grille', 'prominent front splitter with endplates', 'wide lower carbon air dam'],
+        incompatibleKeywords: ['massive black honeycomb grille', 'massive open mouth', 'twin kidney']
+      },
+      hood_geometry: {
+        name: 'sculpted_bonnet_with_elongated_strakes',
+        positiveKeywords: ['hood vents', 'elongated hood vents', 'sculpted bonnet', 'dual strakes'],
+        incompatibleKeywords: ['smooth hood without vents']
+      },
+      fender_architecture: {
+        name: 'extended_carbon_side_strake',
+        positiveKeywords: ['extended side strake', 'carbon side strake', 'long fender strake', 'strake running into door'],
+        incompatibleKeywords: ['curlicue vent']
+      },
+      wing_and_spoiler_architecture: {
+        name: 'hollow_carbon_aeroblade_integrated_spoiler',
+        positiveKeywords: ['hollow aeroblade', 'integrated carbon rear spoiler', 'aeroblade spoiler', 'hollow decklid spoiler'],
+        incompatibleKeywords: ['massive swan neck wing', 'subtle decklid lip without channel']
+      },
+      rear_architecture_and_exhaust: {
+        name: 'light_blade_taillights_dual_exhaust_diffuser',
+        positiveKeywords: ['light blade taillights', 'blade taillights', 'dual round exhaust', 'carbon rear diffuser'],
+        incompatibleKeywords: ['quad exhaust tailpipes']
+      },
+      proportions: {
+        name: 'wide_sculpted_carbon_super_gt',
+        positiveKeywords: ['carbon body', 'super gt proportions', 'muscular haunches', 'long hood short deck'],
+        incompatibleKeywords: ['mid-engine cab forward', 'sedan']
+      }
+    }
+  },
+
+  // ── ASTON MARTIN VANTAGE ──
+  {
+    vehicleId: 'aston-martin-vantage',
+    make: 'Aston Martin',
+    model: 'Vantage',
+    generation: 'VH Generation (V8/V12)',
+    proportionsDescription: 'Compact 2-seat sports car with shorter wheelbase, pronounced ducktail rear decklid, horizontal side strake, and dual round exhausts',
+    confusableWith: ['aston-martin-dbs', 'aston-martin-db9', 'aston-martin-db7', 'aston-martin-db4', 'aston-martin-vanquish', 'aston-martin-dbs-superleggera'],
+    traits: {
+      headlight_shape: {
+        name: 'compact_swept_bi_xenon_headlights',
+        positiveKeywords: ['swept-back headlights', 'compact projector headlights', 'bi-xenon headlights'],
+        incompatibleKeywords: ['round headlamp', 'fried egg']
+      },
+      front_intake_grille: {
+        name: 'compact_slatted_inverted_trapezoid_grille',
+        positiveKeywords: ['slatted grille', 'horizontal slats', 'compact aston martin grille', 'inverted trapezoid grille'],
+        incompatibleKeywords: ['massive black honeycomb open mouth', 'tall chrome eggcrate']
+      },
+      hood_geometry: {
+        name: 'compact_bonnet_with_optional_dual_vents',
+        positiveKeywords: ['compact hood', 'sculpted bonnet', 'dual hood vents'],
+        incompatibleKeywords: ['massive carbon extractors']
+      },
+      fender_architecture: {
+        name: 'compact_horizontal_side_strake',
+        positiveKeywords: ['side strake', 'horizontal fender strake', 'short fender strake'],
+        incompatibleKeywords: ['curlicue vent']
+      },
+      wing_and_spoiler_architecture: {
+        name: 'pronounced_integrated_ducktail_decklid',
+        positiveKeywords: ['ducktail', 'ducktail spoiler', 'upturned rear decklid', 'integrated ducktail lip'],
+        incompatibleKeywords: ['aeroblade', 'towering swan-neck wing']
+      },
+      rear_architecture_and_exhaust: {
+        name: 'dual_round_exhaust_tips_compact_rear',
+        positiveKeywords: ['dual exhaust', 'dual round exhaust', 'clear taillights', 'swan-neck taillights'],
+        incompatibleKeywords: ['quad exhaust tailpipes']
+      },
+      proportions: {
+        name: 'compact_two_seat_sports_coupe',
+        positiveKeywords: ['compact sports coupe', 'short wheelbase', 'two-seater proportions', 'muscular compact haunches'],
+        incompatibleKeywords: ['2+2 grand tourer long wheelbase', 'flagship gt length', 'mid-engine cab forward']
       }
     }
   },

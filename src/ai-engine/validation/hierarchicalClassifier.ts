@@ -358,6 +358,13 @@ export class HierarchicalClassifier {
         } else if (observedBody.includes('sedan') && candNameLower.includes('spyder')) {
           candContradictions.push(`Body style mismatch: Observed sedan vs candidate open-top spyder`);
           score -= 0.60;
+        } else if ((observedBody.includes('convertible') || observedBody.includes('spider') || observedBody.includes('cabriolet') || observedBody.includes('roadster')) &&
+                   !/\b(spider|spyder|cabriolet|convertible|roadster|targa|speedster)\b/i.test(candNameLower)) {
+          const hasOpenTopPeer = raw_candidates.some(c => /\b(spider|spyder|cabriolet|convertible|roadster|targa|speedster)\b/i.test(c.name.toLowerCase()));
+          if (hasOpenTopPeer) {
+            candContradictions.push(`Body style mismatch: Observed convertible/open-top architecture vs candidate fixed coupe`);
+            score -= 0.60;
+          }
         }
       }
 
@@ -742,27 +749,9 @@ export class HierarchicalClassifier {
     // reflects what the VLM actually observed — and never from array order among
     // indistinguishable peers. This is a hypothesis fallback, not a validated exact-model
     // result: the variant tier stays refused and the result remains at family specificity.
-    const anySpecificEvidencePre = fgResult.scoredCandidates.some((c) => c.specificEvidenceCount > 0);
-    // Generic-only margins (+0.05 family wording) do not establish a model either — they only
-    // shuffle indistinguishable siblings. If NO candidate carries model-specific evidence, the
-    // presented identity is the raw provider hypothesis (honest abstention), whatever the
-    // generic-wording ordering happens to be.
-    if (!anySpecificEvidencePre && validCandidates.length >= 1 && input.raw_make && input.raw_model) {
-      const hypPrefix = `${input.raw_make} ${input.raw_model}`.trim().toLowerCase();
-      const hyp = [...validCandidates, ...completeCandidates, ...incompleteCandidates]
-        .find((c) => !c.invalid && c.name.toLowerCase().startsWith(hypPrefix));
-      const top = validCandidates[0];
-      // A contradicted raw hypothesis has already lost on evidence — it must never be hoisted.
-      // And a top candidate leading by more than generic-wording scale has EARNED its lead
-      // (e.g. classifier contradiction-engine architecture support); that lead is real evidence
-      // even when the fingerprint tier saw nothing, so the hoist must not override it.
-      const hypNotContradicted = !hyp || !(hyp.contradictions || []).length;
-      const genericScaleLead = !top || !hyp || top.score - hyp.score <= 0.05;
-      if (hyp && top !== hyp && hypNotContradicted && genericScaleLead) {
-        validCandidates = validCandidates.filter((c) => c !== hyp);
-        validCandidates.unshift(hyp);
-      }
-    }
+    // When NO candidate carries model-specific evidence and the top of the ranking is a tie,
+    // the system preserves honest uncertainty at model family/generation level rather than
+    // resolving by raw-provider bias or unshifting unregistered hypotheses.
 
     calibratedCandidates.length = 0;
     calibratedCandidates.push(...validCandidates, ...completeCandidates.filter(c => !validCandidates.includes(c)), ...incompleteCandidates.filter(c => !validCandidates.includes(c)), ...invalidCandidates);

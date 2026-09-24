@@ -6,16 +6,13 @@
 
 import type { IdentificationResult } from '../types';
 
-// v3.0.0 — production stabilization release:
-//   * generalized fine-grained model discriminator & exact model discrimination
-//   * conjunctive negation detection for compound phrases (e.g. without hood vents or nostrils)
-//   * raw-provider overwrite prevention and viewpoint-gated candidate consistency
-//   * authoritative canonical vehicle registry and verified specs binding
-//   * strict visible-absence contradiction gating
-//   * dual-mode repeatability hardening (cold vs persistent)
-// Bumping the version retires every identification cached under previous pipelines so stale
-// wrong answers cannot be served.
-export const VISION_PIPELINE_VERSION = 'v3.0.0-production-stabilization';
+// v3.1.0 — generalized exact recognition hardening release:
+//   * neutral candidate seeding (all valid peers start at exact neutral 0.50 baseline)
+//   * eliminated raw-provider privilege prior
+//   * Aston Martin DBS 2007-2012 morphological repair & DBS Superleggera clean separation
+//   * McLaren 650S/675LT/570S family-shared trait decoupling & Rule B open-top gating
+//   * neutral pairwise verifier bounded to max 1 additional call
+export const VISION_PIPELINE_VERSION = 'v3.1.0-generalized-exact-recognition';
 
 export function buildCacheKey(
   imageHash: string,
