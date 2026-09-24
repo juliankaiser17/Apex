@@ -61,7 +61,7 @@ export class CloudflareVisionProvider implements AIProvider {
     this.defaultModel = config?.model || (typeof process !== 'undefined' && process.env?.CLOUDFLARE_MODEL) || this.defaultModel;
     this.seed = config?.seed ?? 42;
     this.temperature = config?.temperature ?? 0.1;
-    this.maxTokens = config?.maxTokens ?? 384;
+    this.maxTokens = config?.maxTokens ?? 512;
     this.timeoutMs = config?.timeoutMs ?? 35000;
   }
 
@@ -690,8 +690,10 @@ Rules:
             unobservable_features: []
           }
         ];
+      }
 
-        // Seed peer models for the verified manufacturer from canonical database & fingerprints for contradiction cross-examination
+      // CRITICAL: Always seed peer models for the verified manufacturer from canonical database & fingerprints for contradiction cross-examination
+      if (rawMake) {
         const normMake = rawMake.toLowerCase();
         const peerVehicles = APEX_LOCAL_VEHICLE_DATABASE.filter(v => v.manufacturer.toLowerCase() === normMake);
         for (const peer of peerVehicles) {
@@ -806,7 +808,10 @@ Output flat valid JSON only:
   "candidate_b_contradictions": ["visible trait contradicted"],
   "evidence": ["observable cue 1", "observable cue 2"],
   "reason": "Neutral comparison rationale"
-}`;
+}
+Rules:
+- Output only valid JSON starting with { and ending with }.
+- Do not include conversation, preface, or explanation outside the JSON object.`;
 
           const verifyParams: any = {
             accountId,
@@ -817,7 +822,8 @@ Output flat valid JSON only:
             temperature: 0.1,
             seed: 42,
             maxTokens: effectiveMaxTokens,
-            stream: false
+            stream: false,
+            allowRawTextFallback: true
           };
 
           if (format === 'inst') {
@@ -835,11 +841,36 @@ Output flat valid JSON only:
             verifyJson = verifyJson.response;
           }
 
+          let winner: string | null = null;
           if (verifyJson && (verifyJson.selected_winner || verifyJson.winner_name)) {
-            const winner = verifyJson.selected_winner || verifyJson.winner_name;
-            const winningCandidateName = (winner === 'Candidate A' || winner === candA)
+            winner = verifyJson.selected_winner || verifyJson.winner_name;
+          } else if (verifyJson?.isRawText || typeof verifyResult?.rawText === 'string') {
+            const text = (verifyJson?.rawText || verifyResult?.rawText || '').toLowerCase();
+            const candANorm = candA.toLowerCase();
+            const candBNorm = candB.toLowerCase();
+            const declaresA = text.includes('candidate a') || text.includes(candANorm);
+            const declaresB = text.includes('candidate b') || text.includes(candBNorm);
+            if (declaresA && !declaresB) {
+              winner = candA;
+            } else if (declaresB && !declaresA) {
+              winner = candB;
+            } else if (declaresA && declaresB) {
+              const winnerMatch = text.match(/(?:winner|conclu(?:de|sion)|identified as|is a|focal vehicle is a?)\s*[:\-]?\s*([^\n\.]+)/i);
+              if (winnerMatch) {
+                const matchStr = winnerMatch[1].toLowerCase();
+                if (matchStr.includes('candidate a') || matchStr.includes(candANorm)) {
+                  winner = candA;
+                } else if (matchStr.includes('candidate b') || matchStr.includes(candBNorm)) {
+                  winner = candB;
+                }
+              }
+            }
+          }
+
+          if (winner) {
+            const winningCandidateName = (winner === 'Candidate A' || winner.toLowerCase() === candA.toLowerCase())
               ? candA
-              : (winner === 'Candidate B' || winner === candB)
+              : (winner === 'Candidate B' || winner.toLowerCase() === candB.toLowerCase())
               ? candB
               : null;
 
@@ -1115,6 +1146,7 @@ Output flat valid JSON only:
     seed: number;
     maxTokens: number;
     stream?: boolean;
+    allowRawTextFallback?: boolean;
   }): Promise<{
     json: any;
     tokens: { promptTokens: number; outputTokens: number; totalTokens: number };
@@ -1279,15 +1311,29 @@ Output flat valid JSON only:
         parsedOutput = JSON.parse(jsonCandidate);
       } catch (parseErr: any) {
         let recovered = false;
-        for (const suffix of ['}', '}}', '"}}', 'null}}', ']}', '"]}}']) {
-          try {
-            parsedOutput = JSON.parse(jsonCandidate + suffix);
-            recovered = true;
-            break;
-          } catch {}
+        const quoteCount = (jsonCandidate.match(/(?<!\\)"/g) || []).length;
+        const candidatesToTry = [
+          jsonCandidate,
+          quoteCount % 2 !== 0 ? jsonCandidate + '"' : jsonCandidate
+        ];
+
+        for (const base of candidatesToTry) {
+          for (const suffix of ['', '}', '}}', '"}}', 'null}}', ']}', '"]}}', '}]}', 'null}]}', 'null}}}]', 'null"]}}']) {
+            try {
+              parsedOutput = JSON.parse(base + suffix);
+              recovered = true;
+              break;
+            } catch {}
+          }
+          if (recovered) break;
         }
+
         if (!recovered) {
-          throw new Error(`Cloudflare response could not be parsed as JSON: ${parseErr.message}. Raw: ${rawText.slice(0, 300)}`);
+          if (params.allowRawTextFallback) {
+            parsedOutput = { rawText, isRawText: true };
+          } else {
+            throw new Error(`Cloudflare response could not be parsed as JSON: ${parseErr.message}. Raw: ${rawText.slice(0, 300)}`);
+          }
         }
       }
 

@@ -950,7 +950,7 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
     model: '911 GT3 RS',
     generation: '992',
     proportionsDescription: 'Extreme motorsport-derived track car with prominent swan-neck active DRS wing, dual front hood extractor nostrils, and front fender pressure louvers',
-    confusableWith: ['porsche-911-turbo', 'porsche-911-carrera-997', 'porsche-911-carrera-996', 'porsche-718-boxster'],
+    confusableWith: ['porsche-911-turbo', 'porsche-911-carrera-997', 'porsche-911-carrera-996', 'porsche-718-boxster', 'porsche-cayman-gt4-rs'],
     traits: {
       headlight_shape: {
         name: 'round_oval_projector_headlights_4point_drl',
@@ -993,7 +993,7 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       roofline_greenhouse: {
         name: 'coupe_flyline_with_aerodynamic_roof_fins',
         positiveKeywords: ['roof fins', 'carbon roof', 'coupe flyline'],
-        incompatibleKeywords: ['roadster', 'soft top', 'speedster haunches', 'two-seat convertible', 'boxster roofline', 'convertible roof', 'canvas roof']
+        incompatibleKeywords: ['roadster', 'soft top', 'speedster haunches', 'two-seat convertible', 'boxster roofline', 'convertible roof', 'canvas roof', 'convertible', 'two-door convertible', 'open-top', 'open top', 'soft-top', 'fabric roof']
       },
       proportions: {
         name: 'widebody_track_focused_911_supercar',
@@ -1010,7 +1010,7 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
     model: '911 Turbo',
     generation: '992',
     proportionsDescription: 'Widebody rear-engine everyday supercar with rear fender side air intake ducts, clean front hood, and low integrated active rear spoiler',
-    confusableWith: ['porsche-911-gt3-rs', 'porsche-911-carrera-997', 'porsche-911-carrera-996', 'porsche-718-boxster'],
+    confusableWith: ['porsche-911-gt3-rs', 'porsche-911-carrera-997', 'porsche-911-carrera-996', 'porsche-718-boxster', 'porsche-cayman-gt4-rs'],
     traits: {
       headlight_shape: {
         name: 'round_oval_projector_headlights_4point_drl',
@@ -1051,7 +1051,7 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       roofline_greenhouse: {
         name: 'coupe_flyline_rear_quarter_windows',
         positiveKeywords: ['sloping flyline', 'coupe flyline', 'rearward coupe cabin', 'rear quarter window', 'coupe roofline'],
-        incompatibleKeywords: ['roadster', 'soft top', 'speedster haunches', 'two-seat convertible', 'boxster roofline', 'convertible roof', 'canvas roof']
+        incompatibleKeywords: ['roadster', 'soft top', 'speedster haunches', 'two-seat convertible', 'boxster roofline', 'convertible roof', 'canvas roof', 'convertible', 'two-door convertible', 'open-top', 'open top', 'soft-top', 'fabric roof']
       },
       proportions: {
         name: 'widebody_rear_engine_supercar_proportions',
@@ -1114,12 +1114,12 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       },
       front_intake_grille: {
         name: 'tripartite_lower_intakes_with_led',
-        positiveKeywords: ['tripartite', 'three lower intakes', 'horizontal led in intake', 'wide bumper intakes'],
+        positiveKeywords: ['tripartite', 'three lower intakes', 'three-part front intake', 'three-section front bumper', 'horizontal led in intake', 'horizontal turn signal bars', 'wide bumper intakes'],
         incompatibleKeywords: ['large concave oval', 'horizontal strakes']
       },
       roofline_greenhouse: {
         name: 'classic_911_flyline_pronounced_hips',
-        positiveKeywords: ['sloping flyline', 'pronounced rear hips', 'wide rear fenders', 'classic 911 flyline'],
+        positiveKeywords: ['sloping flyline', 'pronounced rear hips', 'wide rear fenders', 'classic 911 flyline', 'coupe roofline', 'rounded coupe roofline'],
         incompatibleKeywords: ['soft top', 'convertible roof', 'convertible', 'cabriolet', 'canvas roof', 'fabric convertible', 'wraparound visor canopy', 'mid-engine cab forward']
       },
       rear_architecture_and_exhaust: {
@@ -1523,7 +1523,7 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
     model: '718 Boxster',
     generation: '982',
     proportionsDescription: 'Mid-engine two-seater roadster with lateral side air scoops, 4-point LED DRLs, clean front hood without nostrils, and fabric roadster top',
-    confusableWith: ['porsche-911-carrera-cabriolet-996', 'porsche-911-carrera-996', 'porsche-911-carrera-997', 'porsche-911-gt3-rs', 'porsche-911-turbo'],
+    confusableWith: ['porsche-911-carrera-cabriolet-996', 'porsche-911-carrera-996', 'porsche-911-carrera-997', 'porsche-911-gt3-rs', 'porsche-911-turbo', 'porsche-cayman-gt4-rs'],
     traits: {
       headlight_shape: {
         name: 'compact_projector_four_point_led_cluster',
@@ -1537,7 +1537,7 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       },
       hood_geometry: {
         name: 'smooth_unvented_front_luggage_lid',
-        positiveKeywords: ['smooth hood', 'clean front hood', 'unvented hood', 'smooth luggage compartment lid', 'without hood vents', 'clean bonnet'],
+        positiveKeywords: ['smooth hood', 'clean front hood', 'unvented hood', 'smooth luggage compartment lid', 'without hood vents', 'clean bonnet', 'no visible vents', 'no visible vents or louvers', 'without vents'],
         incompatibleKeywords: ['hood nostril', 'hood extractor', 'carbon hood vents', 'dual nostrils', 'radiator extractor', 'cooling nostrils', 'nostrils']
       },
       fender_architecture: {
@@ -1547,7 +1547,7 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       },
       wing_and_spoiler_architecture: {
         name: 'retractable_rear_spoiler_flush_with_body',
-        positiveKeywords: ['retractable spoiler flush with body', 'integrated active spoiler', 'low ducktail', 'retractable rear spoiler', 'clean decklid without fixed wing', 'no fixed rear wing'],
+        positiveKeywords: ['retractable spoiler flush with body', 'integrated active spoiler', 'low ducktail', 'retractable rear spoiler', 'clean decklid without fixed wing', 'no fixed rear wing', 'no rear spoiler', 'clean decklid'],
         incompatibleKeywords: ['towering swan neck', 'swan-neck', 'massive rear wing', 'tall rear wing', 'drs wing', 'high-mounted wing', 'fixed giant swan neck wing']
       },
       side_intake_type: {
@@ -1557,7 +1557,7 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       },
       roofline_greenhouse: {
         name: 'roadster_soft_top_two_seater',
-        positiveKeywords: ['roadster', 'soft top', 'speedster haunches', 'two-seat convertible', 'boxster roofline', 'convertible roof', 'canvas roof', 'fabric roadster soft top', 'fabric roadster soft top with mid-engine side air intakes', 'roadster soft top'],
+        positiveKeywords: ['roadster', 'soft top', 'speedster haunches', 'two-seat convertible', 'boxster roofline', 'convertible roof', 'canvas roof', 'fabric roadster soft top', 'fabric roadster soft top with mid-engine side air intakes', 'roadster soft top', 'convertible', 'two-door convertible', 'open-top', 'open top', 'soft-top', 'fabric roof', 'black roof'],
         incompatibleKeywords: ['rear-engine 2+2 flyline', 'fixed coupe roof', 'coupe flyline', 'sloping rear-engine flyline', 'rear-engine flyline', 'rear-engine', 'rear engine']
       },
       rear_architecture_and_exhaust: {
@@ -1569,6 +1569,55 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
         name: 'mid_engine_roadster_proportions',
         positiveKeywords: ['mid-engine roadster', 'compact roadster', 'short wheelbase sports car', 'roadster proportions', 'mid-engine'],
         incompatibleKeywords: ['rear-engine 911 2+2 proportions', 'front-engine gt', 'sedan', 'rear-engine', 'rear engine', 'rear-engine flyline']
+      }
+    }
+  },
+
+  // ── PORSCHE 718 CAYMAN GT4 RS ──
+  {
+    vehicleId: 'porsche-cayman-gt4-rs',
+    make: 'Porsche',
+    model: '718 Cayman GT4 RS',
+    generation: '982',
+    proportionsDescription: 'Mid-engine track coupe with fixed carbon swan-neck rear wing, side window airboxes, side intake scoops, and dual front hood NACA ducts',
+    confusableWith: ['porsche-718-boxster', 'porsche-911-gt3-rs', 'porsche-911-turbo'],
+    traits: {
+      headlight_shape: {
+        name: 'compact_projector_four_point_led_cluster',
+        positiveKeywords: ['four-point led', '4-point led', 'four point led', 'bi-xenon projector', 'compact modern porsche headlight', 'horizontal led strip', 'oval headlight'],
+        incompatibleKeywords: ['fried egg', 'fried-egg', 'classic bug eye with separate lower strip', 'vertical slit']
+      },
+      front_intake_grille: {
+        name: 'lateral_bumper_cooling_ducts_with_aeroblades',
+        positiveKeywords: ['lateral intake', 'horizontal cooling fins', '718 front bumper', 'wide lower air ducts', 'lateral bumper ducts', 'tripartite', 'tripartite front intakes'],
+        incompatibleKeywords: ['kidney grille', 'concave oval']
+      },
+      hood_geometry: {
+        name: 'carbon_hood_with_naca_cooling_ducts',
+        requiresMandatoryAeroPresence: true,
+        positiveKeywords: ['naca duct', 'naca ducts', 'carbon fiber hood', 'dual naca', 'hood naca', 'dual carbon fiber hood naca duct'],
+        incompatibleKeywords: ['smooth hood without vents', 'clean hood without nostrils', 'flat smooth luggage lid']
+      },
+      wing_and_spoiler_architecture: {
+        name: 'fixed_swan_neck_rear_wing',
+        requiresMandatoryAeroPresence: true,
+        positiveKeywords: ['swan-neck', 'swan neck', 'top-mount wing', 'fixed rear wing', 'gt4 rs wing', 'swan-neck top-mounted rear wing'],
+        incompatibleKeywords: ['retractable spoiler', 'speed-activated spoiler', 'clean decklid without fixed wing', 'no fixed rear wing', 'no rear spoiler']
+      },
+      side_intake_type: {
+        name: 'mid_engine_side_intakes_and_window_airboxes',
+        positiveKeywords: ['side intake scoops behind doors', 'mid-engine side air intake', 'window air intakes', 'airboxes in rear quarter windows', 'process air intakes behind windows', 'side air intake scoops behind doors'],
+        incompatibleKeywords: ['no side intakes on rear fenders', 'smooth rear quarter panels without scoops']
+      },
+      roofline_greenhouse: {
+        name: 'fixed_fastback_coupe_roofline',
+        positiveKeywords: ['fixed coupe roofline', 'fastback coupe roofline', 'fixed fastback', 'coupe roofline', 'fixed fastback coupe roofline tapering to rear hatch'],
+        incompatibleKeywords: ['convertible', 'soft top', 'soft-top', 'open top', 'open-top', 'roadster', 'fabric roof', 'canvas roof']
+      },
+      proportions: {
+        name: 'compact_mid_engine_track_coupe',
+        positiveKeywords: ['mid-engine', 'compact roadster coupe proportions', 'track coupe stance'],
+        incompatibleKeywords: ['rear-engine 911 flyline', 'front-engine gt', 'suv', 'sedan']
       }
     }
   },
@@ -2845,7 +2894,9 @@ export class FineGrainedModelDiscriminator {
       return this.fingerprintCatalog.get(cleanNorm)!;
     }
 
-    for (const [key, fp] of this.fingerprintCatalog.entries()) {
+    const sortedKeys = Array.from(this.fingerprintCatalog.keys()).sort((a, b) => b.length - a.length);
+    for (const key of sortedKeys) {
+      const fp = this.fingerprintCatalog.get(key)!;
       if (norm === fp.make.toLowerCase()) continue;
       if (norm.includes(key) || cleanNorm.includes(key)) {
         return fp;

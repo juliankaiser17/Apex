@@ -348,23 +348,67 @@ export class HierarchicalClassifier {
 
       // ── CONTRADICTION ENGINE RULE B: BODY STYLE CONTRADICTION ──
       const observedBody = (visual_evidence.body_style || '').toLowerCase();
-      if (observedBody) {
-        if (observedBody.includes('coupe') && candNameLower.includes('suv')) {
+      const observedRoof = (visual_evidence.roofline || '').toLowerCase();
+      const isObservedOpenTop =
+        /\b(convertible|spider|spyder|cabriolet|roadster|soft[\s-]?top|canvas[\s-]?roof|fabric[\s-]?roof|targa|open[\s-]?top)\b/i.test(observedBody) ||
+        /\b(convertible|spider|spyder|cabriolet|roadster|soft[\s-]?top|canvas[\s-]?roof|fabric[\s-]?roof|targa|open[\s-]?top)\b/i.test(observedRoof);
+      const isObservedCoupe =
+        (/\b(coupe|hardtop|fixed[\s-]?roof)\b/i.test(observedBody) || /\b(coupe|fixed[\s-]?roof)\b/i.test(observedRoof)) &&
+        !isObservedOpenTop;
+      const isObservedSuv = /\b(suv|crossover)\b/i.test(observedBody);
+      const isObservedSedan = /\b(sedan|saloon)\b/i.test(observedBody);
+
+      // Determine candidate canonical body style
+      const canonCand = canonicalVehicleRegistry.lookupByTextOrAlias(candidate.name, candidateMake || undefined);
+      const candBodyLower = (canonCand?.bodyStyle || '').toLowerCase();
+      const isCandidateOpenTop =
+        candBodyLower === 'convertible' ||
+        candBodyLower === 'targa' ||
+        candBodyLower === 'roadster' ||
+        /\b(spider|spyder|cabriolet|convertible|roadster|targa|speedster|boxster|barchetta|miata|cielo)\b/i.test(candNameLower);
+      const isCandidateCoupe =
+        (candBodyLower === 'coupe' || (!candBodyLower && (candNameLower.includes('coupe') || candNameLower.includes('gt3')))) &&
+        !isCandidateOpenTop;
+      const isCandidateSuv =
+        candBodyLower === 'suv' ||
+        /\b(suv|crossover|macan|cayenne|urac?an\s+sterrato|purosangue|cullinan|bentayga|dbx)\b/i.test(candNameLower);
+      const isCandidateSedan =
+        candBodyLower === 'sedan' ||
+        /\b(sedan|saloon|limousine|panamera|taycan|flying\s+spur|phantom|ghost)\b/i.test(candNameLower);
+
+      if (isObservedOpenTop) {
+        const hasOpenTopPeer = raw_candidates.some(c => {
+          const cCanon = canonicalVehicleRegistry.lookupByTextOrAlias(c.name, candidateMake || undefined);
+          const cBody = (cCanon?.bodyStyle || '').toLowerCase();
+          return cBody === 'convertible' || cBody === 'targa' || cBody === 'roadster' || /\b(spider|spyder|cabriolet|convertible|roadster|targa|speedster|boxster|barchetta|miata|cielo)\b/i.test(c.name.toLowerCase());
+        });
+        if (isCandidateCoupe && hasOpenTopPeer) {
+          candContradictions.push(`Body style mismatch: Observed convertible/open-top architecture vs candidate fixed coupe`);
+          score -= 0.60;
+        } else if (isCandidateOpenTop) {
+          candSupporting.push(`Observed convertible/open-top architecture matches candidate body style`);
+          score += 0.10;
+        }
+      } else if (isObservedCoupe) {
+        if (isCandidateOpenTop) {
+          candContradictions.push(`Body style mismatch: Observed fixed-roof coupe vs candidate open-top convertible`);
+          score -= 0.60;
+        } else if (isCandidateSuv) {
           candContradictions.push(`Body style mismatch: Observed coupe vs candidate SUV`);
           score -= 0.60;
-        } else if (observedBody.includes('suv') && (candNameLower.includes('coupe') || candNameLower.includes('gt3'))) {
+        } else if (isCandidateSedan) {
+          candContradictions.push(`Body style mismatch: Observed coupe vs candidate sedan`);
+          score -= 0.60;
+        }
+      } else if (isObservedSuv) {
+        if (isCandidateCoupe || candNameLower.includes('gt3')) {
           candContradictions.push(`Body style mismatch: Observed SUV vs candidate sports coupe`);
           score -= 0.60;
-        } else if (observedBody.includes('sedan') && candNameLower.includes('spyder')) {
+        }
+      } else if (isObservedSedan) {
+        if (isCandidateOpenTop || candNameLower.includes('spyder')) {
           candContradictions.push(`Body style mismatch: Observed sedan vs candidate open-top spyder`);
           score -= 0.60;
-        } else if ((observedBody.includes('convertible') || observedBody.includes('spider') || observedBody.includes('cabriolet') || observedBody.includes('roadster')) &&
-                   !/\b(spider|spyder|cabriolet|convertible|roadster|targa|speedster)\b/i.test(candNameLower)) {
-          const hasOpenTopPeer = raw_candidates.some(c => /\b(spider|spyder|cabriolet|convertible|roadster|targa|speedster)\b/i.test(c.name.toLowerCase()));
-          if (hasOpenTopPeer) {
-            candContradictions.push(`Body style mismatch: Observed convertible/open-top architecture vs candidate fixed coupe`);
-            score -= 0.60;
-          }
         }
       }
 
@@ -622,13 +666,20 @@ export class HierarchicalClassifier {
             return false;
           }
 
+          // Strict generation gating: If both specify a generation, they must match!
+          const cGenMatch = cNameLower.match(/\(([^)]+)\)/);
+          const fgGenMatch = fgDisplayLower.match(/\(([^)]+)\)/);
+          if (cGenMatch && fgGenMatch && cGenMatch[1].trim() !== fgGenMatch[1].trim()) {
+            return false;
+          }
+
           const cleanC = cNameLower.replace(/\s*\([^)]*\)/g, '').trim();
           const cleanFg = fgDisplayLower.replace(/\s*\([^)]*\)/g, '').trim();
           if (cleanC === cleanFg || cleanC === fgMakeModel || cleanC === fgModelLower) {
             return true;
           }
 
-          return cNameLower.includes(fgModelLower);
+          return cNameLower.includes(fgModelLower) && !cGenMatch;
         });
 
         if (existingIdx >= 0) {
@@ -729,8 +780,29 @@ export class HierarchicalClassifier {
     const completeCandidates = calibratedCandidates.filter((c) => !c.invalid && isCompleteCandidate(c));
     const incompleteCandidates = calibratedCandidates.filter((c) => !c.invalid && !isCompleteCandidate(c));
 
-    completeCandidates.sort((a, b) => b.score - a.score);
-    incompleteCandidates.sort((a, b) => b.score - a.score);
+    const compareCandidates = (a: CandidateComparison, b: CandidateComparison): number => {
+      if (b.score !== a.score) {
+        return b.score - a.score;
+      }
+      // Tie-breaker 1: Net model-specific evidence
+      const aNet = (a.supporting_evidence?.length || 0) - (a.contradictions?.length || 0);
+      const bNet = (b.supporting_evidence?.length || 0) - (b.contradictions?.length || 0);
+      if (bNet !== aNet) {
+        return bNet - aNet;
+      }
+      // Tie-breaker 2: If net specific evidence is identical, check if one matches raw provider hypothesis
+      const rawLower = (input.raw_model || '').toLowerCase();
+      if (rawLower) {
+        const aMatchesRaw = a.name.toLowerCase().includes(rawLower);
+        const bMatchesRaw = b.name.toLowerCase().includes(rawLower);
+        if (aMatchesRaw && !bMatchesRaw) return -1;
+        if (bMatchesRaw && !aMatchesRaw) return 1;
+      }
+      return 0;
+    };
+
+    completeCandidates.sort(compareCandidates);
+    incompleteCandidates.sort(compareCandidates);
 
     // Prioritize candidates passing the completeness gate
     // A complete candidate with severe contradictions (score < 0.50) cannot override an uncontradicted viable candidate

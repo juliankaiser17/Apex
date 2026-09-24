@@ -161,7 +161,10 @@ class CanonicalVehicleRegistry {
       'porsche 996 carrera',
       '996.1',
       '996.2',
-      '911 carrera 996'
+      '911 carrera 996',
+      'porsche 911 carrera 996',
+      'porsche 911 carrera (996)',
+      '911 carrera (996)'
     ]);
 
     this.registerAliases('porsche-911-carrera-cabriolet-996', [
@@ -182,7 +185,10 @@ class CanonicalVehicleRegistry {
       'porsche 997 carrera',
       '997.1',
       '997.2',
-      '911 carrera 997'
+      '911 carrera 997',
+      'porsche 911 carrera 997',
+      'porsche 911 carrera (997)',
+      '911 carrera (997)'
     ]);
 
     this.registerAliases('porsche-718-boxster', [
@@ -190,6 +196,8 @@ class CanonicalVehicleRegistry {
       'porsche 718 boxster',
       '718 boxster 982',
       'boxster 718',
+      'boxster',
+      'porsche boxster',
       '718'
     ]);
 
@@ -225,6 +233,18 @@ class CanonicalVehicleRegistry {
       'porsche 992 turbo s',
       '911 turbos',
       'porsche 911 turbos'
+    ]);
+
+    this.registerAliases('porsche-cayman-gt4-rs', [
+      '718 cayman gt4 rs',
+      'porsche 718 cayman gt4 rs',
+      'cayman gt4 rs',
+      'gt4 rs',
+      'gt4rs',
+      '718 cayman',
+      'porsche 718 cayman',
+      'cayman',
+      'porsche cayman'
     ]);
 
     // NOTE: porsche-911-gt3-992 is intentionally NOT registered here. The 992 GT3 (non-RS)
@@ -696,6 +716,20 @@ class CanonicalVehicleRegistry {
         if (subNorm && scopedMap.has(subNorm)) {
           const id = scopedMap.get(subNorm)!;
           return this.registry.get(id) || null;
+        }
+        // Normalize parenthesized annotations (e.g. generation hints "Porsche Boxster (991)" -> "Porsche Boxster")
+        if (query.includes('(')) {
+          const cleanQuery = query.replace(/\s*\([^)]*\)/g, '').trim();
+          const cleanNorm = this.normalize(cleanQuery);
+          const cleanSubNorm = cleanNorm.startsWith(normMake) ? cleanNorm.slice(normMake.length) : '';
+          if (scopedMap.has(cleanNorm)) {
+            const id = scopedMap.get(cleanNorm)!;
+            return this.registry.get(id) || null;
+          }
+          if (cleanSubNorm && scopedMap.has(cleanSubNorm)) {
+            const id = scopedMap.get(cleanSubNorm)!;
+            return this.registry.get(id) || null;
+          }
         }
       }
 

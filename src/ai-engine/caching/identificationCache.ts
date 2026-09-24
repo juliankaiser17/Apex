@@ -6,13 +6,13 @@
 
 import type { IdentificationResult } from '../types';
 
-// v3.1.0 — generalized exact recognition hardening release:
-//   * neutral candidate seeding (all valid peers start at exact neutral 0.50 baseline)
-//   * eliminated raw-provider privilege prior
-//   * Aston Martin DBS 2007-2012 morphological repair & DBS Superleggera clean separation
-//   * McLaren 650S/675LT/570S family-shared trait decoupling & Rule B open-top gating
-//   * neutral pairwise verifier bounded to max 1 additional call
-export const VISION_PIPELINE_VERSION = 'v3.1.0-generalized-exact-recognition';
+// v3.2.0 — Porsche 718 Boxster architecture hardening & candidate completeness release:
+//   * generalized body-style gating via canonical metadata (Convertible/Roadster/Coupe)
+//   * complete manufacturer candidate universe seeding
+//   * open-top/fixed-roof reciprocal architectural traits
+//   * strict generation token candidate isolation (996/997/992/982)
+//   * free-text LLM fallback & robust quote-repairing JSON recovery
+export const VISION_PIPELINE_VERSION = 'v3.2.0-boxster-architecture-hardening';
 
 export function buildCacheKey(
   imageHash: string,

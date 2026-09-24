@@ -2,7 +2,7 @@
 import { createClient } from "@supabase/supabase-js";
 
 // src/ai-engine/caching/identificationCache.ts
-var VISION_PIPELINE_VERSION = "v3.1.0-generalized-exact-recognition";
+var VISION_PIPELINE_VERSION = "v3.2.0-boxster-architecture-hardening";
 function buildCacheKey(imageHash, provider = "cloudflare", model = "@cf/meta/llama-3.2-11b-vision-instruct") {
   const cleanHash = (imageHash || "").toLowerCase().trim();
   const cleanProvider = (provider || "cloudflare").toLowerCase().trim();
@@ -2618,7 +2618,10 @@ var CanonicalVehicleRegistry = class {
       "porsche 996 carrera",
       "996.1",
       "996.2",
-      "911 carrera 996"
+      "911 carrera 996",
+      "porsche 911 carrera 996",
+      "porsche 911 carrera (996)",
+      "911 carrera (996)"
     ]);
     this.registerAliases("porsche-911-carrera-cabriolet-996", [
       "996 cabriolet",
@@ -2637,13 +2640,18 @@ var CanonicalVehicleRegistry = class {
       "porsche 997 carrera",
       "997.1",
       "997.2",
-      "911 carrera 997"
+      "911 carrera 997",
+      "porsche 911 carrera 997",
+      "porsche 911 carrera (997)",
+      "911 carrera (997)"
     ]);
     this.registerAliases("porsche-718-boxster", [
       "718 boxster",
       "porsche 718 boxster",
       "718 boxster 982",
       "boxster 718",
+      "boxster",
+      "porsche boxster",
       "718"
     ]);
     this.registerAliases("porsche-911-gt3-rs", [
@@ -2673,6 +2681,17 @@ var CanonicalVehicleRegistry = class {
       "porsche 992 turbo s",
       "911 turbos",
       "porsche 911 turbos"
+    ]);
+    this.registerAliases("porsche-cayman-gt4-rs", [
+      "718 cayman gt4 rs",
+      "porsche 718 cayman gt4 rs",
+      "cayman gt4 rs",
+      "gt4 rs",
+      "gt4rs",
+      "718 cayman",
+      "porsche 718 cayman",
+      "cayman",
+      "porsche cayman"
     ]);
     this.registerAliases("ferrari-amalfi", [
       "amalfi",
@@ -3068,6 +3087,19 @@ var CanonicalVehicleRegistry = class {
         if (subNorm && scopedMap.has(subNorm)) {
           const id = scopedMap.get(subNorm);
           return this.registry.get(id) || null;
+        }
+        if (query.includes("(")) {
+          const cleanQuery = query.replace(/\s*\([^)]*\)/g, "").trim();
+          const cleanNorm = this.normalize(cleanQuery);
+          const cleanSubNorm = cleanNorm.startsWith(normMake) ? cleanNorm.slice(normMake.length) : "";
+          if (scopedMap.has(cleanNorm)) {
+            const id = scopedMap.get(cleanNorm);
+            return this.registry.get(id) || null;
+          }
+          if (cleanSubNorm && scopedMap.has(cleanSubNorm)) {
+            const id = scopedMap.get(cleanSubNorm);
+            return this.registry.get(id) || null;
+          }
         }
       }
       const makeCandidates = Array.from(this.registry.values()).filter(
@@ -4140,7 +4172,7 @@ var MORPHOLOGICAL_FINGERPRINTS = [
     model: "911 GT3 RS",
     generation: "992",
     proportionsDescription: "Extreme motorsport-derived track car with prominent swan-neck active DRS wing, dual front hood extractor nostrils, and front fender pressure louvers",
-    confusableWith: ["porsche-911-turbo", "porsche-911-carrera-997", "porsche-911-carrera-996", "porsche-718-boxster"],
+    confusableWith: ["porsche-911-turbo", "porsche-911-carrera-997", "porsche-911-carrera-996", "porsche-718-boxster", "porsche-cayman-gt4-rs"],
     traits: {
       headlight_shape: {
         name: "round_oval_projector_headlights_4point_drl",
@@ -4183,7 +4215,7 @@ var MORPHOLOGICAL_FINGERPRINTS = [
       roofline_greenhouse: {
         name: "coupe_flyline_with_aerodynamic_roof_fins",
         positiveKeywords: ["roof fins", "carbon roof", "coupe flyline"],
-        incompatibleKeywords: ["roadster", "soft top", "speedster haunches", "two-seat convertible", "boxster roofline", "convertible roof", "canvas roof"]
+        incompatibleKeywords: ["roadster", "soft top", "speedster haunches", "two-seat convertible", "boxster roofline", "convertible roof", "canvas roof", "convertible", "two-door convertible", "open-top", "open top", "soft-top", "fabric roof"]
       },
       proportions: {
         name: "widebody_track_focused_911_supercar",
@@ -4199,7 +4231,7 @@ var MORPHOLOGICAL_FINGERPRINTS = [
     model: "911 Turbo",
     generation: "992",
     proportionsDescription: "Widebody rear-engine everyday supercar with rear fender side air intake ducts, clean front hood, and low integrated active rear spoiler",
-    confusableWith: ["porsche-911-gt3-rs", "porsche-911-carrera-997", "porsche-911-carrera-996", "porsche-718-boxster"],
+    confusableWith: ["porsche-911-gt3-rs", "porsche-911-carrera-997", "porsche-911-carrera-996", "porsche-718-boxster", "porsche-cayman-gt4-rs"],
     traits: {
       headlight_shape: {
         name: "round_oval_projector_headlights_4point_drl",
@@ -4240,7 +4272,7 @@ var MORPHOLOGICAL_FINGERPRINTS = [
       roofline_greenhouse: {
         name: "coupe_flyline_rear_quarter_windows",
         positiveKeywords: ["sloping flyline", "coupe flyline", "rearward coupe cabin", "rear quarter window", "coupe roofline"],
-        incompatibleKeywords: ["roadster", "soft top", "speedster haunches", "two-seat convertible", "boxster roofline", "convertible roof", "canvas roof"]
+        incompatibleKeywords: ["roadster", "soft top", "speedster haunches", "two-seat convertible", "boxster roofline", "convertible roof", "canvas roof", "convertible", "two-door convertible", "open-top", "open top", "soft-top", "fabric roof"]
       },
       proportions: {
         name: "widebody_rear_engine_supercar_proportions",
@@ -4301,12 +4333,12 @@ var MORPHOLOGICAL_FINGERPRINTS = [
       },
       front_intake_grille: {
         name: "tripartite_lower_intakes_with_led",
-        positiveKeywords: ["tripartite", "three lower intakes", "horizontal led in intake", "wide bumper intakes"],
+        positiveKeywords: ["tripartite", "three lower intakes", "three-part front intake", "three-section front bumper", "horizontal led in intake", "horizontal turn signal bars", "wide bumper intakes"],
         incompatibleKeywords: ["large concave oval", "horizontal strakes"]
       },
       roofline_greenhouse: {
         name: "classic_911_flyline_pronounced_hips",
-        positiveKeywords: ["sloping flyline", "pronounced rear hips", "wide rear fenders", "classic 911 flyline"],
+        positiveKeywords: ["sloping flyline", "pronounced rear hips", "wide rear fenders", "classic 911 flyline", "coupe roofline", "rounded coupe roofline"],
         incompatibleKeywords: ["soft top", "convertible roof", "convertible", "cabriolet", "canvas roof", "fabric convertible", "wraparound visor canopy", "mid-engine cab forward"]
       },
       rear_architecture_and_exhaust: {
@@ -4700,7 +4732,7 @@ var MORPHOLOGICAL_FINGERPRINTS = [
     model: "718 Boxster",
     generation: "982",
     proportionsDescription: "Mid-engine two-seater roadster with lateral side air scoops, 4-point LED DRLs, clean front hood without nostrils, and fabric roadster top",
-    confusableWith: ["porsche-911-carrera-cabriolet-996", "porsche-911-carrera-996", "porsche-911-carrera-997", "porsche-911-gt3-rs", "porsche-911-turbo"],
+    confusableWith: ["porsche-911-carrera-cabriolet-996", "porsche-911-carrera-996", "porsche-911-carrera-997", "porsche-911-gt3-rs", "porsche-911-turbo", "porsche-cayman-gt4-rs"],
     traits: {
       headlight_shape: {
         name: "compact_projector_four_point_led_cluster",
@@ -4714,7 +4746,7 @@ var MORPHOLOGICAL_FINGERPRINTS = [
       },
       hood_geometry: {
         name: "smooth_unvented_front_luggage_lid",
-        positiveKeywords: ["smooth hood", "clean front hood", "unvented hood", "smooth luggage compartment lid", "without hood vents", "clean bonnet"],
+        positiveKeywords: ["smooth hood", "clean front hood", "unvented hood", "smooth luggage compartment lid", "without hood vents", "clean bonnet", "no visible vents", "no visible vents or louvers", "without vents"],
         incompatibleKeywords: ["hood nostril", "hood extractor", "carbon hood vents", "dual nostrils", "radiator extractor", "cooling nostrils", "nostrils"]
       },
       fender_architecture: {
@@ -4724,7 +4756,7 @@ var MORPHOLOGICAL_FINGERPRINTS = [
       },
       wing_and_spoiler_architecture: {
         name: "retractable_rear_spoiler_flush_with_body",
-        positiveKeywords: ["retractable spoiler flush with body", "integrated active spoiler", "low ducktail", "retractable rear spoiler", "clean decklid without fixed wing", "no fixed rear wing"],
+        positiveKeywords: ["retractable spoiler flush with body", "integrated active spoiler", "low ducktail", "retractable rear spoiler", "clean decklid without fixed wing", "no fixed rear wing", "no rear spoiler", "clean decklid"],
         incompatibleKeywords: ["towering swan neck", "swan-neck", "massive rear wing", "tall rear wing", "drs wing", "high-mounted wing", "fixed giant swan neck wing"]
       },
       side_intake_type: {
@@ -4734,7 +4766,7 @@ var MORPHOLOGICAL_FINGERPRINTS = [
       },
       roofline_greenhouse: {
         name: "roadster_soft_top_two_seater",
-        positiveKeywords: ["roadster", "soft top", "speedster haunches", "two-seat convertible", "boxster roofline", "convertible roof", "canvas roof", "fabric roadster soft top", "fabric roadster soft top with mid-engine side air intakes", "roadster soft top"],
+        positiveKeywords: ["roadster", "soft top", "speedster haunches", "two-seat convertible", "boxster roofline", "convertible roof", "canvas roof", "fabric roadster soft top", "fabric roadster soft top with mid-engine side air intakes", "roadster soft top", "convertible", "two-door convertible", "open-top", "open top", "soft-top", "fabric roof", "black roof"],
         incompatibleKeywords: ["rear-engine 2+2 flyline", "fixed coupe roof", "coupe flyline", "sloping rear-engine flyline", "rear-engine flyline", "rear-engine", "rear engine"]
       },
       rear_architecture_and_exhaust: {
@@ -4746,6 +4778,54 @@ var MORPHOLOGICAL_FINGERPRINTS = [
         name: "mid_engine_roadster_proportions",
         positiveKeywords: ["mid-engine roadster", "compact roadster", "short wheelbase sports car", "roadster proportions", "mid-engine"],
         incompatibleKeywords: ["rear-engine 911 2+2 proportions", "front-engine gt", "sedan", "rear-engine", "rear engine", "rear-engine flyline"]
+      }
+    }
+  },
+  // ── PORSCHE 718 CAYMAN GT4 RS ──
+  {
+    vehicleId: "porsche-cayman-gt4-rs",
+    make: "Porsche",
+    model: "718 Cayman GT4 RS",
+    generation: "982",
+    proportionsDescription: "Mid-engine track coupe with fixed carbon swan-neck rear wing, side window airboxes, side intake scoops, and dual front hood NACA ducts",
+    confusableWith: ["porsche-718-boxster", "porsche-911-gt3-rs", "porsche-911-turbo"],
+    traits: {
+      headlight_shape: {
+        name: "compact_projector_four_point_led_cluster",
+        positiveKeywords: ["four-point led", "4-point led", "four point led", "bi-xenon projector", "compact modern porsche headlight", "horizontal led strip", "oval headlight"],
+        incompatibleKeywords: ["fried egg", "fried-egg", "classic bug eye with separate lower strip", "vertical slit"]
+      },
+      front_intake_grille: {
+        name: "lateral_bumper_cooling_ducts_with_aeroblades",
+        positiveKeywords: ["lateral intake", "horizontal cooling fins", "718 front bumper", "wide lower air ducts", "lateral bumper ducts", "tripartite", "tripartite front intakes"],
+        incompatibleKeywords: ["kidney grille", "concave oval"]
+      },
+      hood_geometry: {
+        name: "carbon_hood_with_naca_cooling_ducts",
+        requiresMandatoryAeroPresence: true,
+        positiveKeywords: ["naca duct", "naca ducts", "carbon fiber hood", "dual naca", "hood naca", "dual carbon fiber hood naca duct"],
+        incompatibleKeywords: ["smooth hood without vents", "clean hood without nostrils", "flat smooth luggage lid"]
+      },
+      wing_and_spoiler_architecture: {
+        name: "fixed_swan_neck_rear_wing",
+        requiresMandatoryAeroPresence: true,
+        positiveKeywords: ["swan-neck", "swan neck", "top-mount wing", "fixed rear wing", "gt4 rs wing", "swan-neck top-mounted rear wing"],
+        incompatibleKeywords: ["retractable spoiler", "speed-activated spoiler", "clean decklid without fixed wing", "no fixed rear wing", "no rear spoiler"]
+      },
+      side_intake_type: {
+        name: "mid_engine_side_intakes_and_window_airboxes",
+        positiveKeywords: ["side intake scoops behind doors", "mid-engine side air intake", "window air intakes", "airboxes in rear quarter windows", "process air intakes behind windows", "side air intake scoops behind doors"],
+        incompatibleKeywords: ["no side intakes on rear fenders", "smooth rear quarter panels without scoops"]
+      },
+      roofline_greenhouse: {
+        name: "fixed_fastback_coupe_roofline",
+        positiveKeywords: ["fixed coupe roofline", "fastback coupe roofline", "fixed fastback", "coupe roofline", "fixed fastback coupe roofline tapering to rear hatch"],
+        incompatibleKeywords: ["convertible", "soft top", "soft-top", "open top", "open-top", "roadster", "fabric roof", "canvas roof"]
+      },
+      proportions: {
+        name: "compact_mid_engine_track_coupe",
+        positiveKeywords: ["mid-engine", "compact roadster coupe proportions", "track coupe stance"],
+        incompatibleKeywords: ["rear-engine 911 flyline", "front-engine gt", "suv", "sedan"]
       }
     }
   },
@@ -5918,7 +5998,9 @@ ${graphValidation.errors.join("\n")}`);
     if (this.fingerprintCatalog.has(cleanNorm)) {
       return this.fingerprintCatalog.get(cleanNorm);
     }
-    for (const [key, fp] of this.fingerprintCatalog.entries()) {
+    const sortedKeys = Array.from(this.fingerprintCatalog.keys()).sort((a, b) => b.length - a.length);
+    for (const key of sortedKeys) {
+      const fp = this.fingerprintCatalog.get(key);
       if (norm === fp.make.toLowerCase()) continue;
       if (norm.includes(key) || cleanNorm.includes(key)) {
         return fp;
@@ -6076,22 +6158,50 @@ var HierarchicalClassifier = class {
         };
       }
       const observedBody = (visual_evidence.body_style || "").toLowerCase();
-      if (observedBody) {
-        if (observedBody.includes("coupe") && candNameLower.includes("suv")) {
+      const observedRoof = (visual_evidence.roofline || "").toLowerCase();
+      const isObservedOpenTop = /\b(convertible|spider|spyder|cabriolet|roadster|soft[\s-]?top|canvas[\s-]?roof|fabric[\s-]?roof|targa|open[\s-]?top)\b/i.test(observedBody) || /\b(convertible|spider|spyder|cabriolet|roadster|soft[\s-]?top|canvas[\s-]?roof|fabric[\s-]?roof|targa|open[\s-]?top)\b/i.test(observedRoof);
+      const isObservedCoupe = (/\b(coupe|hardtop|fixed[\s-]?roof)\b/i.test(observedBody) || /\b(coupe|fixed[\s-]?roof)\b/i.test(observedRoof)) && !isObservedOpenTop;
+      const isObservedSuv = /\b(suv|crossover)\b/i.test(observedBody);
+      const isObservedSedan = /\b(sedan|saloon)\b/i.test(observedBody);
+      const canonCand = canonicalVehicleRegistry.lookupByTextOrAlias(candidate.name, candidateMake || void 0);
+      const candBodyLower = (canonCand?.bodyStyle || "").toLowerCase();
+      const isCandidateOpenTop = candBodyLower === "convertible" || candBodyLower === "targa" || candBodyLower === "roadster" || /\b(spider|spyder|cabriolet|convertible|roadster|targa|speedster|boxster|barchetta|miata|cielo)\b/i.test(candNameLower);
+      const isCandidateCoupe = (candBodyLower === "coupe" || !candBodyLower && (candNameLower.includes("coupe") || candNameLower.includes("gt3"))) && !isCandidateOpenTop;
+      const isCandidateSuv = candBodyLower === "suv" || /\b(suv|crossover|macan|cayenne|urac?an\s+sterrato|purosangue|cullinan|bentayga|dbx)\b/i.test(candNameLower);
+      const isCandidateSedan = candBodyLower === "sedan" || /\b(sedan|saloon|limousine|panamera|taycan|flying\s+spur|phantom|ghost)\b/i.test(candNameLower);
+      if (isObservedOpenTop) {
+        const hasOpenTopPeer = raw_candidates.some((c) => {
+          const cCanon = canonicalVehicleRegistry.lookupByTextOrAlias(c.name, candidateMake || void 0);
+          const cBody = (cCanon?.bodyStyle || "").toLowerCase();
+          return cBody === "convertible" || cBody === "targa" || cBody === "roadster" || /\b(spider|spyder|cabriolet|convertible|roadster|targa|speedster|boxster|barchetta|miata|cielo)\b/i.test(c.name.toLowerCase());
+        });
+        if (isCandidateCoupe && hasOpenTopPeer) {
+          candContradictions.push(`Body style mismatch: Observed convertible/open-top architecture vs candidate fixed coupe`);
+          score -= 0.6;
+        } else if (isCandidateOpenTop) {
+          candSupporting.push(`Observed convertible/open-top architecture matches candidate body style`);
+          score += 0.1;
+        }
+      } else if (isObservedCoupe) {
+        if (isCandidateOpenTop) {
+          candContradictions.push(`Body style mismatch: Observed fixed-roof coupe vs candidate open-top convertible`);
+          score -= 0.6;
+        } else if (isCandidateSuv) {
           candContradictions.push(`Body style mismatch: Observed coupe vs candidate SUV`);
           score -= 0.6;
-        } else if (observedBody.includes("suv") && (candNameLower.includes("coupe") || candNameLower.includes("gt3"))) {
+        } else if (isCandidateSedan) {
+          candContradictions.push(`Body style mismatch: Observed coupe vs candidate sedan`);
+          score -= 0.6;
+        }
+      } else if (isObservedSuv) {
+        if (isCandidateCoupe || candNameLower.includes("gt3")) {
           candContradictions.push(`Body style mismatch: Observed SUV vs candidate sports coupe`);
           score -= 0.6;
-        } else if (observedBody.includes("sedan") && candNameLower.includes("spyder")) {
+        }
+      } else if (isObservedSedan) {
+        if (isCandidateOpenTop || candNameLower.includes("spyder")) {
           candContradictions.push(`Body style mismatch: Observed sedan vs candidate open-top spyder`);
           score -= 0.6;
-        } else if ((observedBody.includes("convertible") || observedBody.includes("spider") || observedBody.includes("cabriolet") || observedBody.includes("roadster")) && !/\b(spider|spyder|cabriolet|convertible|roadster|targa|speedster)\b/i.test(candNameLower)) {
-          const hasOpenTopPeer = raw_candidates.some((c) => /\b(spider|spyder|cabriolet|convertible|roadster|targa|speedster)\b/i.test(c.name.toLowerCase()));
-          if (hasOpenTopPeer) {
-            candContradictions.push(`Body style mismatch: Observed convertible/open-top architecture vs candidate fixed coupe`);
-            score -= 0.6;
-          }
         }
       }
       if (viewpoint === "front" || viewpoint === "front_3q") {
@@ -6291,12 +6401,17 @@ var HierarchicalClassifier = class {
           if (isCSpider !== isFgSpider) {
             return false;
           }
+          const cGenMatch = cNameLower.match(/\(([^)]+)\)/);
+          const fgGenMatch = fgDisplayLower.match(/\(([^)]+)\)/);
+          if (cGenMatch && fgGenMatch && cGenMatch[1].trim() !== fgGenMatch[1].trim()) {
+            return false;
+          }
           const cleanC = cNameLower.replace(/\s*\([^)]*\)/g, "").trim();
           const cleanFg = fgDisplayLower.replace(/\s*\([^)]*\)/g, "").trim();
           if (cleanC === cleanFg || cleanC === fgMakeModel || cleanC === fgModelLower) {
             return true;
           }
-          return cNameLower.includes(fgModelLower);
+          return cNameLower.includes(fgModelLower) && !cGenMatch;
         });
         if (existingIdx >= 0) {
           const existing = calibratedCandidates[existingIdx];
@@ -6358,8 +6473,26 @@ var HierarchicalClassifier = class {
     };
     const completeCandidates = calibratedCandidates.filter((c) => !c.invalid && isCompleteCandidate(c));
     const incompleteCandidates = calibratedCandidates.filter((c) => !c.invalid && !isCompleteCandidate(c));
-    completeCandidates.sort((a, b) => b.score - a.score);
-    incompleteCandidates.sort((a, b) => b.score - a.score);
+    const compareCandidates = (a, b) => {
+      if (b.score !== a.score) {
+        return b.score - a.score;
+      }
+      const aNet = (a.supporting_evidence?.length || 0) - (a.contradictions?.length || 0);
+      const bNet = (b.supporting_evidence?.length || 0) - (b.contradictions?.length || 0);
+      if (bNet !== aNet) {
+        return bNet - aNet;
+      }
+      const rawLower = (input.raw_model || "").toLowerCase();
+      if (rawLower) {
+        const aMatchesRaw = a.name.toLowerCase().includes(rawLower);
+        const bMatchesRaw = b.name.toLowerCase().includes(rawLower);
+        if (aMatchesRaw && !bMatchesRaw) return -1;
+        if (bMatchesRaw && !aMatchesRaw) return 1;
+      }
+      return 0;
+    };
+    completeCandidates.sort(compareCandidates);
+    incompleteCandidates.sort(compareCandidates);
     const viableCompleteCandidates = completeCandidates.filter(
       (c) => c.score >= 0.5 && !c.contradictions.some((ct) => ct.includes("Severe") || ct.includes("contradicts"))
     );
@@ -7871,7 +8004,7 @@ var CloudflareVisionProvider = class {
     this.defaultModel = config2?.model || typeof process !== "undefined" && process.env?.CLOUDFLARE_MODEL || this.defaultModel;
     this.seed = config2?.seed ?? 42;
     this.temperature = config2?.temperature ?? 0.1;
-    this.maxTokens = config2?.maxTokens ?? 384;
+    this.maxTokens = config2?.maxTokens ?? 512;
     this.timeoutMs = config2?.timeoutMs ?? 35e3;
   }
   resolveAccountId() {
@@ -8403,6 +8536,8 @@ ${verifyPrompt} [/INST]`;
             unobservable_features: []
           }
         ];
+      }
+      if (rawMake) {
         const normMake = rawMake.toLowerCase();
         const peerVehicles = APEX_LOCAL_VEHICLE_DATABASE.filter((v) => v.manufacturer.toLowerCase() === normMake);
         for (const peer of peerVehicles) {
@@ -8495,7 +8630,10 @@ Output flat valid JSON only:
   "candidate_b_contradictions": ["visible trait contradicted"],
   "evidence": ["observable cue 1", "observable cue 2"],
   "reason": "Neutral comparison rationale"
-}`;
+}
+Rules:
+- Output only valid JSON starting with { and ending with }.
+- Do not include conversation, preface, or explanation outside the JSON object.`;
           const verifyParams = {
             accountId,
             token,
@@ -8505,7 +8643,8 @@ Output flat valid JSON only:
             temperature: 0.1,
             seed: 42,
             maxTokens: effectiveMaxTokens,
-            stream: false
+            stream: false,
+            allowRawTextFallback: true
           };
           if (format === "inst") {
             verifyParams.prompt = `[INST] <<SYS>>
@@ -8524,9 +8663,33 @@ ${neutralVerifyPrompt} [/INST]`;
           if (verifyJson && typeof verifyJson.response === "object" && verifyJson.response !== null) {
             verifyJson = verifyJson.response;
           }
+          let winner = null;
           if (verifyJson && (verifyJson.selected_winner || verifyJson.winner_name)) {
-            const winner = verifyJson.selected_winner || verifyJson.winner_name;
-            const winningCandidateName = winner === "Candidate A" || winner === candA ? candA : winner === "Candidate B" || winner === candB ? candB : null;
+            winner = verifyJson.selected_winner || verifyJson.winner_name;
+          } else if (verifyJson?.isRawText || typeof verifyResult?.rawText === "string") {
+            const text = (verifyJson?.rawText || verifyResult?.rawText || "").toLowerCase();
+            const candANorm = candA.toLowerCase();
+            const candBNorm = candB.toLowerCase();
+            const declaresA = text.includes("candidate a") || text.includes(candANorm);
+            const declaresB = text.includes("candidate b") || text.includes(candBNorm);
+            if (declaresA && !declaresB) {
+              winner = candA;
+            } else if (declaresB && !declaresA) {
+              winner = candB;
+            } else if (declaresA && declaresB) {
+              const winnerMatch = text.match(/(?:winner|conclu(?:de|sion)|identified as|is a|focal vehicle is a?)\s*[:\-]?\s*([^\n\.]+)/i);
+              if (winnerMatch) {
+                const matchStr = winnerMatch[1].toLowerCase();
+                if (matchStr.includes("candidate a") || matchStr.includes(candANorm)) {
+                  winner = candA;
+                } else if (matchStr.includes("candidate b") || matchStr.includes(candBNorm)) {
+                  winner = candB;
+                }
+              }
+            }
+          }
+          if (winner) {
+            const winningCandidateName = winner === "Candidate A" || winner.toLowerCase() === candA.toLowerCase() ? candA : winner === "Candidate B" || winner.toLowerCase() === candB.toLowerCase() ? candB : null;
             if (winningCandidateName) {
               const targetCand = classResult.calibrated_candidates.find((c) => c.name === winningCandidateName);
               if (targetCand) {
@@ -8900,16 +9063,28 @@ ${neutralVerifyPrompt} [/INST]`;
         parsedOutput = JSON.parse(jsonCandidate);
       } catch (parseErr) {
         let recovered = false;
-        for (const suffix of ["}", "}}", '"}}', "null}}", "]}", '"]}}']) {
-          try {
-            parsedOutput = JSON.parse(jsonCandidate + suffix);
-            recovered = true;
-            break;
-          } catch {
+        const quoteCount = (jsonCandidate.match(/(?<!\\)"/g) || []).length;
+        const candidatesToTry = [
+          jsonCandidate,
+          quoteCount % 2 !== 0 ? jsonCandidate + '"' : jsonCandidate
+        ];
+        for (const base of candidatesToTry) {
+          for (const suffix of ["", "}", "}}", '"}}', "null}}", "]}", '"]}}', "}]}", "null}]}", "null}}}]", 'null"]}}']) {
+            try {
+              parsedOutput = JSON.parse(base + suffix);
+              recovered = true;
+              break;
+            } catch {
+            }
           }
+          if (recovered) break;
         }
         if (!recovered) {
-          throw new Error(`Cloudflare response could not be parsed as JSON: ${parseErr.message}. Raw: ${rawText.slice(0, 300)}`);
+          if (params.allowRawTextFallback) {
+            parsedOutput = { rawText, isRawText: true };
+          } else {
+            throw new Error(`Cloudflare response could not be parsed as JSON: ${parseErr.message}. Raw: ${rawText.slice(0, 300)}`);
+          }
         }
       }
       const finalPromptTokens = promptTokens || Math.round((params.prompt || JSON.stringify(params.messages) || "").length / 4) + 6400;
