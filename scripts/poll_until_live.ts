@@ -1,7 +1,7 @@
 async function pollUntilLive() {
   const url = 'https://apex-spotter.vercel.app/api/analyze';
-  console.log('[Poll] Monitoring Vercel deployment for v3.2.1-production-release...');
-  const targetVersion = 'v3.2.1-production-release';
+  console.log('[Poll] Monitoring Vercel deployment for v3.2.2-production-release...');
+  const targetVersion = 'v3.2.2-production-release';
   const start = Date.now();
   const maxWaitMs = 180000; // 3 minutes
 

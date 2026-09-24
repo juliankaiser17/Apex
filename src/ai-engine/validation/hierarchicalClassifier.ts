@@ -699,35 +699,11 @@ export class HierarchicalClassifier {
             if (!existing.unobservable_features!.includes(u)) existing.unobservable_features!.push(u);
           });
         } else {
-          const canonCand = canonicalVehicleRegistry.lookupByTextOrAlias(fgCand.displayName, fgCand.make || undefined);
-          const candBodyLower = (canonCand?.bodyStyle || '').toLowerCase();
-          const candNameLower = fgCand.displayName.toLowerCase();
-          const isCandOpenTop =
-            candBodyLower === 'convertible' ||
-            candBodyLower === 'targa' ||
-            candBodyLower === 'roadster' ||
-            /\b(spider|spyder|cabriolet|convertible|roadster|targa|speedster|boxster|barchetta|miata|cielo)\b/i.test(candNameLower);
-          const isCandCoupe =
-            (candBodyLower === 'coupe' || (!candBodyLower && (candNameLower.includes('coupe') || candNameLower.includes('gt3')))) &&
-            !isCandOpenTop;
-
-          let candScore = fgCand.calibratedScore;
-          const candContradictions = [...fgCand.contradictions];
-          const candSupporting = [...fgCand.supportingEvidence];
-
-          if (isObservedOpenTop && isCandCoupe) {
-            candContradictions.push(`Body style mismatch: Observed convertible/open-top architecture vs candidate fixed coupe`);
-            candScore -= 0.60;
-          } else if (isObservedCoupe && isCandOpenTop) {
-            candContradictions.push(`Body style mismatch: Observed fixed-roof coupe vs candidate open-top convertible`);
-            candScore -= 0.60;
-          }
-
           calibratedCandidates.push({
             name: fgCand.displayName,
-            score: Math.max(0.01, Math.min(0.99, Number(candScore.toFixed(3)))),
-            supporting_evidence: candSupporting,
-            contradictions: candContradictions,
+            score: fgCand.calibratedScore,
+            supporting_evidence: fgCand.supportingEvidence,
+            contradictions: fgCand.contradictions,
             unobservable_features: fgCand.unobservableTraits,
             invalid: false
           });

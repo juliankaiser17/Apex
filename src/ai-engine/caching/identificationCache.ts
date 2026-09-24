@@ -11,7 +11,7 @@ import type { IdentificationResult } from '../types';
 //   * Enforced body-style consistency on discriminator candidate introduction
 //   * Corroborated brand evidence detection for Koenigsegg
 //   * Teardrop brake cooling duct discrimination for Ferrari 296 GTB
-export const VISION_PIPELINE_VERSION = 'v3.2.1-production-release';
+export const VISION_PIPELINE_VERSION = 'v3.2.2-production-release';
 
 export function buildCacheKey(
   imageHash: string,

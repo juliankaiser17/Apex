@@ -288,9 +288,9 @@ export function buildZonedEvidence(parts: string[]): {
     .filter(Boolean)
     .map((text) => ({ text, zone: zoneOfClause(text) }));
 
-  const full = clauses.map((c) => c.text).join(' ');
-  const withoutRear = clauses.filter((c) => c.zone !== 'rear').map((c) => c.text).join(' ');
-  const withoutFront = clauses.filter((c) => c.zone !== 'front').map((c) => c.text).join(' ');
+  const full = clauses.map((c) => c.text).join(' . ');
+  const withoutRear = clauses.filter((c) => c.zone !== 'rear').map((c) => c.text).join(' . ');
+  const withoutFront = clauses.filter((c) => c.zone !== 'front').map((c) => c.text).join(' . ');
 
   return {
     full,
@@ -1555,22 +1555,78 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       side_intake_type: {
         name: 'prominent_mid_engine_side_scoop',
         positiveKeywords: ['side intake', 'side air scoop', 'lateral intake behind door', 'door intake scoop', 'mid-engine intake', 'side scoop', 'mid-engine side air intakes on rear fenders', 'mid-engine side air intakes', 'side air intakes on rear fenders', 'intakes on rear fenders'],
-        incompatibleKeywords: ['smooth rear haunch without scoop', 'no side intake', 'smooth 911 rear quarter']
+        incompatibleKeywords: ['smooth rear haunch without scoop', 'no side intake', 'smooth 911 rear quarter', 'rear fender leading edge intercooler scoops', 'intercooler scoops']
       },
       roofline_greenhouse: {
         name: 'roadster_soft_top_two_seater',
         positiveKeywords: ['roadster', 'soft top', 'speedster haunches', 'two-seat convertible', 'boxster roofline', 'convertible roof', 'canvas roof', 'fabric roadster soft top', 'fabric roadster soft top with mid-engine side air intakes', 'roadster soft top', 'convertible', 'two-door convertible', 'open-top', 'open top', 'soft-top', 'fabric roof', 'black roof'],
-        incompatibleKeywords: ['rear-engine 2+2 flyline', 'fixed coupe roof', 'coupe flyline', 'sloping rear-engine flyline', 'rear-engine flyline', 'rear-engine', 'rear engine', 'coupe']
+        incompatibleKeywords: ['rear-engine 2+2 flyline', 'fixed coupe roof', 'coupe flyline', 'sloping rear-engine flyline', 'rear-engine flyline', 'rear-engine', 'rear engine']
       },
       rear_architecture_and_exhaust: {
         name: 'central_trapezoidal_or_twin_exhaust_porsche_accent_strip',
         positiveKeywords: ['central exhaust', 'black accent strip between taillights', 'three-dimensional porsche badge', 'compact rear deck', 'porsche accent strip', '718 badge', 'porsche accent strip between rear taillights with 718 badge'],
-        incompatibleKeywords: ['full width strakes', 'top-exit titanium']
+        incompatibleKeywords: ['full width strakes', 'top-exit titanium', 'quad rectangular exhaust tips', 'quad rectangular exhaust']
       },
       proportions: {
         name: 'mid_engine_roadster_proportions',
         positiveKeywords: ['mid-engine roadster', 'compact roadster', 'short wheelbase sports car', 'roadster proportions', 'mid-engine'],
-        incompatibleKeywords: ['rear-engine 911 2+2 proportions', 'front-engine gt', 'sedan', 'rear-engine', 'rear engine', 'rear-engine flyline', 'coupe']
+        incompatibleKeywords: ['rear-engine 911 2+2 proportions', 'front-engine gt', 'sedan', 'rear-engine', 'rear engine', 'rear-engine flyline']
+      }
+    }
+  },
+
+  // ── PORSCHE 911 TURBO (992) ──
+  {
+    vehicleId: 'porsche-911-turbo',
+    make: 'Porsche',
+    model: '911 Turbo',
+    generation: '992',
+    proportionsDescription: 'Widebody rear-engine supercar coupe with rear fender intercooler scoops, active rear wing, quad rectangular exhaust, and 4-point LED headlights',
+    confusableWith: ['porsche-718-boxster', 'porsche-cayman-gt4-rs', 'porsche-911-carrera-997', 'porsche-911-gt3-rs', 'porsche-911-carrera-996'],
+    traits: {
+      headlight_shape: {
+        name: 'compact_projector_four_point_led_cluster',
+        isGeneric: true,
+        positiveKeywords: ['four-point led', '4-point led', 'four point led', 'bi-xenon projector', 'compact modern porsche headlight', 'horizontal led strip', 'oval headlight', 'round 4-point led'],
+        incompatibleKeywords: ['fried egg', 'fried-egg', 'classic bug eye with separate lower strip', 'vertical slit']
+      },
+      front_intake_grille: {
+        name: 'wide_horizontal_slat_intakes_active_vanes',
+        isGeneric: true,
+        positiveKeywords: ['horizontal slats', 'wide lower air ducts', 'lateral bumper ducts', 'active cooling flaps', 'tripartite front intakes', 'active vanes'],
+        incompatibleKeywords: ['kidney grille', 'concave oval', 'hood nostrils']
+      },
+      hood_geometry: {
+        name: 'smooth_unvented_front_luggage_lid',
+        isGeneric: true,
+        positiveKeywords: ['smooth hood', 'clean front hood', 'unvented hood', 'smooth contoured hood', 'without hood vents', 'clean bonnet', 'no visible vents', 'without vents'],
+        incompatibleKeywords: ['hood nostril', 'hood extractor', 'carbon hood vents', 'dual nostrils', 'radiator extractor', 'cooling nostrils', 'nostrils']
+      },
+      fender_architecture: {
+        name: 'smooth_front_fenders_without_louvers',
+        isGeneric: true,
+        positiveKeywords: ['smooth front fender', 'unvented front fender', 'smooth arches', 'fender without louvers', 'smooth front fenders without louvers'],
+        incompatibleKeywords: ['fender louver', 'fender louvers', 'wheel arch vents', 'pressure louvers', 'slatted fender']
+      },
+      side_intake_type: {
+        name: 'rear_fender_leading_edge_intercooler_scoops',
+        positiveKeywords: ['rear fender leading edge intercooler scoops', 'rear fender intercooler scoops', 'intercooler scoops', 'wide rear haunch scoops', 'quarter panel intercooler scoops', 'intercooler air intakes on rear fenders'],
+        incompatibleKeywords: ['mid-engine side air intakes behind doors', 'smooth rear haunch without scoop', 'no side intake']
+      },
+      rear_architecture_and_exhaust: {
+        name: 'quad_rectangular_exhaust_tips_widebody_tail',
+        positiveKeywords: ['quad rectangular exhaust tips', 'quad rectangular exhaust', 'quad exhaust tips', 'rectangular exhaust tips', 'twin dual rectangular exhaust', 'widebody rear bumper'],
+        incompatibleKeywords: ['central exhaust', 'top-exit titanium', 'central trapezoidal exhaust']
+      },
+      roofline_greenhouse: {
+        name: 'widebody_fastback_coupe_flyline',
+        positiveKeywords: ['everyday supercar widebody coupe', 'widebody coupe', 'supercar widebody coupe', 'fastback coupe', 'sloping rear-engine flyline', 'coupe flyline'],
+        incompatibleKeywords: ['canvas soft top', 'open top roadster', 'spider haunches']
+      },
+      proportions: {
+        name: 'widebody_rear_engine_supercar_proportions',
+        positiveKeywords: ['widebody coupe', 'rear-engine widebody', 'rear engine', 'everyday supercar widebody coupe', 'widebody supercar'],
+        incompatibleKeywords: ['compact roadster', 'mid-engine roadster', 'front-engine gt', 'sedan', 'suv']
       }
     }
   },
