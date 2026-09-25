@@ -138,7 +138,7 @@ const TEST_CASES: PhysicalTestCase[] = [
     filename: 'WhatsApp Image 2026-09-08 at 06.51.35.jpeg',
     expectedMake: 'Aston Martin',
     expectedModelFamily: 'DBS',
-    expectedCanonicalId: 'aston-martin-dbs',
+    expectedCanonicalId: 'aston-martin-dbs-superleggera',
     forbiddenVariants: [],
     viewpoint: 'front_3q',
     visualEvidence: {

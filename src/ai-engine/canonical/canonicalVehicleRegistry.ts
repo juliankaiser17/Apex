@@ -144,14 +144,20 @@ class CanonicalVehicleRegistry {
     // 2. Add extra aliases with strict manufacturer scoping
     // ── PORSCHE ──
     this.registerAliases('porsche-911-carrera-992', [
-      '911',
-      'porsche 911',
-      '911 carrera',
-      'porsche 911 carrera',
       '992',
       'porsche 992',
       '992 carrera',
-      'porsche 992 carrera'
+      'porsche 992 carrera',
+      'carrera 992',
+      '911 carrera 992',
+      'porsche 911 carrera 992',
+      'porsche 911 carrera (992)',
+      '911 carrera (992)',
+      'porsche 911 (992)',
+      '911 (992)',
+      'porsche 911 carrera coupe',
+      '911 carrera coupe',
+      'carrera coupe'
     ]);
 
     this.registerAliases('porsche-911-carrera-996', [
@@ -246,6 +252,7 @@ class CanonicalVehicleRegistry {
       'cayman',
       'porsche cayman'
     ]);
+
 
     // NOTE: porsche-911-gt3-992 is intentionally NOT registered here. The 992 GT3 (non-RS)
     // has no canonical / vehicle-database record yet, and registerAliases() silently ignores
@@ -444,23 +451,45 @@ class CanonicalVehicleRegistry {
       'gallardo',
       'lamborghini gallardo',
       'gallardo lp560',
+      'gallardo lp560-4',
       'gallardo lp550',
-      'gallardo superleggera'
+      'gallardo lp550-2',
+      'gallardo lp570',
+      'gallardo lp570-4',
+      'gallardo superleggera',
+      'lamborghini gallardo (l140)',
+      'gallardo l140',
+      'gallardo coupe',
+      'gallardo spyder'
     ]);
 
     this.registerAliases('lamborghini-huracan-lp610-4', [
-      'huracan',
-      'huracán',
-      'lamborghini huracan',
-      'lamborghini huracán',
       'huracan lp610',
       'huracan lp610-4',
-      'huracan coupe',
-      'huracan spyder',
+      'huracán lp610-4',
+      'huracan lp 610-4',
+      'huracán lp 610-4',
+      'lamborghini huracan lp610-4',
+      'lamborghini huracán lp610-4',
+      'lamborghini huracan lp 610-4',
+      'lamborghini huracán lp 610-4',
+      'huracan lp610 coupe',
+      'huracan lp610-4 coupe',
       'lp610',
-      'lp610-4',
+      'lp610-4'
+    ]);
+
+    this.registerAliases('lamborghini-huracan-evo', [
+      'huracan evo',
       'huracán evo',
-      'huracan evo'
+      'lamborghini huracan evo',
+      'lamborghini huracán evo',
+      'huracan lp640-4',
+      'huracán lp640-4',
+      'huracan evo coupe',
+      'huracán evo coupe',
+      'huracan evo spyder',
+      'huracán evo spyder'
     ]);
 
     // ── NISSAN ──

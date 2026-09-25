@@ -260,6 +260,68 @@ const testCases: TestCase[] = [
     ]
   },
   {
+    name: 'Porsche 911 Carrera (992)',
+    expectedMake: 'Porsche',
+    expectedModelSubstring: '911 Carrera',
+    viewpoint: 'front_3q',
+    evidence: {
+      body_style: 'Coupe',
+      grille: 'Wide horizontal slats across front lower intake with active cooling flaps',
+      headlights: 'Round four-point LED daytime running lights inside oval housings',
+      distinctive_details: [
+        'Four-point LED headlights',
+        'Smooth rear fenders without side intercooler air intakes',
+        'Smooth unvented front hood',
+        'Deployable flush rear spoiler'
+      ]
+    },
+    rawCandidates: [
+      { name: 'Porsche 911 Carrera (992)', score: 0.88 },
+      { name: 'Porsche 911 Turbo (992)', score: 0.72 }
+    ]
+  },
+  {
+    name: 'Lamborghini Gallardo',
+    expectedMake: 'Lamborghini',
+    expectedModelSubstring: 'Gallardo',
+    viewpoint: 'front_3q',
+    evidence: {
+      body_style: 'Coupe',
+      grille: 'Twin dual rectangular front air intakes with black horizontal slats',
+      headlights: 'Upright vertical rectangular bi-xenon headlight units running up the fenders',
+      distinctive_details: [
+        'Upright trapezoidal headlights',
+        'Dual rectangular lower front intakes',
+        'Triangular side air scoops behind doors',
+        'No Y-shaped daytime running lights'
+      ]
+    },
+    rawCandidates: [
+      { name: 'Lamborghini Gallardo (L140)', score: 0.85 },
+      { name: 'Lamborghini Huracán EVO', score: 0.70 }
+    ]
+  },
+  {
+    name: 'Lamborghini Huracán EVO',
+    expectedMake: 'Lamborghini',
+    expectedModelSubstring: 'Huracán EVO',
+    viewpoint: 'front_3q',
+    evidence: {
+      body_style: 'Coupe',
+      grille: 'Hexagonal lower front intake with integrated Y-shaped front bumper winglets',
+      headlights: 'Horizontal angled LED headlights with Y-shaped daytime running light signatures',
+      distinctive_details: [
+        'Slotted integrated front winglet and Y-shaped front bumper design',
+        'Horizontal Y-shaped LED headlights',
+        'Elevated twin sports exhausts high in bumper'
+      ]
+    },
+    rawCandidates: [
+      { name: 'Lamborghini Huracán EVO', score: 0.88 },
+      { name: 'Lamborghini Gallardo (L140)', score: 0.60 }
+    ]
+  },
+  {
     name: 'Hong Kong Taxi / Livery (Contradiction Deadlock & Honest Abstention)',
     expectedMake: '',
     expectedModelSubstring: '',

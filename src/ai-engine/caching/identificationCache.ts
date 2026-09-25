@@ -9,9 +9,11 @@ import type { IdentificationResult } from '../types';
 // v3.2.1 — Production Release:
 //   * Hardened 650S Spider vs 675LT Spider trait discrimination & mandatory aero presence
 //   * Enforced body-style consistency on discriminator candidate introduction
-//   * Corroborated brand evidence detection for Koenigsegg
-//   * Teardrop brake cooling duct discrimination for Ferrari 296 GTB
-export const VISION_PIPELINE_VERSION = 'v3.2.2-production-release';
+// v3.3.0 — Production Release:
+//   * Hardened Porsche 911 Carrera (997 vs 992) morphological discrimination
+//   * Hardened Lamborghini Gallardo vs Huracán EVO aerodynamic discrimination
+//   * Native Google Lens touch controls (pinch-zoom, tap-to-focus, exposure slider, torch)
+export const VISION_PIPELINE_VERSION = 'v3.3.0-production-release';
 
 export function buildCacheKey(
   imageHash: string,

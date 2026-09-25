@@ -1,7 +1,7 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Camera as CapCamera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { Capacitor } from '@capacitor/core';
-import { AlertTriangle, SwitchCamera, X, RotateCcw, RefreshCw } from 'lucide-react';
+import { AlertTriangle, X, RotateCcw, RefreshCw } from 'lucide-react';
 import { useApexStore } from '../../store/useApexStore';
 import type { CarCard, RarityTier, LocalRarityInfo } from '../../types/apex';
 import { sounds } from '../../utils/audio';
@@ -12,7 +12,9 @@ import { identifyVehicleWithAi, getAuthoritativeAccessToken } from '../../servic
 import { hunterSceneEngine } from '../../services/hunterSceneEngine';
 import { offlineRecognitionEngine } from '../../services/offlineRecognitionEngine';
 import { useScannerStateMachine } from '../../hooks/useScannerStateMachine';
+import { useNativeCamera } from '../../hooks/useNativeCamera';
 import { HunterOverlay } from './HunterOverlay';
+import { FocusExposureReticle } from './FocusExposureReticle';
 import { ProgressiveAnalysisOverlay } from './ProgressiveAnalysisOverlay';
 import { DiscoveryReveal } from './DiscoveryReveal';
 import { computeImageSha256 } from '../../ai-engine/crypto/sha256';
@@ -23,14 +25,7 @@ export const ScannerModal: React.FC = () => {
   const { scannerOpen, setScannerOpen, user, onScanCompleted } = useApexStore();
   const { sampleCoarseLocation } = useLocalRarity();
   const [shutterFlash, setShutterFlash] = useState(false);
-  const [facingMode, setFacingMode] = useState<'environment' | 'user'>('environment');
-  const [zoomLevel, setZoomLevel] = useState<number>(1);
-
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const streamRef = useRef<MediaStream | null>(null);
-  const sceneLoopRef = useRef<number | null>(null);
   const activeScanIdRef = useRef<string | null>(null);
 
   // State Machine Hook
@@ -57,118 +52,70 @@ export const ScannerModal: React.FC = () => {
     resetScanner
   } = useScannerStateMachine();
 
-  // Stop active hardware stream
-  const stopCameraStream = useCallback(() => {
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach(t => t.stop());
-      streamRef.current = null;
-    }
-    if (sceneLoopRef.current) {
-      cancelAnimationFrame(sceneLoopRef.current);
-      sceneLoopRef.current = null;
-    }
-  }, []);
+  // Native camera hook: real rear camera by default, unmirrored, tap-to-focus, exposure, pinch-zoom, torch
+  const isCameraPhase =
+    scannerOpen &&
+    (phase === 'SEARCHING' ||
+      phase === 'CAR_DETECTED' ||
+      phase === 'POTENTIAL_DISCOVERY' ||
+      phase === 'TRACKING');
 
-  // 1. Initialize Hardware Camera Stream
-  const initHardwareCamera = useCallback(async (mode: 'environment' | 'user' = facingMode) => {
-    try {
-      stopCameraStream();
-
-      try {
-        const permStatus = await CapCamera.requestPermissions();
-        if (permStatus.camera !== 'granted' && permStatus.camera !== 'prompt-with-rationale') {
-          console.warn('Native camera permission status:', permStatus.camera);
-        }
-      } catch (e) {
-        console.log('Capacitor camera request or web platform:', e);
-      }
-
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        startSearching();
-        return;
-      }
-
-      let stream: MediaStream | null = null;
-      try {
-        stream = await navigator.mediaDevices.getUserMedia({
-          video: {
-            facingMode: { ideal: mode },
-            width: { ideal: 1920 },
-            height: { ideal: 1080 }
-          },
-          audio: false
-        });
-      } catch {
-        stream = await navigator.mediaDevices.getUserMedia({
-          video: true,
-          audio: false
-        });
-      }
-
-      streamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        videoRef.current.play().catch(e => console.warn('Video play error:', e));
-      }
+  const {
+    videoRef,
+    canvasRef,
+    containerRef,
+    isRearCamera,
+    isMirrored,
+    zoomLevel,
+    setZoom,
+    hasTorch,
+    torchOn,
+    toggleTorch,
+    switchCamera,
+    focusPoint,
+    handleTapToFocus,
+    exposureValue,
+    setExposure,
+    handleTouchStart,
+    handleTouchMove,
+    handleTouchEnd,
+    captureFrame,
+    startCamera,
+    stopCamera
+  } = useNativeCamera({
+    enabled: isCameraPhase,
+    defaultFacing: 'environment',
+    onCameraReady: () => {
       startSearching();
-    } catch (err) {
-      console.warn('Camera stream fallback active:', err);
+    },
+    onError: (err) => {
+      console.warn('[ScannerModal] Camera error, searching state active:', err);
       startSearching();
     }
-  }, [facingMode, startSearching, stopCameraStream]);
+  });
 
-  // Apply Hardware Zoom if supported
-  const applyZoom = useCallback(async (newZoom: number) => {
-    setZoomLevel(newZoom);
-    if (streamRef.current) {
-      const track = streamRef.current.getVideoTracks()[0];
-      if (track) {
-        try {
-          const capabilities: any = track.getCapabilities ? track.getCapabilities() : {};
-          if (capabilities.zoom) {
-            const minZ = capabilities.zoom.min || 1;
-            const maxZ = capabilities.zoom.max || 5;
-            const targetZ = Math.min(maxZ, Math.max(minZ, newZoom));
-            await track.applyConstraints({
-              advanced: [{ zoom: targetZ } as any]
-            });
-          }
-        } catch (e) {
-          // Hardware zoom not supported, CSS scale fallback handles visual zoom
-        }
-      }
-    }
-  }, []);
-
-  // Toggle Camera Front / Back
-  const handleToggleCamera = useCallback(() => {
-    sounds.playTargetLock();
-    const nextMode = facingMode === 'environment' ? 'user' : 'environment';
-    setFacingMode(nextMode);
-    initHardwareCamera(nextMode);
-  }, [facingMode, initHardwareCamera]);
-
+  // Proactive Auth Readiness Preflight on scanner open
   useEffect(() => {
     if (scannerOpen) {
-      initHardwareCamera(facingMode);
-      // Phase 5: Proactive Auth Readiness Preflight on scanner open
-      getAuthoritativeAccessToken(false).then((auth) => {
-        if (!auth.hasSession) {
-          console.log('[Scanner Preflight] User is guest / unauthenticated');
-        } else if (auth.expiresAtSec && (auth.expiresAtSec - Math.floor(Date.now() / 1000) <= 120)) {
-          console.log('[Scanner Preflight] Session near expiry, proactively refreshing in background...');
-          getAuthoritativeAccessToken(true).catch(() => {});
-        }
-      }).catch(() => {});
-    } else {
-      stopCameraStream();
+      getAuthoritativeAccessToken(false)
+        .then((auth) => {
+          if (!auth.hasSession) {
+            console.log('[Scanner Preflight] User is guest / unauthenticated');
+          } else if (
+            auth.expiresAtSec &&
+            auth.expiresAtSec - Math.floor(Date.now() / 1000) <= 120
+          ) {
+            console.log(
+              '[Scanner Preflight] Session near expiry, proactively refreshing in background...'
+            );
+            getAuthoritativeAccessToken(true).catch(() => {});
+          }
+        })
+        .catch(() => {});
     }
-    return () => {
-      stopCameraStream();
-    };
-  }, [scannerOpen, initHardwareCamera, stopCameraStream, facingMode]);
+  }, [scannerOpen]);
 
-  // 2. Optical Real-Time Vision Loop disabled for locked 60fps performance and clean viewfinder
+  // Optical Real-Time Vision Loop disabled for locked 60fps performance and clean viewfinder
   useEffect(() => {
     if (!scannerOpen) return;
     onVehicleDetectedChange(true, true);
@@ -573,33 +520,8 @@ export const ScannerModal: React.FC = () => {
     startCapturing();
     let photoDataUrl: string | null = null;
 
-    // 1. Primary: Instant In-Viewfinder Canvas Frame Capture with Zoom Crop (Zero Latency)
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
-    if (video && canvas && video.videoWidth > 0) {
-      const maxDim = 1280;
-      let fullW = video.videoWidth;
-      let fullH = video.videoHeight;
-
-      // Calculate zoomed crop box matching the visible reticle
-      const cropW = fullW / zoomLevel;
-      const cropH = fullH / zoomLevel;
-      const startX = (fullW - cropW) / 2;
-      const startY = (fullH - cropH) / 2;
-
-      let targetW = maxDim;
-      let targetH = Math.round((cropH * maxDim) / cropW);
-
-      canvas.width = targetW;
-      canvas.height = targetH;
-      const ctx = canvas.getContext('2d');
-      if (ctx) {
-        ctx.imageSmoothingEnabled = true;
-        ctx.imageSmoothingQuality = 'high';
-        ctx.drawImage(video, startX, startY, cropW, cropH, 0, 0, targetW, targetH);
-        photoDataUrl = canvas.toDataURL('image/jpeg', 0.82);
-      }
-    }
+    // 1. Primary: Instant In-Viewfinder Canvas Frame Capture with Zoom Crop & Proper Orientation
+    photoDataUrl = await captureFrame();
 
     // 2. Secondary: Native Capacitor Camera attempt with bounded dimensions
     if (!photoDataUrl && Capacitor.isNativePlatform()) {
@@ -629,7 +551,7 @@ export const ScannerModal: React.FC = () => {
 
     if (photoDataUrl) {
       // Step 2 & 3: Immediately freeze hardware stream and display confirmed image
-      stopCameraStream();
+      stopCamera();
       setCapturedPhoto(photoDataUrl);
       // Step 4: Now that photo is visibly confirmed, begin AI analysis
       executeInferencePipeline(photoDataUrl, undefined, captureMs);
@@ -641,7 +563,6 @@ export const ScannerModal: React.FC = () => {
       fileInputRef.current.click();
     }
   };
-
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -655,7 +576,7 @@ export const ScannerModal: React.FC = () => {
 
   const handleCloseScanner = () => {
     activeScanIdRef.current = null;
-    stopCameraStream();
+    stopCamera();
     resetScanner();
     setScannerOpen(false);
   };
@@ -676,8 +597,15 @@ export const ScannerModal: React.FC = () => {
 
       {shutterFlash && <div className="absolute inset-0 z-50 bg-white" />}
 
-      {/* 1. LIVE HARDWARE CAMERA STREAM */}
-      <div className="relative flex-1 flex flex-col justify-between w-full h-full bg-black overflow-hidden">
+      {/* 1. LIVE HARDWARE CAMERA STREAM WITH GOOGLE LENS CONTROLS */}
+      <div
+        ref={containerRef}
+        onClick={(e) => handleTapToFocus(e.clientX, e.clientY)}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        className="relative flex-1 flex flex-col justify-between w-full h-full bg-black overflow-hidden cursor-crosshair touch-none"
+      >
         <video
           ref={videoRef}
           autoPlay
@@ -687,46 +615,24 @@ export const ScannerModal: React.FC = () => {
           disablePictureInPicture
           disableRemotePlayback
           poster="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'/>"
-          className="absolute inset-0 w-full h-full object-cover pointer-events-none transition-transform duration-200"
+          className="absolute inset-0 w-full h-full object-cover pointer-events-none transition-transform duration-100 ease-out"
           style={{ 
             background: '#000000',
-            transform: `scale(${zoomLevel})`,
-            transformOrigin: 'center center'
+            transform: `${isMirrored ? 'scaleX(-1)' : 'scaleX(1)'} scale(${zoomLevel})`,
+            transformOrigin: 'center center',
+            filter: exposureValue !== 0 ? `brightness(${1 + exposureValue * 0.25})` : 'none'
           }}
         />
 
         {/* Ambient Viewfinder Vignette */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_transparent_40%,_black_95%)] pointer-events-none z-0" />
 
-        {/* TOP CAMERA CONTROLS: FLIP CAMERA */}
-        <div className="absolute top-4 right-4 z-40">
-          <button
-            onClick={handleToggleCamera}
-            className="w-10 h-10 rounded-full bg-black/60 backdrop-blur-md border border-white/15 flex items-center justify-center text-white/80 hover:text-white transition-colors"
-            title="Switch Camera (Front/Back)"
-          >
-            <SwitchCamera className="w-5 h-5" />
-          </button>
-        </div>
-
-        {/* ZOOM LEVEL CONTROLS (1x, 2x, 3x, 5x) — Positioned clearly above shutter button */}
-        {(phase === 'SEARCHING' || phase === 'CAR_DETECTED' || phase === 'POTENTIAL_DISCOVERY' || phase === 'TRACKING') && (
-          <div className="absolute bottom-[calc(var(--sab,16px)+115px)] left-1/2 -translate-x-1/2 z-40 flex items-center gap-2 bg-black/70 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/15 shadow-2xl">
-            {[1, 2, 3, 5].map((z) => (
-              <button
-                key={z}
-                onClick={() => applyZoom(z)}
-                className={`w-7 h-7 rounded-full text-xs font-semibold transition-all ${
-                  zoomLevel === z 
-                    ? 'bg-[#E50914] text-white shadow-md' 
-                    : 'text-white/60 hover:text-white bg-white/5'
-                }`}
-              >
-                {z}x
-              </button>
-            ))}
-          </div>
-        )}
+        {/* Google Lens Tap-to-Focus Reticle and Exposure Slider */}
+        <FocusExposureReticle
+          focusPoint={focusPoint}
+          exposureValue={exposureValue}
+          onExposureChange={setExposure}
+        />
 
         {/* 2. HUNTER OVERLAY (Strictly during active camera / targeting / shutter press) */}
         {(phase === 'SEARCHING' || phase === 'CAR_DETECTED' || phase === 'POTENTIAL_DISCOVERY' || phase === 'TRACKING' || phase === 'LOCKING' || phase === 'LOCKED' || phase === 'CAPTURING') && (
@@ -742,6 +648,14 @@ export const ScannerModal: React.FC = () => {
             }}
             onShutterPress={handleShutterCapture}
             onClose={handleCloseScanner}
+            onSwitchCamera={switchCamera}
+            onToggleTorch={toggleTorch}
+            hasTorch={hasTorch}
+            torchOn={torchOn}
+            isRearCamera={isRearCamera}
+            zoomLevel={zoomLevel}
+            onSelectZoom={setZoom}
+            onOpenGallery={() => fileInputRef.current?.click()}
           />
         )}
 
@@ -762,7 +676,7 @@ export const ScannerModal: React.FC = () => {
             isDuplicate={phase === 'ALREADY_COLLECTED'}
             onContinueHunt={() => {
               continueHunting();
-              initHardwareCamera(facingMode);
+              startCamera('environment');
             }}
             onClose={handleCloseScanner}
           />
@@ -822,7 +736,7 @@ export const ScannerModal: React.FC = () => {
                 onClick={() => {
                   sounds.playTargetAcquired();
                   retakePhoto();
-                  initHardwareCamera(facingMode);
+                  startCamera('environment');
                 }}
                 className="w-full py-3 rounded-2xl bg-white/[0.08] hover:bg-white/[0.14] border border-white/[0.1] active:scale-98 text-white/90 font-semibold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer min-h-[44px]"
               >

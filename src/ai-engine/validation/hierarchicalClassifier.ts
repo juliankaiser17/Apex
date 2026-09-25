@@ -182,9 +182,13 @@ export class HierarchicalClassifier {
 
     const observedBody = (visual_evidence.body_style || '').toLowerCase();
     const observedRoof = (visual_evidence.roofline || '').toLowerCase();
+    const openTopPattern = /\b(convertible|spider|spyder|cabriolet|roadster|soft[\s-]?top|canvas[\s-]?roof|fabric[\s-]?roof|targa|open[\s-]?top|speedster|boxster|barchetta|drophead|black\s+roof|contrasting\s+roof)\b/i;
     const isObservedOpenTop =
-      /\b(convertible|spider|spyder|cabriolet|roadster|soft[\s-]?top|canvas[\s-]?roof|fabric[\s-]?roof|targa|open[\s-]?top)\b/i.test(observedBody) ||
-      /\b(convertible|spider|spyder|cabriolet|roadster|soft[\s-]?top|canvas[\s-]?roof|fabric[\s-]?roof|targa|open[\s-]?top)\b/i.test(observedRoof);
+      openTopPattern.test(observedBody) ||
+      openTopPattern.test(observedRoof) ||
+      openTopPattern.test(evidenceText) ||
+      (openTopPattern.test(input.raw_model || '') && !observedBody.includes('fixed') && !observedRoof.includes('fixed')) ||
+      (openTopPattern.test(input.raw_variant || '') && !observedBody.includes('fixed') && !observedRoof.includes('fixed'));
     const isObservedCoupe =
       (/\b(coupe|hardtop|fixed[\s-]?roof)\b/i.test(observedBody) || /\b(coupe|fixed[\s-]?roof)\b/i.test(observedRoof)) &&
       !isObservedOpenTop;
@@ -535,28 +539,6 @@ export class HierarchicalClassifier {
         }
       }
 
-      // ── CONTRADICTION ENGINE RULE G: LAMBORGHINI HURACÁN vs GALLARDO DISAMBIGUATION ──
-      const hasHuracanCues = /\b(hexagonal\s+intakes?|y-shaped\s+drl|angled\s+slatted|hurac[aá]n|lp610)\b/i.test(evidenceText);
-      const hasGallardoCues = /\b(rectangular\s+front\s+intakes?|vertical\s+rectangular\s+headlights?|flat\s+horizontal\s+taillights?|gallardo)\b/i.test(evidenceText);
-
-      if (hasHuracanCues) {
-        if (candNameLower.includes('hurac') || candNameLower.includes('huracan')) {
-          candSupporting.push('Observed hexagonal lower intakes and Y-shaped DRLs match Lamborghini Huracán architecture');
-          score += 0.25;
-        } else if (candNameLower.includes('gallardo')) {
-          candContradictions.push('Observed hexagonal lower intakes and Y-shaped DRLs contradict Gallardo rectangular intake architecture');
-          score -= 0.50;
-        }
-      }
-      if (hasGallardoCues) {
-        if (candNameLower.includes('gallardo')) {
-          candSupporting.push('Observed rectangular front intakes and vertical headlights match Lamborghini Gallardo architecture');
-          score += 0.25;
-        } else if (candNameLower.includes('hurac') || candNameLower.includes('huracan')) {
-          candContradictions.push('Observed rectangular front intakes and vertical headlights contradict Huracán hexagonal architecture');
-          score -= 0.50;
-        }
-      }
 
       // ── CONTRADICTION ENGINE RULE H: MASERATI MC20 vs GRANCABRIO / GRANTURISMO ──
       const hasMc20Cues = /\b(butterfly\s+doors?|mid-engine\s+monocoque|nettuno|rear\s+engine\s+trident\s+vents?)\b/i.test(evidenceText);
@@ -608,6 +590,7 @@ export class HierarchicalClassifier {
         };
       }
 
+
       const boundedScore = Math.max(0.01, Math.min(0.99, Number(score.toFixed(3))));
 
       return {
@@ -626,6 +609,8 @@ export class HierarchicalClassifier {
       viewpoint,
       evidenceList: [
         ...(visual_evidence.distinctive_details || []),
+        visual_evidence.body_style || '',
+        visual_evidence.body_proportions || '',
         visual_evidence.headlights || '',
         visual_evidence.grille || '',
         visual_evidence.roofline || '',
@@ -656,10 +641,6 @@ export class HierarchicalClassifier {
           const fgMakeModel = `${fgCand.make} ${fgCand.model}`.toLowerCase();
           const fgModelLower = fgCand.model.toLowerCase();
 
-          if (cNameLower === fgDisplayLower || cNameLower === fgMakeModel) {
-            return true;
-          }
-
           // Strict body style gating: A convertible/spider must never match a fixed-roof coupe candidate!
           const isCSpider = /\b(spider|spyder|cabriolet|convertible|targa|roadster)\b/i.test(cNameLower);
           const isFgSpider = /\b(spider|spyder|cabriolet|convertible|targa|roadster)\b/i.test(fgDisplayLower) || /\b(spider|spyder|cabriolet|convertible|targa|roadster)\b/i.test(fgModelLower);
@@ -667,10 +648,22 @@ export class HierarchicalClassifier {
             return false;
           }
 
-          // Strict generation gating: If both specify a generation, they must match!
+          // Exact displayName match is authoritative
+          if (cNameLower === fgDisplayLower) {
+            return true;
+          }
+
+          // Strict generation gating: If the discriminator candidate specifies a generation,
+          // it must ONLY match an existing candidate that explicitly shares that EXACT same generation.
+          // It must NEVER merge into an un-generationed parent candidate (which would collapse multiple
+          // generation candidates into one, or overwrite sibling generations).
           const cGenMatch = cNameLower.match(/\(([^)]+)\)/);
           const fgGenMatch = fgDisplayLower.match(/\(([^)]+)\)/);
-          if (cGenMatch && fgGenMatch && cGenMatch[1].trim() !== fgGenMatch[1].trim()) {
+          if (fgGenMatch) {
+            if (!cGenMatch || cGenMatch[1].trim() !== fgGenMatch[1].trim()) {
+              return false;
+            }
+          } else if (cGenMatch) {
             return false;
           }
 
@@ -680,7 +673,7 @@ export class HierarchicalClassifier {
             return true;
           }
 
-          return cNameLower.includes(fgModelLower) && !cGenMatch;
+          return false;
         });
 
         if (existingIdx >= 0) {
@@ -806,9 +799,14 @@ export class HierarchicalClassifier {
     incompleteCandidates.sort(compareCandidates);
 
     // Prioritize candidates passing the completeness gate
-    // A complete candidate with severe contradictions (score < 0.50) cannot override an uncontradicted viable candidate
+    // A complete candidate with severe contradictions (score < 0.50, body style mismatch, hard manufacturer mismatch) cannot override an uncontradicted viable candidate
     const viableCompleteCandidates = completeCandidates.filter(
-      (c) => c.score >= 0.50 && !c.contradictions.some((ct) => ct.includes('Severe') || ct.includes('contradicts'))
+      (c) => c.score >= 0.50 && !c.contradictions.some((ct) =>
+        ct.includes('Severe') ||
+        ct.includes('contradicts') ||
+        ct.includes('Body style mismatch') ||
+        ct.includes('Hard manufacturer mismatch')
+      )
     );
     let validCandidates = viableCompleteCandidates.length > 0
       ? viableCompleteCandidates
@@ -945,6 +943,22 @@ export class HierarchicalClassifier {
         if (!resolvedGeneration || resolvedGeneration === 'Current') resolvedGeneration = 'P11';
         numericSpecificity = 2;
         reason = `Identified as McLaren Super Series (${resolvedGeneration}). Specific trim (650S vs 675LT) unconfirmed without observable rear Longtail airbrake or front louvers.`;
+        reasonCustomizedByGate = true;
+      }
+
+      // AMENDMENT 6: MULTI-VIEW CONSISTENCY FOR PORSCHE 911 TURBO
+      // A front / front-3q view lacking visible rear fender intercooler scoops or extending rear wing
+      // cannot assert a Turbo model; it must resolve to Porsche 911 Carrera or Porsche 911 family.
+      const isPorsche911Turbo = (resolvedMake?.toLowerCase() === 'porsche') &&
+        (topCandidate.name.toLowerCase().includes('turbo') || String(resolvedModelFamily).toLowerCase().includes('turbo') || String(resolvedVariant).toLowerCase().includes('turbo'));
+      const hasTurboProof = /\b(?:rear\s+fender\s+(?:leading\s+edge\s+)?intercooler|side\s+(?:haunch\s+)?intercooler\s+scoops?|active\s+extending\s+rear\s+wing|quad\s+rectangular\s+exhaust)\b/i.test(evidenceText);
+      if (isPorsche911Turbo && isFrontView && !hasTurboProof) {
+        resolvedVariant = null;
+        if (resolvedModelFamily && resolvedModelFamily.toLowerCase().includes('turbo')) {
+          resolvedModelFamily = '911 Carrera';
+        }
+        numericSpecificity = resolvedGeneration ? 2 : 1;
+        reason = `Identified as Porsche 911 (${resolvedGeneration || '992'}). Turbo variant unconfirmed without observable rear haunch intercooler scoops or extending wing.`;
         reasonCustomizedByGate = true;
       }
 

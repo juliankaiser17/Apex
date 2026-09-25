@@ -951,7 +951,7 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
     model: '911 GT3 RS',
     generation: '992',
     proportionsDescription: 'Extreme motorsport-derived track car with prominent swan-neck active DRS wing, dual front hood extractor nostrils, and front fender pressure louvers',
-    confusableWith: ['porsche-911-turbo', 'porsche-911-carrera-997', 'porsche-911-carrera-996', 'porsche-718-boxster', 'porsche-cayman-gt4-rs'],
+    confusableWith: ['porsche-911-carrera-992', 'porsche-911-turbo', 'porsche-911-carrera-997', 'porsche-911-carrera-996', 'porsche-718-boxster', 'porsche-cayman-gt4-rs'],
     traits: {
       headlight_shape: {
         name: 'round_oval_projector_headlights_4point_drl',
@@ -1004,59 +1004,89 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
     }
   },
 
-  // ── PORSCHE 911 TURBO ──
+  // ── PORSCHE 911 CARRERA (992) ──
   {
-    vehicleId: 'porsche-911-turbo',
+    vehicleId: 'porsche-911-carrera-992',
     make: 'Porsche',
-    model: '911 Turbo',
+    model: '911 Carrera',
     generation: '992',
-    proportionsDescription: 'Widebody rear-engine everyday supercar with rear fender side air intake ducts, clean front hood, and low integrated active rear spoiler',
-    confusableWith: ['porsche-911-gt3-rs', 'porsche-911-carrera-997', 'porsche-911-carrera-996', 'porsche-718-boxster', 'porsche-cayman-gt4-rs'],
+    proportionsDescription: 'Iconic rear-engine 2+2 sports coupe with clean unvented front hood, smooth rear haunches without intercooler scoops, horizontal slat lower bumper, and flush deployable rear spoiler',
+    confusableWith: ['porsche-911-turbo', 'porsche-911-gt3-rs', 'porsche-911-carrera-997', 'porsche-911-carrera-996', 'porsche-718-boxster', 'porsche-cayman-gt4-rs'],
     traits: {
       headlight_shape: {
-        name: 'round_oval_projector_headlights_4point_drl',
-        positiveKeywords: ['round headlight', 'oval headlight', '4-point', 'four-point led', 'projector led'],
-        incompatibleKeywords: ['fried egg', 'fried-egg', 'vertical slit', 'horizontal strakes']
+        name: 'compact_projector_four_point_led_cluster',
+        positiveKeywords: [
+          'four-point led', '4-point led', 'four point led', 'compact modern porsche headlight',
+          'oval headlight', 'round 4-point led', 'round four-point led',
+          'round headlamps with led daytime running lights', 'round headlights with led daytime running lights',
+          'led daytime running lights', 'round headlamps with led'
+        ],
+        incompatibleKeywords: [
+          'fried egg', 'fried-egg', 'classic bug eye with separate lower strip', 'vertical slit',
+          'separate lower bumper indicator', 'separate horizontal led indicator', 'separate indicator strip',
+          'separate indicator strips', 'thin horizontal led indicator strips in front bumper',
+          'thin horizontal led indicator strips', 'separate lower bumper horizontal led', 'separate bumper indicator',
+          'bi-xenon projector with separate lower indicators', 'separate horizontal indicator strips',
+          'rectangular fog lights', 'rectangular fog lamps'
+        ]
       },
       hood_geometry: {
         name: 'smooth_contoured_front_luggage_lid',
-        positiveKeywords: ['smooth hood', 'clean front hood', 'smooth front hood', 'contoured hood without vents', 'unvented hood', 'smooth luggage compartment lid', 'smooth contoured front luggage lid', 'without hood vents'],
+        isGeneric: true,
+        positiveKeywords: ['smooth hood', 'clean front hood', 'smooth front hood', 'contoured hood without vents', 'unvented hood', 'smooth luggage compartment lid', 'smooth contoured front luggage lid', 'without hood vents', 'clean bonnet', 'no visible vents', 'without vents'],
         incompatibleKeywords: ['hood nostril', 'dual nostrils', 'radiator extractor', 'cooling nostrils', 'hood extractor ducts', 'nostrils']
       },
       fender_architecture: {
-        name: 'smooth_widened_front_fenders_without_louvers',
+        name: 'smooth_front_fenders_without_louvers',
         isGeneric: true,
-        positiveKeywords: ['wide front track without vents', 'unvented front fenders'],
-        incompatibleKeywords: ['fender louvers', 'wheel arch pressure louvers', 'slatted fender vents', 'louvers']
+        positiveKeywords: ['smooth front fender', 'unvented front fender', 'smooth arches', 'fender without louvers', 'smooth front fenders without louvers'],
+        incompatibleKeywords: ['fender louver', 'fender louvers', 'wheel arch vents', 'pressure louvers', 'slatted fender']
       },
       wing_and_spoiler_architecture: {
-        name: 'low_profile_integrated_active_rear_spoiler',
-        positiveKeywords: ['integrated active spoiler', 'active rear spoiler', 'extendable rear spoiler', 'low rear wing', 'turbo rear spoiler', 'variable rear wing'],
-        incompatibleKeywords: ['towering swan neck', 'swan-neck', 'massive top-mount wing', 'high-mounted fixed wing', 'drs actuator']
+        name: 'flush_integrated_deployable_rear_spoiler',
+        positiveKeywords: ['flush integrated deployable rear spoiler', 'flush spoiler', 'retractable rear spoiler', 'deployable flush rear spoiler', 'no fixed wing', 'flush rear spoiler', 'subtle active spoiler', 'clean decklid without fixed wing', 'no fixed rear wing'],
+        incompatibleKeywords: ['swan neck wing', 'multi-stage extending turbo wing', 'large active rear wing', 'fixed wing', 'tall track wing', 'towering swan neck']
       },
       side_intake_type: {
-        name: 'rear_fender_leading_edge_intercooler_intakes',
-        positiveKeywords: ['rear fender intake', 'side air intake', 'intercooler scoop', 'intakes on rear fenders', 'rear haunch intake scoops', 'side intake ducts'],
-        incompatibleKeywords: ['no side intakes on rear fenders', 'smooth rear quarter panels without scoops']
+        name: 'smooth_rear_fenders_without_intercooler_scoops',
+        positiveKeywords: ['smooth rear haunch without scoop', 'smooth rear fender', 'clean flank without scoop', 'no side intake', 'unvented rear fenders', 'smooth rear fenders', 'clean rear quarters without scoops', 'smooth rear haunches'],
+        incompatibleKeywords: ['rear fender leading edge intercooler scoops', 'intercooler scoops', 'wide rear haunch scoops', 'rear fender intercooler scoops', 'side air scoops', 'rear fender intake', 'intercooler scoop']
       },
       front_intake_grille: {
-        name: 'tripartite_lower_bumper_with_active_cooling_flaps',
-        positiveKeywords: ['active cooling flaps', 'tripartite lower intake', 'horizontal front bumper slats', 'wide lower front bumper'],
-        incompatibleKeywords: ['prominent hood nostrils', 'panamericana', 'spindle grille']
+        name: 'wide_horizontal_slat_intakes_active_vanes',
+        positiveKeywords: [
+          'horizontal slats', 'horizontal grille with vertical slats', 'vertical slats', 'active cooling flaps',
+          'large air intake below front bumper', 'wide lower air ducts', 'lateral bumper ducts',
+          'active vanes', 'front air intakes with horizontal slats', 'wide horizontal slats across front lower intake',
+          'continuous lower front intake'
+        ],
+        incompatibleKeywords: [
+          'kidney grille', 'concave oval', 'hood nostrils',
+          'tripartite lower intakes with separate bodywork', 'three separate bumper cutouts',
+          'separate bumper indicator', 'two air intakes on either side of the front bumper',
+          'two air intakes on either side'
+        ]
       },
       rear_architecture_and_exhaust: {
-        name: 'quad_rectangular_or_dual_oval_outer_exhaust',
-        positiveKeywords: ['quad rectangular exhaust', 'outer exhaust tips', 'dual oval exhaust', 'quad exhaust tips', 'wide rear bumper air vents'],
-        incompatibleKeywords: ['central dual exhaust', 'central twin round pipes in center of diffuser']
+        name: 'dual_twin_tailpipes_integrated_apron',
+        positiveKeywords: ['twin oval exhaust', 'quad round exhaust tips', 'dual exhaust outlets in lower apron', 'twin exhaust pipes integrated into the rear bumper', 'carrera sports exhaust', 'dual round exhaust', 'slim full-width led light bar'],
+        incompatibleKeywords: ['quad rectangular exhaust tips', 'quad rectangular exhaust', 'central dual exhaust']
       },
       roofline_greenhouse: {
-        name: 'coupe_flyline_rear_quarter_windows',
-        positiveKeywords: ['sloping flyline', 'coupe flyline', 'rearward coupe cabin', 'rear quarter window', 'coupe roofline'],
+        name: 'classic_fastback_coupe_flyline',
+        positiveKeywords: [
+          'iconic sloping flyline', 'classic porsche teardrop side window profile', 'coupe roofline',
+          'fastback coupe flyline', 'sloping flyline coupe roofline', 'classic 911 flyline', 'sloping flyline',
+          'sloping roofline', 'curved rear window', 'two-door coupe with sloping roofline', 'two-door coupe'
+        ],
         incompatibleKeywords: ['roadster', 'soft top', 'speedster haunches', 'two-seat convertible', 'boxster roofline', 'convertible roof', 'canvas roof', 'convertible', 'two-door convertible', 'open-top', 'open top', 'soft-top', 'fabric roof']
       },
       proportions: {
-        name: 'widebody_rear_engine_supercar_proportions',
-        positiveKeywords: ['sloping flyline', 'rear-engine', 'wide rear haunches', '911 silhouette', 'all-wheel drive stance'],
+        name: 'rear_engine_sports_car_proportions',
+        positiveKeywords: [
+          'rear-engine 2+2 coupe proportions', 'rear-engine sports car', 'rear engine', 'iconic 911 flyline',
+          'sloping flyline', 'rear-engine flyline', 'rear-engine', 'two-door coupe', 'coupe with sloping roofline'
+        ],
         incompatibleKeywords: ['front-engine gt', 'suv', 'sedan', 'mid-engine roadster', 'compact roadster', 'mid-engine']
       }
     }
@@ -1069,7 +1099,7 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
     model: '911 Carrera',
     generation: '996',
     proportionsDescription: 'Rear-engine sports car with distinctive integrated fried-egg teardrop headlights',
-    confusableWith: ['porsche-911-carrera-997', 'porsche-911-carrera-cabriolet-996', 'porsche-911-gt3-rs', 'porsche-911-turbo', 'porsche-718-boxster'],
+    confusableWith: ['porsche-911-carrera-992', 'porsche-911-carrera-997', 'porsche-911-carrera-cabriolet-996', 'porsche-911-gt3-rs', 'porsche-911-turbo', 'porsche-718-boxster'],
     traits: {
       headlight_shape: {
         name: 'fried_egg_integrated_cluster',
@@ -1083,7 +1113,7 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       },
       roofline_greenhouse: {
         name: 'classic_911_flyline',
-        positiveKeywords: ['sloping flyline', 'teardrop flyline', 'classic 911 silhouette', 'rear-engine flyline'],
+        positiveKeywords: ['sloping flyline', 'teardrop flyline', 'classic 911 silhouette', 'rear-engine flyline', 'sloping roofline', 'curved rear window'],
         incompatibleKeywords: ['soft top', 'convertible roof', 'convertible', 'cabriolet', 'canvas roof', 'fabric convertible', 'wraparound visor canopy', 'mid-engine cab forward', 'long hood gt']
       },
       rear_architecture_and_exhaust: {
@@ -1093,7 +1123,7 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       },
       proportions: {
         name: 'rear_engine_sports_car',
-        positiveKeywords: ['rear engine', 'sloping flyline', 'bulbous front fenders'],
+        positiveKeywords: ['rear engine', 'sloping flyline', 'bulbous front fenders', 'two-door coupe'],
         incompatibleKeywords: ['mid-engine cab forward', 'front engine gt']
       }
     }
@@ -1106,21 +1136,84 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
     model: '911 Carrera',
     generation: '997',
     proportionsDescription: 'Rear-engine sports car returning to classic round bug-eye headlights with separate bumper indicator strips',
-    confusableWith: ['porsche-911-carrera-996', 'porsche-911-gt3-rs', 'porsche-911-turbo', 'porsche-718-boxster'],
+    confusableWith: ['porsche-911-carrera-992', 'porsche-911-carrera-996', 'porsche-911-gt3-rs', 'porsche-911-turbo', 'porsche-718-boxster'],
     traits: {
       headlight_shape: {
         name: 'classic_round_bugeye_separate_indicators',
-        positiveKeywords: ['classic round', 'circular headlight', 'bug eye', 'round headlight', 'separate indicator strip', 'separate lower indicator'],
-        incompatibleKeywords: ['fried egg', 'fried-egg', 'integrated turn signal teardrop', 'vertical slit']
+        positiveKeywords: [
+          'classic round', 'circular headlight', 'bug eye', 'round headlight', 'round headlights',
+          'round projector headlights', 'round projector headlight', 'projector headlights', 'projector headlight',
+          'oval bi-xenon', 'bi-xenon projector', 'separate indicator strip', 'separate indicator strips',
+          'separate lower indicator', 'separate lower bumper horizontal led', 'separate lower bumper horizontal',
+          'separate lower bumper indicator', 'rectangular fog lights', 'rectangular fog lamps',
+          'round headlights with led daytime running lights', 'round headlamps with led daytime running lights',
+          'thin horizontal led indicator strips in front bumper', 'thin horizontal led indicator strips',
+          'horizontal led indicator strips', 'horizontal indicator', 'separate bumper indicator'
+        ],
+        incompatibleKeywords: [
+          'fried egg', 'fried-egg', 'integrated turn signal teardrop', 'vertical slit',
+          'four-point led', '4-point led', 'four point led', '4 point led', 'integrated 4-point'
+        ]
+      },
+      hood_geometry: {
+        name: 'smooth_unvented_front_luggage_lid',
+        isGeneric: true,
+        positiveKeywords: [
+          'smooth hood', 'clean front hood', 'smooth front hood', 'contoured hood without vents',
+          'unvented hood', 'smooth luggage compartment lid', 'smooth front luggage compartment lid',
+          'without hood vents', 'clean bonnet', 'no visible vents', 'without vents or nostrils',
+          'without nostrils', 'without vents'
+        ],
+        incompatibleKeywords: ['hood nostril', 'dual nostrils', 'radiator extractor', 'cooling nostrils', 'hood extractor ducts', 'nostrils']
+      },
+      fender_architecture: {
+        name: 'smooth_front_fenders_without_louvers',
+        isGeneric: true,
+        positiveKeywords: [
+          'smooth front fender', 'smooth front fenders', 'unvented front fender', 'smooth arches',
+          'fender without louvers', 'smooth front fenders without louvers', 'without louvers'
+        ],
+        incompatibleKeywords: ['fender louver', 'fender louvers', 'wheel arch vents', 'pressure louvers', 'slatted fender']
+      },
+      wing_and_spoiler_architecture: {
+        name: 'flush_integrated_deployable_rear_spoiler',
+        positiveKeywords: [
+          'flush integrated deployable rear spoiler', 'flush spoiler', 'retractable rear spoiler',
+          'deployable flush rear spoiler', 'no fixed wing', 'flush rear spoiler', 'subtle active spoiler',
+          'clean decklid without fixed wing', 'no fixed rear wing'
+        ],
+        incompatibleKeywords: ['swan neck wing', 'multi-stage extending turbo wing', 'large active rear wing', 'fixed wing', 'tall track wing', 'towering swan neck']
+      },
+      side_intake_type: {
+        name: 'smooth_rear_fenders_without_intercooler_scoops',
+        positiveKeywords: [
+          'smooth rear haunch without scoop', 'smooth rear fender', 'clean flank without scoop',
+          'no side intake', 'unvented rear fenders', 'smooth rear fenders', 'clean rear quarters without scoops',
+          'smooth rear haunches', 'without side intercooler'
+        ],
+        incompatibleKeywords: [
+          'rear fender leading edge intercooler scoops', 'intercooler scoops', 'wide rear haunch scoops',
+          'rear fender intercooler scoops', 'side air scoops', 'rear fender intake', 'intercooler scoop'
+        ]
       },
       front_intake_grille: {
         name: 'tripartite_lower_intakes_with_led',
-        positiveKeywords: ['tripartite', 'three lower intakes', 'three-part front intake', 'three-section front bumper', 'horizontal led in intake', 'horizontal turn signal bars', 'wide bumper intakes'],
-        incompatibleKeywords: ['large concave oval', 'horizontal strakes']
+        positiveKeywords: [
+          'tripartite', 'three lower intakes', 'three-part front intake', 'three-section front bumper',
+          'three-part lower front bumper', 'three-part lower front bumper air intake',
+          'three-section front lower bumper intakes', 'horizontal led in intake', 'horizontal turn signal bars',
+          'wide bumper intakes', 'two air intakes on either side', 'two air intakes on either side of the front bumper',
+          'air intakes on either side', 'lower front bumper air intake'
+        ],
+        incompatibleKeywords: ['large concave oval', 'horizontal strakes', 'continuous lower front intake']
       },
       roofline_greenhouse: {
         name: 'classic_911_flyline_pronounced_hips',
-        positiveKeywords: ['sloping flyline', 'pronounced rear hips', 'wide rear fenders', 'classic 911 flyline', 'coupe roofline', 'rounded coupe roofline'],
+        positiveKeywords: [
+          'sloping flyline', 'pronounced rear hips', 'wide rear fenders', 'classic 911 flyline',
+          'coupe roofline', 'rounded coupe roofline', 'sloping roofline', 'curved rear window',
+          'two-door coupe with sloping roofline', 'sloping roofline and curved rear window'
+        ],
         incompatibleKeywords: ['soft top', 'convertible roof', 'convertible', 'cabriolet', 'canvas roof', 'fabric convertible', 'wraparound visor canopy', 'mid-engine cab forward']
       },
       rear_architecture_and_exhaust: {
@@ -1130,7 +1223,10 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       },
       proportions: {
         name: 'rear_engine_sports_car',
-        positiveKeywords: ['rear engine', 'sloping flyline', 'pronounced rear fender arches'],
+        positiveKeywords: [
+          'rear engine', 'sloping flyline', 'pronounced rear fender arches',
+          'two-door coupe', 'coupe with sloping roofline'
+        ],
         incompatibleKeywords: ['mid-engine cab forward', 'front engine gt']
       }
     }
@@ -1525,7 +1621,7 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
     model: '718 Boxster',
     generation: '982',
     proportionsDescription: 'Mid-engine two-seater roadster with lateral side air scoops, 4-point LED DRLs, clean front hood without nostrils, and fabric roadster top',
-    confusableWith: ['porsche-911-carrera-cabriolet-996', 'porsche-911-carrera-996', 'porsche-911-carrera-997', 'porsche-911-gt3-rs', 'porsche-911-turbo', 'porsche-cayman-gt4-rs'],
+    confusableWith: ['porsche-911-carrera-992', 'porsche-911-carrera-cabriolet-996', 'porsche-911-carrera-996', 'porsche-911-carrera-997', 'porsche-911-gt3-rs', 'porsche-911-turbo', 'porsche-cayman-gt4-rs'],
     traits: {
       headlight_shape: {
         name: 'compact_projector_four_point_led_cluster',
@@ -1582,13 +1678,19 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
     model: '911 Turbo',
     generation: '992',
     proportionsDescription: 'Widebody rear-engine supercar coupe with rear fender intercooler scoops, active rear wing, quad rectangular exhaust, and 4-point LED headlights',
-    confusableWith: ['porsche-718-boxster', 'porsche-cayman-gt4-rs', 'porsche-911-carrera-997', 'porsche-911-gt3-rs', 'porsche-911-carrera-996'],
+    confusableWith: ['porsche-911-carrera-992', 'porsche-718-boxster', 'porsche-cayman-gt4-rs', 'porsche-911-carrera-997', 'porsche-911-gt3-rs', 'porsche-911-carrera-996'],
     traits: {
       headlight_shape: {
         name: 'compact_projector_four_point_led_cluster',
         isGeneric: true,
-        positiveKeywords: ['four-point led', '4-point led', 'four point led', 'bi-xenon projector', 'compact modern porsche headlight', 'horizontal led strip', 'oval headlight', 'round 4-point led'],
-        incompatibleKeywords: ['fried egg', 'fried-egg', 'classic bug eye with separate lower strip', 'vertical slit']
+        positiveKeywords: ['four-point led', '4-point led', 'four point led', 'compact modern porsche headlight', 'oval headlight', 'round 4-point led', 'round four-point led'],
+        incompatibleKeywords: [
+          'fried egg', 'fried-egg', 'classic bug eye with separate lower strip', 'vertical slit',
+          'separate lower bumper indicator', 'separate horizontal led indicator', 'separate indicator strip',
+          'separate indicator strips', 'thin horizontal led indicator strips in front bumper',
+          'thin horizontal led indicator strips', 'separate lower bumper horizontal led', 'separate bumper indicator',
+          'bi-xenon projector'
+        ]
       },
       front_intake_grille: {
         name: 'wide_horizontal_slat_intakes_active_vanes',
@@ -1608,10 +1710,26 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
         positiveKeywords: ['smooth front fender', 'unvented front fender', 'smooth arches', 'fender without louvers', 'smooth front fenders without louvers'],
         incompatibleKeywords: ['fender louver', 'fender louvers', 'wheel arch vents', 'pressure louvers', 'slatted fender']
       },
+      wing_and_spoiler_architecture: {
+        name: 'prominent_active_extending_rear_wing',
+        positiveKeywords: [
+          'active rear wing', 'extending turbo wing', 'prominent rear wing', 'turbo rear spoiler',
+          'variable rear wing', 'multi-stage extending wing', 'extending active rear spoiler',
+          'extending rear wing', 'active extending rear wing', 'multi-stage extending rear wing',
+          'extending active rear wing', 'prominent active extending rear wing', 'active extending wing'
+        ],
+        incompatibleKeywords: ['flush integrated deployable rear spoiler', 'flush spoiler without wing', 'no fixed wing', 'no rear wing']
+      },
       side_intake_type: {
         name: 'rear_fender_leading_edge_intercooler_scoops',
-        positiveKeywords: ['rear fender leading edge intercooler scoops', 'rear fender intercooler scoops', 'intercooler scoops', 'wide rear haunch scoops', 'quarter panel intercooler scoops', 'intercooler air intakes on rear fenders'],
-        incompatibleKeywords: ['mid-engine side air intakes behind doors', 'smooth rear haunch without scoop', 'no side intake']
+        positiveKeywords: [
+          'rear fender leading edge intercooler scoops', 'rear fender intercooler scoops', 'intercooler scoops',
+          'wide rear haunch scoops', 'quarter panel intercooler scoops', 'intercooler air intakes on rear fenders',
+          'rear fender intake', 'side air intake ducts', 'intercooler air intake', 'intercooler air intake scoops',
+          'rear fender leading edge intercooler', 'intercooler air scoops', 'rear haunch intercooler scoops',
+          'intercooler air intakes'
+        ],
+        incompatibleKeywords: ['mid-engine side air intakes behind doors', 'smooth rear haunch without scoop', 'no side intake', 'smooth rear fenders', 'unvented rear fenders', 'clean flank without scoop', 'clean rear quarters without scoops']
       },
       rear_architecture_and_exhaust: {
         name: 'quad_rectangular_exhaust_tips_widebody_tail',
@@ -1620,12 +1738,19 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       },
       roofline_greenhouse: {
         name: 'widebody_fastback_coupe_flyline',
-        positiveKeywords: ['everyday supercar widebody coupe', 'widebody coupe', 'supercar widebody coupe', 'fastback coupe', 'sloping rear-engine flyline', 'coupe flyline'],
+        positiveKeywords: [
+          'everyday supercar widebody coupe', 'widebody coupe', 'supercar widebody coupe', 'fastback coupe',
+          'sloping rear-engine flyline', 'coupe flyline', 'classic sloping flyline', 'sloping flyline coupe',
+          'sloping flyline', 'classic fastback coupe flyline'
+        ],
         incompatibleKeywords: ['canvas soft top', 'open top roadster', 'spider haunches']
       },
       proportions: {
         name: 'widebody_rear_engine_supercar_proportions',
-        positiveKeywords: ['widebody coupe', 'rear-engine widebody', 'rear engine', 'everyday supercar widebody coupe', 'widebody supercar'],
+        positiveKeywords: [
+          'widebody coupe', 'rear-engine widebody', 'rear engine', 'everyday supercar widebody coupe',
+          'widebody supercar', 'rear-engine sports car', 'rear-engine sports car proportions', 'rear-engine'
+        ],
         incompatibleKeywords: ['compact roadster', 'mid-engine roadster', 'front-engine gt', 'sedan', 'suv']
       }
     }
@@ -1638,7 +1763,7 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
     model: '718 Cayman GT4 RS',
     generation: '982',
     proportionsDescription: 'Mid-engine track coupe with fixed carbon swan-neck rear wing, side window airboxes, side intake scoops, and dual front hood NACA ducts',
-    confusableWith: ['porsche-718-boxster', 'porsche-911-gt3-rs', 'porsche-911-turbo'],
+    confusableWith: ['porsche-911-carrera-992', 'porsche-718-boxster', 'porsche-911-gt3-rs', 'porsche-911-turbo'],
     traits: {
       headlight_shape: {
         name: 'compact_projector_four_point_led_cluster',
@@ -1691,32 +1816,91 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
     traits: {
       headlight_shape: {
         name: 'upright_trapezoidal_lens',
-        positiveKeywords: ['trapezoidal headlight', 'vertical rectangular lens', 'straight-edged headlight', 'tall headlight lens', 'halogen projector', 'xenon trapezoid'],
-        incompatibleKeywords: ['y-shaped led', 'y-signature drl', 'hexagonal led', 'round bug eye', 'fried egg']
+        positiveKeywords: [
+          'trapezoidal headlight', 'vertical rectangular lens', 'straight-edged headlight', 'tall headlight lens',
+          'halogen projector', 'xenon trapezoid', 'angular bi-xenon headlights with y-leds', 'trapezoidal bi-xenon lens',
+          'vertical bi-xenon', 'upright trapezoidal headlights', 'upright vertical rectangular',
+          'round headlights with a black trim', 'round lamps with a black trim', 'round headlights with black trim',
+          'two round headlights with a black trim', 'projector headlights with black trim'
+        ],
+        incompatibleKeywords: [
+          'hexagonal led', 'round bug eye', 'fried egg',
+          'y-shaped led', 'y-signature', 'dual y led', 'slanted full led headlights', 'sharp angular led drl',
+          'triangles with a rounded edge', 'triangular headlights', 'triangular lamps', 'slanted triangular headlights',
+          'triangular front lamps', 'lamps are shaped like triangles'
+        ]
+      },
+      hood_geometry: {
+        name: 'smooth_sloping_wedge_hood_clean_front',
+        isGeneric: true,
+        familySharedKeywords: ['smooth hood', 'sloping hood', 'clean front lid', 'hood has a smooth surface', 'unvented hood', 'clean luggage lid'],
+        familySharedAlone: true,
+        positiveKeywords: [
+          'smooth hood', 'sloping hood', 'clean front lid', 'hood has a smooth surface',
+          'unvented hood', 'smooth surface with no vents', 'clean luggage lid',
+          'smooth surface with no vents or louvers', 'clean wedge hood'
+        ],
+        incompatibleKeywords: ['hood vents', 'extractor strakes', 'naca ducts', 'deep hood nostrils']
       },
       front_intake_grille: {
         name: 'dual_rectangular_front_intakes',
-        positiveKeywords: ['twin rectangular intake', 'straight horizontal front air scoops', 'slatted lower bumper pods', 'dual front air dams'],
-        incompatibleKeywords: ['hexagonal front splitter', 'y-shaped front winglets', 'omega splitter']
+        positiveKeywords: [
+          'twin rectangular intake', 'straight horizontal front air scoops', 'slatted lower bumper pods', 'dual front air dams',
+          'dual rectangular lower front intakes', 'twin rectangular front intakes', 'angular lower air dams',
+          'trapezoidal front bumper intakes with black horizontal slats', 'twin rectangular intakes', 'dual rectangular intakes',
+          'large air intake with a black mesh grille', 'black mesh grille', 'front bumper has a large air intake with a black mesh grille',
+          'sharp angle at the bottom', 'distinctive shape with a sharp angle at the bottom', 'large air intake below front bumper', 'large front intake'
+        ],
+        incompatibleKeywords: [
+          'hexagonal front splitter', 'hexagonal intake', 'y-shaped front winglets', 'y-winglet', 'omega splitter',
+          'vertical splitter', 'vertical splitter in front bumper', 'horizontal grille and a vertical splitter',
+          'large opening with a horizontal grille and a vertical splitter', 'unique front grille design',
+          'vertical aerodynamic splitter'
+        ]
       },
       side_intake_type: {
         name: 'triangular_side_intake_duct',
-        positiveKeywords: ['triangular side scoop', 'angular side intake behind door', 'large side air scoop', 'lower rocker intake'],
+        positiveKeywords: ['triangular side scoop', 'angular side intake behind door', 'large side air scoop', 'lower rocker intake', 'triangular side air scoops behind doors'],
         incompatibleKeywords: ['smooth flank without scoop', 'triple fender gills']
+      },
+      wing_and_spoiler_architecture: {
+        name: 'integrated_flush_rear_deck_lip',
+        positiveKeywords: [
+          'small active rear lip spoiler', 'flush rear deck lip', 'integrated rear lip', 'low profile rear deck spoiler',
+          'integrated lip spoiler', 'active rear lip spoiler', 'small spoiler', 'small spoiler on the trunk lid',
+          'rear wing is a small spoiler on the trunk lid', 'subtle rear spoiler'
+        ],
+        incompatibleKeywords: ['massive swan neck wing', 'tall fixed track wing', 'high-mounted fixed wing', 'slotted spoiler', 'slotted ducktail', 'evo ducktail']
       },
       roofline_greenhouse: {
         name: 'classic_angular_wedge_cockpit',
-        positiveKeywords: ['angular wedge greenhouse', 'steep raked windshield', 'short sloping rear engine glass', 'classic wedge silhouette'],
+        familySharedKeywords: [
+          'two-door convertible', 'two-door convertible with a sloping hood', 'convertible',
+          'open-top spyder', 'spyder roofline', 'sloping fastback', 'glass engine cover'
+        ],
+        familySharedAlone: true,
+        positiveKeywords: [
+          'angular wedge greenhouse', 'steep raked windshield', 'short sloping rear engine glass', 'classic wedge silhouette',
+          'sloping fastback coupe roofline', 'sloping fastback', 'glass engine cover', 'engine cover louvers', 'classic wedge greenhouse',
+          'two-door convertible', 'two-door convertible with a sloping hood', 'convertible', 'open-top spyder', 'spyder roofline'
+        ],
         incompatibleKeywords: ['wraparound visor canopy', 'long hood gt']
       },
       rear_architecture_and_exhaust: {
         name: 'tall_vertical_rectangular_taillights_dual_oval_exhaust',
-        positiveKeywords: ['tall vertical taillight', 'rectangular rear grille', 'dual or quad round exhausts in lower bumper'],
-        incompatibleKeywords: ['horizontal y-shaped taillights', 'high exit hexagonal exhaust', 'full horizontal strakes']
+        positiveKeywords: [
+          'tall vertical taillight', 'rectangular rear grille', 'dual or quad round exhausts in lower bumper',
+          'vertical rectangular taillight', 'dual round exhaust pipes in lower rear bumper', 'lower bumper exhaust', 'quad round exhausts'
+        ],
+        incompatibleKeywords: ['horizontal y-shaped taillights', 'high exit hexagonal exhaust', 'full horizontal strakes', 'elevated twin sports exhausts high bumper']
       },
       proportions: {
         name: 'classic_compact_wedge_supercar',
-        positiveKeywords: ['angular wedge', 'compact wedge supercar', 'cab-forward v10'],
+        positiveKeywords: [
+          'angular wedge', 'compact wedge supercar', 'cab-forward v10', 'low slung supercar', 'wedge supercar',
+          'mid-engine v10 coupe', 'compact mid-engine wedge', 'compact mid-engine wedge proportions',
+          'sharply angled rear end'
+        ],
         incompatibleKeywords: ['front-engine gt', 'suv', 'sedan']
       }
     }
@@ -1733,13 +1917,37 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
     traits: {
       headlight_shape: {
         name: 'dual_y_shaped_led_drl',
-        positiveKeywords: ['y-shaped led', 'y-signature', 'dual y led', 'slanted full led headlights', 'sharp angular led drl'],
-        incompatibleKeywords: ['upright trapezoidal lens', 'vertical rectangular lens', 'round bug eye', 'fried egg']
+        positiveKeywords: [
+          'y-shaped led', 'y-signature', 'dual y led', 'slanted full led headlights', 'sharp angular led drl',
+          'triangles with a rounded edge', 'triangular headlights', 'triangular lamps', 'slanted triangular headlights',
+          'triangular front lamps', 'lamps are shaped like triangles'
+        ],
+        incompatibleKeywords: [
+          'upright trapezoidal lens', 'vertical rectangular lens', 'round bug eye', 'fried egg',
+          'trapezoidal headlight', 'upright trapezoidal headlights', 'vertical bi-xenon',
+          'round headlights', 'round headlamps', 'two round headlights', 'two round headlights with a black trim'
+        ]
       },
       front_intake_grille: {
         name: 'hexagonal_sculpted_front_intake',
         positiveKeywords: ['hexagonal intake', 'sharp angular front splitter', 'aerodynamic front nostrils', 'hexagonal mesh'],
-        incompatibleKeywords: ['dual rectangular front intakes', 'twin kidney', 'singleframe']
+        incompatibleKeywords: [
+          'dual rectangular front intakes', 'twin rectangular front intakes', 'twin kidney', 'singleframe',
+          'rectangular front intakes', 'dual rectangular lower front intakes', 'twin rectangular intake', 'dual rectangular intakes',
+          'y-shaped winglet', 'y-winglet', 'evo front bumper', 'ypsilon intake', 'y-shaped front winglets', 'front bumper y-winglets',
+          'front bumper with integrated aerodynamic ypsilon winglets', 'aerodynamic winglets', 'triangular winglets', 'y-shaped lower air intakes',
+          'y-shaped air intakes', 'distinctive y shape', 'distinctive "y" shape',
+          'vertical splitter', 'vertical splitter in front bumper', 'horizontal grille and a vertical splitter',
+          'large opening with a horizontal grille and a vertical splitter', 'unique front grille design'
+        ]
+      },
+      hood_geometry: {
+        name: 'smooth_sloping_hood_central_creases',
+        isGeneric: true,
+        familySharedKeywords: ['smooth hood', 'sloping hood', 'unvented hood', 'clean luggage lid'],
+        familySharedAlone: true,
+        positiveKeywords: ['smooth hood', 'sloping hood', 'angular hood creases', 'unvented hood', 'hood with sharp lines', 'clean luggage lid'],
+        incompatibleKeywords: ['hood air extractor nostrils', 'dual naca ducts', 'large hood scoop', 'carbon hood vents']
       },
       side_intake_type: {
         name: 'horizontal_lower_sill_and_shoulder_ducts',
@@ -1748,13 +1956,22 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       },
       roofline_greenhouse: {
         name: 'fastback_wedge_hexagon_windows',
-        positiveKeywords: ['sloping fastback', 'hexagonal side glass', 'louvers or glass engine cover'],
+        familySharedKeywords: [
+          'two-door convertible', 'two-door convertible with a sloping hood', 'convertible',
+          'open-top spyder', 'spyder roofline', 'sloping fastback', 'glass engine cover'
+        ],
+        familySharedAlone: true,
+        positiveKeywords: [
+          'sloping fastback', 'hexagonal side glass', 'louvers or glass engine cover',
+          'two-door convertible', 'two-door convertible with a sloping hood', 'convertible',
+          'open-top spyder', 'spyder roofline'
+        ],
         incompatibleKeywords: ['wraparound visor canopy', 'upright sedan']
       },
       rear_architecture_and_exhaust: {
         name: 'horizontal_y_taillights_quad_exhausts',
         positiveKeywords: ['horizontal y-shaped taillights', 'quad lower exhaust tips', 'high diffuser', 'hexagonal rear mesh'],
-        incompatibleKeywords: ['tall vertical rectangular taillights', 'single center exhaust']
+        incompatibleKeywords: ['tall vertical rectangular taillights', 'single center exhaust', 'elevated twin sports exhausts high bumper', 'twin exhaust flanking license plate']
       },
       proportions: {
         name: 'modern_hexagonal_wedge_supercar',
@@ -1775,32 +1992,77 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
     traits: {
       headlight_shape: {
         name: 'dual_y_shaped_led_drl',
-        positiveKeywords: ['y-shaped led', 'y-signature', 'dual y led', 'slanted full led headlights', 'sharp angular led drl'],
-        incompatibleKeywords: ['upright trapezoidal lens', 'vertical rectangular lens', 'round bug eye', 'fried egg']
+        positiveKeywords: [
+          'y-shaped led', 'y-signature', 'dual y led', 'slanted full led headlights', 'sharp angular led drl',
+          'triangles with a rounded edge', 'triangular headlights', 'triangular lamps', 'slanted triangular headlights',
+          'triangular front lamps', 'lamps are shaped like triangles'
+        ],
+        incompatibleKeywords: [
+          'upright trapezoidal lens', 'vertical rectangular lens', 'round bug eye', 'fried egg',
+          'trapezoidal headlight', 'upright trapezoidal headlights', 'vertical bi-xenon',
+          'round headlights', 'round headlamps', 'two round headlights', 'two round headlights with a black trim'
+        ]
       },
       front_intake_grille: {
         name: 'front_bumper_y_winglets_and_splitter',
-        positiveKeywords: ['y-shaped winglet', 'y-winglet', 'evo front bumper', 'integrated front splitter with winglets', 'ypsilon intake', 'aerodynamic front nostrils'],
-        incompatibleKeywords: ['dual rectangular front intakes', 'twin kidney', 'singleframe']
+        positiveKeywords: [
+          'y-shaped winglet', 'y-winglet', 'evo front bumper', 'integrated front splitter with winglets', 'ypsilon intake',
+          'aerodynamic front nostrils', 'front bumper y-winglets', 'y-shaped front winglets',
+          'front bumper with integrated aerodynamic ypsilon winglets', 'aerodynamic winglets', 'triangular winglets',
+          'y-shaped lower air intakes', 'y-shaped front intakes', 'distinctive y shape', 'distinctive "y" shape',
+          'y-shaped air intakes', 'front bumper winglets', 'ypsilon winglets', 'y-shaped bumper',
+          'vertical splitter', 'vertical splitter in front bumper', 'horizontal grille and a vertical splitter',
+          'large opening with a horizontal grille and a vertical splitter', 'unique front grille design', 'vertical aerodynamic splitter'
+        ],
+        incompatibleKeywords: [
+          'dual rectangular front intakes', 'twin rectangular front intakes', 'twin kidney', 'singleframe',
+          'rectangular front intakes', 'dual rectangular lower front intakes', 'twin rectangular intake', 'dual rectangular intakes'
+        ]
+      },
+      hood_geometry: {
+        name: 'smooth_sloping_hood_central_creases',
+        isGeneric: true,
+        familySharedKeywords: ['smooth hood', 'sloping hood', 'unvented hood', 'clean luggage lid'],
+        familySharedAlone: true,
+        positiveKeywords: ['smooth hood', 'sloping hood', 'angular hood creases', 'unvented hood', 'hood with sharp lines', 'clean luggage lid'],
+        incompatibleKeywords: ['hood air extractor nostrils', 'dual naca ducts', 'large hood scoop', 'carbon hood vents']
       },
       side_intake_type: {
         name: 'hexagonal_side_air_intakes_and_lower_sill',
-        positiveKeywords: ['lower sill intake', 'shoulder intake scoop', 'hexagonal side intake', 'evo side intake'],
+        positiveKeywords: [
+          'lower sill intake', 'shoulder intake scoop', 'hexagonal side intake', 'evo side intake',
+          'side sill', 'side sill and', 'lower sill and'
+        ],
         incompatibleKeywords: ['triangular side scoop', 'triple fender gills']
       },
       wing_and_spoiler_architecture: {
         name: 'integrated_slotted_rear_spoiler',
-        positiveKeywords: ['slotted spoiler', 'integrated rear spoiler', 'evo ducktail', 'slotted ducktail', 'integrated aerodynamic spoiler'],
+        positiveKeywords: [
+          'slotted spoiler', 'integrated rear spoiler', 'evo ducktail', 'slotted ducktail', 'integrated aerodynamic spoiler',
+          'small rear wing', 'small rear wing and a side sill', 'small spoiler'
+        ],
         incompatibleKeywords: ['massive swan neck wing', 'tall fixed track wing', 'no rear spoiler']
       },
       rear_architecture_and_exhaust: {
         name: 'elevated_twin_sports_exhausts_high_bumper',
         positiveKeywords: ['elevated exhaust', 'high-mounted exhaust', 'twin exhaust flanking license plate', 'performante style exhaust', 'high exit twin exhaust', 'high diffuser'],
-        incompatibleKeywords: ['quad lower exhaust tips', 'outer lower bumper exhaust', 'single center exhaust']
+        incompatibleKeywords: [
+          'quad lower exhaust tips', 'outer lower bumper exhaust', 'single center exhaust',
+          'dual round exhaust pipes in lower rear bumper', 'tall vertical rectangular taillights', 'lower bumper exhaust'
+        ]
       },
       roofline_greenhouse: {
         name: 'fastback_wedge_hexagon_windows',
-        positiveKeywords: ['sloping fastback', 'hexagonal side glass', 'louvers or glass engine cover'],
+        familySharedKeywords: [
+          'two-door convertible', 'two-door convertible with a sloping hood', 'convertible',
+          'open-top spyder', 'spyder roofline', 'sloping fastback', 'glass engine cover'
+        ],
+        familySharedAlone: true,
+        positiveKeywords: [
+          'sloping fastback', 'hexagonal side glass', 'louvers or glass engine cover',
+          'two-door convertible', 'two-door convertible with a sloping hood', 'convertible',
+          'open-top spyder', 'spyder roofline'
+        ],
         incompatibleKeywords: ['wraparound visor canopy', 'upright sedan']
       },
       proportions: {

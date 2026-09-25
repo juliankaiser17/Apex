@@ -315,13 +315,13 @@ CRITICAL INVARIANTS:
    If no passenger motor vehicle is visible (person, pet, building, heavy commercial transit/bus/semi), set "vehicle_present": false, "status": "rejected".
 5. OUTPUT FORMAT: Raw valid JSON only starting with { and ending with }. No markdown, no prose, no conversational text.`;
 
-    const cleanUserPrompt = `Analyze the vehicle in this image following evidentiary discipline.
-Pass 1 — Visual perception only. Record what is plainly visible. Do not attempt to identify the car yet.
+    const cleanUserPrompt = `Analyze the primary foreground vehicle (the closest, most prominent vehicle occupying the center/foreground of the frame) in this image following evidentiary discipline.
+Pass 1 — Visual perception only. Record what is plainly visible on the primary foreground vehicle. Do not attempt to identify the car yet.
 Describe each field in your own words, plainly and concretely (shape, count, position, material).
 - body_silhouette: the overall shape and number of doors
 - dominant_color: the exterior paint colour
 - lighting_cues: the outline and layout of the front and rear lamps exactly as they appear
-- intake_and_grille_cues: the openings in the front and rear bumper as they appear
+- intake_and_grille_cues: the openings in the front and rear bumper as they appear, including any aerodynamic winglets, fins, or splitter details
 - hood_aerodynamics: the hood surface (cooling vents, louvers, air extractors, scoop, or smooth clean surface)
 - aero_and_bodywork: lower front splitter, side air intakes or scoops, side sills, rear wing or diffuser
 - distinctive_road_cues: any road, track, weather, or location context
@@ -329,7 +329,7 @@ Describe each field in your own words, plainly and concretely (shape, count, pos
 
 IMPORTANT: Do NOT reuse any phrase from these instructions as an observation. Do NOT label a feature unless you can point to it in the photograph. It is normal and correct for a field to be null or for distinctive_design_cues to be empty.
 
-In Pass 2, determine the exact model family that corresponds precisely to the observed design cues.
+In Pass 2, determine the exact model and generation that corresponds precisely to the observed design cues.
 
 Output flat valid JSON with this exact structure:
 {
@@ -347,8 +347,8 @@ Output flat valid JSON with this exact structure:
   },
   "pass2_identification": {
     "make": "Dominant vehicle manufacturer",
-    "model": "Exact model family name",
-    "generation": null,
+    "model": "Exact model name (e.g. Huracán EVO, 911 Carrera, DBS Superleggera, 650S)",
+    "generation": "Generation or chassis code if observable (e.g. 997, 992, L140)",
     "variant": null,
     "confidence": 0.90,
     "evidence": ["observable cue 1", "observable cue 2"]
@@ -495,7 +495,6 @@ Rules:
         };
       }
 
-      // Extract Pass 1 Observations & Pass 2 Identification (support both two-pass and flat schemas)
       const pass1 = parsed.pass1_observations || parsed.visual_evidence || {};
       const pass2 = parsed.pass2_identification || parsed.identification || {};
 
@@ -532,7 +531,7 @@ Rules:
         headlights: pass1.headlights || pass1.lighting_cues || pass1.headlight_and_drl_signature || (evidenceList.find((e: string) => /headlight|lamp|drl|eyelid/i.test(e)) ?? null),
         taillights: pass1.taillights || pass1.lighting_cues || (evidenceList.find((e: string) => /taillight/i.test(e)) ?? null),
         hood: pass1.hood || pass1.hood_aerodynamics || null,
-        roofline: pass1.roofline || pass1.greenhouse_and_roofline || pass1.windshield_and_mirrors || null,
+        roofline: pass1.roofline || pass1.greenhouse_and_roofline || pass1.windshield_and_mirrors || (/black\s+roof|soft[\s-]?top|canvas|fabric/i.test(pass1.dominant_color || '') ? pass1.dominant_color : null),
         windows: pass1.windows || pass1.greenhouse_and_roofline || pass1.windshield_and_mirrors || null,
         wheels: pass1.wheels || pass1.mirror_and_wheel_cues || pass1.windshield_and_mirrors || null,
         exhaust: pass1.exhaust || null,
@@ -697,10 +696,20 @@ Rules:
         const normMake = rawMake.toLowerCase();
         const peerVehicles = APEX_LOCAL_VEHICLE_DATABASE.filter(v => v.manufacturer.toLowerCase() === normMake);
         for (const peer of peerVehicles) {
-          const peerName = `${peer.manufacturer} ${peer.model}`;
+          const peerName = peer.generation ? `${peer.manufacturer} ${peer.model} (${peer.generation})` : `${peer.manufacturer} ${peer.model}`;
           if (!rawCandidates.some(c => c.name.toLowerCase() === peerName.toLowerCase())) {
             rawCandidates.push({
               name: peerName,
+              score: neutralBaseline,
+              supporting_evidence: [],
+              contradictions: [],
+              unobservable_features: []
+            });
+          }
+          const baseName = `${peer.manufacturer} ${peer.model}`;
+          if (!rawCandidates.some(c => c.name.toLowerCase() === baseName.toLowerCase())) {
+            rawCandidates.push({
+              name: baseName,
               score: neutralBaseline,
               supporting_evidence: [],
               contradictions: [],
@@ -712,8 +721,7 @@ Rules:
         const fpPeers = fineGrainedModelDiscriminator.findFingerprintsByMake(rawMake);
         for (const fp of fpPeers) {
           const fpName = fp.generation ? `${fp.make} ${fp.model} (${fp.generation})` : `${fp.make} ${fp.model}`;
-          const simpleName = `${fp.make} ${fp.model}`;
-          if (!rawCandidates.some(c => c.name.toLowerCase() === fpName.toLowerCase() || c.name.toLowerCase() === simpleName.toLowerCase())) {
+          if (!rawCandidates.some(c => c.name.toLowerCase() === fpName.toLowerCase())) {
             rawCandidates.push({
               name: fpName,
               score: neutralBaseline,
@@ -770,7 +778,17 @@ Rules:
       // Optional Neutral Pairwise Verification Pass (Hard Amendment 4 & 7: Max 1 additional call, ceiling 2 total)
       // INVARIANT 5: RAW-VS-DISCRIMINATOR CONFLICT
       // Disagreement between raw provider identity and discriminator winner MUST trigger neutral verification path, regardless of numerical margin.
-      const shouldTriggerNeutralVerification = !verificationConsumed && classResult.calibrated_candidates.length >= 2 && (
+      const viableCandidates = classResult.calibrated_candidates.filter((c) =>
+        !c.invalid &&
+        c.score >= 0.50 &&
+        !c.contradictions.some((ct) =>
+          ct.includes('Body style mismatch') ||
+          ct.includes('Severe') ||
+          ct.includes('Hard manufacturer mismatch')
+        )
+      );
+
+      const shouldTriggerNeutralVerification = !verificationConsumed && viableCandidates.length >= 2 && (
         classResult.needs_neutral_verification ||
         classResult.raw_conflict ||
         (classResult.candidate_separation < 0.15 && classResult.top_candidate && classResult.top_candidate.score > 0.50)
@@ -778,11 +796,11 @@ Rules:
 
       if (shouldTriggerNeutralVerification) {
         // INVARIANT 8: PAIRWISE VERIFIER
-        // Candidate A and Candidate B are completely unordered peers.
+        // Candidate A and Candidate B are completely unordered peers from viable uncontradicted candidates.
         // Alternate presentation order to eliminate positional bias.
         const swapPresentation = Math.random() < 0.5;
-        const candA = swapPresentation ? classResult.calibrated_candidates[1].name : classResult.calibrated_candidates[0].name;
-        const candB = swapPresentation ? classResult.calibrated_candidates[0].name : classResult.calibrated_candidates[1].name;
+        const candA = swapPresentation ? viableCandidates[1].name : viableCandidates[0].name;
+        const candB = swapPresentation ? viableCandidates[0].name : viableCandidates[1].name;
         console.log(`[CloudflareVisionProvider] Invoking neutral pairwise verification between "${candA}" and "${candB}" (raw conflict: ${Boolean(classResult.raw_conflict)}, separation: ${classResult.candidate_separation})...`);
         verificationConsumed = true;
         try {
@@ -875,16 +893,18 @@ Rules:
               : null;
 
             if (winningCandidateName) {
-              const targetCand = classResult.calibrated_candidates.find((c) => c.name === winningCandidateName);
+              const targetCand = viableCandidates.find((c) => c.name === winningCandidateName);
               if (targetCand) {
                 targetCand.score = Math.min(0.99, targetCand.score + 0.20);
               }
             }
 
-            classResult.calibrated_candidates.sort((a, b) => b.score - a.score);
-            classResult.top_candidate = classResult.calibrated_candidates[0] || null;
+            viableCandidates.sort((a, b) => b.score - a.score);
+            const remainingCandidates = classResult.calibrated_candidates.filter((c) => !viableCandidates.includes(c));
+            classResult.calibrated_candidates = [...viableCandidates, ...remainingCandidates];
+            classResult.top_candidate = viableCandidates[0] || classResult.calibrated_candidates[0] || null;
             classResult.candidate_separation = classResult.top_candidate
-              ? Number((classResult.top_candidate.score - (classResult.calibrated_candidates[1]?.score || 0)).toFixed(3))
+              ? Number((classResult.top_candidate.score - (viableCandidates[1]?.score || 0)).toFixed(3))
               : 0;
 
             if (classResult.top_candidate) {
