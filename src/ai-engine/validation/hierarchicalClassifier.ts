@@ -50,6 +50,7 @@ export interface HierarchicalClassificationResult {
   canonical_vehicle_id?: string;
   canonical_display_name?: string;
   evidence_grounded?: boolean;
+  gate_customized?: boolean;
 }
 
 // Known architectural signatures for contradiction enforcement
@@ -160,8 +161,44 @@ export class HierarchicalClassifier {
    * determines candidate separation, and bounds specificity.
    */
   public classify(input: HierarchicalClassificationInput): HierarchicalClassificationResult {
-    const { visual_evidence, viewpoint, raw_candidates, adversarial_result } = input;
+    const { visual_evidence, viewpoint, adversarial_result } = input;
     const globalContradictions: string[] = [];
+
+    // MANDATE 2: CANONICAL VEHICLE IDS MUST BE UNIFIED BEFORE SCORING
+    // Ferrari Daytona SP3 and Ferrari Daytona SP3 (Icona) must resolve to the same canonical identity
+    // before candidate scoring/evidence aggregation.
+    // The duplicate-candidate problem must disappear at the candidate representation layer.
+    const unifiedCandidateMap = new Map<string, CandidateComparison>();
+    for (const c of (input.raw_candidates || [])) {
+      const canon = canonicalVehicleRegistry.lookupByTextOrAlias(c.name, input.raw_make || undefined);
+      const canonKey = canon ? canon.vehicleId : c.name.toLowerCase().trim();
+      const unifiedName = (canon && canon.displayName) ? canon.displayName : (c.name || 'Unknown');
+
+      const existing = unifiedCandidateMap.get(canonKey);
+      if (existing) {
+        existing.score = Math.max(existing.score, c.score || 0.5);
+        for (const s of (c.supporting_evidence || [])) {
+          if (!existing.supporting_evidence.includes(s)) existing.supporting_evidence.push(s);
+        }
+        for (const ct of (c.contradictions || [])) {
+          if (!existing.contradictions.includes(ct)) existing.contradictions.push(ct);
+        }
+        for (const u of (c.unobservable_features || [])) {
+          if (!existing.unobservable_features?.includes(u)) existing.unobservable_features?.push(u);
+        }
+      } else {
+        unifiedCandidateMap.set(canonKey, {
+          name: unifiedName,
+          score: c.score || 0.5,
+          supporting_evidence: [...(c.supporting_evidence || [])],
+          contradictions: [...(c.contradictions || [])],
+          unobservable_features: [...(c.unobservable_features || [])],
+          invalid: c.invalid,
+          canonicalVehicleId: canon ? canon.vehicleId : undefined
+        });
+      }
+    }
+    const raw_candidates = Array.from(unifiedCandidateMap.values());
 
     // 1. Normalize visual evidence for rapid cross-examination
     const evidenceText = [
@@ -182,7 +219,7 @@ export class HierarchicalClassifier {
 
     const observedBody = (visual_evidence.body_style || '').toLowerCase();
     const observedRoof = (visual_evidence.roofline || '').toLowerCase();
-    const openTopPattern = /\b(convertible|spider|spyder|cabriolet|roadster|soft[\s-]?top|canvas[\s-]?roof|fabric[\s-]?roof|targa|open[\s-]?top|speedster|boxster|barchetta|drophead|black\s+roof|contrasting\s+roof)\b/i;
+    const openTopPattern = /\b(convertible|spider|spyder|cabriolet|roadster|soft[\s-]?top|canvas[\s-]?(?:roof|top)|fabric[\s-]?(?:roof|top)|open[\s-]?top|speedster|boxster|barchetta|drophead)\b/i;
     const isObservedOpenTop =
       openTopPattern.test(observedBody) ||
       openTopPattern.test(observedRoof) ||
@@ -366,11 +403,12 @@ export class HierarchicalClassifier {
       // Determine candidate canonical body style
       const canonCand = canonicalVehicleRegistry.lookupByTextOrAlias(candidate.name, candidateMake || undefined);
       const candBodyLower = (canonCand?.bodyStyle || '').toLowerCase();
+      const isCandidateTarga = candBodyLower === 'targa' || /\btarga\b/i.test(candNameLower);
       const isCandidateOpenTop =
         candBodyLower === 'convertible' ||
-        candBodyLower === 'targa' ||
         candBodyLower === 'roadster' ||
-        /\b(spider|spyder|cabriolet|convertible|roadster|targa|speedster|boxster|barchetta|miata|cielo)\b/i.test(candNameLower);
+        isCandidateTarga ||
+        /\b(spider|spyder|cabriolet|convertible|roadster|speedster|boxster|barchetta|miata|cielo)\b/i.test(candNameLower);
       const isCandidateCoupe =
         (candBodyLower === 'coupe' || (!candBodyLower && (candNameLower.includes('coupe') || candNameLower.includes('gt3')))) &&
         !isCandidateOpenTop;
@@ -395,7 +433,13 @@ export class HierarchicalClassifier {
           score += 0.10;
         }
       } else if (isObservedCoupe) {
-        if (isCandidateOpenTop) {
+        // Targa has a removable roof panel; when installed, the car looks like a fixed-roof coupe.
+        // Therefore, a targa must NEVER be penalized as an open-top convertible when observed as a coupe!
+        // Similarly, retractable hardtop convertibles (458 Spider, etc.) look like coupes when closed,
+        // so generic coupe observation without explicit fixed glass cover proof must not disqualify them.
+        const isRetractableHardtopSpider = /\b(458\s+spider|488\s+spider|f8\s+spider|california|portofino)\b/i.test(candNameLower);
+        const hasExplicitFixedGlassProof = /\b(?:glass\s+(?:rear\s+)?(?:engine\s+cover|hatch|screen)|fixed\s+coupe\s+roof)\b/i.test(evidenceText);
+        if (isCandidateOpenTop && !isCandidateTarga && !(isRetractableHardtopSpider && !hasExplicitFixedGlassProof)) {
           candContradictions.push(`Body style mismatch: Observed fixed-roof coupe vs candidate open-top convertible`);
           score -= 0.60;
         } else if (isCandidateSuv) {
@@ -464,17 +508,17 @@ export class HierarchicalClassifier {
 
       // ── CONTRADICTION ENGINE RULE E: FERRARI MODEL-FAMILY DISAMBIGUATION ──
       const hasNegativeStrakes = /\b(?:without|no|lacks?|devoid\s+of)\s+(?:horizontal\s+)?strakes?\b/i.test(evidenceText);
-      // NOTE: a bare "strakes"/"eyelids" mention is a GENERIC body feature (e.g. engine-cover
-      // louvers) and must not act as model-specific Daytona evidence. Only the qualified
-      // architectural phrases count.
+      // Model-specific Daytona Icona architectural cues (generic horizontal slats removed)
       const hasDaytonaIconaCues = !hasNegativeStrakes &&
-        /\b(horizontal\s+strakes?|horizontal\s+slats?|headlight\s+eyelids?|eyelid\s+covers?|partial\s+covers?|wraparound\s+visor|visor\s+canopy|fender-mounted\s+mirrors?|door\s+tops?\s+mirrors?|icona)\b/i.test(evidenceText);
+        /\b(horizontal\s+strakes?|headlight\s+eyelids?|eyelid\s+covers?|partial\s+covers?|wraparound\s+visor|visor\s+canopy|fender-mounted\s+mirrors?|door\s+tops?\s+mirrors?|icona)\b/i.test(evidenceText);
 
-      const hasSf90Cues = /\b(sf90|shut-?off\s+gurney|c-shaped\s+(?:horizontal\s+)?(?:matrix\s+)?(?:led\s+)?headlights?|matrix\s+led|hybrid\s+supercar)\b/i.test(evidenceText) || hasNegativeStrakes;
+      // Model-specific SF90 Stradale architectural cues (generic matrix led / hybrid removed)
+      const hasExplicitSf90Cues = /\b(sf90|shut-?off\s+gurney|c-shaped\s+(?:matrix\s+)?(?:led\s+)?headlights?|c-clamp\s+headlights?)\b/i.test(evidenceText);
+      const isFrontViewpoint = viewpoint === 'front' || viewpoint === 'front_3q';
 
       if (hasDaytonaIconaCues) {
         if (candNameLower.includes('daytona') || candNameLower.includes('sp3')) {
-          candSupporting.push('Observed horizontal strakes, headlight eyelids, and wraparound visor canopy uniquely match Ferrari Daytona SP3 Icona design');
+          candSupporting.push('Observed horizontal strakes, headlight eyelids, or wraparound visor canopy uniquely match Ferrari Daytona SP3 Icona design');
           score += 0.25;
         } else if (candidateMake === 'ferrari' && (candNameLower.includes('sf90') || candNameLower.includes('296') || candNameLower.includes('f8') || candNameLower.includes('roma') || candNameLower.includes('portofino') || candNameLower.includes('488') || candNameLower.includes('458'))) {
           candContradictions.push(`Observed horizontal strakes, headlight eyelids, and wraparound canopy contradict ${candidate.name} architecture`);
@@ -482,14 +526,18 @@ export class HierarchicalClassifier {
         }
       }
 
-      if (hasSf90Cues) {
+      if (hasExplicitSf90Cues) {
         if (candNameLower.includes('sf90')) {
-          candSupporting.push('Observed C-shaped matrix LED headlights or shut-off Gurney match Ferrari SF90 Stradale architecture');
+          candSupporting.push('Observed C-shaped headlights or shut-off Gurney match Ferrari SF90 Stradale architecture');
           score += 0.25;
         } else if (candNameLower.includes('daytona') || candNameLower.includes('sp3')) {
-          candContradictions.push('Observed C-shaped matrix LED headlights, lack of horizontal strakes, or shut-off Gurney contradict Ferrari Daytona SP3');
+          candContradictions.push('Observed C-shaped headlights or shut-off Gurney contradict Ferrari Daytona SP3 architecture');
           score -= 0.50;
         }
+      } else if (hasNegativeStrakes && !isFrontViewpoint && (candNameLower.includes('daytona') || candNameLower.includes('sp3'))) {
+        // Only penalize Daytona for absent strakes when the rear fascia is confirmed in view
+        candContradictions.push('Confirmed absence of characteristic horizontal rear strakes contradicts Ferrari Daytona SP3');
+        score -= 0.50;
       }
 
       const has458Cues = 
@@ -635,15 +683,25 @@ export class HierarchicalClassifier {
         if (isServiceLiveryScene && !isDocumentedServiceVehicle(fgCand.displayName.toLowerCase())) {
           continue;
         }
+
         const existingIdx = calibratedCandidates.findIndex((c) => {
           const cNameLower = c.name.toLowerCase();
           const fgDisplayLower = fgCand.displayName.toLowerCase();
           const fgMakeModel = `${fgCand.make} ${fgCand.model}`.toLowerCase();
           const fgModelLower = fgCand.model.toLowerCase();
 
+          // Authoritative canonical vehicle ID match
+          if (c.canonicalVehicleId && c.canonicalVehicleId === fgCand.vehicleId) {
+            return true;
+          }
+          const cCanon = canonicalVehicleRegistry.lookupByTextOrAlias(c.name, fgCand.make);
+          if (cCanon && cCanon.vehicleId === fgCand.vehicleId) {
+            return true;
+          }
+
           // Strict body style gating: A convertible/spider must never match a fixed-roof coupe candidate!
-          const isCSpider = /\b(spider|spyder|cabriolet|convertible|targa|roadster)\b/i.test(cNameLower);
-          const isFgSpider = /\b(spider|spyder|cabriolet|convertible|targa|roadster)\b/i.test(fgDisplayLower) || /\b(spider|spyder|cabriolet|convertible|targa|roadster)\b/i.test(fgModelLower);
+          const isCSpider = /\b(spider|spyder|cabriolet|convertible|roadster)\b/i.test(cNameLower);
+          const isFgSpider = /\b(spider|spyder|cabriolet|convertible|roadster)\b/i.test(fgDisplayLower) || /\b(spider|spyder|cabriolet|convertible|roadster)\b/i.test(fgModelLower);
           if (isCSpider !== isFgSpider) {
             return false;
           }
@@ -698,7 +756,8 @@ export class HierarchicalClassifier {
             supporting_evidence: fgCand.supportingEvidence,
             contradictions: fgCand.contradictions,
             unobservable_features: fgCand.unobservableTraits,
-            invalid: false
+            invalid: false,
+            canonicalVehicleId: fgCand.vehicleId
           });
         }
       }
@@ -784,14 +843,9 @@ export class HierarchicalClassifier {
       if (bNet !== aNet) {
         return bNet - aNet;
       }
-      // Tie-breaker 2: If net specific evidence is identical, check if one matches raw provider hypothesis
-      const rawLower = (input.raw_model || '').toLowerCase();
-      if (rawLower) {
-        const aMatchesRaw = a.name.toLowerCase().includes(rawLower);
-        const bMatchesRaw = b.name.toLowerCase().includes(rawLower);
-        if (aMatchesRaw && !bMatchesRaw) return -1;
-        if (bMatchesRaw && !aMatchesRaw) return 1;
-      }
+      // MANDATE 1: THE RAW PROVIDER MUST NEVER OVERRIDE AN UNCERTAIN DISCRIMINATOR
+      // Do NOT break ties using raw provider hypothesis!
+      // If candidates are still tied, leave them tied (return 0).
       return 0;
     };
 
@@ -841,10 +895,12 @@ export class HierarchicalClassifier {
       ? fgResult.scoredCandidates.some((c) => c.specificEvidenceCount > 0)
       : validCandidates.some((c) => (c.supporting_evidence?.length ?? 0) > 0);
 
+    const isTiedOrDeadlocked = validCandidates.length >= 2 && separation === 0;
+
     // 4. Extract hierarchical components
-    let resolvedModelFamily = input.raw_model;
-    let resolvedGeneration = input.raw_generation;
-    let resolvedVariant: string | null = input.raw_variant;
+    let resolvedModelFamily: string | null = null;
+    let resolvedGeneration: string | null = null;
+    let resolvedVariant: string | null = (input.raw_variant as string | null) || null;
     let canonicalRecord: any = null;
 
     // Check adversarial verification feedback
@@ -872,6 +928,7 @@ export class HierarchicalClassifier {
     let specificity: SpecificityLevel = 'make';
     let numericSpecificity = 0;
     let reason = 'Vehicle manufacturer identified with high visual confidence.';
+    let reasonCustomizedByGate = false;
 
     if (allHaveSevereMismatch || (topHasSevereMismatch && (topCandidate?.score || 0) < 0.50)) {
       resolvedMake = null;
@@ -881,6 +938,20 @@ export class HierarchicalClassifier {
       specificity = 'make';
       numericSpecificity = 0;
       reason = 'Severe architectural contradiction detected: observed visual cues directly contradict proposed candidates.';
+    } else if (!anyModelSpecificEvidence || isTiedOrDeadlocked) {
+      // USER MANDATE 1: THE RAW PROVIDER MUST NEVER OVERRIDE AN UNCERTAIN DISCRIMINATOR
+      // If the evidence pipeline reaches tie, deadlock, insufficient model-specific evidence,
+      // or disqualified candidates, the final result MUST remain uncertain at make level.
+      // The raw VLM's model name is NEVER a valid fallback for exact-model resolution.
+      resolvedModelFamily = null;
+      resolvedGeneration = null;
+      resolvedVariant = null;
+      canonicalRecord = null;
+      specificity = 'make';
+      numericSpecificity = 0;
+      reason = isTiedOrDeadlocked
+        ? 'Candidate comparison resulted in an exact tie: insufficient model-specific evidence to separate candidates.'
+        : `Model family is unconfirmed: no model-specific evidence was observable to separate ${resolvedMake || 'manufacturer'} candidates from this angle.`;
     } else if (topCandidate && topCandidate.score >= 0.50) {
       // ── AMENDMENT 3: MONOTONIC SPECIFICITY & CANONICAL REGISTRY LOOKUP ──
       // Look up canonical record for the winning candidate to prevent specificity collapse
@@ -931,7 +1002,6 @@ export class HierarchicalClassifier {
 
       // Tracks whether an earlier gate already wrote a case-specific reason into the ladder
       // input; the honesty guard below must not overwrite those more-specific messages.
-      let reasonCustomizedByGate = false;
 
       // AMENDMENT 5: MULTI-VIEW CONSISTENCY FOR MCLAREN 675LT
       // Only cap at generation if front view lacks distinguishing front proof
@@ -960,6 +1030,50 @@ export class HierarchicalClassifier {
         numericSpecificity = resolvedGeneration ? 2 : 1;
         reason = `Identified as Porsche 911 (${resolvedGeneration || '992'}). Turbo variant unconfirmed without observable rear haunch intercooler scoops or extending wing.`;
         reasonCustomizedByGate = true;
+      }
+
+      // AMENDMENT 7: MULTI-VIEW CONSISTENCY & VARIANT GATING FOR FERRARI 458 (F142)
+      // The Ferrari 458 Italia (coupe) and 458 Spider (retractable hardtop convertible)
+      // share the identical front clip, mustache winglets, and elongated vertical headlights.
+      // Exact variant separation requires observable roof/deck mechanics:
+      // - Spider: open cockpit / retractable hardtop / dual rear buttresses
+      // - Italia: fixed coupe roof / sloping rear glass engine cover
+      // If neither is observable, the identity must honestly abstain to generation level:
+      // Ferrari 458 (F142) with variant = null.
+      const isF142Family = (resolvedMake?.toLowerCase() === 'ferrari') &&
+        (topCandidate.name.toLowerCase().includes('458') || String(resolvedModelFamily).toLowerCase().includes('458'));
+
+      if (isF142Family) {
+        const hasExplicitSpiderProof = /\b(?:open[\s-]?top|open[\s-]?cockpit|retractable\s+(?:hardtop|aluminum\s+roof|roof)|spider\s+tonneau|dual\s+(?:rear\s+)?buttresses?|buttresses\s+behind|convertible\s+(?:spider|top)|stowed\s+roof|drop[\s-]?top)\b/i.test(evidenceText);
+        const hasExplicitCoupeProof = /\b(?:sloping\s+(?:full\s+)?glass\s+(?:rear\s+)?(?:hatch|screen|engine\s+cover)|rear\s+glass\s+(?:engine\s+)?(?:cover|hatch)|fixed\s+coupe\s+roof|glass\s+engine\s+(?:lid|bonnet)|transparent\s+engine\s+cover)\b/i.test(evidenceText);
+
+        if (hasExplicitSpiderProof && !hasExplicitCoupeProof) {
+          resolvedModelFamily = '458 Spider';
+          resolvedVariant = 'Spider';
+          if (!resolvedGeneration) resolvedGeneration = 'F142';
+          numericSpecificity = 4;
+          specificity = 'variant';
+          reason = `Identified as Ferrari 458 Spider (${resolvedGeneration}). Confirmed with observable open-top/spider roof architecture.`;
+          reasonCustomizedByGate = true;
+        } else if (hasExplicitCoupeProof && !hasExplicitSpiderProof) {
+          resolvedModelFamily = '458 Italia';
+          resolvedVariant = null;
+          if (!resolvedGeneration) resolvedGeneration = 'F142';
+          numericSpecificity = 2;
+          specificity = 'generation';
+          reason = `Identified as Ferrari 458 Italia (${resolvedGeneration}). Confirmed with observable fixed coupe roof and rear glass engine cover.`;
+          reasonCustomizedByGate = true;
+        } else {
+          // Genuinely lacks enough distinguishing evidence to separate Italia vs Spider:
+          // Return honest family/generation-level uncertainty!
+          resolvedModelFamily = '458';
+          resolvedVariant = null;
+          if (!resolvedGeneration) resolvedGeneration = 'F142';
+          numericSpecificity = 2;
+          specificity = 'generation';
+          reason = `Identified as Ferrari 458 (${resolvedGeneration}). Exact variant (Italia Coupe vs Spider) unconfirmed without observable rear glass engine cover or open-top roof mechanics.`;
+          reasonCustomizedByGate = true;
+        }
       }
 
       // Invariant: A high-performance or track variant (e.g. GT3 RS, CSL, SVJ, STO) CANNOT be asserted without grounded evidence!
@@ -1038,8 +1152,17 @@ export class HierarchicalClassifier {
       !adversarial_result
     );
 
-    const finalVehicleId = canonicalRecord?.vehicleId || (topCandidate && canonicalVehicleRegistry.lookupByTextOrAlias(topCandidate.name, resolvedMake || undefined)?.vehicleId);
-    const finalDisplayName = canonicalRecord?.displayName || (canonicalRecord ? `${canonicalRecord.make} ${canonicalRecord.model}` : (topCandidate?.name || `${resolvedMake} ${resolvedModelFamily}`));
+    const isF142Unconfirmed = (resolvedMake?.toLowerCase() === 'ferrari') && resolvedModelFamily === '458' && !resolvedVariant;
+    const finalVehicleId = isF142Unconfirmed
+      ? (canonicalRecord?.vehicleId || 'ferrari-458-italia')
+      : ((resolvedModelFamily && canonicalRecord)
+        ? canonicalRecord.vehicleId
+        : (resolvedModelFamily && topCandidate ? canonicalVehicleRegistry.lookupByTextOrAlias(topCandidate.name, resolvedMake || undefined)?.vehicleId : undefined));
+    const finalDisplayName = isF142Unconfirmed
+      ? `${resolvedMake} 458 (${resolvedGeneration || 'F142'})`
+      : ((resolvedModelFamily && canonicalRecord)
+        ? canonicalRecord.displayName
+        : (resolvedModelFamily && canonicalRecord ? `${canonicalRecord.make} ${canonicalRecord.model}` : (resolvedModelFamily && topCandidate ? topCandidate.name : (resolvedMake ? `${resolvedMake} (Model Family Uncertain)` : undefined))));
 
     return {
       identification: {
@@ -1057,23 +1180,25 @@ export class HierarchicalClassifier {
       reason,
       needs_adversarial_verification: needsAdversarial,
       needs_neutral_verification: Boolean(
-        fgResult.needsVerification ||
-        fgResult.rawConflict ||
-        !anyModelSpecificEvidence ||
-        separation < 0.15
+        !reasonCustomizedByGate &&
+        anyModelSpecificEvidence &&
+        (fgResult.needsVerification || fgResult.rawConflict || separation < 0.15)
       ),
       raw_conflict: fgResult.rawConflict,
       canonical_vehicle_id: finalVehicleId,
       canonical_display_name: finalDisplayName,
       discriminator_identity: (() => {
+        if (!resolvedModelFamily) return resolvedMake ? `${resolvedMake} (Model Family Uncertain)` : undefined;
+        if (isF142Unconfirmed) return finalDisplayName;
         if (canonicalRecord) return canonicalRecord.displayName;
         if (fgResult.topCandidate) return fgResult.topCandidate.displayName;
         return topCandidate?.name || undefined;
       })(),
+      gate_customized: reasonCustomizedByGate,
       // A raw-provider hypothesis that the discriminator could not evaluate is never a validated
       // exact-model result, even if it wins because no evidence-grounded winner existed.
       evidence_grounded: (fgResult.scoredCandidates.length > 0 ? fgResult.evidenceGrounded : Boolean(topCandidate && (topCandidate.supporting_evidence?.length || 0) > 0))
-        && anyModelSpecificEvidence
+        && Boolean(anyModelSpecificEvidence)
         && !(topCandidate && rawHypothesisDemoted.has(topCandidate.name))
     };
   }

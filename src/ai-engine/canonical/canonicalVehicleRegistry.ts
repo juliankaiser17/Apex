@@ -76,7 +76,7 @@ function computeRecordDisplayName(item: { manufacturer: string; model: string; g
   // model "458 Spider" and trim "Spider" must render as "Ferrari 458 Spider", not
   // "Ferrari 458 Spider Spider").
   const trim = (item.trim || '').trim();
-  const trimIsRedundant = !trim || trim === 'Base' || model.toLowerCase().includes(trim.toLowerCase());
+  const trimIsRedundant = !trim || trim === 'Base' || model.toLowerCase().includes(trim.toLowerCase()) || gen.toLowerCase().includes(trim.toLowerCase()) || trim.toLowerCase().includes(gen.toLowerCase());
 
   if (!trimIsRedundant) {
     return isGenericGen ? `${make} ${model} ${trim}` : `${make} ${model} ${trim} (${gen})`;
@@ -293,7 +293,8 @@ class CanonicalVehicleRegistry {
       'ferrari daytona',
       'daytona sp3 icona',
       'ferrari daytona sp3',
-      'ferrari daytona sp3 icona'
+      'ferrari daytona sp3 icona',
+      'ferrari daytona sp3 (icona)'
     ]);
 
     this.registerAliases('ferrari-488-pista', [
@@ -308,6 +309,40 @@ class CanonicalVehicleRegistry {
       'sf90 stradale',
       'ferrari sf90',
       'ferrari sf90 stradale'
+    ]);
+
+    this.registerAliases('ferrari-roma', [
+      'roma',
+      'ferrari roma',
+      'roma f169',
+      'ferrari roma f169'
+    ]);
+
+    this.registerAliases('ferrari-296-gtb', [
+      '296 gtb',
+      '296',
+      'ferrari 296',
+      'ferrari 296 gtb',
+      '296 gtb f171',
+      'ferrari 296 gtb f171',
+      '296gtb'
+    ]);
+
+    this.registerAliases('ferrari-812-superfast', [
+      '812 superfast',
+      '812',
+      'ferrari 812',
+      'ferrari 812 superfast',
+      '812 superfast f152m',
+      'ferrari 812 superfast f152m'
+    ]);
+
+    this.registerAliases('ferrari-laferrari', [
+      'laferrari',
+      'ferrari laferrari',
+      'laferrari f150',
+      'ferrari laferrari f150',
+      'la ferrari'
     ]);
 
     // ── MCLAREN ──
@@ -883,6 +918,26 @@ class CanonicalVehicleRegistry {
   }): OpenCanonicalIdentity {
     const { vehicleId, make, model, generation, variant, source = 'gemini', specs } = params;
 
+    const safeMake = (make || 'Unknown Make').trim();
+    const hasValidModel = typeof model === 'string' && model.trim() !== '' && model.trim().toLowerCase() !== 'unknown model' && model.trim().toLowerCase() !== 'null';
+
+    // 0. If model is null/unconfirmed: Strictly return make-level identity.
+    // Invariant: Never allow canonical resolution to invent a model identity when classifier says model = null.
+    if (!hasValidModel) {
+      return {
+        canonicalId: null as any,
+        make: safeMake,
+        modelFamily: null as any,
+        generation: null,
+        variant: null,
+        registryStatus: safeMake !== 'Unknown Make' ? 'VERIFIED_UNREGISTERED' : 'UNVERIFIED',
+        source: (source as any) || 'gemini',
+        displayName: safeMake,
+        specificityLevel: 0,
+        specs: specs || {}
+      };
+    }
+
     // 1. Try vehicleId
     let record: CanonicalVehicleRecord | null = null;
     if (vehicleId) {
@@ -930,7 +985,6 @@ class CanonicalVehicleRegistry {
     // 3. Open World / Unregistered but Verified Identity:
     // If make and model are provided with evidence from upstream vision,
     // preserve them with VERIFIED_UNREGISTERED status rather than substituting another vehicle!
-    const safeMake = (make || 'Unknown Make').trim();
     const safeModel = (model || 'Unknown Model').trim();
     const generatedId = `${this.normalize(safeMake)}-${this.normalize(safeModel)}`
       .toLowerCase()

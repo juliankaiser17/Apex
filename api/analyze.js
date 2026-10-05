@@ -2,7 +2,7 @@
 import { createClient } from "@supabase/supabase-js";
 
 // src/ai-engine/caching/identificationCache.ts
-var VISION_PIPELINE_VERSION = "v3.3.0-production-release";
+var VISION_PIPELINE_VERSION = "v3.4.0-production-release";
 function buildCacheKey(imageHash, provider = "cloudflare", model = "@cf/meta/llama-3.2-11b-vision-instruct") {
   const cleanHash = (imageHash || "").toLowerCase().trim();
   const cleanProvider = (provider || "cloudflare").toLowerCase().trim();
@@ -819,6 +819,33 @@ var APEX_LOCAL_VEHICLE_DATABASE = [
     notableFacts: "Front-mid engine 2+2 grand tourer succeeding the Roma, featuring monolithic body-color perforated front grille, active 3-position rear spoiler, quad circular exhaust pipes, and return of physical steering wheel controls.",
     baselineRarity: "legendary",
     visualSignature: { aspectRatio: 2.15, silhouetteClass: "grand_tourer", prominentColors: ["Rosso Corsa", "Verde Amalfi", "Blu Pozzi", "Grigio Silverstone"] }
+  },
+  {
+    id: "ferrari-roma",
+    manufacturer: "Ferrari",
+    model: "Roma",
+    generation: "F169",
+    yearStart: 2020,
+    yearEnd: 2024,
+    bodyStyle: "Coupe",
+    engine: "3.9L Twin-Turbo V8 (F154)",
+    displacementCc: 3855,
+    aspiration: "Twin-Turbo",
+    cylinders: 8,
+    drivetrain: "RWD",
+    transmission: "8-Speed Dual-Clutch (DCT)",
+    horsepower: 612,
+    torqueNm: 760,
+    zeroToHundredSec: 3.4,
+    zeroToSixtyMphSec: 3.2,
+    topSpeedKmH: 320,
+    curbWeightKg: 1472,
+    fuelType: "Gasoline",
+    productionYears: "2020\u20132024",
+    originCountry: "Italy",
+    notableFacts: "Front-mid engine 2+2 grand tourer with Shark-nose styling, body-color perforated front grille, horizontal DRL lightbar with separate main headlamp cluster, and active mobile rear spoiler.",
+    baselineRarity: "epic",
+    visualSignature: { aspectRatio: 2.15, silhouetteClass: "grand_tourer", prominentColors: ["Rosso Corsa", "Grigio Titanio", "Blu Roma", "Nero"] }
   },
   {
     id: "ferrari-daytona-sp3",
@@ -2463,7 +2490,7 @@ function computeRecordDisplayName(item) {
   const gen = item.generation;
   const isGenericGen = !gen || gen === "Base" || gen === "Current" || gen === model || model.includes(`(${gen})`);
   const trim = (item.trim || "").trim();
-  const trimIsRedundant = !trim || trim === "Base" || model.toLowerCase().includes(trim.toLowerCase());
+  const trimIsRedundant = !trim || trim === "Base" || model.toLowerCase().includes(trim.toLowerCase()) || gen.toLowerCase().includes(trim.toLowerCase()) || trim.toLowerCase().includes(gen.toLowerCase());
   if (!trimIsRedundant) {
     return isGenericGen ? `${make} ${model} ${trim}` : `${make} ${model} ${trim} (${gen})`;
   }
@@ -2650,7 +2677,8 @@ var CanonicalVehicleRegistry = class {
       "ferrari daytona",
       "daytona sp3 icona",
       "ferrari daytona sp3",
-      "ferrari daytona sp3 icona"
+      "ferrari daytona sp3 icona",
+      "ferrari daytona sp3 (icona)"
     ]);
     this.registerAliases("ferrari-488-pista", [
       "488 pista",
@@ -2663,6 +2691,36 @@ var CanonicalVehicleRegistry = class {
       "sf90 stradale",
       "ferrari sf90",
       "ferrari sf90 stradale"
+    ]);
+    this.registerAliases("ferrari-roma", [
+      "roma",
+      "ferrari roma",
+      "roma f169",
+      "ferrari roma f169"
+    ]);
+    this.registerAliases("ferrari-296-gtb", [
+      "296 gtb",
+      "296",
+      "ferrari 296",
+      "ferrari 296 gtb",
+      "296 gtb f171",
+      "ferrari 296 gtb f171",
+      "296gtb"
+    ]);
+    this.registerAliases("ferrari-812-superfast", [
+      "812 superfast",
+      "812",
+      "ferrari 812",
+      "ferrari 812 superfast",
+      "812 superfast f152m",
+      "ferrari 812 superfast f152m"
+    ]);
+    this.registerAliases("ferrari-laferrari", [
+      "laferrari",
+      "ferrari laferrari",
+      "laferrari f150",
+      "ferrari laferrari f150",
+      "la ferrari"
     ]);
     this.registerAliases("mclaren-650s", [
       "650s",
@@ -3134,6 +3192,22 @@ var CanonicalVehicleRegistry = class {
   }
   resolveCanonicalIdentity(params) {
     const { vehicleId, make, model, generation, variant, source = "gemini", specs } = params;
+    const safeMake = (make || "Unknown Make").trim();
+    const hasValidModel = typeof model === "string" && model.trim() !== "" && model.trim().toLowerCase() !== "unknown model" && model.trim().toLowerCase() !== "null";
+    if (!hasValidModel) {
+      return {
+        canonicalId: null,
+        make: safeMake,
+        modelFamily: null,
+        generation: null,
+        variant: null,
+        registryStatus: safeMake !== "Unknown Make" ? "VERIFIED_UNREGISTERED" : "UNVERIFIED",
+        source: source || "gemini",
+        displayName: safeMake,
+        specificityLevel: 0,
+        specs: specs || {}
+      };
+    }
     let record = null;
     if (vehicleId) {
       record = this.getById(vehicleId);
@@ -3172,7 +3246,6 @@ var CanonicalVehicleRegistry = class {
         }
       };
     }
-    const safeMake = (make || "Unknown Make").trim();
     const safeModel = (model || "Unknown Model").trim();
     const generatedId = `${this.normalize(safeMake)}-${this.normalize(safeModel)}`.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
     const specificityLevel = variant ? 4 : generation ? 2 : safeModel !== "Unknown Model" ? 1 : 0;
@@ -3348,12 +3421,184 @@ var HardNegativesEngine = class {
 };
 var hardNegativesEngine = new HardNegativesEngine();
 
+// src/ai-engine/validation/evidenceNormalizer.ts
+var FRONT_INDICATORS = /\b(front|nose|bonnet|hood|headlights?|headlamps?|front\s+grille|front\s+bumper|front\s+splitter|front\s+fascia|front\s+fenders?|front\s+overhang)\b/i;
+var REAR_INDICATORS = /\b(rear|tail|taillights?|tail\s+lamps?|tail[\s-]?lights?|exhaust|diffuser|rear\s+bumper|rear\s+wing|rear\s+spoiler|trunk|boot|ducktail|rear\s+fascia|rear\s+deck|rear\s+haunches|rear\s+apron)\b/i;
+var HEADLIGHT_INDICATORS = /\b(headlights?|headlamps?|drl|daytime\s+running\s+lights?|front\s+lamps?|front\s+lights?|eyelid\s+covers?|matrix\s+led|high\s+beams?)\b/i;
+var TAILLIGHT_INDICATORS = /\b(taillights?|tail\s+lamps?|tail[\s-]?lights?|rear\s+lamps?|rear\s+lights?|brake\s+lights?|rear\s+lightbar|squircle\s+taillights?)\b/i;
+var EXHAUST_INDICATORS = /\b(exhaust|tailpipes?|exhaust\s+tips?|mufflers?|exhaust\s+outlets?|quad\s+exhaust|central\s+exhaust|dual\s+exhaust)\b/i;
+var INTAKE_INDICATORS = /\b(grille|grill|air\s+intakes?|radiators?|intake\s+ducts?|cooling\s+vents?|air\s+scoops?|naca\s+ducts?|splitters?)\b/i;
+var SIDE_INDICATORS = /\b(side|flanks?|doors?|side\s+skirts?|rockers?|side\s+sills?|side\s+scoops?|door\s+mirrors?|side\s+mirrors?|fender\s+louvers?)\b/i;
+var ROOF_INDICATORS = /\b(roof|roofline|canopy|targa|convertible|soft\s*top|hardtop|a-pillars?|b-pillars?|c-pillars?|buttress(?:es)?|greenhouse|sunroof)\b/i;
+var CABIN_INDICATORS = /\b(cabin|cockpit|windshield|windscreen|interior|seats?|steering\s+wheel|visor\s+canopy|glasshouse)\b/i;
+var WHEEL_INDICATORS = /\b(wheels?|rims?|alloys?|calipers?|tires?|tyres?|brakes?|ceramic\s+rotors?)\b/i;
+var COMPOUND_TRANSITION_RE = /\s*(?:[.;\n]+|,\s*(?:(?:and|while|whereas|but)\s+)?(?=(?:(?:two|three|four|dual|twin|a|an|the|each|pair\s+of|smaller|larger)\s+)?(?:front|rear|side|roof|cabin|wheels?|exhaust|intake|headlights?|headlamps?|lamps?|lights?|taillights?|hood|bonnet|nose|tail|diffuser|splitter|trunk|boot|mirrors?)\b))\s*/i;
+var EvidenceNormalizer = class {
+  /**
+   * Decompose free-text observations into localized, anatomically tagged clauses
+   */
+  decomposeText(text) {
+    if (!text || typeof text !== "string") return [];
+    const rawClauses = text.split(COMPOUND_TRANSITION_RE).map((s) => s.trim()).filter((s) => s.length > 0);
+    const seenClauses = /* @__PURE__ */ new Set();
+    const uniqueClauses = [];
+    for (const c of rawClauses) {
+      const simplified = c.toLowerCase().replace(/[^a-z0-9]/g, " ").replace(/\s+/g, " ").trim();
+      if (!simplified) continue;
+      if (seenClauses.has(simplified)) continue;
+      seenClauses.add(simplified);
+      uniqueClauses.push(c);
+    }
+    return uniqueClauses.map((clause) => {
+      const norm = clause.toLowerCase();
+      const hasFront = FRONT_INDICATORS.test(norm);
+      const hasRear = REAR_INDICATORS.test(norm);
+      const hasHeadlights = HEADLIGHT_INDICATORS.test(norm);
+      const hasTaillights = TAILLIGHT_INDICATORS.test(norm);
+      const hasExhaust = EXHAUST_INDICATORS.test(norm);
+      const hasIntake = INTAKE_INDICATORS.test(norm);
+      const hasSide = SIDE_INDICATORS.test(norm);
+      const hasRoof = ROOF_INDICATORS.test(norm);
+      const hasCabin = CABIN_INDICATORS.test(norm);
+      const hasWheels = WHEEL_INDICATORS.test(norm);
+      return {
+        rawText: clause,
+        normalizedText: norm,
+        hasFront,
+        hasRear,
+        hasSide,
+        hasRoof,
+        hasCabin,
+        hasWheels,
+        hasExhaust,
+        hasIntake,
+        hasHeadlights,
+        hasTaillights
+      };
+    });
+  }
+  /**
+   * Filter evidence clauses for a specific vehicle anatomical region.
+   * Enforces that evidence explicitly describing opposing zones is excluded,
+   * and requires relevant anatomical grounding tokens for targeted zones.
+   */
+  filterClausesForZone(clauses, targetZone) {
+    const eligible = clauses.filter((c) => {
+      switch (targetZone) {
+        case "headlights":
+          if (c.hasRear || c.hasTaillights || c.hasExhaust) return false;
+          if ((c.hasSide || c.hasIntake || c.hasWheels || c.hasCabin) && !c.hasHeadlights) return false;
+          if (!c.hasHeadlights && !/\b(headlights?|headlamps?|drl|lamps?|lights?|eyelid|lens)\b/i.test(c.normalizedText)) return false;
+          return true;
+        case "front_grille":
+          if (c.hasRear || c.hasTaillights || c.hasExhaust) return false;
+          if ((c.hasSide || c.hasRoof || c.hasWheels || c.hasCabin) && !c.hasIntake && !c.hasFront) return false;
+          if (!c.hasIntake && !/\b(grille?|grill|intake|splitter|bumper|mesh|mouth|slats?|strakes?)\b/i.test(c.normalizedText)) return false;
+          return true;
+        case "hood":
+          if (c.hasRear || c.hasTaillights || c.hasExhaust) return false;
+          if ((c.hasSide || c.hasRoof || c.hasWheels || c.hasCabin) && !c.normalizedText.includes("hood") && !c.normalizedText.includes("bonnet")) return false;
+          if (!/\b(hood|bonnet|lid|extractor|vent|scoop|bulge|s-duct)\b/i.test(c.normalizedText)) return false;
+          return true;
+        case "side":
+          if (c.hasFront && !c.hasSide && !c.hasIntake) return false;
+          if (c.hasRear && !c.hasSide && !c.hasIntake) return false;
+          return true;
+        case "roof":
+          if (c.hasExhaust) return false;
+          return true;
+        case "rear_exhaust":
+        case "rear_fascia":
+          if (c.hasFront || c.hasHeadlights) return false;
+          if (!c.hasRear && !c.hasTaillights && !c.hasExhaust && !/\b(exhaust|tailpipe|diffuser|taillight|strakes?|deck)\b/i.test(c.normalizedText)) return false;
+          return true;
+        case "global":
+        default:
+          return true;
+      }
+    });
+    return eligible.map((c) => c.normalizedText).join(" . ");
+  }
+  /**
+   * Separate mixed lighting observations into distinct front and rear fields
+   */
+  separateLightingCues(rawLightingText) {
+    if (!rawLightingText) return { headlights: "", taillights: "" };
+    const clauses = this.decomposeText(rawLightingText);
+    const frontClauses = [];
+    const rearClauses = [];
+    const ambiguousClauses = [];
+    for (const c of clauses) {
+      const isRear = c.hasRear || c.hasTaillights;
+      const isFront = c.hasFront || c.hasHeadlights;
+      if (isRear && !isFront) {
+        rearClauses.push(c.rawText);
+      } else if (isFront && !isRear) {
+        frontClauses.push(c.rawText);
+      } else {
+        ambiguousClauses.push(c.rawText);
+      }
+    }
+    return {
+      headlights: frontClauses.length > 0 ? frontClauses.join("; ") : ambiguousClauses.join("; "),
+      taillights: rearClauses.length > 0 ? rearClauses.join("; ") : ambiguousClauses.length > 0 ? ambiguousClauses.join("; ") : ""
+    };
+  }
+  /**
+   * Separate mixed intake/grille/diffuser cues into distinct front and rear aerodynamic fields
+   */
+  separateIntakeAndAeroCues(rawIntakeText) {
+    if (!rawIntakeText) return { frontGrille: "", rearDiffuser: "" };
+    const clauses = this.decomposeText(rawIntakeText);
+    const frontClauses = [];
+    const rearClauses = [];
+    const ambiguousClauses = [];
+    for (const c of clauses) {
+      const isRear = c.hasRear || c.hasExhaust;
+      const isFront = c.hasFront || c.hasIntake;
+      if (isRear && !isFront) {
+        rearClauses.push(c.rawText);
+      } else if (isFront && !isRear) {
+        frontClauses.push(c.rawText);
+      } else {
+        ambiguousClauses.push(c.rawText);
+      }
+    }
+    return {
+      frontGrille: frontClauses.length > 0 ? frontClauses.join("; ") : ambiguousClauses.join("; "),
+      rearDiffuser: rearClauses.length > 0 ? rearClauses.join("; ") : ""
+    };
+  }
+};
+var evidenceNormalizer = new EvidenceNormalizer();
+
 // src/ai-engine/validation/fineGrainedModelDiscriminator.ts
 function computeVisibilityMatrix(viewpoint, evidenceText) {
   const normEv = evidenceText.toLowerCase();
   const rearOccluded = normEv.includes("rear occluded") || normEv.includes("rear cropped") || normEv.includes("tail occluded") || normEv.includes("rear not visible");
   const frontOccluded = normEv.includes("front occluded") || normEv.includes("front cropped") || normEv.includes("nose occluded") || normEv.includes("front not visible");
   const sideOccluded = normEv.includes("side occluded") || normEv.includes("profile occluded");
+  const isCroppedOrDetail = /\b(cropped?|close[\s-]?up|detail|section|wheel\s+only|door\s+only|fender\s+only|badge\s+only|emblem\s+only|partial\s+view|tight\s+crop|macro)\b/i.test(normEv);
+  if (isCroppedOrDetail) {
+    const hasHeadlightFocus = /\b(headlights?|headlamps?|front\s+lamps?)\b/i.test(normEv);
+    const hasGrilleFocus = /\b(front\s+grille|radiator\s+grille)\b/i.test(normEv);
+    const hasExhaustFocus = /\b(exhaust|tailpipes?)\b/i.test(normEv);
+    const hasDoorFocus = /\b(door|waist|flank)\b/i.test(normEv);
+    return {
+      headlight_shape: hasHeadlightFocus ? "VISIBLE" : "NOT_VISIBLE",
+      front_intake_grille: hasGrilleFocus ? "VISIBLE" : "NOT_VISIBLE",
+      hood_geometry: "NOT_VISIBLE",
+      fender_architecture: "NOT_VISIBLE",
+      roofline_greenhouse: "NOT_VISIBLE",
+      proportions: "NOT_VISIBLE",
+      side_intake_type: hasDoorFocus ? "PARTIAL" : "NOT_VISIBLE",
+      door_architecture: hasDoorFocus ? "PARTIAL" : "NOT_VISIBLE",
+      aero_architecture: "NOT_VISIBLE",
+      wing_and_spoiler_architecture: "NOT_VISIBLE",
+      rear_architecture_and_exhaust: hasExhaustFocus ? "VISIBLE" : "NOT_VISIBLE",
+      rear_fascia_and_strakes: "NOT_VISIBLE"
+    };
+  }
   let matrix;
   switch (viewpoint) {
     case "front":
@@ -3390,9 +3635,9 @@ function computeVisibilityMatrix(viewpoint, evidenceText) {
       break;
     case "side":
       matrix = {
-        headlight_shape: frontOccluded ? "OCCLUDED" : "PARTIAL",
-        front_intake_grille: frontOccluded ? "OCCLUDED" : "PARTIAL",
-        hood_geometry: frontOccluded ? "OCCLUDED" : "PARTIAL",
+        headlight_shape: "NOT_VISIBLE",
+        front_intake_grille: "NOT_VISIBLE",
+        hood_geometry: "NOT_VISIBLE",
         fender_architecture: frontOccluded ? "OCCLUDED" : "VISIBLE",
         roofline_greenhouse: "VISIBLE",
         proportions: "VISIBLE",
@@ -3400,8 +3645,8 @@ function computeVisibilityMatrix(viewpoint, evidenceText) {
         door_architecture: sideOccluded ? "OCCLUDED" : "VISIBLE",
         aero_architecture: "VISIBLE",
         wing_and_spoiler_architecture: "VISIBLE",
-        rear_architecture_and_exhaust: rearOccluded ? "OCCLUDED" : "PARTIAL",
-        rear_fascia_and_strakes: rearOccluded ? "OCCLUDED" : "PARTIAL"
+        rear_architecture_and_exhaust: "NOT_VISIBLE",
+        rear_fascia_and_strakes: "NOT_VISIBLE"
       };
       break;
     case "rear_3q":
@@ -3456,38 +3701,98 @@ function computeVisibilityMatrix(viewpoint, evidenceText) {
   }
   return matrix;
 }
-var REAR_ZONE_RE = /\b(rear|tails?|taillights?|tail[\s-]?lights?|exhaust|diffuser|spoiler|wing|license\s+plate|number\s+plate|trunk|boot\s+lid|ducktail)\b/i;
-var FRONT_ZONE_RE = /\b(front|nose|bonnet|hood|headlights?|headlamps?|grille|grill)\b/i;
-var CATEGORY_EXCLUDED_ZONES = {
-  headlight_shape: ["rear"],
-  front_intake_grille: ["rear"],
-  hood_geometry: ["rear"],
-  fender_architecture: ["rear"],
-  rear_architecture_and_exhaust: ["front"],
-  rear_fascia_and_strakes: ["front"],
-  wing_and_spoiler_architecture: ["front"],
-  aero_architecture: ["front"]
-};
-function zoneOfClause(clause) {
-  const hasRear = REAR_ZONE_RE.test(clause);
-  const hasFront = FRONT_ZONE_RE.test(clause);
-  if (hasRear && !hasFront) return "rear";
-  if (hasFront && !hasRear) return "front";
-  return "global";
-}
-function buildZonedEvidence(parts) {
-  const clauses = parts.join(" . ").toLowerCase().split(/\s*[.;\n]\s*/).map((s) => s.trim()).filter(Boolean).map((text) => ({ text, zone: zoneOfClause(text) }));
-  const full = clauses.map((c) => c.text).join(" . ");
-  const withoutRear = clauses.filter((c) => c.zone !== "rear").map((c) => c.text).join(" . ");
-  const withoutFront = clauses.filter((c) => c.zone !== "front").map((c) => c.text).join(" . ");
+var UNIVERSAL_GENERIC_TOKENS = /* @__PURE__ */ new Set([
+  "horizontal led strip",
+  "horizontal led",
+  "horizontal strip",
+  "horizontal lamp",
+  "led strip",
+  "horizontal led strips",
+  "vertical led strip",
+  "led strips",
+  "light strip",
+  "strip lights",
+  "slight bulge in the center",
+  "bulge in the center",
+  "smooth surface",
+  "sloping roofline",
+  "front splitter",
+  "rear diffuser",
+  "air intakes",
+  "two round headlamps",
+  "distinctive shape",
+  "sloping roofline and short rear deck",
+  "sloping roofline and curved rear window",
+  "no visible vents or louvers",
+  "no visible vents",
+  "smooth, flat surface with no visible vents",
+  "smooth flat surface",
+  "smooth flat hood",
+  "smooth hood without vents",
+  "clean hood surface",
+  "ventless sculpted hood",
+  "hood without vents",
+  "smooth hood",
+  "clean hood",
+  "flat hood",
+  "clean bonnet"
+]);
+function buildZonedEvidence(parts, fieldBuckets) {
+  const combined = parts.filter(Boolean).join(" . ");
+  const clauses = evidenceNormalizer.decomposeText(combined);
+  const full = clauses.map((c) => c.normalizedText).join(" . ");
+  const fieldClauses = fieldBuckets ? {
+    headlights: evidenceNormalizer.decomposeText(fieldBuckets.headlights || ""),
+    grille: evidenceNormalizer.decomposeText(fieldBuckets.grille || ""),
+    hood: evidenceNormalizer.decomposeText(fieldBuckets.hood || ""),
+    side: evidenceNormalizer.decomposeText(fieldBuckets.side || ""),
+    roof: evidenceNormalizer.decomposeText(fieldBuckets.roof || ""),
+    exhaust: evidenceNormalizer.decomposeText([fieldBuckets.exhaust, fieldBuckets.taillights].filter(Boolean).join(" . "))
+  } : null;
   return {
     full,
     forCategory: (category) => {
-      const excluded = CATEGORY_EXCLUDED_ZONES[category];
-      if (!excluded) return full;
-      if (excluded.includes("rear")) return withoutRear;
-      if (excluded.includes("front")) return withoutFront;
-      return full;
+      switch (category) {
+        case "headlight_shape": {
+          const direct = fieldClauses ? evidenceNormalizer.filterClausesForZone(fieldClauses.headlights, "headlights") : "";
+          const global = evidenceNormalizer.filterClausesForZone(clauses, "headlights");
+          return direct ? `${direct} . ${global}` : global;
+        }
+        case "front_intake_grille": {
+          const direct = fieldClauses ? evidenceNormalizer.filterClausesForZone(fieldClauses.grille, "front_grille") : "";
+          const global = evidenceNormalizer.filterClausesForZone(clauses, "front_grille");
+          return direct ? `${direct} . ${global}` : global;
+        }
+        case "hood_geometry": {
+          const direct = fieldClauses ? evidenceNormalizer.filterClausesForZone(fieldClauses.hood, "hood") : "";
+          const global = evidenceNormalizer.filterClausesForZone(clauses, "hood");
+          return direct ? `${direct} . ${global}` : global;
+        }
+        case "side_intake_type":
+        case "door_architecture": {
+          const direct = fieldClauses ? evidenceNormalizer.filterClausesForZone(fieldClauses.side, "side") : "";
+          const global = evidenceNormalizer.filterClausesForZone(clauses, "side");
+          return direct ? `${direct} . ${global}` : global;
+        }
+        case "roofline_greenhouse": {
+          const direct = fieldClauses ? evidenceNormalizer.filterClausesForZone(fieldClauses.roof, "roof") : "";
+          const global = evidenceNormalizer.filterClausesForZone(clauses, "roof");
+          return direct ? `${direct} . ${global}` : global;
+        }
+        case "rear_architecture_and_exhaust": {
+          const direct = fieldClauses ? evidenceNormalizer.filterClausesForZone(fieldClauses.exhaust, "rear_exhaust") : "";
+          const global = evidenceNormalizer.filterClausesForZone(clauses, "rear_exhaust");
+          return direct ? `${direct} . ${global}` : global;
+        }
+        case "rear_fascia_and_strakes":
+        case "wing_and_spoiler_architecture": {
+          const direct = fieldClauses ? evidenceNormalizer.filterClausesForZone(fieldClauses.exhaust, "rear_fascia") : "";
+          const global = evidenceNormalizer.filterClausesForZone(clauses, "rear_fascia");
+          return direct ? `${direct} . ${global}` : global;
+        }
+        default:
+          return full;
+      }
     }
   };
 }
@@ -3761,12 +4066,12 @@ var MORPHOLOGICAL_FINGERPRINTS = [
     model: "Amalfi",
     generation: "F169M",
     proportionsDescription: "Front-mid engine 2+2 grand tourer with long sweeping sculpted hood, body-color perforated front grille, clean body sides, and active 3-position rear spoiler",
-    confusableWith: ["ferrari-daytona-sp3", "ferrari-sf90-stradale", "ferrari-458-italia", "ferrari-296-gtb"],
+    confusableWith: ["ferrari-daytona-sp3", "ferrari-sf90-stradale", "ferrari-458-italia", "ferrari-296-gtb", "ferrari-458-spider", "ferrari-488-pista", "ferrari-roma", "ferrari-812-superfast", "ferrari-laferrari"],
     traits: {
       proportions: {
         name: "front_mid_engine_2plus2_grand_tourer",
         positiveKeywords: ["front-mid engine", "long sweeping hood", "grand tourer proportions", "2+2", "cab-rearward", "fastback", "grand touring coupe"],
-        incompatibleKeywords: ["cab-forward mid-engine", "short front hood", "extreme wedge monovolume", "targa prototype"]
+        incompatibleKeywords: ["cab-forward mid-engine", "mid-engine", "short front hood", "extreme wedge monovolume", "targa prototype"]
       },
       front_intake_grille: {
         name: "monolithic_body_color_perforated_grille",
@@ -3784,7 +4089,7 @@ var MORPHOLOGICAL_FINGERPRINTS = [
       headlight_shape: {
         name: "thin_lamp_bar_with_indown_swept_inner_tip",
         positiveKeywords: ["drl blade", "lamp bar", "thin horizontal lamp", "narrow lamp bar", "lamp bar along the nose", "inward down swept lamp tip", "lamp merging into the grille edge"],
-        incompatibleKeywords: ["c-shaped", "c-clamp", "c shaped", "annular lamp", "ring shaped lamp", "slotted lamp", "elongated vertical", "vertical lens", "tall narrow lamp", "eyelid", "partial cover", "round bug eye", "fried egg"]
+        incompatibleKeywords: ["c-shaped", "c-clamp", "c shaped", "annular lamp", "ring shaped lamp", "slotted lamp", "elongated vertical", "vertical lens", "tall narrow lamp", "eyelid", "partial cover", "round bug eye", "fried egg", "horizontal light strip bisecting", "bisecting led strip"]
       },
       hood_geometry: {
         name: "long_sculpted_hood_without_vents",
@@ -3828,25 +4133,22 @@ var MORPHOLOGICAL_FINGERPRINTS = [
     model: "Daytona SP3",
     generation: "Icona",
     proportionsDescription: "Icona hypercar with wraparound visor canopy, horizontal louvers/strakes, and fender-mounted mirrors",
-    confusableWith: ["ferrari-amalfi", "ferrari-sf90-stradale", "ferrari-488-pista", "ferrari-458-italia", "ferrari-296-gtb"],
+    confusableWith: ["ferrari-amalfi", "ferrari-sf90-stradale", "ferrari-488-pista", "ferrari-458-italia", "ferrari-296-gtb", "ferrari-458-spider", "ferrari-roma", "ferrari-812-superfast", "ferrari-laferrari"],
     traits: {
       headlight_shape: {
         name: "horizontal_eyelid_covers",
-        positiveKeywords: ["eyelid", "eyelid covers", "partial covers", "horizontal partial cover", "slat headlights", "retractable covers"],
-        incompatibleKeywords: ["open c-shape matrix", "c-clamp headlight", "c-shaped", "c-shape", "matrix led", "vertical slit", "round bug eye", "elongated vertical", "swept-back headlights", "vertical led strip"]
+        positiveKeywords: ["eyelid", "eyelid covers", "partial covers", "horizontal partial cover", "slat headlights", "retractable covers", "retractable eyelid", "pop-up covers", "slatted eyelid", "eyelids"],
+        incompatibleKeywords: ["open c-shape matrix", "c-clamp headlight", "c-shaped", "c-shape", "round bug eye", "elongated vertical", "swept-back headlights"]
       },
       front_intake_grille: {
         name: "horizontal_strakes_slatted_grille",
-        // Generic "slats" wording is how VLMs commonly describe ANY mesh grille (measured on
-        // real 296 GTB photographs), so only the distinctive SP3 strakes architecture may
-        // satisfy this trait.
-        positiveKeywords: ["horizontal strakes", "strake grille", "strakes across", "full width strakes"],
-        incompatibleKeywords: ["open mesh grille", "vertical slats", "kidney grille", "singleframe", "front mustache", "deformable winglets", "shut-off gurney", "gurney", "body-color perforated"]
+        positiveKeywords: ["horizontal strakes", "strake grille", "strakes across", "full width strakes", "horizontal slats across front bumper", "slatted strakes", "slatted grille", "horizontal slats", "horizontal slat"],
+        incompatibleKeywords: ["kidney grille", "singleframe", "front mustache", "deformable winglets", "shut-off gurney", "gurney", "body-color perforated", "mustache bar", "horizontal bar across grille"]
       },
       hood_geometry: {
         name: "sculpted_hood_with_deep_air_vents",
-        positiveKeywords: ["hood vents", "sculpted air vents on hood", "hood air extractors", "dual hood scoops"],
-        incompatibleKeywords: ["clean sculpted hood without vents", "smooth hood without vents"]
+        positiveKeywords: ["hood vents", "sculpted air vents on hood", "hood air extractors", "dual hood scoops", "sculpted hood", "central spine", "deep air vents", "air vents on hood"],
+        incompatibleKeywords: ["deep s-duct extractor", "giant hood nostrils", "power bulge with cowl induction"]
       },
       side_intake_type: {
         name: "door_top_sculpted_air_channel",
@@ -3892,19 +4194,50 @@ var MORPHOLOGICAL_FINGERPRINTS = [
     model: "458 Italia",
     generation: "F142",
     proportionsDescription: "Mid-rear naturally aspirated V8 coupe with elongated vertical swept-back headlights, deformable mustache aero winglets, single round taillights, and triple central exhaust",
-    confusableWith: ["ferrari-458-spider", "ferrari-488-pista", "ferrari-sf90-stradale", "ferrari-daytona-sp3", "ferrari-amalfi", "ferrari-296-gtb"],
+    confusableWith: ["ferrari-458-spider", "ferrari-488-pista", "ferrari-sf90-stradale", "ferrari-daytona-sp3", "ferrari-amalfi", "ferrari-296-gtb", "ferrari-roma", "ferrari-812-superfast", "ferrari-laferrari"],
     traits: {
       // STRUCTURED GEOMETRY ONLY: the F142 discriminator is a TALL, vertically oriented lens that
       // sweeps back along the wing — not generic "LED strip" wording.
       headlight_shape: {
         name: "tall_vertical_swept_back_lens",
-        positiveKeywords: ["elongated vertical", "swept-back headlight", "vertical lens", "vertically oriented lamp", "vertical headlight", "f142 headlight", "tall narrow lamp"],
+        positiveKeywords: [
+          "elongated vertical",
+          "swept-back headlight",
+          "vertical lens",
+          "vertically oriented lamp",
+          "vertical headlight",
+          "f142 headlight",
+          "tall narrow lamp",
+          "angular headlamps",
+          "swept-back headlamps",
+          "vertical swept-back"
+        ],
         incompatibleKeywords: ["horizontal eyelid covers", "retractable covers", "c-clamp", "c-shaped", "c shaped", "annular lamp", "slotted lamp", "lamp bar", "round bug eye", "fried egg"]
       },
       front_intake_grille: {
         name: "single_wide_mouth_with_flexible_mustache_winglets",
-        positiveKeywords: ["single wide mouth", "front mustache", "deformable winglets", "flexible aero elastomeric", "central horse badge grille", "mustache winglets"],
-        incompatibleKeywords: ["horizontal strakes", "horizontal slats", "twin kidney", "panamericana", "slatted front bumper"]
+        positiveKeywords: [
+          "single wide mouth",
+          "front mustache",
+          "deformable winglets",
+          "flexible aero elastomeric",
+          "central horse badge grille",
+          "mustache winglets",
+          "trapezoidal grille with a horizontal bar",
+          "horizontal bar and a pair of air intakes",
+          "front bumper with horizontal bar",
+          "horizontal bar across grille"
+        ],
+        incompatibleKeywords: ["horizontal strakes", "horizontal slats across front bumper", "twin kidney", "panamericana", "slatted front bumper", "body-color perforated", "perforated front grille", "monolithic grille"]
+      },
+      hood_geometry: {
+        name: "smooth_sloping_front_lid_without_s_duct",
+        positiveKeywords: [
+          "smooth front lid",
+          "clean sloping front bonnet",
+          "smooth hood without vents"
+        ],
+        incompatibleKeywords: ["s-duct", "hood air extractor", "deep hood channel", "hood nostril", "dual nostrils", "hood vents", "sculpted air vents on hood", "deep air vents"]
       },
       side_intake_type: {
         name: "clean_haunches_no_side_scoop",
@@ -3935,19 +4268,50 @@ var MORPHOLOGICAL_FINGERPRINTS = [
     model: "458 Spider",
     generation: "F142",
     proportionsDescription: "Mid-rear naturally aspirated V8 open-top supercar with retractable aluminum hardtop, dual rear flying buttresses, single round taillights, and triple central exhaust",
-    confusableWith: ["ferrari-458-italia", "ferrari-488-pista", "ferrari-sf90-stradale", "ferrari-296-gtb"],
+    confusableWith: ["ferrari-458-italia", "ferrari-488-pista", "ferrari-sf90-stradale", "ferrari-daytona-sp3", "ferrari-amalfi", "ferrari-296-gtb", "ferrari-roma", "ferrari-812-superfast", "ferrari-laferrari"],
     traits: {
       // STRUCTURED GEOMETRY ONLY: the F142 discriminator is a TALL, vertically oriented lens that
       // sweeps back along the wing — not generic "LED strip" wording.
       headlight_shape: {
         name: "tall_vertical_swept_back_lens",
-        positiveKeywords: ["elongated vertical", "swept-back headlight", "vertical lens", "vertically oriented lamp", "vertical headlight", "f142 headlight", "tall narrow lamp"],
+        positiveKeywords: [
+          "elongated vertical",
+          "swept-back headlight",
+          "vertical lens",
+          "vertically oriented lamp",
+          "vertical headlight",
+          "f142 headlight",
+          "tall narrow lamp",
+          "angular headlamps",
+          "swept-back headlamps",
+          "vertical swept-back"
+        ],
         incompatibleKeywords: ["horizontal eyelid covers", "retractable covers", "c-clamp", "c-shaped", "c shaped", "annular lamp", "slotted lamp", "lamp bar", "round bug eye", "fried egg"]
       },
       front_intake_grille: {
         name: "single_wide_mouth_with_flexible_mustache_winglets",
-        positiveKeywords: ["single wide mouth", "front mustache", "deformable winglets", "flexible aero elastomeric", "central horse badge grille", "mustache winglets"],
-        incompatibleKeywords: ["horizontal strakes", "horizontal slats", "twin kidney", "panamericana", "slatted front bumper"]
+        positiveKeywords: [
+          "single wide mouth",
+          "front mustache",
+          "deformable winglets",
+          "flexible aero elastomeric",
+          "central horse badge grille",
+          "mustache winglets",
+          "trapezoidal grille with a horizontal bar",
+          "horizontal bar and a pair of air intakes",
+          "front bumper with horizontal bar",
+          "horizontal bar across grille"
+        ],
+        incompatibleKeywords: ["horizontal strakes", "horizontal slats across front bumper", "twin kidney", "panamericana", "slatted front bumper", "body-color perforated", "perforated front grille", "monolithic grille"]
+      },
+      hood_geometry: {
+        name: "smooth_sloping_front_lid_without_s_duct",
+        positiveKeywords: [
+          "smooth front lid",
+          "clean sloping front bonnet",
+          "smooth hood without vents"
+        ],
+        incompatibleKeywords: ["s-duct", "hood air extractor", "deep hood channel", "hood nostril", "dual nostrils", "hood vents", "sculpted air vents on hood", "deep air vents"]
       },
       side_intake_type: {
         name: "clean_haunches_no_side_scoop",
@@ -3982,7 +4346,7 @@ var MORPHOLOGICAL_FINGERPRINTS = [
     model: "488 Pista",
     generation: "F142M",
     proportionsDescription: "Mid-engine track-focused V8 supercar with front hood S-Duct channel, dual side intake splitters, and raised dual circular exhausts",
-    confusableWith: ["ferrari-458-italia", "ferrari-458-spider", "ferrari-sf90-stradale", "ferrari-daytona-sp3"],
+    confusableWith: ["ferrari-458-italia", "ferrari-458-spider", "ferrari-sf90-stradale", "ferrari-daytona-sp3", "ferrari-amalfi", "ferrari-296-gtb", "ferrari-roma", "ferrari-812-superfast", "ferrari-laferrari"],
     traits: {
       headlight_shape: {
         name: "swept_back_projector_led",
@@ -3996,7 +4360,7 @@ var MORPHOLOGICAL_FINGERPRINTS = [
         positiveKeywords: ["s-duct", "front hood vent", "bonnet scoop", "hood air channel", "front aerodynamic duct", "carbon front intake"],
         // The S-duct hood channel is on every 488; only exposed-carbon intake wording is Pista-specific.
         familySharedKeywords: ["s-duct", "front hood vent", "bonnet scoop", "hood air channel", "front aerodynamic duct"],
-        incompatibleKeywords: ["horizontal strakes", "slatted front bumper", "smooth unvented hood", "kidney grille"]
+        incompatibleKeywords: ["horizontal strakes", "slatted front bumper", "smooth unvented hood", "kidney grille", "body-color perforated", "monolithic grille", "body-colour perforated"]
       },
       side_intake_type: {
         name: "dual_stage_side_intake_with_splitter_flap",
@@ -4027,19 +4391,24 @@ var MORPHOLOGICAL_FINGERPRINTS = [
     model: "SF90 Stradale",
     generation: "F173",
     proportionsDescription: "Mid-engine flagship PHEV supercar with slender C-shaped matrix headlights and shut-off Gurney flap",
-    confusableWith: ["ferrari-daytona-sp3", "ferrari-amalfi", "ferrari-488-pista", "ferrari-458-italia", "ferrari-458-spider", "ferrari-296-gtb"],
+    confusableWith: ["ferrari-daytona-sp3", "ferrari-amalfi", "ferrari-488-pista", "ferrari-458-italia", "ferrari-458-spider", "ferrari-296-gtb", "ferrari-roma", "ferrari-812-superfast", "ferrari-laferrari"],
     traits: {
       // STRUCTURED GEOMETRY ONLY: the SF90 discriminator is the CLOSED C / annular lamp with an
       // open slot — an actual shape signature, not generic "matrix LED" marketing wording.
       headlight_shape: {
         name: "closed_c_annular_lamp_with_open_slot",
         positiveKeywords: ["c-shaped", "c shaped", "c-clamp", "annular lamp", "ring shaped lamp", "open slot in the lamp", "slotted lamp", "closed c daytime running light", "c shaped daytime running light"],
-        incompatibleKeywords: ["horizontal eyelid covers", "retractable slat cover", "round bug eye", "fried egg", "teardrop", "teardrop headlight", "elongated vertical", "vertical lens", "tall narrow lamp", "lamp bar"]
+        incompatibleKeywords: ["horizontal eyelid covers", "retractable slat cover", "round bug eye", "fried egg", "teardrop", "teardrop headlight", "elongated vertical", "vertical lens", "tall narrow lamp", "lamp bar", "horizontal led strip", "horizontal strip", "horizontal lamp"]
       },
       front_intake_grille: {
         name: "open_nose_wing_diffuser",
         positiveKeywords: ["open nose wing", "front diffuser channel", "low slung slotted intake", "lower bumper splitter", "shut-off gurney", "gurney"],
-        incompatibleKeywords: ["horizontal strakes front", "slatted front bumper", "oval grille"]
+        incompatibleKeywords: ["horizontal strakes front", "slatted front bumper", "oval grille", "horizontal slat", "horizontal slats", "horizontal strakes"]
+      },
+      hood_geometry: {
+        name: "s_duct_hood_extractor_channel",
+        positiveKeywords: ["s-duct", "hood air extractor", "central hood duct", "hood extractor channel", "deep bonnet channel"],
+        incompatibleKeywords: ["smooth hood without vents", "hood without vents or louvers", "no visible vents or louvers", "slight bulge in the center"]
       },
       side_intake_type: {
         name: "high_mounted_rear_haunch_intakes",
@@ -4075,7 +4444,7 @@ var MORPHOLOGICAL_FINGERPRINTS = [
     model: "296 GTB",
     generation: "F171",
     proportionsDescription: "Mid-engine two-seat berlinetta with a short low nose, recessed lamp scoops, flying-buttress rear deck and a single central exhaust",
-    confusableWith: ["ferrari-sf90-stradale", "ferrari-458-italia", "ferrari-458-spider", "ferrari-amalfi", "ferrari-daytona-sp3"],
+    confusableWith: ["ferrari-sf90-stradale", "ferrari-458-italia", "ferrari-458-spider", "ferrari-amalfi", "ferrari-daytona-sp3", "ferrari-488-pista", "ferrari-roma", "ferrari-812-superfast", "ferrari-laferrari"],
     traits: {
       proportions: {
         name: "mid_engine_two_seat_berlinetta",
@@ -4111,6 +4480,114 @@ var MORPHOLOGICAL_FINGERPRINTS = [
         name: "active_rear_spoiler_above_a_centre_exit",
         positiveKeywords: ["active rear spoiler above the centre exit", "integrated deployable spoiler", "body-colour rear spoiler"],
         incompatibleKeywords: ["towering swan-neck wing", "full-width horizontal rear strakes", "integrated lip spoiler above strakes"]
+      }
+    }
+  },
+  // ── FERRARI ROMA ──
+  {
+    vehicleId: "ferrari-roma",
+    make: "Ferrari",
+    model: "Roma",
+    generation: "F169",
+    proportionsDescription: "Front-mid engine 2+2 grand tourer with shark-nose styling, monolithic body-color perforated front grille, horizontal DRL lightbar, and quad circular taillights",
+    confusableWith: ["ferrari-amalfi", "ferrari-daytona-sp3", "ferrari-sf90-stradale", "ferrari-296-gtb", "ferrari-458-italia", "ferrari-458-spider", "ferrari-488-pista", "ferrari-812-superfast", "ferrari-laferrari"],
+    traits: {
+      proportions: {
+        name: "front_mid_engine_2_plus_2_grand_tourer",
+        positiveKeywords: ["front-engine gt", "front-mid engine", "long hood short rear deck", "2+2 coupe", "grand tourer proportions", "shark nose", "shark-nose"],
+        incompatibleKeywords: ["mid-engine", "cab-forward", "rear-engine", "suv"]
+      },
+      headlight_shape: {
+        name: "horizontal_drl_strip_bisecting_headlamp",
+        positiveKeywords: ["horizontal drl", "horizontal light strip bisecting", "horizontal led strip through headlight", "bisecting led strip", "horizontal slit drl", "bisecting drl", "horizontal slit lightbar bisecting"],
+        incompatibleKeywords: ["vertical lens", "swept-back headlight", "c-shaped", "c shaped", "c-clamp", "retractable covers", "lamp bar along the nose", "drl blade", "thin horizontal lamp bar"]
+      },
+      front_intake_grille: {
+        name: "monolithic_body_color_perforated_grille",
+        positiveKeywords: ["body-color perforated", "body-colour perforated", "perforated front grille", "monolithic grille", "body-color mesh grille", "perforated body color"],
+        incompatibleKeywords: ["horizontal slats", "horizontal strakes front", "slatted front bumper", "open nose wing", "s-duct"]
+      },
+      rear_architecture_and_exhaust: {
+        name: "horizontal_gem_strip_taillights_quad_round_exhaust",
+        positiveKeywords: ["horizontal strip taillights", "linear taillights embedded", "gem taillights", "quad round exhaust", "quad circular exhaust", "four round exhaust tips"],
+        incompatibleKeywords: ["horizontal rear strakes", "single central exhaust", "triple central exhaust", "single round taillights", "squircle taillights"]
+      },
+      roofline_greenhouse: {
+        name: "sweeping_fastback_coupe_greenhouse",
+        positiveKeywords: ["sweeping fastback", "flowing rear window", "integrated active mobile rear spoiler", "mobile spoiler below rear screen"],
+        incompatibleKeywords: ["flying buttress", "targa visor", "wraparound visor canopy", "open-top", "retractable hardtop"]
+      }
+    }
+  },
+  // ── FERRARI 812 SUPERFAST ──
+  {
+    vehicleId: "ferrari-812-superfast",
+    make: "Ferrari",
+    model: "812 Superfast",
+    generation: "F152M",
+    proportionsDescription: "Front-mid engine V12 grand tourer berlinetta with long hood, hood air carving bypass ducts next to headlights, dual round taillights per side, and quad exhaust",
+    confusableWith: ["ferrari-roma", "ferrari-amalfi", "ferrari-daytona-sp3", "ferrari-sf90-stradale", "ferrari-296-gtb", "ferrari-458-italia", "ferrari-458-spider", "ferrari-488-pista", "ferrari-laferrari"],
+    traits: {
+      proportions: {
+        name: "front_mid_engine_v12_fastback_berlinetta",
+        positiveKeywords: ["front-engine v12", "front-mid engine", "long sculpted hood", "high tail fastback", "muscular front-engine berlinetta"],
+        incompatibleKeywords: ["cab-forward", "mid-engine two-seater", "rear-engine", "suv"]
+      },
+      headlight_shape: {
+        name: "full_led_headlights_with_hood_intake_air_carving",
+        positiveKeywords: ["headlight with hood air intake", "hood air bypass duct next to headlight", "carved hood vent beside headlight", "vertical hood intake next to headlamp"],
+        incompatibleKeywords: ["horizontal eyelid covers", "retractable covers", "c-clamp", "c-shaped", "c shaped"]
+      },
+      front_intake_grille: {
+        name: "wide_open_black_mouth_active_flaps",
+        positiveKeywords: ["wide black mesh mouth", "front intake with active flaps", "open wide lower grille"],
+        incompatibleKeywords: ["body-color perforated", "horizontal strakes front", "slatted front bumper"]
+      },
+      rear_architecture_and_exhaust: {
+        name: "quad_round_taillights_and_quad_exhaust_pipes",
+        positiveKeywords: ["four round taillights", "dual round taillights each side", "quad circular taillights", "quad round exhaust", "four exhaust tips"],
+        incompatibleKeywords: ["horizontal rear strakes", "single central exhaust", "squircle taillights", "horizontal strip taillights", "triple central exhaust"]
+      },
+      fender_architecture: {
+        name: "sculpted_door_flank_air_extractor",
+        positiveKeywords: ["aerodynamic front fender air extractor", "deep door scalloping", "flank air channel flowing from front wheel"],
+        incompatibleKeywords: ["floating tendon", "triple fender gills"]
+      }
+    }
+  },
+  // ── FERRARI LAFERRARI ──
+  {
+    vehicleId: "ferrari-laferrari",
+    make: "Ferrari",
+    model: "LaFerrari",
+    generation: "F150",
+    proportionsDescription: "Pinnacle flagship hybrid hypercar with F1 sharp arrow nose nosecone, downward-sloping hood S-duct, butterfly doors, and low canopy",
+    confusableWith: ["ferrari-daytona-sp3", "ferrari-sf90-stradale", "ferrari-296-gtb", "ferrari-amalfi", "ferrari-458-italia", "ferrari-458-spider", "ferrari-488-pista", "ferrari-roma", "ferrari-812-superfast"],
+    traits: {
+      proportions: {
+        name: "f1_inspired_hypercar_proportions",
+        positiveKeywords: ["f1 nose", "f1 nosecone", "arrowhead nose", "f1 front wing nose", "extremely low hypercar", "bubble canopy"],
+        incompatibleKeywords: ["front-engine gt", "front-mid engine", "suv", "sedan"]
+      },
+      headlight_shape: {
+        name: "elongated_l_shaped_swept_back_led",
+        positiveKeywords: ["l-shaped headlight", "swept-back f150 headlamp", "elongated narrow swept-back led"],
+        incompatibleKeywords: ["c-shaped", "c-clamp", "horizontal eyelid covers", "retractable covers", "round bug eye"]
+      },
+      front_intake_grille: {
+        name: "central_f1_vertical_support_pillar_flanked_by_giant_mouths",
+        positiveKeywords: ["central vertical pylon in front grille", "f1 center wing pylon", "f1 nosecone vertical strut", "split front grille with central pylon"],
+        incompatibleKeywords: ["horizontal slats", "horizontal strakes front", "slatted front bumper", "body-color perforated"]
+      },
+      roofline_greenhouse: {
+        name: "black_roof_narrow_cockpit_visor_canopy",
+        positiveKeywords: ["black roof canopy", "narrow cockpit bubble", "f1 cockpit canopy", "wraparound windshield with single wiper"],
+        incompatibleKeywords: ["convertible soft top", "front-engine coupe"]
+      },
+      rear_architecture_and_exhaust: {
+        name: "single_round_taillights_quad_exhaust_flanking_giant_active_diffuser",
+        positiveKeywords: ["single round taillights each side", "quad exhaust tips flanking diffuser", "prominent rear active diffuser flaps"],
+        incompatibleKeywords: ["horizontal rear strakes", "single central exhaust", "squircle taillights"]
       }
     }
   },
@@ -6284,22 +6761,33 @@ ${graphValidation.errors.join("\n")}`);
       name: `${c.make} ${c.model}`,
       score: c.confidence
     })) || [];
-    const zonedEvidence = buildZonedEvidence([
-      visualEvidence.body_style || "",
-      visualEvidence.grille || "",
-      visualEvidence.headlights || "",
-      visualEvidence.taillights || "",
-      visualEvidence.hood || "",
-      visualEvidence.roofline || "",
-      visualEvidence.windows || "",
-      visualEvidence.wheels || "",
-      visualEvidence.exhaust || "",
-      visualEvidence.aero || "",
-      visualEvidence.badges || "",
-      visualEvidence.body_proportions || "",
-      ...visualEvidence.distinctive_details || [],
-      ...evidenceList || []
-    ]);
+    const zonedEvidence = buildZonedEvidence(
+      [
+        visualEvidence.body_style || "",
+        visualEvidence.grille || "",
+        visualEvidence.headlights || "",
+        visualEvidence.taillights || "",
+        visualEvidence.hood || "",
+        visualEvidence.roofline || "",
+        visualEvidence.windows || "",
+        visualEvidence.wheels || "",
+        visualEvidence.exhaust || "",
+        visualEvidence.aero || "",
+        visualEvidence.badges || "",
+        visualEvidence.body_proportions || "",
+        ...visualEvidence.distinctive_details || [],
+        ...evidenceList || []
+      ],
+      {
+        headlights: visualEvidence.headlights || "",
+        grille: visualEvidence.grille || "",
+        hood: visualEvidence.hood || "",
+        side: [visualEvidence.aero, visualEvidence.body_proportions].filter(Boolean).join(" . "),
+        roof: [visualEvidence.roofline, visualEvidence.windows].filter(Boolean).join(" . "),
+        exhaust: visualEvidence.exhaust || "",
+        taillights: visualEvidence.taillights || ""
+      }
+    );
     const evidenceText = zonedEvidence.full;
     const visibilityMatrix = computeVisibilityMatrix(viewpoint, evidenceText);
     const candidateFingerprints = [];
@@ -6446,7 +6934,9 @@ ${graphValidation.errors.join("\n")}`);
           (kw) => categoryText.includes(kw) && !isTermNegated(categoryText, kw)
         );
         const familySharedSet = new Set((expectedTrait.familySharedKeywords ?? []).map((k) => k.toLowerCase()));
-        const specificPositiveKws = matchedPositiveKws.filter((kw) => !familySharedSet.has(kw.toLowerCase()));
+        const specificPositiveKws = matchedPositiveKws.filter(
+          (kw) => !familySharedSet.has(kw.toLowerCase()) && !UNIVERSAL_GENERIC_TOKENS.has(kw.toLowerCase())
+        );
         const matchedOnlyFamilyShared = matchedPositiveKws.length > 0 && specificPositiveKws.length === 0;
         const matchesPositive = matchedPositiveKws.length > 0;
         const matchesContradiction = expectedTrait.incompatibleKeywords.some(
@@ -6637,8 +7127,38 @@ var HierarchicalClassifier = class {
    * determines candidate separation, and bounds specificity.
    */
   classify(input) {
-    const { visual_evidence, viewpoint, raw_candidates, adversarial_result } = input;
+    const { visual_evidence, viewpoint, adversarial_result } = input;
     const globalContradictions = [];
+    const unifiedCandidateMap = /* @__PURE__ */ new Map();
+    for (const c of input.raw_candidates || []) {
+      const canon = canonicalVehicleRegistry.lookupByTextOrAlias(c.name, input.raw_make || void 0);
+      const canonKey = canon ? canon.vehicleId : c.name.toLowerCase().trim();
+      const unifiedName = canon && canon.displayName ? canon.displayName : c.name || "Unknown";
+      const existing = unifiedCandidateMap.get(canonKey);
+      if (existing) {
+        existing.score = Math.max(existing.score, c.score || 0.5);
+        for (const s of c.supporting_evidence || []) {
+          if (!existing.supporting_evidence.includes(s)) existing.supporting_evidence.push(s);
+        }
+        for (const ct of c.contradictions || []) {
+          if (!existing.contradictions.includes(ct)) existing.contradictions.push(ct);
+        }
+        for (const u of c.unobservable_features || []) {
+          if (!existing.unobservable_features?.includes(u)) existing.unobservable_features?.push(u);
+        }
+      } else {
+        unifiedCandidateMap.set(canonKey, {
+          name: unifiedName,
+          score: c.score || 0.5,
+          supporting_evidence: [...c.supporting_evidence || []],
+          contradictions: [...c.contradictions || []],
+          unobservable_features: [...c.unobservable_features || []],
+          invalid: c.invalid,
+          canonicalVehicleId: canon ? canon.vehicleId : void 0
+        });
+      }
+    }
+    const raw_candidates = Array.from(unifiedCandidateMap.values());
     const evidenceText = [
       visual_evidence.body_style || "",
       visual_evidence.grille || "",
@@ -6656,7 +7176,7 @@ var HierarchicalClassifier = class {
     ].join(" ").toLowerCase();
     const observedBody = (visual_evidence.body_style || "").toLowerCase();
     const observedRoof = (visual_evidence.roofline || "").toLowerCase();
-    const openTopPattern = /\b(convertible|spider|spyder|cabriolet|roadster|soft[\s-]?top|canvas[\s-]?roof|fabric[\s-]?roof|targa|open[\s-]?top|speedster|boxster|barchetta|drophead|black\s+roof|contrasting\s+roof)\b/i;
+    const openTopPattern = /\b(convertible|spider|spyder|cabriolet|roadster|soft[\s-]?top|canvas[\s-]?(?:roof|top)|fabric[\s-]?(?:roof|top)|open[\s-]?top|speedster|boxster|barchetta|drophead)\b/i;
     const isObservedOpenTop = openTopPattern.test(observedBody) || openTopPattern.test(observedRoof) || openTopPattern.test(evidenceText) || openTopPattern.test(input.raw_model || "") && !observedBody.includes("fixed") && !observedRoof.includes("fixed") || openTopPattern.test(input.raw_variant || "") && !observedBody.includes("fixed") && !observedRoof.includes("fixed");
     const isObservedCoupe = (/\b(coupe|hardtop|fixed[\s-]?roof)\b/i.test(observedBody) || /\b(coupe|fixed[\s-]?roof)\b/i.test(observedRoof)) && !isObservedOpenTop;
     const isObservedSuv = /\b(suv|crossover)\b/i.test(observedBody);
@@ -6781,7 +7301,8 @@ var HierarchicalClassifier = class {
       }
       const canonCand = canonicalVehicleRegistry.lookupByTextOrAlias(candidate.name, candidateMake || void 0);
       const candBodyLower = (canonCand?.bodyStyle || "").toLowerCase();
-      const isCandidateOpenTop = candBodyLower === "convertible" || candBodyLower === "targa" || candBodyLower === "roadster" || /\b(spider|spyder|cabriolet|convertible|roadster|targa|speedster|boxster|barchetta|miata|cielo)\b/i.test(candNameLower);
+      const isCandidateTarga = candBodyLower === "targa" || /\btarga\b/i.test(candNameLower);
+      const isCandidateOpenTop = candBodyLower === "convertible" || candBodyLower === "roadster" || isCandidateTarga || /\b(spider|spyder|cabriolet|convertible|roadster|speedster|boxster|barchetta|miata|cielo)\b/i.test(candNameLower);
       const isCandidateCoupe = (candBodyLower === "coupe" || !candBodyLower && (candNameLower.includes("coupe") || candNameLower.includes("gt3"))) && !isCandidateOpenTop;
       const isCandidateSuv = candBodyLower === "suv" || /\b(suv|crossover|macan|cayenne|urac?an\s+sterrato|purosangue|cullinan|bentayga|dbx)\b/i.test(candNameLower);
       const isCandidateSedan = candBodyLower === "sedan" || /\b(sedan|saloon|limousine|panamera|taycan|flying\s+spur|phantom|ghost)\b/i.test(candNameLower);
@@ -6799,7 +7320,9 @@ var HierarchicalClassifier = class {
           score += 0.1;
         }
       } else if (isObservedCoupe) {
-        if (isCandidateOpenTop) {
+        const isRetractableHardtopSpider = /\b(458\s+spider|488\s+spider|f8\s+spider|california|portofino)\b/i.test(candNameLower);
+        const hasExplicitFixedGlassProof = /\b(?:glass\s+(?:rear\s+)?(?:engine\s+cover|hatch|screen)|fixed\s+coupe\s+roof)\b/i.test(evidenceText);
+        if (isCandidateOpenTop && !isCandidateTarga && !(isRetractableHardtopSpider && !hasExplicitFixedGlassProof)) {
           candContradictions.push(`Body style mismatch: Observed fixed-roof coupe vs candidate open-top convertible`);
           score -= 0.6;
         } else if (isCandidateSuv) {
@@ -6848,25 +7371,29 @@ var HierarchicalClassifier = class {
         }
       }
       const hasNegativeStrakes = /\b(?:without|no|lacks?|devoid\s+of)\s+(?:horizontal\s+)?strakes?\b/i.test(evidenceText);
-      const hasDaytonaIconaCues = !hasNegativeStrakes && /\b(horizontal\s+strakes?|horizontal\s+slats?|headlight\s+eyelids?|eyelid\s+covers?|partial\s+covers?|wraparound\s+visor|visor\s+canopy|fender-mounted\s+mirrors?|door\s+tops?\s+mirrors?|icona)\b/i.test(evidenceText);
-      const hasSf90Cues = /\b(sf90|shut-?off\s+gurney|c-shaped\s+(?:horizontal\s+)?(?:matrix\s+)?(?:led\s+)?headlights?|matrix\s+led|hybrid\s+supercar)\b/i.test(evidenceText) || hasNegativeStrakes;
+      const hasDaytonaIconaCues = !hasNegativeStrakes && /\b(horizontal\s+strakes?|headlight\s+eyelids?|eyelid\s+covers?|partial\s+covers?|wraparound\s+visor|visor\s+canopy|fender-mounted\s+mirrors?|door\s+tops?\s+mirrors?|icona)\b/i.test(evidenceText);
+      const hasExplicitSf90Cues = /\b(sf90|shut-?off\s+gurney|c-shaped\s+(?:matrix\s+)?(?:led\s+)?headlights?|c-clamp\s+headlights?)\b/i.test(evidenceText);
+      const isFrontViewpoint = viewpoint === "front" || viewpoint === "front_3q";
       if (hasDaytonaIconaCues) {
         if (candNameLower.includes("daytona") || candNameLower.includes("sp3")) {
-          candSupporting.push("Observed horizontal strakes, headlight eyelids, and wraparound visor canopy uniquely match Ferrari Daytona SP3 Icona design");
+          candSupporting.push("Observed horizontal strakes, headlight eyelids, or wraparound visor canopy uniquely match Ferrari Daytona SP3 Icona design");
           score += 0.25;
         } else if (candidateMake === "ferrari" && (candNameLower.includes("sf90") || candNameLower.includes("296") || candNameLower.includes("f8") || candNameLower.includes("roma") || candNameLower.includes("portofino") || candNameLower.includes("488") || candNameLower.includes("458"))) {
           candContradictions.push(`Observed horizontal strakes, headlight eyelids, and wraparound canopy contradict ${candidate.name} architecture`);
           score -= 0.45;
         }
       }
-      if (hasSf90Cues) {
+      if (hasExplicitSf90Cues) {
         if (candNameLower.includes("sf90")) {
-          candSupporting.push("Observed C-shaped matrix LED headlights or shut-off Gurney match Ferrari SF90 Stradale architecture");
+          candSupporting.push("Observed C-shaped headlights or shut-off Gurney match Ferrari SF90 Stradale architecture");
           score += 0.25;
         } else if (candNameLower.includes("daytona") || candNameLower.includes("sp3")) {
-          candContradictions.push("Observed C-shaped matrix LED headlights, lack of horizontal strakes, or shut-off Gurney contradict Ferrari Daytona SP3");
+          candContradictions.push("Observed C-shaped headlights or shut-off Gurney contradict Ferrari Daytona SP3 architecture");
           score -= 0.5;
         }
+      } else if (hasNegativeStrakes && !isFrontViewpoint && (candNameLower.includes("daytona") || candNameLower.includes("sp3"))) {
+        candContradictions.push("Confirmed absence of characteristic horizontal rear strakes contradicts Ferrari Daytona SP3");
+        score -= 0.5;
       }
       const has458Cues = /\b(triple\s+(?:central\s+)?exhaust|three\s+(?:central\s+)?exhaust|mustache\s+aero|deformable\s+winglets|vertical\s+swept-?back\s+headlights?|flying\s+buttress(?:es)?)\b/i.test(evidenceText);
       if (has458Cues) {
@@ -6991,8 +7518,15 @@ var HierarchicalClassifier = class {
           const fgDisplayLower = fgCand.displayName.toLowerCase();
           const fgMakeModel = `${fgCand.make} ${fgCand.model}`.toLowerCase();
           const fgModelLower = fgCand.model.toLowerCase();
-          const isCSpider = /\b(spider|spyder|cabriolet|convertible|targa|roadster)\b/i.test(cNameLower);
-          const isFgSpider = /\b(spider|spyder|cabriolet|convertible|targa|roadster)\b/i.test(fgDisplayLower) || /\b(spider|spyder|cabriolet|convertible|targa|roadster)\b/i.test(fgModelLower);
+          if (c.canonicalVehicleId && c.canonicalVehicleId === fgCand.vehicleId) {
+            return true;
+          }
+          const cCanon = canonicalVehicleRegistry.lookupByTextOrAlias(c.name, fgCand.make);
+          if (cCanon && cCanon.vehicleId === fgCand.vehicleId) {
+            return true;
+          }
+          const isCSpider = /\b(spider|spyder|cabriolet|convertible|roadster)\b/i.test(cNameLower);
+          const isFgSpider = /\b(spider|spyder|cabriolet|convertible|roadster)\b/i.test(fgDisplayLower) || /\b(spider|spyder|cabriolet|convertible|roadster)\b/i.test(fgModelLower);
           if (isCSpider !== isFgSpider) {
             return false;
           }
@@ -7037,7 +7571,8 @@ var HierarchicalClassifier = class {
             supporting_evidence: fgCand.supportingEvidence,
             contradictions: fgCand.contradictions,
             unobservable_features: fgCand.unobservableTraits,
-            invalid: false
+            invalid: false,
+            canonicalVehicleId: fgCand.vehicleId
           });
         }
       }
@@ -7084,13 +7619,6 @@ var HierarchicalClassifier = class {
       if (bNet !== aNet) {
         return bNet - aNet;
       }
-      const rawLower = (input.raw_model || "").toLowerCase();
-      if (rawLower) {
-        const aMatchesRaw = a.name.toLowerCase().includes(rawLower);
-        const bMatchesRaw = b.name.toLowerCase().includes(rawLower);
-        if (aMatchesRaw && !bMatchesRaw) return -1;
-        if (bMatchesRaw && !aMatchesRaw) return 1;
-      }
       return 0;
     };
     completeCandidates.sort(compareCandidates);
@@ -7108,9 +7636,10 @@ var HierarchicalClassifier = class {
     const secondCandidate = validCandidates[1] || null;
     const separation = topCandidate ? Number((topCandidate.score - (secondCandidate?.score || 0)).toFixed(3)) : 0;
     const anyModelSpecificEvidence = fgResult.scoredCandidates.length > 0 ? fgResult.scoredCandidates.some((c) => c.specificEvidenceCount > 0) : validCandidates.some((c) => (c.supporting_evidence?.length ?? 0) > 0);
-    let resolvedModelFamily = input.raw_model;
-    let resolvedGeneration = input.raw_generation;
-    let resolvedVariant = input.raw_variant;
+    const isTiedOrDeadlocked = validCandidates.length >= 2 && separation === 0;
+    let resolvedModelFamily = null;
+    let resolvedGeneration = null;
+    let resolvedVariant = input.raw_variant || null;
     let canonicalRecord = null;
     if (adversarial_result && !adversarial_result.verified) {
       resolvedVariant = null;
@@ -7132,6 +7661,7 @@ var HierarchicalClassifier = class {
     let specificity = "make";
     let numericSpecificity = 0;
     let reason = "Vehicle manufacturer identified with high visual confidence.";
+    let reasonCustomizedByGate = false;
     if (allHaveSevereMismatch || topHasSevereMismatch && (topCandidate?.score || 0) < 0.5) {
       resolvedMake = null;
       resolvedModelFamily = null;
@@ -7140,6 +7670,14 @@ var HierarchicalClassifier = class {
       specificity = "make";
       numericSpecificity = 0;
       reason = "Severe architectural contradiction detected: observed visual cues directly contradict proposed candidates.";
+    } else if (!anyModelSpecificEvidence || isTiedOrDeadlocked) {
+      resolvedModelFamily = null;
+      resolvedGeneration = null;
+      resolvedVariant = null;
+      canonicalRecord = null;
+      specificity = "make";
+      numericSpecificity = 0;
+      reason = isTiedOrDeadlocked ? "Candidate comparison resulted in an exact tie: insufficient model-specific evidence to separate candidates." : `Model family is unconfirmed: no model-specific evidence was observable to separate ${resolvedMake || "manufacturer"} candidates from this angle.`;
     } else if (topCandidate && topCandidate.score >= 0.5) {
       const canonMatch = canonicalVehicleRegistry.lookupByTextOrAlias(topCandidate.name, resolvedMake || void 0);
       if (canonMatch) {
@@ -7184,7 +7722,6 @@ var HierarchicalClassifier = class {
         }
         numericSpecificity = resolvedVariant ? 4 : resolvedGeneration ? 2 : 1;
       }
-      let reasonCustomizedByGate = false;
       const isMcLaren675 = topCandidate.name.toLowerCase().includes("675lt");
       const isFrontView = viewpoint === "front" || viewpoint === "front_3q";
       const hasFront675Proof = evidenceText.includes("front fender louver") || evidenceText.includes("carbon endplate") || evidenceText.includes("675lt");
@@ -7205,6 +7742,36 @@ var HierarchicalClassifier = class {
         numericSpecificity = resolvedGeneration ? 2 : 1;
         reason = `Identified as Porsche 911 (${resolvedGeneration || "992"}). Turbo variant unconfirmed without observable rear haunch intercooler scoops or extending wing.`;
         reasonCustomizedByGate = true;
+      }
+      const isF142Family = resolvedMake?.toLowerCase() === "ferrari" && (topCandidate.name.toLowerCase().includes("458") || String(resolvedModelFamily).toLowerCase().includes("458"));
+      if (isF142Family) {
+        const hasExplicitSpiderProof = /\b(?:open[\s-]?top|open[\s-]?cockpit|retractable\s+(?:hardtop|aluminum\s+roof|roof)|spider\s+tonneau|dual\s+(?:rear\s+)?buttresses?|buttresses\s+behind|convertible\s+(?:spider|top)|stowed\s+roof|drop[\s-]?top)\b/i.test(evidenceText);
+        const hasExplicitCoupeProof = /\b(?:sloping\s+(?:full\s+)?glass\s+(?:rear\s+)?(?:hatch|screen|engine\s+cover)|rear\s+glass\s+(?:engine\s+)?(?:cover|hatch)|fixed\s+coupe\s+roof|glass\s+engine\s+(?:lid|bonnet)|transparent\s+engine\s+cover)\b/i.test(evidenceText);
+        if (hasExplicitSpiderProof && !hasExplicitCoupeProof) {
+          resolvedModelFamily = "458 Spider";
+          resolvedVariant = "Spider";
+          if (!resolvedGeneration) resolvedGeneration = "F142";
+          numericSpecificity = 4;
+          specificity = "variant";
+          reason = `Identified as Ferrari 458 Spider (${resolvedGeneration}). Confirmed with observable open-top/spider roof architecture.`;
+          reasonCustomizedByGate = true;
+        } else if (hasExplicitCoupeProof && !hasExplicitSpiderProof) {
+          resolvedModelFamily = "458 Italia";
+          resolvedVariant = null;
+          if (!resolvedGeneration) resolvedGeneration = "F142";
+          numericSpecificity = 2;
+          specificity = "generation";
+          reason = `Identified as Ferrari 458 Italia (${resolvedGeneration}). Confirmed with observable fixed coupe roof and rear glass engine cover.`;
+          reasonCustomizedByGate = true;
+        } else {
+          resolvedModelFamily = "458";
+          resolvedVariant = null;
+          if (!resolvedGeneration) resolvedGeneration = "F142";
+          numericSpecificity = 2;
+          specificity = "generation";
+          reason = `Identified as Ferrari 458 (${resolvedGeneration}). Exact variant (Italia Coupe vs Spider) unconfirmed without observable rear glass engine cover or open-top roof mechanics.`;
+          reasonCustomizedByGate = true;
+        }
       }
       const isHighVariant = Boolean(
         resolvedVariant && /(csl|gt3\s*rs|gt2\s*rs|svj|sto|pista|weissach)/i.test(resolvedVariant) || topCandidate?.name && /(csl|gt3\s*rs|gt2\s*rs|svj|sto|pista)/i.test(topCandidate.name) || resolvedModelFamily && /(csl|gt3\s*rs|gt2\s*rs|svj|sto|pista)/i.test(resolvedModelFamily)
@@ -7263,8 +7830,9 @@ var HierarchicalClassifier = class {
     const needsAdversarial = Boolean(
       isExoticOrHighVariant && topCandidate && topCandidate.score >= 0.65 && !adversarial_result
     );
-    const finalVehicleId = canonicalRecord?.vehicleId || topCandidate && canonicalVehicleRegistry.lookupByTextOrAlias(topCandidate.name, resolvedMake || void 0)?.vehicleId;
-    const finalDisplayName = canonicalRecord?.displayName || (canonicalRecord ? `${canonicalRecord.make} ${canonicalRecord.model}` : topCandidate?.name || `${resolvedMake} ${resolvedModelFamily}`);
+    const isF142Unconfirmed = resolvedMake?.toLowerCase() === "ferrari" && resolvedModelFamily === "458" && !resolvedVariant;
+    const finalVehicleId = isF142Unconfirmed ? canonicalRecord?.vehicleId || "ferrari-458-italia" : resolvedModelFamily && canonicalRecord ? canonicalRecord.vehicleId : resolvedModelFamily && topCandidate ? canonicalVehicleRegistry.lookupByTextOrAlias(topCandidate.name, resolvedMake || void 0)?.vehicleId : void 0;
+    const finalDisplayName = isF142Unconfirmed ? `${resolvedMake} 458 (${resolvedGeneration || "F142"})` : resolvedModelFamily && canonicalRecord ? canonicalRecord.displayName : resolvedModelFamily && canonicalRecord ? `${canonicalRecord.make} ${canonicalRecord.model}` : resolvedModelFamily && topCandidate ? topCandidate.name : resolvedMake ? `${resolvedMake} (Model Family Uncertain)` : void 0;
     return {
       identification: {
         make: resolvedMake,
@@ -7281,19 +7849,22 @@ var HierarchicalClassifier = class {
       reason,
       needs_adversarial_verification: needsAdversarial,
       needs_neutral_verification: Boolean(
-        fgResult.needsVerification || fgResult.rawConflict || !anyModelSpecificEvidence || separation < 0.15
+        !reasonCustomizedByGate && anyModelSpecificEvidence && (fgResult.needsVerification || fgResult.rawConflict || separation < 0.15)
       ),
       raw_conflict: fgResult.rawConflict,
       canonical_vehicle_id: finalVehicleId,
       canonical_display_name: finalDisplayName,
       discriminator_identity: (() => {
+        if (!resolvedModelFamily) return resolvedMake ? `${resolvedMake} (Model Family Uncertain)` : void 0;
+        if (isF142Unconfirmed) return finalDisplayName;
         if (canonicalRecord) return canonicalRecord.displayName;
         if (fgResult.topCandidate) return fgResult.topCandidate.displayName;
         return topCandidate?.name || void 0;
       })(),
+      gate_customized: reasonCustomizedByGate,
       // A raw-provider hypothesis that the discriminator could not evaluate is never a validated
       // exact-model result, even if it wins because no evidence-grounded winner existed.
-      evidence_grounded: (fgResult.scoredCandidates.length > 0 ? fgResult.evidenceGrounded : Boolean(topCandidate && (topCandidate.supporting_evidence?.length || 0) > 0)) && anyModelSpecificEvidence && !(topCandidate && rawHypothesisDemoted.has(topCandidate.name))
+      evidence_grounded: (fgResult.scoredCandidates.length > 0 ? fgResult.evidenceGrounded : Boolean(topCandidate && (topCandidate.supporting_evidence?.length || 0) > 0)) && Boolean(anyModelSpecificEvidence) && !(topCandidate && rawHypothesisDemoted.has(topCandidate.name))
     };
   }
 };
@@ -8471,6 +9042,28 @@ function resolveCanonicalVehicleSpecs(params) {
   const normModel = normalizeKey(params.model);
   const normGen = normalizeKey(params.generation);
   const normTrim = normalizeKey(params.trim);
+  if (!normModel) {
+    return {
+      isVerified: false,
+      canonicalId: null,
+      make: params.make || "Unknown Make",
+      model: null,
+      generation: void 0,
+      trim: void 0,
+      bodyStyle: "Unspecified",
+      engine: "Verified Specs Unavailable",
+      horsepower: null,
+      torqueNm: null,
+      topSpeedKmH: null,
+      zeroToHundredSec: null,
+      kerbWeightKg: null,
+      productionYears: "N/A",
+      originCountry: "Global",
+      rarity: "rare",
+      interestingFact: "Vehicle specifications require verified model identification.",
+      briefHistory: void 0
+    };
+  }
   const canonicalId = (params.canonicalVehicleId || `${params.make || "unknown"}-${params.model || "unknown"}`).toLowerCase().replace(/[^a-z0-9]+/g, "-");
   if (params.canonicalVehicleId) {
     const directMatch = APEX_LOCAL_VEHICLE_DATABASE.find((v) => v.id === params.canonicalVehicleId);
@@ -8509,12 +9102,12 @@ function resolveCanonicalVehicleSpecs(params) {
     let score = 0;
     if (vModel === normModel) {
       score += 10;
-    } else if (normModel.includes(vModel) || vModel.includes(normModel)) {
+    } else if (normModel.length >= 3 && vModel.length >= 3 && (normModel.includes(vModel) || vModel.includes(normModel))) {
       score += 7;
     } else {
       const modelTokens = normModel.split(" ");
       const vTokens = vModel.split(" ");
-      const matchCount = modelTokens.filter((t) => t.length > 1 && vTokens.includes(t)).length;
+      const matchCount = modelTokens.filter((t) => t.length > 2 && vTokens.includes(t)).length;
       if (matchCount > 0) score += matchCount * 3;
     }
     if (score > 0) {
@@ -8558,7 +9151,7 @@ function resolveCanonicalVehicleSpecs(params) {
   for (const p of CAR_PRESETS) {
     const pMake = normalizeKey(p.make);
     const pModel = normalizeKey(p.model);
-    if ((pMake === normMake || normMake.includes(pMake)) && (pModel === normModel || normModel.includes(pModel) || pModel.includes(normModel))) {
+    if ((pMake === normMake || normMake.includes(pMake)) && (pModel === normModel || normModel.length >= 3 && pModel.length >= 3 && (normModel.includes(pModel) || pModel.includes(normModel)))) {
       return {
         isVerified: true,
         canonicalId: `preset-${p.make.toLowerCase()}-${p.model.toLowerCase()}`.replace(/[^a-z0-9]+/g, "-"),
@@ -8583,9 +9176,9 @@ function resolveCanonicalVehicleSpecs(params) {
   }
   return {
     isVerified: false,
-    canonicalId,
+    canonicalId: params.canonicalVehicleId || null,
     make: params.make || "Unknown Make",
-    model: params.model || "Unknown Model",
+    model: params.model || null,
     generation: params.generation || void 0,
     trim: params.trim || void 0,
     bodyStyle: "Coupe",
@@ -9007,17 +9600,21 @@ ${userPrompt} [/INST]`;
       ].filter(Boolean);
       const pass2Cues = Array.isArray(pass2.evidence) ? pass2.evidence : [];
       const evidenceList = Array.from(/* @__PURE__ */ new Set([...pass1Cues, ...pass2Cues, ...Array.isArray(parsed.evidence) ? parsed.evidence : []]));
+      const rawLighting = pass1.headlights || pass1.lighting_cues || pass1.headlight_and_drl_signature || (evidenceList.find((e) => /headlight|lamp|drl|eyelid/i.test(e)) ?? null);
+      const separatedLighting = rawLighting ? evidenceNormalizer.separateLightingCues(rawLighting) : { headlights: "", taillights: "" };
+      const rawGrille = pass1.grille || pass1.intake_and_grille_cues || pass1.front_fascia_and_intakes || (evidenceList.find((e) => /grille|intake|splitter|strake/i.test(e)) ?? null);
+      const separatedIntake = rawGrille ? evidenceNormalizer.separateIntakeAndAeroCues(rawGrille) : { frontGrille: "", rearDiffuser: "" };
       const visualEvidence = {
         body_style: pass1.body_silhouette || parsed.body_style || pass1.body_style || null,
-        grille: pass1.grille || pass1.intake_and_grille_cues || pass1.front_fascia_and_intakes || (evidenceList.find((e) => /grille|intake|splitter|strake/i.test(e)) ?? null),
-        headlights: pass1.headlights || pass1.lighting_cues || pass1.headlight_and_drl_signature || (evidenceList.find((e) => /headlight|lamp|drl|eyelid/i.test(e)) ?? null),
-        taillights: pass1.taillights || pass1.lighting_cues || (evidenceList.find((e) => /taillight/i.test(e)) ?? null),
+        grille: separatedIntake.frontGrille || (rawGrille && !separatedIntake.rearDiffuser ? rawGrille : null),
+        headlights: separatedLighting.headlights || (rawLighting && !separatedLighting.taillights ? rawLighting : null),
+        taillights: pass1.taillights || (separatedLighting.taillights || null) || (evidenceList.find((e) => /taillight/i.test(e)) ?? null),
         hood: pass1.hood || pass1.hood_aerodynamics || null,
-        roofline: pass1.roofline || pass1.greenhouse_and_roofline || pass1.windshield_and_mirrors || (/black\s+roof|soft[\s-]?top|canvas|fabric/i.test(pass1.dominant_color || "") ? pass1.dominant_color : null),
+        roofline: pass1.roofline || pass1.greenhouse_and_roofline || pass1.windshield_and_mirrors || (/soft[\s-]?top|canvas|fabric/i.test(pass1.dominant_color || "") ? pass1.dominant_color : null),
         windows: pass1.windows || pass1.greenhouse_and_roofline || pass1.windshield_and_mirrors || null,
         wheels: pass1.wheels || pass1.mirror_and_wheel_cues || pass1.windshield_and_mirrors || null,
         exhaust: pass1.exhaust || null,
-        aero: pass1.aero || pass1.aero_and_bodywork || (evidenceList.find((e) => /spoiler|wing|splitter|diffuser|strake/i.test(e)) ?? null),
+        aero: pass1.aero || (separatedIntake.rearDiffuser ? `rear diffuser: ${separatedIntake.rearDiffuser}` : null) || pass1.aero_and_bodywork || (evidenceList.find((e) => /spoiler|wing|splitter|diffuser|strake/i.test(e)) ?? null),
         badges: pass1.badges || pass1.badges_and_text || (evidenceList.find((e) => /badge|emblem|roundel|script/i.test(e)) ?? null),
         text: pass1.text || pass1.badges_and_text || null,
         body_proportions: pass1.body_proportions || pass1.body_silhouette || null,
@@ -9132,65 +9729,56 @@ ${verifyPrompt} [/INST]`;
       }
       let rawCandidates = [];
       const neutralBaseline = 0.5;
+      const unifiedCandidateMap = /* @__PURE__ */ new Map();
+      const addUnifiedCandidate = (name, initialScore = neutralBaseline, supporting = [], contradictions = [], unobservable = []) => {
+        if (!name || name === "Unknown Candidate") return;
+        const canon = canonicalVehicleRegistry.lookupByTextOrAlias(name, rawMake || void 0);
+        const canonKey = canon ? canon.vehicleId : name.toLowerCase().trim();
+        const unifiedDisplayName = canon ? canon.displayName || (canon.generation && canon.generation !== "Base" && canon.generation !== "Current" ? `${canon.make} ${canon.model} (${canon.generation})` : `${canon.make} ${canon.model}`) : name;
+        if (unifiedCandidateMap.has(canonKey)) {
+          const existing = unifiedCandidateMap.get(canonKey);
+          supporting.forEach((s) => {
+            if (!existing.supporting_evidence.includes(s)) existing.supporting_evidence.push(s);
+          });
+          contradictions.forEach((c) => {
+            if (!existing.contradictions.includes(c)) existing.contradictions.push(c);
+          });
+          if (!existing.unobservable_features) existing.unobservable_features = [];
+          unobservable.forEach((u) => {
+            if (!existing.unobservable_features.includes(u)) existing.unobservable_features.push(u);
+          });
+        } else {
+          unifiedCandidateMap.set(canonKey, {
+            name: unifiedDisplayName,
+            score: initialScore,
+            supporting_evidence: [...supporting],
+            contradictions: [...contradictions],
+            unobservable_features: [...unobservable]
+          });
+        }
+      };
       if (Array.isArray(parsed.candidates) && parsed.candidates.length > 0) {
-        rawCandidates = parsed.candidates.map((c) => ({
-          name: c.name || "Unknown Candidate",
-          score: neutralBaseline,
-          supporting_evidence: Array.isArray(c.supporting_evidence) ? c.supporting_evidence : [],
-          contradictions: Array.isArray(c.contradictions) ? c.contradictions : [],
-          unobservable_features: Array.isArray(c.unobservable_features) ? c.unobservable_features : []
-        }));
+        for (const c of parsed.candidates) {
+          addUnifiedCandidate(c.name, neutralBaseline, c.supporting_evidence, c.contradictions, c.unobservable_features);
+        }
       } else if (rawMake && rawModel) {
         const candidateName = rawGen ? `${rawMake} ${rawModel} (${rawGen})` : `${rawMake} ${rawModel}`;
-        rawCandidates = [
-          {
-            name: candidateName,
-            score: neutralBaseline,
-            supporting_evidence: [],
-            contradictions: [],
-            unobservable_features: []
-          }
-        ];
+        addUnifiedCandidate(candidateName, neutralBaseline);
       }
       if (rawMake) {
         const normMake = rawMake.toLowerCase();
         const peerVehicles = APEX_LOCAL_VEHICLE_DATABASE.filter((v) => v.manufacturer.toLowerCase() === normMake);
         for (const peer of peerVehicles) {
-          const peerName = peer.generation ? `${peer.manufacturer} ${peer.model} (${peer.generation})` : `${peer.manufacturer} ${peer.model}`;
-          if (!rawCandidates.some((c) => c.name.toLowerCase() === peerName.toLowerCase())) {
-            rawCandidates.push({
-              name: peerName,
-              score: neutralBaseline,
-              supporting_evidence: [],
-              contradictions: [],
-              unobservable_features: []
-            });
-          }
-          const baseName = `${peer.manufacturer} ${peer.model}`;
-          if (!rawCandidates.some((c) => c.name.toLowerCase() === baseName.toLowerCase())) {
-            rawCandidates.push({
-              name: baseName,
-              score: neutralBaseline,
-              supporting_evidence: [],
-              contradictions: [],
-              unobservable_features: []
-            });
-          }
+          const peerName = peer.generation && peer.generation !== "Base" && peer.generation !== "Current" ? `${peer.manufacturer} ${peer.model} (${peer.generation})` : `${peer.manufacturer} ${peer.model}`;
+          addUnifiedCandidate(peerName, neutralBaseline);
         }
         const fpPeers = fineGrainedModelDiscriminator.findFingerprintsByMake(rawMake);
         for (const fp of fpPeers) {
-          const fpName = fp.generation ? `${fp.make} ${fp.model} (${fp.generation})` : `${fp.make} ${fp.model}`;
-          if (!rawCandidates.some((c) => c.name.toLowerCase() === fpName.toLowerCase())) {
-            rawCandidates.push({
-              name: fpName,
-              score: neutralBaseline,
-              supporting_evidence: [],
-              contradictions: [],
-              unobservable_features: []
-            });
-          }
+          const fpName = fp.generation && fp.generation !== "Base" && fp.generation !== "Current" ? `${fp.make} ${fp.model} (${fp.generation})` : `${fp.make} ${fp.model}`;
+          addUnifiedCandidate(fpName, neutralBaseline);
         }
       }
+      rawCandidates = Array.from(unifiedCandidateMap.values());
       const valStart = Date.now();
       const classResult = hierarchicalClassifier.classify({
         visual_evidence: visualEvidence,
@@ -9217,19 +9805,20 @@ ${verifyPrompt} [/INST]`;
         has_vehicle: true
       });
       const deterministicValidationMs = Date.now() - valStart;
+      const isModelDefensible = Boolean(classResult.identification.model_family) && classResult.specificity_level !== "make";
       let finalMake = classResult.identification.make || rawMake || "Unknown Make";
-      let finalModel = classResult.identification.model_family || rawModel || "Unknown Model";
+      let finalModel = isModelDefensible ? classResult.identification.model_family : null;
       if (finalMake && finalModel && finalModel.toLowerCase().startsWith(finalMake.toLowerCase() + " ")) {
         finalModel = finalModel.slice(finalMake.length + 1).trim();
       }
-      let finalGen = classResult.identification.generation || rawGen || void 0;
-      let finalVariant = classResult.specificity_level === "variant" ? classResult.identification.variant || rawVariant || void 0 : void 0;
+      let finalGen = isModelDefensible ? classResult.identification.generation || void 0 : void 0;
+      let finalVariant = isModelDefensible && classResult.specificity_level === "variant" ? classResult.identification.variant || void 0 : void 0;
       const viableCandidates = classResult.calibrated_candidates.filter(
         (c) => !c.invalid && c.score >= 0.5 && !c.contradictions.some(
           (ct) => ct.includes("Body style mismatch") || ct.includes("Severe") || ct.includes("Hard manufacturer mismatch")
         )
       );
-      const shouldTriggerNeutralVerification = !verificationConsumed && viableCandidates.length >= 2 && (classResult.needs_neutral_verification || classResult.raw_conflict || classResult.candidate_separation < 0.15 && classResult.top_candidate && classResult.top_candidate.score > 0.5);
+      const shouldTriggerNeutralVerification = !verificationConsumed && viableCandidates.length >= 2 && Boolean(classResult.evidence_grounded) && !classResult.gate_customized && (classResult.needs_neutral_verification || classResult.raw_conflict || classResult.candidate_separation < 0.15 && classResult.top_candidate && classResult.top_candidate.score > 0.5);
       if (shouldTriggerNeutralVerification) {
         const swapPresentation = Math.random() < 0.5;
         const candA = swapPresentation ? viableCandidates[1].name : viableCandidates[0].name;
@@ -9306,7 +9895,7 @@ ${neutralVerifyPrompt} [/INST]`;
             } else if (declaresB && !declaresA) {
               winner = candB;
             } else if (declaresA && declaresB) {
-              const winnerMatch = text.match(/(?:winner|conclu(?:de|sion)|identified as|is a|focal vehicle is a?)\s*[:\-]?\s*([^\n\.]+)/i);
+              const winnerMatch = text.match(/(?:winner|conclu(?:de|sion)|identified as|is a|focal vehicle is a?)\s*[:-]?\s*([^\n.]+)/i);
               if (winnerMatch) {
                 const matchStr = winnerMatch[1].toLowerCase();
                 if (matchStr.includes("candidate a") || matchStr.includes(candANorm)) {
@@ -9353,18 +9942,28 @@ ${neutralVerifyPrompt} [/INST]`;
                   }
                 }
               }
+              if (finalModel) {
+                classResult.identification.make = finalMake;
+                classResult.identification.model_family = finalModel;
+                classResult.identification.generation = finalGen || null;
+                classResult.identification.variant = finalVariant || null;
+                classResult.specificity_level = finalVariant ? "variant" : finalGen ? "generation" : "model_family";
+                classResult.specificity_level_numeric = finalVariant ? 4 : finalGen ? 2 : 1;
+                classResult.reason = `Verified via neutral pairwise forensic examination: ${finalMake} ${finalModel}.`;
+              }
             }
           }
         } catch (neutralErr) {
           console.warn("[CloudflareVisionProvider] Neutral verification skipped or non-fatal:", neutralErr?.message);
         }
       }
+      const isUncertainModel = !finalModel || classResult.specificity_level === "make";
       const specResolution = resolveCanonicalVehicleSpecs({
         make: finalMake,
-        model: finalModel,
-        generation: finalGen,
-        trim: finalVariant,
-        canonicalVehicleId: classResult.canonical_vehicle_id
+        model: isUncertainModel ? null : finalModel,
+        generation: isUncertainModel ? null : finalGen,
+        trim: isUncertainModel ? null : finalVariant,
+        canonicalVehicleId: isUncertainModel ? null : classResult.canonical_vehicle_id
       });
       const upstreamEvidence = Object.freeze({
         provider: this.name,
@@ -9401,16 +10000,16 @@ ${neutralVerifyPrompt} [/INST]`;
         deterministic_validation: []
       };
       const openCanonicalIdentity = canonicalVehicleRegistry.resolveCanonicalIdentity({
-        vehicleId: classResult.canonical_vehicle_id || specResolution.canonicalId,
+        vehicleId: isUncertainModel ? null : classResult.canonical_vehicle_id || specResolution.canonicalId,
         make: finalMake,
-        model: finalModel,
-        generation: finalGen,
-        variant: finalVariant,
+        model: isUncertainModel ? null : finalModel,
+        generation: isUncertainModel ? null : finalGen,
+        variant: isUncertainModel ? null : finalVariant,
         source: "ensemble",
         specs: parsed.specs
       });
       const canonicalResult = {
-        status: calibConf.status,
+        status: isUncertainModel ? "uncertain" : calibConf.status,
         vehicle_present: true,
         image_quality: {
           usable: true,
@@ -9419,16 +10018,21 @@ ${neutralVerifyPrompt} [/INST]`;
         },
         viewpoint,
         visual_evidence: visualEvidence,
-        identification: classResult.identification,
+        identification: {
+          make: finalMake,
+          model_family: isUncertainModel ? null : finalModel,
+          generation: isUncertainModel ? null : finalGen || null,
+          variant: isUncertainModel ? null : finalVariant || null
+        },
         confidence: calibConf.confidence,
         candidates: classResult.calibrated_candidates,
         contradictions: classResult.contradictions,
-        specificity_level: classResult.specificity_level,
-        specificity_level_numeric: classResult.specificity_level_numeric ?? openCanonicalIdentity.specificityLevel,
+        specificity_level: isUncertainModel ? "make" : classResult.specificity_level,
+        specificity_level_numeric: isUncertainModel ? 0 : classResult.specificity_level_numeric ?? openCanonicalIdentity.specificityLevel,
         reason: classResult.reason,
         needs_retake: calibConf.needs_retake,
         raw_provider_identity: initialRawProviderIdentity || `${rawMake || ""} ${rawModel || ""}`.trim() || "Unknown",
-        discriminator_identity: classResult.discriminator_identity || openCanonicalIdentity.displayName || `${finalMake} ${finalModel}`,
+        discriminator_identity: classResult.discriminator_identity || openCanonicalIdentity.displayName || `${finalMake} ${finalModel || ""}`.trim(),
         specs: parsed.specs,
         privacy_redactions: Array.isArray(parsed.privacy_redactions) ? parsed.privacy_redactions : [],
         upstream_evidence: upstreamEvidence,
@@ -9437,17 +10041,17 @@ ${neutralVerifyPrompt} [/INST]`;
       };
       const valuation = getEstimatedMarketValue({
         make: finalMake,
-        model: finalModel,
+        model: finalModel || "Unknown",
         rarity: specResolution.rarity,
         marketValueLowUsd: parsed.specs?.market_value_low_usd,
         marketValueHighUsd: parsed.specs?.market_value_high_usd
       });
       const output = {
-        vehicleId: specResolution.canonicalId || null,
+        vehicleId: isUncertainModel ? null : specResolution.canonicalId || null,
         make: finalMake,
-        model: finalModel,
-        generation: finalGen || specResolution.generation || "Current",
-        trim: finalVariant || null,
+        model: isUncertainModel ? null : finalModel,
+        generation: isUncertainModel ? null : finalGen || specResolution.generation || "Current",
+        trim: isUncertainModel ? null : finalVariant || null,
         yearEstimate: specResolution.productionYears && specResolution.productionYears !== "N/A" ? specResolution.productionYears.split("\u2013")[0] : String(parsed.year || "2023"),
         color: pass1.dominant_color || parsed.color || "Unknown",
         rarity: specResolution.rarity || "rare",
@@ -9479,7 +10083,7 @@ ${neutralVerifyPrompt} [/INST]`;
           score: c.score,
           reason: c.contradictions.join("; ") || "Runner up candidate"
         })),
-        needsReview: calibConf.status === "uncertain"
+        needsReview: isUncertainModel || calibConf.status === "uncertain"
       };
       const totalEndToEndMs = Date.now() - startTime;
       const telemetry = {
@@ -10137,6 +10741,29 @@ var DeterministicValidator = class {
         requiresHumanReview: true
       };
     }
+    if (!output.model || output.model === "Model Family Uncertain" || output.model.toLowerCase().includes("uncertain")) {
+      return {
+        isValid: false,
+        canonicalRecord: null,
+        resolvedMake: output.make || "Unknown Make",
+        resolvedModel: "Model Family Uncertain",
+        resolvedGeneration: "Unknown",
+        resolvedTrim: void 0,
+        resolvedYear: "Unknown",
+        resolvedRarity: "common",
+        resolvedEngine: "Unknown",
+        resolvedHorsepower: 0,
+        resolvedTorqueNm: 0,
+        resolvedTopSpeed: 0,
+        resolvedZeroToHundred: 0,
+        resolvedKerbWeight: 0,
+        resolvedProductionYears: "Unknown",
+        resolvedOriginCountry: "Global",
+        resolvedBodyStyle: output.bodyStyle || "Coupe",
+        validationWarnings: ["Model family is unconfirmed or ambiguous; abstaining at manufacturer level."],
+        requiresHumanReview: true
+      };
+    }
     const warnings = [];
     let requiresReview = output.needsReview;
     let canonicalRecord = null;
@@ -10661,11 +11288,11 @@ var WorkerPool = class {
         idempotencyKey: job.idempotencyKey,
         userId: job.userId,
         status: finalStatus,
-        canonicalVehicleId: validationReport.canonicalRecord?.vehicleId || validationReport.canonicalIdentity?.canonicalId,
+        canonicalVehicleId: finalStatus === "uncertain" || finalStatus === "abstained" ? void 0 : validationReport.canonicalRecord?.vehicleId || validationReport.canonicalIdentity?.canonicalId,
         make: validationReport.resolvedMake,
-        model: validationReport.resolvedModel,
-        generation: validationReport.resolvedGeneration,
-        trim: validationReport.resolvedTrim,
+        model: finalStatus === "uncertain" || finalStatus === "abstained" ? validationReport.resolvedModel?.includes("Uncertain") ? validationReport.resolvedModel : "Model Family Uncertain" : validationReport.resolvedModel,
+        generation: finalStatus === "uncertain" || finalStatus === "abstained" ? "Unknown" : validationReport.resolvedGeneration,
+        trim: finalStatus === "uncertain" || finalStatus === "abstained" ? void 0 : validationReport.resolvedTrim,
         yearEstimate: validationReport.resolvedYear,
         color: aiResponse.output.color || "Silver",
         rarity: validationReport.resolvedRarity,
@@ -11380,6 +12007,13 @@ function getTrustedClientIp(req) {
 }
 function formatScanResponse(r) {
   const canon = r.canonicalResult;
+  const isModelUncertain = !canon?.identification?.model_family || canon?.status === "uncertain" || canon?.specificity_level === "make";
+  const finalMake = canon?.identification?.make || canon?.canonical_identity?.make || r.make || "Unknown Make";
+  const finalModel = isModelUncertain ? null : canon?.identification?.model_family || canon?.canonical_identity?.modelFamily || r.model || null;
+  const finalGen = isModelUncertain ? null : canon?.identification?.generation || canon?.canonical_identity?.generation || r.generation || null;
+  const finalTrim = isModelUncertain ? null : canon?.identification?.variant || canon?.canonical_identity?.variant || (r.trim || null);
+  const finalCanonId = isModelUncertain ? null : canon?.canonical_identity?.canonicalId || canon?.canonical_vehicle_id || r.vehicleId || null;
+  const finalDisplayName = isModelUncertain ? finalMake : canon?.canonical_identity?.displayName || `${finalMake} ${finalModel}`;
   return {
     // ── Canonical Production Vision Contract ──
     status: canon?.status || (r.status === "abstained" ? "rejected" : "identified"),
@@ -11406,18 +12040,18 @@ function formatScanResponse(r) {
       body_proportions: null,
       distinctive_details: null
     },
-    identification: canon?.identification || {
-      make: r.make,
-      model_family: r.model,
-      generation: r.generation,
-      variant: r.trim || null
+    identification: {
+      make: finalMake,
+      model_family: finalModel,
+      generation: finalGen,
+      variant: finalTrim
     },
     confidence: {
       ...canon?.confidence || {
         make_score: r.confidence?.totalScore ?? 0.95,
-        model_score: r.confidence?.totalScore ?? 0.95,
-        generation_score: Number(((r.confidence?.totalScore ?? 0.95) * 0.85).toFixed(3)),
-        variant_score: r.trim ? Number(((r.confidence?.totalScore ?? 0.95) * 0.75).toFixed(3)) : 0.2,
+        model_score: isModelUncertain ? 0.2 : r.confidence?.totalScore ?? 0.95,
+        generation_score: isModelUncertain ? 0.1 : Number(((r.confidence?.totalScore ?? 0.95) * 0.85).toFixed(3)),
+        variant_score: isModelUncertain ? 0 : r.trim ? Number(((r.confidence?.totalScore ?? 0.95) * 0.75).toFixed(3)) : 0.2,
         overall_score: r.confidence?.totalScore ?? 0.95
       },
       abstentionReason: r.confidence?.abstentionReason || canon?.confidence?.abstentionReason || null
@@ -11429,33 +12063,33 @@ function formatScanResponse(r) {
       contradictions: []
     })),
     contradictions: canon?.contradictions || [],
-    specificity_level: canon?.specificity_level || (r.trim ? "variant" : "model_family"),
+    specificity_level: isModelUncertain ? "make" : canon?.specificity_level || (r.trim ? "variant" : "model_family"),
     reason: canon?.reason || (r.confidence?.abstentionReason || "Vehicle successfully identified."),
     needs_retake: canon ? canon.needs_retake : r.confidence?.shouldAbstain ?? false,
     // ── Card & Client Specifications ──
     is_car: canon ? canon.vehicle_present : r.status !== "abstained",
     scan_id: r.scanId,
-    make: canon?.canonical_identity?.make || canon?.identification?.make || r.make,
-    model: canon?.canonical_identity?.modelFamily || r.model || canon?.identification?.model_family,
-    generation: canon?.canonical_identity?.generation || canon?.identification?.generation || r.generation,
-    trim: canon?.canonical_identity?.variant || canon?.identification?.variant || (r.trim || null),
-    canonical_display_name: canon?.canonical_identity?.displayName || `${canon?.canonical_identity?.make || r.make} ${canon?.canonical_identity?.modelFamily || r.model}`,
-    canonical_vehicle_id: canon?.canonical_identity?.canonicalId || canon?.canonical_vehicle_id || r.vehicleId || null,
-    specificity_level_numeric: canon?.specificity_level_numeric ?? canon?.canonical_identity?.specificityLevel,
-    year_estimate: r.yearEstimate,
+    make: finalMake,
+    model: finalModel,
+    generation: finalGen,
+    trim: finalTrim,
+    canonical_display_name: finalDisplayName,
+    canonical_vehicle_id: finalCanonId,
+    specificity_level_numeric: isModelUncertain ? 0 : canon?.specificity_level_numeric ?? canon?.canonical_identity?.specificityLevel ?? 1,
+    year_estimate: isModelUncertain ? "Unknown" : r.yearEstimate || "Unknown",
     color: r.color,
-    rarity: r.rarity,
-    engine: r.engine,
-    horsepower: r.horsepower,
-    torque_nm: r.torqueNm,
-    top_speed_kmh: r.topSpeedKmH,
-    zero_to_hundred_seconds: r.zeroToHundredSec,
-    kerb_weight_kg: r.kerbWeightKg,
-    production_years: r.productionYears,
-    origin_country: r.originCountry,
+    rarity: isModelUncertain ? "common" : r.rarity || "rare",
+    engine: isModelUncertain ? "Standard Engine" : r.engine || "Standard Engine",
+    horsepower: isModelUncertain ? 0 : r.horsepower || 0,
+    torque_nm: isModelUncertain ? 0 : r.torqueNm || 0,
+    top_speed_kmh: isModelUncertain ? 0 : r.topSpeedKmH || 0,
+    zero_to_hundred_seconds: isModelUncertain ? 0 : r.zeroToHundredSec || 0,
+    kerb_weight_kg: isModelUncertain ? 0 : r.kerbWeightKg || 0,
+    production_years: isModelUncertain ? "Unknown" : r.productionYears || "Unknown",
+    origin_country: isModelUncertain ? "Global" : r.originCountry || "Global",
     body_style: r.bodyStyle,
-    historical_information: r.historicalInformation,
-    interesting_facts: r.interestingFacts,
+    historical_information: isModelUncertain ? "" : r.historicalInformation || "",
+    interesting_facts: isModelUncertain ? "" : r.interestingFacts || "",
     aftermarket_parts_detected: r.aftermarketPartsDetected,
     legacy_confidence: r.confidence?.totalScore ?? 0.95,
     needs_better_angle: canon ? canon.status === "uncertain" || canon.needs_retake : r.confidence?.shouldAbstain ?? false,
@@ -11525,9 +12159,26 @@ async function handler(req, res) {
   const isGuest = !authenticatedUserId;
   const clientIp = getTrustedClientIp(req);
   const { imageBase64, mimeType, fileName, userId: clientUserId, idempotencyKey } = req.body || {};
+  console.log("[BACKEND] analyze_request_received", {
+    mimeType: mimeType || "image/jpeg",
+    payloadLength: imageBase64?.length ?? 0,
+    hasIdempotencyKey: Boolean(idempotencyKey),
+    clientIp
+  });
   if (!imageBase64 || typeof imageBase64 !== "string") {
+    console.warn("[BACKEND] image_decode_failure: Missing or non-string base64 data");
     return res.status(400).json({ error: "Invalid payload: Missing base64 image data." });
   }
+  const rawBase64 = imageBase64.includes(",") ? imageBase64.split(",")[1] : imageBase64;
+  if (!rawBase64 || rawBase64.length < 100) {
+    console.warn("[BACKEND] image_decode_failure: Payload too small or corrupt base64");
+    return res.status(400).json({ error: "Corrupt or unparseable image payload." });
+  }
+  const decodedByteLength = Math.floor(rawBase64.length * 3 / 4);
+  console.log("[BACKEND] image_decode_success", {
+    byteLength: decodedByteLength,
+    mimeType: (mimeType || "image/jpeg").toLowerCase()
+  });
   const effectiveUserId = authenticatedUserId || clientUserId || "anon_guest";
   const rateLimitKey = isGuest ? `guest:${clientIp}` : `user:${effectiveUserId}`;
   const rateCheck = await checkRateLimit(rateLimitKey, isGuest);
@@ -11543,8 +12194,8 @@ async function handler(req, res) {
       retryAfter: rateCheck.resetSeconds
     });
   }
-  if (idempotencyKey && typeof idempotencyKey === "string") {
-    const cleanKey = idempotencyKey.trim();
+  const cleanKey = idempotencyKey && typeof idempotencyKey === "string" ? idempotencyKey.trim() : null;
+  if (cleanKey) {
     const versionedIdemKey = `idem:${VISION_PIPELINE_VERSION}:${cleanKey}`;
     const idemCheck = await checkSingleTier(versionedIdemKey, 1, 3600);
     if (!idemCheck.allowed) {
@@ -11560,10 +12211,15 @@ async function handler(req, res) {
   const sanitizedMime = (mimeType || "image/jpeg").toLowerCase();
   const fullDataUrl = imageBase64.startsWith("data:") ? imageBase64 : `data:${sanitizedMime};base64,${imageBase64}`;
   try {
+    console.log("[BACKEND] vision_provider_request_started", {
+      provider: rawProvider,
+      idempotencyKey: cleanKey || "none",
+      clientIp
+    });
     const ingestion = await apexEngine.ingestScan({
       imageDataUrl: fullDataUrl,
       userId: effectiveUserId,
-      idempotencyKey,
+      idempotencyKey: cleanKey || void 0,
       priority: "HIGH",
       fileName,
       clientIp
@@ -11584,6 +12240,7 @@ async function handler(req, res) {
           break;
         }
         if (current.status === "failed") {
+          console.warn("[BACKEND] vision_provider_response: failed", { error: current.error });
           return res.status(500).json({
             error: current.error || "Vehicle identification failed.",
             scan_id: ingestion.scanId,
@@ -11592,6 +12249,13 @@ async function handler(req, res) {
         }
       }
     }
+    console.log("[BACKEND] vision_provider_response", {
+      scanId: ingestion.scanId,
+      status: finalResult?.status || latestStatus,
+      make: finalResult?.make,
+      model: finalResult?.model,
+      confidence: finalResult?.confidence?.totalScore
+    });
     if (finalResult) {
       const responsePayload = formatScanResponse(finalResult);
       console.log("[api/analyze] Production Debug Trace:", {

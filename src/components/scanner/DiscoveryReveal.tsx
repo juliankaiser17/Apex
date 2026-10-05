@@ -83,6 +83,13 @@ export const DiscoveryReveal: React.FC<DiscoveryRevealProps> = ({
             )}
           </div>
 
+          {((card as any).serverRecorded === false || (card as any).cloudSyncError) && (
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/35 text-amber-300 text-[11px] font-medium mt-1">
+              <AlertCircle className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+              <span>Locally Cached · Cloud Sync Pending</span>
+            </div>
+          )}
+
           {isDuplicate && (
             <div className="text-[11px] font-semibold tracking-wider text-[#E50914] uppercase pt-0.5">
               Repeat Spot (+50 XP)
@@ -107,7 +114,7 @@ export const DiscoveryReveal: React.FC<DiscoveryRevealProps> = ({
 
                 {revealStep >= 2 && (
                   <h1 className="text-3xl font-bold text-white tracking-tight leading-tight">
-                    {card.model}
+                    {card.model || `${card.make} (Unidentified)`}
                   </h1>
                 )}
 
@@ -130,7 +137,7 @@ export const DiscoveryReveal: React.FC<DiscoveryRevealProps> = ({
                 className="space-y-0.5 pt-1"
               >
                 <h2 className="text-2xl font-bold text-white tracking-tight">
-                  {card.make} {card.model}
+                  {card.make}{card.model ? ` ${card.model}` : ''}
                   {card.trim ? ` ${card.trim}` : ''}
                 </h2>
                 <p className="text-xs text-white/50 font-medium">
@@ -249,7 +256,7 @@ export const DiscoveryReveal: React.FC<DiscoveryRevealProps> = ({
                 className="w-full py-3.5 px-6 rounded-2xl bg-[#E50914] hover:bg-[#DC2626] text-white font-semibold text-base shadow-lg tracking-tight flex items-center justify-center gap-2 transition-colors"
               >
                 <Check className="w-4 h-4 text-white" />
-                <span>Save to Garage</span>
+                <span>{(card as any).serverRecorded ? 'Save to Garage (Cloud Confirmed)' : 'Save to Garage (Local Cache)'}</span>
               </button>
 
               <button

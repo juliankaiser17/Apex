@@ -14,9 +14,9 @@ import type { RarityTier } from '../types/apex';
 
 export interface ResolvedVehicleSpecs {
   isVerified: boolean;
-  canonicalId: string;
+  canonicalId: string | null;
   make: string;
-  model: string;
+  model: string | null;
   generation?: string;
   trim?: string;
   bodyStyle: string;
@@ -52,6 +52,33 @@ export function resolveCanonicalVehicleSpecs(params: {
   const normModel = normalizeKey(params.model);
   const normGen = normalizeKey(params.generation);
   const normTrim = normalizeKey(params.trim);
+
+  // GENERIC EMPTY-MODEL GUARD:
+  // If model is null, undefined, empty, or whitespace, spec resolution MUST NOT perform model matching
+  // for ANY manufacturer. A spec lookup must never invent or backfill a model identity.
+  if (!normModel) {
+    return {
+      isVerified: false,
+      canonicalId: null,
+      make: params.make || 'Unknown Make',
+      model: null,
+      generation: undefined,
+      trim: undefined,
+      bodyStyle: 'Unspecified',
+      engine: 'Verified Specs Unavailable',
+      horsepower: null,
+      torqueNm: null,
+      topSpeedKmH: null,
+      zeroToHundredSec: null,
+      kerbWeightKg: null,
+      productionYears: 'N/A',
+      originCountry: 'Global',
+      rarity: 'rare',
+      interestingFact: 'Vehicle specifications require verified model identification.',
+      briefHistory: undefined
+    };
+  }
+
   const canonicalId = (params.canonicalVehicleId || `${params.make || 'unknown'}-${params.model || 'unknown'}`)
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-');
@@ -100,13 +127,13 @@ export function resolveCanonicalVehicleSpecs(params: {
     let score = 0;
     if (vModel === normModel) {
       score += 10;
-    } else if (normModel.includes(vModel) || vModel.includes(normModel)) {
+    } else if (normModel.length >= 3 && vModel.length >= 3 && (normModel.includes(vModel) || vModel.includes(normModel))) {
       score += 7;
     } else {
       // Check if tokens overlap
       const modelTokens = normModel.split(' ');
       const vTokens = vModel.split(' ');
-      const matchCount = modelTokens.filter(t => t.length > 1 && vTokens.includes(t)).length;
+      const matchCount = modelTokens.filter(t => t.length > 2 && vTokens.includes(t)).length;
       if (matchCount > 0) score += matchCount * 3;
     }
 
@@ -154,7 +181,7 @@ export function resolveCanonicalVehicleSpecs(params: {
   for (const p of CAR_PRESETS) {
     const pMake = normalizeKey(p.make);
     const pModel = normalizeKey(p.model);
-    if ((pMake === normMake || normMake.includes(pMake)) && (pModel === normModel || normModel.includes(pModel) || pModel.includes(normModel))) {
+    if ((pMake === normMake || normMake.includes(pMake)) && (pModel === normModel || (normModel.length >= 3 && pModel.length >= 3 && (normModel.includes(pModel) || pModel.includes(normModel))))) {
       return {
         isVerified: true,
         canonicalId: `preset-${p.make.toLowerCase()}-${p.model.toLowerCase()}`.replace(/[^a-z0-9]+/g, '-'),
@@ -181,9 +208,9 @@ export function resolveCanonicalVehicleSpecs(params: {
   // 3. Fallback for uncatalogued vehicle: DO NOT FABRICATE SPECS!
   return {
     isVerified: false,
-    canonicalId,
+    canonicalId: params.canonicalVehicleId || null,
     make: params.make || 'Unknown Make',
-    model: params.model || 'Unknown Model',
+    model: params.model || null,
     generation: params.generation || undefined,
     trim: params.trim || undefined,
     bodyStyle: 'Coupe',

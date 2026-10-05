@@ -13,7 +13,11 @@ import type { IdentificationResult } from '../types';
 //   * Hardened Porsche 911 Carrera (997 vs 992) morphological discrimination
 //   * Hardened Lamborghini Gallardo vs Huracán EVO aerodynamic discrimination
 //   * Native Google Lens touch controls (pinch-zoom, tap-to-focus, exposure slider, torch)
-export const VISION_PIPELINE_VERSION = 'v3.3.0-production-release';
+// v3.4.0 — Production Release:
+//   * Generic empty-model guard preventing false canonical vehicle resolution
+//   * Preserved model uncertainty throughout downstream pipeline and UI
+//   * Ferrari Daytona SP3 horizontal rear strakes & blade signature resolution
+export const VISION_PIPELINE_VERSION = 'v3.4.0-production-release';
 
 export function buildCacheKey(
   imageHash: string,

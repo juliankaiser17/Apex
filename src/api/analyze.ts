@@ -214,6 +214,16 @@ function getTrustedClientIp(req: VercelRequest): string {
 function formatScanResponse(r: any) {
   const canon = r.canonicalResult;
 
+  const isModelUncertain = !canon?.identification?.model_family || canon?.status === 'uncertain' || canon?.specificity_level === 'make';
+  const finalMake = canon?.identification?.make || canon?.canonical_identity?.make || r.make || 'Unknown Make';
+  const finalModel = isModelUncertain ? null : (canon?.identification?.model_family || canon?.canonical_identity?.modelFamily || r.model || null);
+  const finalGen = isModelUncertain ? null : (canon?.identification?.generation || canon?.canonical_identity?.generation || r.generation || null);
+  const finalTrim = isModelUncertain ? null : (canon?.identification?.variant || canon?.canonical_identity?.variant || (r.trim || null));
+  const finalCanonId = isModelUncertain ? null : (canon?.canonical_identity?.canonicalId || (canon as any)?.canonical_vehicle_id || r.vehicleId || null);
+  const finalDisplayName = isModelUncertain
+    ? finalMake
+    : (canon?.canonical_identity?.displayName || `${finalMake} ${finalModel}`);
+
   return {
     // ── Canonical Production Vision Contract ──
     status: canon?.status || (r.status === 'abstained' ? 'rejected' : 'identified'),
@@ -240,18 +250,18 @@ function formatScanResponse(r: any) {
       body_proportions: null,
       distinctive_details: null
     },
-    identification: canon?.identification || {
-      make: r.make,
-      model_family: r.model,
-      generation: r.generation,
-      variant: r.trim || null
+    identification: {
+      make: finalMake,
+      model_family: finalModel,
+      generation: finalGen,
+      variant: finalTrim
     },
     confidence: {
       ...(canon?.confidence || {
         make_score: r.confidence?.totalScore ?? 0.95,
-        model_score: r.confidence?.totalScore ?? 0.95,
-        generation_score: Number(((r.confidence?.totalScore ?? 0.95) * 0.85).toFixed(3)),
-        variant_score: r.trim ? Number(((r.confidence?.totalScore ?? 0.95) * 0.75).toFixed(3)) : 0.2,
+        model_score: isModelUncertain ? 0.2 : (r.confidence?.totalScore ?? 0.95),
+        generation_score: isModelUncertain ? 0.1 : Number(((r.confidence?.totalScore ?? 0.95) * 0.85).toFixed(3)),
+        variant_score: isModelUncertain ? 0.0 : (r.trim ? Number(((r.confidence?.totalScore ?? 0.95) * 0.75).toFixed(3)) : 0.2),
         overall_score: r.confidence?.totalScore ?? 0.95
       }),
       abstentionReason: r.confidence?.abstentionReason || canon?.confidence?.abstentionReason || null
@@ -263,34 +273,34 @@ function formatScanResponse(r: any) {
       contradictions: []
     })),
     contradictions: canon?.contradictions || [],
-    specificity_level: canon?.specificity_level || (r.trim ? 'variant' : 'model_family'),
+    specificity_level: isModelUncertain ? 'make' : (canon?.specificity_level || (r.trim ? 'variant' : 'model_family')),
     reason: canon?.reason || (r.confidence?.abstentionReason || 'Vehicle successfully identified.'),
     needs_retake: canon ? canon.needs_retake : (r.confidence?.shouldAbstain ?? false),
 
     // ── Card & Client Specifications ──
     is_car: canon ? canon.vehicle_present : (r.status !== 'abstained'),
     scan_id: r.scanId,
-    make: canon?.canonical_identity?.make || canon?.identification?.make || r.make,
-    model: canon?.canonical_identity?.modelFamily || r.model || canon?.identification?.model_family,
-    generation: canon?.canonical_identity?.generation || canon?.identification?.generation || r.generation,
-    trim: canon?.canonical_identity?.variant || canon?.identification?.variant || (r.trim || null),
-    canonical_display_name: canon?.canonical_identity?.displayName || `${canon?.canonical_identity?.make || r.make} ${canon?.canonical_identity?.modelFamily || r.model}`,
-    canonical_vehicle_id: canon?.canonical_identity?.canonicalId || (canon as any)?.canonical_vehicle_id || r.vehicleId || null,
-    specificity_level_numeric: canon?.specificity_level_numeric ?? canon?.canonical_identity?.specificityLevel,
-    year_estimate: r.yearEstimate,
+    make: finalMake,
+    model: finalModel,
+    generation: finalGen,
+    trim: finalTrim,
+    canonical_display_name: finalDisplayName,
+    canonical_vehicle_id: finalCanonId,
+    specificity_level_numeric: isModelUncertain ? 0 : (canon?.specificity_level_numeric ?? canon?.canonical_identity?.specificityLevel ?? 1),
+    year_estimate: isModelUncertain ? 'Unknown' : (r.yearEstimate || 'Unknown'),
     color: r.color,
-    rarity: r.rarity,
-    engine: r.engine,
-    horsepower: r.horsepower,
-    torque_nm: r.torqueNm,
-    top_speed_kmh: r.topSpeedKmH,
-    zero_to_hundred_seconds: r.zeroToHundredSec,
-    kerb_weight_kg: r.kerbWeightKg,
-    production_years: r.productionYears,
-    origin_country: r.originCountry,
+    rarity: isModelUncertain ? 'common' : (r.rarity || 'rare'),
+    engine: isModelUncertain ? 'Standard Engine' : (r.engine || 'Standard Engine'),
+    horsepower: isModelUncertain ? 0 : (r.horsepower || 0),
+    torque_nm: isModelUncertain ? 0 : (r.torqueNm || 0),
+    top_speed_kmh: isModelUncertain ? 0 : (r.topSpeedKmH || 0),
+    zero_to_hundred_seconds: isModelUncertain ? 0 : (r.zeroToHundredSec || 0),
+    kerb_weight_kg: isModelUncertain ? 0 : (r.kerbWeightKg || 0),
+    production_years: isModelUncertain ? 'Unknown' : (r.productionYears || 'Unknown'),
+    origin_country: isModelUncertain ? 'Global' : (r.originCountry || 'Global'),
     body_style: r.bodyStyle,
-    historical_information: r.historicalInformation,
-    interesting_facts: r.interestingFacts,
+    historical_information: isModelUncertain ? '' : (r.historicalInformation || ''),
+    interesting_facts: isModelUncertain ? '' : (r.interestingFacts || ''),
     aftermarket_parts_detected: r.aftermarketPartsDetected,
     legacy_confidence: r.confidence?.totalScore ?? 0.95,
     needs_better_angle: canon ? (canon.status === 'uncertain' || canon.needs_retake) : (r.confidence?.shouldAbstain ?? false),
@@ -378,9 +388,28 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const clientIp = getTrustedClientIp(req);
   const { imageBase64, mimeType, fileName, userId: clientUserId, idempotencyKey } = req.body || {};
 
+  console.log('[BACKEND] analyze_request_received', {
+    mimeType: mimeType || 'image/jpeg',
+    payloadLength: imageBase64?.length ?? 0,
+    hasIdempotencyKey: Boolean(idempotencyKey),
+    clientIp
+  });
+
   if (!imageBase64 || typeof imageBase64 !== 'string') {
+    console.warn('[BACKEND] image_decode_failure: Missing or non-string base64 data');
     return res.status(400).json({ error: 'Invalid payload: Missing base64 image data.' });
   }
+
+  const rawBase64 = imageBase64.includes(',') ? imageBase64.split(',')[1] : imageBase64;
+  if (!rawBase64 || rawBase64.length < 100) {
+    console.warn('[BACKEND] image_decode_failure: Payload too small or corrupt base64');
+    return res.status(400).json({ error: 'Corrupt or unparseable image payload.' });
+  }
+  const decodedByteLength = Math.floor((rawBase64.length * 3) / 4);
+  console.log('[BACKEND] image_decode_success', {
+    byteLength: decodedByteLength,
+    mimeType: (mimeType || 'image/jpeg').toLowerCase()
+  });
 
   // 3. Multi-Tier Distributed Rate Limiting & Global Daily Vision Budget
   const effectiveUserId = authenticatedUserId || clientUserId || 'anon_guest';
@@ -406,8 +435,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   // 4. Cross-Instance Distributed Idempotency Protection
-  if (idempotencyKey && typeof idempotencyKey === 'string') {
-    const cleanKey = idempotencyKey.trim();
+  const cleanKey = idempotencyKey && typeof idempotencyKey === 'string' ? idempotencyKey.trim() : null;
+  if (cleanKey) {
     // Atomic check: max 1 consumption per version-scoped idempotency key for 1 hour
     const versionedIdemKey = `idem:${VISION_PIPELINE_VERSION}:${cleanKey}`;
     const idemCheck = await checkSingleTier(versionedIdemKey, 1, 3600);
@@ -429,10 +458,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     : `data:${sanitizedMime};base64,${imageBase64}`;
 
   try {
+    console.log('[BACKEND] vision_provider_request_started', {
+      provider: rawProvider,
+      idempotencyKey: cleanKey || 'none',
+      clientIp
+    });
+
     const ingestion = await apexEngine.ingestScan({
       imageDataUrl: fullDataUrl,
       userId: effectiveUserId,
-      idempotencyKey,
+      idempotencyKey: cleanKey || undefined,
       priority: 'HIGH',
       fileName,
       clientIp
@@ -458,6 +493,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           break;
         }
         if (current.status === 'failed') {
+          console.warn('[BACKEND] vision_provider_response: failed', { error: current.error });
           return res.status(500).json({
             error: current.error || 'Vehicle identification failed.',
             scan_id: ingestion.scanId,
@@ -466,6 +502,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         }
       }
     }
+
+    console.log('[BACKEND] vision_provider_response', {
+      scanId: ingestion.scanId,
+      status: finalResult?.status || latestStatus,
+      make: finalResult?.make,
+      model: finalResult?.model,
+      confidence: finalResult?.confidence?.totalScore
+    });
 
     // Return immediate or awaited completed result
     if (finalResult) {

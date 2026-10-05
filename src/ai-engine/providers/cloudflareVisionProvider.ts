@@ -31,6 +31,7 @@ import { resolveCanonicalVehicleSpecs } from '../../utils/vehicleSpecs';
 import { APEX_LOCAL_VEHICLE_DATABASE } from '../../data/vehicleDatabase';
 import { canonicalVehicleRegistry } from '../canonical/canonicalVehicleRegistry';
 import { fineGrainedModelDiscriminator } from '../validation/fineGrainedModelDiscriminator';
+import { evidenceNormalizer } from '../validation/evidenceNormalizer';
 
 declare const process: any;
 declare const Buffer: any;
@@ -525,17 +526,23 @@ Rules:
       const pass2Cues = Array.isArray(pass2.evidence) ? pass2.evidence : [];
       const evidenceList: string[] = Array.from(new Set([...pass1Cues, ...pass2Cues, ...(Array.isArray(parsed.evidence) ? parsed.evidence : [])]));
 
+      const rawLighting = pass1.headlights || pass1.lighting_cues || pass1.headlight_and_drl_signature || (evidenceList.find((e: string) => /headlight|lamp|drl|eyelid/i.test(e)) ?? null);
+      const separatedLighting = rawLighting ? evidenceNormalizer.separateLightingCues(rawLighting) : { headlights: '', taillights: '' };
+
+      const rawGrille = pass1.grille || pass1.intake_and_grille_cues || pass1.front_fascia_and_intakes || (evidenceList.find((e: string) => /grille|intake|splitter|strake/i.test(e)) ?? null);
+      const separatedIntake = rawGrille ? evidenceNormalizer.separateIntakeAndAeroCues(rawGrille) : { frontGrille: '', rearDiffuser: '' };
+
       const visualEvidence: VisualEvidence = {
         body_style: pass1.body_silhouette || parsed.body_style || pass1.body_style || null,
-        grille: pass1.grille || pass1.intake_and_grille_cues || pass1.front_fascia_and_intakes || (evidenceList.find((e: string) => /grille|intake|splitter|strake/i.test(e)) ?? null),
-        headlights: pass1.headlights || pass1.lighting_cues || pass1.headlight_and_drl_signature || (evidenceList.find((e: string) => /headlight|lamp|drl|eyelid/i.test(e)) ?? null),
-        taillights: pass1.taillights || pass1.lighting_cues || (evidenceList.find((e: string) => /taillight/i.test(e)) ?? null),
+        grille: separatedIntake.frontGrille || (rawGrille && !separatedIntake.rearDiffuser ? rawGrille : null),
+        headlights: separatedLighting.headlights || (rawLighting && !separatedLighting.taillights ? rawLighting : null),
+        taillights: pass1.taillights || (separatedLighting.taillights || null) || (evidenceList.find((e: string) => /taillight/i.test(e)) ?? null),
         hood: pass1.hood || pass1.hood_aerodynamics || null,
-        roofline: pass1.roofline || pass1.greenhouse_and_roofline || pass1.windshield_and_mirrors || (/black\s+roof|soft[\s-]?top|canvas|fabric/i.test(pass1.dominant_color || '') ? pass1.dominant_color : null),
+        roofline: pass1.roofline || pass1.greenhouse_and_roofline || pass1.windshield_and_mirrors || (/soft[\s-]?top|canvas|fabric/i.test(pass1.dominant_color || '') ? pass1.dominant_color : null),
         windows: pass1.windows || pass1.greenhouse_and_roofline || pass1.windshield_and_mirrors || null,
         wheels: pass1.wheels || pass1.mirror_and_wheel_cues || pass1.windshield_and_mirrors || null,
         exhaust: pass1.exhaust || null,
-        aero: pass1.aero || pass1.aero_and_bodywork || (evidenceList.find((e: string) => /spoiler|wing|splitter|diffuser|strake/i.test(e)) ?? null),
+        aero: pass1.aero || (separatedIntake.rearDiffuser ? `rear diffuser: ${separatedIntake.rearDiffuser}` : null) || pass1.aero_and_bodywork || (evidenceList.find((e: string) => /spoiler|wing|splitter|diffuser|strake/i.test(e)) ?? null),
         badges: pass1.badges || pass1.badges_and_text || (evidenceList.find((e: string) => /badge|emblem|roundel|script/i.test(e)) ?? null),
         text: pass1.text || pass1.badges_and_text || null,
         body_proportions: pass1.body_proportions || pass1.body_silhouette || null,
@@ -668,27 +675,48 @@ Rules:
 
       let rawCandidates: CandidateComparison[] = [];
       const neutralBaseline = 0.50;
+      const unifiedCandidateMap = new Map<string, CandidateComparison>();
+
+      const addUnifiedCandidate = (
+        name: string,
+        initialScore: number = neutralBaseline,
+        supporting: string[] = [],
+        contradictions: string[] = [],
+        unobservable: string[] = []
+      ) => {
+        if (!name || name === 'Unknown Candidate') return;
+        const canon = canonicalVehicleRegistry.lookupByTextOrAlias(name, rawMake || undefined);
+        const canonKey = canon ? canon.vehicleId : name.toLowerCase().trim();
+        const unifiedDisplayName = canon
+          ? (canon.displayName || (canon.generation && canon.generation !== 'Base' && canon.generation !== 'Current' ? `${canon.make} ${canon.model} (${canon.generation})` : `${canon.make} ${canon.model}`))
+          : name;
+
+        if (unifiedCandidateMap.has(canonKey)) {
+          const existing = unifiedCandidateMap.get(canonKey)!;
+          supporting.forEach((s) => { if (!existing.supporting_evidence.includes(s)) existing.supporting_evidence.push(s); });
+          contradictions.forEach((c) => { if (!existing.contradictions.includes(c)) existing.contradictions.push(c); });
+          if (!existing.unobservable_features) existing.unobservable_features = [];
+          unobservable.forEach((u) => { if (!existing.unobservable_features!.includes(u)) existing.unobservable_features!.push(u); });
+        } else {
+          unifiedCandidateMap.set(canonKey, {
+            name: unifiedDisplayName,
+            score: initialScore,
+            supporting_evidence: [...supporting],
+            contradictions: [...contradictions],
+            unobservable_features: [...unobservable]
+          });
+        }
+      };
+
       if (Array.isArray(parsed.candidates) && parsed.candidates.length > 0) {
-        rawCandidates = parsed.candidates.map((c: any) => ({
-          name: c.name || 'Unknown Candidate',
-          score: neutralBaseline,
-          supporting_evidence: Array.isArray(c.supporting_evidence) ? c.supporting_evidence : [],
-          contradictions: Array.isArray(c.contradictions) ? c.contradictions : [],
-          unobservable_features: Array.isArray(c.unobservable_features) ? c.unobservable_features : []
-        }));
+        for (const c of parsed.candidates) {
+          addUnifiedCandidate(c.name, neutralBaseline, c.supporting_evidence, c.contradictions, c.unobservable_features);
+        }
       } else if (rawMake && rawModel) {
         const candidateName = rawGen
           ? `${rawMake} ${rawModel} (${rawGen})`
           : `${rawMake} ${rawModel}`;
-        rawCandidates = [
-          {
-            name: candidateName,
-            score: neutralBaseline,
-            supporting_evidence: [],
-            contradictions: [],
-            unobservable_features: []
-          }
-        ];
+        addUnifiedCandidate(candidateName, neutralBaseline);
       }
 
       // CRITICAL: Always seed peer models for the verified manufacturer from canonical database & fingerprints for contradiction cross-examination
@@ -696,42 +724,22 @@ Rules:
         const normMake = rawMake.toLowerCase();
         const peerVehicles = APEX_LOCAL_VEHICLE_DATABASE.filter(v => v.manufacturer.toLowerCase() === normMake);
         for (const peer of peerVehicles) {
-          const peerName = peer.generation ? `${peer.manufacturer} ${peer.model} (${peer.generation})` : `${peer.manufacturer} ${peer.model}`;
-          if (!rawCandidates.some(c => c.name.toLowerCase() === peerName.toLowerCase())) {
-            rawCandidates.push({
-              name: peerName,
-              score: neutralBaseline,
-              supporting_evidence: [],
-              contradictions: [],
-              unobservable_features: []
-            });
-          }
-          const baseName = `${peer.manufacturer} ${peer.model}`;
-          if (!rawCandidates.some(c => c.name.toLowerCase() === baseName.toLowerCase())) {
-            rawCandidates.push({
-              name: baseName,
-              score: neutralBaseline,
-              supporting_evidence: [],
-              contradictions: [],
-              unobservable_features: []
-            });
-          }
+          const peerName = peer.generation && peer.generation !== 'Base' && peer.generation !== 'Current'
+            ? `${peer.manufacturer} ${peer.model} (${peer.generation})`
+            : `${peer.manufacturer} ${peer.model}`;
+          addUnifiedCandidate(peerName, neutralBaseline);
         }
 
         const fpPeers = fineGrainedModelDiscriminator.findFingerprintsByMake(rawMake);
         for (const fp of fpPeers) {
-          const fpName = fp.generation ? `${fp.make} ${fp.model} (${fp.generation})` : `${fp.make} ${fp.model}`;
-          if (!rawCandidates.some(c => c.name.toLowerCase() === fpName.toLowerCase())) {
-            rawCandidates.push({
-              name: fpName,
-              score: neutralBaseline,
-              supporting_evidence: [],
-              contradictions: [],
-              unobservable_features: []
-            });
-          }
+          const fpName = fp.generation && fp.generation !== 'Base' && fp.generation !== 'Current'
+            ? `${fp.make} ${fp.model} (${fp.generation})`
+            : `${fp.make} ${fp.model}`;
+          addUnifiedCandidate(fpName, neutralBaseline);
         }
       }
+
+      rawCandidates = Array.from(unifiedCandidateMap.values());
 
       // Hierarchical Classification & Contradiction Filter
       const valStart = Date.now();
@@ -764,15 +772,18 @@ Rules:
       });
       const deterministicValidationMs = Date.now() - valStart;
 
-      // Resolve Grounded Engineering Specifications (Constraint 7 & 8: Never Fabricate!)
+      // REQUIREMENT 1: The raw provider must NEVER override an uncertain discriminator
+      // If the discriminator reached tie, deadlock, low confidence, or make-only specificity,
+      // the exact model MUST remain unconfirmed/null. The raw VLM guess is never a valid fallback.
+      const isModelDefensible = Boolean(classResult.identification.model_family) && classResult.specificity_level !== 'make';
       let finalMake = classResult.identification.make || rawMake || 'Unknown Make';
-      let finalModel = classResult.identification.model_family || rawModel || 'Unknown Model';
+      let finalModel: string | null = isModelDefensible ? classResult.identification.model_family : null;
       if (finalMake && finalModel && finalModel.toLowerCase().startsWith(finalMake.toLowerCase() + ' ')) {
         finalModel = finalModel.slice(finalMake.length + 1).trim();
       }
-      let finalGen = classResult.identification.generation || rawGen || undefined;
-      let finalVariant = classResult.specificity_level === 'variant'
-        ? (classResult.identification.variant || rawVariant || undefined)
+      let finalGen = isModelDefensible ? (classResult.identification.generation || undefined) : undefined;
+      let finalVariant = (isModelDefensible && classResult.specificity_level === 'variant')
+        ? (classResult.identification.variant || undefined)
         : undefined;
 
       // Optional Neutral Pairwise Verification Pass (Hard Amendment 4 & 7: Max 1 additional call, ceiling 2 total)
@@ -788,7 +799,7 @@ Rules:
         )
       );
 
-      const shouldTriggerNeutralVerification = !verificationConsumed && viableCandidates.length >= 2 && (
+      const shouldTriggerNeutralVerification = !verificationConsumed && viableCandidates.length >= 2 && Boolean(classResult.evidence_grounded) && !classResult.gate_customized && (
         classResult.needs_neutral_verification ||
         classResult.raw_conflict ||
         (classResult.candidate_separation < 0.15 && classResult.top_candidate && classResult.top_candidate.score > 0.50)
@@ -873,7 +884,7 @@ Rules:
             } else if (declaresB && !declaresA) {
               winner = candB;
             } else if (declaresA && declaresB) {
-              const winnerMatch = text.match(/(?:winner|conclu(?:de|sion)|identified as|is a|focal vehicle is a?)\s*[:\-]?\s*([^\n\.]+)/i);
+              const winnerMatch = text.match(/(?:winner|conclu(?:de|sion)|identified as|is a|focal vehicle is a?)\s*[:-]?\s*([^\n.]+)/i);
               if (winnerMatch) {
                 const matchStr = winnerMatch[1].toLowerCase();
                 if (matchStr.includes('candidate a') || matchStr.includes(candANorm)) {
@@ -931,6 +942,17 @@ Rules:
                   }
                 }
               }
+
+              // Upgrade specificity level to reflect verified model
+              if (finalModel) {
+                classResult.identification.make = finalMake;
+                classResult.identification.model_family = finalModel;
+                classResult.identification.generation = finalGen || null;
+                classResult.identification.variant = finalVariant || null;
+                classResult.specificity_level = finalVariant ? 'variant' : (finalGen ? 'generation' : 'model_family');
+                classResult.specificity_level_numeric = finalVariant ? 4 : (finalGen ? 2 : 1);
+                classResult.reason = `Verified via neutral pairwise forensic examination: ${finalMake} ${finalModel}.`;
+              }
             }
           }
         } catch (neutralErr: any) {
@@ -938,12 +960,14 @@ Rules:
         }
       }
 
+      const isUncertainModel = !finalModel || classResult.specificity_level === 'make';
+
       const specResolution = resolveCanonicalVehicleSpecs({
         make: finalMake,
-        model: finalModel,
-        generation: finalGen,
-        trim: finalVariant,
-        canonicalVehicleId: classResult.canonical_vehicle_id
+        model: isUncertainModel ? null : finalModel,
+        generation: isUncertainModel ? null : finalGen,
+        trim: isUncertainModel ? null : finalVariant,
+        canonicalVehicleId: isUncertainModel ? null : classResult.canonical_vehicle_id
       });
 
       // Immutable Upstream Evidence Object
@@ -986,18 +1010,18 @@ Rules:
 
       // Open Canonical Identity
       const openCanonicalIdentity = canonicalVehicleRegistry.resolveCanonicalIdentity({
-        vehicleId: classResult.canonical_vehicle_id || specResolution.canonicalId,
+        vehicleId: isUncertainModel ? null : (classResult.canonical_vehicle_id || specResolution.canonicalId),
         make: finalMake,
-        model: finalModel,
-        generation: finalGen,
-        variant: finalVariant,
+        model: isUncertainModel ? null : finalModel,
+        generation: isUncertainModel ? null : finalGen,
+        variant: isUncertainModel ? null : finalVariant,
         source: 'ensemble',
         specs: parsed.specs
       });
 
       // Construct Canonical Scan Result
       const canonicalResult: CanonicalScanResult = {
-        status: calibConf.status,
+        status: isUncertainModel ? 'uncertain' : calibConf.status,
         vehicle_present: true,
         image_quality: {
           usable: true,
@@ -1006,16 +1030,21 @@ Rules:
         },
         viewpoint,
         visual_evidence: visualEvidence,
-        identification: classResult.identification,
+        identification: {
+          make: finalMake,
+          model_family: isUncertainModel ? null : finalModel,
+          generation: isUncertainModel ? null : (finalGen || null),
+          variant: isUncertainModel ? null : (finalVariant || null)
+        },
         confidence: calibConf.confidence,
         candidates: classResult.calibrated_candidates,
         contradictions: classResult.contradictions,
-        specificity_level: classResult.specificity_level,
-        specificity_level_numeric: classResult.specificity_level_numeric ?? openCanonicalIdentity.specificityLevel,
+        specificity_level: isUncertainModel ? 'make' : classResult.specificity_level,
+        specificity_level_numeric: isUncertainModel ? 0 : (classResult.specificity_level_numeric ?? openCanonicalIdentity.specificityLevel),
         reason: classResult.reason,
         needs_retake: calibConf.needs_retake,
         raw_provider_identity: initialRawProviderIdentity || `${rawMake || ''} ${rawModel || ''}`.trim() || 'Unknown',
-        discriminator_identity: classResult.discriminator_identity || openCanonicalIdentity.displayName || `${finalMake} ${finalModel}`,
+        discriminator_identity: classResult.discriminator_identity || openCanonicalIdentity.displayName || `${finalMake} ${finalModel || ''}`.trim(),
         specs: parsed.specs,
         privacy_redactions: Array.isArray(parsed.privacy_redactions) ? parsed.privacy_redactions : [],
         upstream_evidence: upstreamEvidence,
@@ -1025,18 +1054,18 @@ Rules:
 
       const valuation = getEstimatedMarketValue({
         make: finalMake,
-        model: finalModel,
+        model: finalModel || 'Unknown',
         rarity: specResolution.rarity,
         marketValueLowUsd: parsed.specs?.market_value_low_usd,
         marketValueHighUsd: parsed.specs?.market_value_high_usd
       });
 
       const output: ModelIdentificationOutput = {
-        vehicleId: specResolution.canonicalId || null,
+        vehicleId: isUncertainModel ? null : (specResolution.canonicalId || null),
         make: finalMake,
-        model: finalModel,
-        generation: finalGen || specResolution.generation || 'Current',
-        trim: finalVariant || null,
+        model: isUncertainModel ? null : finalModel,
+        generation: isUncertainModel ? null : (finalGen || specResolution.generation || 'Current'),
+        trim: isUncertainModel ? null : (finalVariant || null),
         yearEstimate: specResolution.productionYears && specResolution.productionYears !== 'N/A'
           ? specResolution.productionYears.split('–')[0]
           : String(parsed.year || '2023'),
@@ -1072,7 +1101,7 @@ Rules:
           score: c.score,
           reason: c.contradictions.join('; ') || 'Runner up candidate'
         })),
-        needsReview: calibConf.status === 'uncertain'
+        needsReview: isUncertainModel || calibConf.status === 'uncertain'
       };
 
       const totalEndToEndMs = Date.now() - startTime;

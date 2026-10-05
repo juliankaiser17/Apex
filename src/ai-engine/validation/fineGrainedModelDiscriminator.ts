@@ -19,6 +19,7 @@
  */
 
 import type { ViewpointType, VisualEvidence } from '../types';
+import { evidenceNormalizer } from './evidenceNormalizer';
 
 export type TraitVisibilityState = 'VISIBLE' | 'PARTIAL' | 'NOT_VISIBLE' | 'OCCLUDED';
 
@@ -123,6 +124,30 @@ export function computeVisibilityMatrix(
   const rearOccluded = normEv.includes('rear occluded') || normEv.includes('rear cropped') || normEv.includes('tail occluded') || normEv.includes('rear not visible');
   const frontOccluded = normEv.includes('front occluded') || normEv.includes('front cropped') || normEv.includes('nose occluded') || normEv.includes('front not visible');
   const sideOccluded = normEv.includes('side occluded') || normEv.includes('profile occluded');
+  const isCroppedOrDetail = /\b(cropped?|close[\s-]?up|detail|section|wheel\s+only|door\s+only|fender\s+only|badge\s+only|emblem\s+only|partial\s+view|tight\s+crop|macro)\b/i.test(normEv);
+
+  // For cropped / detail images, aggressively restrict observable zones to avoid hallucinated front/rear matches
+  if (isCroppedOrDetail) {
+    const hasHeadlightFocus = /\b(headlights?|headlamps?|front\s+lamps?)\b/i.test(normEv);
+    const hasGrilleFocus = /\b(front\s+grille|radiator\s+grille)\b/i.test(normEv);
+    const hasExhaustFocus = /\b(exhaust|tailpipes?)\b/i.test(normEv);
+    const hasDoorFocus = /\b(door|waist|flank)\b/i.test(normEv);
+
+    return {
+      headlight_shape: hasHeadlightFocus ? 'VISIBLE' : 'NOT_VISIBLE',
+      front_intake_grille: hasGrilleFocus ? 'VISIBLE' : 'NOT_VISIBLE',
+      hood_geometry: 'NOT_VISIBLE',
+      fender_architecture: 'NOT_VISIBLE',
+      roofline_greenhouse: 'NOT_VISIBLE',
+      proportions: 'NOT_VISIBLE',
+      side_intake_type: hasDoorFocus ? 'PARTIAL' : 'NOT_VISIBLE',
+      door_architecture: hasDoorFocus ? 'PARTIAL' : 'NOT_VISIBLE',
+      aero_architecture: 'NOT_VISIBLE',
+      wing_and_spoiler_architecture: 'NOT_VISIBLE',
+      rear_architecture_and_exhaust: hasExhaustFocus ? 'VISIBLE' : 'NOT_VISIBLE',
+      rear_fascia_and_strakes: 'NOT_VISIBLE'
+    };
+  }
 
   let matrix: Record<MorphologicalCategory, TraitVisibilityState>;
 
@@ -163,9 +188,9 @@ export function computeVisibilityMatrix(
 
     case 'side':
       matrix = {
-        headlight_shape: frontOccluded ? 'OCCLUDED' : 'PARTIAL',
-        front_intake_grille: frontOccluded ? 'OCCLUDED' : 'PARTIAL',
-        hood_geometry: frontOccluded ? 'OCCLUDED' : 'PARTIAL',
+        headlight_shape: 'NOT_VISIBLE',
+        front_intake_grille: 'NOT_VISIBLE',
+        hood_geometry: 'NOT_VISIBLE',
         fender_architecture: frontOccluded ? 'OCCLUDED' : 'VISIBLE',
         roofline_greenhouse: 'VISIBLE',
         proportions: 'VISIBLE',
@@ -173,8 +198,8 @@ export function computeVisibilityMatrix(
         door_architecture: sideOccluded ? 'OCCLUDED' : 'VISIBLE',
         aero_architecture: 'VISIBLE',
         wing_and_spoiler_architecture: 'VISIBLE',
-        rear_architecture_and_exhaust: rearOccluded ? 'OCCLUDED' : 'PARTIAL',
-        rear_fascia_and_strakes: rearOccluded ? 'OCCLUDED' : 'PARTIAL'
+        rear_architecture_and_exhaust: 'NOT_VISIBLE',
+        rear_fascia_and_strakes: 'NOT_VISIBLE'
       };
       break;
 
@@ -275,31 +300,93 @@ export function zoneOfClause(clause: string): EvidenceZone {
 
 /**
  * Split free-text evidence into clauses and build the eligible evidence string per trait category.
+ * Uses the general EvidenceNormalizer to enforce field-aware anatomical isolation across all makes.
  */
-export function buildZonedEvidence(parts: string[]): {
+/** Universal generic tokens that cannot establish model-specific positive evidence on their own */
+export const UNIVERSAL_GENERIC_TOKENS = new Set([
+  'horizontal led strip', 'horizontal led', 'horizontal strip', 'horizontal lamp', 'led strip',
+  'horizontal led strips', 'vertical led strip', 'led strips', 'light strip', 'strip lights',
+  'slight bulge in the center', 'bulge in the center', 'smooth surface', 'sloping roofline',
+  'front splitter', 'rear diffuser', 'air intakes', 'two round headlamps', 'distinctive shape',
+  'sloping roofline and short rear deck', 'sloping roofline and curved rear window',
+  'no visible vents or louvers', 'no visible vents', 'smooth, flat surface with no visible vents',
+  'smooth flat surface', 'smooth flat hood', 'smooth hood without vents', 'clean hood surface',
+  'ventless sculpted hood', 'hood without vents', 'smooth hood', 'clean hood', 'flat hood', 'clean bonnet'
+]);
+
+export function buildZonedEvidence(
+  parts: string[],
+  fieldBuckets?: {
+    headlights?: string;
+    grille?: string;
+    hood?: string;
+    side?: string;
+    roof?: string;
+    exhaust?: string;
+    taillights?: string;
+  }
+): {
   full: string;
   forCategory: (category: MorphologicalCategory) => string;
 } {
-  const clauses = parts
-    .join(' . ')
-    .toLowerCase()
-    .split(/\s*[.;\n]\s*/)
-    .map((s) => s.trim())
-    .filter(Boolean)
-    .map((text) => ({ text, zone: zoneOfClause(text) }));
+  const combined = parts.filter(Boolean).join(' . ');
+  const clauses = evidenceNormalizer.decomposeText(combined);
+  const full = clauses.map((c) => c.normalizedText).join(' . ');
 
-  const full = clauses.map((c) => c.text).join(' . ');
-  const withoutRear = clauses.filter((c) => c.zone !== 'rear').map((c) => c.text).join(' . ');
-  const withoutFront = clauses.filter((c) => c.zone !== 'front').map((c) => c.text).join(' . ');
+  // Field-grounded clauses: prioritize text that came from the dedicated field itself
+  const fieldClauses = fieldBuckets ? {
+    headlights: evidenceNormalizer.decomposeText(fieldBuckets.headlights || ''),
+    grille: evidenceNormalizer.decomposeText(fieldBuckets.grille || ''),
+    hood: evidenceNormalizer.decomposeText(fieldBuckets.hood || ''),
+    side: evidenceNormalizer.decomposeText(fieldBuckets.side || ''),
+    roof: evidenceNormalizer.decomposeText(fieldBuckets.roof || ''),
+    exhaust: evidenceNormalizer.decomposeText([fieldBuckets.exhaust, fieldBuckets.taillights].filter(Boolean).join(' . '))
+  } : null;
 
   return {
     full,
     forCategory: (category: MorphologicalCategory) => {
-      const excluded = CATEGORY_EXCLUDED_ZONES[category];
-      if (!excluded) return full;
-      if (excluded.includes('rear')) return withoutRear;
-      if (excluded.includes('front')) return withoutFront;
-      return full;
+      switch (category) {
+        case 'headlight_shape': {
+          const direct = fieldClauses ? evidenceNormalizer.filterClausesForZone(fieldClauses.headlights, 'headlights') : '';
+          const global = evidenceNormalizer.filterClausesForZone(clauses, 'headlights');
+          return direct ? `${direct} . ${global}` : global;
+        }
+        case 'front_intake_grille': {
+          const direct = fieldClauses ? evidenceNormalizer.filterClausesForZone(fieldClauses.grille, 'front_grille') : '';
+          const global = evidenceNormalizer.filterClausesForZone(clauses, 'front_grille');
+          return direct ? `${direct} . ${global}` : global;
+        }
+        case 'hood_geometry': {
+          const direct = fieldClauses ? evidenceNormalizer.filterClausesForZone(fieldClauses.hood, 'hood') : '';
+          const global = evidenceNormalizer.filterClausesForZone(clauses, 'hood');
+          return direct ? `${direct} . ${global}` : global;
+        }
+        case 'side_intake_type':
+        case 'door_architecture': {
+          const direct = fieldClauses ? evidenceNormalizer.filterClausesForZone(fieldClauses.side, 'side') : '';
+          const global = evidenceNormalizer.filterClausesForZone(clauses, 'side');
+          return direct ? `${direct} . ${global}` : global;
+        }
+        case 'roofline_greenhouse': {
+          const direct = fieldClauses ? evidenceNormalizer.filterClausesForZone(fieldClauses.roof, 'roof') : '';
+          const global = evidenceNormalizer.filterClausesForZone(clauses, 'roof');
+          return direct ? `${direct} . ${global}` : global;
+        }
+        case 'rear_architecture_and_exhaust': {
+          const direct = fieldClauses ? evidenceNormalizer.filterClausesForZone(fieldClauses.exhaust, 'rear_exhaust') : '';
+          const global = evidenceNormalizer.filterClausesForZone(clauses, 'rear_exhaust');
+          return direct ? `${direct} . ${global}` : global;
+        }
+        case 'rear_fascia_and_strakes':
+        case 'wing_and_spoiler_architecture': {
+          const direct = fieldClauses ? evidenceNormalizer.filterClausesForZone(fieldClauses.exhaust, 'rear_fascia') : '';
+          const global = evidenceNormalizer.filterClausesForZone(clauses, 'rear_fascia');
+          return direct ? `${direct} . ${global}` : global;
+        }
+        default:
+          return full;
+      }
     }
   };
 }
@@ -584,12 +671,12 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
     model: 'Amalfi',
     generation: 'F169M',
     proportionsDescription: 'Front-mid engine 2+2 grand tourer with long sweeping sculpted hood, body-color perforated front grille, clean body sides, and active 3-position rear spoiler',
-    confusableWith: ['ferrari-daytona-sp3', 'ferrari-sf90-stradale', 'ferrari-458-italia', 'ferrari-296-gtb'],
+    confusableWith: ['ferrari-daytona-sp3', 'ferrari-sf90-stradale', 'ferrari-458-italia', 'ferrari-296-gtb', 'ferrari-458-spider', 'ferrari-488-pista', 'ferrari-roma', 'ferrari-812-superfast', 'ferrari-laferrari'],
     traits: {
       proportions: {
         name: 'front_mid_engine_2plus2_grand_tourer',
         positiveKeywords: ['front-mid engine', 'long sweeping hood', 'grand tourer proportions', '2+2', 'cab-rearward', 'fastback', 'grand touring coupe'],
-        incompatibleKeywords: ['cab-forward mid-engine', 'short front hood', 'extreme wedge monovolume', 'targa prototype']
+        incompatibleKeywords: ['cab-forward mid-engine', 'mid-engine', 'short front hood', 'extreme wedge monovolume', 'targa prototype']
       },
       front_intake_grille: {
         name: 'monolithic_body_color_perforated_grille',
@@ -607,7 +694,7 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       headlight_shape: {
         name: 'thin_lamp_bar_with_indown_swept_inner_tip',
         positiveKeywords: ['drl blade', 'lamp bar', 'thin horizontal lamp', 'narrow lamp bar', 'lamp bar along the nose', 'inward down swept lamp tip', 'lamp merging into the grille edge'],
-        incompatibleKeywords: ['c-shaped', 'c-clamp', 'c shaped', 'annular lamp', 'ring shaped lamp', 'slotted lamp', 'elongated vertical', 'vertical lens', 'tall narrow lamp', 'eyelid', 'partial cover', 'round bug eye', 'fried egg']
+        incompatibleKeywords: ['c-shaped', 'c-clamp', 'c shaped', 'annular lamp', 'ring shaped lamp', 'slotted lamp', 'elongated vertical', 'vertical lens', 'tall narrow lamp', 'eyelid', 'partial cover', 'round bug eye', 'fried egg', 'horizontal light strip bisecting', 'bisecting led strip']
       },
       hood_geometry: {
         name: 'long_sculpted_hood_without_vents',
@@ -652,25 +739,22 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
     model: 'Daytona SP3',
     generation: 'Icona',
     proportionsDescription: 'Icona hypercar with wraparound visor canopy, horizontal louvers/strakes, and fender-mounted mirrors',
-    confusableWith: ['ferrari-amalfi', 'ferrari-sf90-stradale', 'ferrari-488-pista', 'ferrari-458-italia', 'ferrari-296-gtb'],
+    confusableWith: ['ferrari-amalfi', 'ferrari-sf90-stradale', 'ferrari-488-pista', 'ferrari-458-italia', 'ferrari-296-gtb', 'ferrari-458-spider', 'ferrari-roma', 'ferrari-812-superfast', 'ferrari-laferrari'],
     traits: {
       headlight_shape: {
         name: 'horizontal_eyelid_covers',
-        positiveKeywords: ['eyelid', 'eyelid covers', 'partial covers', 'horizontal partial cover', 'slat headlights', 'retractable covers'],
-        incompatibleKeywords: ['open c-shape matrix', 'c-clamp headlight', 'c-shaped', 'c-shape', 'matrix led', 'vertical slit', 'round bug eye', 'elongated vertical', 'swept-back headlights', 'vertical led strip']
+        positiveKeywords: ['eyelid', 'eyelid covers', 'partial covers', 'horizontal partial cover', 'slat headlights', 'retractable covers', 'retractable eyelid', 'pop-up covers', 'slatted eyelid', 'eyelids'],
+        incompatibleKeywords: ['open c-shape matrix', 'c-clamp headlight', 'c-shaped', 'c-shape', 'round bug eye', 'elongated vertical', 'swept-back headlights']
       },
       front_intake_grille: {
         name: 'horizontal_strakes_slatted_grille',
-        // Generic "slats" wording is how VLMs commonly describe ANY mesh grille (measured on
-        // real 296 GTB photographs), so only the distinctive SP3 strakes architecture may
-        // satisfy this trait.
-        positiveKeywords: ['horizontal strakes', 'strake grille', 'strakes across', 'full width strakes'],
-        incompatibleKeywords: ['open mesh grille', 'vertical slats', 'kidney grille', 'singleframe', 'front mustache', 'deformable winglets', 'shut-off gurney', 'gurney', 'body-color perforated']
+        positiveKeywords: ['horizontal strakes', 'strake grille', 'strakes across', 'full width strakes', 'horizontal slats across front bumper', 'slatted strakes', 'slatted grille', 'horizontal slats', 'horizontal slat'],
+        incompatibleKeywords: ['kidney grille', 'singleframe', 'front mustache', 'deformable winglets', 'shut-off gurney', 'gurney', 'body-color perforated', 'mustache bar', 'horizontal bar across grille']
       },
       hood_geometry: {
         name: 'sculpted_hood_with_deep_air_vents',
-        positiveKeywords: ['hood vents', 'sculpted air vents on hood', 'hood air extractors', 'dual hood scoops'],
-        incompatibleKeywords: ['clean sculpted hood without vents', 'smooth hood without vents']
+        positiveKeywords: ['hood vents', 'sculpted air vents on hood', 'hood air extractors', 'dual hood scoops', 'sculpted hood', 'central spine', 'deep air vents', 'air vents on hood'],
+        incompatibleKeywords: ['deep s-duct extractor', 'giant hood nostrils', 'power bulge with cowl induction']
       },
       side_intake_type: {
         name: 'door_top_sculpted_air_channel',
@@ -717,19 +801,34 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
     model: '458 Italia',
     generation: 'F142',
     proportionsDescription: 'Mid-rear naturally aspirated V8 coupe with elongated vertical swept-back headlights, deformable mustache aero winglets, single round taillights, and triple central exhaust',
-    confusableWith: ['ferrari-458-spider', 'ferrari-488-pista', 'ferrari-sf90-stradale', 'ferrari-daytona-sp3', 'ferrari-amalfi', 'ferrari-296-gtb'],
+    confusableWith: ['ferrari-458-spider', 'ferrari-488-pista', 'ferrari-sf90-stradale', 'ferrari-daytona-sp3', 'ferrari-amalfi', 'ferrari-296-gtb', 'ferrari-roma', 'ferrari-812-superfast', 'ferrari-laferrari'],
     traits: {
       // STRUCTURED GEOMETRY ONLY: the F142 discriminator is a TALL, vertically oriented lens that
       // sweeps back along the wing — not generic "LED strip" wording.
       headlight_shape: {
         name: 'tall_vertical_swept_back_lens',
-        positiveKeywords: ['elongated vertical', 'swept-back headlight', 'vertical lens', 'vertically oriented lamp', 'vertical headlight', 'f142 headlight', 'tall narrow lamp'],
+        positiveKeywords: [
+          'elongated vertical', 'swept-back headlight', 'vertical lens', 'vertically oriented lamp',
+          'vertical headlight', 'f142 headlight', 'tall narrow lamp',
+          'angular headlamps', 'swept-back headlamps', 'vertical swept-back'
+        ],
         incompatibleKeywords: ['horizontal eyelid covers', 'retractable covers', 'c-clamp', 'c-shaped', 'c shaped', 'annular lamp', 'slotted lamp', 'lamp bar', 'round bug eye', 'fried egg']
       },
       front_intake_grille: {
         name: 'single_wide_mouth_with_flexible_mustache_winglets',
-        positiveKeywords: ['single wide mouth', 'front mustache', 'deformable winglets', 'flexible aero elastomeric', 'central horse badge grille', 'mustache winglets'],
-        incompatibleKeywords: ['horizontal strakes', 'horizontal slats', 'twin kidney', 'panamericana', 'slatted front bumper']
+        positiveKeywords: [
+          'single wide mouth', 'front mustache', 'deformable winglets', 'flexible aero elastomeric',
+          'central horse badge grille', 'mustache winglets',
+          'trapezoidal grille with a horizontal bar', 'horizontal bar and a pair of air intakes', 'front bumper with horizontal bar', 'horizontal bar across grille'
+        ],
+        incompatibleKeywords: ['horizontal strakes', 'horizontal slats across front bumper', 'twin kidney', 'panamericana', 'slatted front bumper', 'body-color perforated', 'perforated front grille', 'monolithic grille']
+      },
+      hood_geometry: {
+        name: 'smooth_sloping_front_lid_without_s_duct',
+        positiveKeywords: [
+          'smooth front lid', 'clean sloping front bonnet', 'smooth hood without vents'
+        ],
+        incompatibleKeywords: ['s-duct', 'hood air extractor', 'deep hood channel', 'hood nostril', 'dual nostrils', 'hood vents', 'sculpted air vents on hood', 'deep air vents']
       },
       side_intake_type: {
         name: 'clean_haunches_no_side_scoop',
@@ -761,19 +860,34 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
     model: '458 Spider',
     generation: 'F142',
     proportionsDescription: 'Mid-rear naturally aspirated V8 open-top supercar with retractable aluminum hardtop, dual rear flying buttresses, single round taillights, and triple central exhaust',
-    confusableWith: ['ferrari-458-italia', 'ferrari-488-pista', 'ferrari-sf90-stradale', 'ferrari-296-gtb'],
+    confusableWith: ['ferrari-458-italia', 'ferrari-488-pista', 'ferrari-sf90-stradale', 'ferrari-daytona-sp3', 'ferrari-amalfi', 'ferrari-296-gtb', 'ferrari-roma', 'ferrari-812-superfast', 'ferrari-laferrari'],
     traits: {
       // STRUCTURED GEOMETRY ONLY: the F142 discriminator is a TALL, vertically oriented lens that
       // sweeps back along the wing — not generic "LED strip" wording.
       headlight_shape: {
         name: 'tall_vertical_swept_back_lens',
-        positiveKeywords: ['elongated vertical', 'swept-back headlight', 'vertical lens', 'vertically oriented lamp', 'vertical headlight', 'f142 headlight', 'tall narrow lamp'],
+        positiveKeywords: [
+          'elongated vertical', 'swept-back headlight', 'vertical lens', 'vertically oriented lamp',
+          'vertical headlight', 'f142 headlight', 'tall narrow lamp',
+          'angular headlamps', 'swept-back headlamps', 'vertical swept-back'
+        ],
         incompatibleKeywords: ['horizontal eyelid covers', 'retractable covers', 'c-clamp', 'c-shaped', 'c shaped', 'annular lamp', 'slotted lamp', 'lamp bar', 'round bug eye', 'fried egg']
       },
       front_intake_grille: {
         name: 'single_wide_mouth_with_flexible_mustache_winglets',
-        positiveKeywords: ['single wide mouth', 'front mustache', 'deformable winglets', 'flexible aero elastomeric', 'central horse badge grille', 'mustache winglets'],
-        incompatibleKeywords: ['horizontal strakes', 'horizontal slats', 'twin kidney', 'panamericana', 'slatted front bumper']
+        positiveKeywords: [
+          'single wide mouth', 'front mustache', 'deformable winglets', 'flexible aero elastomeric',
+          'central horse badge grille', 'mustache winglets',
+          'trapezoidal grille with a horizontal bar', 'horizontal bar and a pair of air intakes', 'front bumper with horizontal bar', 'horizontal bar across grille'
+        ],
+        incompatibleKeywords: ['horizontal strakes', 'horizontal slats across front bumper', 'twin kidney', 'panamericana', 'slatted front bumper', 'body-color perforated', 'perforated front grille', 'monolithic grille']
+      },
+      hood_geometry: {
+        name: 'smooth_sloping_front_lid_without_s_duct',
+        positiveKeywords: [
+          'smooth front lid', 'clean sloping front bonnet', 'smooth hood without vents'
+        ],
+        incompatibleKeywords: ['s-duct', 'hood air extractor', 'deep hood channel', 'hood nostril', 'dual nostrils', 'hood vents', 'sculpted air vents on hood', 'deep air vents']
       },
       side_intake_type: {
         name: 'clean_haunches_no_side_scoop',
@@ -809,7 +923,7 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
     model: '488 Pista',
     generation: 'F142M',
     proportionsDescription: 'Mid-engine track-focused V8 supercar with front hood S-Duct channel, dual side intake splitters, and raised dual circular exhausts',
-    confusableWith: ['ferrari-458-italia', 'ferrari-458-spider', 'ferrari-sf90-stradale', 'ferrari-daytona-sp3'],
+    confusableWith: ['ferrari-458-italia', 'ferrari-458-spider', 'ferrari-sf90-stradale', 'ferrari-daytona-sp3', 'ferrari-amalfi', 'ferrari-296-gtb', 'ferrari-roma', 'ferrari-812-superfast', 'ferrari-laferrari'],
     traits: {
       headlight_shape: {
         name: 'swept_back_projector_led',
@@ -823,7 +937,7 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
         positiveKeywords: ['s-duct', 'front hood vent', 'bonnet scoop', 'hood air channel', 'front aerodynamic duct', 'carbon front intake'],
         // The S-duct hood channel is on every 488; only exposed-carbon intake wording is Pista-specific.
         familySharedKeywords: ['s-duct', 'front hood vent', 'bonnet scoop', 'hood air channel', 'front aerodynamic duct'],
-        incompatibleKeywords: ['horizontal strakes', 'slatted front bumper', 'smooth unvented hood', 'kidney grille']
+        incompatibleKeywords: ['horizontal strakes', 'slatted front bumper', 'smooth unvented hood', 'kidney grille', 'body-color perforated', 'monolithic grille', 'body-colour perforated']
       },
       side_intake_type: {
         name: 'dual_stage_side_intake_with_splitter_flap',
@@ -855,19 +969,24 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
     model: 'SF90 Stradale',
     generation: 'F173',
     proportionsDescription: 'Mid-engine flagship PHEV supercar with slender C-shaped matrix headlights and shut-off Gurney flap',
-    confusableWith: ['ferrari-daytona-sp3', 'ferrari-amalfi', 'ferrari-488-pista', 'ferrari-458-italia', 'ferrari-458-spider', 'ferrari-296-gtb'],
+    confusableWith: ['ferrari-daytona-sp3', 'ferrari-amalfi', 'ferrari-488-pista', 'ferrari-458-italia', 'ferrari-458-spider', 'ferrari-296-gtb', 'ferrari-roma', 'ferrari-812-superfast', 'ferrari-laferrari'],
     traits: {
       // STRUCTURED GEOMETRY ONLY: the SF90 discriminator is the CLOSED C / annular lamp with an
       // open slot — an actual shape signature, not generic "matrix LED" marketing wording.
       headlight_shape: {
         name: 'closed_c_annular_lamp_with_open_slot',
         positiveKeywords: ['c-shaped', 'c shaped', 'c-clamp', 'annular lamp', 'ring shaped lamp', 'open slot in the lamp', 'slotted lamp', 'closed c daytime running light', 'c shaped daytime running light'],
-        incompatibleKeywords: ['horizontal eyelid covers', 'retractable slat cover', 'round bug eye', 'fried egg', 'teardrop', 'teardrop headlight', 'elongated vertical', 'vertical lens', 'tall narrow lamp', 'lamp bar']
+        incompatibleKeywords: ['horizontal eyelid covers', 'retractable slat cover', 'round bug eye', 'fried egg', 'teardrop', 'teardrop headlight', 'elongated vertical', 'vertical lens', 'tall narrow lamp', 'lamp bar', 'horizontal led strip', 'horizontal strip', 'horizontal lamp']
       },
       front_intake_grille: {
         name: 'open_nose_wing_diffuser',
         positiveKeywords: ['open nose wing', 'front diffuser channel', 'low slung slotted intake', 'lower bumper splitter', 'shut-off gurney', 'gurney'],
-        incompatibleKeywords: ['horizontal strakes front', 'slatted front bumper', 'oval grille']
+        incompatibleKeywords: ['horizontal strakes front', 'slatted front bumper', 'oval grille', 'horizontal slat', 'horizontal slats', 'horizontal strakes']
+      },
+      hood_geometry: {
+        name: 's_duct_hood_extractor_channel',
+        positiveKeywords: ['s-duct', 'hood air extractor', 'central hood duct', 'hood extractor channel', 'deep bonnet channel'],
+        incompatibleKeywords: ['smooth hood without vents', 'hood without vents or louvers', 'no visible vents or louvers', 'slight bulge in the center']
       },
       side_intake_type: {
         name: 'high_mounted_rear_haunch_intakes',
@@ -904,7 +1023,7 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
     model: '296 GTB',
     generation: 'F171',
     proportionsDescription: 'Mid-engine two-seat berlinetta with a short low nose, recessed lamp scoops, flying-buttress rear deck and a single central exhaust',
-    confusableWith: ['ferrari-sf90-stradale', 'ferrari-458-italia', 'ferrari-458-spider', 'ferrari-amalfi', 'ferrari-daytona-sp3'],
+    confusableWith: ['ferrari-sf90-stradale', 'ferrari-458-italia', 'ferrari-458-spider', 'ferrari-amalfi', 'ferrari-daytona-sp3', 'ferrari-488-pista', 'ferrari-roma', 'ferrari-812-superfast', 'ferrari-laferrari'],
     traits: {
       proportions: {
         name: 'mid_engine_two_seat_berlinetta',
@@ -940,6 +1059,117 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
         name: 'active_rear_spoiler_above_a_centre_exit',
         positiveKeywords: ['active rear spoiler above the centre exit', 'integrated deployable spoiler', 'body-colour rear spoiler'],
         incompatibleKeywords: ['towering swan-neck wing', 'full-width horizontal rear strakes', 'integrated lip spoiler above strakes']
+      }
+    }
+  },
+
+  // ── FERRARI ROMA ──
+  {
+    vehicleId: 'ferrari-roma',
+    make: 'Ferrari',
+    model: 'Roma',
+    generation: 'F169',
+    proportionsDescription: 'Front-mid engine 2+2 grand tourer with shark-nose styling, monolithic body-color perforated front grille, horizontal DRL lightbar, and quad circular taillights',
+    confusableWith: ['ferrari-amalfi', 'ferrari-daytona-sp3', 'ferrari-sf90-stradale', 'ferrari-296-gtb', 'ferrari-458-italia', 'ferrari-458-spider', 'ferrari-488-pista', 'ferrari-812-superfast', 'ferrari-laferrari'],
+    traits: {
+      proportions: {
+        name: 'front_mid_engine_2_plus_2_grand_tourer',
+        positiveKeywords: ['front-engine gt', 'front-mid engine', 'long hood short rear deck', '2+2 coupe', 'grand tourer proportions', 'shark nose', 'shark-nose'],
+        incompatibleKeywords: ['mid-engine', 'cab-forward', 'rear-engine', 'suv']
+      },
+      headlight_shape: {
+        name: 'horizontal_drl_strip_bisecting_headlamp',
+        positiveKeywords: ['horizontal drl', 'horizontal light strip bisecting', 'horizontal led strip through headlight', 'bisecting led strip', 'horizontal slit drl', 'bisecting drl', 'horizontal slit lightbar bisecting'],
+        incompatibleKeywords: ['vertical lens', 'swept-back headlight', 'c-shaped', 'c shaped', 'c-clamp', 'retractable covers', 'lamp bar along the nose', 'drl blade', 'thin horizontal lamp bar']
+      },
+      front_intake_grille: {
+        name: 'monolithic_body_color_perforated_grille',
+        positiveKeywords: ['body-color perforated', 'body-colour perforated', 'perforated front grille', 'monolithic grille', 'body-color mesh grille', 'perforated body color'],
+        incompatibleKeywords: ['horizontal slats', 'horizontal strakes front', 'slatted front bumper', 'open nose wing', 's-duct']
+      },
+      rear_architecture_and_exhaust: {
+        name: 'horizontal_gem_strip_taillights_quad_round_exhaust',
+        positiveKeywords: ['horizontal strip taillights', 'linear taillights embedded', 'gem taillights', 'quad round exhaust', 'quad circular exhaust', 'four round exhaust tips'],
+        incompatibleKeywords: ['horizontal rear strakes', 'single central exhaust', 'triple central exhaust', 'single round taillights', 'squircle taillights']
+      },
+      roofline_greenhouse: {
+        name: 'sweeping_fastback_coupe_greenhouse',
+        positiveKeywords: ['sweeping fastback', 'flowing rear window', 'integrated active mobile rear spoiler', 'mobile spoiler below rear screen'],
+        incompatibleKeywords: ['flying buttress', 'targa visor', 'wraparound visor canopy', 'open-top', 'retractable hardtop']
+      }
+    }
+  },
+
+  // ── FERRARI 812 SUPERFAST ──
+  {
+    vehicleId: 'ferrari-812-superfast',
+    make: 'Ferrari',
+    model: '812 Superfast',
+    generation: 'F152M',
+    proportionsDescription: 'Front-mid engine V12 grand tourer berlinetta with long hood, hood air carving bypass ducts next to headlights, dual round taillights per side, and quad exhaust',
+    confusableWith: ['ferrari-roma', 'ferrari-amalfi', 'ferrari-daytona-sp3', 'ferrari-sf90-stradale', 'ferrari-296-gtb', 'ferrari-458-italia', 'ferrari-458-spider', 'ferrari-488-pista', 'ferrari-laferrari'],
+    traits: {
+      proportions: {
+        name: 'front_mid_engine_v12_fastback_berlinetta',
+        positiveKeywords: ['front-engine v12', 'front-mid engine', 'long sculpted hood', 'high tail fastback', 'muscular front-engine berlinetta'],
+        incompatibleKeywords: ['cab-forward', 'mid-engine two-seater', 'rear-engine', 'suv']
+      },
+      headlight_shape: {
+        name: 'full_led_headlights_with_hood_intake_air_carving',
+        positiveKeywords: ['headlight with hood air intake', 'hood air bypass duct next to headlight', 'carved hood vent beside headlight', 'vertical hood intake next to headlamp'],
+        incompatibleKeywords: ['horizontal eyelid covers', 'retractable covers', 'c-clamp', 'c-shaped', 'c shaped']
+      },
+      front_intake_grille: {
+        name: 'wide_open_black_mouth_active_flaps',
+        positiveKeywords: ['wide black mesh mouth', 'front intake with active flaps', 'open wide lower grille'],
+        incompatibleKeywords: ['body-color perforated', 'horizontal strakes front', 'slatted front bumper']
+      },
+      rear_architecture_and_exhaust: {
+        name: 'quad_round_taillights_and_quad_exhaust_pipes',
+        positiveKeywords: ['four round taillights', 'dual round taillights each side', 'quad circular taillights', 'quad round exhaust', 'four exhaust tips'],
+        incompatibleKeywords: ['horizontal rear strakes', 'single central exhaust', 'squircle taillights', 'horizontal strip taillights', 'triple central exhaust']
+      },
+      fender_architecture: {
+        name: 'sculpted_door_flank_air_extractor',
+        positiveKeywords: ['aerodynamic front fender air extractor', 'deep door scalloping', 'flank air channel flowing from front wheel'],
+        incompatibleKeywords: ['floating tendon', 'triple fender gills']
+      }
+    }
+  },
+
+  // ── FERRARI LAFERRARI ──
+  {
+    vehicleId: 'ferrari-laferrari',
+    make: 'Ferrari',
+    model: 'LaFerrari',
+    generation: 'F150',
+    proportionsDescription: 'Pinnacle flagship hybrid hypercar with F1 sharp arrow nose nosecone, downward-sloping hood S-duct, butterfly doors, and low canopy',
+    confusableWith: ['ferrari-daytona-sp3', 'ferrari-sf90-stradale', 'ferrari-296-gtb', 'ferrari-amalfi', 'ferrari-458-italia', 'ferrari-458-spider', 'ferrari-488-pista', 'ferrari-roma', 'ferrari-812-superfast'],
+    traits: {
+      proportions: {
+        name: 'f1_inspired_hypercar_proportions',
+        positiveKeywords: ['f1 nose', 'f1 nosecone', 'arrowhead nose', 'f1 front wing nose', 'extremely low hypercar', 'bubble canopy'],
+        incompatibleKeywords: ['front-engine gt', 'front-mid engine', 'suv', 'sedan']
+      },
+      headlight_shape: {
+        name: 'elongated_l_shaped_swept_back_led',
+        positiveKeywords: ['l-shaped headlight', 'swept-back f150 headlamp', 'elongated narrow swept-back led'],
+        incompatibleKeywords: ['c-shaped', 'c-clamp', 'horizontal eyelid covers', 'retractable covers', 'round bug eye']
+      },
+      front_intake_grille: {
+        name: 'central_f1_vertical_support_pillar_flanked_by_giant_mouths',
+        positiveKeywords: ['central vertical pylon in front grille', 'f1 center wing pylon', 'f1 nosecone vertical strut', 'split front grille with central pylon'],
+        incompatibleKeywords: ['horizontal slats', 'horizontal strakes front', 'slatted front bumper', 'body-color perforated']
+      },
+      roofline_greenhouse: {
+        name: 'black_roof_narrow_cockpit_visor_canopy',
+        positiveKeywords: ['black roof canopy', 'narrow cockpit bubble', 'f1 cockpit canopy', 'wraparound windshield with single wiper'],
+        incompatibleKeywords: ['convertible soft top', 'front-engine coupe']
+      },
+      rear_architecture_and_exhaust: {
+        name: 'single_round_taillights_quad_exhaust_flanking_giant_active_diffuser',
+        positiveKeywords: ['single round taillights each side', 'quad exhaust tips flanking diffuser', 'prominent rear active diffuser flaps'],
+        incompatibleKeywords: ['horizontal rear strakes', 'single central exhaust', 'squircle taillights']
       }
     }
   },
@@ -2761,22 +2991,33 @@ export class FineGrainedModelDiscriminator {
     })) || [];
 
     // 1. Build semantic evidence: full text plus per-category eligibility (front/rear routing).
-    const zonedEvidence = buildZonedEvidence([
-      visualEvidence.body_style || '',
-      visualEvidence.grille || '',
-      visualEvidence.headlights || '',
-      visualEvidence.taillights || '',
-      visualEvidence.hood || '',
-      visualEvidence.roofline || '',
-      visualEvidence.windows || '',
-      visualEvidence.wheels || '',
-      visualEvidence.exhaust || '',
-      visualEvidence.aero || '',
-      visualEvidence.badges || '',
-      visualEvidence.body_proportions || '',
-      ...(visualEvidence.distinctive_details || []),
-      ...(evidenceList || [])
-    ]);
+    const zonedEvidence = buildZonedEvidence(
+      [
+        visualEvidence.body_style || '',
+        visualEvidence.grille || '',
+        visualEvidence.headlights || '',
+        visualEvidence.taillights || '',
+        visualEvidence.hood || '',
+        visualEvidence.roofline || '',
+        visualEvidence.windows || '',
+        visualEvidence.wheels || '',
+        visualEvidence.exhaust || '',
+        visualEvidence.aero || '',
+        visualEvidence.badges || '',
+        visualEvidence.body_proportions || '',
+        ...(visualEvidence.distinctive_details || []),
+        ...(evidenceList || [])
+      ],
+      {
+        headlights: visualEvidence.headlights || '',
+        grille: visualEvidence.grille || '',
+        hood: visualEvidence.hood || '',
+        side: [visualEvidence.aero, visualEvidence.body_proportions].filter(Boolean).join(' . '),
+        roof: [visualEvidence.roofline, visualEvidence.windows].filter(Boolean).join(' . '),
+        exhaust: visualEvidence.exhaust || '',
+        taillights: visualEvidence.taillights || ''
+      }
+    );
     const evidenceText = zonedEvidence.full;
 
     // 2. Compute viewpoint-aware visibility matrix
@@ -2997,15 +3238,17 @@ export class FineGrainedModelDiscriminator {
           return false;
         };
 
-        // Check for positive keyword match. FAMILY-SHARED DISCIPLINE: a keyword that names
-        // architecture shared with sibling models of the same family (e.g. the S-duct is on
-        // every 488; roof mechanics are shared between a Spider and its coupe) names the
-        // FAMILY, not the model, and cannot register as model-specific evidence on its own.
+        // Check for positive keyword match. FAMILY-SHARED & GENERIC DISCIPLINE: a keyword that names
+        // architecture shared with sibling models or universal generic tokens (e.g. LED strip,
+        // center bulge, front splitter) cannot register as model-specific evidence on its own.
         const matchedPositiveKws = expectedTrait.positiveKeywords.filter((kw) =>
           categoryText.includes(kw) && !isTermNegated(categoryText, kw)
         );
         const familySharedSet = new Set((expectedTrait.familySharedKeywords ?? []).map((k) => k.toLowerCase()));
-        const specificPositiveKws = matchedPositiveKws.filter((kw) => !familySharedSet.has(kw.toLowerCase()));
+        const specificPositiveKws = matchedPositiveKws.filter((kw) =>
+          !familySharedSet.has(kw.toLowerCase()) &&
+          !UNIVERSAL_GENERIC_TOKENS.has(kw.toLowerCase())
+        );
         const matchedOnlyFamilyShared =
           matchedPositiveKws.length > 0 && specificPositiveKws.length === 0;
         const matchesPositive = matchedPositiveKws.length > 0;
