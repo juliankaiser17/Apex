@@ -119,6 +119,7 @@ export interface CandidateComparison {
   contradictions: string[];
   unobservable_features?: string[];
   invalid?: boolean;
+  canonicalVehicleId?: string | null;
 }
 
 export interface VisionEvidence {
