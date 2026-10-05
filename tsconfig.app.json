@@ -23,5 +23,5 @@
     "noFallthroughCasesInSwitch": true
   },
   "include": ["src"],
-  "exclude": ["src/ai-engine/evaluation"]
+  "exclude": ["src/ai-engine/evaluation", "src/api"]
 }
