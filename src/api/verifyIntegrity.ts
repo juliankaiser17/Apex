@@ -147,7 +147,7 @@ export default async function handler(req: any, res: any) {
   }
 
   const { integrityToken, packageName, nonce } = req.body || {};
-  const result = verifyPlayIntegrityVerdict(integrityToken, {
+  const result = evaluateIntegrityVerdict(integrityToken, {
     expectedPackageName: packageName,
     expectedNonce: nonce
   });
