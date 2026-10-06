@@ -473,6 +473,13 @@ export async function identifyVehicleWithAi(
   try {
     onProgress?.('Contacting Apex AI backend…', 0);
 
+    console.log('[FRONTEND] analyze_request_started', {
+      endpoint: analyzeEndpoint,
+      mimeType: photoDataUrl.substring(photoDataUrl.indexOf(':') + 1, photoDataUrl.indexOf(';')) || 'image/jpeg',
+      byteLength: Math.floor((photoDataUrl.length * 3) / 4),
+      idempotencyKey
+    });
+
     let res = await executePost(authResolution.accessToken);
 
     // ── Phase 4: One-Shot 401 Recovery ──
@@ -490,6 +497,12 @@ export async function identifyVehicleWithAi(
     clearTimeout(timeoutId);
     const tRequestEnd = performance.now();
     const durationMs = Math.round(tRequestEnd - tRequestStart);
+
+    console.log('[FRONTEND] analyze_response_received', {
+      status: res.status,
+      ok: res.ok,
+      durationMs
+    });
 
     if (res.status === 429) {
       const data = await res.json().catch(() => ({}));
@@ -525,8 +538,8 @@ export async function identifyVehicleWithAi(
         status: 'uncertain',
         is_car: true,
         needs_better_angle: false,
-        reason: errData.error || `Vision backend error (HTTP ${res.status}). Please try again.`,
-        rejection_reason: 'backend_error',
+        reason: errData.error || (res.status === 401 ? 'Your session expired. Please sign in again.' : 'Connection failed. Try again.'),
+        rejection_reason: res.status === 401 ? 'auth_session_expired' : 'backend_error',
         confidence: 0
       };
     }
@@ -563,9 +576,7 @@ export async function identifyVehicleWithAi(
       status: 'uncertain',
       is_car: true,
       needs_better_angle: false,
-      reason: isTimeout
-        ? 'Scanning timed out. Please ensure you have a stable network connection.'
-        : 'Could not connect to Apex vision service. Please verify your connection.',
+      reason: 'Connection failed. Try again.',
       rejection_reason: isTimeout ? 'timeout' : 'network_error',
       confidence: 0
     };

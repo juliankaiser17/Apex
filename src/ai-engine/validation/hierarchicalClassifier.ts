@@ -508,9 +508,9 @@ export class HierarchicalClassifier {
 
       // ── CONTRADICTION ENGINE RULE E: FERRARI MODEL-FAMILY DISAMBIGUATION ──
       const hasNegativeStrakes = /\b(?:without|no|lacks?|devoid\s+of)\s+(?:horizontal\s+)?strakes?\b/i.test(evidenceText);
-      // Model-specific Daytona Icona architectural cues (generic horizontal slats removed)
+      // Model-specific Daytona Icona architectural cues (semantic front & rear equivalents)
       const hasDaytonaIconaCues = !hasNegativeStrakes &&
-        /\b(horizontal\s+strakes?|headlight\s+eyelids?|eyelid\s+covers?|partial\s+covers?|wraparound\s+visor|visor\s+canopy|fender-mounted\s+mirrors?|door\s+tops?\s+mirrors?|icona)\b/i.test(evidenceText);
+        /\b(horizontal\s+strakes?|headlight\s+eyelids?|eyelid\s+covers?|partial\s+covers?|wraparound\s+visor|visor\s+canopy|fender-mounted\s+mirrors?|door\s+tops?\s+mirrors?|icona|(?:thin|low|recessed)\s+horizontal\s+(?:head)?lamps?|(?:thin|low|recessed)\s+horizontal\s+headlights?|(?:large|wide)\s+horizontal\s+(?:front\s+)?grille|horizontal\s+grille\s+with\s+black|horizontal\s+blade\s+splitter)\b/i.test(evidenceText);
 
       // Model-specific SF90 Stradale architectural cues (generic matrix led / hybrid removed)
       const hasExplicitSf90Cues = /\b(sf90|shut-?off\s+gurney|c-shaped\s+(?:matrix\s+)?(?:led\s+)?headlights?|c-clamp\s+headlights?)\b/i.test(evidenceText);
@@ -1181,7 +1181,7 @@ export class HierarchicalClassifier {
       needs_adversarial_verification: needsAdversarial,
       needs_neutral_verification: Boolean(
         !reasonCustomizedByGate &&
-        anyModelSpecificEvidence &&
+        (anyModelSpecificEvidence || fgResult.rawConflict) &&
         (fgResult.needsVerification || fgResult.rawConflict || separation < 0.15)
       ),
       raw_conflict: fgResult.rawConflict,
@@ -1198,7 +1198,7 @@ export class HierarchicalClassifier {
       // A raw-provider hypothesis that the discriminator could not evaluate is never a validated
       // exact-model result, even if it wins because no evidence-grounded winner existed.
       evidence_grounded: (fgResult.scoredCandidates.length > 0 ? fgResult.evidenceGrounded : Boolean(topCandidate && (topCandidate.supporting_evidence?.length || 0) > 0))
-        && Boolean(anyModelSpecificEvidence)
+        && (Boolean(anyModelSpecificEvidence) || Boolean(fgResult.rawConflict))
         && !(topCandidate && rawHypothesisDemoted.has(topCandidate.name))
     };
   }

@@ -743,17 +743,34 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
     traits: {
       headlight_shape: {
         name: 'horizontal_eyelid_covers',
-        positiveKeywords: ['eyelid', 'eyelid covers', 'partial covers', 'horizontal partial cover', 'slat headlights', 'retractable covers', 'retractable eyelid', 'pop-up covers', 'slatted eyelid', 'eyelids'],
+        positiveKeywords: [
+          'eyelid', 'eyelid covers', 'partial covers', 'horizontal partial cover', 'slat headlights',
+          'retractable covers', 'retractable eyelid', 'pop-up covers', 'slatted eyelid', 'eyelids',
+          'thin horizontal headlamps', 'thin horizontal headlights', 'horizontal headlamps with black',
+          'horizontal headlights with black', 'horizontal slit headlamps', 'horizontal slit headlights',
+          'low horizontal headlamps', 'low horizontal headlights', 'recessed horizontal headlights'
+        ],
         incompatibleKeywords: ['open c-shape matrix', 'c-clamp headlight', 'c-shaped', 'c-shape', 'round bug eye', 'elongated vertical', 'swept-back headlights']
       },
       front_intake_grille: {
         name: 'horizontal_strakes_slatted_grille',
-        positiveKeywords: ['horizontal strakes', 'strake grille', 'strakes across', 'full width strakes', 'horizontal slats across front bumper', 'slatted strakes', 'slatted grille', 'horizontal slats', 'horizontal slat'],
+        positiveKeywords: [
+          'horizontal strakes', 'strake grille', 'strakes across', 'full width strakes',
+          'horizontal slats across front bumper', 'slatted strakes', 'slatted grille', 'horizontal slats',
+          'horizontal slat', 'large horizontal grille', 'horizontal grille with black', 'wide horizontal grille',
+          'horizontal front grille', 'horizontal front intake', 'horizontal blade', 'horizontal splitter',
+          'low flat front splitter', 'horizontal bumper opening'
+        ],
         incompatibleKeywords: ['kidney grille', 'singleframe', 'front mustache', 'deformable winglets', 'shut-off gurney', 'gurney', 'body-color perforated', 'mustache bar', 'horizontal bar across grille']
       },
       hood_geometry: {
         name: 'sculpted_hood_with_deep_air_vents',
-        positiveKeywords: ['hood vents', 'sculpted air vents on hood', 'hood air extractors', 'dual hood scoops', 'sculpted hood', 'central spine', 'deep air vents', 'air vents on hood'],
+        positiveKeywords: [
+          'hood vents', 'sculpted air vents on hood', 'hood air extractors', 'dual hood scoops',
+          'sculpted hood', 'central spine', 'deep air vents', 'air vents on hood',
+          'hood has a slight bulge in the center and a small vent', 'small vent', 'small vent on',
+          'dual hood air chimneys', 'hood air chimneys'
+        ],
         incompatibleKeywords: ['deep s-duct extractor', 'giant hood nostrils', 'power bulge with cowl induction']
       },
       side_intake_type: {
@@ -812,7 +829,13 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
           'vertical headlight', 'f142 headlight', 'tall narrow lamp',
           'angular headlamps', 'swept-back headlamps', 'vertical swept-back'
         ],
-        incompatibleKeywords: ['horizontal eyelid covers', 'retractable covers', 'c-clamp', 'c-shaped', 'c shaped', 'annular lamp', 'slotted lamp', 'lamp bar', 'round bug eye', 'fried egg']
+        incompatibleKeywords: [
+          'horizontal eyelid covers', 'retractable covers', 'c-clamp', 'c-shaped', 'c shaped',
+          'annular lamp', 'slotted lamp', 'lamp bar', 'round bug eye', 'fried egg',
+          'thin horizontal headlamps', 'thin horizontal headlights', 'horizontal slit headlamps',
+          'horizontal slit headlights', 'horizontal headlamps with black', 'horizontal headlights with black',
+          'low horizontal headlamps', 'low horizontal headlights'
+        ]
       },
       front_intake_grille: {
         name: 'single_wide_mouth_with_flexible_mustache_winglets',
@@ -821,7 +844,11 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
           'central horse badge grille', 'mustache winglets',
           'trapezoidal grille with a horizontal bar', 'horizontal bar and a pair of air intakes', 'front bumper with horizontal bar', 'horizontal bar across grille'
         ],
-        incompatibleKeywords: ['horizontal strakes', 'horizontal slats across front bumper', 'twin kidney', 'panamericana', 'slatted front bumper', 'body-color perforated', 'perforated front grille', 'monolithic grille']
+        incompatibleKeywords: [
+          'horizontal strakes', 'horizontal slats across front bumper', 'twin kidney', 'panamericana',
+          'slatted front bumper', 'body-color perforated', 'perforated front grille', 'monolithic grille',
+          'large horizontal grille', 'horizontal grille with black', 'wide horizontal grille', 'horizontal front grille'
+        ]
       },
       hood_geometry: {
         name: 'smooth_sloping_front_lid_without_s_duct',
@@ -871,7 +898,13 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
           'vertical headlight', 'f142 headlight', 'tall narrow lamp',
           'angular headlamps', 'swept-back headlamps', 'vertical swept-back'
         ],
-        incompatibleKeywords: ['horizontal eyelid covers', 'retractable covers', 'c-clamp', 'c-shaped', 'c shaped', 'annular lamp', 'slotted lamp', 'lamp bar', 'round bug eye', 'fried egg']
+        incompatibleKeywords: [
+          'horizontal eyelid covers', 'retractable covers', 'c-clamp', 'c-shaped', 'c shaped',
+          'annular lamp', 'slotted lamp', 'lamp bar', 'round bug eye', 'fried egg',
+          'thin horizontal headlamps', 'thin horizontal headlights', 'horizontal slit headlamps',
+          'horizontal slit headlights', 'horizontal headlamps with black', 'horizontal headlights with black',
+          'low horizontal headlamps', 'low horizontal headlights'
+        ]
       },
       front_intake_grille: {
         name: 'single_wide_mouth_with_flexible_mustache_winglets',
@@ -880,7 +913,11 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
           'central horse badge grille', 'mustache winglets',
           'trapezoidal grille with a horizontal bar', 'horizontal bar and a pair of air intakes', 'front bumper with horizontal bar', 'horizontal bar across grille'
         ],
-        incompatibleKeywords: ['horizontal strakes', 'horizontal slats across front bumper', 'twin kidney', 'panamericana', 'slatted front bumper', 'body-color perforated', 'perforated front grille', 'monolithic grille']
+        incompatibleKeywords: [
+          'horizontal strakes', 'horizontal slats across front bumper', 'twin kidney', 'panamericana',
+          'slatted front bumper', 'body-color perforated', 'perforated front grille', 'monolithic grille',
+          'large horizontal grille', 'horizontal grille with black', 'wide horizontal grille', 'horizontal front grille'
+        ]
       },
       hood_geometry: {
         name: 'smooth_sloping_front_lid_without_s_duct',
@@ -930,14 +967,23 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
         positiveKeywords: ['swept-back headlights', 'f142m headlights', 'elongated led headlight', 'projector led'],
         // 488 GTB shares swept/elongated/projector lamps; only the F142M code is Pista-specific.
         familySharedKeywords: ['swept-back headlights', 'elongated led headlight', 'projector led'],
-        incompatibleKeywords: ['horizontal eyelid covers', 'retractable covers', 'c-clamp', 'c-shaped', 'horizontal strakes']
+        incompatibleKeywords: [
+          'horizontal eyelid covers', 'retractable covers', 'c-clamp', 'c-shaped', 'horizontal strakes',
+          'thin horizontal headlamps', 'thin horizontal headlights', 'horizontal slit headlamps',
+          'horizontal slit headlights', 'low horizontal headlamps'
+        ]
       },
       front_intake_grille: {
         name: 'f1_derived_s_duct_hood_channel',
         positiveKeywords: ['s-duct', 'front hood vent', 'bonnet scoop', 'hood air channel', 'front aerodynamic duct', 'carbon front intake'],
         // The S-duct hood channel is on every 488; only exposed-carbon intake wording is Pista-specific.
         familySharedKeywords: ['s-duct', 'front hood vent', 'bonnet scoop', 'hood air channel', 'front aerodynamic duct'],
-        incompatibleKeywords: ['horizontal strakes', 'slatted front bumper', 'smooth unvented hood', 'kidney grille', 'body-color perforated', 'monolithic grille', 'body-colour perforated']
+        incompatibleKeywords: [
+          'horizontal strakes', 'slatted front bumper', 'smooth unvented hood', 'kidney grille',
+          'body-color perforated', 'monolithic grille', 'body-colour perforated',
+          'large horizontal grille', 'horizontal grille with black', 'wide horizontal grille',
+          'horizontal front grille', 'horizontal front intake'
+        ]
       },
       side_intake_type: {
         name: 'dual_stage_side_intake_with_splitter_flap',

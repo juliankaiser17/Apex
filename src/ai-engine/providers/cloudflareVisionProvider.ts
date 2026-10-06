@@ -799,10 +799,10 @@ Rules:
         )
       );
 
-      const shouldTriggerNeutralVerification = !verificationConsumed && viableCandidates.length >= 2 && Boolean(classResult.evidence_grounded) && !classResult.gate_customized && (
-        classResult.needs_neutral_verification ||
-        classResult.raw_conflict ||
-        (classResult.candidate_separation < 0.15 && classResult.top_candidate && classResult.top_candidate.score > 0.50)
+      const shouldTriggerNeutralVerification = !verificationConsumed && viableCandidates.length >= 2 && !classResult.gate_customized && (
+        Boolean(classResult.needs_neutral_verification) ||
+        Boolean(classResult.raw_conflict) ||
+        (classResult.candidate_separation < 0.15 && classResult.top_candidate && classResult.top_candidate.score >= 0.50 && Boolean(classResult.evidence_grounded))
       );
 
       if (shouldTriggerNeutralVerification) {
@@ -815,10 +815,34 @@ Rules:
         console.log(`[CloudflareVisionProvider] Invoking neutral pairwise verification between "${candA}" and "${candB}" (raw conflict: ${Boolean(classResult.raw_conflict)}, separation: ${classResult.candidate_separation})...`);
         verificationConsumed = true;
         try {
+          const getCandidateDecisiveCues = (name: string): string => {
+            const n = name.toLowerCase();
+            if (n.includes('daytona') || n.includes('sp3')) {
+              return '- Daytona SP3 decisive architecture: horizontal blade/strake architecture across lower front fascia, horizontal eyelid/slit headlights, dual hood air extractor chimneys, wraparound helmet-visor windshield canopy, fender/door-top mounted mirrors, full-width horizontal rear strakes. Contradicted by: vertical swept-back headlights, C-shaped headlights, front mustache winglets, central hood S-duct.';
+            }
+            if (n.includes('sf90')) {
+              return '- SF90 Stradale decisive architecture: C-shaped / annular matrix LED headlights, deep central S-duct hood extractor channel, shut-off Gurney flap, high-mounted twin central exhaust. Contradicted by: horizontal eyelid/slit headlights, full-width front strakes, front mustache winglets.';
+            }
+            if (n.includes('458')) {
+              return '- 458 Italia/Spider decisive architecture: elongated vertical swept-back headlights running up fenders, single wide front intake with deformable aero mustache winglets, triple central exhaust, single round taillights. Contradicted by: horizontal slit headlights, C-shaped headlights, horizontal strakes.';
+            }
+            if (n.includes('296')) {
+              return '- 296 GTB decisive architecture: teardrop horizontal headlights with integrated brake cooling scoops, short low nose with wide mesh mouth without slats, flying buttress rear deck, single central exhaust in diffuser.';
+            }
+            if (n.includes('pista')) {
+              return '- 488 Pista decisive architecture: prominent front hood S-Duct channel, swept-back projector headlights, dual side intake splitters, raised twin circular exhausts.';
+            }
+            return '';
+          };
+
+          const decisiveA = getCandidateDecisiveCues(candA);
+          const decisiveB = getCandidateDecisiveCues(candB);
+          const decisiveNotes = [decisiveA, decisiveB].filter(Boolean).join('\n');
+
           const neutralVerifyPrompt = `Inspect the focal vehicle in this photo with rigorous neutral forensic scrutiny.
 Compare Candidate A: "${candA}" and Candidate B: "${candB}" against the visible exterior features in the image.
 
-CRITICAL INVARIANTS:
+${decisiveNotes ? `CANDIDATE-SPECIFIC STRUCTURAL CRITERIA TO EXAMINE:\n${decisiveNotes}\n` : ''}CRITICAL INVARIANTS:
 1. Candidate A and Candidate B are completely unordered peers. Neither candidate has any default priority, advantage, or baseline preference.
 2. Ground analysis exclusively in visible exterior features (headlights, front grille, hood geometry, side air scoops/tendons, fender louvers, roofline/greenhouse, rear wing/spoiler, rear exhaust).
 3. If a feature zone is NOT_VISIBLE or OCCLUDED from this viewpoint, it contributes exactly ZERO evidence, ZERO contradiction, and ZERO penalty.

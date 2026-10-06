@@ -62,6 +62,31 @@ export class DeterministicValidator {
       };
     }
 
+    // 0b. Explicit model uncertainty check: if model is unconfirmed or uncertain, never fabricate or guess an arbitrary model!
+    if (!output.model || output.model === 'Model Family Uncertain' || output.model.toLowerCase().includes('uncertain')) {
+      return {
+        isValid: false,
+        canonicalRecord: null,
+        resolvedMake: output.make || 'Unknown Make',
+        resolvedModel: 'Model Family Uncertain',
+        resolvedGeneration: 'Unknown',
+        resolvedTrim: undefined,
+        resolvedYear: 'Unknown',
+        resolvedRarity: 'common',
+        resolvedEngine: 'Unknown',
+        resolvedHorsepower: 0,
+        resolvedTorqueNm: 0,
+        resolvedTopSpeed: 0,
+        resolvedZeroToHundred: 0,
+        resolvedKerbWeight: 0,
+        resolvedProductionYears: 'Unknown',
+        resolvedOriginCountry: 'Global',
+        resolvedBodyStyle: output.bodyStyle || 'Coupe',
+        validationWarnings: ['Model family is unconfirmed or ambiguous; abstaining at manufacturer level.'],
+        requiresHumanReview: true
+      };
+    }
+
     const warnings: string[] = [];
     let requiresReview = output.needsReview;
 

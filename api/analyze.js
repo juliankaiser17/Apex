@@ -4137,17 +4137,70 @@ var MORPHOLOGICAL_FINGERPRINTS = [
     traits: {
       headlight_shape: {
         name: "horizontal_eyelid_covers",
-        positiveKeywords: ["eyelid", "eyelid covers", "partial covers", "horizontal partial cover", "slat headlights", "retractable covers", "retractable eyelid", "pop-up covers", "slatted eyelid", "eyelids"],
+        positiveKeywords: [
+          "eyelid",
+          "eyelid covers",
+          "partial covers",
+          "horizontal partial cover",
+          "slat headlights",
+          "retractable covers",
+          "retractable eyelid",
+          "pop-up covers",
+          "slatted eyelid",
+          "eyelids",
+          "thin horizontal headlamps",
+          "thin horizontal headlights",
+          "horizontal headlamps with black",
+          "horizontal headlights with black",
+          "horizontal slit headlamps",
+          "horizontal slit headlights",
+          "low horizontal headlamps",
+          "low horizontal headlights",
+          "recessed horizontal headlights"
+        ],
         incompatibleKeywords: ["open c-shape matrix", "c-clamp headlight", "c-shaped", "c-shape", "round bug eye", "elongated vertical", "swept-back headlights"]
       },
       front_intake_grille: {
         name: "horizontal_strakes_slatted_grille",
-        positiveKeywords: ["horizontal strakes", "strake grille", "strakes across", "full width strakes", "horizontal slats across front bumper", "slatted strakes", "slatted grille", "horizontal slats", "horizontal slat"],
+        positiveKeywords: [
+          "horizontal strakes",
+          "strake grille",
+          "strakes across",
+          "full width strakes",
+          "horizontal slats across front bumper",
+          "slatted strakes",
+          "slatted grille",
+          "horizontal slats",
+          "horizontal slat",
+          "large horizontal grille",
+          "horizontal grille with black",
+          "wide horizontal grille",
+          "horizontal front grille",
+          "horizontal front intake",
+          "horizontal blade",
+          "horizontal splitter",
+          "low flat front splitter",
+          "horizontal bumper opening"
+        ],
         incompatibleKeywords: ["kidney grille", "singleframe", "front mustache", "deformable winglets", "shut-off gurney", "gurney", "body-color perforated", "mustache bar", "horizontal bar across grille"]
       },
       hood_geometry: {
         name: "sculpted_hood_with_deep_air_vents",
-        positiveKeywords: ["hood vents", "sculpted air vents on hood", "hood air extractors", "dual hood scoops", "sculpted hood", "central spine", "deep air vents", "air vents on hood"],
+        positiveKeywords: [
+          "hood vents",
+          "sculpted air vents on hood",
+          "hood air extractors",
+          "dual hood scoops",
+          "sculpted hood",
+          "central spine",
+          "deep air vents",
+          "air vents on hood",
+          "hood has a slight bulge in the center and a small vent",
+          "small vent",
+          "small vent on",
+          "dual hood air chimneys",
+          "hood air chimneys"
+        ],
         incompatibleKeywords: ["deep s-duct extractor", "giant hood nostrils", "power bulge with cowl induction"]
       },
       side_intake_type: {
@@ -4212,7 +4265,26 @@ var MORPHOLOGICAL_FINGERPRINTS = [
           "swept-back headlamps",
           "vertical swept-back"
         ],
-        incompatibleKeywords: ["horizontal eyelid covers", "retractable covers", "c-clamp", "c-shaped", "c shaped", "annular lamp", "slotted lamp", "lamp bar", "round bug eye", "fried egg"]
+        incompatibleKeywords: [
+          "horizontal eyelid covers",
+          "retractable covers",
+          "c-clamp",
+          "c-shaped",
+          "c shaped",
+          "annular lamp",
+          "slotted lamp",
+          "lamp bar",
+          "round bug eye",
+          "fried egg",
+          "thin horizontal headlamps",
+          "thin horizontal headlights",
+          "horizontal slit headlamps",
+          "horizontal slit headlights",
+          "horizontal headlamps with black",
+          "horizontal headlights with black",
+          "low horizontal headlamps",
+          "low horizontal headlights"
+        ]
       },
       front_intake_grille: {
         name: "single_wide_mouth_with_flexible_mustache_winglets",
@@ -4228,7 +4300,20 @@ var MORPHOLOGICAL_FINGERPRINTS = [
           "front bumper with horizontal bar",
           "horizontal bar across grille"
         ],
-        incompatibleKeywords: ["horizontal strakes", "horizontal slats across front bumper", "twin kidney", "panamericana", "slatted front bumper", "body-color perforated", "perforated front grille", "monolithic grille"]
+        incompatibleKeywords: [
+          "horizontal strakes",
+          "horizontal slats across front bumper",
+          "twin kidney",
+          "panamericana",
+          "slatted front bumper",
+          "body-color perforated",
+          "perforated front grille",
+          "monolithic grille",
+          "large horizontal grille",
+          "horizontal grille with black",
+          "wide horizontal grille",
+          "horizontal front grille"
+        ]
       },
       hood_geometry: {
         name: "smooth_sloping_front_lid_without_s_duct",
@@ -4286,7 +4371,26 @@ var MORPHOLOGICAL_FINGERPRINTS = [
           "swept-back headlamps",
           "vertical swept-back"
         ],
-        incompatibleKeywords: ["horizontal eyelid covers", "retractable covers", "c-clamp", "c-shaped", "c shaped", "annular lamp", "slotted lamp", "lamp bar", "round bug eye", "fried egg"]
+        incompatibleKeywords: [
+          "horizontal eyelid covers",
+          "retractable covers",
+          "c-clamp",
+          "c-shaped",
+          "c shaped",
+          "annular lamp",
+          "slotted lamp",
+          "lamp bar",
+          "round bug eye",
+          "fried egg",
+          "thin horizontal headlamps",
+          "thin horizontal headlights",
+          "horizontal slit headlamps",
+          "horizontal slit headlights",
+          "horizontal headlamps with black",
+          "horizontal headlights with black",
+          "low horizontal headlamps",
+          "low horizontal headlights"
+        ]
       },
       front_intake_grille: {
         name: "single_wide_mouth_with_flexible_mustache_winglets",
@@ -4302,7 +4406,20 @@ var MORPHOLOGICAL_FINGERPRINTS = [
           "front bumper with horizontal bar",
           "horizontal bar across grille"
         ],
-        incompatibleKeywords: ["horizontal strakes", "horizontal slats across front bumper", "twin kidney", "panamericana", "slatted front bumper", "body-color perforated", "perforated front grille", "monolithic grille"]
+        incompatibleKeywords: [
+          "horizontal strakes",
+          "horizontal slats across front bumper",
+          "twin kidney",
+          "panamericana",
+          "slatted front bumper",
+          "body-color perforated",
+          "perforated front grille",
+          "monolithic grille",
+          "large horizontal grille",
+          "horizontal grille with black",
+          "wide horizontal grille",
+          "horizontal front grille"
+        ]
       },
       hood_geometry: {
         name: "smooth_sloping_front_lid_without_s_duct",
@@ -4353,14 +4470,38 @@ var MORPHOLOGICAL_FINGERPRINTS = [
         positiveKeywords: ["swept-back headlights", "f142m headlights", "elongated led headlight", "projector led"],
         // 488 GTB shares swept/elongated/projector lamps; only the F142M code is Pista-specific.
         familySharedKeywords: ["swept-back headlights", "elongated led headlight", "projector led"],
-        incompatibleKeywords: ["horizontal eyelid covers", "retractable covers", "c-clamp", "c-shaped", "horizontal strakes"]
+        incompatibleKeywords: [
+          "horizontal eyelid covers",
+          "retractable covers",
+          "c-clamp",
+          "c-shaped",
+          "horizontal strakes",
+          "thin horizontal headlamps",
+          "thin horizontal headlights",
+          "horizontal slit headlamps",
+          "horizontal slit headlights",
+          "low horizontal headlamps"
+        ]
       },
       front_intake_grille: {
         name: "f1_derived_s_duct_hood_channel",
         positiveKeywords: ["s-duct", "front hood vent", "bonnet scoop", "hood air channel", "front aerodynamic duct", "carbon front intake"],
         // The S-duct hood channel is on every 488; only exposed-carbon intake wording is Pista-specific.
         familySharedKeywords: ["s-duct", "front hood vent", "bonnet scoop", "hood air channel", "front aerodynamic duct"],
-        incompatibleKeywords: ["horizontal strakes", "slatted front bumper", "smooth unvented hood", "kidney grille", "body-color perforated", "monolithic grille", "body-colour perforated"]
+        incompatibleKeywords: [
+          "horizontal strakes",
+          "slatted front bumper",
+          "smooth unvented hood",
+          "kidney grille",
+          "body-color perforated",
+          "monolithic grille",
+          "body-colour perforated",
+          "large horizontal grille",
+          "horizontal grille with black",
+          "wide horizontal grille",
+          "horizontal front grille",
+          "horizontal front intake"
+        ]
       },
       side_intake_type: {
         name: "dual_stage_side_intake_with_splitter_flap",
@@ -7371,7 +7512,7 @@ var HierarchicalClassifier = class {
         }
       }
       const hasNegativeStrakes = /\b(?:without|no|lacks?|devoid\s+of)\s+(?:horizontal\s+)?strakes?\b/i.test(evidenceText);
-      const hasDaytonaIconaCues = !hasNegativeStrakes && /\b(horizontal\s+strakes?|headlight\s+eyelids?|eyelid\s+covers?|partial\s+covers?|wraparound\s+visor|visor\s+canopy|fender-mounted\s+mirrors?|door\s+tops?\s+mirrors?|icona)\b/i.test(evidenceText);
+      const hasDaytonaIconaCues = !hasNegativeStrakes && /\b(horizontal\s+strakes?|headlight\s+eyelids?|eyelid\s+covers?|partial\s+covers?|wraparound\s+visor|visor\s+canopy|fender-mounted\s+mirrors?|door\s+tops?\s+mirrors?|icona|(?:thin|low|recessed)\s+horizontal\s+(?:head)?lamps?|(?:thin|low|recessed)\s+horizontal\s+headlights?|(?:large|wide)\s+horizontal\s+(?:front\s+)?grille|horizontal\s+grille\s+with\s+black|horizontal\s+blade\s+splitter)\b/i.test(evidenceText);
       const hasExplicitSf90Cues = /\b(sf90|shut-?off\s+gurney|c-shaped\s+(?:matrix\s+)?(?:led\s+)?headlights?|c-clamp\s+headlights?)\b/i.test(evidenceText);
       const isFrontViewpoint = viewpoint === "front" || viewpoint === "front_3q";
       if (hasDaytonaIconaCues) {
@@ -7849,7 +7990,7 @@ var HierarchicalClassifier = class {
       reason,
       needs_adversarial_verification: needsAdversarial,
       needs_neutral_verification: Boolean(
-        !reasonCustomizedByGate && anyModelSpecificEvidence && (fgResult.needsVerification || fgResult.rawConflict || separation < 0.15)
+        !reasonCustomizedByGate && (anyModelSpecificEvidence || fgResult.rawConflict) && (fgResult.needsVerification || fgResult.rawConflict || separation < 0.15)
       ),
       raw_conflict: fgResult.rawConflict,
       canonical_vehicle_id: finalVehicleId,
@@ -7864,7 +8005,7 @@ var HierarchicalClassifier = class {
       gate_customized: reasonCustomizedByGate,
       // A raw-provider hypothesis that the discriminator could not evaluate is never a validated
       // exact-model result, even if it wins because no evidence-grounded winner existed.
-      evidence_grounded: (fgResult.scoredCandidates.length > 0 ? fgResult.evidenceGrounded : Boolean(topCandidate && (topCandidate.supporting_evidence?.length || 0) > 0)) && Boolean(anyModelSpecificEvidence) && !(topCandidate && rawHypothesisDemoted.has(topCandidate.name))
+      evidence_grounded: (fgResult.scoredCandidates.length > 0 ? fgResult.evidenceGrounded : Boolean(topCandidate && (topCandidate.supporting_evidence?.length || 0) > 0)) && (Boolean(anyModelSpecificEvidence) || Boolean(fgResult.rawConflict)) && !(topCandidate && rawHypothesisDemoted.has(topCandidate.name))
     };
   }
 };
@@ -9818,7 +9959,7 @@ ${verifyPrompt} [/INST]`;
           (ct) => ct.includes("Body style mismatch") || ct.includes("Severe") || ct.includes("Hard manufacturer mismatch")
         )
       );
-      const shouldTriggerNeutralVerification = !verificationConsumed && viableCandidates.length >= 2 && Boolean(classResult.evidence_grounded) && !classResult.gate_customized && (classResult.needs_neutral_verification || classResult.raw_conflict || classResult.candidate_separation < 0.15 && classResult.top_candidate && classResult.top_candidate.score > 0.5);
+      const shouldTriggerNeutralVerification = !verificationConsumed && viableCandidates.length >= 2 && !classResult.gate_customized && (Boolean(classResult.needs_neutral_verification) || Boolean(classResult.raw_conflict) || classResult.candidate_separation < 0.15 && classResult.top_candidate && classResult.top_candidate.score >= 0.5 && Boolean(classResult.evidence_grounded));
       if (shouldTriggerNeutralVerification) {
         const swapPresentation = Math.random() < 0.5;
         const candA = swapPresentation ? viableCandidates[1].name : viableCandidates[0].name;
@@ -9826,10 +9967,34 @@ ${verifyPrompt} [/INST]`;
         console.log(`[CloudflareVisionProvider] Invoking neutral pairwise verification between "${candA}" and "${candB}" (raw conflict: ${Boolean(classResult.raw_conflict)}, separation: ${classResult.candidate_separation})...`);
         verificationConsumed = true;
         try {
+          const getCandidateDecisiveCues = (name) => {
+            const n = name.toLowerCase();
+            if (n.includes("daytona") || n.includes("sp3")) {
+              return "- Daytona SP3 decisive architecture: horizontal blade/strake architecture across lower front fascia, horizontal eyelid/slit headlights, dual hood air extractor chimneys, wraparound helmet-visor windshield canopy, fender/door-top mounted mirrors, full-width horizontal rear strakes. Contradicted by: vertical swept-back headlights, C-shaped headlights, front mustache winglets, central hood S-duct.";
+            }
+            if (n.includes("sf90")) {
+              return "- SF90 Stradale decisive architecture: C-shaped / annular matrix LED headlights, deep central S-duct hood extractor channel, shut-off Gurney flap, high-mounted twin central exhaust. Contradicted by: horizontal eyelid/slit headlights, full-width front strakes, front mustache winglets.";
+            }
+            if (n.includes("458")) {
+              return "- 458 Italia/Spider decisive architecture: elongated vertical swept-back headlights running up fenders, single wide front intake with deformable aero mustache winglets, triple central exhaust, single round taillights. Contradicted by: horizontal slit headlights, C-shaped headlights, horizontal strakes.";
+            }
+            if (n.includes("296")) {
+              return "- 296 GTB decisive architecture: teardrop horizontal headlights with integrated brake cooling scoops, short low nose with wide mesh mouth without slats, flying buttress rear deck, single central exhaust in diffuser.";
+            }
+            if (n.includes("pista")) {
+              return "- 488 Pista decisive architecture: prominent front hood S-Duct channel, swept-back projector headlights, dual side intake splitters, raised twin circular exhausts.";
+            }
+            return "";
+          };
+          const decisiveA = getCandidateDecisiveCues(candA);
+          const decisiveB = getCandidateDecisiveCues(candB);
+          const decisiveNotes = [decisiveA, decisiveB].filter(Boolean).join("\n");
           const neutralVerifyPrompt = `Inspect the focal vehicle in this photo with rigorous neutral forensic scrutiny.
 Compare Candidate A: "${candA}" and Candidate B: "${candB}" against the visible exterior features in the image.
 
-CRITICAL INVARIANTS:
+${decisiveNotes ? `CANDIDATE-SPECIFIC STRUCTURAL CRITERIA TO EXAMINE:
+${decisiveNotes}
+` : ""}CRITICAL INVARIANTS:
 1. Candidate A and Candidate B are completely unordered peers. Neither candidate has any default priority, advantage, or baseline preference.
 2. Ground analysis exclusively in visible exterior features (headlights, front grille, hood geometry, side air scoops/tendons, fender louvers, roofline/greenhouse, rear wing/spoiler, rear exhaust).
 3. If a feature zone is NOT_VISIBLE or OCCLUDED from this viewpoint, it contributes exactly ZERO evidence, ZERO contradiction, and ZERO penalty.
@@ -11147,7 +11312,7 @@ var WorkerPool = class {
           fileName: job.fileName,
           rawKeywords: [job.fileName || ""]
         },
-        15
+        25
       );
       const candidateIds = candidates.map((c) => c.vehicleId);
       const distinguishingNotes = hardNegativesEngine.getDistinguishingPromptInstructions(candidateIds);

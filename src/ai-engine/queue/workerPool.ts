@@ -179,7 +179,7 @@ export class WorkerPool {
           fileName: job.fileName,
           rawKeywords: [job.fileName || '']
         },
-        15
+        25
       );
 
       // Distinguishing instructions for hard negatives
@@ -336,11 +336,11 @@ export class WorkerPool {
         idempotencyKey: job.idempotencyKey,
         userId: job.userId,
         status: finalStatus,
-        canonicalVehicleId: validationReport.canonicalRecord?.vehicleId || validationReport.canonicalIdentity?.canonicalId,
+        canonicalVehicleId: (finalStatus === 'uncertain' || finalStatus === 'abstained') ? undefined : (validationReport.canonicalRecord?.vehicleId || validationReport.canonicalIdentity?.canonicalId),
         make: validationReport.resolvedMake,
-        model: validationReport.resolvedModel,
-        generation: validationReport.resolvedGeneration,
-        trim: validationReport.resolvedTrim,
+        model: (finalStatus === 'uncertain' || finalStatus === 'abstained') ? (validationReport.resolvedModel?.includes('Uncertain') ? validationReport.resolvedModel : 'Model Family Uncertain') : validationReport.resolvedModel,
+        generation: (finalStatus === 'uncertain' || finalStatus === 'abstained') ? 'Unknown' : validationReport.resolvedGeneration,
+        trim: (finalStatus === 'uncertain' || finalStatus === 'abstained') ? undefined : validationReport.resolvedTrim,
         yearEstimate: validationReport.resolvedYear,
         color: aiResponse.output.color || 'Silver',
         rarity: validationReport.resolvedRarity,
