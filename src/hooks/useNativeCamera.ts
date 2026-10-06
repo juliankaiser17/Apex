@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Camera as CapCamera } from '@capacitor/camera';
-import { Capacitor } from '@capacitor/core';
+import { Capacitor, registerPlugin } from '@capacitor/core';
 import { hapticTap, hapticImpact } from '../utils/haptics';
 
 export interface FocusPoint {
@@ -17,6 +17,44 @@ export interface UseNativeCameraOptions {
   onCameraReady?: () => void;
   onError?: (err: Error) => void;
 }
+
+export interface FrameCaptureResult {
+  photoDataUrl: string;
+  width: number;
+  height: number;
+  byteLength: number;
+  mimeType: string;
+}
+
+export interface ApexCameraPluginType {
+  startCamera(options: { facing?: string }): Promise<{
+    active: boolean;
+    facing: string;
+    hasFlashUnit: boolean;
+    exposureSupported: boolean;
+    minExposure?: number;
+    maxExposure?: number;
+    exposureStep?: number;
+    minZoom?: number;
+    maxZoom?: number;
+  }>;
+  stopCamera(): Promise<void>;
+  setFocus(options: { normX?: number; normY?: number; x?: number; y?: number }): Promise<{ success: boolean; isFocusSuccessful?: boolean }>;
+  setExposure(options: { ev: number }): Promise<{ supported: boolean; index?: number; ev?: number }>;
+  setZoom(options: { ratio: number }): Promise<void>;
+  toggleTorch(options: { on: boolean }): Promise<{ torchOn: boolean }>;
+  switchCamera(): Promise<{
+    active: boolean;
+    facing: string;
+    hasFlashUnit: boolean;
+    exposureSupported: boolean;
+    minZoom?: number;
+    maxZoom?: number;
+  }>;
+  captureFrame(): Promise<FrameCaptureResult>;
+}
+
+export const ApexCamera = registerPlugin<ApexCameraPluginType>('ApexCamera');
 
 export function useNativeCamera({
   enabled = true,
@@ -46,6 +84,15 @@ export function useNativeCamera({
 
   // Stop active hardware stream completely and release sensor
   const stopCamera = useCallback(() => {
+    if (Capacitor.isNativePlatform()) {
+      ApexCamera.stopCamera().catch(() => {});
+      try {
+        document.documentElement.classList.remove('camera-active');
+        document.documentElement.style.backgroundColor = '';
+        document.body.classList.remove('camera-active');
+        document.body.style.backgroundColor = '';
+      } catch {}
+    }
     if (streamRef.current) {
       try {
         streamRef.current.getTracks().forEach((t) => {
@@ -165,6 +212,29 @@ export function useNativeCamera({
             }
           } catch (e) {
             console.warn('[NativeCamera] Native permission check error:', e);
+          }
+
+          try {
+            try {
+              document.documentElement.classList.add('camera-active');
+              document.documentElement.style.backgroundColor = 'transparent';
+              document.body.classList.add('camera-active');
+              document.body.style.backgroundColor = 'transparent';
+            } catch {}
+
+            const res = await ApexCamera.startCamera({ facing: targetFacing });
+            setFacingMode(res.facing === 'user' ? 'user' : 'environment');
+            setHasTorch(!!res.hasFlashUnit);
+            setHasHardwareExposure(!!res.exposureSupported);
+            if (res.minZoom) setMinZoom(res.minZoom);
+            if (res.maxZoom) setMaxZoom(Math.min(res.maxZoom, 8));
+            setIsStreaming(true);
+            setZoomLevel(1);
+            setExposureValue(0);
+            onCameraReady?.();
+            return;
+          } catch (nativeErr: any) {
+            console.error('[NativeCamera] ApexCamera native start failed, falling back to web:', nativeErr);
           }
         }
 
@@ -297,6 +367,15 @@ export function useNativeCamera({
       const clamped = Math.max(minZoom, Math.min(maxZoom, targetZoom));
       setZoomLevel(clamped);
 
+      if (Capacitor.isNativePlatform()) {
+        try {
+          await ApexCamera.setZoom({ ratio: clamped });
+        } catch (err) {
+          console.warn('[NativeCamera] ApexCamera.setZoom error:', err);
+        }
+        return;
+      }
+
       const track = streamRef.current?.getVideoTracks()[0];
       if (track) {
         try {
@@ -318,6 +397,18 @@ export function useNativeCamera({
   const toggleTorch = useCallback(async () => {
     if (!hasTorch || facingMode !== 'environment') return;
     const nextState = !torchOn;
+
+    if (Capacitor.isNativePlatform()) {
+      try {
+        const res = await ApexCamera.toggleTorch({ on: nextState });
+        setTorchOn(res.torchOn);
+        hapticTap();
+      } catch (err) {
+        console.warn('[NativeCamera] ApexCamera.toggleTorch error:', err);
+      }
+      return;
+    }
+
     const track = streamRef.current?.getVideoTracks()[0];
     if (track) {
       try {
@@ -335,6 +426,21 @@ export function useNativeCamera({
   // Switch between front and rear cameras cleanly without race conditions
   const switchCamera = useCallback(async () => {
     hapticImpact('medium');
+
+    if (Capacitor.isNativePlatform()) {
+      try {
+        const res = await ApexCamera.switchCamera();
+        setFacingMode(res.facing === 'user' ? 'user' : 'environment');
+        setHasTorch(!!res.hasFlashUnit);
+        setHasHardwareExposure(!!res.exposureSupported);
+        setZoomLevel(1);
+        setExposureValue(0);
+        return;
+      } catch (err) {
+        console.warn('[NativeCamera] ApexCamera.switchCamera error:', err);
+      }
+    }
+
     const nextFacing = facingMode === 'environment' ? 'user' : 'environment';
     stopCamera();
     // Allow Android Camera HAL 60ms to fully release the physical sensor
@@ -345,14 +451,21 @@ export function useNativeCamera({
   // Tap-to-focus handler mapping screen coordinates to camera sensor
   const handleTapToFocus = useCallback(
     async (clientX: number, clientY: number) => {
-      if (!containerRef.current || !videoRef.current) return;
-      const rect = containerRef.current.getBoundingClientRect();
-      const tapX = clientX - rect.left;
-      const tapY = clientY - rect.top;
+      let tapX = clientX;
+      let tapY = clientY;
+      let normX = 0.5;
+      let normY = 0.5;
 
-      // Normalization relative to container
-      const normX = Math.max(0, Math.min(1, tapX / rect.width));
-      const normY = Math.max(0, Math.min(1, tapY / rect.height));
+      if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        tapX = clientX - rect.left;
+        tapY = clientY - rect.top;
+        normX = Math.max(0, Math.min(1, tapX / rect.width));
+        normY = Math.max(0, Math.min(1, tapY / rect.height));
+      } else {
+        normX = Math.max(0, Math.min(1, clientX / window.innerWidth));
+        normY = Math.max(0, Math.min(1, clientY / window.innerHeight));
+      }
 
       setFocusPoint({
         x: tapX,
@@ -368,9 +481,19 @@ export function useNativeCamera({
       if (focusTimeoutRef.current) clearTimeout(focusTimeoutRef.current);
       focusTimeoutRef.current = setTimeout(() => {
         setFocusPoint(null);
-      }, 2500);
+      }, 3000);
 
-      // Apply hardware autofocus point if supported
+      // 1. Native CameraX Hardware Autofocus (Samsung Galaxy A54 5G HAL control)
+      if (Capacitor.isNativePlatform()) {
+        try {
+          await ApexCamera.setFocus({ normX, normY, x: tapX, y: tapY });
+        } catch (err) {
+          console.warn('[NativeCamera] ApexCamera.setFocus error:', err);
+        }
+        return;
+      }
+
+      // 2. Web fallback (applyConstraints single-shot if supported)
       const track = streamRef.current?.getVideoTracks()[0];
       if (track) {
         try {
@@ -406,6 +529,15 @@ export function useNativeCamera({
     async (ev: number) => {
       const clamped = Math.max(-2, Math.min(2, Number(ev.toFixed(2))));
       setExposureValue(clamped);
+
+      if (Capacitor.isNativePlatform()) {
+        try {
+          await ApexCamera.setExposure({ ev: clamped });
+        } catch (err) {
+          console.warn('[NativeCamera] ApexCamera.setExposure error:', err);
+        }
+        return;
+      }
 
       const track = streamRef.current?.getVideoTracks()[0];
       if (track && hasHardwareExposure) {
@@ -453,13 +585,43 @@ export function useNativeCamera({
     pinchStartDistRef.current = null;
   }, []);
 
-  // Frame Capture: captures the exact visible viewfinder region, respecting unmirrored rear orientation & zoom
-  const captureFrame = useCallback(async (): Promise<string | null> => {
+  // Frame Capture: captures high-res frame via native CameraX or HTML5 video canvas fallback
+  const captureFrame = useCallback(async (): Promise<FrameCaptureResult | null> => {
+    console.log('[CAMERA] captureFrame_started');
+
+    if (Capacitor.isNativePlatform()) {
+      try {
+        const res = await ApexCamera.captureFrame();
+        if (res && res.photoDataUrl) {
+          const byteLen = res.byteLength || (res.photoDataUrl ? res.photoDataUrl.length : 0);
+          console.log('[CAMERA] captureFrame_result:', {
+            success: true,
+            width: res.width || 0,
+            height: res.height || 0,
+            byteLength: byteLen,
+            mimeType: res.mimeType || 'image/jpeg',
+            base64NonEmpty: Boolean(res.photoDataUrl && res.photoDataUrl.length > 50)
+          });
+          return {
+            photoDataUrl: res.photoDataUrl,
+            width: res.width || 0,
+            height: res.height || 0,
+            byteLength: byteLen,
+            mimeType: res.mimeType || 'image/jpeg'
+          };
+        }
+      } catch (err: any) {
+        console.error('[CAMERA] captureFrame_result: success=false, error=', err?.message || err);
+        return null;
+      }
+    }
+
     const video = videoRef.current;
     const canvas = canvasRef.current;
     const container = containerRef.current;
 
     if (!video || !canvas || video.videoWidth === 0 || video.videoHeight === 0) {
+      console.error('[CAMERA] captureFrame_result: success=false, error=Video element not ready or zero dimensions');
       return null;
     }
 
@@ -491,7 +653,10 @@ export function useNativeCamera({
     canvas.width = targetW;
     canvas.height = targetH;
     const ctx = canvas.getContext('2d');
-    if (!ctx) return null;
+    if (!ctx) {
+      console.error('[CAMERA] captureFrame_result: success=false, error=Canvas 2D context not available');
+      return null;
+    }
 
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'high';
@@ -517,7 +682,25 @@ export function useNativeCamera({
       ctx.drawImage(video, startX, startY, cropW, cropH, 0, 0, targetW, targetH);
     }
 
-    return canvas.toDataURL('image/jpeg', 0.85);
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+    const byteLen = dataUrl ? dataUrl.length : 0;
+
+    console.log('[CAMERA] captureFrame_result:', {
+      success: true,
+      width: targetW,
+      height: targetH,
+      byteLength: byteLen,
+      mimeType: 'image/jpeg',
+      base64NonEmpty: byteLen > 50
+    });
+
+    return {
+      photoDataUrl: dataUrl,
+      width: targetW,
+      height: targetH,
+      byteLength: byteLen,
+      mimeType: 'image/jpeg'
+    };
   }, [exposureValue, facingMode, zoomLevel]);
 
   // Lifecycle: start camera when enabled, stop when disabled
@@ -557,8 +740,10 @@ export function useNativeCamera({
     containerRef,
     facingMode,
     isStreaming,
+    isCameraReady: isStreaming,
     isRearCamera: facingMode === 'environment',
     isMirrored: facingMode === 'user',
+    isNativeCamera: Capacitor.isNativePlatform(),
     zoomLevel,
     minZoom,
     maxZoom,

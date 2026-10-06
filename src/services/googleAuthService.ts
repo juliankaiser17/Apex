@@ -104,6 +104,18 @@ export function decodeJwtToken(token: string): GoogleUserData | null {
  * - On Native Android / iOS: Opens native OS Google Account Bottom Sheet dialog inside the app.
  * - On Web: Opens in-page account popup without leaving or redirecting the page.
  */
+let isNativeGoogleInitialized = false;
+
+async function ensureNativeGoogleInitialized(clientId: string): Promise<void> {
+  if (!isNativeGoogleInitialized) {
+    await GoogleSignIn.initialize({
+      clientId,
+      scopes: ['profile', 'email']
+    });
+    isNativeGoogleInitialized = true;
+  }
+}
+
 export async function triggerGoogleSignIn(
   onSuccess: (userData: GoogleUserData) => void,
   onError?: (errMessage: string) => void
@@ -115,16 +127,7 @@ export async function triggerGoogleSignIn(
   // ══════════════════════════════════════════════════════════════════════════
   if (Capacitor.isNativePlatform()) {
     try {
-      // Initialize the native Google plugin with the Web Client ID
-      await GoogleSignIn.initialize({
-        clientId,
-        scopes: ['profile', 'email']
-      });
-
-      // Reset any previous session so the native account picker opens cleanly
-      try {
-        await GoogleSignIn.signOut();
-      } catch (_) {}
+      await ensureNativeGoogleInitialized(clientId);
 
       // Show native Google Play Services Account Picker dialog
       const result = await GoogleSignIn.signIn();

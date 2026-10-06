@@ -220,4 +220,11 @@
 .animate-scalePop { animation: scalePop 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; will-change: transform, opacity; }
 .animate-slideUp { animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards; will-change: transform, opacity; }
 
-
+/* Transparent WebView surface for Native CameraX Viewfinder */
+html.camera-active,
+body.camera-active,
+body.camera-active #root,
+body.camera-active main {
+  background-color: transparent !important;
+  background: transparent !important;
+}

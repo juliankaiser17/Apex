@@ -17,7 +17,7 @@ import type { IdentificationResult } from '../types';
 //   * Generic empty-model guard preventing false canonical vehicle resolution
 //   * Preserved model uncertainty throughout downstream pipeline and UI
 //   * Ferrari Daytona SP3 horizontal rear strakes & blade signature resolution
-export const VISION_PIPELINE_VERSION = 'v3.4.0-production-release';
+export const VISION_PIPELINE_VERSION = 'v3.4.1-broad-recognition-restored';
 
 export function buildCacheKey(
   imageHash: string,

@@ -137,6 +137,8 @@ export interface CarCard {
   explanationDebug?: RarityExplanationDebug;
   imageHash?: string;
   customFoil?: boolean;
+  serverRecorded?: boolean;
+  cloudSyncError?: string;
 }
 
 export interface EconomyLedgerEntry {
@@ -190,10 +192,16 @@ export interface UserProfile {
   cardThemeColor?: string;
   speedUnits?: 'kmh' | 'mph';
   soundEffectsEnabled?: boolean;
+  hapticsEnabled?: boolean;
+  featuredBadgeSlug?: string;
+  favoriteClass?: string;
+  showcaseCardId?: string;
 }
 
 export interface DailyQuest {
   id: string;
+  tier?: 'NORMAL' | 'HARD' | 'EXTREME';
+  type?: string;
   title: string;
   description: string;
   targetCount: number;
@@ -201,10 +209,13 @@ export interface DailyQuest {
   xpReward: number;
   coinReward: number;
   badgeName?: string;
-  expiresInSeconds: number;
+  badgeRewardSlug?: string;
+  expiresInSeconds?: number;
   expiresAtTimestamp?: number; // Persistent epoch ms timestamp
+  startedAtTimestamp?: number;
+  windowMinutes?: number;
   allowedMakes?: string[];
-  allowedBodyStyles?: string[];
+  allowedBodyStyles?: BodyStyle[];
   isCompleted: boolean;
 }
 
@@ -220,12 +231,19 @@ export interface Badge {
   id: string;
   slug: string;
   name: string;
+  category?: string;
   description: string;
+  unlockCondition?: string;
   icon: string;
   rarity: 'bronze' | 'silver' | 'gold' | 'platinum' | 'diamond';
   earnedAt?: string;
   isUnlocked: boolean;
   xpBonus: number;
+  progress?: {
+    current: number;
+    max: number;
+    unit?: string;
+  };
 }
 
 export interface Hunt {

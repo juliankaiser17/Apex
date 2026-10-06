@@ -5,16 +5,21 @@ import {
   CheckCircle2, 
   Clock, 
   Flame,
-  Sparkles
+  Sparkles,
+  Zap,
+  MapPin,
+  Gauge,
+  Compass
 } from 'lucide-react';
 import { useApexStore, GLOBAL_QUEST_EXPIRES_AT } from '../../store/useApexStore';
-import { RARITY_CONFIG } from '../../utils/rarity';
-import type { Mission } from '../../types/apex';
+import type { Mission, DailyQuest } from '../../types/apex';
 import { sounds } from '../../utils/audio';
 import { getOptimizedImageUrl } from '../../utils/imageUrl';
 import { hapticTap, hapticImpact, hapticSuccess } from '../../utils/haptics';
 import { getProgressToNextLevel } from '../../utils/mastery';
 import { MasteryTierModal } from './MasteryTierModal';
+import { TimedQuestConfirmModal } from './TimedQuestConfirmModal';
+import { RARITY_CONFIG } from '../../utils/rarity';
 
 // Isolated, High-Performance Micro-Countdown Component (Prevents Root Page Re-rendering)
 const LiveCountdownTimer = memo(({ targetTimestamp, className }: { targetTimestamp: number; className?: string }) => {
@@ -50,6 +55,7 @@ export const HomeScreen: React.FC = () => {
   const dailyMissions = useApexStore(s => s.dailyMissions);
   const setScannerOpen = useApexStore(s => s.setScannerOpen);
   const setActiveTab = useApexStore(s => s.setActiveTab);
+  const startTimedQuest = useApexStore(s => s.startTimedQuest);
   const claimMissionReward = useApexStore(s => s.claimMissionReward);
   const feedPosts = useApexStore(s => s.feedPosts);
   const userLevel = useApexStore(s => s.user.level);
@@ -57,11 +63,16 @@ export const HomeScreen: React.FC = () => {
   const userStreakDays = useApexStore(s => s.user.streakDays);
 
   const [activeTabSection, setActiveTabSection] = useState<'quests' | 'missions'>('quests');
+  const [questFilter, setQuestFilter] = useState<'all' | 'NORMAL' | 'HARD' | 'EXTREME'>('all');
   const [isTierModalOpen, setIsTierModalOpen] = useState(false);
+  const [selectedQuestForModal, setSelectedQuestForModal] = useState<DailyQuest | null>(null);
   const [missionClaimingId, setMissionClaimingId] = useState<string | null>(null);
   const [missionToast, setMissionToast] = useState<{ message: string; isError: boolean } | null>(null);
+
+  const normalQuests = useMemo(() => dailyQuests.filter(q => (q as any).tier === 'NORMAL' || !(q as any).tier), [dailyQuests]);
+  const hardQuests = useMemo(() => dailyQuests.filter(q => (q as any).tier === 'HARD'), [dailyQuests]);
+  const extremeQuests = useMemo(() => dailyQuests.filter(q => (q as any).tier === 'EXTREME'), [dailyQuests]);
   const activeQuest = dailyQuests[0];
-  const sideQuests = dailyQuests.slice(1);
 
   const { level, tierConfig, percentage } = useMemo(() => {
     return getProgressToNextLevel(userLevel, userXp);
@@ -71,24 +82,34 @@ export const HomeScreen: React.FC = () => {
     if (m.completed || missionClaimingId) return;
     hapticTap();
     sounds.playTargetLock();
-    setMissionClaimingId(m.id);
 
-    const res = await claimMissionReward(m.id);
-    setMissionClaimingId(null);
+    // Only 'login' mission can be claimed on click without vehicle scan
+    if (m.type === 'login') {
+      setMissionClaimingId(m.id);
+      const res = await claimMissionReward(m.id);
+      setMissionClaimingId(null);
 
-    if (res.success) {
-      hapticSuccess();
-      sounds.playXpPop();
-      setMissionToast({ message: `Reward Claimed! +${res.xpAwarded} XP`, isError: false });
-      setTimeout(() => setMissionToast(null), 3000);
-    } else {
-      hapticTap();
-      setMissionToast({ 
-        message: res.error || 'Mission not satisfied yet. Scan vehicles to complete requirement!', 
-        isError: true 
-      });
-      setTimeout(() => setMissionToast(null), 4000);
+      if (res.success) {
+        hapticSuccess();
+        sounds.playXpPop();
+        setMissionToast({ message: `Reward Claimed! +${res.xpAwarded} XP`, isError: false });
+        setTimeout(() => setMissionToast(null), 3000);
+      } else {
+        setMissionToast({ 
+          message: res.error || 'Login bonus already claimed today.', 
+          isError: true 
+        });
+        setTimeout(() => setMissionToast(null), 3000);
+      }
+      return;
     }
+
+    // For scan-based missions, clicking prompts user to scan vehicles
+    setMissionToast({ 
+      message: `${m.title}: Scan vehicles to fulfill this objective!`, 
+      isError: true 
+    });
+    setTimeout(() => setMissionToast(null), 4000);
   };
 
   return (
@@ -323,7 +344,7 @@ export const HomeScreen: React.FC = () => {
               }`}
               style={activeTabSection === 'quests' ? { backgroundColor: 'var(--accent-color)' } : undefined}
             >
-              Side Quests ({sideQuests.length})
+              Quests ({dailyQuests.length})
             </button>
             <button
               onClick={() => { 
@@ -343,44 +364,141 @@ export const HomeScreen: React.FC = () => {
           </div>
         </div>
 
-        {/* Section 1: Side Quests */}
+        {/* Section 1: 3-Tier Quests (Normal, Hard, Extreme) */}
         {activeTabSection === 'quests' && (
-          <div className="space-y-2">
-            {sideQuests.length > 0 ? (
-              sideQuests.map((quest) => {
-                const pct = Math.min(100, (quest.currentCount / quest.targetCount) * 100);
+          <div className="space-y-3.5">
+            {/* Difficulty Sub-Filter Pills */}
+            <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
+              {[
+                { id: 'all' as const, label: `All (${dailyQuests.length})` },
+                { id: 'NORMAL' as const, label: `Normal (${normalQuests.length})` },
+                { id: 'HARD' as const, label: `Hard (${hardQuests.length})` },
+                { id: 'EXTREME' as const, label: `Extreme (${extremeQuests.length})` },
+              ].map((pill) => (
+                <button
+                  key={pill.id}
+                  onClick={() => {
+                    hapticTap();
+                    sounds.playTargetLock();
+                    setQuestFilter(pill.id);
+                  }}
+                  className={`text-[10px] font-bold px-2.5 py-1 rounded-xl border transition-all cursor-pointer whitespace-nowrap ${
+                    questFilter === pill.id
+                      ? 'bg-white text-black font-extrabold shadow-md border-white'
+                      : 'bg-black/40 text-white/50 border-white/10 hover:border-white/20'
+                  }`}
+                >
+                  {pill.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Helper to render a group of quests */}
+            {(() => {
+              const renderQuestCard = (quest: any) => {
+                const pct = Math.min(100, Math.round((quest.currentCount / quest.targetCount) * 100));
+                const tierColor = 
+                  quest.tier === 'EXTREME' ? { badge: 'bg-rose-500/20 text-rose-300 border-rose-500/40', bar: '#F43F5E' } :
+                  quest.tier === 'HARD' ? { badge: 'bg-amber-500/20 text-amber-300 border-amber-500/40', bar: '#F59E0B' } :
+                  { badge: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40', bar: '#10B981' };
+
                 return (
                   <div 
                     key={quest.id} 
-                    className={`p-3 rounded-2xl border transition-all ${
+                    onClick={() => {
+                      hapticTap();
+                      sounds.playTargetLock();
+                      if (quest.isCompleted) {
+                        sounds.playXpPop();
+                        return;
+                      }
+                      setSelectedQuestForModal(quest);
+                    }}
+                    className={`p-3 rounded-2xl border transition-all cursor-pointer active:scale-[0.99] ${
                       quest.isCompleted 
-                        ? 'bg-white/[0.02] border-white/[0.04] opacity-50' 
-                        : 'bg-[#181818]/90 border-white/[0.08] hover:border-white/[0.16]'
+                        ? 'bg-emerald-950/20 border-emerald-500/30 shadow-sm' 
+                        : 'bg-[#181818]/90 border-white/[0.08] hover:border-white/[0.22]'
                     }`}
                   >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="text-xs font-bold text-white">{quest.title}</h4>
-                        <p className="text-[11px] text-white/50 mt-0.5">{quest.description}</p>
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${tierColor.badge}`}>
+                            {quest.tier || 'NORMAL'}
+                          </span>
+
+                          {quest.targetCity && (
+                            <span className="text-[9px] font-semibold text-white/70 bg-white/[0.05] border border-white/10 px-2 py-0.5 rounded-full flex items-center gap-1">
+                              <MapPin className="w-2.5 h-2.5 text-white/50" /> {quest.targetCity}
+                            </span>
+                          )}
+
+                          {quest.allowedMakes && quest.allowedMakes.length > 0 && (
+                            <span className="text-[9px] font-semibold text-white/70 bg-white/[0.05] border border-white/10 px-2 py-0.5 rounded-full flex items-center gap-1">
+                              <Compass className="w-2.5 h-2.5 text-white/50" /> Heritage
+                            </span>
+                          )}
+
+                          {quest.windowMinutes && (
+                            <span className="text-[9px] font-semibold text-amber-300 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-full flex items-center gap-1">
+                              <Clock className="w-2.5 h-2.5" /> {quest.windowMinutes}m Window
+                            </span>
+                          )}
+
+                          {quest.minHorsepower && (
+                            <span className="text-[9px] font-semibold text-orange-300 bg-orange-500/10 border border-orange-500/20 px-2 py-0.5 rounded-full flex items-center gap-1">
+                              <Gauge className="w-2.5 h-2.5" /> {quest.minHorsepower}+ HP
+                            </span>
+                          )}
+
+                          {quest.minRarity && (
+                            <span className="text-[9px] font-semibold text-purple-300 bg-purple-500/10 border border-purple-500/20 px-2 py-0.5 rounded-full capitalize">
+                              {quest.minRarity}+
+                            </span>
+                          )}
+                        </div>
+
+                        <h4 className="text-xs font-bold text-white tracking-tight pt-0.5">
+                          {quest.title}
+                        </h4>
+                        <p className="text-[11px] text-white/60 leading-snug">
+                          {quest.description}
+                        </p>
                       </div>
-                      <span 
-                        className="text-xs font-bold shrink-0 ml-2 font-data"
-                        style={{ color: 'var(--accent-color)' }}
-                      >
-                        +{quest.xpReward} XP
-                      </span>
+
+                      <div className="text-right shrink-0">
+                        <span 
+                          className="text-xs font-extrabold font-data block"
+                          style={{ color: 'var(--accent-color)' }}
+                        >
+                          +{quest.xpReward} XP
+                        </span>
+                        {quest.coinReward > 0 && (
+                          <span className="text-[10px] font-data text-amber-400 block">
+                            +{quest.coinReward} Coins
+                          </span>
+                        )}
+                        {quest.isCompleted && (
+                          <span className="text-[9px] font-bold text-emerald-400 bg-emerald-500/20 border border-emerald-500/40 px-1.5 py-0.5 rounded-full uppercase inline-block mt-1">
+                            Done
+                          </span>
+                        )}
+                      </div>
                     </div>
 
-                    <div className="mt-2 space-y-1">
-                      <div className="flex justify-between text-[10px] text-white/40 font-data">
-                        <span>PROGRESS</span>
-                        <span>{quest.currentCount} / {quest.targetCount}</span>
+                    {/* Progress Bar */}
+                    <div className="mt-2.5 space-y-1">
+                      <div className="flex justify-between text-[10px] font-data">
+                        <span className="text-white/40">OBJECTIVE PROGRESS</span>
+                        <span className="font-bold text-white/90">
+                          {quest.currentCount} / {quest.targetCount}
+                        </span>
                       </div>
                       <div className="h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
                         <div 
                           style={{ 
                             width: `${pct}%`,
-                            backgroundColor: quest.isCompleted ? 'rgba(255,255,255,0.4)' : 'var(--accent-color)'
+                            backgroundColor: quest.isCompleted ? '#10B981' : tierColor.bar
                           }} 
                           className="h-full rounded-full transition-all duration-300" 
                         />
@@ -388,10 +506,72 @@ export const HomeScreen: React.FC = () => {
                     </div>
                   </div>
                 );
-              })
-            ) : (
-              <p className="text-xs text-white/40 text-center py-4">All quests completed for today!</p>
-            )}
+              };
+
+              return (
+                <div className="space-y-3.5">
+                  {/* Normal Tier Section */}
+                  {(questFilter === 'all' || questFilter === 'NORMAL') && normalQuests.length > 0 && (
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1.5">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                          <span className="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">
+                            Normal Quests
+                          </span>
+                        </div>
+                        <span className="text-[10px] text-white/40">Everyday Spotting</span>
+                      </div>
+                      <div className="space-y-2">
+                        {normalQuests.map(renderQuestCard)}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Hard Tier Section */}
+                  {(questFilter === 'all' || questFilter === 'HARD') && hardQuests.length > 0 && (
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1.5">
+                          <Zap className="w-3.5 h-3.5 text-amber-400" />
+                          <span className="text-[11px] font-bold text-amber-400 uppercase tracking-wider">
+                            Hard Quests
+                          </span>
+                        </div>
+                        <span className="text-[10px] text-white/40">Speed & Power</span>
+                      </div>
+                      <div className="space-y-2">
+                        {hardQuests.map(renderQuestCard)}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Extreme Tier Section */}
+                  {(questFilter === 'all' || questFilter === 'EXTREME') && extremeQuests.length > 0 && (
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1.5">
+                          <Flame className="w-3.5 h-3.5 text-rose-400" />
+                          <span className="text-[11px] font-bold text-rose-400 uppercase tracking-wider">
+                            Extreme Quests
+                          </span>
+                        </div>
+                        <span className="text-[10px] text-white/40">Ultra-Rare & Precision</span>
+                      </div>
+                      <div className="space-y-2">
+                        {extremeQuests.map(renderQuestCard)}
+                      </div>
+                    </div>
+                  )}
+
+                  {dailyQuests.length === 0 && (
+                    <p className="text-xs text-white/40 text-center py-4">
+                      All daily quests completed! Check back after rotation.
+                    </p>
+                  )}
+                </div>
+              );
+            })()}
           </div>
         )}
 
@@ -454,6 +634,18 @@ export const HomeScreen: React.FC = () => {
       <MasteryTierModal 
         isOpen={isTierModalOpen} 
         onClose={() => setIsTierModalOpen(false)} 
+      />
+
+      {/* Timed Quest Challenge Confirmation Modal */}
+      <TimedQuestConfirmModal
+        quest={selectedQuestForModal}
+        isOpen={Boolean(selectedQuestForModal)}
+        onClose={() => setSelectedQuestForModal(null)}
+        onStartQuest={(questId) => {
+          startTimedQuest(questId);
+          setSelectedQuestForModal(null);
+          setScannerOpen(true);
+        }}
       />
     </div>
   );

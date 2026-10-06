@@ -32,6 +32,7 @@ import { APEX_LOCAL_VEHICLE_DATABASE } from '../../data/vehicleDatabase';
 import { canonicalVehicleRegistry } from '../canonical/canonicalVehicleRegistry';
 import { fineGrainedModelDiscriminator } from '../validation/fineGrainedModelDiscriminator';
 import { evidenceNormalizer } from '../validation/evidenceNormalizer';
+import { safeParseVlmJson } from '../utils/jsonExtractor';
 
 declare const process: any;
 declare const Buffer: any;
@@ -410,6 +411,25 @@ Rules:
         } catch (err: any) {
           lastErr = err;
           const classified = this.classifyError(err);
+
+          // Bounded retry on malformed JSON response (at most 1 retry, max 2 calls per scan)
+          if (attempt === 0 && err.isMalformedJson) {
+            retriesAttempted += 1;
+            retryConsumed = true;
+            console.warn('[CloudflareVisionProvider] Malformed JSON received on attempt 1, retrying with strict JSON contract:', err?.message);
+            const strictContract = '\n\nIMPORTANT CONTRACT: Return ONLY valid JSON. No Markdown. No commentary. No code fences. Start immediately with { and end with }.';
+            if (format === 'inst') {
+              execParams.prompt = `[INST] <<SYS>>\n${systemPrompt}\n${strictContract}\n<</SYS>>\n\n${userPrompt}\n${strictContract} [/INST]`;
+            } else {
+              execParams.messages = [
+                { role: 'system', content: `${systemPrompt}\n${strictContract}` },
+                { role: 'user', content: `${userPrompt}\n${strictContract}` }
+              ];
+            }
+            await new Promise((r) => setTimeout(r, 300));
+            continue;
+          }
+
           if (attempt === 0 && classified.isTransient) {
             retriesAttempted += 1;
             retryConsumed = true;
@@ -423,6 +443,66 @@ Rules:
       }
 
       if (!execResult && lastErr) {
+        if (lastErr.isMalformedJson) {
+          // If the second response is also malformed:
+          // Return a clean, user-facing analysis failure without guessing or hallucinating.
+          const failureReason = 'Vision backend returned an unparseable response after retry. Please retake the photo.';
+          const qualityScore = 0.2;
+          const canonicalResult: CanonicalScanResult = {
+            status: 'uncertain',
+            vehicle_present: true,
+            image_quality: {
+              usable: false,
+              score: qualityScore,
+              issues: [failureReason]
+            },
+            viewpoint: 'unknown',
+            visual_evidence: this.getEmptyEvidence(),
+            identification: { make: null, model_family: null, generation: null, variant: null },
+            confidence: { make_score: 0, model_score: 0, generation_score: 0, variant_score: 0, overall_score: 0 },
+            candidates: [],
+            contradictions: ['Unparseable model payload from vision backend.'],
+            specificity_level: 'make',
+            reason: failureReason,
+            needs_retake: true
+          };
+
+          const totalEndToEndMs = Date.now() - startTime;
+          const telemetry: VisionStageTelemetry = {
+            isColdStart,
+            warmState,
+            imagePreprocessingMs,
+            encodedImageBytes,
+            imageDimensions,
+            uploadStartTimestamp,
+            cloudflareRequestDurationMs: totalEndToEndMs,
+            timeToFirstTokenMs: null,
+            totalModelResponseDurationMs: totalEndToEndMs,
+            jsonParsingMs: 0,
+            deterministicValidationMs: 0,
+            totalEndToEndMs,
+            neurons: undefined,
+            promptTokens: undefined,
+            completionTokens: undefined,
+            totalTokens: undefined
+          };
+
+          return {
+            success: true,
+            output: this.createRejectionOutput(failureReason, qualityScore),
+            canonicalResult,
+            providerName: this.name,
+            providerAttempted: this.name,
+            fallbackUsed: false,
+            retriesAttempted,
+            retryConsumed,
+            modelUsed: model,
+            tokensConsumed: { promptTokens: 0, outputTokens: 0, totalTokens: 0 },
+            telemetry,
+            durationMs: totalEndToEndMs
+          };
+        }
+
         throw lastErr;
       }
 
@@ -1366,52 +1446,25 @@ Rules:
         }
       }
 
-      // Robust JSON extraction from raw text (handles ```json fences or conversational framing)
-      let jsonCandidate = rawText.trim();
-      const codeFenceMatch = jsonCandidate.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
-      if (codeFenceMatch) {
-        jsonCandidate = codeFenceMatch[1].trim();
-      } else {
-        const firstBrace = jsonCandidate.indexOf('{');
-        const lastBrace = jsonCandidate.lastIndexOf('}');
-        if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
-          jsonCandidate = jsonCandidate.slice(firstBrace, lastBrace + 1);
-        }
-      }
-
+      // Deterministic, quote-aware, escape-aware JSON extraction and parsing (no guessing/inventing)
+      const parseResult = safeParseVlmJson(rawText);
       let parsedOutput: any;
-      try {
-        parsedOutput = JSON.parse(jsonCandidate);
-      } catch (parseErr: any) {
-        let recovered = false;
-        const quoteCount = (jsonCandidate.match(/(?<!\\)"/g) || []).length;
-        const candidatesToTry = [
-          jsonCandidate,
-          quoteCount % 2 !== 0 ? jsonCandidate + '"' : jsonCandidate
-        ];
 
-        for (const base of candidatesToTry) {
-          for (const suffix of ['', '}', '}}', '"}}', 'null}}', ']}', '"]}}', '}]}', 'null}]}', 'null}}}]', 'null"]}}']) {
-            try {
-              parsedOutput = JSON.parse(base + suffix);
-              recovered = true;
-              break;
-            } catch {}
-          }
-          if (recovered) break;
-        }
-
-        if (!recovered) {
-          if (params.allowRawTextFallback) {
-            parsedOutput = { rawText, isRawText: true };
-          } else {
-            throw new Error(`Cloudflare response could not be parsed as JSON: ${parseErr.message}. Raw: ${rawText.slice(0, 300)}`);
-          }
+      if (parseResult.success) {
+        parsedOutput = parseResult.data;
+      } else {
+        if (params.allowRawTextFallback) {
+          parsedOutput = { rawText, isRawText: true };
+        } else {
+          const parseErr: any = new Error(`Cloudflare response could not be parsed as JSON: ${parseResult.error || 'Syntax error'}. Raw: ${rawText.slice(0, 300)}`);
+          parseErr.isMalformedJson = true;
+          parseErr.rawResponse = rawText;
+          throw parseErr;
         }
       }
 
       const finalPromptTokens = promptTokens || (Math.round((params.prompt || JSON.stringify(params.messages) || '').length / 4) + 6400);
-      const finalOutputTokens = outputTokens || Math.round(jsonCandidate.length / 4);
+      const finalOutputTokens = outputTokens || Math.round((parseResult.extracted?.length || rawText.length) / 4);
       const finalTotalTokens = totalTokens || (finalPromptTokens + finalOutputTokens);
 
       return {

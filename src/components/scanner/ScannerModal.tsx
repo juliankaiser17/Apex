@@ -1,6 +1,4 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Camera as CapCamera, CameraResultType, CameraSource } from '@capacitor/camera';
-import { Capacitor } from '@capacitor/core';
 import { AlertTriangle, X, RotateCcw, RefreshCw } from 'lucide-react';
 import { useApexStore } from '../../store/useApexStore';
 import type { CarCard, RarityTier, LocalRarityInfo } from '../../types/apex';
@@ -12,7 +10,7 @@ import { identifyVehicleWithAi, getAuthoritativeAccessToken } from '../../servic
 import { hunterSceneEngine } from '../../services/hunterSceneEngine';
 import { offlineRecognitionEngine } from '../../services/offlineRecognitionEngine';
 import { useScannerStateMachine } from '../../hooks/useScannerStateMachine';
-import { useNativeCamera } from '../../hooks/useNativeCamera';
+import { useNativeCamera, type FrameCaptureResult } from '../../hooks/useNativeCamera';
 import { HunterOverlay } from './HunterOverlay';
 import { FocusExposureReticle } from './FocusExposureReticle';
 import { ProgressiveAnalysisOverlay } from './ProgressiveAnalysisOverlay';
@@ -21,12 +19,66 @@ import { computeImageSha256 } from '../../ai-engine/crypto/sha256';
 import { getEstimatedMarketValue } from '../../utils/marketValuation';
 import { resolveCanonicalVehicleSpecs } from '../../utils/vehicleSpecs';
 
+export interface ImageValidationResult {
+  valid: boolean;
+  width: number;
+  height: number;
+  byteLength: number;
+  error?: string;
+}
+
+export function validateCapturedImage(result: FrameCaptureResult | null | undefined): ImageValidationResult {
+  if (!result || !result.photoDataUrl) {
+    return { valid: false, width: 0, height: 0, byteLength: 0, error: 'Empty or null frame result' };
+  }
+
+  const { photoDataUrl, width = 0, height = 0 } = result;
+
+  if (typeof photoDataUrl !== 'string' || photoDataUrl.trim().length === 0) {
+    return { valid: false, width: 0, height: 0, byteLength: 0, error: 'Photo data URL is empty string' };
+  }
+
+  if (!photoDataUrl.startsWith('data:image/jpeg;base64,') &&
+      !photoDataUrl.startsWith('data:image/png;base64,') &&
+      !photoDataUrl.startsWith('data:image/webp;base64,')) {
+    return { valid: false, width: 0, height: 0, byteLength: 0, error: 'Invalid data URL format or unsupported MIME type' };
+  }
+
+  const base64Data = photoDataUrl.split(',')[1];
+  if (!base64Data || base64Data.length < 100) {
+    return { valid: false, width: 0, height: 0, byteLength: 0, error: 'Base64 payload missing or suspiciously small' };
+  }
+
+  let padding = 0;
+  if (base64Data.endsWith('==')) padding = 2;
+  else if (base64Data.endsWith('=')) padding = 1;
+  const computedByteLength = Math.floor((base64Data.length * 3) / 4) - padding;
+
+  if (computedByteLength < 1024) {
+    return { valid: false, width, height, byteLength: computedByteLength, error: 'Zero-byte or truncated payload (< 1KB)' };
+  }
+
+  const finalW = width || 0;
+  const finalH = height || 0;
+  if (finalW > 0 && finalH > 0 && (finalW < 32 || finalH < 32)) {
+    return { valid: false, width: finalW, height: finalH, byteLength: computedByteLength, error: 'Impossible image dimensions' };
+  }
+
+  return {
+    valid: true,
+    width: finalW,
+    height: finalH,
+    byteLength: computedByteLength
+  };
+}
+
 export const ScannerModal: React.FC = () => {
   const { scannerOpen, setScannerOpen, user, onScanCompleted } = useApexStore();
   const { sampleCoarseLocation } = useLocalRarity();
   const [shutterFlash, setShutterFlash] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [captureError, setCaptureError] = useState<string | null>(null);
   const activeScanIdRef = useRef<string | null>(null);
+  const isCapturingRef = useRef<boolean>(false);
 
   // State Machine Hook
   const {
@@ -52,13 +104,15 @@ export const ScannerModal: React.FC = () => {
     resetScanner
   } = useScannerStateMachine();
 
-  // Native camera hook: real rear camera by default, unmirrored, tap-to-focus, exposure, pinch-zoom, torch
-  const isCameraPhase =
-    scannerOpen &&
-    (phase === 'SEARCHING' ||
-      phase === 'CAR_DETECTED' ||
-      phase === 'POTENTIAL_DISCOVERY' ||
-      phase === 'TRACKING');
+  // Camera viewfinder phases where native preview should be visible
+  const isCameraViewfinderPhase =
+    phase === 'SEARCHING' ||
+    phase === 'CAR_DETECTED' ||
+    phase === 'POTENTIAL_DISCOVERY' ||
+    phase === 'TRACKING' ||
+    phase === 'LOCKING' ||
+    phase === 'LOCKED' ||
+    phase === 'CAPTURING';
 
   const {
     videoRef,
@@ -66,6 +120,8 @@ export const ScannerModal: React.FC = () => {
     containerRef,
     isRearCamera,
     isMirrored,
+    isStreaming,
+    isNativeCamera,
     zoomLevel,
     setZoom,
     hasTorch,
@@ -83,7 +139,7 @@ export const ScannerModal: React.FC = () => {
     startCamera,
     stopCamera
   } = useNativeCamera({
-    enabled: isCameraPhase,
+    enabled: scannerOpen,
     defaultFacing: 'environment',
     onCameraReady: () => {
       startSearching();
@@ -208,10 +264,11 @@ export const ScannerModal: React.FC = () => {
     onAnalysisStageResolved(1, 'Analyzing Vehicle Characteristics');
 
     try {
+      console.log('[SCAN] recognition_started');
       // 1. Perform AI vehicle vision analysis first
       const aiPromise = identifyVehicleWithAi(readyPhotoDataUrl, false, fileName);
       const timeoutPromise = new Promise<null>((_, reject) => 
-        setTimeout(() => reject(new Error('Analysis timed out. Please check network connection and retry.')), 25000)
+        setTimeout(() => reject(new Error('Analysis timed out. Please check network connection and retry.')), 35000)
       );
 
       let aiResult: any = null;
@@ -438,7 +495,9 @@ export const ScannerModal: React.FC = () => {
       });
 
       const newCard: CarCard = {
-        id: `card-${Date.now()}`,
+        id: (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') 
+          ? crypto.randomUUID() 
+          : '00000000-0000-4000-8000-' + Date.now().toString(16).padStart(12, '0'),
         cardNumber: `#APX-${Math.floor(1000 + Math.random() * 9000)}`,
         make: finalMake,
         model: finalModel,
@@ -501,77 +560,77 @@ export const ScannerModal: React.FC = () => {
         });
       }
 
+      console.log('[SCAN] recognition_completed', {
+        make: newCard.make,
+        model: newCard.model,
+        rarity: newCard.rarity,
+        cardId: newCard.id
+      });
       onAnalysisStageResolved(4, `Certainty: ${(newCard.identificationStatus || 'identified').toUpperCase()}`);
       onScanCompleted(newCard);
       onIdentificationSuccess(newCard, false);
 
     } catch (err: any) {
+      console.warn('[SCAN] recognition_failed', { reason: err?.message || 'Inference error' });
       console.warn('Inference pipeline error:', err);
-      onIdentificationFailed(err?.message || 'Vehicle identification failed. Please retry.');
+      onIdentificationFailed(err?.message || 'Connection failed. Try again.');
     }
   };
 
   // 4. Handle Shutter Button Capture (Capture First -> Render Frozen Image -> Analyze Second)
   const handleShutterCapture = async () => {
-    const tCaptureStart = performance.now();
-    sounds.playShutter();
-    setShutterFlash(true);
-    setTimeout(() => setShutterFlash(false), 70);
-    startCapturing();
-    let photoDataUrl: string | null = null;
-
-    // 1. Primary: Instant In-Viewfinder Canvas Frame Capture with Zoom Crop & Proper Orientation
-    photoDataUrl = await captureFrame();
-
-    // 2. Secondary: Native Capacitor Camera attempt with bounded dimensions
-    if (!photoDataUrl && Capacitor.isNativePlatform()) {
-      try {
-        const image = await CapCamera.getPhoto({
-          quality: 80,
-          width: 1280,
-          height: 1280,
-          allowEditing: false,
-          correctOrientation: true,
-          resultType: CameraResultType.DataUrl,
-          source: CameraSource.Camera
-        });
-        if (image && image.dataUrl) {
-          photoDataUrl = image.dataUrl;
-        }
-      } catch (err: any) {
-        if (err.message && err.message.toLowerCase().includes('cancel')) {
-          startSearching();
-          return;
-        }
-      }
-    }
-
-    const tCaptureEnd = performance.now();
-    const captureMs = Math.round(tCaptureEnd - tCaptureStart);
-
-    if (photoDataUrl) {
-      // Step 2 & 3: Immediately freeze hardware stream and display confirmed image
-      stopCamera();
-      setCapturedPhoto(photoDataUrl);
-      // Step 4: Now that photo is visibly confirmed, begin AI analysis
-      executeInferencePipeline(photoDataUrl, undefined, captureMs);
+    if (!isStreaming || isCapturingRef.current) {
+      console.warn('[SCAN] Shutter ignored: stream not ready or capture already in progress', {
+        isStreaming,
+        isCapturing: isCapturingRef.current
+      });
       return;
     }
 
-    // 3. Fallback Camera File Capture
-    if (fileInputRef.current) {
-      fileInputRef.current.click();
-    }
-  };
+    isCapturingRef.current = true;
+    console.log('[SCAN] shutter_pressed');
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      executeInferencePipeline(reader.result as string, file.name);
-    };
-    reader.readAsDataURL(file);
+    try {
+      const tCaptureStart = performance.now();
+      sounds.playShutter();
+      setShutterFlash(true);
+      setTimeout(() => setShutterFlash(false), 50);
+      setCaptureError(null);
+      startCapturing();
+
+      // 1. Primary: Sensor Frame Capture via CameraX ImageCapture or HTML5 Canvas
+      const captureResult = await captureFrame();
+
+      const tCaptureEnd = performance.now();
+      const captureMs = Math.round(tCaptureEnd - tCaptureStart);
+
+      // 2. Validate Captured Image Quality (Requirement 3: Never send empty/black frame to AI)
+      const validation = validateCapturedImage(captureResult);
+      console.log('[CAMERA] image_quality_validation:', {
+        valid: validation.valid,
+        dimensions: `${validation.width}x${validation.height}`,
+        byteCount: validation.byteLength,
+        error: validation.error || null
+      });
+
+      if (!validation.valid || !captureResult) {
+        console.warn('[CAMERA] image_quality_validation failed:', validation.error);
+        setCaptureError("Couldn't capture the frame. Try again.");
+        startSearching();
+        return;
+      }
+
+      // 3. Image Valid: Display frozen image in ProgressiveAnalysisOverlay and begin inference
+      // Keep native camera alive in background (do NOT stopCamera)
+      setCapturedPhoto(captureResult.photoDataUrl);
+      executeInferencePipeline(captureResult.photoDataUrl, undefined, captureMs);
+    } catch (err: any) {
+      console.error('[SCAN] Shutter capture exception:', err);
+      setCaptureError("Couldn't capture the frame. Try again.");
+      startSearching();
+    } finally {
+      isCapturingRef.current = false;
+    }
   };
 
   const handleCloseScanner = () => {
@@ -583,19 +642,17 @@ export const ScannerModal: React.FC = () => {
 
   if (!scannerOpen) return null;
 
-  return (
-    <div className="fixed inset-0 z-50 bg-black flex flex-col justify-between overflow-hidden select-none font-sans">
-      <canvas ref={canvasRef} className="hidden" />
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        capture="environment"
-        onChange={handleFileUpload}
-        className="hidden"
-      />
+  const isNativeLive = isNativeCamera && isStreaming && isCameraViewfinderPhase;
 
-      {shutterFlash && <div className="absolute inset-0 z-50 bg-white" />}
+  return (
+    <div
+      className={`fixed inset-0 z-50 ${isNativeLive ? 'bg-transparent' : 'bg-black'} flex flex-col justify-between overflow-hidden select-none font-sans`}
+    >
+      <canvas ref={canvasRef} className="hidden" />
+
+      {shutterFlash && (
+        <div className="absolute inset-0 z-50 bg-white/25 pointer-events-none transition-opacity duration-75" />
+      )}
 
       {/* 1. LIVE HARDWARE CAMERA STREAM WITH GOOGLE LENS CONTROLS */}
       <div
@@ -604,28 +661,43 @@ export const ScannerModal: React.FC = () => {
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
-        className="relative flex-1 flex flex-col justify-between w-full h-full bg-black overflow-hidden cursor-crosshair touch-none"
+        className={`relative flex-1 flex flex-col justify-between w-full h-full ${isNativeLive ? 'bg-transparent' : 'bg-black'} overflow-hidden cursor-crosshair touch-none`}
       >
-        <video
-          ref={videoRef}
-          autoPlay
-          playsInline
-          muted
-          controls={false}
-          disablePictureInPicture
-          disableRemotePlayback
-          poster="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'/>"
-          className="absolute inset-0 w-full h-full object-cover pointer-events-none transition-transform duration-100 ease-out"
-          style={{ 
-            background: '#000000',
-            transform: `${isMirrored ? 'scaleX(-1)' : 'scaleX(1)'} scale(${zoomLevel})`,
-            transformOrigin: 'center center',
-            filter: exposureValue !== 0 ? `brightness(${1 + exposureValue * 0.25})` : 'none'
-          }}
-        />
+        {!isNativeCamera && (
+          <video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            muted
+            controls={false}
+            disablePictureInPicture
+            disableRemotePlayback
+            poster="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'/>"
+            className="absolute inset-0 w-full h-full object-cover pointer-events-none transition-transform duration-100 ease-out"
+            style={{ 
+              background: '#000000',
+              transform: `${isMirrored ? 'scaleX(-1)' : 'scaleX(1)'} scale(${zoomLevel})`,
+              transformOrigin: 'center center',
+              filter: exposureValue !== 0 ? `brightness(${1 + exposureValue * 0.25})` : 'none'
+            }}
+          />
+        )}
 
         {/* Ambient Viewfinder Vignette */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_transparent_40%,_black_95%)] pointer-events-none z-0" />
+
+        {/* Real-Time Capture Error HUD Banner */}
+        {captureError && (
+          <div className="absolute top-[calc(var(--sat,24px)+64px)] left-4 right-4 z-40 flex items-center justify-between gap-3 bg-red-600/90 text-white px-4 py-3 rounded-2xl shadow-2xl backdrop-blur-md border border-red-400/40 animate-fade-in">
+            <div className="flex items-center gap-2.5">
+              <AlertTriangle className="w-5 h-5 flex-shrink-0 text-white" />
+              <span className="text-xs font-semibold">{captureError}</span>
+            </div>
+            <button onClick={() => setCaptureError(null)} className="p-1 hover:bg-white/20 rounded-full cursor-pointer">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
 
         {/* Google Lens Tap-to-Focus Reticle and Exposure Slider */}
         <FocusExposureReticle
@@ -635,7 +707,7 @@ export const ScannerModal: React.FC = () => {
         />
 
         {/* 2. HUNTER OVERLAY (Strictly during active camera / targeting / shutter press) */}
-        {(phase === 'SEARCHING' || phase === 'CAR_DETECTED' || phase === 'POTENTIAL_DISCOVERY' || phase === 'TRACKING' || phase === 'LOCKING' || phase === 'LOCKED' || phase === 'CAPTURING') && (
+        {isCameraViewfinderPhase && (
           <HunterOverlay
             phase={phase}
             hasVehicle={hasVehicle}
@@ -655,7 +727,8 @@ export const ScannerModal: React.FC = () => {
             isRearCamera={isRearCamera}
             zoomLevel={zoomLevel}
             onSelectZoom={setZoom}
-            onOpenGallery={() => fileInputRef.current?.click()}
+            isCameraReady={isStreaming}
+            isCapturing={phase === 'CAPTURING'}
           />
         )}
 
@@ -676,7 +749,6 @@ export const ScannerModal: React.FC = () => {
             isDuplicate={phase === 'ALREADY_COLLECTED'}
             onContinueHunt={() => {
               continueHunting();
-              startCamera('environment');
             }}
             onClose={handleCloseScanner}
           />
@@ -736,7 +808,9 @@ export const ScannerModal: React.FC = () => {
                 onClick={() => {
                   sounds.playTargetAcquired();
                   retakePhoto();
-                  startCamera('environment');
+                  if (!isStreaming) {
+                    startCamera('environment');
+                  }
                 }}
                 className="w-full py-3 rounded-2xl bg-white/[0.08] hover:bg-white/[0.14] border border-white/[0.1] active:scale-98 text-white/90 font-semibold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer min-h-[44px]"
               >

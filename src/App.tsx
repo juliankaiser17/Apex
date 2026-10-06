@@ -37,11 +37,6 @@ export const App: React.FC = () => {
 
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session?.user) {
-        logAuthTransition('SESSION_RESOLVED', session.user.id, session.user.email);
-        
-        // Fast unlock: show cached state immediately to eliminate startup lag
-        setIsAuthReady(true);
-
         // Authoritatively verify with Supabase server in background
         const authUser = (await getAuthoritativeUser()) || session.user;
         const provider = authUser.app_metadata?.provider || (authUser.email?.includes('gmail') ? 'google' : 'email');
@@ -70,6 +65,7 @@ export const App: React.FC = () => {
         if (typeof window !== 'undefined' && window.location.hash && window.location.hash.includes('access_token=')) {
           window.history.replaceState(null, '', window.location.pathname);
         }
+        setIsAuthReady(true);
       } else {
         // No Supabase session: Authoritatively transition to GUEST
         useApexStore.getState().setAuthStatus('GUEST', null);
@@ -136,6 +132,7 @@ export const App: React.FC = () => {
   const activeHuntModal = useApexStore(s => s.activeHuntModal);
   const closeHuntModal = useApexStore(s => s.closeHuntModal);
   const setScannerOpen = useApexStore(s => s.setScannerOpen);
+  const scannerOpen = useApexStore(s => s.scannerOpen);
   const selectedCardForDetail = useApexStore(s => s.selectedCardForDetail);
   const setSelectedCardForDetail = useApexStore(s => s.setSelectedCardForDetail);
   const settingsModalOpen = useApexStore(s => s.settingsModalOpen);
@@ -211,41 +208,45 @@ export const App: React.FC = () => {
 
   return (
     <div className="min-h-[100dvh] bg-transparent text-[#F0EBE3] flex flex-col selection:bg-[#FF4500] selection:text-white relative z-0 pb-[110px]" style={{ fontFamily: 'DM Sans' }}>
-      <AmbientBackground />
-      {/* Top Status Header */}
-      <HeaderBar />
+      {/* Ambient Background (Omitted while scanner active to ensure full transparency) */}
+      {!scannerOpen && <AmbientBackground />}
 
-      {/* Main Tab Viewport */}
-      <main className="flex-1 flex flex-col">
-        {activeTab === 'home' && (
-          <ModuleErrorBoundary moduleName="Dashboard">
-            <HomeScreen />
-          </ModuleErrorBoundary>
-        )}
-        {activeTab === 'map' && (
-          <ModuleErrorBoundary moduleName="Radar Map">
-            <MapScreen />
-          </ModuleErrorBoundary>
-        )}
-        {activeTab === 'garage' && (
-          <ModuleErrorBoundary moduleName="Garage Vault">
-            <GarageScreen />
-          </ModuleErrorBoundary>
-        )}
-        {activeTab === 'social' && (
-          <ModuleErrorBoundary moduleName="Spotter Feed">
-            <SocialScreen />
-          </ModuleErrorBoundary>
-        )}
-        {activeTab === 'profile' && (
-          <ModuleErrorBoundary moduleName="Spotter Profile">
-            <SocialScreen />
-          </ModuleErrorBoundary>
-        )}
-      </main>
+      {/* Top Status Header (Omitted while scanner active) */}
+      {!scannerOpen && <HeaderBar />}
 
-      {/* Fixed Bottom 5-Tab Bar */}
-      <TabBar />
+      {/* Main Tab Viewport (Omitted while scanner active to prevent rendering beneath viewfinder) */}
+      {!scannerOpen && (
+        <main className="flex-1 flex flex-col">
+          {activeTab === 'home' && (
+            <ModuleErrorBoundary moduleName="Dashboard">
+              <HomeScreen />
+            </ModuleErrorBoundary>
+          )}
+          {activeTab === 'map' && (
+            <ModuleErrorBoundary moduleName="Radar Map">
+              <MapScreen />
+            </ModuleErrorBoundary>
+          )}
+          {activeTab === 'garage' && (
+            <ModuleErrorBoundary moduleName="Garage Vault">
+              <GarageScreen />
+            </ModuleErrorBoundary>
+          )}
+          {activeTab === 'social' && (
+            <ModuleErrorBoundary moduleName="Spotter Feed">
+              <SocialScreen />
+            </ModuleErrorBoundary>
+          )}
+          {activeTab === 'profile' && (
+            <ModuleErrorBoundary moduleName="Spotter Profile">
+              <SocialScreen />
+            </ModuleErrorBoundary>
+          )}
+        </main>
+      )}
+
+      {/* Fixed Bottom 5-Tab Bar (Omitted while scanner active) */}
+      {!scannerOpen && <TabBar />}
 
       {/* Global 3D Card Detail Modal (accessible from Map, Home, Garage & Social) */}
       {selectedCardForDetail && (

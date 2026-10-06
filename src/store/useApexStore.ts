@@ -18,7 +18,8 @@ import type {
   AuthUser,
   LocalRarityInfo,
   RarityExplanationDebug,
-  EconomyLedgerEntry
+  EconomyLedgerEntry,
+  RarityTier
 } from '../types/apex';
 import { calculateDiscoveryXp, processXpGain } from '../utils/mastery';
 import { sounds } from '../utils/audio';
@@ -46,9 +47,13 @@ import {
   removeFriendship as apiRemoveFriendship,
   normalizeUsername
 } from '../services/userService';
+import { computeAuthoritativeStats } from '../utils/userStats';
+import { evaluateBadgeCatalog } from '../utils/badgeCatalog';
+import { generateAuthoritativeQuests, processQuestScan, getDailyExpirationTimestamp } from '../utils/questEngine';
+import { setHapticsEnabled } from '../utils/haptics';
 
-// PERSISTENT GLOBAL EVENT EXPIRATION TIMESTAMPS (Never reset on tab switch!)
-export const GLOBAL_QUEST_EXPIRES_AT = Date.now() + 3 * 3600 * 1000 + 47 * 60 * 1000 + 22 * 1000;
+// PERSISTENT GLOBAL EVENT EXPIRATION TIMESTAMPS (Pinned to UTC midnight daily boundary)
+export const GLOBAL_QUEST_EXPIRES_AT = getDailyExpirationTimestamp();
 export const GLOBAL_EVENT_EXPIRES_AT = Date.now() + 14 * 3600 * 1000 + 32 * 60 * 1000 + 9 * 1000;
 
 interface ApexState {
@@ -78,6 +83,17 @@ interface ApexState {
   garage: CarCard[];
   activeHunts: Hunt[];
   dailyQuests: DailyQuest[];
+  activeTimedQuest: {
+    questId: string;
+    questTitle: string;
+    startedAt: number;
+    expiresAt: number;
+    targetCount: number;
+    currentCount: number;
+    windowMinutes: number;
+  } | null;
+  startTimedQuest: (questId: string) => void;
+  cancelTimedQuest: () => void;
   dailyMissions: Mission[];
   badges: Badge[];
   feedPosts: FeedPost[];
@@ -200,7 +216,8 @@ export const createFreshUser = (): UserProfile => ({
   favoriteBrand: '',
   cardThemeColor: '#E50914',
   speedUnits: 'kmh',
-  soundEffectsEnabled: true
+  soundEffectsEnabled: true,
+  hapticsEnabled: true
 });
 
 const INITIAL_USER: UserProfile = createFreshUser();
@@ -359,26 +376,32 @@ export function generatePersonaQuests(persona: Persona = 'unspecified'): DailyQu
   ];
 }
 
-export const getSavedDailyQuests = (persona: Persona = 'unspecified'): DailyQuest[] => {
+export const getSavedDailyQuests = (userId?: string, city?: string, country?: string): DailyQuest[] => {
   try {
     if (typeof localStorage !== 'undefined') {
       const today = new Date().toISOString().slice(0, 10);
-      const savedDate = localStorage.getItem('apex_daily_quests_date');
+      const userKey = userId ? `apex_daily_quests_${userId}` : 'apex_daily_quests';
+      const dateKey = userId ? `apex_daily_quests_date_${userId}` : 'apex_daily_quests_date';
+      const savedDate = localStorage.getItem(dateKey);
       if (savedDate === today) {
-        const saved = localStorage.getItem('apex_daily_quests');
+        const saved = localStorage.getItem(userKey);
         if (saved) {
           const parsed = JSON.parse(saved);
           if (Array.isArray(parsed) && parsed.length > 0) return parsed;
         }
       } else {
-        localStorage.setItem('apex_daily_quests_date', today);
+        localStorage.setItem(dateKey, today);
       }
     }
   } catch (e) {}
-  return generatePersonaQuests(persona);
+  return generateAuthoritativeQuests({
+    userId: userId || 'guest',
+    userCity: city,
+    userCountry: country
+  });
 };
 
-const INITIAL_QUESTS: DailyQuest[] = generatePersonaQuests('unspecified');
+const INITIAL_QUESTS: DailyQuest[] = generateAuthoritativeQuests({ userId: 'guest' });
 
 const INITIAL_MISSIONS: Mission[] = [
   { id: 'm1', title: 'Scan 1 car today', xpReward: 50, completed: false, type: 'scan' },
@@ -409,14 +432,7 @@ export const getSavedDailyMissions = (): Mission[] => {
   return INITIAL_MISSIONS;
 };
 
-const INITIAL_BADGES: Badge[] = [
-  { id: 'b1', slug: 'first_blood', name: 'First Blood', description: 'Scanned your very first car card.', icon: 'Target', rarity: 'bronze', isUnlocked: false, xpBonus: 100 },
-  { id: 'b2', slug: 'rare_encounter', name: 'Rare Encounter', description: 'Spotted a Rare rarity car in the wild.', icon: 'Zap', rarity: 'silver', isUnlocked: false, xpBonus: 250 },
-  { id: 'b3', slug: 'das_auto', name: 'Das Auto', description: 'Spotted 3 German cars in a single day.', icon: 'Flag', rarity: 'silver', isUnlocked: false, xpBonus: 300 },
-  { id: 'b4', slug: 'mythic_hunter', name: 'Mythic Hunter', description: 'Scanned an ultra-rare Mythic tier hypercar!', icon: 'Crown', rarity: 'diamond', isUnlocked: false, xpBonus: 1000 },
-  { id: 'b5', slug: 'streak_7', name: '7-Day Spotter', description: 'Maintained a 7-day active scan streak.', icon: 'Flame', rarity: 'gold', isUnlocked: false, xpBonus: 500 },
-  { id: 'b6', slug: 'jdm_royalty', name: 'JDM Royalty', description: 'Spot 10 iconic Japanese domestic market cars.', icon: 'Globe', rarity: 'gold', isUnlocked: false, xpBonus: 600 }
-];
+export const INITIAL_BADGES: Badge[] = evaluateBadgeCatalog([], undefined);
 
 const INITIAL_NOTIFICATIONS: NotificationItem[] = [
   {
@@ -881,10 +897,6 @@ const getSavedOnboarding = (): boolean => {
   try {
     if (typeof localStorage !== 'undefined') {
       const saved = localStorage.getItem('apex_onboarding_v2_completed');
-      const user = getSavedUser();
-      if (!user || !user.username || user.username.startsWith('user_') || user.username.startsWith('spotter_') || user.username.startsWith('hunter_')) {
-        return false;
-      }
       if (saved === 'true') return true;
     }
   } catch (e) {}
@@ -892,6 +904,24 @@ const getSavedOnboarding = (): boolean => {
 };
 
 const initialSavedUser = getSavedUser();
+const initialSavedGarage = getSavedGarage(initialSavedUser.id);
+const initialUnlockedSlugs = new Set<string>();
+try {
+  if (typeof localStorage !== 'undefined' && initialSavedUser.id) {
+    const bSaved = localStorage.getItem(`apex_unlocked_badges_${initialSavedUser.id}`);
+    if (bSaved) {
+      const parsed = JSON.parse(bSaved);
+      if (Array.isArray(parsed)) parsed.forEach((s: string) => initialUnlockedSlugs.add(s));
+    }
+  }
+} catch {}
+const initialEvaluatedBadges = evaluateBadgeCatalog(initialSavedGarage, initialSavedUser, undefined, initialUnlockedSlugs);
+const initialStats = computeAuthoritativeStats(initialSavedGarage, initialEvaluatedBadges, initialSavedUser);
+initialSavedUser.totalSpots = initialStats.totalCarsSpotted;
+initialSavedUser.badgesUnlocked = initialStats.badgesUnlockedCount;
+
+let activeInitializePromise: Promise<void> | null = null;
+let activeInitializeUserId: string | null = null;
 
 export const useApexStore = create<ApexState>((set, get) => ({
   authStatus: 'AUTH_LOADING',
@@ -927,12 +957,38 @@ export const useApexStore = create<ApexState>((set, get) => ({
   },
 
   user: initialSavedUser,
-  garage: getSavedGarage(initialSavedUser.id),
+  garage: initialSavedGarage,
   friends: getUserFriends(initialSavedUser.username),
   activeHunts: [],
-  dailyQuests: getSavedDailyQuests(initialSavedUser.persona),
+  dailyQuests: getSavedDailyQuests(initialSavedUser.id, initialSavedUser.city, initialSavedUser.country),
+  activeTimedQuest: null,
+  startTimedQuest: (questId: string) => {
+    const quest = get().dailyQuests.find(q => q.id === questId);
+    if (!quest) return;
+    const windowMinutes = quest.windowMinutes || 15;
+    const startedAt = Date.now();
+    const expiresAt = startedAt + windowMinutes * 60 * 1000;
+    const timedSession = {
+      questId: quest.id,
+      questTitle: quest.title,
+      startedAt,
+      expiresAt,
+      targetCount: quest.targetCount,
+      currentCount: quest.currentCount,
+      windowMinutes
+    };
+    const updatedQuests = get().dailyQuests.map(q => q.id === questId ? { ...q, startedAtTimestamp: startedAt } : q);
+    set({
+      activeTimedQuest: timedSession,
+      dailyQuests: updatedQuests,
+      scannerOpen: true
+    });
+  },
+  cancelTimedQuest: () => {
+    set({ activeTimedQuest: null });
+  },
   dailyMissions: getSavedDailyMissions(),
-  badges: INITIAL_BADGES,
+  badges: initialEvaluatedBadges,
   feedPosts: getSavedPosts(),
   economyLedger: [],
   leaderboards: computeLeaderboard(initialSavedUser),
@@ -1080,12 +1136,41 @@ export const useApexStore = create<ApexState>((set, get) => ({
   },
 
   updateUserProfile: (profile) => set((state) => {
+    if (profile.hapticsEnabled !== undefined) {
+      setHapticsEnabled(profile.hapticsEnabled);
+    }
     const updatedUser = { ...state.user, ...profile };
     try {
       persistItem('apex_user_session', JSON.stringify(updatedUser));
     } catch (e) {}
     
     registerOrUpdateUser(updatedUser);
+
+    // Cloud persistence: sync customization to Supabase profiles & auth metadata
+    if (updatedUser.id && !updatedUser.id.startsWith('user_')) {
+      supabase.from('profiles').update({
+        display_name: updatedUser.displayName,
+        username: updatedUser.username,
+        avatar_url: updatedUser.avatarUrl,
+        city: updatedUser.city,
+        country: updatedUser.country
+      }).eq('id', updatedUser.id).then(() => {}, () => {});
+
+      supabase.auth.updateUser({
+        data: {
+          bio: updatedUser.bio,
+          driver_title: updatedUser.driverTitle,
+          favorite_car: updatedUser.favoriteCar,
+          favorite_brand: updatedUser.favoriteBrand,
+          card_theme_color: updatedUser.cardThemeColor,
+          speed_units: updatedUser.speedUnits,
+          sound_effects_enabled: updatedUser.soundEffectsEnabled,
+          haptics_enabled: updatedUser.hapticsEnabled !== false,
+          city: updatedUser.city,
+          country: updatedUser.country
+        }
+      }).catch(() => {});
+    }
     
     return { 
       user: updatedUser,
@@ -1445,237 +1530,336 @@ export const useApexStore = create<ApexState>((set, get) => ({
 
   setPersona: (persona) => set((state) => ({
     user: { ...state.user, persona },
-    dailyQuests: generatePersonaQuests(persona)
+    dailyQuests: getSavedDailyQuests(state.user.id, state.user.city, state.user.country)
   })),
   
   initializeSession: async (userId: string, authEmail?: string, provider?: string, userMetadata?: any) => {
-    logAuthTransition('PROFILE_LOADING', userId, authEmail);
-    const resolvedEmail = authEmail || '';
-    const determinedProvider = provider || (resolvedEmail.includes('gmail') || resolvedEmail.includes('google') ? 'google' : 'email');
+    if (activeInitializePromise && activeInitializeUserId === userId) {
+      return activeInitializePromise;
+    }
+    activeInitializeUserId = userId;
+    activeInitializePromise = (async () => {
+      logAuthTransition('PROFILE_LOADING', userId, authEmail);
+      const resolvedEmail = authEmail || '';
+      const determinedProvider = provider || (resolvedEmail.includes('gmail') || resolvedEmail.includes('google') ? 'google' : 'email');
 
-    set({ 
-      authStatus: 'AUTHENTICATED_PROFILE_LOADING',
-      authUser: {
-        id: userId,
-        email: resolvedEmail,
-        provider: determinedProvider
-      }
-    });
-
-    try {
-      // 1. Authoritatively fetch profile from Supabase using only valid columns
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('id, username, display_name, avatar_url, level, xp, coins, streak_days, last_scan_at, total_spots, rarest_find, created_at, daily_scans_count, daily_scans_reset_at, last_login_at')
-        .eq('id', userId)
-        .maybeSingle();
-
-      // 2. Fetch garage cars belonging to this auth user
-      const { data: garage } = await supabase
-        .from('garage')
-        .select('*')
-        .eq('user_id', userId)
-        .limit(100);
-
-      // Determine if this account is an established existing active profile
-      const isExistingActiveUser = Boolean(
-        profile && (
-          (profile.username && !profile.username.startsWith('hunter_') && !profile.username.startsWith('spotter_')) ||
-          (profile.xp && profile.xp > 0) ||
-          (profile.level && profile.level > 1) ||
-          (profile.total_spots && profile.total_spots > 0) ||
-          (garage && garage.length > 0)
-        )
-      );
-
-      // Authoritative onboarding state: true if metadata says true, OR if established profile and not explicitly set false
-      const isOnboardingDone = 
-        userMetadata?.onboarding_completed === true || 
-        (isExistingActiveUser && userMetadata?.onboarding_completed !== false);
-
-      if (isOnboardingDone && userMetadata?.onboarding_completed !== true) {
-        supabase.auth.updateUser({ data: { onboarding_completed: true } }).catch(() => {});
-      }
-
-      if (profile) {
-        // Existing profile in Supabase: Hydrate existing identity & progress
-        const cached = getSavedUser();
-        const resolvedStreakDays = (profile.streak_days && profile.streak_days > 0)
-          ? profile.streak_days
-          : (userMetadata?.streak_days || (cached.id === userId ? cached.streakDays : 0) || 0);
-
-        const resolvedStreakLastAt = userMetadata?.streak_last_at || 
-          (profile as any).streak_last_at || 
-          profile.last_scan_at || 
-          (cached.id === userId ? cached.streakLastAt : undefined) || 
-          undefined;
-
-        const mergedUser: UserProfile = {
-          ...INITIAL_USER,
-          id: profile.id,
-          username: profile.username || `hunter_${userId.substring(0, 6)}`,
-          displayName: profile.display_name || 'Apex Hunter',
+      set({ 
+        authStatus: 'AUTHENTICATED_PROFILE_LOADING',
+        authUser: {
+          id: userId,
           email: resolvedEmail,
-          avatarUrl: profile.avatar_url || INITIAL_USER.avatarUrl,
-          level: profile.level ?? 1,
-          xp: profile.xp ?? 0,
-          coins: profile.coins ?? 0,
-          streakDays: resolvedStreakDays,
-          streakLastAt: resolvedStreakLastAt,
-          totalSpots: profile.total_spots ?? 0,
-          rarestFind: (profile.rarest_find as any) || 'None',
-          city: userMetadata?.city || '',
-          country: userMetadata?.country || '',
-          bio: userMetadata?.bio || '',
-          driverTitle: userMetadata?.driver_title || 'Apex Spotter',
-          favoriteCar: userMetadata?.favorite_car || '',
-          favoriteBrand: userMetadata?.favorite_brand || '',
-          cardThemeColor: userMetadata?.card_theme_color || '#E50914',
-          speedUnits: userMetadata?.speed_units || 'kmh',
-          soundEffectsEnabled: userMetadata?.sound_effects_enabled !== false
-        };
+          provider: determinedProvider
+        }
+      });
 
-        const localCards = getSavedGarage(mergedUser.id);
-        const cardMap = new Map<string, CarCard>();
-        localCards.forEach(c => { if (c?.id) cardMap.set(c.id, c); });
+      try {
+        const cached = getSavedUser();
+        const isCachedSameUser = cached.id === userId;
 
-        if (garage && garage.length > 0) {
-          garage.forEach(g => {
-            const existing = cardMap.get(g.id);
-            const remoteCard = createSampleCard({
-              id: g.id,
-              cardNumber: g.card_number || existing?.cardNumber || `#APX-${Math.floor(100000 + Math.random() * 900000)}`,
-              make: g.make,
-              model: g.model,
-              yearEstimate: String(g.year_estimate || existing?.yearEstimate || 2023),
-              bodyStyle: (g.body_style as any) || existing?.bodyStyle || 'Coupe',
-              rarity: (g.rarity as any) || existing?.rarity || 'rare',
-              rarityScore: g.rarity_score || existing?.rarityScore || 75,
-              horsepower: g.horsepower || existing?.horsepower || 400,
-              topSpeedKmH: g.top_speed_kmh || existing?.topSpeedKmH || 280,
-              zeroToHundredSec: g.zero_to_hundred_sec || existing?.zeroToHundredSec || 3.8,
-              color: g.color || existing?.color || 'Standard',
-              imageUrl: g.image_url || existing?.imageUrl || '',
-              city: g.city || existing?.city || 'Tokyo',
-              country: g.country || existing?.country || 'Japan',
-              originCountry: g.origin_country || existing?.originCountry || 'Japan',
-              interestingFact: g.interesting_fact || existing?.interestingFact || 'Precision engineering.',
-              briefHistory: g.brief_history || existing?.briefHistory || 'Performance icon.',
-              modsDetected: g.mods_detected || existing?.modsDetected || [],
-              createdAt: g.created_at || existing?.createdAt || new Date().toISOString(),
-              pendingDeletionUntil: g.pending_deletion_until || undefined,
-              isPublic: true,
-              privacyLevel: 'public_blurred',
-              xpEarned: existing?.xpEarned || 250,
-              aiConfidence: existing?.aiConfidence || 0.95
-            });
-            if (existing?.imageUrl && (!remoteCard.imageUrl || remoteCard.imageUrl.startsWith('indexeddb://'))) {
-              remoteCard.imageUrl = existing.imageUrl;
+        // 1. Authoritatively fetch profile from Supabase with resilient 4s timeout
+        let profile: any = null;
+        let garage: any[] | null = null;
+        try {
+          const profilePromise = supabase
+            .from('profiles')
+            .select('id, username, display_name, avatar_url, level, xp, coins, streak_days, last_scan_at, total_spots, rarest_find, created_at, daily_scans_count, daily_scans_reset_at, last_login_at, city, country')
+            .eq('id', userId)
+            .maybeSingle();
+          const profileTimeout = new Promise<any>((resolve) => 
+            setTimeout(() => resolve({ data: null, error: new Error('TIMEOUT') }), 4000)
+          );
+          const res = await Promise.race([profilePromise, profileTimeout]);
+          if (res?.data) profile = res.data;
+        } catch (err) {
+          console.warn('[initializeSession] Profile query error/timeout:', err);
+        }
+
+        // 2. Fetch garage cars belonging to this auth user with resilient 4s timeout
+        try {
+          const garagePromise = supabase
+            .from('garage')
+            .select('*')
+            .eq('user_id', userId)
+            .order('scanned_at', { ascending: false });
+          const garageTimeout = new Promise<any>((resolve) => 
+            setTimeout(() => resolve({ data: null, error: new Error('TIMEOUT') }), 4000)
+          );
+          const res = await Promise.race([garagePromise, garageTimeout]);
+          if (res?.data) garage = res.data;
+        } catch (err) {
+          console.warn('[initializeSession] Garage query error/timeout:', err);
+        }
+
+        // Determine derived username & display name
+        const derivedUsername = profile?.username || 
+          (isCachedSameUser && cached.username && !cached.username.startsWith('hunter_') ? cached.username : null) ||
+          userMetadata?.username || 
+          (resolvedEmail ? resolvedEmail.split('@')[0].replace(/[^a-z0-9_]/gi, '').toLowerCase() : `hunter_${userId.substring(0, 6)}`);
+
+        const derivedDisplayName = profile?.display_name || 
+          (isCachedSameUser && cached.displayName ? cached.displayName : null) ||
+          userMetadata?.full_name || 
+          userMetadata?.display_name || 
+          'Apex Hunter';
+
+        // If missing profile row in Supabase and we have network, create one idempotently
+        if (!profile) {
+          const newProfileRow = {
+            id: userId,
+            username: derivedUsername,
+            display_name: derivedDisplayName,
+            level: isCachedSameUser && cached.level > 1 ? cached.level : 1,
+            xp: isCachedSameUser && cached.xp > 0 ? cached.xp : 0,
+            coins: isCachedSameUser && cached.coins > 50 ? cached.coins : 50,
+            streak_days: isCachedSameUser && cached.streakDays > 0 ? cached.streakDays : 0,
+            total_spots: garage?.length || (isCachedSameUser ? cached.totalSpots : 0) || 0,
+            rarest_find: isCachedSameUser && cached.rarestFind ? cached.rarestFind : 'common'
+          };
+          try {
+            await supabase.from('profiles').upsert([newProfileRow], { onConflict: 'id' });
+          } catch (insertErr) {
+            console.warn('Idempotent profile creation notice:', insertErr);
+          }
+        }
+
+        // Determine if this account is an established existing active profile
+        const isExistingActiveUser = Boolean(
+          (profile && (
+            (profile.username && !profile.username.startsWith('hunter_') && !profile.username.startsWith('spotter_')) ||
+            (profile.xp && profile.xp > 0) ||
+            (profile.level && profile.level > 1) ||
+            (profile.total_spots && profile.total_spots > 0)
+          )) ||
+          (garage && garage.length > 0) ||
+          (isCachedSameUser && (cached.totalSpots > 0 || cached.xp > 0)) ||
+          getSavedOnboarding()
+        );
+
+        // Authoritative onboarding state: never revert completed onboarding to false
+        const isOnboardingDone = 
+          userMetadata?.onboarding_completed === true || 
+          getSavedOnboarding() === true ||
+          (isExistingActiveUser && userMetadata?.onboarding_completed !== false);
+
+        if (isOnboardingDone && userMetadata?.onboarding_completed !== true) {
+          supabase.auth.updateUser({ data: { onboarding_completed: true } }).catch(() => {});
+        }
+      const resolvedStreakDays = (profile?.streak_days && profile.streak_days > 0)
+        ? profile.streak_days
+        : (userMetadata?.streak_days || (cached.id === userId ? cached.streakDays : 0) || 0);
+
+      const resolvedStreakLastAt = userMetadata?.streak_last_at || 
+        (profile as any)?.streak_last_at || 
+        profile?.last_scan_at || 
+        (cached.id === userId ? cached.streakLastAt : undefined) || 
+        undefined;
+
+      const resolvedHaptics = userMetadata?.haptics_enabled !== undefined 
+        ? userMetadata.haptics_enabled !== false 
+        : true;
+      setHapticsEnabled(resolvedHaptics);
+
+      // Hydrate local cache and remote garage cards
+      const localCards = getSavedGarage(userId);
+      const cardMap = new Map<string, CarCard>();
+
+      // Check for orphaned guest cards from before authentication
+      try {
+        const guestCards = getSavedGarage();
+        if (guestCards && guestCards.length > 0) {
+          guestCards.forEach(c => {
+            if (c?.id && !cardMap.has(c.id)) {
+              (c as any).userId = userId;
+              cardMap.set(c.id, c);
             }
-            cardMap.set(g.id, remoteCard);
           });
         }
-        const hydratedGarage: CarCard[] = Array.from(cardMap.values());
+      } catch (e) {}
 
-        try {
-          persistItem('apex_user_session', JSON.stringify(mergedUser));
-          persistLightweightGarage(mergedUser.id, hydratedGarage);
-          if (isOnboardingDone) {
-            persistItem('apex_onboarding_v2_completed', 'true');
+      localCards.forEach(c => { if (c?.id) cardMap.set(c.id, c); });
+
+      if (garage && garage.length > 0) {
+        garage.forEach(g => {
+          const existing = cardMap.get(g.id);
+          const specs = (typeof g.specs === 'object' && g.specs !== null) ? g.specs : {};
+          const remoteCard: CarCard = {
+            id: g.id,
+            cardNumber: g.card_number || existing?.cardNumber || `#APX-${g.id.substring(0, 6).toUpperCase()}`,
+            make: g.make,
+            model: g.model,
+            generation: specs.generation || existing?.generation,
+            trim: specs.trim || existing?.trim,
+            yearEstimate: String(g.year_estimate || g.year || specs.yearEstimate || existing?.yearEstimate || '2023'),
+            releasedYear: String(g.year_estimate || g.year || specs.yearEstimate || existing?.releasedYear || '2023'),
+            productionYears: specs.productionYears || existing?.productionYears,
+            discontinuedStatus: existing?.discontinuedStatus,
+            color: g.color || existing?.color || 'Standard',
+            bodyStyle: (g.body_style as any) || specs.bodyStyle || existing?.bodyStyle || 'Coupe',
+            rarity: (g.rarity || existing?.rarity || 'rare').toLowerCase() as RarityTier,
+            rarityScore: specs.rarityScore || g.rarity_score || existing?.rarityScore || 75,
+            horsepower: g.horsepower || specs.horsepower || existing?.horsepower || 0,
+            topSpeedKmH: g.top_speed_kmh || specs.topSpeedKmH || existing?.topSpeedKmH || 0,
+            engine: specs.engine || existing?.engine,
+            zeroToHundredSec: specs.zeroToHundredSec || g.zero_to_hundred_sec || existing?.zeroToHundredSec || 3.8,
+            torqueNm: specs.torqueNm || existing?.torqueNm,
+            kerbWeightKg: specs.kerbWeightKg || existing?.kerbWeightKg,
+            originCountry: specs.originCountry || g.origin_country || existing?.originCountry || g.country || 'Global',
+            interestingFact: specs.interestingFact || g.interesting_fact || existing?.interestingFact || 'Precision engineering.',
+            briefHistory: specs.briefHistory || g.brief_history || existing?.briefHistory || `${g.make} ${g.model}`,
+            modsDetected: specs.modsDetected || g.mods_detected || existing?.modsDetected || [],
+            imageUrl: g.image_url || existing?.imageUrl || '',
+            imageHash: g.image_hash || existing?.imageHash,
+            latApprox: g.latitude || existing?.latApprox || 0,
+            lngApprox: g.longitude || existing?.lngApprox || 0,
+            city: g.city || existing?.city || 'Local Area',
+            country: g.country || existing?.country || 'Global',
+            xpEarned: g.xp_earned || existing?.xpEarned || 250,
+            marketValueLowUsd: specs.marketValueLowUsd || existing?.marketValueLowUsd || 30000,
+            marketValueHighUsd: specs.marketValueHighUsd || existing?.marketValueHighUsd || 45000,
+            scanValidated: true,
+            isPublic: true,
+            huntTriggered: false,
+            privacyLevel: specs.privacyLevel || existing?.privacyLevel || 'public_blurred',
+            aiConfidence: g.confidence || specs.aiConfidence || existing?.aiConfidence || 0.95,
+            createdAt: g.scanned_at || g.created_at || existing?.createdAt || new Date().toISOString()
+          };
+          (remoteCard as any).serverRecorded = true;
+          if (existing?.imageUrl && (!remoteCard.imageUrl || remoteCard.imageUrl.startsWith('indexeddb://'))) {
+            remoteCard.imageUrl = existing.imageUrl;
           }
-        } catch (e) {}
-
-        await registerOrUpdateUser(mergedUser);
-        logAuthTransition('PROFILE_LOADED', userId, resolvedEmail);
-
-        const serverDailyScans = profile.daily_scans_count ?? 0;
-        const currentQuests = get().dailyQuests;
-        const updatedQuests = currentQuests.map(q => {
-          if (q.id === 'quest-daily-spotlight') {
-            return {
-              ...q,
-              currentCount: serverDailyScans,
-              isCompleted: serverDailyScans >= q.targetCount
-            };
-          }
-          return q;
-        });
-
-        set({
-          authStatus: 'AUTHENTICATED',
-          authUser: {
-            id: userId,
-            email: resolvedEmail,
-            provider: determinedProvider
-          },
-          user: mergedUser,
-          garage: hydratedGarage,
-          dailyQuests: updatedQuests,
-          friends: getUserFriends(mergedUser.username),
-          incomingRequests: getIncomingRequests(mergedUser.username),
-          outgoingRequests: getOutgoingRequests(mergedUser.username),
-          leaderboards: computeLeaderboard(mergedUser),
-          onboardingCompleted: isOnboardingDone
-        });
-      } else {
-        // Missing profile in Supabase: Idempotently create exactly one default profile row
-        const derivedUsername = userMetadata?.username || (resolvedEmail ? resolvedEmail.split('@')[0].replace(/[^a-z0-9_]/gi, '').toLowerCase() : `hunter_${userId.substring(0, 6)}`);
-        const derivedDisplayName = userMetadata?.full_name || userMetadata?.display_name || 'Apex Hunter';
-
-        const newProfileRow = {
-          id: userId,
-          username: derivedUsername,
-          display_name: derivedDisplayName,
-          level: 1,
-          xp: 0,
-          coins: 50,
-          streak_days: 0,
-          total_spots: 0,
-          rarest_find: 'None'
-        };
-
-        try {
-          await supabase.from('profiles').upsert([newProfileRow], { onConflict: 'id' });
-        } catch (insertErr) {
-          console.warn('Idempotent profile creation notice:', insertErr);
-        }
-
-        const existingLocalGarage = getSavedGarage(userId);
-        const newUser: UserProfile = {
-          ...INITIAL_USER,
-          id: userId,
-          username: derivedUsername,
-          displayName: derivedDisplayName,
-          email: resolvedEmail,
-          city: userMetadata?.city || '',
-          country: userMetadata?.country || '',
-          totalSpots: existingLocalGarage.length
-        };
-
-        try {
-          persistItem('apex_user_session', JSON.stringify(newUser));
-          persistLightweightGarage(userId, existingLocalGarage);
-        } catch (e) {}
-
-        await registerOrUpdateUser(newUser);
-        logAuthTransition('PROFILE_LOADED', userId, resolvedEmail);
-
-        set({
-          authStatus: 'AUTHENTICATED',
-          authUser: {
-            id: userId,
-            email: resolvedEmail,
-            provider: determinedProvider
-          },
-          user: newUser,
-          garage: existingLocalGarage,
-          friends: [],
-          incomingRequests: [],
-          outgoingRequests: [],
-          leaderboards: computeLeaderboard(newUser),
-          onboardingCompleted: isOnboardingDone
+          cardMap.set(g.id, remoteCard);
         });
       }
+      const hydratedGarage: CarCard[] = Array.from(cardMap.values());
+
+      // Cloud Persistence: If user has unrecorded local cards, sync them to Supabase in background
+      if (userId && !userId.startsWith('user_')) {
+        const unrecordedCards = hydratedGarage.filter(c => !(c as any).serverRecorded);
+        if (unrecordedCards.length > 0) {
+          const syncPayloads = unrecordedCards.map(c => ({
+            id: c.id,
+            user_id: userId,
+            make: c.make,
+            model: c.model,
+            year_estimate: String(c.yearEstimate || '2023'),
+            year: String(c.yearEstimate || '2023'),
+            color: c.color || 'Standard',
+            rarity: (c.rarity || 'common').toLowerCase(),
+            card_number: c.cardNumber || `#APX-${Math.floor(100000 + Math.random() * 900000)}`,
+            image_url: c.imageUrl || '',
+            image_hash: c.imageHash || null,
+            city: c.city || 'Local Area',
+            country: c.country || 'Global',
+            latitude: c.latApprox || null,
+            longitude: c.lngApprox || null,
+            horsepower: c.horsepower || 0,
+            top_speed_kmh: c.topSpeedKmH || 0,
+            xp_earned: c.xpEarned || 250,
+            is_minted: true,
+            scanned_at: c.createdAt || new Date().toISOString(),
+            body_style: c.bodyStyle || 'Coupe',
+            confidence: c.aiConfidence || 0.95
+          }));
+
+          supabase.from('garage').upsert(syncPayloads, { onConflict: 'id' }).then(({ error: syncErr }) => {
+            if (!syncErr) {
+              unrecordedCards.forEach(c => { (c as any).serverRecorded = true; });
+              persistLightweightGarage(userId, hydratedGarage);
+            } else {
+              console.warn('[SyncUnsyncedCards] Background upsert notice:', syncErr.message);
+            }
+          });
+        }
+      }
+
+      // Restore unlocked badge slugs from metadata and local storage
+      const unlockedBadgesSet = new Set<string>();
+      if (Array.isArray(userMetadata?.unlocked_badges)) {
+        userMetadata.unlocked_badges.forEach((s: string) => unlockedBadgesSet.add(s));
+      }
+      try {
+        const localUnlocked = localStorage.getItem(`apex_unlocked_badges_${userId}`);
+        if (localUnlocked) {
+          const parsed = JSON.parse(localUnlocked);
+          if (Array.isArray(parsed)) parsed.forEach((s: string) => unlockedBadgesSet.add(s));
+        }
+      } catch {}
+
+      const mergedUser: UserProfile = {
+        ...INITIAL_USER,
+        id: userId,
+        username: derivedUsername,
+        displayName: derivedDisplayName,
+        email: resolvedEmail,
+        avatarUrl: profile?.avatar_url || (isCachedSameUser ? cached.avatarUrl : null) || INITIAL_USER.avatarUrl,
+        level: profile?.level ?? (isCachedSameUser && cached.level > 1 ? cached.level : 1),
+        xp: profile?.xp ?? (isCachedSameUser && cached.xp > 0 ? cached.xp : 0),
+        coins: profile?.coins ?? (isCachedSameUser && cached.coins > 50 ? cached.coins : 50),
+        streakDays: resolvedStreakDays,
+        streakLastAt: resolvedStreakLastAt,
+        city: profile?.city || (isCachedSameUser ? cached.city : '') || userMetadata?.city || '',
+        country: profile?.country || (isCachedSameUser ? cached.country : '') || userMetadata?.country || '',
+        bio: userMetadata?.bio || (isCachedSameUser ? cached.bio : '') || '',
+        driverTitle: userMetadata?.driver_title || (isCachedSameUser ? cached.driverTitle : 'Apex Spotter'),
+        favoriteCar: userMetadata?.favorite_car || (isCachedSameUser ? cached.favoriteCar : ''),
+        favoriteBrand: userMetadata?.favorite_brand || (isCachedSameUser ? cached.favoriteBrand : ''),
+        cardThemeColor: userMetadata?.card_theme_color || (isCachedSameUser ? cached.cardThemeColor : '#E50914'),
+        speedUnits: userMetadata?.speed_units || (isCachedSameUser ? cached.speedUnits : 'kmh'),
+        soundEffectsEnabled: userMetadata?.sound_effects_enabled !== false,
+        hapticsEnabled: resolvedHaptics
+      };
+
+      // Authoritatively evaluate 106+ badge catalog against real spotted history
+      const evaluatedBadges = evaluateBadgeCatalog(hydratedGarage, mergedUser, undefined, unlockedBadgesSet);
+
+      // Compute unified authoritative statistics
+      const authoritativeStats = computeAuthoritativeStats(hydratedGarage, evaluatedBadges, mergedUser);
+      mergedUser.totalSpots = authoritativeStats.totalCarsSpotted;
+      mergedUser.badgesUnlocked = authoritativeStats.badgesUnlockedCount;
+      mergedUser.rarestFind = authoritativeStats.highestTier !== 'none' ? authoritativeStats.highestTier : 'common';
+
+      // Restore or generate 3-tier location-aware quests
+      const serverDailyScans = profile?.daily_scans_count ?? 0;
+      const userQuests = getSavedDailyQuests(userId, mergedUser.city, mergedUser.country).map(q => {
+        if (q.id.includes('3scans') || q.id === 'quest-daily-spotlight') {
+          return {
+            ...q,
+            currentCount: Math.max(q.currentCount, serverDailyScans),
+            isCompleted: Math.max(q.currentCount, serverDailyScans) >= q.targetCount
+          };
+        }
+        return q;
+      });
+
+      // Persist to local storage for offline durability
+      try {
+        persistItem('apex_user_session', JSON.stringify(mergedUser));
+        persistLightweightGarage(mergedUser.id, hydratedGarage);
+        if (isOnboardingDone) {
+          persistItem('apex_onboarding_v2_completed', 'true');
+        }
+      } catch (e) {}
+
+      await registerOrUpdateUser(mergedUser);
+      logAuthTransition('PROFILE_LOADED', userId, resolvedEmail);
+
+      set({
+        authStatus: 'AUTHENTICATED',
+        authUser: {
+          id: userId,
+          email: resolvedEmail,
+          provider: determinedProvider
+        },
+        user: mergedUser,
+        garage: hydratedGarage,
+        badges: evaluatedBadges,
+        dailyQuests: userQuests,
+        friends: getUserFriends(mergedUser.username),
+        incomingRequests: getIncomingRequests(mergedUser.username),
+        outgoingRequests: getOutgoingRequests(mergedUser.username),
+        leaderboards: computeLeaderboard(mergedUser),
+        onboardingCompleted: isOnboardingDone
+      });
 
       try {
         await get().fetchFeedPosts();
@@ -1705,7 +1889,12 @@ export const useApexStore = create<ApexState>((set, get) => ({
         onboardingCompleted: getSavedOnboarding()
       });
     }
-  },
+  })().finally(() => {
+    activeInitializePromise = null;
+    activeInitializeUserId = null;
+  });
+  return activeInitializePromise;
+},
 
   fetchFeedPosts: async () => {
     try {
@@ -1793,9 +1982,13 @@ export const useApexStore = create<ApexState>((set, get) => ({
           createdAt: p.created_at
         }));
         
-        const userPostIds = new Set(mappedPosts.map(p => p.id));
-        const nonDuplicateSamples = SAMPLE_FEED_POSTS.filter(s => !userPostIds.has(s.id));
-        set({ feedPosts: [...mappedPosts, ...nonDuplicateSamples] });
+        const localSaved = getSavedPosts();
+        const serverPostIds = new Set(mappedPosts.map(p => p.id));
+        const localOnly = localSaved.filter(p => !serverPostIds.has(p.id));
+        const mergedAll = [...localOnly, ...mappedPosts];
+        const allPostIds = new Set(mergedAll.map(p => p.id));
+        const nonDuplicateSamples = SAMPLE_FEED_POSTS.filter(s => !allPostIds.has(s.id));
+        set({ feedPosts: [...mergedAll, ...nonDuplicateSamples] });
       } else {
         set({ feedPosts: getSavedPosts() });
       }
@@ -2042,22 +2235,15 @@ export const useApexStore = create<ApexState>((set, get) => ({
         totalSpots: (state.user.totalSpots || 0) + 1
       };
 
-      // Only increment quests if not already processed in onScanCompleted
-      let updatedQuests = state.dailyQuests;
-      if (!(newCard as any).serverRecorded) {
-        updatedQuests = state.dailyQuests.map(quest => {
-          if (!quest.isCompleted && (!quest.allowedMakes || quest.allowedMakes.length === 0 || quest.allowedMakes.includes(newCard.make))) {
-            const newCount = quest.currentCount + 1;
-            const isNowCompleted = newCount >= quest.targetCount;
-            return {
-              ...quest,
-              currentCount: newCount,
-              isCompleted: isNowCompleted
-            };
-          }
-          return quest;
-        });
-      }
+      // Process 3-Tier Quests with real progress tracking
+      const questScanContext = {
+        card: authoritativeCard,
+        scanTimestamp: Date.now(),
+        city: authoritativeCard.city,
+        country: authoritativeCard.country
+      };
+      const questEval = processQuestScan(state.dailyQuests as any, questScanContext);
+      const updatedQuests = questEval.updatedQuests;
 
       // Missions must be authoritatively verified and claimed via claimMissionReward
       const updatedMissions = state.dailyMissions;
@@ -2086,39 +2272,101 @@ export const useApexStore = create<ApexState>((set, get) => ({
         } catch (e) {}
       }
 
+      // Evaluate 106+ Badges dynamically against updated garage
+      const currentUnlocked = new Set<string>();
+      state.badges.filter(b => b.isUnlocked).forEach(b => currentUnlocked.add(b.slug));
+      const evaluatedBadges = evaluateBadgeCatalog(updatedGarage, updatedUser, {
+        scansInCurrentSession: updatedGarage.length
+      }, currentUnlocked);
+
+      // Persist unlocked badges
+      const newUnlockedList = evaluatedBadges.filter(b => b.isUnlocked).map(b => b.slug);
+      try {
+        localStorage.setItem(`apex_unlocked_badges_${updatedUser.id}`, JSON.stringify(newUnlockedList));
+      } catch {}
+
+      // Authoritative unified statistics calculation
+      const authoritativeStats = computeAuthoritativeStats(updatedGarage, evaluatedBadges, updatedUser);
+      updatedUser.totalSpots = authoritativeStats.totalCarsSpotted;
+      updatedUser.badgesUnlocked = authoritativeStats.badgesUnlockedCount;
+      updatedUser.rarestFind = authoritativeStats.highestTier !== 'none' ? authoritativeStats.highestTier : 'common';
+
       try {
         localStorage.setItem('apex_user_session', JSON.stringify(updatedUser));
       } catch (e) {}
       registerOrUpdateUser(updatedUser);
 
-      // Cloud persistence: save vehicle to Supabase garage table
-      try {
-        supabase.from('garage').upsert([{
+      // Cloud persistence: save vehicle to Supabase garage table with verified Postgres columns
+      if (updatedUser.id && !updatedUser.id.startsWith('user_')) {
+        const garagePayload = {
           id: authoritativeCard.id,
           user_id: updatedUser.id,
           make: authoritativeCard.make,
           model: authoritativeCard.model,
-          year_estimate: authoritativeCard.yearEstimate,
-          body_style: authoritativeCard.bodyStyle,
-          rarity: authoritativeCard.rarity,
-          rarity_score: authoritativeCard.rarityScore,
-          horsepower: authoritativeCard.horsepower,
-          top_speed_kmh: authoritativeCard.topSpeedKmH,
-          zero_to_hundred_sec: authoritativeCard.zeroToHundredSec,
-          color: authoritativeCard.color,
-          image_url: authoritativeCard.imageUrl,
-          city: authoritativeCard.city,
-          country: authoritativeCard.country,
-          origin_country: authoritativeCard.originCountry,
-          interesting_fact: authoritativeCard.interestingFact,
-          brief_history: authoritativeCard.briefHistory,
-          created_at: authoritativeCard.createdAt
-        }]);
-      } catch (e) {}
+          year_estimate: String(authoritativeCard.yearEstimate || '2023'),
+          year: String(authoritativeCard.yearEstimate || '2023'),
+          color: authoritativeCard.color || 'Standard',
+          rarity: (authoritativeCard.rarity || 'common').toLowerCase(),
+          card_number: authoritativeCard.cardNumber || `#APX-${Math.floor(100000 + Math.random() * 900000)}`,
+          image_url: authoritativeCard.imageUrl || '',
+          image_hash: authoritativeCard.imageHash || null,
+          city: authoritativeCard.city || 'Local Area',
+          country: authoritativeCard.country || 'Global',
+          latitude: authoritativeCard.latApprox || null,
+          longitude: authoritativeCard.lngApprox || null,
+          horsepower: authoritativeCard.horsepower || 0,
+          top_speed_kmh: authoritativeCard.topSpeedKmH || 0,
+          xp_earned: authoritativeCard.xpEarned || 250,
+          is_minted: true,
+          scanned_at: authoritativeCard.createdAt || new Date().toISOString(),
+          body_style: authoritativeCard.bodyStyle || 'Coupe',
+          confidence: authoritativeCard.aiConfidence || 0.95,
+          specs: {
+            generation: authoritativeCard.generation,
+            trim: authoritativeCard.trim,
+            productionYears: authoritativeCard.productionYears,
+            discontinuedStatus: authoritativeCard.discontinuedStatus,
+            engine: authoritativeCard.engine,
+            torqueNm: authoritativeCard.torqueNm,
+            zeroToHundredSec: authoritativeCard.zeroToHundredSec,
+            kerbWeightKg: authoritativeCard.kerbWeightKg,
+            originCountry: authoritativeCard.originCountry,
+            interestingFact: authoritativeCard.interestingFact,
+            briefHistory: authoritativeCard.briefHistory,
+            modsDetected: authoritativeCard.modsDetected,
+            rarityScore: authoritativeCard.rarityScore,
+            privacyLevel: authoritativeCard.privacyLevel,
+            marketValueLowUsd: authoritativeCard.marketValueLowUsd,
+            marketValueHighUsd: authoritativeCard.marketValueHighUsd
+          }
+        };
+
+        supabase.from('garage').upsert([garagePayload], { onConflict: 'id' }).then(
+          ({ error: upsertErr }) => {
+            if (upsertErr) {
+              console.warn('[Garage Cloud Persistence] Direct upsert warning:', upsertErr.message || upsertErr);
+              (authoritativeCard as any).cloudSyncError = upsertErr.message;
+            } else {
+              (authoritativeCard as any).serverRecorded = true;
+              (authoritativeCard as any).cloudSyncError = undefined;
+            }
+          },
+          (err: any) => {
+            console.warn('[Garage Cloud Persistence] Exception:', err);
+            (authoritativeCard as any).cloudSyncError = err?.message || 'Network exception';
+          }
+        );
+
+        // Sync unlocked badges to user metadata
+        supabase.auth.updateUser({
+          data: { unlocked_badges: newUnlockedList }
+        }).catch(() => {});
+      }
 
       return {
         garage: updatedGarage,
         user: updatedUser,
+        badges: evaluatedBadges,
         levelUpLevel: xpResult.leveledUp ? updatedUser.level : state.levelUpLevel,
         dailyQuests: updatedQuests,
         dailyMissions: updatedMissions,
@@ -2394,8 +2642,6 @@ export const useApexStore = create<ApexState>((set, get) => ({
 
   onScanCompleted: async (card: CarCard) => {
     // 1. Authoritative Server Path: record_car_scan transaction on database
-    let authoritativeDailyScans: number | null = null;
-
     try {
       const canonicalId = (card as any).canonicalVehicleId || 
         `${card.make}-${card.model}`.toLowerCase().replace(/[^a-z0-9]+/g, '-');
@@ -2424,6 +2670,7 @@ export const useApexStore = create<ApexState>((set, get) => ({
 
       if (!rpcError && rpcResult?.success) {
         (card as any).serverRecorded = true;
+        (card as any).cloudSyncError = undefined;
         if (rpcResult.card_id) {
           (card as any).serverCardId = rpcResult.card_id;
           card.id = rpcResult.card_id;
@@ -2431,17 +2678,6 @@ export const useApexStore = create<ApexState>((set, get) => ({
 
         const currentUser = get().user;
         if (currentUser && currentUser.id) {
-          // Fetch authoritative daily_scans_count updated by record_car_scan in profiles table
-          const { data: profRow } = await supabase
-            .from('profiles')
-            .select('daily_scans_count')
-            .eq('id', currentUser.id)
-            .maybeSingle();
-
-          if (profRow && typeof profRow.daily_scans_count === 'number') {
-            authoritativeDailyScans = profRow.daily_scans_count;
-          }
-
           const updatedUser: UserProfile = {
             ...currentUser,
             xp: rpcResult.new_total_xp ?? currentUser.xp,
@@ -2454,42 +2690,36 @@ export const useApexStore = create<ApexState>((set, get) => ({
           });
           registerOrUpdateUser(updatedUser);
         }
+      } else {
+        const failureReason = rpcError?.message || rpcResult?.error || 'Database transaction rejected scan';
+        console.warn('[onScanCompleted] RPC record_car_scan failure:', failureReason);
+        (card as any).serverRecorded = false;
+        (card as any).cloudSyncError = failureReason;
       }
-    } catch (scanErr) {
-      console.warn('[onScanCompleted] RPC record_car_scan notice:', scanErr);
+    } catch (scanErr: any) {
+      console.warn('[onScanCompleted] RPC record_car_scan exception:', scanErr?.message || scanErr);
+      (card as any).serverRecorded = false;
+      (card as any).cloudSyncError = scanErr?.message || 'Network exception during scan recording';
     }
 
-    // 2. Authoritative UI Quest State Update:
-    // Uses server-returned daily_scans_count when online/authenticated, with local increment fallback for offline/guest
+    // 2. Authoritative UI Quest State Update via 3-Tier Quest Engine
     set((state) => {
-      const updatedQuests = state.dailyQuests.map(quest => {
-        if (quest.id === 'quest-daily-spotlight') {
-          const newCount = authoritativeDailyScans !== null 
-            ? authoritativeDailyScans 
-            : (quest.currentCount + 1);
-          const isNowCompleted = newCount >= quest.targetCount;
-          return {
-            ...quest,
-            currentCount: newCount,
-            isCompleted: isNowCompleted
-          };
-        }
-        if (!quest.isCompleted && (!quest.allowedMakes || quest.allowedMakes.length === 0 || quest.allowedMakes.includes(card.make))) {
-          const newCount = quest.currentCount + 1;
-          const isNowCompleted = newCount >= quest.targetCount;
-          return {
-            ...quest,
-            currentCount: newCount,
-            isCompleted: isNowCompleted
-          };
-        }
-        return quest;
-      });
+      const questScanContext = {
+        card,
+        scanTimestamp: Date.now(),
+        city: card.city,
+        country: card.country,
+        isSessionConsecutive: true
+      };
+      const questEval = processQuestScan(state.dailyQuests as any, questScanContext);
+      const updatedQuests = questEval.updatedQuests;
 
       try {
         const today = new Date().toISOString().slice(0, 10);
-        localStorage.setItem('apex_daily_quests_date', today);
-        localStorage.setItem('apex_daily_quests', JSON.stringify(updatedQuests));
+        const userKey = state.user.id ? `apex_daily_quests_${state.user.id}` : 'apex_daily_quests';
+        const dateKey = state.user.id ? `apex_daily_quests_date_${state.user.id}` : 'apex_daily_quests_date';
+        localStorage.setItem(dateKey, today);
+        localStorage.setItem(userKey, JSON.stringify(updatedQuests));
       } catch (e) {}
 
       return { dailyQuests: updatedQuests };

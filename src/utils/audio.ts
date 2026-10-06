@@ -1,10 +1,38 @@
-// Web Audio API Synthesizer for APEX Sound & Haptic FX
+const APEX_SOUND_STORAGE_KEY = 'apex_sound_fx_enabled';
+
+export function isSoundEnabled(): boolean {
+  try {
+    if (typeof localStorage !== 'undefined') {
+      const stored = localStorage.getItem(APEX_SOUND_STORAGE_KEY);
+      return stored !== 'false';
+    }
+  } catch {}
+  return true;
+}
+
+export function setSoundEnabled(enabled: boolean): void {
+  try {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem(APEX_SOUND_STORAGE_KEY, enabled ? 'true' : 'false');
+    }
+  } catch {}
+  sounds.setEnabled(enabled);
+}
 
 class SoundSystem {
   private ctx: AudioContext | null = null;
-  private enabled: boolean = true;
+  private enabled: boolean = isSoundEnabled();
+
+  public isEnabled(): boolean {
+    return isSoundEnabled() && this.enabled;
+  }
+
+  public setEnabled(enabled: boolean): void {
+    this.enabled = enabled;
+  }
 
   private initCtx() {
+    if (!this.isEnabled()) return;
     if (!this.ctx && typeof window !== 'undefined') {
       const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
       if (AudioCtx) {

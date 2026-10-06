@@ -76,7 +76,7 @@ export const registerOrUpdateUser = async (profile: UserProfile): Promise<void> 
       total_spots: updatedProfile.totalSpots || 0,
       rarest_find: updatedProfile.rarestFind || 'None',
       streak_days: updatedProfile.streakDays || 0,
-      last_scan_at: updatedProfile.streakLastAt || new Date().toISOString()
+      ...(updatedProfile.streakLastAt ? { last_scan_at: updatedProfile.streakLastAt } : {})
     }], { onConflict: 'id' });
   } catch (err) {
     // Graceful offline fallback

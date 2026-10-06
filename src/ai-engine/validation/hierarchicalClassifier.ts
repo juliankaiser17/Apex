@@ -238,19 +238,25 @@ export class HierarchicalClassifier {
     const brandVisualEvidence: Record<string, boolean> = {
       nissan: /\b(nissan|skyline|gt-?r|gtr|nismo|v-?spec|r32|r33|r34|r35|twin\s+round\s+tail|quad\s+round\s+tail|circular\s+tail)\b/i.test(evidenceText),
       honda: /\b(honda|integra|type-?r|vtec|dc2|dc5|nsx|civic|s2000)\b/i.test(evidenceText),
-      toyota: /\b(toyota|supra|gr\s+supra|gazoo|2jz|a90|a80)\b/i.test(evidenceText),
-      mclaren: /\b(mclaren|650s|675lt|720s|p11|p14|senna|p1|dihedral\s+doors?|longtail\s+airbrake)\b/i.test(evidenceText),
+      toyota: /\b(toyota|supra|gr\s+supra|gazoo|2jz|a90|a80|crown\s+comfort|taxi)\b/i.test(evidenceText),
+      mclaren: /\b(mclaren|650s|675lt|720s|765lt|artura|p11|p14|senna|p1|dihedral\s+doors?|longtail\s+airbrake)\b/i.test(evidenceText),
       maserati: /\b(maserati|trident|mc20|grancabrio|granturismo|nettuno|triple\s+portholes?)\b/i.test(evidenceText),
-      porsche: /\b(porsche|911|carrera|boxster|cayman|718|gt3|gt2|sloping\s+flyline|teardrop\s+roofline|bulbous\s+front\s+fenders?|rear-engine)\b/i.test(evidenceText),
-      ferrari: /\b(ferrari|prancing\s+horse|458|488|f8|sf90|daytona\s+sp3|icona|mustache\s+aero)\b/i.test(evidenceText),
-      lamborghini: /\b(lamborghini|hurac[aá]n|gallardo|aventador|revuelto|bull\s+emblem|y-shaped\s+drl|hexagonal\s+intakes?)\b/i.test(evidenceText),
-      bmw: /\b(kidney|hofmeister|bmw|m3|m4|m5|m8)\b/i.test(evidenceText),
-      mercedes: /\b(panamericana|three-pointed\s+star|mercedes(?:-benz)?|amg\s+grille|maybach|vertical\s+chrome\s+(?:pinstripe\s+)?grille|s-class|s\s*class)\b/i.test(evidenceText),
-      audi: /\b(singleframe|quattro|audi)\b/i.test(evidenceText),
+      porsche: /\b(porsche|911|carrera|boxster|cayman|718|gt3|gt2|918|macan|sloping\s+flyline|teardrop\s+roofline|bulbous\s+front\s+fenders?|rear-engine)\b/i.test(evidenceText),
+      ferrari: /\b(ferrari|prancing\s+horse|458|488|f8|sf90|daytona\s+sp3|icona|mustache\s+aero|f40|laferrari)\b/i.test(evidenceText),
+      lamborghini: /\b(lamborghini|hurac[aá]n|gallardo|aventador|revuelto|sto|svj|bull\s+emblem|y-shaped\s+drl|hexagonal\s+intakes?)\b/i.test(evidenceText),
+      bmw: /\b(kidney|hofmeister|bmw|m3|m4|m5|m8|7\s*series)\b/i.test(evidenceText),
+      mercedes: /\b(panamericana|three-pointed\s+star|mercedes(?:-benz)?|amg\s+grille|maybach|vertical\s+chrome\s+(?:pinstripe\s+)?grille|s-class|s\s*class|amg\s+gt|amg\s+one)\b/i.test(evidenceText),
+      audi: /\b(singleframe|quattro|audi|r8|rs6)\b/i.test(evidenceText),
       aston_martin: /\b(aston\s+martin|dbs|db9|db7|db11|db12|vantage|vanquish|valkyrie|swan\s+doors?|aeroblade|curlicue)\b/i.test(evidenceText),
       rolls_royce: /\b(rolls[- ]royce|phantom|ghost|cullinan|wraith|spirit\s+of\s+ecstasy|pantheon)\b/i.test(evidenceText),
       bentley: /\b(bentley|continental\s+gt|flying\s+spur|bentayga|flying\s+b|matrix\s+grille)\b/i.test(evidenceText),
-      koenigsegg: /\b(koenigsegg|gemera|jesko|agera|regera|cc850|ccx|synchro-helix)\b/i.test(evidenceText)
+      koenigsegg: /\b(koenigsegg|gemera|jesko|agera|regera|cc850|ccx|synchro-helix)\b/i.test(evidenceText),
+      chevrolet: /\b(chevrolet|chevy|corvette|z06|c8|stingray)\b/i.test(evidenceText),
+      ford: /\b(ford|ford\s+gt|ecoboost|mustang)\b/i.test(evidenceText),
+      kia: /\b(kia|ev9|tiger\s+face|star\s+map)\b/i.test(evidenceText),
+      rimac: /\b(rimac|nevera|c_two)\b/i.test(evidenceText),
+      bugatti: /\b(bugatti|chiron|veyron|horseshoe\s+grille|tourbillon)\b/i.test(evidenceText),
+      lexus: /\b(lexus|lfa|spindle\s+grille|1lr-gue)\b/i.test(evidenceText)
     };
 
     const normalizeBrandKey = (make: string): string => {
@@ -329,6 +335,11 @@ export class HierarchicalClassifier {
       else if (candNameLower.includes('aston')) candidateMake = 'aston_martin';
       else if (candNameLower.includes('rolls')) candidateMake = 'rolls_royce';
       else if (candNameLower.includes('bentley')) candidateMake = 'bentley';
+      else if (candNameLower.includes('chevrolet') || candNameLower.includes('corvette')) candidateMake = 'chevrolet';
+      else if (candNameLower.includes('kia')) candidateMake = 'kia';
+      else if (candNameLower.includes('rimac')) candidateMake = 'rimac';
+      else if (candNameLower.includes('bugatti')) candidateMake = 'bugatti';
+      else if (candNameLower.includes('lexus')) candidateMake = 'lexus';
 
       // ── CONTRADICTION ENGINE RULE 0: BUS / COMMERCIAL FLEET ELIMINATION ──
       const structuredClass = (visual_evidence as any)?.vehicle_classification;
@@ -510,7 +521,7 @@ export class HierarchicalClassifier {
       const hasNegativeStrakes = /\b(?:without|no|lacks?|devoid\s+of)\s+(?:horizontal\s+)?strakes?\b/i.test(evidenceText);
       // Model-specific Daytona Icona architectural cues (semantic front & rear equivalents)
       const hasDaytonaIconaCues = !hasNegativeStrakes &&
-        /\b(horizontal\s+strakes?|headlight\s+eyelids?|eyelid\s+covers?|partial\s+covers?|wraparound\s+visor|visor\s+canopy|fender-mounted\s+mirrors?|door\s+tops?\s+mirrors?|icona|(?:thin|low|recessed)\s+horizontal\s+(?:head)?lamps?|(?:thin|low|recessed)\s+horizontal\s+headlights?|(?:large|wide)\s+horizontal\s+(?:front\s+)?grille|horizontal\s+grille\s+with\s+black|horizontal\s+blade\s+splitter)\b/i.test(evidenceText);
+        /\b(horizontal\s+strakes?|headlight\s+eyelids?|eyelid\s+covers?|partial\s+covers?|wraparound\s+visor|visor\s+canopy|fender-mounted\s+mirrors?|door\s+tops?\s+mirrors?|icona|(?:thin|slim|low|recessed|narrow)\s+horizontal\s+(?:head)?(?:lamps?|lights?|openings?)|(?:large|wide)\s+horizontal\s+(?:front\s+)?grille|horizontal\s+grille\s+with\s+black|horizontal\s+blade\s+splitter)\b/i.test(evidenceText);
 
       // Model-specific SF90 Stradale architectural cues (generic matrix led / hybrid removed)
       const hasExplicitSf90Cues = /\b(sf90|shut-?off\s+gurney|c-shaped\s+(?:matrix\s+)?(?:led\s+)?headlights?|c-clamp\s+headlights?)\b/i.test(evidenceText);
@@ -651,6 +662,13 @@ export class HierarchicalClassifier {
       };
     });
 
+    const allInitialCandidatesDisqualified = calibratedCandidates.length > 0 &&
+      calibratedCandidates.every((c) => c.invalid || c.contradictions.some((ct) =>
+        ct.includes('Severe vehicle-type mismatch') ||
+        ct.includes('Hard manufacturer mismatch') ||
+        ct.includes('Severe manufacturer mismatch')
+      ));
+
     // 2b. Generalized Fine-Grained Model Discrimination
     const fgResult = fineGrainedModelDiscriminator.discriminate({
       visualEvidence: visual_evidence,
@@ -670,7 +688,7 @@ export class HierarchicalClassifier {
       fallbackModel: input.raw_model || undefined
     });
 
-    if (fgResult.scoredCandidates.length > 0) {
+    if (!allInitialCandidatesDisqualified && fgResult.scoredCandidates.length > 0) {
       for (const fgCand of fgResult.scoredCandidates) {
         const fgMakeNorm = normalizeBrandKey(fgCand.make);
         if (lockedManufacturer && fgMakeNorm !== lockedManufacturer) {
@@ -807,14 +825,19 @@ export class HierarchicalClassifier {
         : lockedManufacturer === 'aston_martin' ? 'Aston Martin'
         : lockedManufacturer === 'rolls_royce' ? 'Rolls-Royce'
         : lockedManufacturer === 'bentley' ? 'Bentley'
+        : lockedManufacturer === 'chevrolet' ? 'Chevrolet'
+        : lockedManufacturer === 'kia' ? 'Kia'
+        : lockedManufacturer === 'rimac' ? 'Rimac'
+        : lockedManufacturer === 'bugatti' ? 'Bugatti'
+        : lockedManufacturer === 'lexus' ? 'Lexus'
+        : lockedManufacturer === 'ford' ? 'Ford'
         : lockedManufacturer.charAt(0).toUpperCase() + lockedManufacturer.slice(1))
       : input.raw_make;
 
     // INVARIANT 2: CANDIDATE COMPLETENESS GATE
     // A model cannot become final unless:
     // - canonical registry entry exists
-    // - database entry exists
-    // - morphological fingerprint exists
+    // - database entry exists OR morphological fingerprint exists
     // - manufacturer namespace matches
     // INVARIANT 3: NO-REGISTRY FALLTHROUGH
     // If the raw provider returns a model absent from the registry/fingerprints,
@@ -822,12 +845,11 @@ export class HierarchicalClassifier {
     const isCompleteCandidate = (cand: CandidateComparison): boolean => {
       const canon = canonicalVehicleRegistry.lookupByTextOrAlias(cand.name, resolvedMake || undefined);
       if (!canon) return false;
-      if (resolvedMake && canon.make.toLowerCase() !== resolvedMake.toLowerCase()) return false;
+      if (resolvedMake && normalizeBrandKey(canon.make) !== normalizeBrandKey(resolvedMake)) return false;
       const fp = fineGrainedModelDiscriminator.getFingerprint(canon.vehicleId) ||
                  fineGrainedModelDiscriminator.getFingerprint(canon.displayName || cand.name);
-      if (!fp) return false;
       const inDb = APEX_LOCAL_VEHICLE_DATABASE.some((v) => v.id === canon.vehicleId);
-      return inDb;
+      return Boolean(inDb || fp);
     };
 
     const completeCandidates = calibratedCandidates.filter((c) => !c.invalid && isCompleteCandidate(c));
@@ -887,15 +909,32 @@ export class HierarchicalClassifier {
 
     // EVIDENCE-FLOOR GATE:
     // Exact-model resolution is only defensible when at least one candidate carries observable
-    // MODEL-SPECIFIC support. If every candidate is indistinguishable (identical neutral baseline,
-    // no specific evidence, no contradictions), the engine must not present a confident exact
-    // model. It still returns exactly one canonical identity (the best-supported hypothesis) but it
-    // refuses the variant tier and requests verification.
+    // MODEL-SPECIFIC or family-grounded support.
     const anyModelSpecificEvidence = fgResult.scoredCandidates.length > 0
-      ? fgResult.scoredCandidates.some((c) => c.specificEvidenceCount > 0)
+      ? fgResult.scoredCandidates.some((c) => (c.specificEvidenceCount > 0) || (c.supportingEvidence?.length > 0))
       : validCandidates.some((c) => (c.supporting_evidence?.length ?? 0) > 0);
 
     const isTiedOrDeadlocked = validCandidates.length >= 2 && separation === 0;
+
+    const areTiedCandidatesSameFamily = isTiedOrDeadlocked && (() => {
+      const first = validCandidates[0];
+      const second = validCandidates[1];
+      if (!first || !second) return false;
+      const c1 = canonicalVehicleRegistry.lookupByTextOrAlias(first.name, resolvedMake || undefined);
+      const c2 = canonicalVehicleRegistry.lookupByTextOrAlias(second.name, resolvedMake || undefined);
+      if (c1 && c2 && normalizeBrandKey(c1.make) === normalizeBrandKey(c2.make) && c1.model.toLowerCase() === c2.model.toLowerCase()) {
+        return true;
+      }
+      const n1 = first.name.toLowerCase();
+      const n2 = second.name.toLowerCase();
+      if ((n1.includes('650s') || n1.includes('675lt')) && (n2.includes('650s') || n2.includes('675lt'))) {
+        return true;
+      }
+      if (n1.includes('458') && n2.includes('458')) return true;
+      if (n1.includes('911') && n2.includes('911')) return true;
+      if (n1.includes('hurac') && n2.includes('hurac')) return true;
+      return false;
+    })();
 
     // 4. Extract hierarchical components
     let resolvedModelFamily: string | null = null;
@@ -938,7 +977,7 @@ export class HierarchicalClassifier {
       specificity = 'make';
       numericSpecificity = 0;
       reason = 'Severe architectural contradiction detected: observed visual cues directly contradict proposed candidates.';
-    } else if (!anyModelSpecificEvidence || isTiedOrDeadlocked) {
+    } else if (!anyModelSpecificEvidence || (isTiedOrDeadlocked && !areTiedCandidatesSameFamily)) {
       // USER MANDATE 1: THE RAW PROVIDER MUST NEVER OVERRIDE AN UNCERTAIN DISCRIMINATOR
       // If the evidence pipeline reaches tie, deadlock, insufficient model-specific evidence,
       // or disqualified candidates, the final result MUST remain uncertain at make level.
@@ -949,7 +988,7 @@ export class HierarchicalClassifier {
       canonicalRecord = null;
       specificity = 'make';
       numericSpecificity = 0;
-      reason = isTiedOrDeadlocked
+      reason = (isTiedOrDeadlocked && !areTiedCandidatesSameFamily)
         ? 'Candidate comparison resulted in an exact tie: insufficient model-specific evidence to separate candidates.'
         : `Model family is unconfirmed: no model-specific evidence was observable to separate ${resolvedMake || 'manufacturer'} candidates from this angle.`;
     } else if (topCandidate && topCandidate.score >= 0.50) {
@@ -1012,6 +1051,7 @@ export class HierarchicalClassifier {
         resolvedVariant = null;
         if (!resolvedGeneration || resolvedGeneration === 'Current') resolvedGeneration = 'P11';
         numericSpecificity = 2;
+        specificity = 'generation';
         reason = `Identified as McLaren Super Series (${resolvedGeneration}). Specific trim (650S vs 675LT) unconfirmed without observable rear Longtail airbrake or front louvers.`;
         reasonCustomizedByGate = true;
       }

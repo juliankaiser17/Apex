@@ -2,6 +2,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 import { apexEngine } from '../ai-engine/engine';
 import { VISION_PIPELINE_VERSION } from '../ai-engine/caching/identificationCache';
+import { canonicalVehicleRegistry } from '../ai-engine/canonical/canonicalVehicleRegistry';
 
 export const config = {
   api: {
@@ -214,15 +215,28 @@ function getTrustedClientIp(req: VercelRequest): string {
 function formatScanResponse(r: any) {
   const canon = r.canonicalResult;
 
-  const isModelUncertain = !canon?.identification?.model_family || canon?.status === 'uncertain' || canon?.specificity_level === 'make';
+  const modelCandidate = canon?.identification?.model_family || canon?.canonical_identity?.modelFamily || r.model;
+  const isModelExplicitlyUncertain = canon?.status === 'uncertain' || canon?.specificity_level === 'make' || r.status === 'abstained';
+  const isModelUncertain = isModelExplicitlyUncertain || !modelCandidate || String(modelCandidate).trim().toLowerCase() === 'unknown model' || String(modelCandidate).trim().toLowerCase() === 'null';
+
   const finalMake = canon?.identification?.make || canon?.canonical_identity?.make || r.make || 'Unknown Make';
-  const finalModel = isModelUncertain ? null : (canon?.identification?.model_family || canon?.canonical_identity?.modelFamily || r.model || null);
+  const finalModel = isModelUncertain ? null : (modelCandidate || null);
   const finalGen = isModelUncertain ? null : (canon?.identification?.generation || canon?.canonical_identity?.generation || r.generation || null);
   const finalTrim = isModelUncertain ? null : (canon?.identification?.variant || canon?.canonical_identity?.variant || (r.trim || null));
-  const finalCanonId = isModelUncertain ? null : (canon?.canonical_identity?.canonicalId || (canon as any)?.canonical_vehicle_id || r.vehicleId || null);
+
+  // Resolve canonical record if finalModel exists to enrich specs
+  let finalCanonId = isModelUncertain ? null : (canon?.canonical_identity?.canonicalId || (canon as any)?.canonical_vehicle_id || r.vehicleId || null);
+  let canonRecord = finalCanonId ? canonicalVehicleRegistry.getById(finalCanonId) : null;
+  if (!canonRecord && !isModelUncertain && finalMake && finalModel) {
+    canonRecord = canonicalVehicleRegistry.lookupByTextOrAlias(`${finalMake} ${finalModel}`, finalMake);
+    if (canonRecord) {
+      finalCanonId = canonRecord.vehicleId;
+    }
+  }
+
   const finalDisplayName = isModelUncertain
     ? finalMake
-    : (canon?.canonical_identity?.displayName || `${finalMake} ${finalModel}`);
+    : (canon?.canonical_identity?.displayName || canonRecord?.displayName || `${finalMake} ${finalModel}${finalGen ? ` (${finalGen})` : ''}`);
 
   return {
     // ── Canonical Production Vision Contract ──
@@ -286,21 +300,21 @@ function formatScanResponse(r: any) {
     trim: finalTrim,
     canonical_display_name: finalDisplayName,
     canonical_vehicle_id: finalCanonId,
-    specificity_level_numeric: isModelUncertain ? 0 : (canon?.specificity_level_numeric ?? canon?.canonical_identity?.specificityLevel ?? 1),
-    year_estimate: isModelUncertain ? 'Unknown' : (r.yearEstimate || 'Unknown'),
+    specificity_level_numeric: isModelUncertain ? 0 : (canon?.specificity_level_numeric ?? canon?.canonical_identity?.specificityLevel ?? (canonRecord?.specificityLevel || 1)),
+    year_estimate: isModelUncertain ? 'Unknown' : (r.yearEstimate || (canonRecord ? `${canonRecord.yearStart}` : 'Unknown')),
     color: r.color,
-    rarity: isModelUncertain ? 'common' : (r.rarity || 'rare'),
-    engine: isModelUncertain ? 'Standard Engine' : (r.engine || 'Standard Engine'),
-    horsepower: isModelUncertain ? 0 : (r.horsepower || 0),
-    torque_nm: isModelUncertain ? 0 : (r.torqueNm || 0),
-    top_speed_kmh: isModelUncertain ? 0 : (r.topSpeedKmH || 0),
-    zero_to_hundred_seconds: isModelUncertain ? 0 : (r.zeroToHundredSec || 0),
-    kerb_weight_kg: isModelUncertain ? 0 : (r.kerbWeightKg || 0),
-    production_years: isModelUncertain ? 'Unknown' : (r.productionYears || 'Unknown'),
-    origin_country: isModelUncertain ? 'Global' : (r.originCountry || 'Global'),
-    body_style: r.bodyStyle,
-    historical_information: isModelUncertain ? '' : (r.historicalInformation || ''),
-    interesting_facts: isModelUncertain ? '' : (r.interestingFacts || ''),
+    rarity: isModelUncertain ? 'common' : (r.rarity || canonRecord?.baselineRarity || 'rare'),
+    engine: isModelUncertain ? 'Standard Engine' : (r.engine || canonRecord?.engine || 'Standard Engine'),
+    horsepower: isModelUncertain ? 0 : (r.horsepower || canon?.canonical_identity?.specs?.horsepower || canonRecord?.horsepower || 0),
+    torque_nm: isModelUncertain ? 0 : (r.torqueNm || canon?.canonical_identity?.specs?.torqueNm || canonRecord?.torqueNm || 0),
+    top_speed_kmh: isModelUncertain ? 0 : (r.topSpeedKmH || canon?.canonical_identity?.specs?.topSpeedKmH || canonRecord?.topSpeedKmH || 0),
+    zero_to_hundred_seconds: isModelUncertain ? 0 : (r.zeroToHundredSec || canon?.canonical_identity?.specs?.zeroToHundredSec || canonRecord?.zeroToHundredSec || 0),
+    kerb_weight_kg: isModelUncertain ? 0 : (r.kerbWeightKg || canon?.canonical_identity?.specs?.kerbWeightKg || canonRecord?.kerbWeightKg || 0),
+    production_years: isModelUncertain ? 'Unknown' : (r.productionYears || canonRecord?.productionYears || 'Unknown'),
+    origin_country: isModelUncertain ? 'Global' : (r.originCountry || canonRecord?.originCountry || 'Global'),
+    body_style: r.bodyStyle || canonRecord?.bodyStyle,
+    historical_information: isModelUncertain ? '' : (r.historicalInformation || canonRecord?.historicalInformation || ''),
+    interesting_facts: isModelUncertain ? '' : (r.interestingFacts || canonRecord?.notableFacts || ''),
     aftermarket_parts_detected: r.aftermarketPartsDetected,
     legacy_confidence: r.confidence?.totalScore ?? 0.95,
     needs_better_angle: canon ? (canon.status === 'uncertain' || canon.needs_retake) : (r.confidence?.shouldAbstain ?? false),

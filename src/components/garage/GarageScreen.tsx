@@ -11,7 +11,8 @@ import {
   X, 
   ChevronRight,
   ChevronDown,
-  Clock
+  Clock,
+  CloudOff
 } from 'lucide-react';
 import { useApexStore } from '../../store/useApexStore';
 import type { CarCard, RarityTier } from '../../types/apex';
@@ -19,6 +20,7 @@ import { RARITY_CONFIG } from '../../utils/rarity';
 import { sounds } from '../../utils/audio';
 import { getOptimizedImageUrl } from '../../utils/imageUrl';
 import { hapticTap, hapticImpact } from '../../utils/haptics';
+import { computeAuthoritativeStats } from '../../utils/userStats';
 
 const INITIAL_RENDER_LIMIT = 24;
 
@@ -61,6 +63,15 @@ const GarageGridCard = React.memo<{ card: CarCard; onClick: (card: CarCard) => v
           <div className="absolute bottom-2 left-2 right-2 z-10">
             <span className="text-[9px] font-bold px-2 py-0.5 rounded-lg bg-amber-500/95 text-black shadow-md flex items-center justify-center gap-1 font-data">
               <Clock className="w-2.5 h-2.5" /> Deleting in 3d · Tap to Restore
+            </span>
+          </div>
+        )}
+
+        {/* Unconfirmed Cloud Persistence / Local Cache Indicator */}
+        {(card.serverRecorded === false || card.cloudSyncError) && !card.pendingDeletionUntil && (
+          <div className="absolute bottom-2 left-2 right-2 z-10">
+            <span className="text-[9px] font-bold px-2 py-0.5 rounded-lg bg-amber-500/95 text-black shadow-md flex items-center justify-center gap-1 font-data">
+              <CloudOff className="w-2.5 h-2.5" /> Cloud Sync Pending
             </span>
           </div>
         )}
@@ -135,6 +146,11 @@ const GarageListCard = React.memo<{ card: CarCard; onClick: (card: CarCard) => v
                 <Clock className="w-2.5 h-2.5" /> Deleting in 3d
               </span>
             )}
+            {(card.serverRecorded === false || card.cloudSyncError) && !card.pendingDeletionUntil && (
+              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-500/90 text-black flex items-center gap-0.5 font-data">
+                <CloudOff className="w-2.5 h-2.5" /> Sync Pending
+              </span>
+            )}
           </div>
           <h3 className="text-sm font-bold text-white truncate mt-1">
             {card.make} {card.model}
@@ -157,6 +173,8 @@ GarageListCard.displayName = 'GarageListCard';
 /* ══════════════════════════════════════════════════════════════════ */
 export const GarageScreen: React.FC = () => {
   const garage = useApexStore(s => s.garage);
+  const badges = useApexStore(s => s.badges);
+  const user = useApexStore(s => s.user);
   const setScannerOpen = useApexStore(s => s.setScannerOpen);
   const setSelectedCardForDetail = useApexStore(s => s.setSelectedCardForDetail);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -167,42 +185,27 @@ export const GarageScreen: React.FC = () => {
   // Non-blocking concurrent search input scheduling
   const deferredSearch = useDeferredValue(searchQuery);
 
-  // Single-Pass O(N) Aggregation for Stats & Rarity Counts
+  // Authoritative Unified Aggregation for Stats & Rarity Counts
   const { stats, rarityCounts } = useMemo(() => {
-    let totalHp = 0;
-    let topSpeedMax = 0;
-    let mythicCount = 0;
-    let legendaryCount = 0;
-    let epicCount = 0;
-    const counts: Record<string, number> = {
-      mythic: 0,
-      legendary: 0,
-      epic: 0,
-      rare: 0,
-      uncommon: 0,
-      common: 0
-    };
-
-    for (let i = 0; i < garage.length; i++) {
-      const c = garage[i];
-      totalHp += (c.horsepower || 300);
-      if ((c.topSpeedKmH || 240) > topSpeedMax) {
-        topSpeedMax = c.topSpeedKmH || 240;
-      }
-      if (c.rarity === 'mythic') mythicCount++;
-      else if (c.rarity === 'legendary') legendaryCount++;
-      else if (c.rarity === 'epic') epicCount++;
-
-      if (counts[c.rarity] !== undefined) {
-        counts[c.rarity]++;
-      }
-    }
-
+    const authStats = computeAuthoritativeStats(garage, badges, user);
     return {
-      stats: { totalHp, topSpeedMax, mythicCount, legendaryCount, epicCount },
-      rarityCounts: counts
+      stats: {
+        totalHp: authStats.totalHorsepower,
+        topSpeedMax: authStats.topSpeedKmH,
+        highestTierLabel: authStats.highestTierLabel,
+        topSpeedLabel: authStats.topSpeedLabel,
+        totalHorsepowerLabel: authStats.totalHorsepowerLabel
+      },
+      rarityCounts: {
+        mythic: authStats.mythicCount,
+        legendary: authStats.legendaryCount,
+        epic: authStats.epicCount,
+        rare: authStats.rareCount,
+        uncommon: authStats.uncommonCount,
+        common: authStats.commonCount
+      }
     };
-  }, [garage]);
+  }, [garage, badges, user]);
 
   // Memoized Filtered Garage Cards
   const filteredGarage = useMemo(() => {
@@ -316,7 +319,7 @@ export const GarageScreen: React.FC = () => {
               style={{ color: 'var(--accent-color)' }}
             >
               <Trophy className="w-3 h-3" style={{ color: 'var(--accent-color)' }} />
-              {stats.mythicCount > 0 ? 'Mythic' : stats.legendaryCount > 0 ? 'Legendary' : stats.epicCount > 0 ? 'Epic' : 'Rare'}
+              {stats.highestTierLabel}
             </span>
           </div>
 
@@ -324,7 +327,7 @@ export const GarageScreen: React.FC = () => {
             <span className="text-[9px] font-data text-white/40 uppercase block">TOP SPEED</span>
             <span className="text-xs font-bold text-white flex items-center justify-center gap-1 mt-0.5">
               <Gauge className="w-3 h-3 text-white/50" />
-              {stats.topSpeedMax > 0 ? `${stats.topSpeedMax} km/h` : '—'}
+              {stats.topSpeedLabel}
             </span>
           </div>
 
@@ -332,7 +335,7 @@ export const GarageScreen: React.FC = () => {
             <span className="text-[9px] font-data text-white/40 uppercase block">TOTAL POWER</span>
             <span className="text-xs font-bold text-white flex items-center justify-center gap-1 mt-0.5">
               <Zap className="w-3 h-3 text-yellow-400" />
-              {stats.totalHp > 0 ? `${stats.totalHp.toLocaleString()} hp` : '0 hp'}
+              {stats.totalHorsepowerLabel}
             </span>
           </div>
         </div>

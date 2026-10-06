@@ -1,6 +1,7 @@
-import React from 'react';
-import { Camera, X, SwitchCamera, Zap, ZapOff, Image as ImageIcon } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Camera, X, SwitchCamera, Zap, ZapOff } from 'lucide-react';
 import { ScanningReticle } from './ScanningReticle';
+import { useApexStore } from '../../store/useApexStore';
 import type { HunterTargetCandidate, ApproachGuidance } from '../../services/hunterSceneEngine';
 import type { ScannerPhase } from '../../hooks/useScannerStateMachine';
 
@@ -18,9 +19,10 @@ interface HunterOverlayProps {
   hasTorch?: boolean;
   torchOn?: boolean;
   isRearCamera?: boolean;
-  onOpenGallery?: () => void;
   zoomLevel?: number;
   onSelectZoom?: (z: number) => void;
+  isCameraReady?: boolean;
+  isCapturing?: boolean;
 }
 
 export const HunterOverlay: React.FC<HunterOverlayProps> = ({
@@ -31,11 +33,32 @@ export const HunterOverlay: React.FC<HunterOverlayProps> = ({
   hasTorch = false,
   torchOn = false,
   isRearCamera = true,
-  onOpenGallery,
   zoomLevel = 1,
-  onSelectZoom
+  onSelectZoom,
+  isCameraReady = true,
+  isCapturing = false
 }) => {
   const zoomPresets = [1, 2, 3, 5];
+  const activeTimedQuest = useApexStore(s => s.activeTimedQuest);
+  const [remainingMs, setRemainingMs] = useState<number>(() => {
+    return activeTimedQuest ? Math.max(0, activeTimedQuest.expiresAt - Date.now()) : 0;
+  });
+
+  useEffect(() => {
+    if (!activeTimedQuest) return;
+    const interval = setInterval(() => {
+      const rem = Math.max(0, activeTimedQuest.expiresAt - Date.now());
+      setRemainingMs(rem);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [activeTimedQuest]);
+
+  const formatRemainingTime = (ms: number) => {
+    const totalSecs = Math.floor(ms / 1000);
+    const m = Math.floor(totalSecs / 60);
+    const s = totalSecs % 60;
+    return `${m}:${s < 10 ? '0' : ''}${s}`;
+  };
 
   return (
     <div className="absolute inset-0 z-30 pointer-events-none flex flex-col justify-between overflow-hidden select-none font-sans">
@@ -90,6 +113,22 @@ export const HunterOverlay: React.FC<HunterOverlayProps> = ({
         </div>
       </div>
 
+      {/* ACTIVE TIMED QUEST HUD BADGE */}
+      {activeTimedQuest && remainingMs > 0 && (
+        <div className="relative z-20 flex justify-center -mt-2 pointer-events-auto px-4">
+          <div className="flex items-center gap-2.5 bg-black/85 backdrop-blur-xl border border-amber-500/40 px-4 py-1.5 rounded-full shadow-[0_0_24px_rgba(245,158,11,0.35)] animate-pulse">
+            <div className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
+            <span className="text-xs font-mono font-bold text-amber-300">
+              ⚡ {formatRemainingTime(remainingMs)}
+            </span>
+            <span className="text-white/30 text-xs">|</span>
+            <span className="text-[11px] font-bold text-white/90 truncate max-w-[150px]">
+              {activeTimedQuest.currentCount}/{activeTimedQuest.targetCount} Spotted
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* 2. UNIFIED TARGETING RETICLE (Apex Red #E50914) */}
       <ScanningReticle isScanning={false} />
 
@@ -125,31 +164,24 @@ export const HunterOverlay: React.FC<HunterOverlayProps> = ({
           </div>
         )}
 
-        {/* Primary Action Row: Gallery | Shutter | Spacer */}
+        {/* Primary Action Row: Spacer | Shutter | Spacer */}
         <div className="flex items-center justify-between w-full px-4">
-          {/* Gallery Button */}
-          {onOpenGallery ? (
-            <button
-              onClick={onOpenGallery}
-              className="w-12 h-12 rounded-full bg-black/60 backdrop-blur-md border border-white/15 flex items-center justify-center text-white/80 hover:text-white active:scale-90 transition-all shadow-lg cursor-pointer"
-              title="Upload from Photo Library"
-              aria-label="Photo Library"
-            >
-              <ImageIcon className="w-5 h-5" />
-            </button>
-          ) : (
-            <div className="w-12 h-12" />
-          )}
+          <div className="w-12 h-12" />
 
           {/* Shutter Button (Pixel/Google Lens style double ring) */}
           <button
             onClick={onShutterPress}
-            className="group relative w-20 h-20 rounded-full border-4 border-white/80 flex items-center justify-center transition-all cursor-pointer active:scale-90 shadow-[0_4px_20px_rgba(0,0,0,0.8)]"
-            title="Capture Vehicle"
+            disabled={!isCameraReady || isCapturing}
+            className={`group relative w-20 h-20 rounded-full border-4 border-white/80 flex items-center justify-center transition-all shadow-[0_4px_20px_rgba(0,0,0,0.8)] ${
+              !isCameraReady || isCapturing
+                ? 'opacity-40 cursor-not-allowed'
+                : 'cursor-pointer active:scale-90'
+            }`}
+            title={!isCameraReady ? 'Camera Initializing…' : isCapturing ? 'Capturing…' : 'Capture Vehicle'}
             aria-label="Capture Vehicle"
           >
             {/* Inner Vibrant Red Button */}
-            <div className="w-16 h-16 rounded-full bg-[#E50914] group-hover:bg-[#DC2626] group-active:scale-95 transition-all flex items-center justify-center shadow-inner text-white">
+            <div className={`w-16 h-16 rounded-full bg-[#E50914] ${!isCameraReady || isCapturing ? '' : 'group-hover:bg-[#DC2626] group-active:scale-95'} transition-all flex items-center justify-center shadow-inner text-white`}>
               <Camera className="w-7 h-7" />
             </div>
           </button>

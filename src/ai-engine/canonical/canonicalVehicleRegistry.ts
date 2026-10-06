@@ -95,6 +95,14 @@ class CanonicalVehicleRegistry {
     this.seedCanonicalDatabase();
   }
 
+  private normalizeBrandKey(str: string): string {
+    const norm = this.normalize(str);
+    if (norm.startsWith('mercedes')) return 'mercedes';
+    if (norm.startsWith('aston')) return 'astonmartin';
+    if (norm.startsWith('rolls')) return 'rollsroyce';
+    return norm;
+  }
+
   private seedCanonicalDatabase() {
     // 1. Ingest base local database
     APEX_LOCAL_VEHICLE_DATABASE.forEach((item) => {
@@ -129,6 +137,8 @@ class CanonicalVehicleRegistry {
           `${item.manufacturer} ${item.model}`.toLowerCase(),
           `${item.manufacturer} ${item.model} ${item.generation}`.toLowerCase(),
           `${item.model} ${item.generation}`.toLowerCase(),
+          `${item.model}`.toLowerCase(),
+          `${item.model} (${item.generation})`.toLowerCase(),
           item.id.toLowerCase()
         ],
         notableFacts: item.notableFacts,
@@ -706,12 +716,219 @@ class CanonicalVehicleRegistry {
       'huracan evo coupe',
       'huracan evo spyder'
     ]);
+
+    // ── EXPANDED VEHICLE ALIASES ──
+    this.registerAliases('koenigsegg-jesko', [
+      'jesko',
+      'koenigsegg jesko',
+      'jesko attack',
+      'jesko absolut',
+      'koenigsegg jesko attack',
+      'koenigsegg jesko absolut'
+    ]);
+
+    this.registerAliases('bugatti-chiron-super-sport', [
+      'chiron',
+      'chiron super sport',
+      'bugatti chiron',
+      'chiron ss',
+      'bugatti chiron super sport'
+    ]);
+
+    this.registerAliases('rimac-nevera', [
+      'nevera',
+      'rimac nevera',
+      'c_two',
+      'rimac c_two'
+    ]);
+
+    this.registerAliases('lexus-lfa', [
+      'lfa',
+      'lexus lfa',
+      'lfa nurburgring'
+    ]);
+
+    this.registerAliases('chevrolet-corvette-z06-c8', [
+      'corvette',
+      'corvette z06',
+      'c8 z06',
+      'corvette c8',
+      'c8 corvette',
+      'chevrolet corvette',
+      'chevrolet corvette z06'
+    ]);
+
+    this.registerAliases('ford-gt-2017', [
+      'ford gt',
+      'gt 2017',
+      'ford gt 2017',
+      'ford gt 2nd gen'
+    ]);
+
+    this.registerAliases('kia-ev9', [
+      'ev9',
+      'kia ev9',
+      'ev9 gt-line'
+    ]);
+
+    this.registerAliases('toyota-crown-comfort-taxi', [
+      'crown comfort',
+      'crown comfort taxi',
+      'hong kong taxi',
+      'toyota crown',
+      'toyota crown comfort',
+      'comfort taxi',
+      'crown taxi'
+    ]);
+
+    this.registerAliases('mercedes-amg-gt', [
+      'amg gt',
+      'mercedes amg gt',
+      'mercedes-benz amg gt',
+      'mercedes-amg gt',
+      'amg gt coupe'
+    ]);
+
+    this.registerAliases('mercedes-amg-gt-black-series', [
+      'amg gt black series',
+      'gt black series',
+      'mercedes amg gt black series',
+      'amg gt black'
+    ]);
+
+    this.registerAliases('mercedes-amg-one', [
+      'amg one',
+      'project one',
+      'mercedes amg one',
+      'mercedes-amg project one'
+    ]);
+
+    this.registerAliases('mclaren-675lt', [
+      '675lt',
+      'mclaren 675lt',
+      '675lt coupe',
+      '675 lt'
+    ]);
+
+    this.registerAliases('mclaren-650s', [
+      '650s',
+      'mclaren 650s',
+      '650s coupe',
+      '650 s'
+    ]);
+
+    this.registerAliases('mclaren-artura', [
+      'artura',
+      'mclaren artura'
+    ]);
+
+    this.registerAliases('mclaren-765lt', [
+      '765lt',
+      'mclaren 765lt',
+      '765 lt'
+    ]);
+
+    this.registerAliases('mclaren-p1', [
+      'p1',
+      'mclaren p1'
+    ]);
+
+    this.registerAliases('audi-r8-v10-performance', [
+      'r8',
+      'r8 v10',
+      'r8 v10 performance',
+      'audi r8',
+      'audi r8 v10'
+    ]);
+
+    this.registerAliases('audi-rs6-avant-c8', [
+      'rs6',
+      'rs6 avant',
+      'rs6 avant performance',
+      'rs6 c8',
+      'audi rs6',
+      'audi rs6 avant'
+    ]);
+
+    this.registerAliases('bmw-m3-competition-g80', [
+      'm3',
+      'm3 competition',
+      'm3 g80',
+      'bmw m3',
+      'bmw m3 competition'
+    ]);
+
+    this.registerAliases('bmw-m5-cs-f90', [
+      'm5',
+      'm5 cs',
+      'm5 f90',
+      'bmw m5',
+      'bmw m5 cs'
+    ]);
+
+    this.registerAliases('nissan-gt-r-nismo-r35', [
+      'gt-r nismo',
+      'gtr nismo',
+      'r35 nismo',
+      'nissan gt-r',
+      'nissan gtr',
+      'nissan gt-r nismo'
+    ]);
+
+    this.registerAliases('lamborghini-huracan-sto', [
+      'huracan sto',
+      'huracán sto',
+      'lamborghini huracan sto',
+      'lamborghini huracán sto',
+      'sto'
+    ]);
+
+    this.registerAliases('lamborghini-revuelto', [
+      'revuelto',
+      'lamborghini revuelto',
+      'lb744'
+    ]);
+
+    this.registerAliases('lamborghini-aventador-svj', [
+      'aventador svj',
+      'svj',
+      'lamborghini aventador svj'
+    ]);
+
+    this.registerAliases('porsche-918-spyder', [
+      '918 spyder',
+      '918',
+      'porsche 918',
+      'porsche 918 spyder'
+    ]);
+
+    this.registerAliases('porsche-carrera-gt', [
+      'carrera gt',
+      'porsche carrera gt'
+    ]);
+
+    this.registerAliases('porsche-macan', [
+      'macan',
+      'porsche macan'
+    ]);
+
+    this.registerAliases('ferrari-f40', [
+      'f40',
+      'ferrari f40'
+    ]);
+
+    this.registerAliases('maserati-granturismo-gen2', [
+      'granturismo gen 2',
+      'granturismo m161',
+      'granturismo folgore',
+      'new granturismo'
+    ]);
   }
 
   public registerVehicle(record: CanonicalVehicleRecord) {
     this.registry.set(record.vehicleId, record);
 
-    const normMake = this.normalize(record.make);
+    const normMake = this.normalizeBrandKey(record.make);
     if (!this.manufacturerScopedAliasLookup.has(normMake)) {
       this.manufacturerScopedAliasLookup.set(normMake, new Map());
     }
@@ -735,7 +952,7 @@ class CanonicalVehicleRegistry {
     const record = this.registry.get(vehicleId);
     if (!record) return;
 
-    const normMake = this.normalize(record.make);
+    const normMake = this.normalizeBrandKey(record.make);
     if (!this.manufacturerScopedAliasLookup.has(normMake)) {
       this.manufacturerScopedAliasLookup.set(normMake, new Map());
     }
@@ -766,7 +983,7 @@ class CanonicalVehicleRegistry {
   public lookupByTextOrAlias(query: string, preferredMake?: string): CanonicalVehicleRecord | null {
     if (!query) return null;
     const norm = this.normalize(query);
-    const normMake = preferredMake ? this.normalize(preferredMake) : '';
+    const normMake = preferredMake ? this.normalizeBrandKey(preferredMake) : '';
 
     // 1. Scoped search when manufacturer is specified
     if (normMake) {
@@ -799,7 +1016,7 @@ class CanonicalVehicleRegistry {
 
       // Specificity-aware candidate matching strictly within this manufacturer
       const makeCandidates = Array.from(this.registry.values()).filter(
-        (r) => this.normalize(r.make) === normMake
+        (r) => this.normalizeBrandKey(r.make) === normMake
       );
 
       let bestRecord: CanonicalVehicleRecord | null = null;
@@ -878,12 +1095,12 @@ class CanonicalVehicleRegistry {
    */
   public findMatchingCandidates(make?: string, model?: string, generation?: string): CanonicalVehicleRecord[] {
     const scoredResults: { record: CanonicalVehicleRecord; score: number }[] = [];
-    const normMake = make ? this.normalize(make) : '';
+    const normMake = make ? this.normalizeBrandKey(make) : '';
     const normModel = model ? this.normalize(model) : '';
     const normGen = generation ? this.normalize(generation) : '';
 
     for (const record of this.registry.values()) {
-      const recMake = this.normalize(record.make);
+      const recMake = this.normalizeBrandKey(record.make);
       const recModel = this.normalize(record.model);
       const recGen = this.normalize(record.generation);
 

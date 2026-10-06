@@ -17,7 +17,10 @@ import {
   UserCheck, 
   AlertCircle,
   Clock,
-  Plus
+  Plus,
+  Sparkles,
+  Video,
+  Play
 } from 'lucide-react';
 import { useApexStore, SAMPLE_FEED_POSTS } from '../../store/useApexStore';
 import type { FeedPost, CarCard, LeaderboardEntry } from '../../types/apex';
@@ -28,9 +31,12 @@ import { MediaPostComposerModal } from './MediaPostComposerModal';
 import { PublicProfileModal } from '../profile/PublicProfileModal';
 import { DirectMessageModal } from './DirectMessageModal';
 import { SpatialCreationSheet } from './SpatialCreationSheet';
+import { ProfileCustomizationModal } from '../profile/ProfileCustomizationModal';
+import { BadgesModal } from '../profile/BadgesModal';
 import { sounds } from '../../utils/audio';
-import { hapticImpact } from '../../utils/haptics';
+import { hapticImpact, hapticTap } from '../../utils/haptics';
 import { getProgressToNextLevel } from '../../utils/mastery';
+import { computeAuthoritativeStats } from '../../utils/userStats';
 
 export const SocialScreen: React.FC = () => {
   const user = useApexStore(s => s.user);
@@ -62,6 +68,10 @@ export const SocialScreen: React.FC = () => {
   const [composerInitialPhoto, setComposerInitialPhoto] = useState<string | null>(null);
   const [selectedUserForProfile, setSelectedUserForProfile] = useState<{ userId?: string; username?: string } | null>(null);
   const [activeConversationUser, setActiveConversationUser] = useState<{ id: string; username: string; displayName: string; avatarUrl: string; level: number } | null>(null);
+
+  // Profile Customization & Badges Modals
+  const [isCustomizationOpen, setIsCustomizationOpen] = useState(false);
+  const [isBadgesModalOpen, setIsBadgesModalOpen] = useState(false);
 
   // Add Friend Modal State
   const [isAddFriendModalOpen, setIsAddFriendModalOpen] = useState(false);
@@ -584,18 +594,16 @@ export const SocialScreen: React.FC = () => {
       {/* SUB-TAB 4: USER PROFILE */}
       {subTab === 'profile' && (() => {
         const mastery = getProgressToNextLevel(user.level, user.xp);
-        const totalCarsSpotted = user.totalSpots || garage.length;
-        const uniqueCarsCount = new Set(garage.map(c => `${c.make}_${c.model}`.toLowerCase())).size;
-        const rareCount = garage.filter(c => c.rarity === 'rare').length;
-        const epicCount = garage.filter(c => c.rarity === 'epic').length;
-        const legendaryCount = garage.filter(c => c.rarity === 'legendary' || c.rarity === 'mythic').length;
+        const authStats = computeAuthoritativeStats(garage, badges);
+        const unlockedBadges = badges.filter(b => b.isUnlocked);
+        const previewBadges = unlockedBadges.length > 0 ? unlockedBadges.slice(0, 6) : badges.slice(0, 6);
 
         return (
           <div className="space-y-4">
             {/* Main Profile Header Card */}
             <div 
               className="p-6 rounded-2xl bg-[#111111] border text-center space-y-4 relative overflow-hidden transition-colors"
-              style={{ borderColor: user.cardThemeColor ? `${user.cardThemeColor}30` : 'rgba(255,255,255,0.1)' }}
+              style={{ borderColor: user.cardThemeColor ? `${user.cardThemeColor}40` : 'rgba(255,255,255,0.1)' }}
             >
               {/* Ambient Glow */}
               <div 
@@ -608,7 +616,7 @@ export const SocialScreen: React.FC = () => {
                   src={user.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400'} 
                   alt={user.username} 
                   className="w-20 h-20 rounded-full border-2 object-cover mx-auto shadow-xl" 
-                  style={{ borderColor: 'var(--accent-color)', boxShadow: '0 0 16px var(--accent-glow)' }}
+                  style={{ borderColor: user.cardThemeColor || 'var(--accent-color)', boxShadow: '0 0 16px var(--accent-glow)' }}
                 />
                 <span className={`absolute -bottom-2 left-1/2 -translate-x-1/2 px-2.5 py-0.5 rounded-full text-[9px] font-bold tracking-wider uppercase border shadow-md whitespace-nowrap ${mastery.tierConfig.badgeBg} ${mastery.tierConfig.badgeBorder} ${mastery.tierConfig.textColor}`}>
                   {mastery.tierConfig.label}
@@ -622,9 +630,9 @@ export const SocialScreen: React.FC = () => {
                     <span 
                       className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border"
                       style={{ 
-                        color: 'var(--accent-color)',
-                        backgroundColor: 'var(--accent-subtle)',
-                        borderColor: 'var(--accent-border)'
+                        color: user.cardThemeColor || 'var(--accent-color)',
+                        backgroundColor: `${user.cardThemeColor || '#E50914'}15`,
+                        borderColor: `${user.cardThemeColor || '#E50914'}30`
                       }}
                     >
                       {user.driverTitle}
@@ -645,16 +653,30 @@ export const SocialScreen: React.FC = () => {
                 {(user.favoriteCar || user.favoriteBrand) && (
                   <div className="flex items-center justify-center gap-3 pt-1.5 text-[11px] text-white/60">
                     <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white/[0.04] border border-white/[0.06]">
-                      🏎️ <span className="text-white/40">Dream Car:</span> <strong className="text-white font-medium">{[user.favoriteBrand, user.favoriteCar].filter(Boolean).join(' ')}</strong>
+                      🏎️ <span className="text-white/40">Dream Machine:</span> <strong className="text-white font-medium">{[user.favoriteBrand, user.favoriteCar].filter(Boolean).join(' ')}</strong>
                     </span>
                   </div>
                 )}
 
-                {user.email && (
-                  <p className="text-[11px] font-medium pt-0.5" style={{ color: 'var(--accent-color)' }}>
-                    {user.email}
-                  </p>
-                )}
+                {/* Profile Customization CTA */}
+                <div className="pt-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      hapticTap();
+                      sounds.playTargetLock();
+                      setIsCustomizationOpen(true);
+                    }}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold text-white shadow-xl active:scale-95 transition-all cursor-pointer border border-white/20 hover:scale-[1.02]"
+                    style={{
+                      backgroundColor: user.cardThemeColor || 'var(--accent-color)',
+                      boxShadow: '0 4px 16px var(--accent-glow)'
+                    }}
+                  >
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>Customize Profile</span>
+                  </button>
+                </div>
               </div>
 
               {/* ─── SPOTTER LEVEL & MASTERY PROGRESSION ─── */}
@@ -691,8 +713,8 @@ export const SocialScreen: React.FC = () => {
                       className="h-full rounded-full transition-all duration-500 shadow-sm"
                       style={{ 
                         width: `${mastery.percentage}%`,
-                        backgroundColor: 'var(--accent-color)',
-                        boxShadow: '0 0 8px var(--accent-color)'
+                        backgroundColor: user.cardThemeColor || 'var(--accent-color)',
+                        boxShadow: `0 0 8px ${user.cardThemeColor || 'var(--accent-color)'}`
                       }}
                     />
                   </div>
@@ -705,69 +727,187 @@ export const SocialScreen: React.FC = () => {
                 </div>
               </div>
 
-              {/* ─── 5-METRIC DISCOVERY STATS GRID ─── */}
+              {/* ─── 6-METRIC AUTHORITATIVE DISCOVERY STATS GRID ─── */}
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 pt-1 text-left font-data">
                 <div className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
                   <span className="text-white/40 text-[10px] block uppercase font-medium">Cars Spotted</span>
-                  <span className="text-white font-bold text-lg">{totalCarsSpotted}</span>
+                  <span className="text-white font-bold text-lg">{authStats.totalCarsSpotted}</span>
                 </div>
                 <div className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
                   <span className="text-white/40 text-[10px] block uppercase font-medium">Unique Cars</span>
-                  <span className="text-[#FF4500] font-bold text-lg">{uniqueCarsCount}</span>
+                  <span className="text-[#FF4500] font-bold text-lg">{authStats.uniqueFindsCount}</span>
                 </div>
                 <div className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
                   <span className="text-white/40 text-[10px] block uppercase font-medium">Rare Finds</span>
-                  <span className="text-blue-400 font-bold text-lg">{rareCount}</span>
+                  <span className="text-blue-400 font-bold text-lg">{authStats.rareCount}</span>
                 </div>
                 <div className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
                   <span className="text-white/40 text-[10px] block uppercase font-medium">Epic Finds</span>
-                  <span className="text-purple-400 font-bold text-lg">{epicCount}</span>
+                  <span className="text-purple-400 font-bold text-lg">{authStats.epicCount}</span>
                 </div>
-                <div className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.06] col-span-2 sm:col-span-1">
+                <div className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
                   <span className="text-white/40 text-[10px] block uppercase font-medium">Legendary Finds</span>
-                  <span className="text-amber-400 font-bold text-lg">{legendaryCount}</span>
+                  <span className="text-amber-400 font-bold text-lg">{authStats.legendaryCount}</span>
+                </div>
+                <div className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+                  <span className="text-white/40 text-[10px] block uppercase font-medium">Badges Unlocked</span>
+                  <span className="text-emerald-400 font-bold text-lg">{authStats.badgesUnlockedCount}</span>
                 </div>
               </div>
             </div>
 
-            {/* Badges Showcase */}
-            <div className="bg-[#111111] border border-white/10 rounded-xl p-5 space-y-3">
-            <h3 className="font-display text-xl text-[#F0EBE3] flex items-center gap-2">
-              <Award className="w-5 h-5 text-[#FFA500]" /> BADGES UNLOCKED ({badges.filter(b => b.isUnlocked).length})
-            </h3>
+            {/* Badges Showcase Section */}
+            <div className="bg-[#111111] border border-white/10 rounded-xl p-5 space-y-4">
+              <div className="flex items-center justify-between pb-1 border-b border-white/10">
+                <div className="flex items-center gap-2">
+                  <Award className="w-5 h-5 text-[#FFA500]" />
+                  <h3 className="font-display text-lg text-[#F0EBE3] tracking-wide">
+                    BADGES UNLOCKED ({authStats.badgesUnlockedCount} / {badges.length})
+                  </h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    hapticTap();
+                    sounds.playTargetLock();
+                    setIsBadgesModalOpen(true);
+                  }}
+                  className="text-xs font-bold text-[#FFA500] hover:text-amber-300 transition-colors flex items-center gap-1 cursor-pointer bg-amber-500/10 px-2.5 py-1 rounded-lg border border-amber-500/20 active:scale-95"
+                >
+                  <span>View All ({badges.length})</span> →
+                </button>
+              </div>
 
-            <div className="grid grid-cols-3 gap-3">
-              {badges.map((badge) => {
-                const IconComponent = 
-                  badge.icon === 'Target' ? Target :
-                  badge.icon === 'Zap' ? Zap :
-                  badge.icon === 'Flag' ? Flag :
-                  badge.icon === 'Crown' ? Crown :
-                  badge.icon === 'Flame' ? Flame :
-                  badge.icon === 'Globe' ? Globe : Award;
-                  
-                return (
-                  <div
-                    key={badge.id}
-                    className={`p-3 rounded-xl border flex flex-col items-center text-center space-y-1 ${
-                      badge.isUnlocked 
-                        ? 'bg-black/60 border-[#FFA500]/40' 
-                        : 'bg-black/20 border-white/5 opacity-40 grayscale'
-                    }`}
-                  >
-                    <IconComponent className="w-8 h-8 mb-1 text-[#FFA500]" />
-                    <h4 className="font-display text-xs text-[#F0EBE3] truncate w-full">{badge.name}</h4>
-                    <span className="text-[9px] font-data text-[#FFA500]">+{badge.xpBonus} XP</span>
-                  </div>
-                );
-              })}
+              <div className="grid grid-cols-3 gap-2.5">
+                {previewBadges.map((badge) => {
+                  const IconComponent = 
+                    badge.icon === 'Target' ? Target :
+                    badge.icon === 'Zap' ? Zap :
+                    badge.icon === 'Flag' ? Flag :
+                    badge.icon === 'Crown' ? Crown :
+                    badge.icon === 'Flame' ? Flame :
+                    badge.icon === 'Globe' ? Globe : Award;
+                    
+                  return (
+                    <div
+                      key={badge.id}
+                      onClick={() => {
+                        hapticTap();
+                        sounds.playTargetLock();
+                        setIsBadgesModalOpen(true);
+                      }}
+                      className={`p-3 rounded-xl border flex flex-col items-center text-center space-y-1 transition-all cursor-pointer hover:border-amber-500/40 active:scale-95 ${
+                        badge.isUnlocked 
+                          ? 'bg-black/60 border-[#FFA500]/40 shadow-sm' 
+                          : 'bg-black/20 border-white/5 opacity-40 grayscale'
+                      }`}
+                    >
+                      <IconComponent className="w-7 h-7 mb-1 text-[#FFA500]" />
+                      <h4 className="font-display text-xs text-[#F0EBE3] truncate w-full">{badge.name}</h4>
+                      <span className="text-[9px] font-data text-[#FFA500]">+{badge.xpBonus} XP</span>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Full Catalog Button */}
+              <button
+                type="button"
+                onClick={() => {
+                  hapticTap();
+                  sounds.playTargetLock();
+                  setIsBadgesModalOpen(true);
+                }}
+                className="w-full py-2.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-white/80 hover:text-white text-xs font-semibold flex items-center justify-center gap-2 transition-all active:scale-[0.99] cursor-pointer"
+              >
+                <Award className="w-4 h-4 text-amber-400" />
+                <span>Open Full 100+ Badge Showcase</span>
+              </button>
             </div>
+
+            {/* My Media & Video Uploads Showcase Section */}
+            {(() => {
+              const myUploads = feedPosts.filter(p => 
+                p.user?.id === user.id || 
+                (p.user?.username && user.username && p.user.username.toLowerCase() === user.username.toLowerCase())
+              );
+
+              return (
+                <div className="bg-[#111111] border border-white/10 rounded-xl p-5 space-y-4">
+                  <div className="flex items-center justify-between pb-1 border-b border-white/10">
+                    <div className="flex items-center gap-2">
+                      <Video className="w-5 h-5 text-[#FF4500]" />
+                      <h3 className="font-display text-lg text-[#F0EBE3] tracking-wide">
+                        MY MEDIA & UPLOADS ({myUploads.length})
+                      </h3>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setIsMediaComposerOpen(true)}
+                      className="text-xs font-bold text-[#FF4500] hover:text-orange-400 transition-colors flex items-center gap-1 cursor-pointer bg-[#FF4500]/10 px-2.5 py-1 rounded-lg border border-[#FF4500]/20 active:scale-95"
+                    >
+                      <Plus className="w-3.5 h-3.5" /> Post Media
+                    </button>
+                  </div>
+
+                  {myUploads.length === 0 ? (
+                    <div className="text-center py-6 text-white/40 text-xs">
+                      <p>No video or photo uploads yet.</p>
+                      <p className="text-[10px] text-white/30 mt-1">Capture videos or pictures of spotted cars to feature them here.</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                      {myUploads.map(post => (
+                        <div 
+                          key={post.id}
+                          onClick={() => {
+                            hapticTap();
+                            setSelectedPostForComments(post);
+                          }}
+                          className="relative rounded-xl overflow-hidden aspect-[4/3] bg-black/60 border border-white/10 group cursor-pointer hover:border-white/30 transition-all"
+                        >
+                          {post.mediaType === 'video' ? (
+                            <>
+                              <img 
+                                src={post.thumbnailUrl || post.mediaUrl} 
+                                alt={post.caption || 'Video upload'} 
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
+                              />
+                              <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                                <div className="w-8 h-8 rounded-full bg-black/60 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white">
+                                  <Play className="w-4 h-4 fill-white ml-0.5" />
+                                </div>
+                              </div>
+                              <span className="absolute top-2 left-2 px-1.5 py-0.5 rounded bg-black/70 backdrop-blur-sm text-[9px] font-bold text-amber-400 border border-white/10 uppercase font-data flex items-center gap-1">
+                                <Video className="w-2.5 h-2.5" /> Video
+                              </span>
+                            </>
+                          ) : (
+                            <img 
+                              src={post.mediaUrl || post.card?.imageUrl} 
+                              alt={post.caption || 'Photo upload'} 
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
+                            />
+                          )}
+                          {post.caption && (
+                            <div className="absolute inset-x-0 bottom-0 p-2 bg-gradient-to-t from-black/90 via-black/50 to-transparent">
+                              <p className="text-[10px] text-white/90 truncate font-medium">
+                                {post.caption}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
           </div>
-        </div>
-      );
-    })()}
-        </div>
-      )}
+        );
+      })()}
+    </div>
+  )}
 
       {/* 3D Card Detail Modal */}
       <Card3DDetail 
@@ -902,6 +1042,18 @@ export const SocialScreen: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Profile Customization Modal */}
+      <ProfileCustomizationModal
+        isOpen={isCustomizationOpen}
+        onClose={() => setIsCustomizationOpen(false)}
+      />
+
+      {/* 100+ Badges Full Showcase Modal */}
+      <BadgesModal
+        isOpen={isBadgesModalOpen}
+        onClose={() => setIsBadgesModalOpen(false)}
+      />
     </>
   );
 };
