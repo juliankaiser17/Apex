@@ -279,10 +279,14 @@ export async function getAuthoritativeAccessToken(forceRefresh = false): Promise
 function formatEngineResult(r: IdentificationResult): any {
   const canon = r.canonicalResult;
   const canonicalIdentity = canon?.canonical_identity;
-  const resolvedMake = canonicalIdentity?.make || canon?.identification?.make || r.make;
-  const resolvedModel = canonicalIdentity?.modelFamily || r.model || canon?.identification?.model_family;
-  const resolvedDisplayName = canonicalIdentity?.displayName || `${resolvedMake} ${resolvedModel}`;
-  const canonicalVehicleId = canonicalIdentity?.canonicalId || r.canonicalVehicleId || null;
+  const resolvedMake = canonicalIdentity?.make || canon?.identification?.make || r.make || 'Unknown';
+  const isModelUncertain = canon?.status === 'uncertain' || canon?.specificity_level === 'make' || r.status === 'abstained';
+  const rawModel = canonicalIdentity?.modelFamily || r.model || canon?.identification?.model_family;
+  const resolvedModel = (isModelUncertain || !rawModel || String(rawModel).trim().toLowerCase() === 'unknown' || String(rawModel).trim().toLowerCase() === 'null')
+    ? null
+    : String(rawModel).trim();
+  const resolvedDisplayName = canonicalIdentity?.displayName || (resolvedModel ? `${resolvedMake} ${resolvedModel}` : resolvedMake);
+  const canonicalVehicleId = isModelUncertain ? null : (canonicalIdentity?.canonicalId || r.canonicalVehicleId || null);
 
   return {
     status: canon?.status || (r.status === 'completed' ? 'identified' : r.status),
@@ -658,8 +662,11 @@ function parseBackendResponse(r: any): AiIdentificationPayload {
     };
   }
 
-  const isMakeUnknown = !r.make || r.make.trim() === '' || r.make.toLowerCase().includes('unknown');
-  const isModelUnknown = !r.model || r.model.trim() === '' || r.model.toLowerCase().includes('unknown');
+  const rawMake = typeof r.make === 'string' ? r.make.trim() : '';
+  const rawModel = typeof r.model === 'string' ? r.model.trim() : '';
+  const isMakeUnknown = !rawMake || rawMake.toLowerCase().includes('unknown');
+  const isModelExplicitlyUncertain = r.status === 'uncertain' || r.specificity_level === 'make';
+  const isModelUnknown = isModelExplicitlyUncertain || !rawModel || rawModel.toLowerCase().includes('unknown') || rawModel.toLowerCase() === 'null';
 
   if (isMakeUnknown && isModelUnknown) {
     if (r.status === 'uncertain') {
@@ -668,8 +675,8 @@ function parseBackendResponse(r: any): AiIdentificationPayload {
         ...getEmptyPayload(),
         status: 'uncertain',
         is_car: true,
-        make: r.make || 'Unknown',
-        model: r.model || 'Unknown',
+        make: isMakeUnknown ? 'Unknown' : rawMake,
+        model: '',
         rejection_reason: (machineReason === 'VISION_QUOTA_EXHAUSTED' || r.reason?.includes('VISION_QUOTA_EXHAUSTED'))
           ? 'Vehicle identification temporarily unavailable. Vision quota has been reached. Please try again later.'
           : (r.reason || 'Vision provider unavailable. Explicit abstention enforced.'),
@@ -713,15 +720,19 @@ function parseBackendResponse(r: any): AiIdentificationPayload {
       ? 'probable'
       : 'uncertain';
 
+  const finalMake = isMakeUnknown ? 'Unknown' : rawMake;
+  const finalModel = isModelUnknown ? null : rawModel;
+  const finalDisplayName = r.canonical_display_name || (finalModel ? `${finalMake} ${finalModel}` : finalMake);
+
   return {
     is_car: true,
     status,
-    specificity_level: r.specificity_level || (r.trim ? 'variant' : 'model_family'),
+    specificity_level: isModelUnknown ? 'make' : (r.specificity_level || (r.trim ? 'variant' : 'model_family')),
     viewpoint: r.viewpoint || 'unknown',
-    make: r.make || 'Unknown',
-    model: r.model || 'Unknown',
-    generation: r.generation || 'Base',
-    trim: r.trim || null,
+    make: finalMake,
+    model: finalModel,
+    generation: isModelUnknown ? 'Base' : (r.generation || 'Base'),
+    trim: isModelUnknown ? null : (r.trim || null),
     year_estimate: r.year_estimate || r.yearEstimate || 'N/A',
     color: r.color || 'Unknown',
     rarity: r.rarity || 'common',
@@ -746,9 +757,9 @@ function parseBackendResponse(r: any): AiIdentificationPayload {
     visual_evidence: r.visual_evidence || null,
     contradictions: Array.isArray(r.contradictions) ? r.contradictions : [],
     reason: r.reason || '',
-    canonical_vehicle_id: r.canonical_vehicle_id || r.canonicalVehicleId,
-    canonical_display_name: r.canonical_display_name || (r.make && r.model ? `${r.make} ${r.model}` : undefined),
-    specificity_level_numeric: r.specificity_level_numeric,
+    canonical_vehicle_id: isModelUnknown ? null : (r.canonical_vehicle_id || r.canonicalVehicleId || null),
+    canonical_display_name: finalDisplayName,
+    specificity_level_numeric: isModelUnknown ? 0 : r.specificity_level_numeric,
     scan_id: r.scan_id || r.scanId,
     trace_id: r.trace_id || r.traceId
   };

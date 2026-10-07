@@ -2,6 +2,9 @@ const APEX_SOUND_STORAGE_KEY = 'apex_sound_fx_enabled';
 
 export function isSoundEnabled(): boolean {
   try {
+    if (typeof window !== 'undefined' && (window as any).__APEX_SOUND_ENABLED__ === false) {
+      return false;
+    }
     if (typeof localStorage !== 'undefined') {
       const stored = localStorage.getItem(APEX_SOUND_STORAGE_KEY);
       return stored !== 'false';
@@ -12,6 +15,9 @@ export function isSoundEnabled(): boolean {
 
 export function setSoundEnabled(enabled: boolean): void {
   try {
+    if (typeof window !== 'undefined') {
+      (window as any).__APEX_SOUND_ENABLED__ = enabled;
+    }
     if (typeof localStorage !== 'undefined') {
       localStorage.setItem(APEX_SOUND_STORAGE_KEY, enabled ? 'true' : 'false');
     }
@@ -29,6 +35,9 @@ class SoundSystem {
 
   public setEnabled(enabled: boolean): void {
     this.enabled = enabled;
+    if (!enabled && this.ctx && this.ctx.state === 'running') {
+      this.ctx.suspend().catch(() => {});
+    }
   }
 
   private initCtx() {
@@ -45,7 +54,7 @@ class SoundSystem {
   }
 
   public async unlock(): Promise<void> {
-    if (typeof window === 'undefined') return;
+    if (typeof window === 'undefined' || !this.isEnabled()) return;
     this.initCtx();
     if (this.ctx && this.ctx.state === 'suspended') {
       try {
@@ -57,7 +66,7 @@ class SoundSystem {
   }
 
   public playShutter() {
-    if (!this.enabled) return;
+    if (!this.isEnabled()) return;
     this.initCtx();
     if (!this.ctx) return;
 
@@ -79,7 +88,7 @@ class SoundSystem {
   }
 
   public playTargetAcquired() {
-    if (!this.enabled) return;
+    if (!this.isEnabled()) return;
     this.initCtx();
     if (!this.ctx) return;
 
@@ -102,7 +111,7 @@ class SoundSystem {
   }
 
   public playTargetLost() {
-    if (!this.enabled) return;
+    if (!this.isEnabled()) return;
     this.initCtx();
     if (!this.ctx) return;
 
@@ -125,7 +134,7 @@ class SoundSystem {
   }
 
   public playTargetReacquired() {
-    if (!this.enabled) return;
+    if (!this.isEnabled()) return;
     this.initCtx();
     if (!this.ctx) return;
 
@@ -152,7 +161,7 @@ class SoundSystem {
   }
 
   public playFrequencyResonanceLock() {
-    if (!this.enabled) return;
+    if (!this.isEnabled()) return;
     this.initCtx();
     if (!this.ctx) return;
 
@@ -184,7 +193,7 @@ class SoundSystem {
   }
 
   public playPipelineStageComplete() {
-    if (!this.enabled) return;
+    if (!this.isEnabled()) return;
     this.initCtx();
     if (!this.ctx) return;
 
@@ -207,7 +216,7 @@ class SoundSystem {
   }
 
   public playTargetLock() {
-    if (!this.enabled) return;
+    if (!this.isEnabled()) return;
     this.initCtx();
     if (!this.ctx) return;
 
@@ -230,7 +239,7 @@ class SoundSystem {
   }
 
   public playXpPop() {
-    if (!this.enabled) return;
+    if (!this.isEnabled()) return;
     this.initCtx();
     if (!this.ctx) return;
 
@@ -260,7 +269,7 @@ class SoundSystem {
   }
 
   public playCardFlip() {
-    if (!this.enabled) return;
+    if (!this.isEnabled()) return;
     this.initCtx();
     if (!this.ctx) return;
 
@@ -283,7 +292,7 @@ class SoundSystem {
   }
 
   public playRarityReveal(tier: string) {
-    if (!this.enabled) return;
+    if (!this.isEnabled()) return;
     this.initCtx();
     if (!this.ctx) return;
 
@@ -320,7 +329,7 @@ class SoundSystem {
   }
 
   public playPaperThrow() {
-    if (!this.enabled) return;
+    if (!this.isEnabled()) return;
     this.initCtx();
     if (!this.ctx) return;
 

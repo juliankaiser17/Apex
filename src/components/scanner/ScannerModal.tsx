@@ -388,15 +388,23 @@ export const ScannerModal: React.FC = () => {
       }
 
       // 3. Bind to resolved vehicle specifications
-      const make = aiResult?.make || 'Unknown Make';
-      let model = aiResult?.model || 'Unknown Model';
+      const rawMake = aiResult?.make;
+      const make = (rawMake && typeof rawMake === 'string' && !rawMake.toLowerCase().includes('unknown'))
+        ? rawMake.trim()
+        : 'Unknown Make';
+
+      const rawModel = aiResult?.model;
+      let model: string | null = (rawModel && typeof rawModel === 'string' && !rawModel.toLowerCase().includes('unknown') && rawModel.toLowerCase() !== 'null')
+        ? rawModel.trim()
+        : null;
+
       if (make && model && model.toLowerCase().startsWith(make.toLowerCase() + ' ')) {
         model = model.slice(make.length + 1).trim();
       }
 
       // Guard: Reject non-vehicles or obscure scans resulting in unknown make & model
-      const isMakeUnknown = !make || make.trim() === '' || make.toLowerCase().includes('unknown');
-      const isModelUnknown = !model || model.trim() === '' || model.toLowerCase().includes('unknown');
+      const isMakeUnknown = make === 'Unknown Make';
+      const isModelUnknown = model === null;
       if (isMakeUnknown && isModelUnknown) {
         const isQuota = aiResult?.reason?.includes('VISION_QUOTA_EXHAUSTED') ||
           aiResult?.rejection_reason?.includes('VISION_QUOTA_EXHAUSTED') ||
@@ -442,7 +450,7 @@ export const ScannerModal: React.FC = () => {
         : `${bodyStyle} Silhouette`;
       onAnalysisStageResolved(1, featuresSummary);
 
-      onAnalysisStageResolved(2, `${finalMake} ${finalModel} Confirmed`);
+      onAnalysisStageResolved(2, finalModel ? `${finalMake} ${finalModel} Confirmed` : `${finalMake} Confirmed`);
 
       const candidateSummary = aiResult?.status === 'uncertain'
         ? 'Variant Uncertain — Preserving Base Model'
@@ -500,7 +508,7 @@ export const ScannerModal: React.FC = () => {
           : '00000000-0000-4000-8000-' + Date.now().toString(16).padStart(12, '0'),
         cardNumber: `#APX-${Math.floor(1000 + Math.random() * 9000)}`,
         make: finalMake,
-        model: finalModel,
+        model: finalModel || '',
         generation,
         trim,
         yearEstimate: specResolution.productionYears && specResolution.productionYears !== 'N/A'

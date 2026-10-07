@@ -139,6 +139,14 @@ export interface CarCard {
   customFoil?: boolean;
   serverRecorded?: boolean;
   cloudSyncError?: string;
+  notes?: string;
+  userCorrectionReport?: {
+    make?: string;
+    model?: string;
+    trim?: string;
+    reason?: string;
+    submittedAt?: string;
+  };
 }
 
 export interface EconomyLedgerEntry {

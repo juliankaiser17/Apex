@@ -594,7 +594,7 @@ export const SocialScreen: React.FC = () => {
       {/* SUB-TAB 4: USER PROFILE */}
       {subTab === 'profile' && (() => {
         const mastery = getProgressToNextLevel(user.level, user.xp);
-        const authStats = computeAuthoritativeStats(garage, badges);
+        const authStats = computeAuthoritativeStats(garage, badges, user);
         const unlockedBadges = badges.filter(b => b.isUnlocked);
         const previewBadges = unlockedBadges.length > 0 ? unlockedBadges.slice(0, 6) : badges.slice(0, 6);
 

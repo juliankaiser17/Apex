@@ -15,7 +15,7 @@ export const CorrectionModal: React.FC<CorrectionModalProps> = ({
   card,
   onClose
 }) => {
-  const { updateCardInGarage } = useApexStore();
+  const { updateCardUserMetadata } = useApexStore();
   const [correctedMake, setCorrectedMake] = useState(card.make || '');
   const [correctedModel, setCorrectedModel] = useState(card.model || '');
   const [correctedTrim, setCorrectedTrim] = useState(card.trim || '');
@@ -32,16 +32,16 @@ export const CorrectionModal: React.FC<CorrectionModalProps> = ({
     setIsSubmitting(true);
 
     try {
-      // 1. Immediately update local card in garage
-      if (updateCardInGarage) {
-        updateCardInGarage(card.id, {
-          make: correctedMake.trim(),
-          model: correctedModel.trim(),
-          trim: correctedTrim.trim() || undefined,
-          identificationStatus: 'identified',
-          identificationReason: correctionNotes.trim()
-            ? `User Verified Correction: ${correctionNotes.trim()}`
-            : 'User Verified Correction'
+      // 1. Submit user metadata & correction audit report without forging canonical specifications
+      if (updateCardUserMetadata) {
+        updateCardUserMetadata(card.id, {
+          notes: correctionNotes.trim() || undefined,
+          suggestedCorrection: {
+            make: correctedMake.trim(),
+            model: correctedModel.trim(),
+            trim: correctedTrim.trim() || undefined,
+            reason: correctionNotes.trim() || 'User suggested correction'
+          }
         });
       }
 
@@ -107,9 +107,9 @@ export const CorrectionModal: React.FC<CorrectionModalProps> = ({
           {submittedSuccess ? (
             <div className="py-10 text-center space-y-3">
               <CheckCircle className="w-12 h-12 text-emerald-400 mx-auto animate-bounce" />
-              <h4 className="text-base font-bold text-white">Garage Updated</h4>
+              <h4 className="text-base font-bold text-white">Correction Submitted</h4>
               <p className="text-xs text-white/60 max-w-xs mx-auto">
-                Vehicle identity and specifications have been corrected and saved.
+                Your suggestion and notes have been securely saved to this card.
               </p>
             </div>
           ) : (

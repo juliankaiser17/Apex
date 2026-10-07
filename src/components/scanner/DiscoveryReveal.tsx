@@ -114,7 +114,7 @@ export const DiscoveryReveal: React.FC<DiscoveryRevealProps> = ({
 
                 {revealStep >= 2 && (
                   <h1 className="text-3xl font-bold text-white tracking-tight leading-tight">
-                    {card.model || `${card.make} (Unidentified)`}
+                    {card.model && !card.model.toLowerCase().includes('unknown') ? card.model : `${card.make} (Unidentified Model)`}
                   </h1>
                 )}
 
@@ -137,7 +137,7 @@ export const DiscoveryReveal: React.FC<DiscoveryRevealProps> = ({
                 className="space-y-0.5 pt-1"
               >
                 <h2 className="text-2xl font-bold text-white tracking-tight">
-                  {card.make}{card.model ? ` ${card.model}` : ''}
+                  {card.make}{card.model && !card.model.toLowerCase().includes('unknown') ? ` ${card.model}` : ''}
                   {card.trim ? ` ${card.trim}` : ''}
                 </h2>
                 <p className="text-xs text-white/50 font-medium">

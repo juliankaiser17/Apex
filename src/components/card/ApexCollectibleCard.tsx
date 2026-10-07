@@ -127,7 +127,7 @@ export const ApexCollectibleCard: React.FC<ApexCollectibleCardProps> = React.mem
         {/* Floating Title on Photo Overlay */}
         <div className="absolute bottom-3 left-4 right-4">
           <h3 className="text-xl font-bold text-white tracking-tight leading-tight">
-            {card.model || card.make}
+            {card.model && !card.model.toLowerCase().includes('unknown') ? card.model : card.make}
           </h3>
           <p className="text-xs text-white/60 font-medium">
             {card.productionYears || card.yearEstimate || '2023'} • {card.originCountry || 'Germany'}

@@ -15,7 +15,9 @@ export type AuthEvent =
   | 'SIGNED_OUT'
   | 'ACCOUNT_DELETED'
   | 'AUTH_ERROR'
-  | 'GUEST_SESSION_STARTED';
+  | 'GUEST_SESSION_STARTED'
+  | 'OAUTH_CALLBACK_PENDING'
+  | 'CACHED_SESSION_PRESERVED';
 
 declare const process: any;
 

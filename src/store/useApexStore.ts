@@ -22,7 +22,7 @@ import type {
   RarityTier
 } from '../types/apex';
 import { calculateDiscoveryXp, processXpGain } from '../utils/mastery';
-import { sounds } from '../utils/audio';
+import { sounds, setSoundEnabled } from '../utils/audio';
 import { supabase } from '../lib/supabase';
 import { cardImageStorage } from '../lib/cardImageStorage';
 import { computeImageSha256 } from '../ai-engine/crypto/sha256';
@@ -175,6 +175,14 @@ interface ApexState {
   purchaseCardFoil: (cardId: string) => { success: boolean; error?: string };
   purchaseReScan: () => { success: boolean; error?: string };
   updateCardInGarage: (cardId: string, updates: Partial<CarCard>) => void;
+  updateCardUserMetadata: (
+    cardId: string,
+    metadata: {
+      notes?: string;
+      privacyLevel?: PrivacyLevel;
+      suggestedCorrection?: { make?: string; model?: string; trim?: string; reason?: string };
+    }
+  ) => void;
   blockUser: (targetUserId: string) => void;
   unblockUser: (targetUserId: string) => void;
 }
@@ -903,6 +911,31 @@ const getSavedOnboarding = (): boolean => {
   return false;
 };
 
+const getSavedActiveTimedQuest = (): {
+  questId: string;
+  questTitle: string;
+  startedAt: number;
+  expiresAt: number;
+  targetCount: number;
+  currentCount: number;
+  windowMinutes: number;
+} | null => {
+  if (typeof localStorage === 'undefined') return null;
+  try {
+    const raw = localStorage.getItem('apex_active_timed_quest');
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (parsed && typeof parsed.expiresAt === 'number') {
+      if (Date.now() < parsed.expiresAt) {
+        return parsed;
+      } else {
+        localStorage.removeItem('apex_active_timed_quest');
+      }
+    }
+  } catch {}
+  return null;
+};
+
 const initialSavedUser = getSavedUser();
 const initialSavedGarage = getSavedGarage(initialSavedUser.id);
 const initialUnlockedSlugs = new Set<string>();
@@ -961,7 +994,7 @@ export const useApexStore = create<ApexState>((set, get) => ({
   friends: getUserFriends(initialSavedUser.username),
   activeHunts: [],
   dailyQuests: getSavedDailyQuests(initialSavedUser.id, initialSavedUser.city, initialSavedUser.country),
-  activeTimedQuest: null,
+  activeTimedQuest: getSavedActiveTimedQuest(),
   startTimedQuest: (questId: string) => {
     const quest = get().dailyQuests.find(q => q.id === questId);
     if (!quest) return;
@@ -977,6 +1010,9 @@ export const useApexStore = create<ApexState>((set, get) => ({
       currentCount: quest.currentCount,
       windowMinutes
     };
+    try {
+      localStorage.setItem('apex_active_timed_quest', JSON.stringify(timedSession));
+    } catch {}
     const updatedQuests = get().dailyQuests.map(q => q.id === questId ? { ...q, startedAtTimestamp: startedAt } : q);
     set({
       activeTimedQuest: timedSession,
@@ -985,6 +1021,9 @@ export const useApexStore = create<ApexState>((set, get) => ({
     });
   },
   cancelTimedQuest: () => {
+    try {
+      localStorage.removeItem('apex_active_timed_quest');
+    } catch {}
     set({ activeTimedQuest: null });
   },
   dailyMissions: getSavedDailyMissions(),
@@ -1138,6 +1177,9 @@ export const useApexStore = create<ApexState>((set, get) => ({
   updateUserProfile: (profile) => set((state) => {
     if (profile.hapticsEnabled !== undefined) {
       setHapticsEnabled(profile.hapticsEnabled);
+    }
+    if (profile.soundEffectsEnabled !== undefined) {
+      setSoundEnabled(profile.soundEffectsEnabled);
     }
     const updatedUser = { ...state.user, ...profile };
     try {
@@ -1503,6 +1545,46 @@ export const useApexStore = create<ApexState>((set, get) => ({
     });
   },
 
+  updateCardUserMetadata: (cardId, metadata) => {
+    const currentUserId = get().user?.id;
+    set((state) => {
+      const card = state.garage.find(c => c.id === cardId);
+      if (!card) return state;
+
+      const cardOwnerId = (card as any).userId || (card as any).user_id || state.user.id;
+      if (cardOwnerId && currentUserId && cardOwnerId !== currentUserId) {
+        console.warn('[updateCardUserMetadata] Rejected: user is not card owner');
+        return state;
+      }
+
+      const updatedGarage = state.garage.map((c) => {
+        if (c.id !== cardId) return c;
+        return {
+          ...c,
+          notes: metadata.notes !== undefined ? metadata.notes : c.notes,
+          privacyLevel: metadata.privacyLevel || c.privacyLevel,
+          userCorrectionReport: metadata.suggestedCorrection || c.userCorrectionReport
+        };
+      });
+
+      try {
+        persistLightweightGarage(currentUserId || 'default', updatedGarage);
+      } catch (e) {}
+
+      if (currentUserId && !currentUserId.startsWith('user_')) {
+        supabase.from('garage').update({
+          notes: metadata.notes,
+          specs: {
+            ...((card as any).specs || {}),
+            userCorrectionReport: metadata.suggestedCorrection
+          }
+        }).eq('id', cardId).then(() => {}, () => {});
+      }
+
+      return { garage: updatedGarage };
+    });
+  },
+
   blockUser: (targetUserId: string) => {
     set((state) => {
       const currentBlocked = state.user.blockedUsers || [];
@@ -1574,17 +1656,22 @@ export const useApexStore = create<ApexState>((set, get) => ({
           console.warn('[initializeSession] Profile query error/timeout:', err);
         }
 
-        // 2. Fetch garage cars belonging to this auth user with resilient 4s timeout
+        // 2. Fetch garage cars belonging to this auth user with resilient 12s timeout + retry
         try {
-          const garagePromise = supabase
+          const fetchGarage = () => supabase
             .from('garage')
             .select('*')
             .eq('user_id', userId)
-            .order('scanned_at', { ascending: false });
-          const garageTimeout = new Promise<any>((resolve) => 
-            setTimeout(() => resolve({ data: null, error: new Error('TIMEOUT') }), 4000)
+            .order('scanned_at', { ascending: false })
+            .limit(1000);
+          const garageTimeout = (ms: number) => new Promise<any>((resolve) => 
+            setTimeout(() => resolve({ data: null, error: new Error('TIMEOUT') }), ms)
           );
-          const res = await Promise.race([garagePromise, garageTimeout]);
+          let res = await Promise.race([fetchGarage(), garageTimeout(12000)]);
+          if (!res?.data || res?.error) {
+            console.warn('[initializeSession] Garage query retry attempt 2...');
+            res = await Promise.race([fetchGarage(), garageTimeout(6000)]);
+          }
           if (res?.data) garage = res.data;
         } catch (err) {
           console.warn('[initializeSession] Garage query error/timeout:', err);
@@ -1658,6 +1745,9 @@ export const useApexStore = create<ApexState>((set, get) => ({
         ? userMetadata.haptics_enabled !== false 
         : true;
       setHapticsEnabled(resolvedHaptics);
+
+      const resolvedSound = userMetadata?.sound_effects_enabled !== false;
+      setSoundEnabled(resolvedSound);
 
       // Hydrate local cache and remote garage cards
       const localCards = getSavedGarage(userId);
@@ -2363,12 +2453,30 @@ export const useApexStore = create<ApexState>((set, get) => ({
         }).catch(() => {});
       }
 
+      let updatedTimedQuest = state.activeTimedQuest;
+      if (updatedTimedQuest) {
+        const matchingQuest = updatedQuests.find(q => q.id === updatedTimedQuest!.questId);
+        if (matchingQuest) {
+          if (matchingQuest.isCompleted || Date.now() > updatedTimedQuest.expiresAt) {
+            updatedTimedQuest = null;
+            try { localStorage.removeItem('apex_active_timed_quest'); } catch {}
+          } else {
+            updatedTimedQuest = {
+              ...updatedTimedQuest,
+              currentCount: matchingQuest.currentCount
+            };
+            try { localStorage.setItem('apex_active_timed_quest', JSON.stringify(updatedTimedQuest)); } catch {}
+          }
+        }
+      }
+
       return {
         garage: updatedGarage,
         user: updatedUser,
         badges: evaluatedBadges,
         levelUpLevel: xpResult.leveledUp ? updatedUser.level : state.levelUpLevel,
         dailyQuests: updatedQuests,
+        activeTimedQuest: updatedTimedQuest,
         dailyMissions: updatedMissions,
         feedPosts: updatedPosts,
         leaderboards: computeLeaderboard(updatedUser)
@@ -2787,8 +2895,14 @@ export const useApexStore = create<ApexState>((set, get) => ({
 
     // 2. Serverless API Fallback
     try {
-      const apiBase = (typeof window !== 'undefined' && window.location?.origin) ? window.location.origin : '';
-      const endpoint = apiBase ? `${apiBase}/api/missions/claim` : '/api/missions/claim';
+      const isLocalOrNative = typeof window !== 'undefined' && 
+        (window.location.hostname === 'localhost' || 
+         window.location.protocol === 'capacitor:' || 
+         window.location.protocol === 'ionic:');
+      const apiBase = isLocalOrNative 
+        ? 'https://apex-spotter.vercel.app' 
+        : ((typeof window !== 'undefined' && window.location?.origin) ? window.location.origin : 'https://apex-spotter.vercel.app');
+      const endpoint = `${apiBase}/api/missions/claim`;
       const session = (await supabase.auth.getSession()).data.session;
       const res = await fetch(endpoint, {
         method: 'POST',

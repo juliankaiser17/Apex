@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Camera as CapCamera } from '@capacitor/camera';
 import { Capacitor, registerPlugin } from '@capacitor/core';
 import { hapticTap, hapticImpact } from '../utils/haptics';
 
@@ -203,17 +202,8 @@ export function useNativeCamera({
       try {
         stopCamera();
 
-        // 1. Request native camera permissions via Capacitor
+        // 1. Request native camera permissions and start CameraX via ApexCamera
         if (Capacitor.isNativePlatform()) {
-          try {
-            const perm = await CapCamera.requestPermissions();
-            if (perm.camera !== 'granted' && perm.camera !== 'prompt-with-rationale') {
-              console.warn('[NativeCamera] Camera permission not granted:', perm.camera);
-            }
-          } catch (e) {
-            console.warn('[NativeCamera] Native permission check error:', e);
-          }
-
           try {
             try {
               document.documentElement.classList.add('camera-active');

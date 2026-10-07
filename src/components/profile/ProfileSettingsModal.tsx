@@ -49,8 +49,8 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ isOp
 
   // Authoritative Single Source of Truth Statistics
   const authoritativeStats = useMemo(() => {
-    return computeAuthoritativeStats(garage, badges);
-  }, [garage, badges]);
+    return computeAuthoritativeStats(garage, badges, user);
+  }, [garage, badges, user]);
 
   // Preferences state
   const [speedUnits, setSpeedUnits] = useState<'kmh' | 'mph'>(user.speedUnits || 'kmh');

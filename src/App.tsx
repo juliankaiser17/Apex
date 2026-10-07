@@ -35,6 +35,12 @@ export const App: React.FC = () => {
     // ─── PHASE 6: APP STARTUP & DETERMINISTIC SESSION RESOLUTION ───
     useApexStore.getState().setAuthStatus('AUTH_LOADING', null);
 
+    const hasAuthCallback = typeof window !== 'undefined' && (
+      window.location.hash.includes('access_token=') || 
+      window.location.hash.includes('refresh_token=') ||
+      window.location.search.includes('code=')
+    );
+
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session?.user) {
         // Authoritatively verify with Supabase server in background
@@ -66,10 +72,19 @@ export const App: React.FC = () => {
           window.history.replaceState(null, '', window.location.pathname);
         }
         setIsAuthReady(true);
+      } else if (hasAuthCallback) {
+        // Wait for onAuthStateChange to process OAuth callback tokens, don't flash guest
+        logAuthTransition('OAUTH_CALLBACK_PENDING');
       } else {
-        // No Supabase session: Authoritatively transition to GUEST
-        useApexStore.getState().setAuthStatus('GUEST', null);
-        logAuthTransition('GUEST_SESSION_STARTED');
+        // No Supabase session: check if cached authenticated user exists before dropping to guest
+        const cached = useApexStore.getState().user;
+        if (cached?.id && cached.email && !cached.id.startsWith('user_')) {
+          logAuthTransition('CACHED_SESSION_PRESERVED', cached.id, cached.email);
+          useApexStore.getState().setAuthStatus('AUTHENTICATED', { id: cached.id, email: cached.email });
+        } else {
+          useApexStore.getState().setAuthStatus('GUEST', null);
+          logAuthTransition('GUEST_SESSION_STARTED');
+        }
         setIsAuthReady(true);
       }
     }).catch((err) => {
