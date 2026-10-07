@@ -203,21 +203,36 @@ export const ScannerModal: React.FC = () => {
     });
   };
 
-  // Helper: Fast Client-Side Image Downscaler (Downscales to 768px for optimal Cloudflare vision latency)
-  const optimizeScanImage = async (dataUrl: string, maxDimension = 768, quality = 0.82): Promise<string> => {
+  // Helper: Fast Client-Side Image Preprocessor
+  // Preserves high-resolution visual cues (up to 1600px, JPEG 0.90) for fine-grained morphological discrimination
+  // Bypasses canvas re-encoding when native CameraX frame is already optimal (< 2.5MB, <= 1600px)
+  const optimizeScanImage = async (dataUrl: string, maxDimension = 1600, quality = 0.90): Promise<string> => {
     return new Promise((resolve) => {
       if (!dataUrl || !dataUrl.startsWith('data:image')) {
         resolve(dataUrl);
         return;
       }
+      const rawByteEstimate = Math.floor((dataUrl.length * 3) / 4);
+
       const img = new Image();
       img.onload = () => {
         try {
           let { width, height } = img;
-          if (width <= maxDimension && height <= maxDimension && dataUrl.length < 800000) {
+          const maxSide = Math.max(width, height);
+
+          // BYPASS: If image is already appropriately sized (maxSide <= 1600 and byte size < 2.5MB),
+          // send directly without decoding -> canvas -> re-compressing to avoid generational JPEG artifacts
+          if (maxSide <= maxDimension && rawByteEstimate < 2500000) {
+            console.log('[CAMERA] optimizeScanImage bypassed (already optimal):', {
+              width,
+              height,
+              byteLength: rawByteEstimate
+            });
             resolve(dataUrl);
             return;
           }
+
+          // Progressive aspect-ratio-preserving downscale if exceeding payload limits
           if (width > height) {
             if (width > maxDimension) {
               height = Math.round((height * maxDimension) / width);
@@ -229,6 +244,7 @@ export const ScannerModal: React.FC = () => {
               height = maxDimension;
             }
           }
+
           const canvas = document.createElement('canvas');
           canvas.width = width;
           canvas.height = height;
