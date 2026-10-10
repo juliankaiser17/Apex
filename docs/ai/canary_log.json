@@ -1,0 +1,177 @@
+{
+  "timestamp": "2026-10-10T14:52:27.721Z",
+  "totalSamples": 20,
+  "avgLatencyMs": 35,
+  "metrics": {
+    "successfulIdentifications": 0,
+    "validAbstentions": 20,
+    "providerFailures": 0,
+    "invalidResponses": 0
+  },
+  "circuitBreakers": {
+    "gemini": "OPEN",
+    "cloudflare": "CLOSED"
+  },
+  "runs": [
+    {
+      "id": "REAL_BLIND_000897",
+      "groundTruth": "Lexus LC (First Generation (Z100)) LC 500",
+      "resultStatus": "not_in_catalogue",
+      "identifiedVehicle": null,
+      "outcome": "valid_abstention",
+      "latencyMs": 38
+    },
+    {
+      "id": "REAL_BLIND_000898",
+      "groundTruth": "Lexus LC (First Generation (Z100)) LC 500",
+      "resultStatus": "not_in_catalogue",
+      "identifiedVehicle": null,
+      "outcome": "valid_abstention",
+      "latencyMs": 32
+    },
+    {
+      "id": "REAL_BLIND_000901",
+      "groundTruth": "Lexus LC (First Generation (Z100)) LC 500",
+      "resultStatus": "not_in_catalogue",
+      "identifiedVehicle": null,
+      "outcome": "valid_abstention",
+      "latencyMs": 30
+    },
+    {
+      "id": "REAL_BLIND_000902",
+      "groundTruth": "Lexus LC (First Generation (Z100)) LC 500",
+      "resultStatus": "not_in_catalogue",
+      "identifiedVehicle": null,
+      "outcome": "valid_abstention",
+      "latencyMs": 34
+    },
+    {
+      "id": "REAL_BLIND_000613",
+      "groundTruth": "Mercedes-Benz SL-Class (W113) 280 SL",
+      "resultStatus": "not_in_catalogue",
+      "identifiedVehicle": null,
+      "outcome": "valid_abstention",
+      "latencyMs": 38
+    },
+    {
+      "id": "REAL_BLIND_000614",
+      "groundTruth": "Mercedes-Benz SL-Class (W113) 280 SL",
+      "resultStatus": "not_in_catalogue",
+      "identifiedVehicle": null,
+      "outcome": "valid_abstention",
+      "latencyMs": 35
+    },
+    {
+      "id": "REAL_BLIND_000615",
+      "groundTruth": "Mercedes-Benz SL-Class (W113) 280 SL",
+      "resultStatus": "not_in_catalogue",
+      "identifiedVehicle": null,
+      "outcome": "valid_abstention",
+      "latencyMs": 39
+    },
+    {
+      "id": "REAL_BLIND_000617",
+      "groundTruth": "Mercedes-Benz SL-Class (W113) 280 SL",
+      "resultStatus": "not_in_catalogue",
+      "identifiedVehicle": null,
+      "outcome": "valid_abstention",
+      "latencyMs": 36
+    },
+    {
+      "id": "REAL_BLIND_000336",
+      "groundTruth": "BMW M4 (G82) M4",
+      "resultStatus": "not_in_catalogue",
+      "identifiedVehicle": null,
+      "outcome": "valid_abstention",
+      "latencyMs": 38
+    },
+    {
+      "id": "REAL_BLIND_000337",
+      "groundTruth": "BMW M4 (G82) M4",
+      "resultStatus": "not_in_catalogue",
+      "identifiedVehicle": null,
+      "outcome": "valid_abstention",
+      "latencyMs": 31
+    },
+    {
+      "id": "REAL_BLIND_000338",
+      "groundTruth": "BMW M4 (G82) M4",
+      "resultStatus": "not_in_catalogue",
+      "identifiedVehicle": null,
+      "outcome": "valid_abstention",
+      "latencyMs": 29
+    },
+    {
+      "id": "REAL_BLIND_000293",
+      "groundTruth": "Porsche 718 (982) Cayman",
+      "resultStatus": "not_in_catalogue",
+      "identifiedVehicle": null,
+      "outcome": "valid_abstention",
+      "latencyMs": 31
+    },
+    {
+      "id": "REAL_BLIND_000296",
+      "groundTruth": "Porsche 718 (982) Cayman",
+      "resultStatus": "uncertain",
+      "identifiedVehicle": null,
+      "outcome": "valid_abstention",
+      "latencyMs": 42
+    },
+    {
+      "id": "REAL_BLIND_000297",
+      "groundTruth": "Porsche 718 (982) Cayman",
+      "resultStatus": "not_in_catalogue",
+      "identifiedVehicle": null,
+      "outcome": "valid_abstention",
+      "latencyMs": 32
+    },
+    {
+      "id": "REAL_BLIND_000368",
+      "groundTruth": "Nissan 370Z (Z34)",
+      "resultStatus": "not_in_catalogue",
+      "identifiedVehicle": null,
+      "outcome": "valid_abstention",
+      "latencyMs": 36
+    },
+    {
+      "id": "REAL_BLIND_000369",
+      "groundTruth": "Nissan 370Z (Z34)",
+      "resultStatus": "not_in_catalogue",
+      "identifiedVehicle": null,
+      "outcome": "valid_abstention",
+      "latencyMs": 36
+    },
+    {
+      "id": "REAL_BLIND_000370",
+      "groundTruth": "Nissan 370Z (Z34)",
+      "resultStatus": "not_in_catalogue",
+      "identifiedVehicle": null,
+      "outcome": "valid_abstention",
+      "latencyMs": 33
+    },
+    {
+      "id": "REAL_BLIND_000965",
+      "groundTruth": "Ferrari Dino 246 (Classic) 246 GT",
+      "resultStatus": "uncertain",
+      "identifiedVehicle": null,
+      "outcome": "valid_abstention",
+      "latencyMs": 31
+    },
+    {
+      "id": "REAL_BLIND_000966",
+      "groundTruth": "Ferrari Dino 246 (Classic) 246 GT",
+      "resultStatus": "not_in_catalogue",
+      "identifiedVehicle": null,
+      "outcome": "valid_abstention",
+      "latencyMs": 34
+    },
+    {
+      "id": "REAL_BLIND_000967",
+      "groundTruth": "Ferrari Dino 246 (Classic) 246 GT",
+      "resultStatus": "uncertain",
+      "identifiedVehicle": null,
+      "outcome": "valid_abstention",
+      "latencyMs": 42
+    }
+  ]
+}
