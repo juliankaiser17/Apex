@@ -32,7 +32,7 @@ export class AIProviderRouter {
   private config: ProviderCapacityConfig = {
     providerName: 'Cloudflare Workers AI',
     primaryModel: '@cf/meta/llama-3.2-11b-vision-instruct',
-    secondaryModel: 'gemini-2.5-flash',
+    secondaryModel: (typeof process !== 'undefined' && process.env?.GEMINI_MODEL) || 'gemini-3.5-flash',
     rpmLimit: 720, // Cloudflare platform Image-to-Text reference limit
     tpmLimit: 100000,
     maxConcurrency: 20,
@@ -56,7 +56,7 @@ export class AIProviderRouter {
       } else if (requestedProvider === 'gemini') {
         this.primaryProvider = new GeminiProvider();
         this.config.providerName = 'Google Gemini';
-        this.config.primaryModel = 'gemini-2.5-flash';
+        this.config.primaryModel = (typeof process !== 'undefined' && process.env?.GEMINI_MODEL) || 'gemini-3.5-flash';
       } else {
         throw new Error(
           `[AIProviderRouter Configuration Error] Invalid VISION_PROVIDER="${rawProvider}". ` +

@@ -33,7 +33,6 @@ import { decisionPolicyEngine } from './stageE_decisionPolicy';
 import { specResolutionEngine } from './stageF_specResolver';
 import { aiTelemetry } from './telemetry';
 import type { V2IdentificationResult, VlmAdjudicationOutput } from './types';
-import type { ViewpointType } from '../types';
 import crypto from 'crypto';
 
 export interface V2ScanInput {
@@ -164,10 +163,15 @@ export class V2IdentificationPipeline {
     );
     const latencyB = Math.round(performance.now() - tStageB);
 
-    // ── STAGE C: Constrained VLM Adjudication (Invoked only if margin < threshold) ──
+    // ── STAGE C: Constrained VLM Adjudication ──
     const tStageC = performance.now();
     let adjudicationOutput: VlmAdjudicationOutput;
-    if (!retrieval.isDecisive && !retrieval.isOpenSetAnomaly && retrieval.topCandidates.length > 1) {
+    const shouldAdjudicate = (
+      !retrieval.isDecisive &&
+      (retrieval.topCandidates.length > 0 || Boolean(input.simulatedPerceptualHints?.rawVlmResponse) || Boolean(input.customVlmCaller))
+    );
+
+    if (shouldAdjudicate) {
       adjudicationOutput = await constrainedVlmAdjudicator.adjudicate({
         candidates: retrieval.topCandidates,
         viewpoint: qualityResult.quality.estimatedViewpoint,
@@ -269,6 +273,8 @@ export class V2IdentificationPipeline {
       variant: policy.variant,
       displayName: policy.displayName,
       calibratedConfidence: fused.calibratedConfidence,
+      openWorldIdentity: adjudicationOutput.openWorldIdentity,
+      inCatalogue: policy.inCatalogue ?? (policy.status === 'identified' || policy.status === 'identified_model'),
       verifiedSpecs,
       guidedRecovery: policy.guidedRecovery,
       candidateOptions: policy.candidateOptions,

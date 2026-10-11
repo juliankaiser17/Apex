@@ -15,7 +15,7 @@
 
 import { imageFeatureExtractor, EXTRACTOR_VERSION as HANDBUILT_VERSION } from './imageFeatureExtractor.ts';
 
-export type ExtractorType = 'handbuilt' | 'dinov2' | 'clip';
+export type ExtractorType = 'handbuilt' | 'dinov2' | 'clip' | 'service';
 
 export interface IEmbeddingExtractor {
   readonly type: ExtractorType;
@@ -65,24 +65,22 @@ async function toImageBuffer(imageInput: string | Buffer): Promise<Buffer | null
   if (typeof imageInput !== 'string') return null;
 
   const clean = imageInput.trim();
+  // Safe input decoding: never treat string as a local file path
   if (clean.startsWith('data:image/')) {
     const parts = clean.split(',');
     if (parts.length < 2 || !parts[1]) return null;
-    return Buffer.from(parts[1], 'base64');
-  }
-
-  if (clean.length < 1000) {
     try {
-      const fs = await import('fs');
-      if (fs.existsSync(clean)) {
-        return fs.readFileSync(clean);
-      }
+      return Buffer.from(parts[1], 'base64');
     } catch {
-      // not a local file
+      return null;
     }
   }
 
-  return Buffer.from(clean, 'base64');
+  try {
+    return Buffer.from(clean, 'base64');
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -118,7 +116,7 @@ export class Dinov2Extractor implements IEmbeddingExtractor {
       await this.ensureLoaded();
 
       const { RawImage } = await import('@xenova/transformers');
-      const blob = new Blob([buf]);
+      const blob = new Blob([new Uint8Array(buf)]);
       const rawImg = await RawImage.fromBlob(blob);
       const resized = await rawImg.resize(224, 224);
 
@@ -183,7 +181,7 @@ export class ClipExtractor implements IEmbeddingExtractor {
       await this.ensureLoaded();
 
       const { RawImage } = await import('@xenova/transformers');
-      const blob = new Blob([buf]);
+      const blob = new Blob([new Uint8Array(buf)]);
       const rawImg = await RawImage.fromBlob(blob);
       const resized = await rawImg.resize(224, 224);
 
@@ -222,12 +220,24 @@ export const handbuiltExtractor = new HandBuiltExtractor();
 export const dinov2Extractor = new Dinov2Extractor();
 export const clipExtractor = new ClipExtractor();
 
+import { RemoteEmbeddingServiceAdapter } from './embeddingServiceAdapter.ts';
+
+export const remoteServiceAdapter = new RemoteEmbeddingServiceAdapter();
+
 /**
- * Factory resolver based on configuration or explicit parameter
+ * Factory resolver based on configuration or explicit parameter.
+ * Prefers containerized remote embedding service if EMBEDDING_SERVICE_URL is set,
+ * or in-process learned extractors when configured.
  */
 export function getEmbeddingExtractor(type?: ExtractorType): IEmbeddingExtractor {
-  const chosen = type || (process.env.STAGE_B_EXTRACTOR_TYPE as ExtractorType) || 'dinov2';
+  if (type === 'service' || (typeof process !== 'undefined' && process.env.EMBEDDING_SERVICE_URL)) {
+    return remoteServiceAdapter;
+  }
+
+  const chosen = type || (process.env.STAGE_B_EXTRACTOR_TYPE as ExtractorType) || 'handbuilt';
   switch (chosen) {
+    case 'service':
+      return remoteServiceAdapter;
     case 'dinov2':
       return dinov2Extractor;
     case 'clip':

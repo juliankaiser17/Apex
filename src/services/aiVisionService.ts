@@ -8,8 +8,6 @@ import type { BodyStyle, RarityTier } from '../types/apex';
 import { offlineRecognitionEngine } from './offlineRecognitionEngine';
 import type { NormalizedVehicle } from '../data/vehicleDatabase';
 import { supabase } from '../lib/supabase';
-import { apexEngine } from '../ai-engine/engine';
-import type { IdentificationResult } from '../ai-engine/types';
 import { Capacitor } from '@capacitor/core';
 
 export interface AftermarketPart {
@@ -21,7 +19,18 @@ export interface AftermarketPart {
 
 export interface AiIdentificationPayload {
   is_car: boolean;
-  status?: 'identified' | 'probable' | 'uncertain' | 'rejected';
+  status?:
+    | 'identified'
+    | 'probable'
+    | 'uncertain'
+    | 'rejected'
+    | 'not_in_catalogue'
+    | 'invalid_image'
+    | 'retrieval_unavailable'
+    | 'provider_error'
+    | 'invalid_provider_response';
+  in_catalogue?: boolean;
+  collectible_eligible?: boolean;
   specificity_level?: 'make' | 'model_family' | 'generation' | 'variant';
   viewpoint?: string;
   rejection_reason?: string;
@@ -276,120 +285,14 @@ export async function getAuthoritativeAccessToken(forceRefresh = false): Promise
   return await resolutionTask;
 }
 
-function formatEngineResult(r: IdentificationResult): any {
-  const canon = r.canonicalResult;
-  const canonicalIdentity = canon?.canonical_identity;
-  const resolvedMake = canonicalIdentity?.make || canon?.identification?.make || r.make || 'Unknown';
-  const isModelUncertain = canon?.status === 'uncertain' || canon?.specificity_level === 'make' || r.status === 'abstained';
-  const rawModel = canonicalIdentity?.modelFamily || r.model || canon?.identification?.model_family;
-  const resolvedModel = (isModelUncertain || !rawModel || String(rawModel).trim().toLowerCase() === 'unknown' || String(rawModel).trim().toLowerCase() === 'null')
-    ? null
-    : String(rawModel).trim();
-  const resolvedDisplayName = canonicalIdentity?.displayName || (resolvedModel ? `${resolvedMake} ${resolvedModel}` : resolvedMake);
-  const canonicalVehicleId = isModelUncertain ? null : (canonicalIdentity?.canonicalId || r.canonicalVehicleId || null);
 
-  return {
-    status: canon?.status || (r.status === 'completed' ? 'identified' : r.status),
-    confidence: r.confidence?.totalScore ?? 0.95,
-    visual_evidence: canon?.visual_evidence || null,
-    viewpoint: canon?.viewpoint || 'unknown',
-    candidates: (canon?.candidates || []).map(c => ({
-      name: c.name,
-      score: c.score,
-      supporting_evidence: c.supporting_evidence,
-      contradictions: c.contradictions || [],
-      invalid: c.invalid
-    })),
-    contradictions: canon?.contradictions || [],
-    specificity_level: canon?.specificity_level || (r.trim ? 'variant' : 'model_family'),
-    specificity_level_numeric: canon?.specificity_level_numeric ?? canonicalIdentity?.specificityLevel ?? (r.trim ? 4 : r.generation ? 2 : 1),
-    reason: canon?.reason || (r.confidence?.abstentionReason || 'Vehicle successfully identified.'),
-    needs_retake: canon ? canon.needs_retake : (r.confidence?.shouldAbstain ?? false),
-    is_car: canon ? canon.vehicle_present : (r.status !== 'failed'),
-    scan_id: r.scanId,
-    make: resolvedMake,
-    model: resolvedModel,
-    generation: canonicalIdentity?.generation || canon?.identification?.generation || r.generation,
-    trim: canonicalIdentity?.variant || canon?.identification?.variant || (r.trim || null),
-    canonical_display_name: resolvedDisplayName,
-    canonical_vehicle_id: canonicalVehicleId,
-    year_estimate: r.yearEstimate,
-    color: r.color,
-    rarity: r.rarity,
-    engine: r.engine,
-    horsepower: r.horsepower,
-    torque_nm: r.torqueNm,
-    top_speed_kmh: r.topSpeedKmH,
-    zero_to_hundred_seconds: r.zeroToHundredSec,
-    kerb_weight_kg: r.kerbWeightKg,
-    production_years: r.productionYears,
-    origin_country: r.originCountry,
-    body_style: r.bodyStyle,
-    historical_information: r.historicalInformation,
-    interesting_facts: r.interestingFacts,
-    aftermarket_parts_detected: r.aftermarketPartsDetected,
-    legacy_confidence: r.confidence?.totalScore ?? 0.95,
-    needs_better_angle: canon ? (canon.status === 'uncertain' || canon.needs_retake) : (r.confidence?.shouldAbstain ?? false),
-    angle_instruction: canon?.reason || r.confidence?.abstentionReason || null,
-    upstream_evidence: canon?.upstream_evidence,
-    canonical_identity: canonicalIdentity,
-    provenance: canon?.provenance,
-    cached: r.cached,
-    trace_id: r.traceId
-  };
-}
 
 export async function runDirectApexEngine(
-  photoDataUrl: string,
-  fileName?: string,
-  onProgress?: (msg: string, pct: number) => void
+  _photoDataUrl: string,
+  _fileName?: string,
+  _onProgress?: (msg: string, pct: number) => void
 ): Promise<AiIdentificationPayload> {
-  console.log('[Apex AI Vision Telemetry] Executing direct embedded Apex Vision Engine...');
-  onProgress?.('Analyzing vehicle with Apex Vision AI…', 15);
-
-  const idempotencyKey = `direct_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-  const ingest = await apexEngine.ingestScan({
-    imageDataUrl: photoDataUrl,
-    fileName: fileName || 'scan.jpg',
-    userId: 'mobile_user',
-    priority: 'HIGH',
-    idempotencyKey
-  });
-
-  if (ingest.status === 'completed' && ingest.result) {
-    return parseBackendResponse(formatEngineResult(ingest.result));
-  }
-
-  // Poll local worker pool
-  const scanId = ingest.scanId;
-  const pollStart = performance.now();
-  const maxTimeoutMs = 35000;
-
-  while (performance.now() - pollStart < maxTimeoutMs) {
-    await new Promise(r => setTimeout(r, 200));
-    const status = apexEngine.getScanStatus(scanId);
-
-    if (status.status === 'completed' && status.result) {
-      return parseBackendResponse(formatEngineResult(status.result));
-    }
-
-    if (status.status === 'needs_review' || status.status === 'abstained' || status.status === 'uncertain' || status.status === 'failed') {
-      if (status.result) {
-        return parseBackendResponse(formatEngineResult(status.result));
-      }
-      if (status.status === 'failed') break;
-    }
-  }
-
-  return {
-    ...getEmptyPayload(),
-    status: 'uncertain',
-    is_car: true,
-    needs_better_angle: true,
-    reason: 'Could not achieve definitive vehicle identification.',
-    rejection_reason: 'low_confidence',
-    confidence: 0
-  };
+  throw new Error('Direct engine execution is disabled in client bundle. All scans route strictly through /api/analyze.');
 }
 
 /**
@@ -703,6 +606,60 @@ function parseBackendResponse(r: any): AiIdentificationPayload {
     };
   }
 
+  if (r.status === 'not_in_catalogue') {
+    return {
+      ...getEmptyPayload(),
+      status: 'not_in_catalogue',
+      is_car: true,
+      in_catalogue: false,
+      collectible_eligible: false,
+      make: rawMake || 'Uncatalogued Make',
+      model: rawModel || '',
+      canonical_vehicle_id: undefined,
+      canonical_display_name: r.canonical_display_name || (rawModel ? `${rawMake} ${rawModel}` : (rawMake || 'Uncatalogued Vehicle')),
+      needs_better_angle: false,
+      angle_instruction: null,
+      reason: r.reason || `Spotted ${rawMake} ${rawModel}! This vehicle is not currently in Apex's launch collectible catalogue.`,
+      rejection_reason: 'not_in_catalogue',
+      confidence: typeof r.confidence === 'number' ? r.confidence : 0,
+      scan_id: r.scan_id,
+      trace_id: r.trace_id
+    };
+  }
+
+  if (r.status === 'invalid_image') {
+    return {
+      ...getEmptyPayload(),
+      status: 'invalid_image',
+      is_car: false,
+      in_catalogue: false,
+      collectible_eligible: false,
+      needs_better_angle: true,
+      rejection_reason: r.rejection_reason || r.reason || 'Image content or formatting failed validation.',
+      angle_instruction: r.angle_instruction || 'Please capture a clear, uncorrupted photo in good light.',
+      confidence: 0,
+      scan_id: r.scan_id,
+      trace_id: r.trace_id
+    };
+  }
+
+  if (r.status === 'retrieval_unavailable' || r.status === 'provider_error' || r.status === 'invalid_provider_response') {
+    return {
+      ...getEmptyPayload(),
+      status: r.status,
+      is_car: true,
+      in_catalogue: false,
+      collectible_eligible: false,
+      needs_better_angle: true,
+      rejection_reason: r.status,
+      reason: r.reason || `Inference error: ${r.status}`,
+      angle_instruction: 'Identification service temporarily unavailable. Please retry.',
+      confidence: 0,
+      scan_id: r.scan_id,
+      trace_id: r.trace_id
+    };
+  }
+
   const rawParts = Array.isArray(r.aftermarket_parts_detected) ? r.aftermarket_parts_detected : [];
   const parts: AftermarketPart[] = rawParts.map((p: any) => ({
     part_name: p.part_name || p.partName || 'Custom Component',
@@ -711,14 +668,29 @@ function parseBackendResponse(r: any): AiIdentificationPayload {
     confidence: typeof p.confidence === 'number' ? p.confidence : 0.8
   }));
 
-  const status: 'identified' | 'probable' | 'uncertain' | 'rejected' =
-    r.status === 'identified' || r.status === 'probable' || r.status === 'uncertain' || r.status === 'rejected'
+  const status:
+    | 'identified'
+    | 'probable'
+    | 'uncertain'
+    | 'rejected'
+    | 'not_in_catalogue'
+    | 'invalid_image'
+    | 'retrieval_unavailable'
+    | 'provider_error'
+    | 'invalid_provider_response' =
+    r.status === 'identified' || r.status === 'probable' || r.status === 'uncertain' || r.status === 'rejected' ||
+    r.status === 'not_in_catalogue' || r.status === 'invalid_image' || r.status === 'retrieval_unavailable' ||
+    r.status === 'provider_error' || r.status === 'invalid_provider_response'
       ? r.status
       : (typeof r.confidence === 'number' && r.confidence >= 0.75)
       ? 'identified'
       : (typeof r.confidence === 'number' && r.confidence >= 0.50)
       ? 'probable'
       : 'uncertain';
+
+  const inCatalogue = r.in_catalogue ?? (r.status_v2 ? r.status_v2 !== 'not_in_catalogue' : (status === 'identified' || status === 'probable'));
+  const finalCanonId = isModelUnknown ? undefined : (r.canonical_vehicle_id || undefined);
+  const collectibleEligible = Boolean(r.collectible_eligible ?? (inCatalogue && (status === 'identified' || status === 'probable') && finalCanonId));
 
   const finalMake = isMakeUnknown ? 'Unknown' : rawMake;
   const finalModel = isModelUnknown ? null : rawModel;
@@ -727,6 +699,9 @@ function parseBackendResponse(r: any): AiIdentificationPayload {
   return {
     is_car: true,
     status,
+    in_catalogue: inCatalogue,
+    collectible_eligible: collectibleEligible,
+    canonical_vehicle_id: collectibleEligible ? finalCanonId : undefined,
     specificity_level: isModelUnknown ? 'make' : (r.specificity_level || (r.trim ? 'variant' : 'model_family')),
     viewpoint: r.viewpoint || 'unknown',
     make: finalMake,
@@ -757,7 +732,6 @@ function parseBackendResponse(r: any): AiIdentificationPayload {
     visual_evidence: r.visual_evidence || null,
     contradictions: Array.isArray(r.contradictions) ? r.contradictions : [],
     reason: r.reason || '',
-    canonical_vehicle_id: isModelUnknown ? null : (r.canonical_vehicle_id || r.canonicalVehicleId || null),
     canonical_display_name: finalDisplayName,
     specificity_level_numeric: isModelUnknown ? 0 : r.specificity_level_numeric,
     scan_id: r.scan_id || r.scanId,

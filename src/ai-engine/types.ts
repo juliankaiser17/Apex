@@ -18,7 +18,17 @@ export type ScanJobStatus =
   | 'dead_letter';
 
 // ─── CANONICAL PRODUCTION RESULT CONTRACT ───
-export type IdentificationStatus = 'identified' | 'probable' | 'uncertain' | 'rejected' | 'provider_unavailable';
+export type IdentificationStatus =
+  | 'identified'
+  | 'probable'
+  | 'uncertain'
+  | 'rejected'
+  | 'not_in_catalogue'
+  | 'invalid_image'
+  | 'retrieval_unavailable'
+  | 'provider_error'
+  | 'invalid_provider_response'
+  | 'provider_unavailable';
 
 export type VisionPipelineStatus =
   | 'VISION_IDENTIFIED'
@@ -311,6 +321,7 @@ export interface IdentificationResult {
   cached: boolean;
   traceId: string;
   canonicalResult?: CanonicalScanResult;
+  v2Result?: any;
 }
 
 export interface ScanJob {

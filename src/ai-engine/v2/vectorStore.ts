@@ -88,8 +88,8 @@ export class LocalVectorIndex implements IVectorStore {
  * When provisioning is approved, connects to external endpoint without changing application contract.
  */
 export class HostedVectorStoreAdapter implements IVectorStore {
-  private endpointUrl: string;
-  private apiKey: string | null;
+  public readonly endpointUrl: string;
+  public readonly apiKey: string | null;
   private localFallback: LocalVectorIndex;
 
   constructor(endpointUrl: string = 'http://localhost:6333', apiKey: string | null = null) {

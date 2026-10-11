@@ -9,7 +9,7 @@
 
 | Gate | Category | Summary | Current Recommendation | Impact / What is Blocked | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **G1** | Data Manifest | Promote proposed clean manifest as `manifest_v2.json` beside canonical | Recommend promotion as `eval/golden/manifest_v2.json` without overwriting original | Blocks final Phase 13 validation metric sign-off | OPEN |
+| **G1** | Data Manifest | Promote proposed clean manifest as `manifest_v2.json` beside canonical | Promoted as `eval/golden/manifest_v2.json` (SHA-256: `F4884118...`); canonical `manifest.json` completely untouched. | Closed / Approved | **RESOLVED** |
 | **G2** | IP / Legal | User photo consent & licensing for shipped gallery references | Restrict release gallery to public-domain / explicitly licensed assets | Blocks bundling user photos in app assets | OPEN |
 | **G3** | Infrastructure | Provisioning hosted embedding service / database migrations | Defer hosted embedding until Phase 13B/13E evaluates VLM vs gallery tradeoff | Infrastructure costs paused; no migration applied | OPEN |
 | **G4** | Field Campaign | Physical field-photo collection campaign | Run with internal team once release candidate is stable | Blocks adding new camera captures to test splits | OPEN |

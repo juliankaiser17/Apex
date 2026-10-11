@@ -1,0 +1,31 @@
+{
+  "timestamp": "2026-10-11T10:34:42.811Z",
+  "evaluationPool": "eval/golden/proposed_clean_manifest.json (val in-catalogue, N=32)",
+  "subsampleResults": {
+    "1": {
+      "recallAt1": 50,
+      "recallAt5": 81.3,
+      "recallAt10": 90.6,
+      "sampleCount": 32
+    },
+    "2": {
+      "recallAt1": 37.5,
+      "recallAt5": 78.1,
+      "recallAt10": 90.6,
+      "sampleCount": 32
+    },
+    "3": {
+      "recallAt1": 43.8,
+      "recallAt5": 81.3,
+      "recallAt10": 93.8,
+      "sampleCount": 32
+    }
+  },
+  "fittedModel": {
+    "formula": "Recall@5(k) = a * ln(k) + b",
+    "slope": 0,
+    "intercept": 81.3,
+    "targetRecallAt5": 95,
+    "projectedImagesPerClass": 890912
+  }
+}

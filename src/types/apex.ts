@@ -129,7 +129,7 @@ export interface CarCard {
   spottedDateFormatted?: string; // e.g. "12 JUL 2025"
   isFirstGlobalScan?: boolean;
   isFirstCityScan?: boolean;
-  identificationStatus?: 'identified' | 'probable' | 'uncertain' | 'rejected';
+  identificationStatus?: 'identified' | 'probable' | 'uncertain' | 'rejected' | 'not_in_catalogue' | 'invalid_image' | 'retrieval_unavailable' | 'provider_error' | 'invalid_provider_response';
   specificityLevel?: 'make' | 'model_family' | 'generation' | 'variant';
   identificationReason?: string;
   pendingDeletionUntil?: string; // ISO string 3 days in the future for deletion grace period

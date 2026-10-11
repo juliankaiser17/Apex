@@ -2172,12 +2172,31 @@ export const useApexStore = create<ApexState>((set, get) => ({
         } catch (_) {}
       }
     } else {
-      // Invoke Authoritative Server-Side PostgreSQL RPC if connected
-      try {
-        const canonicalId = (newCard as any).canonicalVehicleId || 
-          `${newCard.make}-${newCard.model}`.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      // Fail-closed check: Unsupported, uncertain, or uncatalogued scans NEVER trigger server record_car_scan or mint XP
+      const isEligible = Boolean(
+        (newCard as any).collectibleEligible ?? (
+          newCard.identificationStatus !== 'uncertain' &&
+          newCard.identificationStatus !== 'rejected' &&
+          newCard.identificationStatus !== 'not_in_catalogue' &&
+          newCard.identificationStatus !== 'invalid_image' &&
+          newCard.identificationStatus !== 'provider_error' &&
+          newCard.identificationStatus !== 'retrieval_unavailable' &&
+          (newCard as any).inCatalogue !== false &&
+          Boolean((newCard as any).canonicalVehicleId) &&
+          newCard.make && !newCard.make.toLowerCase().includes('unknown')
+        )
+      );
 
-        const { data: rpcResult, error: rpcError } = await supabase.rpc('record_car_scan', {
+      if (!isEligible) {
+        console.log(`[addCard] Card is not collectible-eligible (status: ${newCard.identificationStatus}). Skipping record_car_scan.`);
+      } else {
+        // Invoke Authoritative Server-Side PostgreSQL RPC if connected
+        try {
+          const canonicalId = (newCard as any).canonicalVehicleId;
+          if (!canonicalId) {
+            console.warn('[addCard] Missing canonicalVehicleId. Skipping record_car_scan.');
+          } else {
+            const { data: rpcResult, error: rpcError } = await supabase.rpc('record_car_scan', {
         p_make: newCard.make,
         p_model: newCard.model,
         p_year_estimate: newCard.yearEstimate || 'Unknown',
@@ -2288,16 +2307,18 @@ export const useApexStore = create<ApexState>((set, get) => ({
             bonusXp: localRarityData.localBonusXp
           });
         }
-      } else if (rpcResult && !rpcResult.success) {
-        localRarityTracer.recordAbuseRejection(
-          rpcResult.error || 'Scan validation failed',
-          options?.geoBucket || (newCard as any).geoBucket
-        );
+        } else if (rpcResult && !rpcResult.success) {
+          localRarityTracer.recordAbuseRejection(
+            rpcResult.error || 'Scan validation failed',
+            options?.geoBucket || (newCard as any).geoBucket
+          );
+        }
       }
     } catch (dbErr) {
       console.warn('RPC record_car_scan execution fallback:', dbErr);
     }
   }
+}
 
     const authoritativeCard: CarCard = {
       ...newCard,
@@ -2749,10 +2770,35 @@ export const useApexStore = create<ApexState>((set, get) => ({
   },
 
   onScanCompleted: async (card: CarCard) => {
+    // 0. Fail-Closed Guard: Unsupported, uncatalogued, uncertain, invalid, and failed scans NEVER grant garage unlocks or XP
+    const isCollectibleEligible = Boolean(
+      (card as any).collectibleEligible ?? (
+        card.identificationStatus !== 'uncertain' &&
+        card.identificationStatus !== 'rejected' &&
+        card.identificationStatus !== 'not_in_catalogue' &&
+        card.identificationStatus !== 'invalid_image' &&
+        card.identificationStatus !== 'provider_error' &&
+        card.identificationStatus !== 'retrieval_unavailable' &&
+        card.identificationStatus !== 'invalid_provider_response' &&
+        (card as any).inCatalogue !== false &&
+        Boolean((card as any).canonicalVehicleId) &&
+        card.make && !card.make.toLowerCase().includes('unknown')
+      )
+    );
+
+    if (!isCollectibleEligible) {
+      console.log(`[onScanCompleted] Scan is not collectible-eligible (status: ${card.identificationStatus}). Skipping record_car_scan and XP grants.`);
+      (card as any).serverRecorded = false;
+      return;
+    }
+
     // 1. Authoritative Server Path: record_car_scan transaction on database
     try {
-      const canonicalId = (card as any).canonicalVehicleId || 
-        `${card.make}-${card.model}`.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      const canonicalId = (card as any).canonicalVehicleId;
+      if (!canonicalId) {
+        console.warn('[onScanCompleted] Missing canonicalVehicleId on collectible scan. Failing closed.');
+        return;
+      }
       const imageHash = card.imageHash || computeImageSha256(card.imageUrl) || `hash_${card.make}_${card.model}_${card.id}`;
 
       const { data: rpcResult, error: rpcError } = await supabase.rpc('record_car_scan', {

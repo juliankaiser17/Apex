@@ -12,7 +12,6 @@
 
 import type { CalibratedConfidence, GalleryCandidate, RetrievalResult, VlmAdjudicationOutput } from './types';
 import type { ViewpointType } from '../types';
-import { fineGrainedModelDiscriminator } from '../validation/fineGrainedModelDiscriminator';
 
 export interface FusionInput {
   retrieval: RetrievalResult;
@@ -97,7 +96,7 @@ export class EvidenceFusionEngine {
     calibratedConfidence: CalibratedConfidence;
     isVetoed: boolean;
   } {
-    const { retrieval, adjudication, observableCues = [], viewpoint } = input;
+    const { retrieval, adjudication, observableCues = [] } = input;
     const candidates = retrieval.topCandidates;
 
     if (!candidates || candidates.length === 0) {
@@ -162,17 +161,34 @@ export class EvidenceFusionEngine {
 
     // Fail-Closed Calibration Invariant:
     // When adjudication was attempted and did NOT yield a successful valid identification,
-    // retrieval similarity alone CANNOT promote variant confidence to the >= 0.70 threshold.
+    // or when retrieval was not decisive, candidate confidence CANNOT remain high.
     if (adjudication && adjudication.outcome !== 'successful_identification') {
-      if (adjudication.outcome === 'provider_failure' || adjudication.outcome === 'invalid_response') {
-        varScore = Math.min(0.35, varScore);
-        genScore = Math.min(0.50, genScore);
-        modelScore = Math.min(0.65, modelScore);
+      if (adjudication.outcome === 'not_in_catalogue') {
+        varScore = Math.min(0.10, varScore);
+        genScore = Math.min(0.15, genScore);
+        modelScore = Math.min(0.20, modelScore);
+        makeScore = Math.min(0.25, makeScore);
+      } else if (adjudication.outcome === 'provider_failure' || adjudication.outcome === 'invalid_response' || adjudication.outcome === 'invalid_image') {
+        varScore = Math.min(0.15, varScore);
+        genScore = Math.min(0.25, genScore);
+        modelScore = Math.min(0.35, modelScore);
+        makeScore = Math.min(0.45, makeScore);
       } else if (adjudication.outcome === 'valid_abstention') {
-        varScore = Math.min(0.30, varScore);
-        genScore = Math.min(0.45, genScore);
-        modelScore = Math.min(0.60, modelScore);
+        varScore = Math.min(0.15, varScore);
+        genScore = Math.min(0.25, genScore);
+        modelScore = Math.min(0.35, modelScore);
+        makeScore = Math.min(0.45, makeScore);
+      } else if (adjudication.outcome === 'skipped_adjudication' && !retrieval.isDecisive) {
+        varScore = Math.min(0.20, varScore);
+        genScore = Math.min(0.30, genScore);
+        modelScore = Math.min(0.40, modelScore);
+        makeScore = Math.min(0.50, makeScore);
       }
+    } else if (!adjudication && !retrieval.isDecisive) {
+      varScore = Math.min(0.20, varScore);
+      genScore = Math.min(0.30, genScore);
+      modelScore = Math.min(0.40, modelScore);
+      makeScore = Math.min(0.50, makeScore);
     }
 
     const calibratedConfidence: CalibratedConfidence = {

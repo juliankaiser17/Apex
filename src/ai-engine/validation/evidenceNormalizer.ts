@@ -197,6 +197,44 @@ export class EvidenceNormalizer {
   }
 
   /**
+   * Separate mixed rear-lower observations (rear lamps vs exhaust outlets) into distinct fields.
+   * Used for dedicated rear-view evidence extraction: a clause describing lamps stays in
+   * taillights; a clause describing pipes/tips goes to exhaust; ambiguous clauses go to both
+   * only if they mention both anatomies, otherwise to exhaust (the lower-rear default).
+   */
+  public separateRearLowerCues(rawRearText: string): { taillights: string; exhaust: string } {
+    if (!rawRearText) return { taillights: '', exhaust: '' };
+
+    const clauses = this.decomposeText(rawRearText);
+    const taillightClauses: string[] = [];
+    const exhaustClauses: string[] = [];
+
+    for (const c of clauses) {
+      const isTaillight = c.hasTaillights || /\b(lamps?|lights?|light\s+bar|lightbar|lens)\b/i.test(c.normalizedText);
+      const isExhaust = c.hasExhaust || /\b(exhaust|tailpipes?|pipes?|tips?|muffler|diffuser)\b/i.test(c.normalizedText);
+
+      if (isTaillight && !isExhaust) {
+        taillightClauses.push(c.rawText);
+      } else if (isExhaust && !isTaillight) {
+        exhaustClauses.push(c.rawText);
+      } else if (isTaillight && isExhaust) {
+        // Clause mentions both: split by exhaust anatomy into exhaust, keep lamp wording for taillights
+        exhaustClauses.push(c.rawText);
+        if (/\b(taillights?|tail\s+lamps?|tail[\s-]?lights?|rear\s+lamps?)\b/i.test(c.normalizedText)) {
+          taillightClauses.push(c.rawText);
+        }
+      } else {
+        exhaustClauses.push(c.rawText);
+      }
+    }
+
+    return {
+      taillights: taillightClauses.join('; '),
+      exhaust: exhaustClauses.join('; ')
+    };
+  }
+
+  /**
    * Separate mixed intake/grille/diffuser cues into distinct front and rear aerodynamic fields
    */
   public separateIntakeAndAeroCues(rawIntakeText: string): { frontGrille: string; rearDiffuser: string } {

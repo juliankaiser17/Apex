@@ -11,7 +11,11 @@ export type V2ResolutionStatus =
   | 'needs_more_views'
   | 'uncertain'
   | 'rejected'
-  | 'not_in_catalogue';
+  | 'not_in_catalogue'
+  | 'retrieval_unavailable'
+  | 'provider_error'
+  | 'invalid_image'
+  | 'invalid_provider_response';
 
 export interface ImageQualityMetrics {
   isVehiclePresent: boolean;
@@ -49,13 +53,37 @@ export interface RetrievalResult {
 export type AdjudicationOutcome =
   | 'successful_identification'
   | 'valid_abstention'
+  | 'not_in_catalogue'
+  | 'provider_error'
   | 'provider_failure'
+  | 'invalid_image'
   | 'invalid_response'
+  | 'invalid_provider_response'
+  | 'retrieval_unavailable'
   | 'skipped_adjudication';
+
+export interface FusedCandidate {
+  candidate: GalleryCandidate;
+  fusedScore: number;
+  isVetoed: boolean;
+  vetoReason?: string;
+  supportingCues: string[];
+}
+
+export interface OpenWorldIdentity {
+  make: string | null;
+  model: string | null;
+  generation: string | null;
+  variant: string | null;
+  confidence: number;
+  reasoning?: string;
+}
 
 export interface VlmAdjudicationOutput {
   outcome: AdjudicationOutcome;
   chosenCandidateId: string | 'none';
+  openWorldIdentity?: OpenWorldIdentity;
+  isInCatalogue?: boolean;
   decidingCues: string[];
   legibleBadgeText: string | null;
   rawConfidence: number;
@@ -114,6 +142,8 @@ export interface V2IdentificationResult {
   variant: string | null;
   displayName: string;
   calibratedConfidence: CalibratedConfidence;
+  openWorldIdentity?: OpenWorldIdentity;
+  inCatalogue?: boolean;
   verifiedSpecs: VerifiedVehicleSpecs | null;
   guidedRecovery?: GuidedRecoveryInfo;
   candidateOptions?: Array<{

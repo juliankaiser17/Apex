@@ -1,3 +1,13 @@
+/**
+ * MANDATORY COST TRANSPARENCY STATEMENT:
+ * "One user action can cause at most 2 expensive operations."
+ * - Expected operation count: Normal user path executes 0-1 VLM operations (Stage B retrieval cache or 1 adjudication call).
+ * - Worst-case operation count: Degraded network or adversarial deadlock triggers at most 2 VLM operations.
+ * - Failure behavior: Degrades gracefully to Stage B gallery retrieval or returns HTTP 429 / 503 maintenance response.
+ * - Rollback strategy: Flag AI_PIPELINE=v1 or emergency kill switches (VISION_SCANNING_ENABLED=false, CLOUDFLARE_SCANNING_ENABLED=false, GEMINI_SCANNING_ENABLED=false).
+ * - Regression test: scripts/test_acceptance_infrastructure.ts, test_production_regression_suite.ts.
+ */
+
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 import { apexEngine } from '../ai-engine/engine';
@@ -213,35 +223,77 @@ function getTrustedClientIp(req: VercelRequest): string {
 }
 
 function formatScanResponse(r: any) {
+  const v2 = r.v2Result;
   const canon = r.canonicalResult;
 
-  const modelCandidate = canon?.identification?.model_family || canon?.canonical_identity?.modelFamily || r.model;
-  const isModelExplicitlyUncertain = canon?.status === 'uncertain' || canon?.specificity_level === 'make' || r.status === 'abstained';
-  const isModelUncertain = isModelExplicitlyUncertain || !modelCandidate || String(modelCandidate).trim().toLowerCase() === 'unknown model' || String(modelCandidate).trim().toLowerCase() === 'null';
+  const resolvedStatus: string = v2
+    ? v2.status
+    : canon?.status || (r.status === 'abstained' ? 'rejected' : r.status === 'uncertain' ? 'uncertain' : 'identified');
 
-  const finalMake = canon?.identification?.make || canon?.canonical_identity?.make || r.make || 'Unknown Make';
-  const finalModel = isModelUncertain ? null : (modelCandidate || null);
-  const finalGen = isModelUncertain ? null : (canon?.identification?.generation || canon?.canonical_identity?.generation || r.generation || null);
-  const finalTrim = isModelUncertain ? null : (canon?.identification?.variant || canon?.canonical_identity?.variant || (r.trim || null));
+  const isNotInCatalogue = resolvedStatus === 'not_in_catalogue';
+  const isModelExplicitlyUncertain =
+    resolvedStatus === 'uncertain' ||
+    resolvedStatus === 'rejected' ||
+    resolvedStatus === 'invalid_image' ||
+    resolvedStatus === 'provider_error' ||
+    resolvedStatus === 'retrieval_unavailable' ||
+    resolvedStatus === 'invalid_provider_response' ||
+    canon?.specificity_level === 'make';
 
-  // Resolve canonical record if finalModel exists to enrich specs
-  let finalCanonId = isModelUncertain ? null : (canon?.canonical_identity?.canonicalId || (canon as any)?.canonical_vehicle_id || r.vehicleId || null);
+  const modelCandidate = v2?.model || canon?.identification?.model_family || canon?.canonical_identity?.modelFamily || r.model;
+  const isModelUncertain = isNotInCatalogue
+    ? false
+    : (isModelExplicitlyUncertain || (!modelCandidate || String(modelCandidate).trim().toLowerCase() === 'unknown model' || String(modelCandidate).trim().toLowerCase() === 'null'));
+
+  const finalMake = v2?.make || canon?.identification?.make || canon?.canonical_identity?.make || r.make || 'Unknown Make';
+  const finalModel = isModelUncertain ? null : (v2?.model || modelCandidate || null);
+  const finalGen = isModelUncertain ? null : (v2?.generation || canon?.identification?.generation || canon?.canonical_identity?.generation || r.generation || null);
+  const finalTrim = isModelUncertain ? null : (v2?.variant || canon?.identification?.variant || canon?.canonical_identity?.variant || (r.trim || null));
+
+  // Resolve canonical record ONLY if model is identified and not in catalogue limbo
+  let finalCanonId = (isModelUncertain || isNotInCatalogue)
+    ? null
+    : (v2?.canonicalVehicleId || canon?.canonical_identity?.canonicalId || (canon as any)?.canonical_vehicle_id || r.vehicleId || null);
+
   let canonRecord = finalCanonId ? canonicalVehicleRegistry.getById(finalCanonId) : null;
-  if (!canonRecord && !isModelUncertain && finalMake && finalModel) {
+  if (!canonRecord && !isModelUncertain && !isNotInCatalogue && finalMake && finalModel) {
     canonRecord = canonicalVehicleRegistry.lookupByTextOrAlias(`${finalMake} ${finalModel}`, finalMake);
     if (canonRecord) {
       finalCanonId = canonRecord.vehicleId;
     }
   }
 
-  const finalDisplayName = isModelUncertain
+  const inCatalogue = isNotInCatalogue
+    ? false
+    : (v2
+      ? Boolean(v2.inCatalogue ?? (v2.status === 'identified' || v2.status === 'identified_model'))
+      : Boolean(canon?.status === 'identified' && finalCanonId));
+
+  const collectibleEligible = Boolean(
+    inCatalogue &&
+    (resolvedStatus === 'identified' || resolvedStatus === 'identified_model' || resolvedStatus === 'probable') &&
+    finalCanonId &&
+    !isModelExplicitlyUncertain
+  );
+
+  const finalDisplayName = isNotInCatalogue
+    ? (v2?.displayName || (finalModel ? `${finalMake} ${finalModel}` : finalMake))
+    : isModelUncertain
     ? finalMake
-    : (canon?.canonical_identity?.displayName || canonRecord?.displayName || `${finalMake} ${finalModel}${finalGen ? ` (${finalGen})` : ''}`);
+    : (v2?.displayName || canon?.canonical_identity?.displayName || canonRecord?.displayName || `${finalMake} ${finalModel}${finalGen ? ` (${finalGen})` : ''}`);
+
+  const isCar = (resolvedStatus !== 'rejected' && resolvedStatus !== 'invalid_image' && r.status !== 'abstained');
+
+  // Clamp confidence numbers to [0.0, 1.0] and ensure finite values
+  const safeTotalScore = Number.isFinite(r.confidence?.totalScore) ? Math.max(0, Math.min(1, r.confidence.totalScore)) : 0.95;
 
   return {
     // ── Canonical Production Vision Contract ──
-    status: canon?.status || (r.status === 'abstained' ? 'rejected' : 'identified'),
-    vehicle_present: canon ? canon.vehicle_present : (r.status !== 'abstained'),
+    status: resolvedStatus,
+    in_catalogue: inCatalogue,
+    collectible_eligible: collectibleEligible,
+    vehicle_present: isCar,
+    is_car: isCar,
     image_quality: canon?.image_quality || {
       usable: r.quality?.isUsable ?? true,
       score: r.quality?.blurScore || 0.9,
@@ -272,62 +324,100 @@ function formatScanResponse(r: any) {
     },
     confidence: {
       ...(canon?.confidence || {
-        make_score: r.confidence?.totalScore ?? 0.95,
-        model_score: isModelUncertain ? 0.2 : (r.confidence?.totalScore ?? 0.95),
-        generation_score: isModelUncertain ? 0.1 : Number(((r.confidence?.totalScore ?? 0.95) * 0.85).toFixed(3)),
-        variant_score: isModelUncertain ? 0.0 : (r.trim ? Number(((r.confidence?.totalScore ?? 0.95) * 0.75).toFixed(3)) : 0.2),
-        overall_score: r.confidence?.totalScore ?? 0.95
+        make_score: safeTotalScore,
+        model_score: (isModelExplicitlyUncertain || isNotInCatalogue) ? 0.2 : safeTotalScore,
+        generation_score: (isModelExplicitlyUncertain || isNotInCatalogue) ? 0.1 : Number((safeTotalScore * 0.85).toFixed(3)),
+        variant_score: (isModelExplicitlyUncertain || isNotInCatalogue) ? 0.0 : (r.trim ? Number((safeTotalScore * 0.75).toFixed(3)) : 0.2),
+        overall_score: safeTotalScore
       }),
       abstentionReason: r.confidence?.abstentionReason || canon?.confidence?.abstentionReason || null
     },
     candidates: canon?.candidates || (r.topCandidates || []).map((c: any) => ({
       name: `${c.make} ${c.model}`,
-      score: c.visualSimilarityScore,
+      score: Number.isFinite(c.visualSimilarityScore) ? Math.max(0, Math.min(1, c.visualSimilarityScore)) : 0,
       supporting_evidence: c.distinguishingFeatures,
       contradictions: []
     })),
     contradictions: canon?.contradictions || [],
     specificity_level: isModelUncertain ? 'make' : (canon?.specificity_level || (r.trim ? 'variant' : 'model_family')),
-    reason: canon?.reason || (r.confidence?.abstentionReason || 'Vehicle successfully identified.'),
-    needs_retake: canon ? canon.needs_retake : (r.confidence?.shouldAbstain ?? false),
+    reason: isNotInCatalogue
+      ? `Spotted ${finalDisplayName}! This vehicle is not currently in Apex's launch collectible catalogue.`
+      : (canon?.reason || (r.confidence?.abstentionReason || 'Vehicle successfully identified.')),
+    needs_retake: canon ? canon.needs_retake : (r.confidence?.shouldAbstain ?? (resolvedStatus === 'uncertain' || resolvedStatus === 'needs_more_views')),
 
     // ── Card & Client Specifications ──
-    is_car: canon ? canon.vehicle_present : (r.status !== 'abstained'),
     scan_id: r.scanId,
     make: finalMake,
     model: finalModel,
     generation: finalGen,
     trim: finalTrim,
     canonical_display_name: finalDisplayName,
-    canonical_vehicle_id: finalCanonId,
-    specificity_level_numeric: isModelUncertain ? 0 : (canon?.specificity_level_numeric ?? canon?.canonical_identity?.specificityLevel ?? (canonRecord?.specificityLevel || 1)),
-    year_estimate: isModelUncertain ? 'Unknown' : (r.yearEstimate || (canonRecord ? `${canonRecord.yearStart}` : 'Unknown')),
+    canonical_vehicle_id: collectibleEligible ? finalCanonId : null,
+    specificity_level_numeric: (isModelUncertain || isNotInCatalogue) ? 0 : (canon?.specificity_level_numeric ?? canon?.canonical_identity?.specificityLevel ?? (canonRecord?.specificityLevel || 1)),
+    year_estimate: (isModelUncertain || isNotInCatalogue) ? 'Unknown' : (r.yearEstimate || (canonRecord ? `${canonRecord.yearStart}` : 'Unknown')),
     color: r.color,
-    rarity: isModelUncertain ? 'common' : (r.rarity || canonRecord?.baselineRarity || 'rare'),
-    engine: isModelUncertain ? 'Standard Engine' : (r.engine || canonRecord?.engine || 'Standard Engine'),
-    horsepower: isModelUncertain ? 0 : (r.horsepower || canon?.canonical_identity?.specs?.horsepower || canonRecord?.horsepower || 0),
-    torque_nm: isModelUncertain ? 0 : (r.torqueNm || canon?.canonical_identity?.specs?.torqueNm || canonRecord?.torqueNm || 0),
-    top_speed_kmh: isModelUncertain ? 0 : (r.topSpeedKmH || canon?.canonical_identity?.specs?.topSpeedKmH || canonRecord?.topSpeedKmH || 0),
-    zero_to_hundred_seconds: isModelUncertain ? 0 : (r.zeroToHundredSec || canon?.canonical_identity?.specs?.zeroToHundredSec || canonRecord?.zeroToHundredSec || 0),
-    kerb_weight_kg: isModelUncertain ? 0 : (r.kerbWeightKg || canon?.canonical_identity?.specs?.kerbWeightKg || canonRecord?.kerbWeightKg || 0),
-    production_years: isModelUncertain ? 'Unknown' : (r.productionYears || canonRecord?.productionYears || 'Unknown'),
-    origin_country: isModelUncertain ? 'Global' : (r.originCountry || canonRecord?.originCountry || 'Global'),
-    body_style: r.bodyStyle || canonRecord?.bodyStyle,
-    historical_information: isModelUncertain ? '' : (r.historicalInformation || canonRecord?.historicalInformation || ''),
-    interesting_facts: isModelUncertain ? '' : (r.interestingFacts || canonRecord?.notableFacts || ''),
+    rarity: (isModelUncertain || isNotInCatalogue) ? 'common' : (v2?.verifiedSpecs?.baselineRarity || r.rarity || canonRecord?.baselineRarity || 'rare'),
+    engine: (isModelUncertain || isNotInCatalogue) ? 'Standard Engine' : (v2?.verifiedSpecs?.engine || r.engine || canonRecord?.engine || 'Standard Engine'),
+    horsepower: (isModelUncertain || isNotInCatalogue) ? 0 : (v2?.verifiedSpecs?.horsepower || r.horsepower || canon?.canonical_identity?.specs?.horsepower || canonRecord?.horsepower || 0),
+    torque_nm: (isModelUncertain || isNotInCatalogue) ? 0 : (v2?.verifiedSpecs?.torqueNm || r.torqueNm || canon?.canonical_identity?.specs?.torqueNm || canonRecord?.torqueNm || 0),
+    top_speed_kmh: (isModelUncertain || isNotInCatalogue) ? 0 : (v2?.verifiedSpecs?.topSpeedKmH || r.topSpeedKmH || canon?.canonical_identity?.specs?.topSpeedKmH || canonRecord?.topSpeedKmH || 0),
+    zero_to_hundred_seconds: (isModelUncertain || isNotInCatalogue) ? 0 : (v2?.verifiedSpecs?.zeroToHundredSec || r.zeroToHundredSec || canon?.canonical_identity?.specs?.zeroToHundredSec || canonRecord?.zeroToHundredSec || 0),
+    kerb_weight_kg: (isModelUncertain || isNotInCatalogue) ? 0 : (v2?.verifiedSpecs?.kerbWeightKg || r.kerbWeightKg || canon?.canonical_identity?.specs?.kerbWeightKg || canonRecord?.kerbWeightKg || 0),
+    production_years: (isModelUncertain || isNotInCatalogue) ? 'Unknown' : (v2?.verifiedSpecs?.productionYears || r.productionYears || canonRecord?.productionYears || 'Unknown'),
+    origin_country: (isModelUncertain || isNotInCatalogue) ? 'Global' : (v2?.verifiedSpecs?.originCountry || r.originCountry || canonRecord?.originCountry || 'Global'),
+    body_style: r.bodyStyle || v2?.verifiedSpecs?.bodyStyle || canonRecord?.bodyStyle,
+    historical_information: (isModelUncertain || isNotInCatalogue) ? '' : (r.historicalInformation || canonRecord?.historicalInformation || ''),
+    interesting_facts: (isModelUncertain || isNotInCatalogue) ? '' : (r.interestingFacts || canonRecord?.notableFacts || ''),
     aftermarket_parts_detected: r.aftermarketPartsDetected,
-    legacy_confidence: r.confidence?.totalScore ?? 0.95,
-    needs_better_angle: canon ? (canon.status === 'uncertain' || canon.needs_retake) : (r.confidence?.shouldAbstain ?? false),
+    legacy_confidence: safeTotalScore,
+    needs_better_angle: canon ? (canon.status === 'uncertain' || canon.needs_retake) : (r.confidence?.shouldAbstain ?? (resolvedStatus === 'uncertain' || resolvedStatus === 'needs_more_views')),
     angle_instruction: (r.confidence?.abstentionReason === 'VISION_QUOTA_EXHAUSTED' || canon?.confidence?.abstentionReason === 'VISION_QUOTA_EXHAUSTED' || canon?.reason?.includes('VISION_QUOTA_EXHAUSTED'))
       ? 'Vehicle identification temporarily unavailable. Vision quota has been reached. Please try again later.'
       : (canon?.reason || r.confidence?.abstentionReason || null),
     upstream_evidence: canon?.upstream_evidence,
-    canonical_identity: canon?.canonical_identity,
+    canonical_identity: (isModelUncertain || isNotInCatalogue)
+      ? (canon?.canonical_identity ? {
+          ...canon.canonical_identity,
+          canonicalId: null,
+          modelFamily: null,
+          generation: null,
+          variant: null,
+          displayName: finalDisplayName,
+          specificityLevel: 0
+        } : null)
+      : (canon?.canonical_identity ? {
+          ...canon.canonical_identity,
+          canonicalId: finalCanonId,
+          modelFamily: finalModel,
+          generation: finalGen,
+          variant: finalTrim,
+          displayName: finalDisplayName
+        } : null),
     provenance: canon?.provenance,
     cached: r.cached,
     trace_id: r.traceId,
     analysisVersion: VISION_PIPELINE_VERSION,
-    providerRevision: (process.env.VISION_PROVIDER || 'cloudflare').toLowerCase().trim()
+    providerRevision: (process.env.VISION_PROVIDER || 'cloudflare').toLowerCase().trim(),
+
+    // ── V2 Additive Fields (Backward-compatible additions for v2 UI / clients) ──
+    status_v2: resolvedStatus,
+    calibrated_confidence: v2?.calibratedConfidence || {
+      make: safeTotalScore,
+      model: (isModelExplicitlyUncertain || isNotInCatalogue) ? 0.30 : safeTotalScore,
+      generation: (isModelExplicitlyUncertain || isNotInCatalogue) ? 0.20 : 0.85,
+      variant: (isModelExplicitlyUncertain || isNotInCatalogue) ? 0.00 : 0.75,
+      overall: safeTotalScore
+    },
+    guided_recovery: v2?.guidedRecovery || null,
+    candidate_options: v2?.candidateOptions || (r.topCandidates || []).map((c: any) => ({
+      canonicalId: c.canonicalVehicleId || null,
+      displayName: c.model || `${c.make} ${c.model}`,
+      variant: c.variant || null,
+      confidenceScore: Number.isFinite(c.visualSimilarityScore) ? Math.max(0, Math.min(1, c.visualSimilarityScore)) : 0.8,
+      distinguishingFeatures: c.distinguishingFeatures || []
+    })),
+    session_frame_count: v2?.sessionFrameCount || 1,
+    pipeline_mode: process.env.AI_PIPELINE || 'v2'
   };
 }
 
@@ -495,7 +585,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (!finalResult) {
       const waitStart = Date.now();
-      const maxWaitMs = 22000;
+      const maxWaitMs = 35000;
       while (Date.now() - waitStart < maxWaitMs) {
         await new Promise((resolve) => setTimeout(resolve, 200));
         const current = apexEngine.getScanStatus(ingestion.scanId);
@@ -535,7 +625,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         traceId: ingestion.traceId,
         analysisVersion: VISION_PIPELINE_VERSION,
         provider: rawProvider,
-        model: isCloudflare ? '@cf/meta/llama-3.2-11b-vision-instruct' : 'gemini-2.5-flash',
+        model: isCloudflare ? '@cf/meta/llama-3.2-11b-vision-instruct' : (process.env.GEMINI_MODEL || 'gemini-3.5-flash'),
         imageSha256Short: ingestion.scanId?.substring(0, 12),
         cacheHit: Boolean(ingestion.isCachedHit),
         cacheVersion: VISION_PIPELINE_VERSION,

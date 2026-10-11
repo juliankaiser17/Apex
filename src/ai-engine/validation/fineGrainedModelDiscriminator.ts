@@ -151,6 +151,10 @@ export function computeVisibilityMatrix(
 
   let matrix: Record<MorphologicalCategory, TraitVisibilityState>;
 
+  const hasAffirmativeRearEvidence =
+    !rearOccluded &&
+    /\b(?:exhaust\s+pipes?|tailpipes?|rear\s+diffuser|rear\s+strakes?|rear\s+lamps?|taillights?|exit(?:ing)?\s+low\s+in\s+the\s+centre|exit(?:ing)?\s+low\s+in\s+the\s+center|exit(?:ing)?\s+in\s+the\s+centre|exit(?:ing)?\s+in\s+the\s+center|centre\s+of\s+the\s+diffuser|center\s+of\s+the\s+diffuser)\b/i.test(normEv);
+
   switch (viewpoint) {
     case 'front':
       matrix = {
@@ -198,8 +202,8 @@ export function computeVisibilityMatrix(
         door_architecture: sideOccluded ? 'OCCLUDED' : 'VISIBLE',
         aero_architecture: 'VISIBLE',
         wing_and_spoiler_architecture: 'VISIBLE',
-        rear_architecture_and_exhaust: 'NOT_VISIBLE',
-        rear_fascia_and_strakes: 'NOT_VISIBLE'
+        rear_architecture_and_exhaust: hasAffirmativeRearEvidence ? 'PARTIAL' : 'NOT_VISIBLE',
+        rear_fascia_and_strakes: hasAffirmativeRearEvidence ? 'PARTIAL' : 'NOT_VISIBLE'
       };
       break;
 
@@ -510,11 +514,13 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       front_intake_grille: {
         name: 'p1_style_front_bumper',
         positiveKeywords: ['p1 bumper', 'deep dual intakes', 'bumper pods', 'p1-inspired front', 'front bumper with lower intakes', 'front intake nacelles', 'large air intake below grille'],
-        incompatibleKeywords: ['three-segment aero blade', 'singleframe', 'upright oval', 'carbon endplate', 'front endplate', 'splitter endplate', 'front fender louver', 'fender louvers']
+        incompatibleKeywords: ['three-segment aero blade', 'singleframe', 'upright oval', 'carbon endplate', 'front endplate', 'splitter endplate', 'front fender louver', 'fender louvers', 'endplate', 'endplates', 'winglet', 'winglets', 'endplates/winglets', 'splitter with endplates', 'blade with endplates', 'carbon blade with endplates', 'upturned endplates']
       },
       side_intake_type: {
         name: 'large_side_radiator_scoop',
         positiveKeywords: ['large side scoop', 'radiator intake behind door', 'prominent side scoop', 'deep door recess', 'open side radiator', 'side radiator scoop', 'side air intake', 'side air scoop', 'side radiator intake', 'side intake scoop', 'large side air intakes'],
+        familySharedKeywords: ['large side scoop', 'radiator intake behind door', 'prominent side scoop', 'deep door recess', 'open side radiator', 'side radiator scoop', 'side air intake', 'side air scoop', 'side radiator intake', 'side intake scoop', 'large side air intakes', 'side air intakes', 'side intake', 'side radiator'],
+        familySharedAlone: true,
         incompatibleKeywords: ['floating tendon', 'tendon duct without open scoop', 'smooth door tendon', 'fender gills only']
       },
       door_architecture: {
@@ -621,7 +627,15 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       },
       front_intake_grille: {
         name: 'carbon_splitter_with_endplates',
-        positiveKeywords: ['carbon front endplate', 'front endplate', 'carbon endplate', 'splitter endplate', 'front winglet', 'front fender louver', 'fender louvers'],
+        positiveKeywords: ['carbon front endplate', 'front endplate', 'carbon endplate', 'splitter endplate', 'front winglet', 'front fender louver', 'fender louvers', 'front splitter', 'carbon front splitter', 'carbon splitter',
+          // Semantic variants of the extended-splitter-with-upturned-endplates geometry:
+          'winglets at the outer corners', 'upturned endplates', 'upturned outer corners', 'upturned corners', 'splitter winglets', 'carbon blade with winglets', 'deep carbon blade with winglets',
+          'endplate', 'endplates', 'winglet', 'winglets', 'endplates/winglets', 'splitter with endplates', 'blade with endplates', 'carbon blade with endplates', 'deep dark carbon blade with endplates'],
+        // P11 FAMILY-SHARED: a plain/carbon front splitter is common to the whole Super Series;
+        // only endplate/louvre/winglet geometry is LT-specific. Splitter wording alone must not
+        // manufacture model-specific separation from the 650S.
+        familySharedKeywords: ['front splitter', 'carbon front splitter', 'carbon splitter'],
+        familySharedAlone: true,
         incompatibleKeywords: ['three-segment aero blade', 'concave oval'],
         requiresMandatoryAeroPresence: true
       },
@@ -706,7 +720,11 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       },
       side_intake_type: {
         name: 'clean_sculpted_body_sides_without_side_scoops',
-        positiveKeywords: ['clean body sides', 'smooth doors', 'no side scoops', 'sculpted waistline without intakes', 'clean flanks'],
+        // ABSENCE-MINING DISCIPLINE: bare negation enumerations ("no side scoops or spoilers",
+        // "smooth doors") are NOT positive Amalfi architecture — from a front view they merely
+        // describe an unobservable zone and previously manufactured a false +0.30 on other models.
+        // Only an affirmative description of sculpted/clean flanks may satisfy this trait.
+        positiveKeywords: ['clean body sides', 'clean sculpted sides', 'sculpted clean flanks', 'clean flanks', 'sculpted waistline'],
         incompatibleKeywords: ['large side radiator scoops', 'rear fender shoulder intake', 'side air boxes', 'side intake ducts behind doors']
       },
       door_architecture: {
@@ -727,7 +745,14 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       rear_architecture_and_exhaust: {
         name: 'quad_round_exhaust_tailpipes_in_dual_clusters',
         positiveKeywords: ['quad round exhaust', 'quad circular exhaust', 'dual pairs of round exhaust', 'four circular tailpipes'],
-        incompatibleKeywords: ['triple central exhaust', 'dual high-mounted rectangular exhaust in center', 'top-exit exhaust', 'single central exhaust', 'single centre exhaust', 'one central tailpipe']
+        incompatibleKeywords: [
+          'triple central exhaust', 'dual high-mounted rectangular exhaust in center', 'top-exit exhaust',
+          'single central exhaust', 'single centre exhaust', 'one central tailpipe',
+          'central exhaust', 'centre exhaust', 'in the center of the diffuser', 'in the centre of the diffuser',
+          'in the center of the rear diffuser', 'in the centre of the rear diffuser',
+          'central exhaust in the diffuser', 'centre exhaust in the diffuser',
+          'exit low in the centre', 'exit low in the center', 'exiting low in the centre', 'exiting low in the center'
+        ]
       }
     }
   },
@@ -748,7 +773,8 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
           'retractable covers', 'retractable eyelid', 'pop-up covers', 'slatted eyelid', 'eyelids',
           'thin horizontal headlamps', 'thin horizontal headlights', 'horizontal headlamps with black',
           'horizontal headlights with black', 'horizontal slit headlamps', 'horizontal slit headlights',
-          'low horizontal headlamps', 'low horizontal headlights', 'recessed horizontal headlights'
+          'low horizontal headlamps', 'low horizontal headlights', 'recessed horizontal headlights',
+          'horizontal led strip', 'horizontal led strips', 'horizontal led'
         ],
         incompatibleKeywords: ['open c-shape matrix', 'c-clamp headlight', 'c-shaped', 'c-shape', 'round bug eye', 'elongated vertical', 'swept-back headlights']
       },
@@ -759,7 +785,9 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
           'horizontal slats across front bumper', 'slatted strakes', 'slatted grille', 'horizontal slats',
           'horizontal slat', 'large horizontal grille', 'horizontal grille with black', 'wide horizontal grille',
           'horizontal front grille', 'horizontal front intake', 'horizontal blade', 'horizontal splitter',
-          'low flat front splitter', 'horizontal bumper opening'
+          'low flat front splitter', 'horizontal bumper opening',
+          'front splitter with a deep, dark carbon blade', 'deep, dark carbon blade', 'deep dark carbon blade',
+          'blade that rises upward into endplates', 'carbon blade that rises upward'
         ],
         incompatibleKeywords: ['kidney grille', 'singleframe', 'front mustache', 'deformable winglets', 'shut-off gurney', 'gurney', 'body-color perforated', 'mustache bar', 'horizontal bar across grille']
       },
@@ -870,7 +898,12 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       rear_architecture_and_exhaust: {
         name: 'triple_central_exhaust_pipes_single_round_taillights',
         positiveKeywords: ['triple central exhaust', 'triple exhaust', 'three central exhaust', '3 central exhaust', 'three exhaust tips', 'single round taillights', 'round circular taillights'],
-        incompatibleKeywords: ['full width horizontal rear strakes', 'horizontal rear strakes', 'rectangular exhaust', 'twin dual outer exhaust', 'squircle taillights', 'single central exhaust', 'single centre exhaust', 'one central tailpipe']
+        incompatibleKeywords: ['full width horizontal rear strakes', 'horizontal rear strakes', 'rectangular exhaust', 'twin dual outer exhaust', 'squircle taillights', 'single central exhaust', 'single centre exhaust', 'one central tailpipe', 'center of the rear diffuser', 'centre of the rear diffuser', 'exit low in the centre', 'exit low in the center', 'two exhaust pipes exit low']
+      },
+      rear_fascia_and_strakes: {
+        name: 'single_round_taillights',
+        positiveKeywords: ['single round taillights', 'round taillights', 'circular taillights'],
+        incompatibleKeywords: ['horizontal and rectangular', 'rectangular rear lamps', 'horizontal rear lamps', 'horizontal led strip across the rear', 'full-width horizontal rear strakes']
       },
       proportions: {
         name: 'mid_engine_berlinetta',
@@ -943,7 +976,12 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       rear_architecture_and_exhaust: {
         name: 'triple_central_exhaust_pipes_single_round_taillights',
         positiveKeywords: ['triple central exhaust', 'triple exhaust', 'three central exhaust', '3 central exhaust', 'three exhaust tips', 'single round taillights', 'round circular taillights'],
-        incompatibleKeywords: ['full width horizontal rear strakes', 'horizontal rear strakes', 'rectangular exhaust', 'twin dual outer exhaust', 'squircle taillights', 'single central exhaust', 'single centre exhaust', 'one central tailpipe']
+        incompatibleKeywords: ['full width horizontal rear strakes', 'horizontal rear strakes', 'rectangular exhaust', 'twin dual outer exhaust', 'squircle taillights', 'single central exhaust', 'single centre exhaust', 'one central tailpipe', 'center of the rear diffuser', 'centre of the rear diffuser', 'exit low in the centre', 'exit low in the center', 'two exhaust pipes exit low']
+      },
+      rear_fascia_and_strakes: {
+        name: 'single_round_taillights',
+        positiveKeywords: ['single round taillights', 'round taillights', 'circular taillights'],
+        incompatibleKeywords: ['horizontal and rectangular', 'rectangular rear lamps', 'horizontal rear lamps', 'horizontal led strip across the rear', 'full-width horizontal rear strakes']
       },
       proportions: {
         name: 'mid_engine_spider',
@@ -1021,18 +1059,18 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       // open slot — an actual shape signature, not generic "matrix LED" marketing wording.
       headlight_shape: {
         name: 'closed_c_annular_lamp_with_open_slot',
-        positiveKeywords: ['c-shaped', 'c shaped', 'c-clamp', 'annular lamp', 'ring shaped lamp', 'open slot in the lamp', 'slotted lamp', 'closed c daytime running light', 'c shaped daytime running light'],
-        incompatibleKeywords: ['horizontal eyelid covers', 'retractable slat cover', 'round bug eye', 'fried egg', 'teardrop', 'teardrop headlight', 'elongated vertical', 'vertical lens', 'tall narrow lamp', 'lamp bar', 'horizontal led strip', 'horizontal strip', 'horizontal lamp']
+        positiveKeywords: ['c-shaped', 'c shaped', 'c-clamp', 'annular lamp', 'ring shaped lamp', 'open slot in the lamp', 'slotted lamp', 'closed c daytime running light', 'c shaped daytime running light', 'horizontal led strip', 'horizontal led', 'thin horizontal led', 'slender led'],
+        incompatibleKeywords: ['horizontal eyelid covers', 'retractable slat cover', 'round bug eye', 'fried egg', 'teardrop', 'teardrop headlight', 'elongated vertical', 'vertical lens', 'tall narrow lamp', 'lamp bar']
       },
       front_intake_grille: {
         name: 'open_nose_wing_diffuser',
-        positiveKeywords: ['open nose wing', 'front diffuser channel', 'low slung slotted intake', 'lower bumper splitter', 'shut-off gurney', 'gurney'],
-        incompatibleKeywords: ['horizontal strakes front', 'slatted front bumper', 'oval grille', 'horizontal slat', 'horizontal slats', 'horizontal strakes']
+        positiveKeywords: ['open nose wing', 'front diffuser channel', 'low slung slotted intake', 'lower bumper splitter', 'shut-off gurney', 'gurney', 'trapezoidal grille', 'mesh pattern'],
+        incompatibleKeywords: ['horizontal strakes front', 'slatted front bumper', 'oval grille', 'full-width horizontal strakes']
       },
       hood_geometry: {
         name: 's_duct_hood_extractor_channel',
         positiveKeywords: ['s-duct', 'hood air extractor', 'central hood duct', 'hood extractor channel', 'deep bonnet channel'],
-        incompatibleKeywords: ['smooth hood without vents', 'hood without vents or louvers', 'no visible vents or louvers', 'slight bulge in the center']
+        incompatibleKeywords: ['deep hood nostrils with strakes', 'large central scoop', 'shaker hood']
       },
       side_intake_type: {
         name: 'high_mounted_rear_haunch_intakes',
@@ -1047,7 +1085,7 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       rear_architecture_and_exhaust: {
         name: 'dual_high_mounted_central_exhaust_squircle',
         positiveKeywords: ['dual high-mounted central exhaust', 'squircle taillights', 'horizontal squircle', 'shut-off gurney flap'],
-        incompatibleKeywords: ['horizontal rear strakes', 'slatted rear', 'full width louvers', 'single central', 'single exhaust', 'single center']
+        incompatibleKeywords: ['horizontal rear strakes', 'slatted rear', 'full width louvers', 'single central', 'single exhaust', 'single center', 'center of the rear diffuser', 'centre of the rear diffuser', 'exit low in the centre', 'exit low in the center', 'exiting low in the centre', 'exiting low in the center', 'exhaust pipes exit low', 'low in the rear diffuser', 'low in the centre of the rear diffuser', 'low in the center of the rear diffuser']
       },
       proportions: {
         name: 'mid_engine_flagship_supercar',
@@ -1073,17 +1111,17 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
     traits: {
       proportions: {
         name: 'mid_engine_two_seat_berlinetta',
-        positiveKeywords: ['mid-engine two-seater', 'mid-engine berlinetta', 'short front overhang', 'cabin set forward', 'very short nose', 'compact two-seat cabin'],
+        positiveKeywords: ['mid-engine two-seater', 'mid-engine berlinetta', 'short front overhang', 'cabin set forward', 'very short nose', 'compact two-seat cabin', 'berlinetta'],
         incompatibleKeywords: ['front-engine grand tourer', 'front-mid engine 2+2', 'long dash to axle', 'four-door', 'suv']
       },
       headlight_shape: {
         name: 'lamp_recessed_into_front_wing_scoop',
-        positiveKeywords: ['recessed lamp', 'headlamp recessed', 'lamp recessed into', 'recessed into the wing', 'recessed into a scoop', 'lamp set into a scoop', 'lamp sunk into the wing', 'lamp housing undercut', 'lamp inside a bodywork recess', 'teardrop', 'teardrop headlight', 'integrated brake cooling', 'cooling duct'],
+        positiveKeywords: ['recessed lamp', 'headlamp recessed', 'lamp recessed into', 'recessed into the wing', 'recessed into a scoop', 'lamp set into a scoop', 'lamp sunk into the wing', 'lamp housing undercut', 'lamp inside a bodywork recess', 'teardrop', 'teardrop headlight', 'teardrop headlights', 'integrated brake cooling', 'cooling duct', 'brake cooling duct'],
         incompatibleKeywords: ['c-shaped', 'c shaped', 'c-clamp', 'annular lamp', 'ring shaped lamp', 'elongated vertical', 'vertical lens', 'lamp bar', 'eyelid', 'partial cover', 'round bug eye', 'fried egg']
       },
       front_intake_grille: {
         name: 'low_wide_mesh_grille_with_exposed_radiators',
-        positiveKeywords: ['low wide mesh grille', 'exposed radiators', 'two large radiator openings', 'wide lower mesh without slats', 'low short nose with a wide mesh mouth', 'single opening mouth', 'mouth intake'],
+        positiveKeywords: ['low wide mesh grille', 'exposed radiators', 'two large radiator openings', 'wide lower mesh without slats', 'low short nose with a wide mesh mouth', 'single opening mouth', 'mouth intake', 'wide mouth grille', 'wide mesh grille'],
         incompatibleKeywords: ['horizontal strakes', 'horizontal slats', 'body-color perforated', 'upright oval grille', 'kidney grille']
       },
       hood_geometry: {
@@ -1093,17 +1131,35 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       },
       roofline_greenhouse: {
         name: 'flying_buttress_deck_over_shallow_rear_screen',
-        positiveKeywords: ['flying buttress rear deck', 'buttress sloping into the tail', 'shallow rear screen', 'narrow rear window above a buttress', 'rear deck buttress over the engine bay'],
+        positiveKeywords: ['flying buttress rear deck', 'buttress sloping into the tail', 'shallow rear screen', 'narrow rear window above a buttress', 'rear deck buttress over the engine bay', 'flying buttress', 'flying buttresses', 'buttresses', 'shallow rear window'],
         incompatibleKeywords: ['wraparound visor canopy', 'fixed coupe roof with a full glass hatch', 'retractable hardtop', 'fabric soft top', 'long hood short deck gt']
       },
       rear_architecture_and_exhaust: {
         name: 'single_central_exhaust_in_the_diffuser',
-        positiveKeywords: ['single central exhaust', 'single centre exhaust', 'one central tailpipe', 'exhaust exiting the centre of the diffuser', 'centre exit exhaust'],
+        positiveKeywords: ['single central exhaust', 'single centre exhaust', 'one central tailpipe', 'exhaust exiting the centre of the diffuser', 'centre exit exhaust', 'central exhaust', 'center exhaust', 'single central exhaust tip', 'single exhaust tip', 'central exhaust pipe', 'center exhaust pipe',
+          // Semantic variants observed in real VLM rear descriptions (plural/round/in-diffuser
+          // wording of the same low central exit architecture):
+          'two central exhaust', 'two central pipes', 'two round central exhaust', 'pair of central exhaust', 'twin central round exhaust', 'central round exhaust', 'central exhaust pipes in the diffuser', 'exhaust in the center of the diffuser', 'exhaust in the centre of the diffuser', 'pipes in the center of the diffuser', 'exits in the center of the diffuser', 'exhaust pipes in the center of the diffuser', 'central tailpipes in the diffuser', 'exhausts in the center of the diffuser',
+          'center of the rear diffuser', 'centre of the rear diffuser', 'exit low in the centre', 'exit low in the center', 'exiting low in the centre', 'exiting low in the center', 'exhaust pipes exit low', 'two exhaust pipes exit low', 'two exhaust pipes exit in the centre', 'two exhaust pipes exit in the center', 'diffuser with a central exhaust', 'diffuser with a centre exhaust', 'central exhaust outlet in the rear diffuser', 'central exhaust in the diffuser'],
         incompatibleKeywords: ['dual high-mounted central exhaust', 'quad round exhaust', 'triple central exhaust', 'twin central rectangular exhaust', 'top-exit exhaust']
+      },
+      rear_fascia_and_strakes: {
+        name: 'horizontal_rectangular_rear_lamps_integrated_in_fascia',
+        positiveKeywords: [
+          'horizontal and rectangular', 'rectangular rear lamps', 'horizontal rear lamps',
+          'horizontal led strip across the rear', 'rear lamps are horizontal and rectangular',
+          'rear lamps are horizontal', 'horizontal slit taillights', 'horizontal slit rear lamps',
+          'horizontal taillights', 'horizontal tail lamps', 'horizontal rear lights',
+          'slim horizontal rear lamps', 'lightbar across the rear'
+        ],
+        incompatibleKeywords: [
+          'round taillights', 'circular taillights', 'single round taillights', 'quad round taillights',
+          'full-width horizontal rear strakes', 'horizontal slats across entire rear'
+        ]
       },
       aero_architecture: {
         name: 'active_rear_spoiler_above_a_centre_exit',
-        positiveKeywords: ['active rear spoiler above the centre exit', 'integrated deployable spoiler', 'body-colour rear spoiler'],
+        positiveKeywords: ['active rear spoiler above the centre exit', 'integrated deployable spoiler', 'body-colour rear spoiler', 'active rear spoiler', 'deployable rear spoiler'],
         incompatibleKeywords: ['towering swan-neck wing', 'full-width horizontal rear strakes', 'integrated lip spoiler above strakes']
       }
     }
@@ -1759,13 +1815,22 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       side_intake_type: {
         name: 'large_side_radiator_scoop',
         positiveKeywords: ['large side scoop', 'radiator intake', 'prominent side scoop', 'open side radiator', 'side radiator', 'strakes', 'side intake', 'side air intake', 'side air scoop', 'side radiator intake', 'side intake scoop', 'large side air intakes'],
-        incompatibleKeywords: ['internal door duct', 'smooth door surface', 'floating tendon']
+        incompatibleKeywords: ['internal door duct', 'smooth door surface', 'floating tendon'],
+        // P11 FAMILY-SHARED: the 650S and 675LT share the same large side radiator architecture.
+        // Scoop wording alone is family evidence (+generic weight) and must never manufacture
+        // model-specific separation between the two.
+        familySharedKeywords: ['large side scoop', 'radiator intake', 'prominent side scoop', 'open side radiator', 'side radiator', 'strakes', 'side intake', 'side air intake', 'side air scoop', 'side radiator intake', 'side intake scoop', 'large side air intakes'],
+        familySharedAlone: true
       },
       roofline_greenhouse: {
         name: 'retractable_hardtop_spider_tonneau',
         // Same open-top discipline as the Ferrari Spider trait: roof MECHANICS or nothing.
         positiveKeywords: ['hardtop', 'retractable roof', 'convertible roof', 'folding roof', 'soft top', 'soft-top', 'spider tonneau', 'open cockpit', 'open-top', 'open top', 'drop-top', 'convertible', 'spider', 'spyder'],
-        incompatibleKeywords: ['monocage glass canopy', 'full glass rear hatch', 'long hood gt', 'fixed roof', 'fixed coupe roof']
+        incompatibleKeywords: ['monocage glass canopy', 'full glass rear hatch', 'long hood gt', 'fixed roof', 'fixed coupe roof'],
+        // P11 FAMILY-SHARED: retractable-hardtop spider mechanics are identical on 650S Spider
+        // and 675LT Spider; they establish the spider body style, not the exact model.
+        familySharedKeywords: ['hardtop', 'retractable roof', 'convertible roof', 'folding roof', 'soft top', 'soft-top', 'spider tonneau', 'open cockpit', 'open-top', 'open top', 'drop-top', 'convertible', 'spider', 'spyder'],
+        familySharedAlone: true
       },
       rear_architecture_and_exhaust: {
         name: 'dual_central_mid_bumper_exhaust_airbrake',
@@ -1780,7 +1845,10 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       proportions: {
         name: 'mid_engine_spider_supercar',
         positiveKeywords: ['mid-engine spider', 'cab-forward convertible', 'open-top spider', 'two-door convertible', 'convertible spider', 'two-door spider'],
-        incompatibleKeywords: ['front-engine gt', 'suv', 'sedan']
+        incompatibleKeywords: ['front-engine gt', 'suv', 'sedan'],
+        // P11 FAMILY-SHARED: mid-engine spider proportions describe the shared generation body.
+        familySharedKeywords: ['mid-engine spider', 'cab-forward convertible', 'open-top spider', 'two-door convertible', 'convertible spider', 'two-door spider'],
+        familySharedAlone: true
       },
       door_architecture: {
         name: 'dihedral_doors',
@@ -1811,7 +1879,10 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       },
       front_intake_grille: {
         name: 'carbon_splitter_with_endplates',
-        positiveKeywords: ['carbon front endplate', 'front endplate', 'carbon endplate', 'splitter endplate', 'front winglet', 'front fender louver', 'fender louvers'],
+        positiveKeywords: ['carbon front endplate', 'front endplate', 'carbon endplate', 'splitter endplate', 'front winglet', 'front fender louver', 'fender louvers',
+          // Semantic variants of the extended-splitter-with-upturned-endplates geometry
+          // observed in real VLM front descriptions:
+          'winglets at the outer corners', 'winglets at the outer corners of the splitter', 'upturned endplates', 'upturned outer corners', 'upturned corners', 'splitter winglets', 'carbon blade with winglets', 'deep carbon blade with winglets'],
         incompatibleKeywords: ['three-segment aero blade', 'eye socket'],
         requiresMandatoryAeroPresence: true
       },
@@ -1825,7 +1896,11 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       roofline_greenhouse: {
         name: 'retractable_hardtop_longtail_spider',
         positiveKeywords: ['spider tonneau', 'folding hardtop', 'retractable hardtop', 'open-top spider', 'convertible tonneau', 'flying buttress', 'flying buttresses', 'buttresses', 'convertible', 'spider', 'spyder', 'open top', 'open-top'],
-        incompatibleKeywords: ['fixed coupe roof', 'monocage glass canopy', 'fixed roof']
+        incompatibleKeywords: ['fixed coupe roof', 'monocage glass canopy', 'fixed roof'],
+        // P11 FAMILY-SHARED: shared with 650S Spider — spider roof mechanics are generic across
+        // the P11 spider pair and cannot create model-specific separation on their own.
+        familySharedKeywords: ['spider tonneau', 'folding hardtop', 'retractable hardtop', 'open-top spider', 'convertible tonneau', 'flying buttress', 'flying buttresses', 'buttresses', 'convertible', 'spider', 'spyder', 'open top', 'open-top'],
+        familySharedAlone: true
       },
       rear_architecture_and_exhaust: {
         name: 'dual_circular_titanium_top_exit_exhaust',
@@ -3894,12 +3969,12 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       },
       roofline_greenhouse: {
         name: 'fighter_jet_wraparound_visor_canopy',
-        positiveKeywords: ['fighter jet canopy', 'wraparound visor windshield', 'curved panoramic windshield', 'helmet visor cockpit'],
+        positiveKeywords: ['fighter jet canopy', 'wraparound visor windshield', 'curved panoramic windshield', 'helmet visor cockpit', 'wraparound visor', 'visor canopy'],
         incompatibleKeywords: ['upright windshield', 'four-door sedan greenhouse', 'convertible soft top']
       },
       wing_and_spoiler_architecture: {
         name: 'gigantic_top_mounted_active_boomerang_rear_wing',
-        positiveKeywords: ['giant top-mounted boomerang rear wing', 'boomerang wing', 'active carbon rear wing with top pylons', 'jesko rear wing', 'massive double-profile rear wing'],
+        positiveKeywords: ['giant top-mounted boomerang rear wing', 'boomerang wing', 'active carbon rear wing with top pylons', 'jesko rear wing', 'massive double-profile rear wing', 'top-mounted rear wing', 'large rear wing', 'massive rear wing', 'giant rear wing', 'high-mounted rear wing', 'top-mounted wing', 'large active rear wing', 'prominent rear wing', 'rear wing with top pylons', 'large wing'],
         incompatibleKeywords: ['flush active lip', 'no rear wing']
       },
       door_architecture: {
@@ -3909,7 +3984,7 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       },
       front_intake_grille: {
         name: 'deep_front_splitter_with_active_flaps',
-        positiveKeywords: ['deep carbon front splitter', 'active underbody flaps', 'aggressive front air intakes'],
+        positiveKeywords: ['deep carbon front splitter', 'active underbody flaps', 'aggressive front air intakes', 'deep front splitter', 'prominent front splitter', 'large carbon front splitter', 'aggressive front splitter'],
         incompatibleKeywords: ['panamericana', 'singleframe', 'kidney grille']
       },
       rear_architecture_and_exhaust: {
@@ -3919,7 +3994,7 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       },
       proportions: {
         name: 'extreme_track_megacar',
-        positiveKeywords: ['extreme track hypercar stance', 'low slung cab forward silhouette', 'carbon monocoque track car'],
+        positiveKeywords: ['extreme track hypercar stance', 'low slung cab forward silhouette', 'carbon monocoque track car', 'jesko', 'attack', 'jesko attack'],
         incompatibleKeywords: ['grand tourer', 'suv', 'sedan']
       }
     }
@@ -4255,7 +4330,11 @@ export class FineGrainedModelDiscriminator {
 
         // FIELD-AWARE ROUTING: this trait may only be judged on evidence that does not describe
         // the opposite end of the vehicle (a rear-lamp description can never satisfy a front trait).
+        // SEMANTIC WORDING MATCH: normalize benign regional spelling variants (centre/center) on
+        // both the evidence and the keyword so architecture matching is not defeated by spelling.
+        const canonicalizeWording = (text: string): string => text.toLowerCase().replace(/centre/g, 'center');
         const categoryText = zonedEvidence.forCategory(categoryKey);
+        const matchText = canonicalizeWording(categoryText);
 
         // Helper to check if a keyword match is negated by preceding tokens.
         // Handles natural language conjunctive negation:
@@ -4327,7 +4406,7 @@ export class FineGrainedModelDiscriminator {
         // architecture shared with sibling models or universal generic tokens (e.g. LED strip,
         // center bulge, front splitter) cannot register as model-specific evidence on its own.
         const matchedPositiveKws = expectedTrait.positiveKeywords.filter((kw) =>
-          categoryText.includes(kw) && !isTermNegated(categoryText, kw)
+          matchText.includes(canonicalizeWording(kw)) && !isTermNegated(matchText, canonicalizeWording(kw))
         );
         const familySharedSet = new Set((expectedTrait.familySharedKeywords ?? []).map((k) => k.toLowerCase()));
         const specificPositiveKws = matchedPositiveKws.filter((kw) =>
@@ -4340,7 +4419,7 @@ export class FineGrainedModelDiscriminator {
 
         // Check for explicit contradiction
         const matchesContradiction = expectedTrait.incompatibleKeywords.some((kw) =>
-          categoryText.includes(kw) && !isTermNegated(categoryText, kw)
+          matchText.includes(canonicalizeWording(kw)) && !isTermNegated(matchText, canonicalizeWording(kw))
         );
 
         if (matchesPositive && !matchesContradiction) {
@@ -4385,21 +4464,42 @@ export class FineGrainedModelDiscriminator {
             reason: `Direct contradiction observed in visible area (${delta.toFixed(2)})`
           });
         } else if (expectedTrait.requiresMandatoryAeroPresence && visibility === 'VISIBLE' && categoryText.length >= 10) {
-          // Amendment 3: Strict Visible-Absence Penalty. Feature is expected, zone is confirmed VISIBLE,
-          // but the observed geometry lacks the mandatory signature.
-          contradictionCount += 1;
-          const delta = -0.30;
-          score += delta;
-          contradictions.push(`Mandatory distinguishing feature (${expectedTrait.name}) is absent from confirmed visible ${categoryKey.replace(/_/g, ' ')}`);
-          evaluations.push({
-            category: categoryKey,
-            visibility,
-            expectedTraitName: expectedTrait.name,
-            matched: false,
-            contradicted: true,
-            scoreDelta: delta,
-            reason: `Confirmed absence of mandatory feature in visible zone (${delta.toFixed(2)})`
-          });
+          // Amendment 3 (as amended): Strict Visible-Absence Penalty.
+          // INVARIANT: NOT_VISIBLE / UNCONFIRMED is NOT absence. The penalty may only fire when
+          // the evidence AFFIRMATIVELY describes the zone as plain/smooth/standard bodywork, or
+          // explicitly negates the mandatory feature. A generic description that simply never
+          // mentions the signature (e.g. "front bumper has a large opening") is UNCERTAIN, not
+          // absent — treating it as absent manufactured a false contradiction.
+          const affirmsFeatureAbsence =
+            /\b(?:smooth|flush|plain|clean|standard|body[- ]colou?red|unvented|simple|bare|minimal)\b/i.test(categoryText) ||
+            /\b(?:without|no|lacks?|absence\s+of)\b[^.;\n]{0,60}\b(?:splitter|endplates?|louvers?|louvres?|vents?|nostrils?|wing|ducts?|naca|extractors?)\b/i.test(categoryText);
+
+          if (affirmsFeatureAbsence) {
+            contradictionCount += 1;
+            const delta = -0.30;
+            score += delta;
+            contradictions.push(`Mandatory distinguishing feature (${expectedTrait.name}) is absent from confirmed visible ${categoryKey.replace(/_/g, ' ')}`);
+            evaluations.push({
+              category: categoryKey,
+              visibility,
+              expectedTraitName: expectedTrait.name,
+              matched: false,
+              contradicted: true,
+              scoreDelta: delta,
+              reason: `Confirmed absence of mandatory feature in visible zone (${delta.toFixed(2)})`
+            });
+          } else {
+            // Feature unconfirmed in a visible zone: neutral, zero evidence, zero penalty.
+            evaluations.push({
+              category: categoryKey,
+              visibility,
+              expectedTraitName: expectedTrait.name,
+              matched: false,
+              contradicted: false,
+              scoreDelta: 0,
+              reason: 'Neutral: mandatory feature unconfirmed (not affirmatively absent) in the visible zone. Contributes ZERO evidence and ZERO penalty.'
+            });
+          }
         } else {
           // Feature zone is visible or partial, but neutral
           evaluations.push({
@@ -4420,7 +4520,15 @@ export class FineGrainedModelDiscriminator {
         ((specificEvidenceCount - (1.5 * contradictionCount)) / Math.max(1, visibleTraitCount)).toFixed(3)
       );
 
-      const boundedScore = Math.max(0.01, Math.min(0.99, Number(score.toFixed(3))));
+      // GENERIC-EVIDENCE DISCIPLINE (Phase 4 hierarchy):
+      //   MODEL-EXCLUSIVE > MODEL-SPECIFIC > FAMILY > GENERIC MORPHOLOGY.
+      // A candidate whose visible-zone matches are ONLY generic/family-shared carries zero
+      // model-specific evidence. Generic accumulation must NOT create separation from the
+      // neutral baseline (that is what let generic wording canonize a wrong exact model),
+      // while contradictions still penalize as computed.
+      const boundedScore = (specificEvidenceCount === 0 && contradictionCount === 0)
+        ? neutralBaseline
+        : Math.max(0.01, Math.min(0.99, Number(score.toFixed(3))));
 
       return {
         vehicleId: fp.vehicleId,

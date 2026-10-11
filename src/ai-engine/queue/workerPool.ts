@@ -129,15 +129,23 @@ export class WorkerPool {
           sessionFramesCount: job.multiFrames ? job.multiFrames.length + 1 : 1
         });
 
-        const finalStatus: ScanJobStatus = v2Res.status === 'rejected' ? 'abstained' : v2Res.status === 'uncertain' ? 'uncertain' : 'completed';
+        const finalStatus: ScanJobStatus =
+          v2Res.status === 'rejected' || v2Res.status === 'invalid_image'
+            ? 'abstained'
+            : v2Res.status === 'uncertain' || v2Res.status === 'retrieval_unavailable' || v2Res.status === 'invalid_provider_response'
+            ? 'uncertain'
+            : v2Res.status === 'provider_error'
+            ? 'failed'
+            : 'completed';
+
         const finalResult: IdentificationResult = {
           scanId: job.id,
           idempotencyKey: job.idempotencyKey,
           userId: job.userId,
           status: finalStatus,
-          canonicalVehicleId: v2Res.canonicalVehicleId || undefined,
+          canonicalVehicleId: (v2Res.status === 'identified' || v2Res.status === 'identified_model') ? (v2Res.canonicalVehicleId || undefined) : undefined,
           make: v2Res.make || 'Unknown Make',
-          model: v2Res.model || (v2Res.status === 'identified_model' ? v2Res.displayName : 'Model Family Uncertain'),
+          model: v2Res.status === 'not_in_catalogue' ? (v2Res.model || 'Uncatalogued Model') : (v2Res.model || (v2Res.status === 'identified_model' ? v2Res.displayName : 'Model Family Uncertain')),
           generation: v2Res.generation || 'Unknown',
           trim: v2Res.variant || undefined,
           yearEstimate: v2Res.verifiedSpecs?.productionYears?.split('–')[0] || 'Unknown',
@@ -157,9 +165,13 @@ export class WorkerPool {
           aftermarketPartsDetected: [],
           confidence: {
             totalScore: v2Res.calibratedConfidence.overall,
-            isConfident: v2Res.calibratedConfidence.overall >= 0.70,
-            shouldAbstain: v2Res.status === 'uncertain' || v2Res.status === 'rejected',
-            abstentionReason: v2Res.status === 'needs_more_views' ? v2Res.guidedRecovery?.userPrompt : null,
+            isConfident: (v2Res.status === 'identified' || v2Res.status === 'identified_model') && v2Res.calibratedConfidence.overall >= 0.70,
+            shouldAbstain: v2Res.status !== 'identified' && v2Res.status !== 'identified_model' && v2Res.status !== 'not_in_catalogue',
+            abstentionReason: v2Res.status === 'needs_more_views'
+              ? (v2Res.guidedRecovery?.userPrompt || undefined)
+              : v2Res.status === 'not_in_catalogue'
+              ? `Spotted ${v2Res.displayName}! This vehicle is not currently in Apex's launch collectible catalogue.`
+              : (v2Res.status === 'uncertain' ? 'Visual evidence insufficient for definitive identification' : undefined),
             breakdown: {
               visualSimilarityWeight: 0.8,
               modelAgreementWeight: 0.8,
@@ -172,15 +184,19 @@ export class WorkerPool {
           quality: {
             isUsable: v2Res.qualityStage.isVehiclePresent,
             blurScore: v2Res.qualityStage.blurScore,
-            brightnessScore: v2Res.qualityStage.brightnessScore,
-            viewpoint: v2Res.qualityStage.estimatedViewpoint,
-            occlusionRatio: 1.0 - v2Res.qualityStage.occlusionScore,
-            cropBox: v2Res.qualityStage.cropBox || { x: 0, y: 0, width: 1, height: 1 }
+            luminanceScore: v2Res.qualityStage.brightnessScore,
+            contrastScore: 0.8,
+            aspectRatio: 1.33,
+            vehicleBoundingEstimated: Boolean(v2Res.qualityStage.cropBox),
+            viewpoint: v2Res.qualityStage.estimatedViewpoint
           },
           topCandidates: v2Res.candidateOptions?.map((c: any) => ({
             vehicleId: c.canonicalId,
             make: v2Res.make || '',
             model: c.displayName,
+            generation: '',
+            bodyStyle: (v2Res.verifiedSpecs?.bodyStyle || 'Coupe') as any,
+            yearStart: 2020,
             variant: c.variant || '',
             yearRange: '',
             rarity: 'rare',
@@ -201,7 +217,9 @@ export class WorkerPool {
 
         jobQueue.completeJob(job.id, finalStatus);
         job.result = finalResult;
-        identificationCache.setResult(job.imageHash, finalResult, 'cloudflare', 'v2-pipeline');
+        if (finalStatus !== 'failed' && v2Res.status !== 'provider_error') {
+          identificationCache.setResult(job.imageHash, finalResult, 'cloudflare', 'v2-pipeline');
+        }
         return finalResult;
       }
 

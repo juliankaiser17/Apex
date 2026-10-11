@@ -37,6 +37,7 @@ export interface DecisionPolicyOutput {
   generation: string | null;
   variant: string | null;
   displayName: string;
+  inCatalogue?: boolean;
   guidedRecovery?: GuidedRecoveryInfo;
   candidateOptions?: Array<{
     canonicalId: string;
@@ -49,7 +50,11 @@ export interface DecisionPolicyOutput {
 
 export class DecisionPolicyEngine {
   /**
-   * Evaluates fused signals and renders final policy determination
+   * Evaluates fused signals and renders final policy determination.
+   * STRICT FAIL-CLOSED INVARIANTS:
+   * 1. A failed or abstained Stage C adjudication NEVER defaults to Stage B candidate.
+   * 2. Uncatalogued cars (Golf, Civic, Corolla, Altima, Elantra) are returned as 'not_in_catalogue' with open-world make/model, canonicalId: null.
+   * 3. An exact identification requires an explicit successful adjudication matching a shortlisted candidate or decisive retrieval.
    */
   public evaluate(input: DecisionPolicyInput): DecisionPolicyOutput {
     const { quality, retrieval, rankedCandidates, calibratedConfidence, viewpoint, sessionFramesCount = 1, adjudication } = input;
@@ -64,6 +69,7 @@ export class DecisionPolicyEngine {
         generation: null,
         variant: null,
         displayName: 'Vehicle Rejected',
+        inCatalogue: false,
         guidedRecovery: {
           currentAngle: viewpoint,
           missingCues: ['Clear automobile silhouette'],
@@ -73,16 +79,152 @@ export class DecisionPolicyEngine {
       };
     }
 
-    // 2. Open-Set Out of Catalogue Gate
-    if (retrieval.isOpenSetAnomaly) {
+    // 2. Open-World Identity / Out-of-Catalogue from Stage C
+    if (adjudication?.outcome === 'not_in_catalogue') {
+      const ow = adjudication.openWorldIdentity;
+      const make = ow?.make || null;
+      const model = ow?.model || null;
+      const gen = ow?.generation || null;
+      const variant = ow?.variant || null;
+      const displayName = make && model ? `${make} ${model}` : (make || 'Uncatalogued Vehicle');
+
       return {
         status: 'not_in_catalogue',
+        canonicalId: null,
+        make,
+        model,
+        generation: gen,
+        variant,
+        displayName,
+        inCatalogue: false,
+        guidedRecovery: {
+          currentAngle: viewpoint,
+          missingCues: ['Catalogue collectible registry inclusion'],
+          suggestedView: 'badge_closeup',
+          userPrompt: `Spotted ${displayName}! This vehicle is not currently in Apex's launch collectible catalogue.`
+        }
+      };
+    }
+
+    // 3. HARD FAIL-CLOSED ADJUDICATION GATES
+    // Invariant: If Stage C was attempted and failed (provider failure, timeout, 429 quota exhaustion,
+    // HTTP 5xx, missing credentials, malformed JSON, explicit abstention), the pipeline MUST NEVER
+    // return status 'identified' or 'identified_model' and MUST NOT claim catalogue absence!
+    if (adjudication) {
+      if (adjudication.outcome === 'provider_failure' || (adjudication.outcome as string) === 'provider_error') {
+        const failureReason = adjudication.failureReason || adjudication.error || 'Provider execution failure';
+        return {
+          status: 'uncertain',
+          canonicalId: null,
+          make: null,
+          model: null,
+          generation: null,
+          variant: null,
+          displayName: 'Identification Unavailable (Provider Failure)',
+          inCatalogue: false,
+          guidedRecovery: {
+            currentAngle: viewpoint,
+            missingCues: ['Visual adjudication service connectivity'],
+            suggestedView: 'front_fascia',
+            userPrompt: `Visual verification could not be completed (${failureReason}). Please ensure network connectivity and try again.`
+          }
+        };
+      }
+
+      if (
+        adjudication.outcome === 'invalid_response' ||
+        (adjudication.outcome as string) === 'invalid_provider_response' ||
+        adjudication.outcome === 'invalid_image'
+      ) {
+        return {
+          status: 'uncertain',
+          canonicalId: null,
+          make: null,
+          model: null,
+          generation: null,
+          variant: null,
+          displayName: 'Identification Unavailable (Invalid Response)',
+          inCatalogue: false,
+          guidedRecovery: {
+            currentAngle: viewpoint,
+            missingCues: ['Clear, uncorrupted visual capture'],
+            suggestedView: 'front_fascia',
+            userPrompt: 'Model output or image could not be verified. Please capture a clear photo with good lighting.'
+          }
+        };
+      }
+
+      if (adjudication.outcome === 'valid_abstention') {
+        // Model explicitly stated that visual evidence does not support any candidate
+        return {
+          status: 'uncertain',
+          canonicalId: null,
+          make: null,
+          model: null,
+          generation: null,
+          variant: null,
+          displayName: 'Uncertain Identification',
+          inCatalogue: false,
+          guidedRecovery: {
+            currentAngle: viewpoint,
+            missingCues: ['Distinctive manufacturer front/rear cues'],
+            suggestedView: 'front_fascia',
+            userPrompt: 'Observable visual cues do not decisively match candidate variants. Please capture an additional angle.'
+          }
+        };
+      }
+
+      if (adjudication.outcome === 'skipped_adjudication' && !retrieval.isDecisive) {
+        // Stage C was skipped and Stage B retrieval was NOT decisive
+        return {
+          status: 'uncertain',
+          canonicalId: null,
+          make: null,
+          model: null,
+          generation: null,
+          variant: null,
+          displayName: 'Uncertain Identification',
+          inCatalogue: false,
+          guidedRecovery: {
+            currentAngle: viewpoint,
+            missingCues: ['Visual verification'],
+            suggestedView: 'front_fascia',
+            userPrompt: 'Could not clearly recognize the vehicle. Please try taking a photo from a front 3-quarter angle.'
+          }
+        };
+      }
+    } else if (!retrieval.isDecisive) {
+      // No adjudication and retrieval not decisive
+      return {
+        status: 'uncertain',
         canonicalId: null,
         make: null,
         model: null,
         generation: null,
         variant: null,
-        displayName: 'Uncatalogued Vehicle Spotted',
+        displayName: 'Uncertain Identification',
+        inCatalogue: false
+      };
+    }
+
+    // 4. Open-Set Out of Catalogue from Stage B Retrieval Anomaly
+    if (retrieval.isOpenSetAnomaly && (!adjudication || adjudication.outcome !== 'successful_identification' || adjudication.chosenCandidateId === 'none')) {
+      const ow = adjudication?.openWorldIdentity;
+      const make = ow?.make || null;
+      const model = ow?.model || null;
+      const gen = ow?.generation || null;
+      const variant = ow?.variant || null;
+      const displayName = make && model ? `${make} ${model}` : 'Uncatalogued Vehicle Spotted';
+
+      return {
+        status: 'not_in_catalogue',
+        canonicalId: null,
+        make,
+        model,
+        generation: gen,
+        variant,
+        displayName,
+        inCatalogue: false,
         guidedRecovery: {
           currentAngle: viewpoint,
           missingCues: ['Catalogue reference match'],
@@ -105,6 +247,7 @@ export class DecisionPolicyEngine {
         generation: null,
         variant: null,
         displayName: 'Uncertain Identification',
+        inCatalogue: false,
         guidedRecovery: {
           currentAngle: viewpoint,
           missingCues: ['Distinctive manufacturer front/rear cues'],
@@ -123,81 +266,65 @@ export class DecisionPolicyEngine {
       distinguishingFeatures: c.candidate.distinguishingFeatures
     }));
 
-    // ── HARD FAIL-CLOSED ADJUDICATION GATE ──
-    // Invariant: If Stage C adjudication was attempted and failed (timeout, 429 quota exhaustion,
-    // HTTP 5xx, missing credentials, malformed JSON, unlisted candidate ID) or resulted in valid abstention,
-    // the pipeline MUST NEVER return status 'identified'.
-    // Retrieval similarity alone CANNOT promote a vehicle to a confident exact variant identification.
-    if (adjudication) {
-      if (adjudication.outcome === 'provider_failure' || adjudication.outcome === 'invalid_response') {
-        const failureReason = adjudication.failureReason || adjudication.error || 'Provider execution failure';
-        return {
-          status: 'uncertain',
-          canonicalId: null,
-          make: top ? top.candidate.make : null,
-          model: top ? top.candidate.model : null,
-          generation: null,
-          variant: null,
-          displayName: top ? `${top.candidate.make} ${top.candidate.model} (Verification Unavailable)` : 'Uncertain Identification',
-          candidateOptions,
-          guidedRecovery: {
-            currentAngle: viewpoint,
-            missingCues: ['Visual adjudication verification'],
-            suggestedView: 'front_fascia',
-            userPrompt: `Visual verification could not be completed (${failureReason}). Please ensure clear lighting and take another photo.`
-          }
-        };
-      }
-
-      if (adjudication.outcome === 'valid_abstention') {
-        return {
-          status: 'uncertain',
-          canonicalId: null,
-          make: top ? top.candidate.make : null,
-          model: top ? top.candidate.model : null,
-          generation: null,
-          variant: null,
-          displayName: top ? `${top.candidate.make} ${top.candidate.model} (Unconfirmed)` : 'Uncertain Identification',
-          candidateOptions,
-          guidedRecovery: {
-            currentAngle: viewpoint,
-            missingCues: top?.candidate?.distinguishingFeatures?.slice(0, 2) || ['Distinctive vehicle features'],
-            suggestedView: 'rear',
-            userPrompt: 'Observable visual cues do not decisively match candidate variants. Please capture an additional angle.'
-          }
-        };
+    // Find the winning candidate (if adjudication chose a candidate, use that candidate!)
+    let winningCandidate = top;
+    if (adjudication && adjudication.outcome === 'successful_identification' && adjudication.chosenCandidateId !== 'none') {
+      const match = rankedCandidates.find(c => c.candidate.canonicalId === adjudication.chosenCandidateId);
+      if (match) {
+        winningCandidate = match;
       }
     }
 
-    // 3. Close Variant Deadlock -> 'needs_more_views'
+    // Check architectural veto on winning candidate
+    if (winningCandidate.isVetoed) {
+      return {
+        status: 'uncertain',
+        canonicalId: null,
+        make: null,
+        model: null,
+        generation: null,
+        variant: null,
+        displayName: 'Uncertain Identification (Feature Conflict)',
+        inCatalogue: false,
+        candidateOptions,
+        guidedRecovery: {
+          currentAngle: viewpoint,
+          missingCues: [winningCandidate.vetoReason || 'Architectural contradiction detected'],
+          suggestedView: 'rear',
+          userPrompt: 'Visual features conflict with candidate architecture. Please capture another angle.'
+        }
+      };
+    }
+
+    // 5. Close Variant Deadlock -> 'needs_more_views'
     const isVariantAmbiguity = second &&
-      (top.candidate.make === second.candidate.make) &&
-      (top.candidate.model === second.candidate.model) &&
-      (top.candidate.variant !== second.candidate.variant) &&
-      (top.fusedScore - second.fusedScore < 0.08) &&
+      (winningCandidate.candidate.make === second.candidate.make) &&
+      (winningCandidate.candidate.model === second.candidate.model) &&
+      (winningCandidate.candidate.variant !== second.candidate.variant) &&
+      (winningCandidate.fusedScore - second.fusedScore < 0.08) &&
       (sessionFramesCount < 3);
 
     if (isVariantAmbiguity) {
-      // Determine what angle would resolve the ambiguity
       let suggestedAngle: GuidedRecoveryInfo['suggestedView'] = 'rear';
-      let promptText = `We recognize this ${top.candidate.make} ${top.candidate.model}! To confirm if it's a ${top.candidate.variant || 'Coupe'} or ${second.candidate.variant || 'Spider'}, capture the rear engine cover or roofline.`;
+      let promptText = `We recognize this ${winningCandidate.candidate.make} ${winningCandidate.candidate.model}! To confirm if it's a ${winningCandidate.candidate.variant || 'Coupe'} or ${second.candidate.variant || 'Spider'}, capture the rear engine cover or roofline.`;
 
       if (viewpoint === 'rear') {
         suggestedAngle = 'roofline_side';
-        promptText = `To confirm whether this ${top.candidate.make} ${top.candidate.model} is a ${top.candidate.variant} or ${second.candidate.variant}, capture the side roofline or front aero.`;
+        promptText = `To confirm whether this ${winningCandidate.candidate.make} ${winningCandidate.candidate.model} is a ${winningCandidate.candidate.variant} or ${second.candidate.variant}, capture the side roofline or front aero.`;
       }
 
       return {
         status: 'needs_more_views',
-        canonicalId: top.candidate.canonicalId,
-        make: top.candidate.make,
-        model: top.candidate.model,
-        generation: top.candidate.generation,
+        canonicalId: winningCandidate.candidate.canonicalId,
+        make: winningCandidate.candidate.make,
+        model: winningCandidate.candidate.model,
+        generation: winningCandidate.candidate.generation,
         variant: null,
-        displayName: `${top.candidate.make} ${top.candidate.model}`,
+        displayName: `${winningCandidate.candidate.make} ${winningCandidate.candidate.model}`,
+        inCatalogue: true,
         guidedRecovery: {
           currentAngle: viewpoint,
-          missingCues: top.candidate.distinguishingFeatures.slice(0, 2),
+          missingCues: winningCandidate.candidate.distinguishingFeatures.slice(0, 2),
           suggestedView: suggestedAngle,
           userPrompt: promptText
         },
@@ -205,45 +332,59 @@ export class DecisionPolicyEngine {
       };
     }
 
-    // 4. Variant-Level Confirmation
-    // Invariant: Only permitted if adjudication explicitly succeeded, OR if retrieval was decisive in skipped mode.
-    // In NO circumstance can a failed, abstained, or non-decisive adjudication enter 'identified'.
+    // 6. Variant-Level Confirmation
+    // Invariant: ONLY permitted if adjudication explicitly succeeded, OR decisive retrieval is enabled.
     const canPromoteToIdentified = (
       (adjudication && adjudication.outcome === 'successful_identification') ||
       (!adjudication && retrieval.isDecisive) ||
       (adjudication && adjudication.outcome === 'skipped_adjudication' && retrieval.isDecisive)
     );
 
-    if (canPromoteToIdentified && calibratedConfidence.variant >= 0.70 && top.fusedScore >= 0.70) {
+    if (canPromoteToIdentified && calibratedConfidence.variant >= 0.70 && winningCandidate.fusedScore >= 0.70) {
       return {
         status: 'identified',
-        canonicalId: top.candidate.canonicalId,
-        make: top.candidate.make,
-        model: top.candidate.model,
-        generation: top.candidate.generation,
-        variant: top.candidate.variant,
-        displayName: top.candidate.displayName,
+        canonicalId: winningCandidate.candidate.canonicalId,
+        make: winningCandidate.candidate.make,
+        model: winningCandidate.candidate.model,
+        generation: winningCandidate.candidate.generation,
+        variant: winningCandidate.candidate.variant,
+        displayName: winningCandidate.candidate.displayName,
+        inCatalogue: true,
         candidateOptions
       };
     }
 
-    // 5. Model-Level Confirmation with Candidate Picker
-    // INVARIANT: Never return silent make-only. Present identified_model with candidate options!
+    // 7. Model-Level Confirmation with Candidate Picker
+    if (canPromoteToIdentified) {
+      return {
+        status: 'identified_model',
+        canonicalId: winningCandidate.candidate.canonicalId,
+        make: winningCandidate.candidate.make,
+        model: winningCandidate.candidate.model,
+        generation: winningCandidate.candidate.generation,
+        variant: null,
+        displayName: `${winningCandidate.candidate.make} ${winningCandidate.candidate.model}`,
+        inCatalogue: true,
+        candidateOptions,
+        guidedRecovery: {
+          currentAngle: viewpoint,
+          missingCues: ['Variant trim badge or aero package verification'],
+          suggestedView: 'rear',
+          userPrompt: `Identified as ${winningCandidate.candidate.make} ${winningCandidate.candidate.model}. Select the exact variant below or take a photo of the rear badge.`
+        }
+      };
+    }
+
+    // Fallback fail-closed
     return {
-      status: 'identified_model',
-      canonicalId: top.candidate.canonicalId,
-      make: top.candidate.make,
-      model: top.candidate.model,
-      generation: top.candidate.generation,
+      status: 'uncertain',
+      canonicalId: null,
+      make: null,
+      model: null,
+      generation: null,
       variant: null,
-      displayName: `${top.candidate.make} ${top.candidate.model}`,
-      candidateOptions,
-      guidedRecovery: {
-        currentAngle: viewpoint,
-        missingCues: ['Variant trim badge or aero package verification'],
-        suggestedView: 'rear',
-        userPrompt: `Identified as ${top.candidate.make} ${top.candidate.model}. Select the exact variant below or take a photo of the rear badge.`
-      }
+      displayName: 'Uncertain Identification',
+      inCatalogue: false
     };
   }
 

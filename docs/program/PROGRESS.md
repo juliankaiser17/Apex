@@ -7,9 +7,9 @@
 ---
 
 ## 1. Current Status Summary
-- **Active Track**: Track R (Stability and Release Engineering) — COMPLETE.
-- **Next Tracks**: Track A (AI Identification: Phase 13 & Stopgap) and Track U (UI Redesign)
-- **Overall Program State**: Track R completed with full evidence. Bundle hygiene verified, code-splitting achieved (>80% reduction in entry chunk), RLS verified, crash reporting configured. Transitioning to Track A & U.
+- **Completed Tracks**: Track R (Stability and Release Engineering), Track A (AI Identification: Phase 13)
+- **Active Track**: Track U (UI Redesign: Appendix A)
+- **Overall Program State**: Track R & Track A completed with full cryptographic evidence and tests passing. Starting Track U (UI Redesign: Tokens, Components, Screens).
 
 ---
 
@@ -53,14 +53,33 @@
   - [x] Write `docs/program/RUNBOOK.md` covering build, sync, install, logcat capture, and black-screen triage checklist
 
 ### Track A: AI Identification (`ai/identification`)
-- [ ] 13A: Scope decision and metric split (In-catalogue vs Out-of-catalogue)
-- [ ] 13B: Three-way baseline evaluation on 316-image pool (v1, open-vocab VLM, v2)
-- [ ] 13C: Shortlist anchoring fix in Stage C
-- [ ] 13D: Open-set retrieval calibration
-- [ ] 13E: Reference data plan (`docs/ai/proposals/REFERENCE_DATA_PLAN.md`)
-- [ ] 13F: Production stopgap implementation behind flags
-- [ ] 13G: Registry evidence hardening (fetch page HTML/PDF text and hashes)
-- [ ] 13H: Guard checks (Gate G5 closed, no `gemini-2.5-flash`)
+- [x] **13A: Scope decision and metric split**
+  - [x] Separated metrics into In-catalogue exotics vs Out-of-catalogue commuter vehicles (`docs/ai/PHASE14_RELEASE_RESCUE_REPORT.md`)
+  - [x] 0.0% false acceptance of uncatalogued vehicles achieved across 193 uncatalogued items
+- [x] **13B: Three-way baseline evaluation on 316-image pool**
+  - [x] Benchmarked v1 pipeline, open-vocab VLM-first, and v2 pipeline on identical 316-image pool
+- [x] **13C: Shortlist anchoring fix in Stage C**
+  - [x] Two-step reasoning protocol: Step 1 free open-world identity, Step 2 catalogue matching
+  - [x] Contradiction guard discarding candidate match when open-world make contradicts candidate make
+  - [x] Verified by `scripts/test_fail_closed_regression.ts` (12/12 passed)
+- [x] **13D: Open-set retrieval calibration**
+  - [x] Calibrated open-set anomaly floors (0.65 for CLIP, 0.45 for 64D) in `stageB_galleryRetrieval.ts`
+- [x] **13E: Reference data plan**
+  - [x] Executed subsampling experiment (k=1, 2, 3) in `scripts/benchmark_learning_curve.ts` (raw file: `eval/raw_responses/learning_curve_raw.json`, SHA-256: `5436a80b...`)
+  - [x] Written `docs/ai/proposals/REFERENCE_DATA_PLAN.md` covering lawful acquisition, 515 anchor targets, and owner decisions
+- [x] **13F: Production stopgap implementation behind flags**
+  - [x] Server-side Gemini 3.5 Flash primary with Gemini 3.1 Flash-Lite fallback behind config flags
+  - [x] Bounded 8.5s timeouts, distinct error codes (`VISION_QUOTA_EXHAUSTED`, `VISION_TIMEOUT`, `PROVIDER_UNAVAILABLE`)
+  - [x] Written `docs/ai/proposals/PRODUCTION_STOPGAP_PROPOSAL.md` with client bridge diff and cost models ($0.81/mo at 100/day, $8.10/mo at 1k/day)
+- [x] **13G: Registry evidence hardening**
+  - [x] Audited 70 vehicle variants (350 spec values) in `scripts/audit_registry_evidence_hardening.ts`
+  - [x] Saved 350 raw HTML/text page snapshots in `eval/registry_evidence/snapshots/`
+  - [x] Generated `eval/registry_evidence/hardened_spotcheck_report.json` (SHA-256: `7679899e...`) with 0% error rate
+- [x] **13H: Guard checks**
+  - [x] Retrieval-only decisive path strictly disabled (`DECISIVE_RETRIEVAL_ENABLED=false`)
+  - [x] Deprecated `gemini-2.5-flash` references migrated to `gemini-3.5-flash`
+  - [x] Gate G5 LOCKED: 248 held-out test items untouched, unexposed, and unevaluated
+  - [x] Gate G1 RESOLVED: clean manifest promoted as `eval/golden/manifest_v2.json` (SHA-256: `F4884118...`) while canonical `manifest.json` remains frozen
 
 ### Track U: UI Redesign (`ui/redesign`)
 - [ ] Phase 0: Audit & baseline captures
