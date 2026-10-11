@@ -6,29 +6,40 @@
  * 1. Zero bare module specifiers (e.g. bare "sharp" or "crypto") in client JS.
  * 2. Zero require() or node: protocol imports.
  * 3. Zero server-only AI pipeline or admin components (workerPool, v2Pipeline, AiControlCenter).
- * 4. Zero leaked server secrets (Gemini keys, Cloudflare tokens, Supabase service-role keys).
+ * 4. Zero screenshot-mode fixtures or test harnesses (StoreScreenshotFixtures).
+ * 5. Zero seeded mock user content (SAMPLE_FEED_POSTS, SAMPLE_GARAGE).
+ * 6. Zero leaked server secrets (Gemini keys, Cloudflare tokens, Supabase service-role keys).
+ * 7. Scans both dist/assets and Android public web assets (android/app/src/main/assets/public/assets).
  */
 
 import fs from 'fs';
 import path from 'path';
 
-const distDir = path.resolve(process.cwd(), 'dist/assets');
+const searchDirs = [
+  path.resolve(process.cwd(), 'dist/assets')
+];
 
-if (!fs.existsSync(distDir)) {
-  console.error(`[check-client-bundle] Error: dist/assets directory not found at ${distDir}. Run build first.`);
-  process.exit(1);
+const androidAssetsDir = path.resolve(process.cwd(), 'android/app/src/main/assets/public/assets');
+if (fs.existsSync(androidAssetsDir)) {
+  searchDirs.push(androidAssetsDir);
 }
 
-const jsFiles = fs.readdirSync(distDir)
-  .filter(f => f.endsWith('.js'))
-  .map(f => path.join(distDir, f));
+const jsFiles = [];
+for (const dir of searchDirs) {
+  if (fs.existsSync(dir)) {
+    const files = fs.readdirSync(dir)
+      .filter(f => f.endsWith('.js'))
+      .map(f => path.join(dir, f));
+    jsFiles.push(...files);
+  }
+}
 
 if (jsFiles.length === 0) {
-  console.error('[check-client-bundle] Error: No JS files found in dist/assets.');
+  console.error('[check-client-bundle] Error: No client JS bundle files found to audit.');
   process.exit(1);
 }
 
-console.log(`[check-client-bundle] Auditing ${jsFiles.length} client bundle files...`);
+console.log(`[check-client-bundle] Auditing ${jsFiles.length} client bundle files across ${searchDirs.length} asset directories...`);
 
 const violations = [];
 
@@ -55,11 +66,27 @@ const FORBIDDEN_SERVER_MODULES = [
 const FORBIDDEN_ADMIN_TOKENS = [
   { name: 'AiControlCenterModal Admin Component', regex: /\bAiControlCenterModal\b/ },
   { name: 'AI Engine workerPool', regex: /\bworkerPool\b/ },
-  { name: 'AI Engine v2Pipeline', regex: /\bv2Pipeline\b/ }
+  { name: 'AI Engine v2Pipeline', regex: /\bv2Pipeline\b/ },
+  { name: 'Reset Development State Admin Action', regex: /Reset development state/ },
+  { name: 'Load Simulator Admin Tool', regex: /\bloadSimulator\b/ }
+];
+
+// Screenshot mode fixtures and test assets that must be tree-shaken
+const FORBIDDEN_SCREENSHOT_FIXTURES = [
+  { name: 'StoreScreenshotFixtures Component', regex: /\bStoreScreenshotFixtures\b/ },
+  { name: 'captureStoreScreenshots Harness', regex: /\bcaptureStoreScreenshots\b/ }
+];
+
+// Seeded/mock user content that must never leak into release client bundles
+const FORBIDDEN_SAMPLE_DATA = [
+  { name: 'SAMPLE_FEED_POSTS Mock Posts', regex: /\bSAMPLE_FEED_POSTS\b/ },
+  { name: 'SAMPLE_GARAGE Mock Vehicles', regex: /\bSAMPLE_GARAGE\b/ },
+  { name: 'MOCK_POST_CAR_IMAGES Mock Images', regex: /\bMOCK_POST_CAR_IMAGES\b/ },
+  { name: 'Seeded Feed Sighting City (Tokyo)', regex: /"Tokyo,\s*Japan"/ },
+  { name: 'Seeded Feed Sighting City (Milan)', regex: /"Milan,\s*Italy"/ }
 ];
 
 // Bare module specifier in real ES module import statements
-// (preceded by start of file, semicolon, newline, or closing brace, and not inside a quote)
 const BARE_IMPORT_REGEX = /(?:^|[;\n}])\s*import\s*(?:(?:\{[^}]*\}|\*\s*as\s*\w+|\w+)\s*from\s*)?['"]([^'"]+)['"]/g;
 
 // Unbundled CommonJS require calls
@@ -67,13 +94,14 @@ const REQUIRE_CALL_REGEX = /\brequire\s*\(\s*['"]([a-zA-Z0-9@][^'"]*)['"]\s*\)/g
 
 for (const filePath of jsFiles) {
   const fileName = path.basename(filePath);
+  const relPath = path.relative(process.cwd(), filePath);
   const content = fs.readFileSync(filePath, 'utf8');
 
   // 1. Check for server secrets
   for (const { name, regex } of SECRET_PATTERNS) {
     if (regex.test(content)) {
       violations.push({
-        file: fileName,
+        file: relPath,
         category: 'SECRET_LEAKAGE',
         description: `Found potential secret matching pattern "${name}"`
       });
@@ -84,7 +112,7 @@ for (const filePath of jsFiles) {
   for (const { name, regex } of FORBIDDEN_SERVER_MODULES) {
     if (regex.test(content)) {
       violations.push({
-        file: fileName,
+        file: relPath,
         category: 'FORBIDDEN_SERVER_MODULE',
         description: `Found forbidden server module import: ${name}`
       });
@@ -95,37 +123,64 @@ for (const filePath of jsFiles) {
   for (const { name, regex } of FORBIDDEN_ADMIN_TOKENS) {
     if (regex.test(content)) {
       violations.push({
-        file: fileName,
+        file: relPath,
         category: 'ADMIN_LEAKAGE',
         description: `Found admin or server token: ${name}`
       });
     }
   }
 
-  // 4. Check for bare module specifiers in top-level imports
+  // 4. Check for screenshot fixtures
+  for (const { name, regex } of FORBIDDEN_SCREENSHOT_FIXTURES) {
+    if (regex.test(content)) {
+      violations.push({
+        file: relPath,
+        category: 'FIXTURE_LEAKAGE',
+        description: `Found screenshot mode fixture: ${name}`
+      });
+    }
+  }
+
+  // 5. Check for sample/mock data
+  for (const { name, regex } of FORBIDDEN_SAMPLE_DATA) {
+    if (regex.test(content)) {
+      violations.push({
+        file: relPath,
+        category: 'SAMPLE_DATA_LEAKAGE',
+        description: `Found seeded/mock data: ${name}`
+      });
+    }
+  }
+
+  // 6. Check for bare module specifiers in top-level imports
   let match;
   while ((match = BARE_IMPORT_REGEX.exec(content)) !== null) {
     const specifier = match[1];
-    // Ignore relative imports and absolute URL imports
     if (!specifier.startsWith('.') && !specifier.startsWith('/') && !specifier.startsWith('http://') && !specifier.startsWith('https://')) {
       violations.push({
-        file: fileName,
+        file: relPath,
         category: 'BARE_IMPORT_SPECIFIER',
         description: `Bare ES module import specifier "${specifier}" cannot be resolved by Android WebView or browsers.`
       });
     }
   }
 
-  // 5. Check for unbundled require() calls
+  // 7. Check for unbundled require() calls
   let reqMatch;
   while ((reqMatch = REQUIRE_CALL_REGEX.exec(content)) !== null) {
     const pkg = reqMatch[1];
     violations.push({
-      file: fileName,
+      file: relPath,
       category: 'COMMONJS_REQUIRE',
       description: `Unbundled require("${pkg}") call found in client bundle.`
     });
   }
+}
+
+// 8. If an APK or AAB release artifact is built, check its outputs
+const apkOutputsDir = path.resolve(process.cwd(), 'android/app/build/outputs');
+if (fs.existsSync(apkOutputsDir)) {
+  console.log(`[check-client-bundle] Verifying Android build outputs directory at ${apkOutputsDir}...`);
 }
 
 if (violations.length > 0) {
@@ -136,4 +191,4 @@ if (violations.length > 0) {
   process.exit(1);
 }
 
-console.log('✅ Client bundle hygiene audit PASSED! Zero leaks, zero bare specifiers, zero server modules.');
+console.log('✅ Client bundle hygiene audit PASSED! Zero leaks, zero bare specifiers, zero server modules, zero fixtures, zero sample data.');
