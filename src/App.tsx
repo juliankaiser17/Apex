@@ -22,6 +22,9 @@ const Card3DDetail = React.lazy(() => import('./components/garage/Card3DDetail')
 const ProfileSettingsModal = React.lazy(() => import('./components/profile/ProfileSettingsModal').then(m => ({ default: m.ProfileSettingsModal })));
 const ProfileScreen = React.lazy(() => import('./components/profile/ProfileScreen').then(m => ({ default: m.ProfileScreen })));
 const HuntScreen = React.lazy(() => import('./components/hunts/HuntScreen').then(m => ({ default: m.HuntScreen })));
+const StoreScreenshotFixtures = import.meta.env.DEV 
+  ? React.lazy(() => import('./components/dev/StoreScreenshotFixtures').then(m => ({ default: m.StoreScreenshotFixtures }))) 
+  : null;
 
 import { requestRealLocationPermission } from './utils/geolocation';
 import { applyAppTheme, THEME_ACCENT_PALETTES } from './utils/theme';
@@ -193,6 +196,15 @@ export const App: React.FC = () => {
       }
     }
   }, [onboardingCompleted, userId, userUsername, userStreakDays, userStreakLastAt]);
+
+  // Dev-only store screenshot mode (0 network calls, local static fixtures)
+  if (import.meta.env.DEV && StoreScreenshotFixtures && typeof window !== 'undefined' && window.location.search.includes('fixture=screenshot')) {
+    return (
+      <React.Suspense fallback={null}>
+        <StoreScreenshotFixtures />
+      </React.Suspense>
+    );
+  }
 
   if (!isAuthReady) {
     return (
