@@ -1,0 +1,8 @@
+# Frozen paths for Track S (Store Readiness)
+# Scope: Section 7.
+# May change: docs/**, public/**, static pages, Android release config.
+# Must not change: app behaviour (src/**, api/**, supabase/**).
+
+^api/
+^supabase/
+^src/

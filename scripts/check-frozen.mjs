@@ -19,8 +19,14 @@ const patterns = fs.readFileSync(frozenFile, 'utf8')
 
 let changedFiles = [];
 try {
-  // Diff against merge-base with ai/identification or master
-  let baseBranch = 'ai/identification';
+  // Diff against merge-base with parent track
+  let baseBranch = 'master';
+  if (track === 'S') baseBranch = 'fix/functional';
+  else if (track === 'F') baseBranch = 'ui/redesign';
+  else if (track === 'U') baseBranch = 'ai/identification';
+  else if (track === 'A') baseBranch = 'fix/stability';
+  else baseBranch = 'master';
+
   try {
     execSync(`git rev-parse --verify ${baseBranch}`, { stdio: 'ignore' });
   } catch {

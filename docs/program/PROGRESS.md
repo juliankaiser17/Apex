@@ -7,9 +7,9 @@
 ---
 
 ## 1. Current Status Summary
-- **Completed Tracks**: Track R (Stability and Release Engineering), Track A (AI Identification: Phase 13), Track U (UI Redesign: Phases 0–10), Track F (Functional Audit: Items 1–8)
-- **Active Track**: Track S (Store Readiness: S1–S7)
-- **Overall Program State**: Tracks R, A, U, and F 100% complete with passing test suites, 0 frozen path violations, 0 client bundle leaks, and verified proposals. Ready to execute Track S store readiness.
+- **Completed Tracks**: Track R (Stability and Release Engineering), Track A (AI Identification: Phase 13), Track U (UI Redesign: Phases 0–10), Track F (Functional Audit: Items 1–8), Track S (Store Readiness: S1–S7)
+- **Active Track**: Integration & Final Reporting (Section 8b & 8c)
+- **Overall Program State**: All five tracks (R, A, U, F, S) 100% complete with passing test suites, 0 frozen path violations, 0 client bundle leaks, verified store packages, and complete cryptographic evidence. Ready for final master integration and final report.
 
 ---
 
@@ -106,13 +106,13 @@
 - [x] Item 8: Card specs restricted to verified registry values (`scripts/test_verified_specs_only.ts`)
 
 ### Track S: Store Readiness (`release/store-readiness`)
-- [ ] S1: Listing package (`docs/store/LISTING.md`)
-- [ ] S2: Data-flow audit & privacy policy draft
-- [ ] S3: Data Safety worksheet
-- [ ] S4: Account deletion specification & static page
-- [ ] S5: UGC moderation gap analysis
-- [ ] S6: Store assets (screenshots & icon/graphic briefs)
-- [ ] S7: Release checklist (`docs/store/RELEASE_CHECKLIST.md`)
+- [x] S1: Listing package (`docs/store/LISTING.md`)
+- [x] S2: Data-flow audit & privacy policy draft (`docs/store/DATA_FLOW_AUDIT.md`, `docs/store/PRIVACY_POLICY_DRAFT.md`)
+- [x] S3: Data Safety worksheet (`docs/store/DATA_SAFETY_WORKSHEET.md`)
+- [x] S4: Account deletion specification & static page (`docs/store/ACCOUNT_DELETION_PAGE.md`, `public/account-deletion.html`)
+- [x] S5: UGC moderation gap analysis (`docs/store/UGC_GAP_ANALYSIS.md`)
+- [x] S6: Store assets (6 high-res screenshots in `docs/store/screenshots/`, briefs in `docs/store/ASSET_SPECIFICATIONS.md`)
+- [x] S7: Release checklist (`docs/store/RELEASE_CHECKLIST.md`)
 
 ---
 
