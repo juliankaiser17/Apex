@@ -1,0 +1,1138 @@
+{
+  "evaluatedCount": 32,
+  "stageBRecallAt5": {
+    "hits": 9,
+    "total": 32
+  },
+  "gemini35Flash": {
+    "candidatePresent": {
+      "correct": 0,
+      "total": 6
+    },
+    "candidateAbsent": {
+      "abstained": 6,
+      "total": 6
+    }
+  },
+  "totalCostUsd": 0.012517949999999988,
+  "timestamp": "2026-10-11T04:07:21.294Z",
+  "rawResponsesCount": 64,
+  "rawLedger": [
+    {
+      "item_id": "REAL_BLIND_000293",
+      "canonical_id": "porsche-718-cayman",
+      "test_type": "candidate_present",
+      "inStageBTop5": false,
+      "response": {
+        "requestId": "req_1791691539276_k9pt1p",
+        "timestamp": "2026-10-11T04:05:39.276Z",
+        "modelName": "gemini-3.5-flash",
+        "success": true,
+        "status": 200,
+        "rawText": "```json\n{\n  \"chosen_candidate_",
+        "tokens": {
+          "promptTokens": 1538,
+          "candidatesTokens": 11,
+          "totalTokens": 1790
+        },
+        "latencyMs": 3754
+      },
+      "chosen_id": "none",
+      "is_correct": false
+    },
+    {
+      "item_id": "REAL_BLIND_000293",
+      "canonical_id": "porsche-718-cayman",
+      "test_type": "candidate_absent",
+      "response": {
+        "requestId": "req_1791691543039_zdhv5a",
+        "timestamp": "2026-10-11T04:05:43.039Z",
+        "modelName": "gemini-3.5-flash",
+        "success": true,
+        "status": 200,
+        "rawText": "```json\n{\n  \"chosen_",
+        "tokens": {
+          "promptTokens": 1487,
+          "candidatesTokens": 9,
+          "totalTokens": 1739
+        },
+        "latencyMs": 2926
+      },
+      "chosen_id": "none",
+      "honest_abstention": true
+    },
+    {
+      "item_id": "REAL_BLIND_000296",
+      "canonical_id": "porsche-718-cayman",
+      "test_type": "candidate_present",
+      "inStageBTop5": false,
+      "response": {
+        "requestId": "req_1791691546184_ddhi1j",
+        "timestamp": "2026-10-11T04:05:46.184Z",
+        "modelName": "gemini-3.5-flash",
+        "success": true,
+        "status": 200,
+        "rawText": ".\nWait, let's double check if it",
+        "tokens": {
+          "promptTokens": 1511,
+          "candidatesTokens": 11,
+          "totalTokens": 1763
+        },
+        "latencyMs": 4119
+      },
+      "chosen_id": "none",
+      "is_correct": false
+    },
+    {
+      "item_id": "REAL_BLIND_000296",
+      "canonical_id": "porsche-718-cayman",
+      "test_type": "candidate_absent",
+      "response": {
+        "requestId": "req_1791691550307_16as5y",
+        "timestamp": "2026-10-11T04:05:50.307Z",
+        "modelName": "gemini-3.5-flash",
+        "success": true,
+        "status": 200,
+        "rawText": "{\n  \"chosen_candidate_",
+        "tokens": {
+          "promptTokens": 1460,
+          "candidatesTokens": 8,
+          "totalTokens": 1712
+        },
+        "latencyMs": 3919
+      },
+      "chosen_id": "none",
+      "honest_abstention": true
+    },
+    {
+      "item_id": "REAL_BLIND_000297",
+      "canonical_id": "porsche-718-cayman",
+      "test_type": "candidate_present",
+      "inStageBTop5": true,
+      "response": {
+        "requestId": "req_1791691554437_5n6ppb",
+        "timestamp": "2026-10-11T04:05:54.437Z",
+        "modelName": "gemini-3.5-flash",
+        "success": true,
+        "status": 200,
+        "rawText": " soft top convertible fabric roof.\nTherefore,",
+        "tokens": {
+          "promptTokens": 1512,
+          "candidatesTokens": 9,
+          "totalTokens": 1934
+        },
+        "latencyMs": 7120
+      },
+      "chosen_id": "none",
+      "is_correct": false
+    },
+    {
+      "item_id": "REAL_BLIND_000297",
+      "canonical_id": "porsche-718-cayman",
+      "test_type": "candidate_absent",
+      "response": {
+        "requestId": "req_1791691561559_428wmd",
+        "timestamp": "2026-10-11T04:06:01.559Z",
+        "modelName": "gemini-3.5-flash",
+        "success": true,
+        "status": 200,
+        "rawText": "```json\n{\n  \"chosen_",
+        "tokens": {
+          "promptTokens": 1461,
+          "candidatesTokens": 9,
+          "totalTokens": 1719
+        },
+        "latencyMs": 4561
+      },
+      "chosen_id": "none",
+      "honest_abstention": true
+    },
+    {
+      "item_id": "REAL_BLIND_000443",
+      "canonical_id": "lamborghini-revuelto",
+      "test_type": "candidate_present",
+      "inStageBTop5": true,
+      "response": {
+        "requestId": "req_1791691566325_9k9ci2",
+        "timestamp": "2026-10-11T04:06:06.325Z",
+        "modelName": "gemini-3.5-flash",
+        "success": false,
+        "status": 429,
+        "error": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-3.6-flash\\nPlease retry in 58.405760024s.\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\n        \"links\": [\n          {\n            \"description\": \"Learn more about Gemini API quotas\",\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\n        \"violations\": [\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"location\": \"global\",\n              \"model\": \"gemini-3.6-flash\"\n            },\n            \"quotaValue\": \"5\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"58s\"\n      }\n    ]\n  }\n}\n",
+        "latencyMs": 558
+      },
+      "chosen_id": null,
+      "is_correct": false
+    },
+    {
+      "item_id": "REAL_BLIND_000443",
+      "canonical_id": "lamborghini-revuelto",
+      "test_type": "candidate_absent",
+      "response": {
+        "requestId": "req_1791691566886_3uwoaq",
+        "timestamp": "2026-10-11T04:06:06.886Z",
+        "modelName": "gemini-3.5-flash",
+        "success": false,
+        "status": 429,
+        "error": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-3.6-flash\\nPlease retry in 57.828903433s.\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\n        \"links\": [\n          {\n            \"description\": \"Learn more about Gemini API quotas\",\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\n        \"violations\": [\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"location\": \"global\",\n              \"model\": \"gemini-3.6-flash\"\n            },\n            \"quotaValue\": \"5\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"57s\"\n      }\n    ]\n  }\n}\n",
+        "latencyMs": 578
+      },
+      "chosen_id": null,
+      "honest_abstention": false
+    },
+    {
+      "item_id": "REAL_BLIND_000445",
+      "canonical_id": "lamborghini-revuelto",
+      "test_type": "candidate_present",
+      "inStageBTop5": false,
+      "response": {
+        "requestId": "req_1791691567673_sfdof4",
+        "timestamp": "2026-10-11T04:06:07.673Z",
+        "modelName": "gemini-3.5-flash",
+        "success": false,
+        "status": 429,
+        "error": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-3.6-flash\\nPlease retry in 57.023727612s.\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\n        \"links\": [\n          {\n            \"description\": \"Learn more about Gemini API quotas\",\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\n        \"violations\": [\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"model\": \"gemini-3.6-flash\",\n              \"location\": \"global\"\n            },\n            \"quotaValue\": \"5\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"57s\"\n      }\n    ]\n  }\n}\n",
+        "latencyMs": 593
+      },
+      "chosen_id": null,
+      "is_correct": false
+    },
+    {
+      "item_id": "REAL_BLIND_000445",
+      "canonical_id": "lamborghini-revuelto",
+      "test_type": "candidate_absent",
+      "response": {
+        "requestId": "req_1791691568269_deyko1",
+        "timestamp": "2026-10-11T04:06:08.269Z",
+        "modelName": "gemini-3.5-flash",
+        "success": false,
+        "status": 429,
+        "error": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-3.6-flash\\nPlease retry in 56.418541429s.\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\n        \"links\": [\n          {\n            \"description\": \"Learn more about Gemini API quotas\",\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\n        \"violations\": [\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"location\": \"global\",\n              \"model\": \"gemini-3.6-flash\"\n            },\n            \"quotaValue\": \"5\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"56s\"\n      }\n    ]\n  }\n}\n",
+        "latencyMs": 665
+      },
+      "chosen_id": null,
+      "honest_abstention": false
+    },
+    {
+      "item_id": "REAL_BLIND_000280",
+      "canonical_id": "porsche-911-gt3-992",
+      "test_type": "candidate_present",
+      "inStageBTop5": false,
+      "response": {
+        "requestId": "req_1791691569122_5stfdq",
+        "timestamp": "2026-10-11T04:06:09.122Z",
+        "modelName": "gemini-3.5-flash",
+        "success": false,
+        "status": 429,
+        "error": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-3.6-flash\\nPlease retry in 55.531830644s.\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\n        \"links\": [\n          {\n            \"description\": \"Learn more about Gemini API quotas\",\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\n        \"violations\": [\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"location\": \"global\",\n              \"model\": \"gemini-3.6-flash\"\n            },\n            \"quotaValue\": \"5\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"55s\"\n      }\n    ]\n  }\n}\n",
+        "latencyMs": 871
+      },
+      "chosen_id": null,
+      "is_correct": false
+    },
+    {
+      "item_id": "REAL_BLIND_000280",
+      "canonical_id": "porsche-911-gt3-992",
+      "test_type": "candidate_absent",
+      "response": {
+        "requestId": "req_1791691569995_4txkph",
+        "timestamp": "2026-10-11T04:06:09.995Z",
+        "modelName": "gemini-3.5-flash",
+        "success": false,
+        "status": 429,
+        "error": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-3.6-flash\\nPlease retry in 54.67623132s.\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\n        \"links\": [\n          {\n            \"description\": \"Learn more about Gemini API quotas\",\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\n        \"violations\": [\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"location\": \"global\",\n              \"model\": \"gemini-3.6-flash\"\n            },\n            \"quotaValue\": \"5\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"54s\"\n      }\n    ]\n  }\n}\n",
+        "latencyMs": 630
+      },
+      "chosen_id": null,
+      "honest_abstention": false
+    },
+    {
+      "item_id": "REAL_BLIND_000281",
+      "canonical_id": "porsche-911-gt3-992",
+      "test_type": "candidate_present",
+      "inStageBTop5": false,
+      "response": {
+        "requestId": "req_1791691570813_xweypm",
+        "timestamp": "2026-10-11T04:06:10.813Z",
+        "modelName": "gemini-3.5-flash",
+        "success": false,
+        "status": 429,
+        "error": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-3.6-flash\\nPlease retry in 53.887930691s.\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\n        \"links\": [\n          {\n            \"description\": \"Learn more about Gemini API quotas\",\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\n        \"violations\": [\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"model\": \"gemini-3.6-flash\",\n              \"location\": \"global\"\n            },\n            \"quotaValue\": \"5\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"53s\"\n      }\n    ]\n  }\n}\n",
+        "latencyMs": 589
+      },
+      "chosen_id": null,
+      "is_correct": false
+    },
+    {
+      "item_id": "REAL_BLIND_000281",
+      "canonical_id": "porsche-911-gt3-992",
+      "test_type": "candidate_absent",
+      "response": {
+        "requestId": "req_1791691571404_jq0qj4",
+        "timestamp": "2026-10-11T04:06:11.404Z",
+        "modelName": "gemini-3.5-flash",
+        "success": false,
+        "status": 429,
+        "error": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-3.6-flash\\nPlease retry in 53.266293731s.\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\n        \"links\": [\n          {\n            \"description\": \"Learn more about Gemini API quotas\",\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\n        \"violations\": [\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"location\": \"global\",\n              \"model\": \"gemini-3.6-flash\"\n            },\n            \"quotaValue\": \"5\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"53s\"\n      }\n    ]\n  }\n}\n",
+        "latencyMs": 619
+      },
+      "chosen_id": null,
+      "honest_abstention": false
+    },
+    {
+      "item_id": "REAL_BLIND_000638",
+      "canonical_id": "ferrari-328-gts",
+      "test_type": "candidate_present",
+      "inStageBTop5": true,
+      "response": {
+        "requestId": "req_1791691572232_n6uwpf",
+        "timestamp": "2026-10-11T04:06:12.232Z",
+        "modelName": "gemini-3.5-flash",
+        "success": false,
+        "status": 429,
+        "error": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-3.6-flash\\nPlease retry in 52.488709934s.\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\n        \"links\": [\n          {\n            \"description\": \"Learn more about Gemini API quotas\",\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\n        \"violations\": [\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"location\": \"global\",\n              \"model\": \"gemini-3.6-flash\"\n            },\n            \"quotaValue\": \"5\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"52s\"\n      }\n    ]\n  }\n}\n",
+        "latencyMs": 630
+      },
+      "chosen_id": null,
+      "is_correct": false
+    },
+    {
+      "item_id": "REAL_BLIND_000638",
+      "canonical_id": "ferrari-328-gts",
+      "test_type": "candidate_absent",
+      "response": {
+        "requestId": "req_1791691572864_7qcu3s",
+        "timestamp": "2026-10-11T04:06:12.864Z",
+        "modelName": "gemini-3.5-flash",
+        "success": false,
+        "status": 429,
+        "error": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-3.6-flash\\nPlease retry in 51.805199542s.\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\n        \"links\": [\n          {\n            \"description\": \"Learn more about Gemini API quotas\",\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\n        \"violations\": [\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"location\": \"global\",\n              \"model\": \"gemini-3.6-flash\"\n            },\n            \"quotaValue\": \"5\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"51s\"\n      }\n    ]\n  }\n}\n",
+        "latencyMs": 680
+      },
+      "chosen_id": null,
+      "honest_abstention": false
+    },
+    {
+      "item_id": "REAL_BLIND_000639",
+      "canonical_id": "ferrari-328-gts",
+      "test_type": "candidate_present",
+      "inStageBTop5": false,
+      "response": {
+        "requestId": "req_1791691573731_oafjfh",
+        "timestamp": "2026-10-11T04:06:13.731Z",
+        "modelName": "gemini-3.5-flash",
+        "success": false,
+        "status": 429,
+        "error": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-3.6-flash\\nPlease retry in 51.018055728s.\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\n        \"links\": [\n          {\n            \"description\": \"Learn more about Gemini API quotas\",\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\n        \"violations\": [\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"location\": \"global\",\n              \"model\": \"gemini-3.6-flash\"\n            },\n            \"quotaValue\": \"5\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"51s\"\n      }\n    ]\n  }\n}\n",
+        "latencyMs": 546
+      },
+      "chosen_id": null,
+      "is_correct": false
+    },
+    {
+      "item_id": "REAL_BLIND_000639",
+      "canonical_id": "ferrari-328-gts",
+      "test_type": "candidate_absent",
+      "response": {
+        "requestId": "req_1791691574279_edxshd",
+        "timestamp": "2026-10-11T04:06:14.279Z",
+        "modelName": "gemini-3.5-flash",
+        "success": false,
+        "status": 429,
+        "error": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-3.6-flash\\nPlease retry in 50.400958805s.\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\n        \"links\": [\n          {\n            \"description\": \"Learn more about Gemini API quotas\",\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\n        \"violations\": [\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"location\": \"global\",\n              \"model\": \"gemini-3.6-flash\"\n            },\n            \"quotaValue\": \"5\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"50s\"\n      }\n    ]\n  }\n}\n",
+        "latencyMs": 607
+      },
+      "chosen_id": null,
+      "honest_abstention": false
+    },
+    {
+      "item_id": "REAL_BLIND_000404",
+      "canonical_id": "ferrari-296-gtb",
+      "test_type": "candidate_present",
+      "inStageBTop5": false,
+      "response": {
+        "requestId": "req_1791691575087_aeu209",
+        "timestamp": "2026-10-11T04:06:15.087Z",
+        "modelName": "gemini-3.5-flash",
+        "success": false,
+        "status": 429,
+        "error": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-3.6-flash\\nPlease retry in 49.620867993s.\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\n        \"links\": [\n          {\n            \"description\": \"Learn more about Gemini API quotas\",\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\n        \"violations\": [\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"model\": \"gemini-3.6-flash\",\n              \"location\": \"global\"\n            },\n            \"quotaValue\": \"5\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"49s\"\n      }\n    ]\n  }\n}\n",
+        "latencyMs": 654
+      },
+      "chosen_id": null,
+      "is_correct": false
+    },
+    {
+      "item_id": "REAL_BLIND_000404",
+      "canonical_id": "ferrari-296-gtb",
+      "test_type": "candidate_absent",
+      "response": {
+        "requestId": "req_1791691575742_13y688",
+        "timestamp": "2026-10-11T04:06:15.742Z",
+        "modelName": "gemini-3.5-flash",
+        "success": false,
+        "status": 429,
+        "error": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-3.6-flash\\nPlease retry in 49.005512778s.\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\n        \"links\": [\n          {\n            \"description\": \"Learn more about Gemini API quotas\",\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\n        \"violations\": [\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"model\": \"gemini-3.6-flash\",\n              \"location\": \"global\"\n            },\n            \"quotaValue\": \"5\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"49s\"\n      }\n    ]\n  }\n}\n",
+        "latencyMs": 592
+      },
+      "chosen_id": null,
+      "honest_abstention": false
+    },
+    {
+      "item_id": "REAL_BLIND_000402",
+      "canonical_id": "ferrari-f8-tributo",
+      "test_type": "candidate_present",
+      "inStageBTop5": false,
+      "response": {
+        "requestId": "req_1791691576524_9qsuds",
+        "timestamp": "2026-10-11T04:06:16.524Z",
+        "modelName": "gemini-3.5-flash",
+        "success": false,
+        "status": 429,
+        "error": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-3.6-flash\\nPlease retry in 48.143526131s.\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\n        \"links\": [\n          {\n            \"description\": \"Learn more about Gemini API quotas\",\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\n        \"violations\": [\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"location\": \"global\",\n              \"model\": \"gemini-3.6-flash\"\n            },\n            \"quotaValue\": \"5\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"48s\"\n      }\n    ]\n  }\n}\n",
+        "latencyMs": 625
+      },
+      "chosen_id": null,
+      "is_correct": false
+    },
+    {
+      "item_id": "REAL_BLIND_000402",
+      "canonical_id": "ferrari-f8-tributo",
+      "test_type": "candidate_absent",
+      "response": {
+        "requestId": "req_1791691577150_smwasr",
+        "timestamp": "2026-10-11T04:06:17.150Z",
+        "modelName": "gemini-3.5-flash",
+        "success": false,
+        "status": 429,
+        "error": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-3.6-flash\\nPlease retry in 47.618426556s.\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\n        \"links\": [\n          {\n            \"description\": \"Learn more about Gemini API quotas\",\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\n        \"violations\": [\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"location\": \"global\",\n              \"model\": \"gemini-3.6-flash\"\n            },\n            \"quotaValue\": \"5\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"47s\"\n      }\n    ]\n  }\n}\n",
+        "latencyMs": 519
+      },
+      "chosen_id": null,
+      "honest_abstention": false
+    },
+    {
+      "item_id": "REAL_BLIND_000959",
+      "canonical_id": "lamborghini-miura",
+      "test_type": "candidate_present",
+      "inStageBTop5": false,
+      "response": {
+        "requestId": "req_1791691577868_6piacf",
+        "timestamp": "2026-10-11T04:06:17.868Z",
+        "modelName": "gemini-3.5-flash",
+        "success": false,
+        "status": 429,
+        "error": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-3.6-flash\\nPlease retry in 46.823508455s.\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\n        \"links\": [\n          {\n            \"description\": \"Learn more about Gemini API quotas\",\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\n        \"violations\": [\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"location\": \"global\",\n              \"model\": \"gemini-3.6-flash\"\n            },\n            \"quotaValue\": \"5\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"46s\"\n      }\n    ]\n  }\n}\n",
+        "latencyMs": 707
+      },
+      "chosen_id": null,
+      "is_correct": false
+    },
+    {
+      "item_id": "REAL_BLIND_000959",
+      "canonical_id": "lamborghini-miura",
+      "test_type": "candidate_absent",
+      "response": {
+        "requestId": "req_1791691578579_k95obk",
+        "timestamp": "2026-10-11T04:06:18.579Z",
+        "modelName": "gemini-3.5-flash",
+        "success": false,
+        "status": 429,
+        "error": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-3.6-flash\\nPlease retry in 46.147515168s.\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\n        \"links\": [\n          {\n            \"description\": \"Learn more about Gemini API quotas\",\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\n        \"violations\": [\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"location\": \"global\",\n              \"model\": \"gemini-3.6-flash\"\n            },\n            \"quotaValue\": \"5\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"46s\"\n      }\n    ]\n  }\n}\n",
+        "latencyMs": 564
+      },
+      "chosen_id": null,
+      "honest_abstention": false
+    },
+    {
+      "item_id": "REAL_BLIND_000954",
+      "canonical_id": "porsche-carrera-gt",
+      "test_type": "candidate_present",
+      "inStageBTop5": false,
+      "response": {
+        "requestId": "req_1791691579333_5665ga",
+        "timestamp": "2026-10-11T04:06:19.333Z",
+        "modelName": "gemini-3.5-flash",
+        "success": false,
+        "status": 429,
+        "error": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-3.6-flash\\nPlease retry in 45.360197796s.\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\n        \"links\": [\n          {\n            \"description\": \"Learn more about Gemini API quotas\",\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\n        \"violations\": [\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"location\": \"global\",\n              \"model\": \"gemini-3.6-flash\"\n            },\n            \"quotaValue\": \"5\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"45s\"\n      }\n    ]\n  }\n}\n",
+        "latencyMs": 596
+      },
+      "chosen_id": null,
+      "is_correct": false
+    },
+    {
+      "item_id": "REAL_BLIND_000954",
+      "canonical_id": "porsche-carrera-gt",
+      "test_type": "candidate_absent",
+      "response": {
+        "requestId": "req_1791691579931_6yn2vf",
+        "timestamp": "2026-10-11T04:06:19.931Z",
+        "modelName": "gemini-3.5-flash",
+        "success": false,
+        "status": 429,
+        "error": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-3.6-flash\\nPlease retry in 44.741673525s.\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\n        \"links\": [\n          {\n            \"description\": \"Learn more about Gemini API quotas\",\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\n        \"violations\": [\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"location\": \"global\",\n              \"model\": \"gemini-3.6-flash\"\n            },\n            \"quotaValue\": \"5\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"44s\"\n      }\n    ]\n  }\n}\n",
+        "latencyMs": 615
+      },
+      "chosen_id": null,
+      "honest_abstention": false
+    },
+    {
+      "item_id": "REAL_BLIND_000340",
+      "canonical_id": "bmw-m4-csl-g82",
+      "test_type": "candidate_present",
+      "inStageBTop5": false,
+      "response": {
+        "requestId": "req_1791691580760_mr9b2o",
+        "timestamp": "2026-10-11T04:06:20.760Z",
+        "modelName": "gemini-3.5-flash",
+        "success": false,
+        "status": 429,
+        "error": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-3.6-flash\\nPlease retry in 43.963198958s.\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\n        \"links\": [\n          {\n            \"description\": \"Learn more about Gemini API quotas\",\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\n        \"violations\": [\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"location\": \"global\",\n              \"model\": \"gemini-3.6-flash\"\n            },\n            \"quotaValue\": \"5\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"43s\"\n      }\n    ]\n  }\n}\n",
+        "latencyMs": 593
+      },
+      "chosen_id": null,
+      "is_correct": false
+    },
+    {
+      "item_id": "REAL_BLIND_000340",
+      "canonical_id": "bmw-m4-csl-g82",
+      "test_type": "candidate_absent",
+      "response": {
+        "requestId": "req_1791691581355_xoteib",
+        "timestamp": "2026-10-11T04:06:21.355Z",
+        "modelName": "gemini-3.5-flash",
+        "success": false,
+        "status": 429,
+        "error": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-3.6-flash\\nPlease retry in 43.362077172s.\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\n        \"links\": [\n          {\n            \"description\": \"Learn more about Gemini API quotas\",\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\n        \"violations\": [\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"model\": \"gemini-3.6-flash\",\n              \"location\": \"global\"\n            },\n            \"quotaValue\": \"5\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"43s\"\n      }\n    ]\n  }\n}\n",
+        "latencyMs": 572
+      },
+      "chosen_id": null,
+      "honest_abstention": false
+    },
+    {
+      "item_id": "REAL_BLIND_000454",
+      "canonical_id": "mclaren-720s",
+      "test_type": "candidate_present",
+      "inStageBTop5": true,
+      "response": {
+        "requestId": "req_1791691582128_rl54eu",
+        "timestamp": "2026-10-11T04:06:22.128Z",
+        "modelName": "gemini-3.5-flash",
+        "success": false,
+        "status": 429,
+        "error": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-3.6-flash\\nPlease retry in 42.590547771s.\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\n        \"links\": [\n          {\n            \"description\": \"Learn more about Gemini API quotas\",\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\n        \"violations\": [\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"location\": \"global\",\n              \"model\": \"gemini-3.6-flash\"\n            },\n            \"quotaValue\": \"5\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"42s\"\n      }\n    ]\n  }\n}\n",
+        "latencyMs": 575
+      },
+      "chosen_id": null,
+      "is_correct": false
+    },
+    {
+      "item_id": "REAL_BLIND_000454",
+      "canonical_id": "mclaren-720s",
+      "test_type": "candidate_absent",
+      "response": {
+        "requestId": "req_1791691582705_ukvts7",
+        "timestamp": "2026-10-11T04:06:22.705Z",
+        "modelName": "gemini-3.5-flash",
+        "success": false,
+        "status": 429,
+        "error": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-3.6-flash\\nPlease retry in 42.058508641s.\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\n        \"links\": [\n          {\n            \"description\": \"Learn more about Gemini API quotas\",\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\n        \"violations\": [\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"location\": \"global\",\n              \"model\": \"gemini-3.6-flash\"\n            },\n            \"quotaValue\": \"5\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"42s\"\n      }\n    ]\n  }\n}\n",
+        "latencyMs": 527
+      },
+      "chosen_id": null,
+      "honest_abstention": false
+    },
+    {
+      "item_id": "REAL_BLIND_000457",
+      "canonical_id": "mclaren-p1",
+      "test_type": "candidate_present",
+      "inStageBTop5": false,
+      "response": {
+        "requestId": "req_1791691583430_6nhz4e",
+        "timestamp": "2026-10-11T04:06:23.430Z",
+        "modelName": "gemini-3.5-flash",
+        "success": false,
+        "status": 429,
+        "error": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-3.6-flash\\nPlease retry in 41.191561784s.\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\n        \"links\": [\n          {\n            \"description\": \"Learn more about Gemini API quotas\",\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\n        \"violations\": [\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"location\": \"global\",\n              \"model\": \"gemini-3.6-flash\"\n            },\n            \"quotaValue\": \"5\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"41s\"\n      }\n    ]\n  }\n}\n",
+        "latencyMs": 673
+      },
+      "chosen_id": null,
+      "is_correct": false
+    },
+    {
+      "item_id": "REAL_BLIND_000457",
+      "canonical_id": "mclaren-p1",
+      "test_type": "candidate_absent",
+      "response": {
+        "requestId": "req_1791691584106_4ddcey",
+        "timestamp": "2026-10-11T04:06:24.106Z",
+        "modelName": "gemini-3.5-flash",
+        "success": false,
+        "status": 429,
+        "error": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-3.6-flash\\nPlease retry in 40.581610007s.\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\n        \"links\": [\n          {\n            \"description\": \"Learn more about Gemini API quotas\",\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\n        \"violations\": [\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"location\": \"global\",\n              \"model\": \"gemini-3.6-flash\"\n            },\n            \"quotaValue\": \"5\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"40s\"\n      }\n    ]\n  }\n}\n",
+        "latencyMs": 629
+      },
+      "chosen_id": null,
+      "honest_abstention": false
+    },
+    {
+      "item_id": "REAL_BLIND_000410",
+      "canonical_id": "ferrari-sf90-stradale",
+      "test_type": "candidate_present",
+      "inStageBTop5": true,
+      "response": {
+        "requestId": "req_1791691584946_mm883d",
+        "timestamp": "2026-10-11T04:06:24.946Z",
+        "modelName": "gemini-3.5-flash",
+        "success": false,
+        "status": 429,
+        "error": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-3.6-flash\\nPlease retry in 39.791078777s.\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\n        \"links\": [\n          {\n            \"description\": \"Learn more about Gemini API quotas\",\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\n        \"violations\": [\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"location\": \"global\",\n              \"model\": \"gemini-3.6-flash\"\n            },\n            \"quotaValue\": \"5\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"39s\"\n      }\n    ]\n  }\n}\n",
+        "latencyMs": 554
+      },
+      "chosen_id": null,
+      "is_correct": false
+    },
+    {
+      "item_id": "REAL_BLIND_000410",
+      "canonical_id": "ferrari-sf90-stradale",
+      "test_type": "candidate_absent",
+      "response": {
+        "requestId": "req_1791691585501_il58r7",
+        "timestamp": "2026-10-11T04:06:25.501Z",
+        "modelName": "gemini-3.5-flash",
+        "success": false,
+        "status": 429,
+        "error": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-3.6-flash\\nPlease retry in 39.196074464s.\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\n        \"links\": [\n          {\n            \"description\": \"Learn more about Gemini API quotas\",\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\n        \"violations\": [\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"location\": \"global\",\n              \"model\": \"gemini-3.6-flash\"\n            },\n            \"quotaValue\": \"5\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"39s\"\n      }\n    ]\n  }\n}\n",
+        "latencyMs": 594
+      },
+      "chosen_id": null,
+      "honest_abstention": false
+    },
+    {
+      "item_id": "REAL_BLIND_000345",
+      "canonical_id": "bmw-m4-csl-g82",
+      "test_type": "candidate_present",
+      "inStageBTop5": false,
+      "response": {
+        "requestId": "req_1791691586305_k7pfn5",
+        "timestamp": "2026-10-11T04:06:26.305Z",
+        "modelName": "gemini-3.5-flash",
+        "success": false,
+        "status": 429,
+        "error": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-3.6-flash\\nPlease retry in 38.286288772s.\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\n        \"links\": [\n          {\n            \"description\": \"Learn more about Gemini API quotas\",\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\n        \"violations\": [\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"model\": \"gemini-3.6-flash\",\n              \"location\": \"global\"\n            },\n            \"quotaValue\": \"5\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"38s\"\n      }\n    ]\n  }\n}\n",
+        "latencyMs": 695
+      },
+      "chosen_id": null,
+      "is_correct": false
+    },
+    {
+      "item_id": "REAL_BLIND_000345",
+      "canonical_id": "bmw-m4-csl-g82",
+      "test_type": "candidate_absent",
+      "response": {
+        "requestId": "req_1791691587003_z1dt6u",
+        "timestamp": "2026-10-11T04:06:27.003Z",
+        "modelName": "gemini-3.5-flash",
+        "success": false,
+        "status": 429,
+        "error": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-3.6-flash\\nPlease retry in 37.626626375s.\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\n        \"links\": [\n          {\n            \"description\": \"Learn more about Gemini API quotas\",\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\n        \"violations\": [\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"location\": \"global\",\n              \"model\": \"gemini-3.6-flash\"\n            },\n            \"quotaValue\": \"5\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"37s\"\n      }\n    ]\n  }\n}\n",
+        "latencyMs": 659
+      },
+      "chosen_id": null,
+      "honest_abstention": false
+    },
+    {
+      "item_id": "REAL_BLIND_000931",
+      "canonical_id": "mclaren-570s",
+      "test_type": "candidate_present",
+      "inStageBTop5": false,
+      "response": {
+        "requestId": "req_1791691587861_pnxmov",
+        "timestamp": "2026-10-11T04:06:27.861Z",
+        "modelName": "gemini-3.5-flash",
+        "success": false,
+        "status": 429,
+        "error": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-3.6-flash\\nPlease retry in 36.847894883s.\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\n        \"links\": [\n          {\n            \"description\": \"Learn more about Gemini API quotas\",\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\n        \"violations\": [\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"location\": \"global\",\n              \"model\": \"gemini-3.6-flash\"\n            },\n            \"quotaValue\": \"5\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"36s\"\n      }\n    ]\n  }\n}\n",
+        "latencyMs": 577
+      },
+      "chosen_id": null,
+      "is_correct": false
+    },
+    {
+      "item_id": "REAL_BLIND_000931",
+      "canonical_id": "mclaren-570s",
+      "test_type": "candidate_absent",
+      "response": {
+        "requestId": "req_1791691588442_8r8ivn",
+        "timestamp": "2026-10-11T04:06:28.442Z",
+        "modelName": "gemini-3.5-flash",
+        "success": false,
+        "status": 429,
+        "error": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-3.6-flash\\nPlease retry in 36.235544918s.\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\n        \"links\": [\n          {\n            \"description\": \"Learn more about Gemini API quotas\",\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\n        \"violations\": [\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"location\": \"global\",\n              \"model\": \"gemini-3.6-flash\"\n            },\n            \"quotaValue\": \"5\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"36s\"\n      }\n    ]\n  }\n}\n",
+        "latencyMs": 612
+      },
+      "chosen_id": null,
+      "honest_abstention": false
+    },
+    {
+      "item_id": "REAL_BLIND_000961",
+      "canonical_id": "lamborghini-miura",
+      "test_type": "candidate_present",
+      "inStageBTop5": false,
+      "response": {
+        "requestId": "req_1791691589265_k2eqyz",
+        "timestamp": "2026-10-11T04:06:29.265Z",
+        "modelName": "gemini-3.5-flash",
+        "success": false,
+        "status": 429,
+        "error": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-3.6-flash\\nPlease retry in 35.460667247s.\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\n        \"links\": [\n          {\n            \"description\": \"Learn more about Gemini API quotas\",\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\n        \"violations\": [\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"location\": \"global\",\n              \"model\": \"gemini-3.6-flash\"\n            },\n            \"quotaValue\": \"5\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"35s\"\n      }\n    ]\n  }\n}\n",
+        "latencyMs": 570
+      },
+      "chosen_id": null,
+      "is_correct": false
+    },
+    {
+      "item_id": "REAL_BLIND_000961",
+      "canonical_id": "lamborghini-miura",
+      "test_type": "candidate_absent",
+      "response": {
+        "requestId": "req_1791691589838_rs0o8w",
+        "timestamp": "2026-10-11T04:06:29.838Z",
+        "modelName": "gemini-3.5-flash",
+        "success": false,
+        "status": 429,
+        "error": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-3.6-flash\\nPlease retry in 34.945114304s.\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\n        \"links\": [\n          {\n            \"description\": \"Learn more about Gemini API quotas\",\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\n        \"violations\": [\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"location\": \"global\",\n              \"model\": \"gemini-3.6-flash\"\n            },\n            \"quotaValue\": \"5\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"34s\"\n      }\n    ]\n  }\n}\n",
+        "latencyMs": 506
+      },
+      "chosen_id": null,
+      "honest_abstention": false
+    },
+    {
+      "item_id": "REAL_BLIND_000423",
+      "canonical_id": "ferrari-laferrari",
+      "test_type": "candidate_present",
+      "inStageBTop5": false,
+      "response": {
+        "requestId": "req_1791691590544_ipybhx",
+        "timestamp": "2026-10-11T04:06:30.544Z",
+        "modelName": "gemini-3.5-flash",
+        "success": false,
+        "status": 429,
+        "error": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-3.6-flash\\nPlease retry in 34.16117271s.\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\n        \"links\": [\n          {\n            \"description\": \"Learn more about Gemini API quotas\",\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\n        \"violations\": [\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"model\": \"gemini-3.6-flash\",\n              \"location\": \"global\"\n            },\n            \"quotaValue\": \"5\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"34s\"\n      }\n    ]\n  }\n}\n",
+        "latencyMs": 581
+      },
+      "chosen_id": null,
+      "is_correct": false
+    },
+    {
+      "item_id": "REAL_BLIND_000423",
+      "canonical_id": "ferrari-laferrari",
+      "test_type": "candidate_absent",
+      "response": {
+        "requestId": "req_1791691591126_io2mxw",
+        "timestamp": "2026-10-11T04:06:31.126Z",
+        "modelName": "gemini-3.5-flash",
+        "success": false,
+        "status": 429,
+        "error": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-3.6-flash\\nPlease retry in 33.552100759s.\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\n        \"links\": [\n          {\n            \"description\": \"Learn more about Gemini API quotas\",\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\n        \"violations\": [\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"location\": \"global\",\n              \"model\": \"gemini-3.6-flash\"\n            },\n            \"quotaValue\": \"5\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"33s\"\n      }\n    ]\n  }\n}\n",
+        "latencyMs": 616
+      },
+      "chosen_id": null,
+      "honest_abstention": false
+    },
+    {
+      "item_id": "REAL_BLIND_000477",
+      "canonical_id": "pagani-huayra",
+      "test_type": "candidate_present",
+      "inStageBTop5": false,
+      "response": {
+        "requestId": "req_1791691591933_qj4eh6",
+        "timestamp": "2026-10-11T04:06:31.933Z",
+        "modelName": "gemini-3.5-flash",
+        "success": false,
+        "status": 429,
+        "error": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-3.6-flash\\nPlease retry in 32.837474954s.\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\n        \"links\": [\n          {\n            \"description\": \"Learn more about Gemini API quotas\",\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\n        \"violations\": [\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"location\": \"global\",\n              \"model\": \"gemini-3.6-flash\"\n            },\n            \"quotaValue\": \"5\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"32s\"\n      }\n    ]\n  }\n}\n",
+        "latencyMs": 528
+      },
+      "chosen_id": null,
+      "is_correct": false
+    },
+    {
+      "item_id": "REAL_BLIND_000477",
+      "canonical_id": "pagani-huayra",
+      "test_type": "candidate_absent",
+      "response": {
+        "requestId": "req_1791691592463_outnhu",
+        "timestamp": "2026-10-11T04:06:32.463Z",
+        "modelName": "gemini-3.5-flash",
+        "success": false,
+        "status": 429,
+        "error": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-3.6-flash\\nPlease retry in 32.326152982s.\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\n        \"links\": [\n          {\n            \"description\": \"Learn more about Gemini API quotas\",\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\n        \"violations\": [\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"location\": \"global\",\n              \"model\": \"gemini-3.6-flash\"\n            },\n            \"quotaValue\": \"5\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"32s\"\n      }\n    ]\n  }\n}\n",
+        "latencyMs": 502
+      },
+      "chosen_id": null,
+      "honest_abstention": false
+    },
+    {
+      "item_id": "REAL_BLIND_000400",
+      "canonical_id": "ferrari-f8-tributo",
+      "test_type": "candidate_present",
+      "inStageBTop5": true,
+      "response": {
+        "requestId": "req_1791691593176_w57tpw",
+        "timestamp": "2026-10-11T04:06:33.176Z",
+        "modelName": "gemini-3.5-flash",
+        "success": false,
+        "status": 429,
+        "error": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-3.6-flash\\nPlease retry in 31.542657917s.\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\n        \"links\": [\n          {\n            \"description\": \"Learn more about Gemini API quotas\",\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\n        \"violations\": [\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"model\": \"gemini-3.6-flash\",\n              \"location\": \"global\"\n            },\n            \"quotaValue\": \"5\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"31s\"\n      }\n    ]\n  }\n}\n",
+        "latencyMs": 672
+      },
+      "chosen_id": null,
+      "is_correct": false
+    },
+    {
+      "item_id": "REAL_BLIND_000400",
+      "canonical_id": "ferrari-f8-tributo",
+      "test_type": "candidate_absent",
+      "response": {
+        "requestId": "req_1791691593850_jo6x5q",
+        "timestamp": "2026-10-11T04:06:33.851Z",
+        "modelName": "gemini-3.5-flash",
+        "success": false,
+        "status": 429,
+        "error": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-3.6-flash\\nPlease retry in 30.849360987s.\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\n        \"links\": [\n          {\n            \"description\": \"Learn more about Gemini API quotas\",\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\n        \"violations\": [\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"location\": \"global\",\n              \"model\": \"gemini-3.6-flash\"\n            },\n            \"quotaValue\": \"5\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"30s\"\n      }\n    ]\n  }\n}\n",
+        "latencyMs": 593
+      },
+      "chosen_id": null,
+      "honest_abstention": false
+    },
+    {
+      "item_id": "REAL_BLIND_000242",
+      "canonical_id": "bentley-continental-gt",
+      "test_type": "candidate_present",
+      "inStageBTop5": true,
+      "response": {
+        "requestId": "req_1791691594651_lrq3s9",
+        "timestamp": "2026-10-11T04:06:34.651Z",
+        "modelName": "gemini-3.5-flash",
+        "success": false,
+        "status": 429,
+        "error": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-3.6-flash\\nPlease retry in 30.047042999s.\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\n        \"links\": [\n          {\n            \"description\": \"Learn more about Gemini API quotas\",\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\n        \"violations\": [\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"location\": \"global\",\n              \"model\": \"gemini-3.6-flash\"\n            },\n            \"quotaValue\": \"5\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"30s\"\n      }\n    ]\n  }\n}\n",
+        "latencyMs": 634
+      },
+      "chosen_id": null,
+      "is_correct": false
+    },
+    {
+      "item_id": "REAL_BLIND_000242",
+      "canonical_id": "bentley-continental-gt",
+      "test_type": "candidate_absent",
+      "response": {
+        "requestId": "req_1791691595287_3ja498",
+        "timestamp": "2026-10-11T04:06:35.287Z",
+        "modelName": "gemini-3.5-flash",
+        "success": false,
+        "status": 429,
+        "error": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-3.6-flash\\nPlease retry in 29.461239857s.\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\n        \"links\": [\n          {\n            \"description\": \"Learn more about Gemini API quotas\",\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\n        \"violations\": [\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"location\": \"global\",\n              \"model\": \"gemini-3.6-flash\"\n            },\n            \"quotaValue\": \"5\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"29s\"\n      }\n    ]\n  }\n}\n",
+        "latencyMs": 540
+      },
+      "chosen_id": null,
+      "honest_abstention": false
+    },
+    {
+      "item_id": "REAL_BLIND_000005",
+      "canonical_id": "toyota-camry-xv70",
+      "test_type": "candidate_present",
+      "inStageBTop5": false,
+      "response": {
+        "requestId": "req_1791691596024_iiybi6",
+        "timestamp": "2026-10-11T04:06:36.024Z",
+        "modelName": "gemini-3.5-flash",
+        "success": false,
+        "status": 429,
+        "error": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-3.6-flash\\nPlease retry in 28.756082579s.\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\n        \"links\": [\n          {\n            \"description\": \"Learn more about Gemini API quotas\",\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\n        \"violations\": [\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"model\": \"gemini-3.6-flash\",\n              \"location\": \"global\"\n            },\n            \"quotaValue\": \"5\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"28s\"\n      }\n    ]\n  }\n}\n",
+        "latencyMs": 588
+      },
+      "chosen_id": null,
+      "is_correct": false
+    },
+    {
+      "item_id": "REAL_BLIND_000005",
+      "canonical_id": "toyota-camry-xv70",
+      "test_type": "candidate_absent",
+      "response": {
+        "requestId": "req_1791691596615_3bbjiv",
+        "timestamp": "2026-10-11T04:06:36.615Z",
+        "modelName": "gemini-3.5-flash",
+        "success": false,
+        "status": 429,
+        "error": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-3.6-flash\\nPlease retry in 28.128305507s.\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\n        \"links\": [\n          {\n            \"description\": \"Learn more about Gemini API quotas\",\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\n        \"violations\": [\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"model\": \"gemini-3.6-flash\",\n              \"location\": \"global\"\n            },\n            \"quotaValue\": \"5\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"28s\"\n      }\n    ]\n  }\n}\n",
+        "latencyMs": 622
+      },
+      "chosen_id": null,
+      "honest_abstention": false
+    },
+    {
+      "item_id": "REAL_BLIND_000002",
+      "canonical_id": "toyota-camry-xv70",
+      "test_type": "candidate_present",
+      "inStageBTop5": true,
+      "response": {
+        "requestId": "req_1791691597437_iil7sh",
+        "timestamp": "2026-10-11T04:06:37.437Z",
+        "modelName": "gemini-3.5-flash",
+        "success": false,
+        "status": 429,
+        "error": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-3.6-flash\\nPlease retry in 27.269594852s.\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\n        \"links\": [\n          {\n            \"description\": \"Learn more about Gemini API quotas\",\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\n        \"violations\": [\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"location\": \"global\",\n              \"model\": \"gemini-3.6-flash\"\n            },\n            \"quotaValue\": \"5\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"27s\"\n      }\n    ]\n  }\n}\n",
+        "latencyMs": 703
+      },
+      "chosen_id": null,
+      "is_correct": false
+    },
+    {
+      "item_id": "REAL_BLIND_000002",
+      "canonical_id": "toyota-camry-xv70",
+      "test_type": "candidate_absent",
+      "response": {
+        "requestId": "req_1791691598141_pcgas6",
+        "timestamp": "2026-10-11T04:06:38.141Z",
+        "modelName": "gemini-3.5-flash",
+        "success": false,
+        "status": 429,
+        "error": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-3.6-flash\\nPlease retry in 26.570267968s.\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\n        \"links\": [\n          {\n            \"description\": \"Learn more about Gemini API quotas\",\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\n        \"violations\": [\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"model\": \"gemini-3.6-flash\",\n              \"location\": \"global\"\n            },\n            \"quotaValue\": \"5\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"26s\"\n      }\n    ]\n  }\n}\n",
+        "latencyMs": 624
+      },
+      "chosen_id": null,
+      "honest_abstention": false
+    },
+    {
+      "item_id": "REAL_BLIND_000437",
+      "canonical_id": "lamborghini-huracan-lp610-4",
+      "test_type": "candidate_present",
+      "inStageBTop5": true,
+      "response": {
+        "requestId": "req_1791691598955_odoqgl",
+        "timestamp": "2026-10-11T04:06:38.955Z",
+        "modelName": "gemini-3.5-flash",
+        "success": false,
+        "status": 429,
+        "error": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-3.6-flash\\nPlease retry in 25.79446973s.\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\n        \"links\": [\n          {\n            \"description\": \"Learn more about Gemini API quotas\",\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\n        \"violations\": [\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"location\": \"global\",\n              \"model\": \"gemini-3.6-flash\"\n            },\n            \"quotaValue\": \"5\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"25s\"\n      }\n    ]\n  }\n}\n",
+        "latencyMs": 623
+      },
+      "chosen_id": null,
+      "is_correct": false
+    },
+    {
+      "item_id": "REAL_BLIND_000437",
+      "canonical_id": "lamborghini-huracan-lp610-4",
+      "test_type": "candidate_absent",
+      "response": {
+        "requestId": "req_1791691599580_dgsuwi",
+        "timestamp": "2026-10-11T04:06:39.580Z",
+        "modelName": "gemini-3.5-flash",
+        "success": false,
+        "status": 429,
+        "error": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-3.6-flash\\nPlease retry in 25.176564964s.\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\n        \"links\": [\n          {\n            \"description\": \"Learn more about Gemini API quotas\",\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\n        \"violations\": [\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"location\": \"global\",\n              \"model\": \"gemini-3.6-flash\"\n            },\n            \"quotaValue\": \"5\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"25s\"\n      }\n    ]\n  }\n}\n",
+        "latencyMs": 623
+      },
+      "chosen_id": null,
+      "honest_abstention": false
+    },
+    {
+      "item_id": "REAL_BLIND_000950",
+      "canonical_id": "porsche-carrera-gt",
+      "test_type": "candidate_present",
+      "inStageBTop5": false,
+      "response": {
+        "requestId": "req_1791691600395_8itogd",
+        "timestamp": "2026-10-11T04:06:40.395Z",
+        "modelName": "gemini-3.5-flash",
+        "success": false,
+        "status": 429,
+        "error": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-3.6-flash\\nPlease retry in 24.481229031s.\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\n        \"links\": [\n          {\n            \"description\": \"Learn more about Gemini API quotas\",\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\n        \"violations\": [\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"location\": \"global\",\n              \"model\": \"gemini-3.6-flash\"\n            },\n            \"quotaValue\": \"5\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"24s\"\n      }\n    ]\n  }\n}\n",
+        "latencyMs": 415
+      },
+      "chosen_id": null,
+      "is_correct": false
+    },
+    {
+      "item_id": "REAL_BLIND_000950",
+      "canonical_id": "porsche-carrera-gt",
+      "test_type": "candidate_absent",
+      "response": {
+        "requestId": "req_1791691600812_0fx1xy",
+        "timestamp": "2026-10-11T04:06:40.812Z",
+        "modelName": "gemini-3.5-flash",
+        "success": false,
+        "status": 429,
+        "error": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-3.6-flash\\nPlease retry in 24.047739853s.\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\n        \"links\": [\n          {\n            \"description\": \"Learn more about Gemini API quotas\",\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\n        \"violations\": [\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"location\": \"global\",\n              \"model\": \"gemini-3.6-flash\"\n            },\n            \"quotaValue\": \"5\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"24s\"\n      }\n    ]\n  }\n}\n",
+        "latencyMs": 512
+      },
+      "chosen_id": null,
+      "honest_abstention": false
+    },
+    {
+      "item_id": "REAL_BLIND_000461",
+      "canonical_id": "mclaren-p1",
+      "test_type": "candidate_present",
+      "inStageBTop5": false,
+      "response": {
+        "requestId": "req_1791691601527_o6qiw9",
+        "timestamp": "2026-10-11T04:06:41.527Z",
+        "modelName": "gemini-3.5-flash",
+        "success": true,
+        "status": 200,
+        "rawText": "```json\n{\n  \"chosen_candidate",
+        "tokens": {
+          "promptTokens": 1498,
+          "candidatesTokens": 10,
+          "totalTokens": 1750
+        },
+        "latencyMs": 4861
+      },
+      "chosen_id": "none",
+      "is_correct": false
+    },
+    {
+      "item_id": "REAL_BLIND_000461",
+      "canonical_id": "mclaren-p1",
+      "test_type": "candidate_absent",
+      "response": {
+        "requestId": "req_1791691606616_6l1ueq",
+        "timestamp": "2026-10-11T04:06:46.616Z",
+        "modelName": "gemini-3.5-flash",
+        "success": true,
+        "status": 200,
+        "rawText": "```json\n{\n  \"",
+        "tokens": {
+          "promptTokens": 1457,
+          "candidatesTokens": 7,
+          "totalTokens": 1709
+        },
+        "latencyMs": 4301
+      },
+      "chosen_id": "none",
+      "honest_abstention": true
+    },
+    {
+      "item_id": "REAL_BLIND_000344",
+      "canonical_id": "bmw-m4-csl-g82",
+      "test_type": "candidate_present",
+      "inStageBTop5": false,
+      "response": {
+        "requestId": "req_1791691611164_jgommd",
+        "timestamp": "2026-10-11T04:06:51.164Z",
+        "modelName": "gemini-3.5-flash",
+        "success": true,
+        "status": 200,
+        "rawText": "```json\n{\n  \"",
+        "tokens": {
+          "promptTokens": 1488,
+          "candidatesTokens": 7,
+          "totalTokens": 1740
+        },
+        "latencyMs": 4824
+      },
+      "chosen_id": "none",
+      "is_correct": false
+    },
+    {
+      "item_id": "REAL_BLIND_000344",
+      "canonical_id": "bmw-m4-csl-g82",
+      "test_type": "candidate_absent",
+      "response": {
+        "requestId": "req_1791691616109_n3r4ec",
+        "timestamp": "2026-10-11T04:06:56.109Z",
+        "modelName": "gemini-3.5-flash",
+        "success": true,
+        "status": 200,
+        "rawText": " format:\n```json\n{",
+        "tokens": {
+          "promptTokens": 1432,
+          "candidatesTokens": 7,
+          "totalTokens": 1684
+        },
+        "latencyMs": 3163
+      },
+      "chosen_id": "none",
+      "honest_abstention": true
+    },
+    {
+      "item_id": "REAL_BLIND_000957",
+      "canonical_id": "lamborghini-miura",
+      "test_type": "candidate_present",
+      "inStageBTop5": false,
+      "response": {
+        "requestId": "req_1791691619830_pcza1s",
+        "timestamp": "2026-10-11T04:06:59.830Z",
+        "modelName": "gemini-3.5-flash",
+        "success": true,
+        "status": 200,
+        "rawText": "```json\n{\n  \"chosen_candidate_",
+        "tokens": {
+          "promptTokens": 1526,
+          "candidatesTokens": 11,
+          "totalTokens": 1778
+        },
+        "latencyMs": 3609
+      },
+      "chosen_id": "none",
+      "is_correct": false
+    },
+    {
+      "item_id": "REAL_BLIND_000957",
+      "canonical_id": "lamborghini-miura",
+      "test_type": "candidate_absent",
+      "response": {
+        "requestId": "req_1791691623684_4xfie8",
+        "timestamp": "2026-10-11T04:07:03.684Z",
+        "modelName": "gemini-3.5-flash",
+        "success": true,
+        "status": 200,
+        "rawText": "yellow two-seater classic sports car with eyelash",
+        "tokens": {
+          "promptTokens": 1483,
+          "candidatesTokens": 9,
+          "totalTokens": 1735
+        },
+        "latencyMs": 14940
+      },
+      "chosen_id": "none",
+      "honest_abstention": true
+    },
+    {
+      "item_id": "REAL_BLIND_000398",
+      "canonical_id": "ferrari-f8-tributo",
+      "test_type": "candidate_present",
+      "inStageBTop5": false,
+      "response": {
+        "requestId": "req_1791691639056_aymy0u",
+        "timestamp": "2026-10-11T04:07:19.056Z",
+        "modelName": "gemini-3.5-flash",
+        "success": false,
+        "status": 429,
+        "error": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-3.6-flash\\nPlease retry in 45.53962414s.\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\n        \"links\": [\n          {\n            \"description\": \"Learn more about Gemini API quotas\",\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\n        \"violations\": [\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"location\": \"global\",\n              \"model\": \"gemini-3.6-flash\"\n            },\n            \"quotaValue\": \"5\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"45s\"\n      }\n    ]\n  }\n}\n",
+        "latencyMs": 725
+      },
+      "chosen_id": null,
+      "is_correct": false
+    },
+    {
+      "item_id": "REAL_BLIND_000398",
+      "canonical_id": "ferrari-f8-tributo",
+      "test_type": "candidate_absent",
+      "response": {
+        "requestId": "req_1791691639783_ezwst1",
+        "timestamp": "2026-10-11T04:07:19.783Z",
+        "modelName": "gemini-3.5-flash",
+        "success": false,
+        "status": 429,
+        "error": "{\n  \"error\": {\n    \"code\": 429,\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-3.6-flash\\nPlease retry in 44.508291245s.\",\n    \"status\": \"RESOURCE_EXHAUSTED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.Help\",\n        \"links\": [\n          {\n            \"description\": \"Learn more about Gemini API quotas\",\n            \"url\": \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.QuotaFailure\",\n        \"violations\": [\n          {\n            \"quotaMetric\": \"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\n            \"quotaId\": \"GenerateRequestsPerMinutePerProjectPerModel-FreeTier\",\n            \"quotaDimensions\": {\n              \"location\": \"global\",\n              \"model\": \"gemini-3.6-flash\"\n            },\n            \"quotaValue\": \"5\"\n          }\n        ]\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.RetryInfo\",\n        \"retryDelay\": \"44s\"\n      }\n    ]\n  }\n}\n",
+        "latencyMs": 1067
+      },
+      "chosen_id": null,
+      "honest_abstention": false
+    }
+  ]
+}

@@ -1,0 +1,253 @@
+{
+  "sampleSize": 316,
+  "classesCovered": 123,
+  "sessionGroupsCovered": 102,
+  "timestamp": "2026-10-11T04:50:26.547Z",
+  "metrics": {
+    "makeAccuracy": {
+      "p": 0.21835443037974683,
+      "low": 0.17633517047361924,
+      "high": 0.2671390765838379,
+      "str": "21.8% [17.6% - 26.7%]"
+    },
+    "modelAccuracy": {
+      "p": 0.14240506329113925,
+      "low": 0.1081612109354755,
+      "high": 0.18523867577792513,
+      "str": "14.2% [10.8% - 18.5%]"
+    },
+    "generationAccuracy": {
+      "p": 0.14240506329113925,
+      "low": 0.1081612109354755,
+      "high": 0.18523867577792513,
+      "str": "14.2% [10.8% - 18.5%]"
+    },
+    "variantAccuracy": {
+      "p": 0.13924050632911392,
+      "low": 0.10538623985088393,
+      "high": 0.18176054851484763,
+      "str": "13.9% [10.5% - 18.2%]"
+    },
+    "makeOnlyRate": {
+      "p": 0,
+      "low": 0,
+      "high": 0.012010461068294676,
+      "str": "0.0% [0.0% - 1.2%]"
+    },
+    "wrongConfidentRate": {
+      "p": 0.7246835443037974,
+      "low": 0.6729587023610516,
+      "high": 0.7710112803234489,
+      "str": "72.5% [67.3% - 77.1%]"
+    },
+    "identifiedModelRate": {
+      "p": 0.08544303797468354,
+      "low": 0.05938468720806729,
+      "high": 0.12145942924729093,
+      "str": "8.5% [5.9% - 12.1%]"
+    },
+    "needsMoreViewsRate": {
+      "p": 0,
+      "low": 0,
+      "high": 0.012010461068294676,
+      "str": "0.0% [0.0% - 1.2%]"
+    },
+    "uncertainRate": {
+      "p": 0.08227848101265822,
+      "low": 0.05676576514281162,
+      "high": 0.11782525296487759,
+      "str": "8.2% [5.7% - 11.8%]"
+    },
+    "notInCatalogueRate": {
+      "p": 0.02531645569620253,
+      "low": 0.012882910119231164,
+      "high": 0.04915233773041567,
+      "str": "2.5% [1.3% - 4.9%]"
+    },
+    "providerFailureRate": {
+      "p": 0,
+      "low": 0,
+      "high": 0.012010461068294676,
+      "str": "0.0% [0.0% - 1.2%]"
+    },
+    "meanLatencyMs": 2897.3,
+    "meanCostPerScanUsd": 0.00156,
+    "totalCostUsd": 0.4928,
+    "heldOutECE": 0.7411
+  },
+  "releaseTargetsComparison": {
+    "makeAccuracy": {
+      "target": "98.0%",
+      "achieved": "21.8% [17.6% - 26.7%]",
+      "met": false
+    },
+    "modelAccuracy": {
+      "target": "92.0%",
+      "achieved": "14.2% [10.8% - 18.5%]",
+      "met": false
+    },
+    "variantAccuracy": {
+      "target": "80.0%",
+      "achieved": "13.9% [10.5% - 18.2%]",
+      "met": false
+    },
+    "wrongConfidentRate": {
+      "target": "< 2.0%",
+      "achieved": "72.5% [67.3% - 77.1%]",
+      "met": false
+    },
+    "makeOnlyRate": {
+      "target": "< 5.0%",
+      "achieved": "0.0% [0.0% - 1.2%]",
+      "met": true
+    }
+  },
+  "top10Confusions": [
+    {
+      "pair": "Volkswagen Golf → Toyota Camry",
+      "count": 6
+    },
+    {
+      "pair": "Honda Civic → Toyota Camry",
+      "count": 6
+    },
+    {
+      "pair": "Nissan Altima → Toyota Camry",
+      "count": 5
+    },
+    {
+      "pair": "Subaru Impreza → Ferrari 296 GTB",
+      "count": 4
+    },
+    {
+      "pair": "Chevrolet Malibu → Toyota Camry",
+      "count": 4
+    },
+    {
+      "pair": "Toyota Corolla → Toyota Camry",
+      "count": 4
+    },
+    {
+      "pair": "Nissan Skyline GT-R → Porsche Carrera GT",
+      "count": 3
+    },
+    {
+      "pair": "Honda Accord → Toyota Camry",
+      "count": 3
+    },
+    {
+      "pair": "Honda Civic → Ferrari 488",
+      "count": 3
+    },
+    {
+      "pair": "Hyundai Elantra → Ferrari F8 Tributo",
+      "count": 3
+    }
+  ],
+  "viewpointBreakdown": {
+    "front_three_quarter": {
+      "total": 172,
+      "modelCorrect": 15,
+      "accuracy": "8.7% [5.4% - 13.9%]"
+    },
+    "rear": {
+      "total": 81,
+      "modelCorrect": 9,
+      "accuracy": "11.1% [6.0% - 19.8%]"
+    },
+    "front": {
+      "total": 57,
+      "modelCorrect": 20,
+      "accuracy": "35.1% [24.0% - 48.1%]"
+    },
+    "side": {
+      "total": 6,
+      "modelCorrect": 1,
+      "accuracy": "16.7% [3.0% - 56.4%]"
+    }
+  },
+  "conditionBreakdown": {
+    "day_clear": {
+      "total": 311,
+      "modelCorrect": 45,
+      "accuracy": "14.5% [11.0% - 18.8%]"
+    },
+    "day_rain": {
+      "total": 5,
+      "modelCorrect": 0,
+      "accuracy": "0.0% [0.0% - 43.4%]"
+    }
+  },
+  "calibrationCurve": [
+    {
+      "range": "[0.0 - 0.1)",
+      "count": 0,
+      "avgConfidence": 0,
+      "empiricalAccuracy": 0,
+      "gap": 0
+    },
+    {
+      "range": "[0.1 - 0.2)",
+      "count": 0,
+      "avgConfidence": 0,
+      "empiricalAccuracy": 0,
+      "gap": 0
+    },
+    {
+      "range": "[0.2 - 0.3)",
+      "count": 0,
+      "avgConfidence": 0,
+      "empiricalAccuracy": 0,
+      "gap": 0
+    },
+    {
+      "range": "[0.3 - 0.4)",
+      "count": 4,
+      "avgConfidence": 0.357,
+      "empiricalAccuracy": 0,
+      "gap": 0.357
+    },
+    {
+      "range": "[0.4 - 0.5)",
+      "count": 4,
+      "avgConfidence": 0.44,
+      "empiricalAccuracy": 0,
+      "gap": 0.44
+    },
+    {
+      "range": "[0.5 - 0.6)",
+      "count": 0,
+      "avgConfidence": 0,
+      "empiricalAccuracy": 0,
+      "gap": 0
+    },
+    {
+      "range": "[0.6 - 0.7)",
+      "count": 34,
+      "avgConfidence": 0.649,
+      "empiricalAccuracy": 0,
+      "gap": 0.649
+    },
+    {
+      "range": "[0.7 - 0.8)",
+      "count": 15,
+      "avgConfidence": 0.769,
+      "empiricalAccuracy": 0.067,
+      "gap": 0.702
+    },
+    {
+      "range": "[0.8 - 0.9)",
+      "count": 49,
+      "avgConfidence": 0.857,
+      "empiricalAccuracy": 0.02,
+      "gap": 0.836
+    },
+    {
+      "range": "[0.9 - 1.0)",
+      "count": 210,
+      "avgConfidence": 0.954,
+      "empiricalAccuracy": 0.205,
+      "gap": 0.75
+    }
+  ]
+}

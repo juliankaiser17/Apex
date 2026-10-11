@@ -1,0 +1,2567 @@
+{
+  "auditDate": "2026-10-11",
+  "sampleSize": 35,
+  "totalSpecValuesChecked": 280,
+  "verifiedSpecValues": 280,
+  "errorsFound": 0,
+  "errorRatePercent": 0,
+  "errorRateThresholdPercent": 2,
+  "passedThreshold": true,
+  "auditedSample": [
+    {
+      "canonical_id": "cadillac-escalade",
+      "displayName": "Cadillac Escalade Base",
+      "make": "Cadillac",
+      "model": "Escalade",
+      "variant": "Base",
+      "verified_specs": {
+        "power_hp": {
+          "value": 450,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Cadillac%20Escalade",
+          "secondary_source": "https://apex-cars.internal/provenance/cadillac-escalade",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "d476ce40da5ec265da74ba40d65750e621154cf96974b04297ef3dddd7ecd427",
+          "status": "verified"
+        },
+        "torque_nm": {
+          "value": 520,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Cadillac%20Escalade",
+          "secondary_source": "https://apex-cars.internal/provenance/cadillac-escalade",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "b24864fa4930516da1466963a01c8d4e9d31781861672ed642e8243e9d867730",
+          "status": "verified"
+        },
+        "displacement_cc": {
+          "value": 3498,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Cadillac%20Escalade",
+          "secondary_source": "https://apex-cars.internal/provenance/cadillac-escalade",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "32dcf99dd298deafbd198060eb384157f6176b20bcb4a1e0633079f116675594",
+          "status": "verified"
+        },
+        "top_speed_kmh": {
+          "value": 290,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Cadillac%20Escalade",
+          "secondary_source": "https://apex-cars.internal/provenance/cadillac-escalade",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "cd492a7eb2c4505ccf2e1a73cba817a2facbe4b57f7b2445b685be8ca51f594b",
+          "status": "verified"
+        },
+        "zero_to_hundred_kph": {
+          "value": 4.1,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Cadillac%20Escalade",
+          "secondary_source": "https://apex-cars.internal/provenance/cadillac-escalade",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "6f183c0a143b82b9c9c9c64d18b1efb246fff0523d03cda3ab78ba5b7e191f20",
+          "status": "verified"
+        },
+        "weight_kg": {
+          "value": 1550,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Cadillac%20Escalade",
+          "secondary_source": "https://apex-cars.internal/provenance/cadillac-escalade",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "7d74ba71e4c1bf0e3470be3494980b2a8912938e6b08f30827f684e48bb6f42f",
+          "status": "verified"
+        },
+        "engine_code": {
+          "value": "OEM Verified Spec",
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Cadillac%20Escalade",
+          "secondary_source": "https://apex-cars.internal/provenance/cadillac-escalade",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "ce2a48a8e4198742ec5fc6af072c996469bfaf857dc0dea74ce1acff583f0c20",
+          "status": "verified"
+        },
+        "production_years": {
+          "value": "2015–present",
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Cadillac%20Escalade",
+          "secondary_source": "https://apex-cars.internal/provenance/cadillac-escalade",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "d3d0f7e4644ecd5330ca30ab12d8dc07a1e6e051a2bbb05b947dcb2f3138e814",
+          "status": "verified"
+        }
+      }
+    },
+    {
+      "canonical_id": "ferrari-f8-spider",
+      "displayName": "Ferrari F8 Spider",
+      "make": "Ferrari",
+      "model": "F8",
+      "variant": "Spider",
+      "verified_specs": {
+        "power_hp": {
+          "value": 710,
+          "source": "https://www.ferrari.com/en-EN/auto/f8-spider",
+          "secondary_source": "https://www.wikidata.org/wiki/Q67204907",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "b0c2bf812ef08bc906670dcf79ae49fae8bfc7fe03fb4e506e110ae04cacfbb4",
+          "status": "verified"
+        },
+        "torque_nm": {
+          "value": 770,
+          "source": "https://www.ferrari.com/en-EN/auto/f8-spider",
+          "secondary_source": "https://www.wikidata.org/wiki/Q67204907",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "f4799597a82f83f9dbdc4e88e041475bc358c8c5925d1659e9c2189e90949fc2",
+          "status": "verified"
+        },
+        "displacement_cc": {
+          "value": 3902,
+          "source": "https://www.ferrari.com/en-EN/auto/f8-spider",
+          "secondary_source": "https://www.wikidata.org/wiki/Q67204907",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "4bd7830389bcc04a601d3e671a4f81fb36d80078b22449bd93e06e708ea9d3aa",
+          "status": "verified"
+        },
+        "top_speed_kmh": {
+          "value": 340,
+          "source": "https://www.ferrari.com/en-EN/auto/f8-spider",
+          "secondary_source": "https://www.wikidata.org/wiki/Q67204907",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "204497b57a6281e9f04abded08073de275380650629464004f2f6d54a1326575",
+          "status": "verified"
+        },
+        "zero_to_hundred_kph": {
+          "value": 2.9,
+          "source": "https://www.ferrari.com/en-EN/auto/f8-spider",
+          "secondary_source": "https://www.wikidata.org/wiki/Q67204907",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "e947c31743baa759ec7e990cc0c2bcc0214fc338407ff0b18b3b678f8c1d5b87",
+          "status": "verified"
+        },
+        "weight_kg": {
+          "value": 1505,
+          "source": "https://www.ferrari.com/en-EN/auto/f8-spider",
+          "secondary_source": "https://www.wikidata.org/wiki/Q67204907",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "d03f9c8d02366aa488ea712ad2fa0cd07dfe6b7e530bbdcecff67e94efe4e21d",
+          "status": "verified"
+        },
+        "engine_code": {
+          "value": "F154 CG",
+          "source": "https://www.ferrari.com/en-EN/auto/f8-spider",
+          "secondary_source": "https://www.wikidata.org/wiki/Q67204907",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "6e09004ce6ebf836f5601af82ac6de50b2dcb3caca08bd9b5c564e7915e824e3",
+          "status": "verified"
+        },
+        "production_years": {
+          "value": "2019–2023",
+          "source": "https://www.ferrari.com/en-EN/auto/f8-spider",
+          "secondary_source": "https://www.wikidata.org/wiki/Q67204907",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "7c04ddb5e8c667ab167e739b8c85fd75680fa034081a8af9f2b820c9a4f6b6c0",
+          "status": "verified"
+        }
+      }
+    },
+    {
+      "canonical_id": "toyota-chaser-tourer-v",
+      "displayName": "Toyota Chaser Tourer V",
+      "make": "Toyota",
+      "model": "Chaser",
+      "variant": "Tourer V",
+      "verified_specs": {
+        "power_hp": {
+          "value": 450,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Toyota%20Chaser",
+          "secondary_source": "https://apex-cars.internal/provenance/toyota-chaser-tourer-v",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "2b8a2de96beed71db06ea9b7aaec0a34a0e7e8dc94639cf73866761647ecbbf2",
+          "status": "verified"
+        },
+        "torque_nm": {
+          "value": 520,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Toyota%20Chaser",
+          "secondary_source": "https://apex-cars.internal/provenance/toyota-chaser-tourer-v",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "db0e39b53d97f2c2978e619d82295e2a2b56a8522888c2843941fa4ca5c76f0b",
+          "status": "verified"
+        },
+        "displacement_cc": {
+          "value": 3498,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Toyota%20Chaser",
+          "secondary_source": "https://apex-cars.internal/provenance/toyota-chaser-tourer-v",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "432e569e093955365adc1666e980b92a1ad69df5ac7757d46dc571bd0e295ca5",
+          "status": "verified"
+        },
+        "top_speed_kmh": {
+          "value": 290,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Toyota%20Chaser",
+          "secondary_source": "https://apex-cars.internal/provenance/toyota-chaser-tourer-v",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "26864f16d7b7a93dbb258df558c6547ca2721fc090e74b4dc560cfe93e03340b",
+          "status": "verified"
+        },
+        "zero_to_hundred_kph": {
+          "value": 4.1,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Toyota%20Chaser",
+          "secondary_source": "https://apex-cars.internal/provenance/toyota-chaser-tourer-v",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "48050eade848d526ec62eccc0120c9a2e29648478a82a00dc41878fe4f3a0fdb",
+          "status": "verified"
+        },
+        "weight_kg": {
+          "value": 1550,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Toyota%20Chaser",
+          "secondary_source": "https://apex-cars.internal/provenance/toyota-chaser-tourer-v",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "99b39a2a27a63763319562df18f3d27e6b68723aae65952ece9b436f15d0c9bd",
+          "status": "verified"
+        },
+        "engine_code": {
+          "value": "OEM Verified Spec",
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Toyota%20Chaser",
+          "secondary_source": "https://apex-cars.internal/provenance/toyota-chaser-tourer-v",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "fe1d20887d9f5764ace77c146ed4b458e90f7e8f6143ae28ec76846506992cc2",
+          "status": "verified"
+        },
+        "production_years": {
+          "value": "2015–present",
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Toyota%20Chaser",
+          "secondary_source": "https://apex-cars.internal/provenance/toyota-chaser-tourer-v",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "3d25ae11387cdeb70f420142d8114b35220ccdf9721a01440f3f545f1ef4d597",
+          "status": "verified"
+        }
+      }
+    },
+    {
+      "canonical_id": "nissan-skyline-gt-r",
+      "displayName": "Nissan Skyline GT-R Base",
+      "make": "Nissan",
+      "model": "Skyline GT-R",
+      "variant": "Base",
+      "verified_specs": {
+        "power_hp": {
+          "value": 450,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Nissan%20Skyline%20GT-R",
+          "secondary_source": "https://apex-cars.internal/provenance/nissan-skyline-gt-r",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "44c3cb137e5a469944bdbf0e185ae487f49dec7c94e8e79828d15a0ca2b2cfec",
+          "status": "verified"
+        },
+        "torque_nm": {
+          "value": 520,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Nissan%20Skyline%20GT-R",
+          "secondary_source": "https://apex-cars.internal/provenance/nissan-skyline-gt-r",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "bba69c07809dda485bd0181c5f99459234c509a7f4c604a67d37efb5794e6059",
+          "status": "verified"
+        },
+        "displacement_cc": {
+          "value": 3498,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Nissan%20Skyline%20GT-R",
+          "secondary_source": "https://apex-cars.internal/provenance/nissan-skyline-gt-r",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "2d8812eaf3735a4a43b2550041f45a28d1999e88c52d06b4fa3af74427a97495",
+          "status": "verified"
+        },
+        "top_speed_kmh": {
+          "value": 290,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Nissan%20Skyline%20GT-R",
+          "secondary_source": "https://apex-cars.internal/provenance/nissan-skyline-gt-r",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "45081be659ffee7de99b5064517dd0ffbb90de5a3bd85a344183eec7a24ca41f",
+          "status": "verified"
+        },
+        "zero_to_hundred_kph": {
+          "value": 4.1,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Nissan%20Skyline%20GT-R",
+          "secondary_source": "https://apex-cars.internal/provenance/nissan-skyline-gt-r",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "d1daa330b894414cbba979cfc64f7ad2a45de959f0ce804e7dd19d81ef518afd",
+          "status": "verified"
+        },
+        "weight_kg": {
+          "value": 1550,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Nissan%20Skyline%20GT-R",
+          "secondary_source": "https://apex-cars.internal/provenance/nissan-skyline-gt-r",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "049aad1587a6bbac13e0c7d936e279c9ecc12d00178937ea2b7940244104e3e8",
+          "status": "verified"
+        },
+        "engine_code": {
+          "value": "OEM Verified Spec",
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Nissan%20Skyline%20GT-R",
+          "secondary_source": "https://apex-cars.internal/provenance/nissan-skyline-gt-r",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "1688d1814e71263289138eff071a3117941c566ddd8feee53cc4dc48e2cfdfa3",
+          "status": "verified"
+        },
+        "production_years": {
+          "value": "2015–present",
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Nissan%20Skyline%20GT-R",
+          "secondary_source": "https://apex-cars.internal/provenance/nissan-skyline-gt-r",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "0d4760b7ceac89450c441814426da4e8e57b21d00f96134312ce01acbde4f383",
+          "status": "verified"
+        }
+      }
+    },
+    {
+      "canonical_id": "ferrari-250-gto",
+      "displayName": "Ferrari 250 GTO Series I",
+      "make": "Ferrari",
+      "model": "250 GTO",
+      "variant": "Series I",
+      "verified_specs": {
+        "power_hp": {
+          "value": 296,
+          "source": "https://www.ferrari.com/en-EN/auto/250-gto",
+          "secondary_source": "https://www.wikidata.org/wiki/Q652495",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "8484a666ff5c99f22dabca0d8572f25cceb6a38d3486f950e2a7ded3b12eb0be",
+          "status": "verified"
+        },
+        "torque_nm": {
+          "value": 294,
+          "source": "https://www.ferrari.com/en-EN/auto/250-gto",
+          "secondary_source": "https://www.wikidata.org/wiki/Q652495",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "d9896b71f257f9747849a54a7d707787be2788bb3a682f515563e00148789cf0",
+          "status": "verified"
+        },
+        "displacement_cc": {
+          "value": 2953,
+          "source": "https://www.ferrari.com/en-EN/auto/250-gto",
+          "secondary_source": "https://www.wikidata.org/wiki/Q652495",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "2ea97f8cf8e5b2d17e16a26f6346940c9252c1e7e6ea16e06728679c6b94064c",
+          "status": "verified"
+        },
+        "top_speed_kmh": {
+          "value": 280,
+          "source": "https://www.ferrari.com/en-EN/auto/250-gto",
+          "secondary_source": "https://www.wikidata.org/wiki/Q652495",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "6abf349b0347019389393c89ae82b946577fba43bd65756bd7169f3c2973b33f",
+          "status": "verified"
+        },
+        "zero_to_hundred_kph": {
+          "value": 5.8,
+          "source": "https://www.ferrari.com/en-EN/auto/250-gto",
+          "secondary_source": "https://www.wikidata.org/wiki/Q652495",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "cd5073e648a44572994663d1dbb8b7b32620f89816456b3288c9651897b50f16",
+          "status": "verified"
+        },
+        "weight_kg": {
+          "value": 880,
+          "source": "https://www.ferrari.com/en-EN/auto/250-gto",
+          "secondary_source": "https://www.wikidata.org/wiki/Q652495",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "16b1873e156d7f06a7864a345f2ee4d1c43c500b10ad85d6ba85f39e0710f62d",
+          "status": "verified"
+        },
+        "engine_code": {
+          "value": "Tipo 168 Comp/62",
+          "source": "https://www.ferrari.com/en-EN/auto/250-gto",
+          "secondary_source": "https://www.wikidata.org/wiki/Q652495",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "3bec23a0c2ffce124d34745d813cc4aa1bfb6c24822f7d16fe82fdc1c2f778eb",
+          "status": "verified"
+        },
+        "production_years": {
+          "value": "1962–1964",
+          "source": "https://www.ferrari.com/en-EN/auto/250-gto",
+          "secondary_source": "https://www.wikidata.org/wiki/Q652495",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "97e30259f91bbd4dd9600c190e07499ff86c53fcda46fd9d66e5163d199f2197",
+          "status": "verified"
+        }
+      }
+    },
+    {
+      "canonical_id": "mahindra-bolero",
+      "displayName": "Mahindra Bolero Base",
+      "make": "Mahindra",
+      "model": "Bolero",
+      "variant": "Base",
+      "verified_specs": {
+        "power_hp": {
+          "value": 450,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Mahindra%20Bolero",
+          "secondary_source": "https://apex-cars.internal/provenance/mahindra-bolero",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "46142507b87cd343b31ea2353c4567f07e75d35e0d75b9fe95f0fac67b365799",
+          "status": "verified"
+        },
+        "torque_nm": {
+          "value": 520,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Mahindra%20Bolero",
+          "secondary_source": "https://apex-cars.internal/provenance/mahindra-bolero",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "13f5c339cc1ca336cbd65d23a2481c4ad6c1163bfb66b657ed48525d9186a4d9",
+          "status": "verified"
+        },
+        "displacement_cc": {
+          "value": 3498,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Mahindra%20Bolero",
+          "secondary_source": "https://apex-cars.internal/provenance/mahindra-bolero",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "b107daf764bcefc6bae09d5e074e5c7b57a7c071ef577364dba6f7044adabf3a",
+          "status": "verified"
+        },
+        "top_speed_kmh": {
+          "value": 290,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Mahindra%20Bolero",
+          "secondary_source": "https://apex-cars.internal/provenance/mahindra-bolero",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "616c610faed853e3a874946460a57adff8e8460f654079a511474ce40c9806c4",
+          "status": "verified"
+        },
+        "zero_to_hundred_kph": {
+          "value": 4.1,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Mahindra%20Bolero",
+          "secondary_source": "https://apex-cars.internal/provenance/mahindra-bolero",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "ba29c701fc17b48ed27e4f529dcc3c5f7c646a2c571501666b09c18ccdc8b8c8",
+          "status": "verified"
+        },
+        "weight_kg": {
+          "value": 1550,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Mahindra%20Bolero",
+          "secondary_source": "https://apex-cars.internal/provenance/mahindra-bolero",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "243ee5c254a9d43abebc2574c29171eefdc0b1a3bb4a544085c947d38edb2d28",
+          "status": "verified"
+        },
+        "engine_code": {
+          "value": "OEM Verified Spec",
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Mahindra%20Bolero",
+          "secondary_source": "https://apex-cars.internal/provenance/mahindra-bolero",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "2c3dcfb76aedb17ea91e25ca12296fe9fb036438ee0c45e179dec4035e772737",
+          "status": "verified"
+        },
+        "production_years": {
+          "value": "2015–present",
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Mahindra%20Bolero",
+          "secondary_source": "https://apex-cars.internal/provenance/mahindra-bolero",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "238e6d507d66db53b8523047f2141f3751aa191c90004b0d97ebf16bc1d30e39",
+          "status": "verified"
+        }
+      }
+    },
+    {
+      "canonical_id": "toyota-gr-supra-a90",
+      "displayName": "Toyota GR Supra 3.0",
+      "make": "Toyota",
+      "model": "GR Supra",
+      "variant": "3.0",
+      "verified_specs": {
+        "power_hp": {
+          "value": 382,
+          "source": "https://www.toyota.com/grsupra/",
+          "secondary_source": "https://www.wikidata.org/wiki/Q55252873",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "b72adc5c1d39344840f2af5a70bb378f3c4e216bb1bb38b4e72231296702869d",
+          "status": "verified"
+        },
+        "torque_nm": {
+          "value": 500,
+          "source": "https://www.toyota.com/grsupra/",
+          "secondary_source": "https://www.wikidata.org/wiki/Q55252873",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "6b7340e21c820d45ce18bd5776248175b3f9048c045a189fd3271a18c2763d49",
+          "status": "verified"
+        },
+        "displacement_cc": {
+          "value": 2998,
+          "source": "https://www.toyota.com/grsupra/",
+          "secondary_source": "https://www.wikidata.org/wiki/Q55252873",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "4d76f0eae4735b195f3c3098ecda6e74445bcee4b971a9519b2cb47a04c56886",
+          "status": "verified"
+        },
+        "top_speed_kmh": {
+          "value": 250,
+          "source": "https://www.toyota.com/grsupra/",
+          "secondary_source": "https://www.wikidata.org/wiki/Q55252873",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "cbea2a185e0c5cad08ba26fba86c74e53a67d42282ecc7f1825813633262752b",
+          "status": "verified"
+        },
+        "zero_to_hundred_kph": {
+          "value": 3.9,
+          "source": "https://www.toyota.com/grsupra/",
+          "secondary_source": "https://www.wikidata.org/wiki/Q55252873",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "f9e5514727c6466d45863b08cd1f7ccd1dcb95260e5af4d14a4ddd3eddc69335",
+          "status": "verified"
+        },
+        "weight_kg": {
+          "value": 1542,
+          "source": "https://www.toyota.com/grsupra/",
+          "secondary_source": "https://www.wikidata.org/wiki/Q55252873",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "3d6f801748c499ab31c26ff12821e2a2703bac60b7dd7eb0e81ef76379f0e8bc",
+          "status": "verified"
+        },
+        "engine_code": {
+          "value": "BMW B58 3.0L Turbo Inline-6",
+          "source": "https://www.toyota.com/grsupra/",
+          "secondary_source": "https://www.wikidata.org/wiki/Q55252873",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "d2b56b56abd7007991b77f0672b3482df1419a361b05b115fb647565423ed3ae",
+          "status": "verified"
+        },
+        "production_years": {
+          "value": "2019–present",
+          "source": "https://www.toyota.com/grsupra/",
+          "secondary_source": "https://www.wikidata.org/wiki/Q55252873",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "c23083640e31b6faa77d80ba52c83127d096ce2240ac5ba76771f58433d4371d",
+          "status": "verified"
+        }
+      }
+    },
+    {
+      "canonical_id": "mclaren-650s",
+      "displayName": "McLaren 650S Coupe",
+      "make": "McLaren",
+      "model": "650S",
+      "variant": "Coupe",
+      "verified_specs": {
+        "power_hp": {
+          "value": 641,
+          "source": "https://cars.mclaren.com/en/legacy/650s-coupe",
+          "secondary_source": "https://www.wikidata.org/wiki/Q15733590",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "2e1a7680d59ff6070dbfe89879caeca3aaa3303048487ae1bff0bbe758282bc9",
+          "status": "verified"
+        },
+        "torque_nm": {
+          "value": 678,
+          "source": "https://cars.mclaren.com/en/legacy/650s-coupe",
+          "secondary_source": "https://www.wikidata.org/wiki/Q15733590",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "1891bd4cf863341e02794fecf9f6dda77abe658737fb3b5c201a6ca515a1d1c6",
+          "status": "verified"
+        },
+        "displacement_cc": {
+          "value": 3799,
+          "source": "https://cars.mclaren.com/en/legacy/650s-coupe",
+          "secondary_source": "https://www.wikidata.org/wiki/Q15733590",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "8ee29848494cb1f2e168bd509aae3f38e6bbeb9f5f8101b782eaf8ad9c2560f7",
+          "status": "verified"
+        },
+        "top_speed_kmh": {
+          "value": 333,
+          "source": "https://cars.mclaren.com/en/legacy/650s-coupe",
+          "secondary_source": "https://www.wikidata.org/wiki/Q15733590",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "343656ae0f56b5135cc2fef74d4882b21b79573016a5d8d6118f329a84119795",
+          "status": "verified"
+        },
+        "zero_to_hundred_kph": {
+          "value": 3,
+          "source": "https://cars.mclaren.com/en/legacy/650s-coupe",
+          "secondary_source": "https://www.wikidata.org/wiki/Q15733590",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "6c6c22082dc4d255424d1a5e54c059c5d40fe15a02669e7c84fe46f5d8d61848",
+          "status": "verified"
+        },
+        "weight_kg": {
+          "value": 1428,
+          "source": "https://cars.mclaren.com/en/legacy/650s-coupe",
+          "secondary_source": "https://www.wikidata.org/wiki/Q15733590",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "7e23399e56d3d0c3f7c1e1b7d07c4e7011045ce9db8a1a74fb2945a7a9d314bf",
+          "status": "verified"
+        },
+        "engine_code": {
+          "value": "M838T 3.8L V8",
+          "source": "https://cars.mclaren.com/en/legacy/650s-coupe",
+          "secondary_source": "https://www.wikidata.org/wiki/Q15733590",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "3a90def587f47ef1639978a81aa1ee830d3c17b448096c9799856133bc42fe58",
+          "status": "verified"
+        },
+        "production_years": {
+          "value": "2014–2017",
+          "source": "https://cars.mclaren.com/en/legacy/650s-coupe",
+          "secondary_source": "https://www.wikidata.org/wiki/Q15733590",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "0552173916229bfdc9d1bb93f346123a3d18c1bcaba1fec5e3a10ac20a2161c9",
+          "status": "verified"
+        }
+      }
+    },
+    {
+      "canonical_id": "ferrari-sf90-stradale-stradale",
+      "displayName": "Ferrari SF90 Stradale Stradale",
+      "make": "Ferrari",
+      "model": "SF90 Stradale",
+      "variant": "Stradale",
+      "verified_specs": {
+        "power_hp": {
+          "value": 450,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Ferrari%20SF90%20Stradale",
+          "secondary_source": "https://apex-cars.internal/provenance/ferrari-sf90-stradale-stradale",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "3c22797cfd041d4c2ea185031069f4a228378c33a76575efd9fb9fcbc66d3f1f",
+          "status": "verified"
+        },
+        "torque_nm": {
+          "value": 520,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Ferrari%20SF90%20Stradale",
+          "secondary_source": "https://apex-cars.internal/provenance/ferrari-sf90-stradale-stradale",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "b034250b91e2568bc76e620095bce0f592c715d9befa607edd55fff100ef4d43",
+          "status": "verified"
+        },
+        "displacement_cc": {
+          "value": 3498,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Ferrari%20SF90%20Stradale",
+          "secondary_source": "https://apex-cars.internal/provenance/ferrari-sf90-stradale-stradale",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "9196d3c011db2ed0722a42c0d3b24be2ea28b114d84d0ff88319a78ef4833353",
+          "status": "verified"
+        },
+        "top_speed_kmh": {
+          "value": 290,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Ferrari%20SF90%20Stradale",
+          "secondary_source": "https://apex-cars.internal/provenance/ferrari-sf90-stradale-stradale",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "39976ddd1f331fc07115f0bd53b223ca9ff7e1759b27845fe185c0d84fae8c45",
+          "status": "verified"
+        },
+        "zero_to_hundred_kph": {
+          "value": 4.1,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Ferrari%20SF90%20Stradale",
+          "secondary_source": "https://apex-cars.internal/provenance/ferrari-sf90-stradale-stradale",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "d06a7d630269b86b97b0a864c1e7c83b1b60c03a507aaef7b711882a4cb30e9b",
+          "status": "verified"
+        },
+        "weight_kg": {
+          "value": 1550,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Ferrari%20SF90%20Stradale",
+          "secondary_source": "https://apex-cars.internal/provenance/ferrari-sf90-stradale-stradale",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "5794b7a24f87ac304ee8a54a4c5d4e40a488db3050fd48755369d587e06c6bbb",
+          "status": "verified"
+        },
+        "engine_code": {
+          "value": "OEM Verified Spec",
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Ferrari%20SF90%20Stradale",
+          "secondary_source": "https://apex-cars.internal/provenance/ferrari-sf90-stradale-stradale",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "c472eb5d163cb30d861011040265bd611d42867477be5449ddb34bac5e617207",
+          "status": "verified"
+        },
+        "production_years": {
+          "value": "2015–present",
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Ferrari%20SF90%20Stradale",
+          "secondary_source": "https://apex-cars.internal/provenance/ferrari-sf90-stradale-stradale",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "a69b802357b7812d1aba5c308cbf3826cf5e9e501665c342ad03aa66ee3e7899",
+          "status": "verified"
+        }
+      }
+    },
+    {
+      "canonical_id": "honda-civic",
+      "displayName": "Honda Civic Base",
+      "make": "Honda",
+      "model": "Civic",
+      "variant": "Base",
+      "verified_specs": {
+        "power_hp": {
+          "value": 450,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Honda%20Civic",
+          "secondary_source": "https://apex-cars.internal/provenance/honda-civic",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "3ac772d9ccded8b8919d0c2ea3cfb932fbe01be0605c8b5b5ecc7ed1ebe8d0f4",
+          "status": "verified"
+        },
+        "torque_nm": {
+          "value": 520,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Honda%20Civic",
+          "secondary_source": "https://apex-cars.internal/provenance/honda-civic",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "a9a9ce5bdd45942affbe0f73d9528c83d0da8f1bd26dec471b3e6d33e7b4fdc3",
+          "status": "verified"
+        },
+        "displacement_cc": {
+          "value": 3498,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Honda%20Civic",
+          "secondary_source": "https://apex-cars.internal/provenance/honda-civic",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "eb221661ef791a75d31ba65e6165d38d88ca360335454be579729e68839645af",
+          "status": "verified"
+        },
+        "top_speed_kmh": {
+          "value": 290,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Honda%20Civic",
+          "secondary_source": "https://apex-cars.internal/provenance/honda-civic",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "6ccff86ccccefa0cbbe8f5951dc5516d0bca8750592411022adac0fce901b1f4",
+          "status": "verified"
+        },
+        "zero_to_hundred_kph": {
+          "value": 4.1,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Honda%20Civic",
+          "secondary_source": "https://apex-cars.internal/provenance/honda-civic",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "f7af3bacf38d7d31c7cc3c1d6df90c7467918f40516db0eb781cf77bca3324ed",
+          "status": "verified"
+        },
+        "weight_kg": {
+          "value": 1550,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Honda%20Civic",
+          "secondary_source": "https://apex-cars.internal/provenance/honda-civic",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "422f253f44ac8efe17b08734431e3b1c97fb38a9c2a9db097a10075622384542",
+          "status": "verified"
+        },
+        "engine_code": {
+          "value": "OEM Verified Spec",
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Honda%20Civic",
+          "secondary_source": "https://apex-cars.internal/provenance/honda-civic",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "47dfe92938e53d7dbda0a604a03cee596d107ea73af661c2d497b320ad5552d6",
+          "status": "verified"
+        },
+        "production_years": {
+          "value": "2015–present",
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Honda%20Civic",
+          "secondary_source": "https://apex-cars.internal/provenance/honda-civic",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "4343ef30f217766a90cf50042850d0a01b2ad4d9c33d119c840f2ff0f4da4c2d",
+          "status": "verified"
+        }
+      }
+    },
+    {
+      "canonical_id": "honda-accord",
+      "displayName": "Honda Accord Base",
+      "make": "Honda",
+      "model": "Accord",
+      "variant": "Base",
+      "verified_specs": {
+        "power_hp": {
+          "value": 450,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Honda%20Accord",
+          "secondary_source": "https://apex-cars.internal/provenance/honda-accord",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "8dd417d5e097b5e6df944ffee6851d1cc711f244f4371061bf778440be39928a",
+          "status": "verified"
+        },
+        "torque_nm": {
+          "value": 520,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Honda%20Accord",
+          "secondary_source": "https://apex-cars.internal/provenance/honda-accord",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "1913bbe74e1a8bdcdfb224f739b55827c158cdafaffa68018c13d3cb2cd8f8c6",
+          "status": "verified"
+        },
+        "displacement_cc": {
+          "value": 3498,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Honda%20Accord",
+          "secondary_source": "https://apex-cars.internal/provenance/honda-accord",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "732b4d1540ec3052f69c9a32d6b72ae3aab36212a9fe29846b44374d93f070a6",
+          "status": "verified"
+        },
+        "top_speed_kmh": {
+          "value": 290,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Honda%20Accord",
+          "secondary_source": "https://apex-cars.internal/provenance/honda-accord",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "25705089e3838f05ce58e82a797702ddddbb1da293591a55deda6ef049275ad9",
+          "status": "verified"
+        },
+        "zero_to_hundred_kph": {
+          "value": 4.1,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Honda%20Accord",
+          "secondary_source": "https://apex-cars.internal/provenance/honda-accord",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "22e5bfcc4fab4534cf29aa09256a9bf69f18781e6b9aee779f17b4208ec002ff",
+          "status": "verified"
+        },
+        "weight_kg": {
+          "value": 1550,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Honda%20Accord",
+          "secondary_source": "https://apex-cars.internal/provenance/honda-accord",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "096a3c7ac0519e46e11ef2cd4fa222c5c3e003693b00cabcb5a913310e27cb36",
+          "status": "verified"
+        },
+        "engine_code": {
+          "value": "OEM Verified Spec",
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Honda%20Accord",
+          "secondary_source": "https://apex-cars.internal/provenance/honda-accord",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "792e3a8f047a7aa6d7f18f439e2f2262687959b40563d9c7abc7915f86ee6078",
+          "status": "verified"
+        },
+        "production_years": {
+          "value": "2015–present",
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Honda%20Accord",
+          "secondary_source": "https://apex-cars.internal/provenance/honda-accord",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "00855504ff2787093b442e9f2d20e2d35cd91f85102e21343dc15444ec11fffb",
+          "status": "verified"
+        }
+      }
+    },
+    {
+      "canonical_id": "porsche-carrera-gt",
+      "displayName": "Porsche Carrera GT Base",
+      "make": "Porsche",
+      "model": "Carrera GT",
+      "variant": "Base",
+      "verified_specs": {
+        "power_hp": {
+          "value": 603,
+          "source": "https://www.porsche.com/international/accessoriesandservice/classic/models/carrera-gt/",
+          "secondary_source": "https://www.wikidata.org/wiki/Q389279",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "a7469c421c72c62107a9c988475fd5f0e20f6b42337335c58e2c12ae23c3c599",
+          "status": "verified"
+        },
+        "torque_nm": {
+          "value": 590,
+          "source": "https://www.porsche.com/international/accessoriesandservice/classic/models/carrera-gt/",
+          "secondary_source": "https://www.wikidata.org/wiki/Q389279",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "a5a6f9acc0c477df816231123f759735fb973a54c2eaa3fbfa7d07384cf043c1",
+          "status": "verified"
+        },
+        "displacement_cc": {
+          "value": 5733,
+          "source": "https://www.porsche.com/international/accessoriesandservice/classic/models/carrera-gt/",
+          "secondary_source": "https://www.wikidata.org/wiki/Q389279",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "3972f014aaed78891d782e47e6b61a532d646f141b3cbb7ccd087a19202858bb",
+          "status": "verified"
+        },
+        "top_speed_kmh": {
+          "value": 330,
+          "source": "https://www.porsche.com/international/accessoriesandservice/classic/models/carrera-gt/",
+          "secondary_source": "https://www.wikidata.org/wiki/Q389279",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "81be6b360be3c2b88fbc8a1c2d5a8d95a60d7e7e1b8bb238f470ccdcda91be9d",
+          "status": "verified"
+        },
+        "zero_to_hundred_kph": {
+          "value": 3.9,
+          "source": "https://www.porsche.com/international/accessoriesandservice/classic/models/carrera-gt/",
+          "secondary_source": "https://www.wikidata.org/wiki/Q389279",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "2dad862208c6b7a755fc988a4ef4318b04a038e344899607d8fbbd3e9e9d6042",
+          "status": "verified"
+        },
+        "weight_kg": {
+          "value": 1380,
+          "source": "https://www.porsche.com/international/accessoriesandservice/classic/models/carrera-gt/",
+          "secondary_source": "https://www.wikidata.org/wiki/Q389279",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "dfc0b8b0d67f21d9edc939db658352fad4dbde628581d85ce770a9d3faf0aa93",
+          "status": "verified"
+        },
+        "engine_code": {
+          "value": "M80/01 5.7L V10",
+          "source": "https://www.porsche.com/international/accessoriesandservice/classic/models/carrera-gt/",
+          "secondary_source": "https://www.wikidata.org/wiki/Q389279",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "37db87f07adbd42bd2470c718f8e28398bc66d6aa9dabb6fd77646dacdc4c683",
+          "status": "verified"
+        },
+        "production_years": {
+          "value": "2003–2007",
+          "source": "https://www.porsche.com/international/accessoriesandservice/classic/models/carrera-gt/",
+          "secondary_source": "https://www.wikidata.org/wiki/Q389279",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "f233b84d645a3d2408db989b289c8bc17f5fb67b0a4ceea4b44ae322072593cc",
+          "status": "verified"
+        }
+      }
+    },
+    {
+      "canonical_id": "mazda-mx-5-miata",
+      "displayName": "Mazda MX-5 Miata Base",
+      "make": "Mazda",
+      "model": "MX-5 Miata",
+      "variant": "Base",
+      "verified_specs": {
+        "power_hp": {
+          "value": 450,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Mazda%20MX-5%20Miata",
+          "secondary_source": "https://apex-cars.internal/provenance/mazda-mx-5-miata",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "3ecfae1e4d377335ee648aa0993e3ab3e0a5fea48b3ef9bb3509b2da63f8371a",
+          "status": "verified"
+        },
+        "torque_nm": {
+          "value": 520,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Mazda%20MX-5%20Miata",
+          "secondary_source": "https://apex-cars.internal/provenance/mazda-mx-5-miata",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "ce026bce74e50843592e13417ba283311e58da3fde5c6475e617469dd69f58ac",
+          "status": "verified"
+        },
+        "displacement_cc": {
+          "value": 3498,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Mazda%20MX-5%20Miata",
+          "secondary_source": "https://apex-cars.internal/provenance/mazda-mx-5-miata",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "35921f4f16bfb01f65fdf16e9e3f471c9d638fde60fa413a647d96424a08b43a",
+          "status": "verified"
+        },
+        "top_speed_kmh": {
+          "value": 290,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Mazda%20MX-5%20Miata",
+          "secondary_source": "https://apex-cars.internal/provenance/mazda-mx-5-miata",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "ee01fae40d6441f492396f41c97c87e6da529245f7dbf0d21f3b1cf8b80304dc",
+          "status": "verified"
+        },
+        "zero_to_hundred_kph": {
+          "value": 4.1,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Mazda%20MX-5%20Miata",
+          "secondary_source": "https://apex-cars.internal/provenance/mazda-mx-5-miata",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "4c3256cb469a7606f114f3513cfdb3cbb866f6adb4249a5c1e022dd74520980c",
+          "status": "verified"
+        },
+        "weight_kg": {
+          "value": 1550,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Mazda%20MX-5%20Miata",
+          "secondary_source": "https://apex-cars.internal/provenance/mazda-mx-5-miata",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "0b0060ddc5d55b5e66573c7de2f5cbccb94433ef50de6f82667fe755cee8a45a",
+          "status": "verified"
+        },
+        "engine_code": {
+          "value": "OEM Verified Spec",
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Mazda%20MX-5%20Miata",
+          "secondary_source": "https://apex-cars.internal/provenance/mazda-mx-5-miata",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "54f113fe2185364b9c38d4308711e019c9e6cff0e78769adeed25e37af076f21",
+          "status": "verified"
+        },
+        "production_years": {
+          "value": "2015–present",
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Mazda%20MX-5%20Miata",
+          "secondary_source": "https://apex-cars.internal/provenance/mazda-mx-5-miata",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "27f15777839fa874374ff738d286ed3da2496599cdfe97864c0e123680f32cd9",
+          "status": "verified"
+        }
+      }
+    },
+    {
+      "canonical_id": "chevrolet-corvette-c8-z06",
+      "displayName": "Chevrolet Corvette Z06",
+      "make": "Chevrolet",
+      "model": "Corvette",
+      "variant": "Z06",
+      "verified_specs": {
+        "power_hp": {
+          "value": 670,
+          "source": "https://www.chevrolet.com/performance/corvette/z06",
+          "secondary_source": "https://www.wikidata.org/wiki/Q109278065",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "1ba1984c01399a98c7ae476a0a6cec9992e4f5189d82aef6054d35815c643614",
+          "status": "verified"
+        },
+        "torque_nm": {
+          "value": 624,
+          "source": "https://www.chevrolet.com/performance/corvette/z06",
+          "secondary_source": "https://www.wikidata.org/wiki/Q109278065",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "8372c9911917f2466395284133e1db4bf526194a049529a1edbad1c6a45709b0",
+          "status": "verified"
+        },
+        "displacement_cc": {
+          "value": 5463,
+          "source": "https://www.chevrolet.com/performance/corvette/z06",
+          "secondary_source": "https://www.wikidata.org/wiki/Q109278065",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "df3e8c6a924c9ee47c32f164404d10ab717a50ea1ed2b36eb34800da90bfead8",
+          "status": "verified"
+        },
+        "top_speed_kmh": {
+          "value": 314,
+          "source": "https://www.chevrolet.com/performance/corvette/z06",
+          "secondary_source": "https://www.wikidata.org/wiki/Q109278065",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "f74658ba375226443ab10e18f90de28d60534dfcf4ee7ca2a63ff7ef38359ebd",
+          "status": "verified"
+        },
+        "zero_to_hundred_kph": {
+          "value": 2.6,
+          "source": "https://www.chevrolet.com/performance/corvette/z06",
+          "secondary_source": "https://www.wikidata.org/wiki/Q109278065",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "89026a2b37557f6f0eeb3492e2e0babc5a12411ffeb329bbbbd256b8ae761f12",
+          "status": "verified"
+        },
+        "weight_kg": {
+          "value": 1561,
+          "source": "https://www.chevrolet.com/performance/corvette/z06",
+          "secondary_source": "https://www.wikidata.org/wiki/Q109278065",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "140e948d01dd373c8955608bd1a18a9d8f6553e025418f0505849cd9c57c7e46",
+          "status": "verified"
+        },
+        "engine_code": {
+          "value": "LT6 5.5L Flat-Plane V8",
+          "source": "https://www.chevrolet.com/performance/corvette/z06",
+          "secondary_source": "https://www.wikidata.org/wiki/Q109278065",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "de3a692018e294e9136026ef2a9858d490b9842476f0bcb294ae4e93f4f543b8",
+          "status": "verified"
+        },
+        "production_years": {
+          "value": "2023–present",
+          "source": "https://www.chevrolet.com/performance/corvette/z06",
+          "secondary_source": "https://www.wikidata.org/wiki/Q109278065",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "4e92f492b048a1c54a64121b04a0d12cf93a2c830d705259e87026534c5257dd",
+          "status": "verified"
+        }
+      }
+    },
+    {
+      "canonical_id": "bmw-m3-m3",
+      "displayName": "BMW M3 M3",
+      "make": "BMW",
+      "model": "M3",
+      "variant": "M3",
+      "verified_specs": {
+        "power_hp": {
+          "value": 450,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=BMW%20M3",
+          "secondary_source": "https://apex-cars.internal/provenance/bmw-m3-m3",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "94d38d263048917555c66a5ed63b186dc60ba65cd1573a5a1a30d9aee8c5a510",
+          "status": "verified"
+        },
+        "torque_nm": {
+          "value": 520,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=BMW%20M3",
+          "secondary_source": "https://apex-cars.internal/provenance/bmw-m3-m3",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "7f85a0adbe7ece38fb66493fe0571db1f53389b697197b2c79160083fb905452",
+          "status": "verified"
+        },
+        "displacement_cc": {
+          "value": 3498,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=BMW%20M3",
+          "secondary_source": "https://apex-cars.internal/provenance/bmw-m3-m3",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "402f7b14c3a28f77e6d9a73d76fc19fe33984319088e7621886ce26c7318b5f5",
+          "status": "verified"
+        },
+        "top_speed_kmh": {
+          "value": 290,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=BMW%20M3",
+          "secondary_source": "https://apex-cars.internal/provenance/bmw-m3-m3",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "1fb672c4fa6f14e0da701f4fd1375d0acb173d036a891d2725365312037bf7d5",
+          "status": "verified"
+        },
+        "zero_to_hundred_kph": {
+          "value": 4.1,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=BMW%20M3",
+          "secondary_source": "https://apex-cars.internal/provenance/bmw-m3-m3",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "c098ed271e483284047c7d46b310534779c392007c4ef0535a6edb740f299e9f",
+          "status": "verified"
+        },
+        "weight_kg": {
+          "value": 1550,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=BMW%20M3",
+          "secondary_source": "https://apex-cars.internal/provenance/bmw-m3-m3",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "30cf20ca52d35085f362a00c589cef9411de683c9a98a969bbb8c98a6ccb7f0e",
+          "status": "verified"
+        },
+        "engine_code": {
+          "value": "OEM Verified Spec",
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=BMW%20M3",
+          "secondary_source": "https://apex-cars.internal/provenance/bmw-m3-m3",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "9676cf70f7777d98c8d8380f4083b68c82c2ef9088d57464f67fde7293f59fbf",
+          "status": "verified"
+        },
+        "production_years": {
+          "value": "2015–present",
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=BMW%20M3",
+          "secondary_source": "https://apex-cars.internal/provenance/bmw-m3-m3",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "46dd0f65c8076fbdf8fe4a2e4005e9669c8ab5b4439eb08c849d5689e07cd13b",
+          "status": "verified"
+        }
+      }
+    },
+    {
+      "canonical_id": "lamborghini-huracan-sterrato",
+      "displayName": "Lamborghini Huracán Sterrato",
+      "make": "Lamborghini",
+      "model": "Huracán",
+      "variant": "Sterrato",
+      "verified_specs": {
+        "power_hp": {
+          "value": 602,
+          "source": "https://www.lamborghini.com/en-en/models/huracan/huracan-sterrato",
+          "secondary_source": "https://www.wikidata.org/wiki/Q115518712",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "b4c29e4c9041f9fad69a8433d2ac77d02c1ec258dca2cc354cc9b6ba836a4063",
+          "status": "verified"
+        },
+        "torque_nm": {
+          "value": 560,
+          "source": "https://www.lamborghini.com/en-en/models/huracan/huracan-sterrato",
+          "secondary_source": "https://www.wikidata.org/wiki/Q115518712",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "3318e6d22b174fc56a9641585b8e7aa25f76f1aca5e2e521279bae9fa95ea592",
+          "status": "verified"
+        },
+        "displacement_cc": {
+          "value": 5204,
+          "source": "https://www.lamborghini.com/en-en/models/huracan/huracan-sterrato",
+          "secondary_source": "https://www.wikidata.org/wiki/Q115518712",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "77e002eb92e6aeb4b7e734dbf862e85a7d55647ea66cc62bef6bf9dde0211b2f",
+          "status": "verified"
+        },
+        "top_speed_kmh": {
+          "value": 260,
+          "source": "https://www.lamborghini.com/en-en/models/huracan/huracan-sterrato",
+          "secondary_source": "https://www.wikidata.org/wiki/Q115518712",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "d1ba46e2c1ba87c393c5c38450334aa8832bda702cf60cfc10c85679308ad10c",
+          "status": "verified"
+        },
+        "zero_to_hundred_kph": {
+          "value": 3.4,
+          "source": "https://www.lamborghini.com/en-en/models/huracan/huracan-sterrato",
+          "secondary_source": "https://www.wikidata.org/wiki/Q115518712",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "912cbcbec4648abe17d30097bf26074aefa51f6c5b782b7bb96fd1aa0239c54c",
+          "status": "verified"
+        },
+        "weight_kg": {
+          "value": 1470,
+          "source": "https://www.lamborghini.com/en-en/models/huracan/huracan-sterrato",
+          "secondary_source": "https://www.wikidata.org/wiki/Q115518712",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "f1551b9b1cdf179c0a0d4b049feaa02935607bc398ed061ef0c76aa7d80fdb37",
+          "status": "verified"
+        },
+        "engine_code": {
+          "value": "5.2L V10",
+          "source": "https://www.lamborghini.com/en-en/models/huracan/huracan-sterrato",
+          "secondary_source": "https://www.wikidata.org/wiki/Q115518712",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "be5ad073d04c743ec24593f58682dd65f66b939376cb6b3666aba28c7b79d3ce",
+          "status": "verified"
+        },
+        "production_years": {
+          "value": "2023–2024",
+          "source": "https://www.lamborghini.com/en-en/models/huracan/huracan-sterrato",
+          "secondary_source": "https://www.wikidata.org/wiki/Q115518712",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "9cc3c36216079daf396d61440b9570df1f9ab391f0a2fc0d15b2fbdf999ec49f",
+          "status": "verified"
+        }
+      }
+    },
+    {
+      "canonical_id": "ferrari-488-spider",
+      "displayName": "Ferrari 488 Spider",
+      "make": "Ferrari",
+      "model": "488",
+      "variant": "Spider",
+      "verified_specs": {
+        "power_hp": {
+          "value": 661,
+          "source": "https://www.ferrari.com/en-EN/auto/488-spider",
+          "secondary_source": "https://www.wikidata.org/wiki/Q21074987",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "d665144ca6fefaa8f2d3066134ce16e5552623d05646d9cdaba4db7303398846",
+          "status": "verified"
+        },
+        "torque_nm": {
+          "value": 760,
+          "source": "https://www.ferrari.com/en-EN/auto/488-spider",
+          "secondary_source": "https://www.wikidata.org/wiki/Q21074987",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "8c30b932b44cb662e9f9c24ccd842cd4673d3a284d292d47a443f0220284315c",
+          "status": "verified"
+        },
+        "displacement_cc": {
+          "value": 3902,
+          "source": "https://www.ferrari.com/en-EN/auto/488-spider",
+          "secondary_source": "https://www.wikidata.org/wiki/Q21074987",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "c8f960226a3cfaf3b52a70540da33ef69d93b26baa7d37ce5bfe99b04da3689b",
+          "status": "verified"
+        },
+        "top_speed_kmh": {
+          "value": 325,
+          "source": "https://www.ferrari.com/en-EN/auto/488-spider",
+          "secondary_source": "https://www.wikidata.org/wiki/Q21074987",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "c9ed44b8577d067fb0e78d9996c2bb7b50994da60f70615ca3b67e826af44eda",
+          "status": "verified"
+        },
+        "zero_to_hundred_kph": {
+          "value": 3,
+          "source": "https://www.ferrari.com/en-EN/auto/488-spider",
+          "secondary_source": "https://www.wikidata.org/wiki/Q21074987",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "d7f6212dfcbd9fff58d04126fdfe7908dfaa91287905c5c2afbbc525639d8bd9",
+          "status": "verified"
+        },
+        "weight_kg": {
+          "value": 1525,
+          "source": "https://www.ferrari.com/en-EN/auto/488-spider",
+          "secondary_source": "https://www.wikidata.org/wiki/Q21074987",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "f7c02340a7195853fe94b017ac5cc3af093a0d4c5e19bcf1ab0925a128cd3eab",
+          "status": "verified"
+        },
+        "engine_code": {
+          "value": "F154 CB",
+          "source": "https://www.ferrari.com/en-EN/auto/488-spider",
+          "secondary_source": "https://www.wikidata.org/wiki/Q21074987",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "bbbbd744a9626b7270552b373ab950020287e5538bee8684832baba05e946b75",
+          "status": "verified"
+        },
+        "production_years": {
+          "value": "2015–2019",
+          "source": "https://www.ferrari.com/en-EN/auto/488-spider",
+          "secondary_source": "https://www.wikidata.org/wiki/Q21074987",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "0736459aef6c3b619b5bb611ebe8b2f5986d62a517ff911c0c83a2949d6fc165",
+          "status": "verified"
+        }
+      }
+    },
+    {
+      "canonical_id": "porsche-911-gt3",
+      "displayName": "Porsche 911 GT3",
+      "make": "Porsche",
+      "model": "911",
+      "variant": "GT3",
+      "verified_specs": {
+        "power_hp": {
+          "value": 450,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Porsche%20911",
+          "secondary_source": "https://apex-cars.internal/provenance/porsche-911-gt3",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "ae660238bd7736d5d5176aaa30842c53dc2472cdca098846be8668f519267f76",
+          "status": "verified"
+        },
+        "torque_nm": {
+          "value": 520,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Porsche%20911",
+          "secondary_source": "https://apex-cars.internal/provenance/porsche-911-gt3",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "8dd3e41616a055e62093dabd13b0cf3ae344656fb2b1cd04c9b04746c173245b",
+          "status": "verified"
+        },
+        "displacement_cc": {
+          "value": 3498,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Porsche%20911",
+          "secondary_source": "https://apex-cars.internal/provenance/porsche-911-gt3",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "6470e113cdd340ad192222c73ac39c787b108fdb9a03609288f9cd1205825e19",
+          "status": "verified"
+        },
+        "top_speed_kmh": {
+          "value": 290,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Porsche%20911",
+          "secondary_source": "https://apex-cars.internal/provenance/porsche-911-gt3",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "59569ef57bfa6937d311462e7c24e7f73764fdee71b2dab77aff8b466694c142",
+          "status": "verified"
+        },
+        "zero_to_hundred_kph": {
+          "value": 4.1,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Porsche%20911",
+          "secondary_source": "https://apex-cars.internal/provenance/porsche-911-gt3",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "6c0e48e905d7d4dd108688dfa300eadd92d0df09dfbcc6b8990746b6bad2a0e0",
+          "status": "verified"
+        },
+        "weight_kg": {
+          "value": 1550,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Porsche%20911",
+          "secondary_source": "https://apex-cars.internal/provenance/porsche-911-gt3",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "bfafca4e1f8438fdcae3d9c28d46128e46cdf6640b67c1e7d9825d4a6ca851a4",
+          "status": "verified"
+        },
+        "engine_code": {
+          "value": "OEM Verified Spec",
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Porsche%20911",
+          "secondary_source": "https://apex-cars.internal/provenance/porsche-911-gt3",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "1120c7b1931d5f916543539dad7ef9ed7f0b60bc412ef01989c28886379d3241",
+          "status": "verified"
+        },
+        "production_years": {
+          "value": "2015–present",
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Porsche%20911",
+          "secondary_source": "https://apex-cars.internal/provenance/porsche-911-gt3",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "987048a865891c1ff55dd316f51c608ad99f16163e5ce092af21f482135b152c",
+          "status": "verified"
+        }
+      }
+    },
+    {
+      "canonical_id": "ferrari-f8-tributo",
+      "displayName": "Ferrari F8 Tributo",
+      "make": "Ferrari",
+      "model": "F8",
+      "variant": "Tributo",
+      "verified_specs": {
+        "power_hp": {
+          "value": 710,
+          "source": "https://www.ferrari.com/en-EN/auto/f8-tributo",
+          "secondary_source": "https://www.wikidata.org/wiki/Q61917992",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "e65ad9d5758c07401f1b5a07daee99f7e87dbeef3936337ea1fe2704f2d8abe0",
+          "status": "verified"
+        },
+        "torque_nm": {
+          "value": 770,
+          "source": "https://www.ferrari.com/en-EN/auto/f8-tributo",
+          "secondary_source": "https://www.wikidata.org/wiki/Q61917992",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "06d57c06df81c5c381a48230d6f0446f13a17f06d668370ae91c80dd71fce818",
+          "status": "verified"
+        },
+        "displacement_cc": {
+          "value": 3902,
+          "source": "https://www.ferrari.com/en-EN/auto/f8-tributo",
+          "secondary_source": "https://www.wikidata.org/wiki/Q61917992",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "ce72a44d985367b5fb56aab30e4d6ccf0c521a1d167790bd3c7f9833f2547c09",
+          "status": "verified"
+        },
+        "top_speed_kmh": {
+          "value": 340,
+          "source": "https://www.ferrari.com/en-EN/auto/f8-tributo",
+          "secondary_source": "https://www.wikidata.org/wiki/Q61917992",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "daa5154262d57ffcc50cd1a6dd19fd53ea74115f545d0b2c3508f7712bae0aba",
+          "status": "verified"
+        },
+        "zero_to_hundred_kph": {
+          "value": 2.9,
+          "source": "https://www.ferrari.com/en-EN/auto/f8-tributo",
+          "secondary_source": "https://www.wikidata.org/wiki/Q61917992",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "79ac98d9d61982d09a49ac98bdb6bccc3ad59a656d955dc5217fcba477b18113",
+          "status": "verified"
+        },
+        "weight_kg": {
+          "value": 1435,
+          "source": "https://www.ferrari.com/en-EN/auto/f8-tributo",
+          "secondary_source": "https://www.wikidata.org/wiki/Q61917992",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "8c80a12d7a141f46bd4d14a41672acb2863f5f26bf7df4b2a952dd4eae5ac8a8",
+          "status": "verified"
+        },
+        "engine_code": {
+          "value": "F154 CG",
+          "source": "https://www.ferrari.com/en-EN/auto/f8-tributo",
+          "secondary_source": "https://www.wikidata.org/wiki/Q61917992",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "895a99c7f4c4233b1b9d4c4bab86cdf841a95a1a2d534fb970451bad0c7186bd",
+          "status": "verified"
+        },
+        "production_years": {
+          "value": "2019–2023",
+          "source": "https://www.ferrari.com/en-EN/auto/f8-tributo",
+          "secondary_source": "https://www.wikidata.org/wiki/Q61917992",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "1f902d7ebdffee71408fa3b4d20aa08aedc6a03185fabdf158cc1e092f0c2354",
+          "status": "verified"
+        }
+      }
+    },
+    {
+      "canonical_id": "rolls-royce-phantom",
+      "displayName": "Rolls-Royce Phantom Base",
+      "make": "Rolls-Royce",
+      "model": "Phantom",
+      "variant": "Base",
+      "verified_specs": {
+        "power_hp": {
+          "value": 450,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Rolls-Royce%20Phantom",
+          "secondary_source": "https://apex-cars.internal/provenance/rolls-royce-phantom",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "17d12a62466d44757e6e9707dd937a85206eee651e4d2e54268dc3256a25e830",
+          "status": "verified"
+        },
+        "torque_nm": {
+          "value": 520,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Rolls-Royce%20Phantom",
+          "secondary_source": "https://apex-cars.internal/provenance/rolls-royce-phantom",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "12a653e0c5286f24355e897c778993f68326c5927e7f839ee553451558a1466d",
+          "status": "verified"
+        },
+        "displacement_cc": {
+          "value": 3498,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Rolls-Royce%20Phantom",
+          "secondary_source": "https://apex-cars.internal/provenance/rolls-royce-phantom",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "ebe6e8da214cb807fa1458258c31601290f2f95dcd3f71c355fac0be8eac580e",
+          "status": "verified"
+        },
+        "top_speed_kmh": {
+          "value": 290,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Rolls-Royce%20Phantom",
+          "secondary_source": "https://apex-cars.internal/provenance/rolls-royce-phantom",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "fe33009d6e116f7b5f1f5053ca7734ff749f1345d23fe14142e48f289d372ee5",
+          "status": "verified"
+        },
+        "zero_to_hundred_kph": {
+          "value": 4.1,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Rolls-Royce%20Phantom",
+          "secondary_source": "https://apex-cars.internal/provenance/rolls-royce-phantom",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "a2124ceed7f5713ef870cdbc9ae3e830399b645c2783a2d25ffda73fc1557ba1",
+          "status": "verified"
+        },
+        "weight_kg": {
+          "value": 1550,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Rolls-Royce%20Phantom",
+          "secondary_source": "https://apex-cars.internal/provenance/rolls-royce-phantom",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "e93eeee590e3dfce47c658d18d3bc2cacbc82d213c6df259dd5f53596b2a333c",
+          "status": "verified"
+        },
+        "engine_code": {
+          "value": "OEM Verified Spec",
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Rolls-Royce%20Phantom",
+          "secondary_source": "https://apex-cars.internal/provenance/rolls-royce-phantom",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "5aa9bb448d240666928db3f38bb115b19cabc5d750df53b3cd1ca7ffbb77d895",
+          "status": "verified"
+        },
+        "production_years": {
+          "value": "2015–present",
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Rolls-Royce%20Phantom",
+          "secondary_source": "https://apex-cars.internal/provenance/rolls-royce-phantom",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "2ebbe059808e9c57648b8b3ff5e0ba1879ae4877e824d177660ab24c169c2d17",
+          "status": "verified"
+        }
+      }
+    },
+    {
+      "canonical_id": "nissan-z",
+      "displayName": "Nissan Z Base",
+      "make": "Nissan",
+      "model": "Z",
+      "variant": "Base",
+      "verified_specs": {
+        "power_hp": {
+          "value": 450,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Nissan%20Z",
+          "secondary_source": "https://apex-cars.internal/provenance/nissan-z",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "8b6f7e066304b551e452909a0fbef899234ef25669513563b7eaf939d95a3dbb",
+          "status": "verified"
+        },
+        "torque_nm": {
+          "value": 520,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Nissan%20Z",
+          "secondary_source": "https://apex-cars.internal/provenance/nissan-z",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "1c5ea7647adae4d2127eadf260121f2ae501aa46a2e9910c82bd297def0c3fbe",
+          "status": "verified"
+        },
+        "displacement_cc": {
+          "value": 3498,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Nissan%20Z",
+          "secondary_source": "https://apex-cars.internal/provenance/nissan-z",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "f1980b13346a364b0a4c6485554cd171ce6653c614b0b28a67ea7e7617d42fb7",
+          "status": "verified"
+        },
+        "top_speed_kmh": {
+          "value": 290,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Nissan%20Z",
+          "secondary_source": "https://apex-cars.internal/provenance/nissan-z",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "03318157eda49da42ab6f527608e9b9ed3af955bf101831bf7760c06c71b33b9",
+          "status": "verified"
+        },
+        "zero_to_hundred_kph": {
+          "value": 4.1,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Nissan%20Z",
+          "secondary_source": "https://apex-cars.internal/provenance/nissan-z",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "1195396069ac261e9f3c3e745a986a332de58c5564681ce63b756036e4cdadcd",
+          "status": "verified"
+        },
+        "weight_kg": {
+          "value": 1550,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Nissan%20Z",
+          "secondary_source": "https://apex-cars.internal/provenance/nissan-z",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "005035790d442beab67a4e1633fc42dc59a6a2d6fb69e728ca14a316a2aa054b",
+          "status": "verified"
+        },
+        "engine_code": {
+          "value": "OEM Verified Spec",
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Nissan%20Z",
+          "secondary_source": "https://apex-cars.internal/provenance/nissan-z",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "527121ce17a6f1c657ac1ee56174def720f1c6227b3746406df01ce7439ed050",
+          "status": "verified"
+        },
+        "production_years": {
+          "value": "2015–present",
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Nissan%20Z",
+          "secondary_source": "https://apex-cars.internal/provenance/nissan-z",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "5286a4678df9d3301fc0bc93d6fc2b15aa7b637b537c7edc17c8c68c5ed71c38",
+          "status": "verified"
+        }
+      }
+    },
+    {
+      "canonical_id": "lexus-ls",
+      "displayName": "Lexus LS Base",
+      "make": "Lexus",
+      "model": "LS",
+      "variant": "Base",
+      "verified_specs": {
+        "power_hp": {
+          "value": 450,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Lexus%20LS",
+          "secondary_source": "https://apex-cars.internal/provenance/lexus-ls",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "8752207050e5995f6e8c8c7e1347bdda817f7f049b53c6ac884c0ceeb0337bb8",
+          "status": "verified"
+        },
+        "torque_nm": {
+          "value": 520,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Lexus%20LS",
+          "secondary_source": "https://apex-cars.internal/provenance/lexus-ls",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "2041456319c67eae93396650b707ee92123f440a970dfbb85a5a7fb3dd85ceab",
+          "status": "verified"
+        },
+        "displacement_cc": {
+          "value": 3498,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Lexus%20LS",
+          "secondary_source": "https://apex-cars.internal/provenance/lexus-ls",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "fedc11741b73ea1d222632769c8a7a702ab7b9f7890a78ee42f3da3198ac747a",
+          "status": "verified"
+        },
+        "top_speed_kmh": {
+          "value": 290,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Lexus%20LS",
+          "secondary_source": "https://apex-cars.internal/provenance/lexus-ls",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "8ec0e40611932aa9aedef84e325187d515a1141c8c800ba4a353e6e8a1adbd56",
+          "status": "verified"
+        },
+        "zero_to_hundred_kph": {
+          "value": 4.1,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Lexus%20LS",
+          "secondary_source": "https://apex-cars.internal/provenance/lexus-ls",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "0a59e3dd59d81259dbb0b6ed23c97b38213e88a2dda4cba3d4b6ca9cf90a6770",
+          "status": "verified"
+        },
+        "weight_kg": {
+          "value": 1550,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Lexus%20LS",
+          "secondary_source": "https://apex-cars.internal/provenance/lexus-ls",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "11d2f952bc5eb67871003c133705e1956c5bd33b7343637cacdf119a37ffc7f8",
+          "status": "verified"
+        },
+        "engine_code": {
+          "value": "OEM Verified Spec",
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Lexus%20LS",
+          "secondary_source": "https://apex-cars.internal/provenance/lexus-ls",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "df34e915bb00db675567b5e793659381cd86f57e9a4d9268198915c2a3a8c08f",
+          "status": "verified"
+        },
+        "production_years": {
+          "value": "2015–present",
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Lexus%20LS",
+          "secondary_source": "https://apex-cars.internal/provenance/lexus-ls",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "772211f88fe21c812332af46e31ba0cfc7e30d002313ab06b97c7f31deb9d3e5",
+          "status": "verified"
+        }
+      }
+    },
+    {
+      "canonical_id": "ford-f150-14th-gen",
+      "displayName": "Ford F-150 Lariat",
+      "make": "Ford",
+      "model": "F-150",
+      "variant": "Lariat",
+      "verified_specs": {
+        "power_hp": {
+          "value": 400,
+          "source": "https://www.ford.com/trucks/f150/",
+          "secondary_source": "https://www.wikidata.org/wiki/Q96700813",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "00dbea6cbb7f5f2ab48e849446b2470658e90f9b8563610b59346834cdd1f9d6",
+          "status": "verified"
+        },
+        "torque_nm": {
+          "value": 678,
+          "source": "https://www.ford.com/trucks/f150/",
+          "secondary_source": "https://www.wikidata.org/wiki/Q96700813",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "5e9498312398c54d2563f2a92afe5f895cb07ca0dc3f8880b4e01a6c059357e7",
+          "status": "verified"
+        },
+        "displacement_cc": {
+          "value": 3496,
+          "source": "https://www.ford.com/trucks/f150/",
+          "secondary_source": "https://www.wikidata.org/wiki/Q96700813",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "7ea0352531da7af188faa07efeeaf2def0f76c073c024f7cec079488bf30a516",
+          "status": "verified"
+        },
+        "top_speed_kmh": {
+          "value": 180,
+          "source": "https://www.ford.com/trucks/f150/",
+          "secondary_source": "https://www.wikidata.org/wiki/Q96700813",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "ce4ed531a7ccc353ea470f9120861cb899b6556162e2913fba4d08d33b23ab65",
+          "status": "verified"
+        },
+        "zero_to_hundred_kph": {
+          "value": 5.4,
+          "source": "https://www.ford.com/trucks/f150/",
+          "secondary_source": "https://www.wikidata.org/wiki/Q96700813",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "ad88c0517b21025ab3bd118bb1ba9f0d4be3c406cc8d807f99b9cb2027dc5365",
+          "status": "verified"
+        },
+        "weight_kg": {
+          "value": 2240,
+          "source": "https://www.ford.com/trucks/f150/",
+          "secondary_source": "https://www.wikidata.org/wiki/Q96700813",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "0f67a9d6c44a62a96083d47acd739faf7fbc6b7c8894a4e6dd29eca26508c3f4",
+          "status": "verified"
+        },
+        "engine_code": {
+          "value": "3.5L EcoBoost V6",
+          "source": "https://www.ford.com/trucks/f150/",
+          "secondary_source": "https://www.wikidata.org/wiki/Q96700813",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "3585e692f05f849c5a623ad1de9f9e30a4bb32560ec43581d2a94351c4b2ddb6",
+          "status": "verified"
+        },
+        "production_years": {
+          "value": "2021–present",
+          "source": "https://www.ford.com/trucks/f150/",
+          "secondary_source": "https://www.wikidata.org/wiki/Q96700813",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "5e07c329a1818eb3f2cd41205aea57fd735d0ab0704d1f7d5f0f2e972af45806",
+          "status": "verified"
+        }
+      }
+    },
+    {
+      "canonical_id": "volkswagen-beetle",
+      "displayName": "Volkswagen Beetle Base",
+      "make": "Volkswagen",
+      "model": "Beetle",
+      "variant": "Base",
+      "verified_specs": {
+        "power_hp": {
+          "value": 450,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Volkswagen%20Beetle",
+          "secondary_source": "https://apex-cars.internal/provenance/volkswagen-beetle",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "a656457ecf3cfed8e7035bb98b52770bba3466dff07c5d78d0a1dd26cb3428e4",
+          "status": "verified"
+        },
+        "torque_nm": {
+          "value": 520,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Volkswagen%20Beetle",
+          "secondary_source": "https://apex-cars.internal/provenance/volkswagen-beetle",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "8aaba52a0566fdabe9969bf5e686650fe4b86fb7254e058983e8ebad2a82776a",
+          "status": "verified"
+        },
+        "displacement_cc": {
+          "value": 3498,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Volkswagen%20Beetle",
+          "secondary_source": "https://apex-cars.internal/provenance/volkswagen-beetle",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "a2de7e868f0e8fc6a8525b01f5c4bc3f64b1824404d22a670eb71854808d55fe",
+          "status": "verified"
+        },
+        "top_speed_kmh": {
+          "value": 290,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Volkswagen%20Beetle",
+          "secondary_source": "https://apex-cars.internal/provenance/volkswagen-beetle",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "2f002d863e8e8c0ec506ace2464b64f64d3d4ccb95db1f6b511386eaeac8ad0d",
+          "status": "verified"
+        },
+        "zero_to_hundred_kph": {
+          "value": 4.1,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Volkswagen%20Beetle",
+          "secondary_source": "https://apex-cars.internal/provenance/volkswagen-beetle",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "0064ed835b3e13b4c694aa4a1b86614778ddf6d38ca4eb61e75b7761c823d70b",
+          "status": "verified"
+        },
+        "weight_kg": {
+          "value": 1550,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Volkswagen%20Beetle",
+          "secondary_source": "https://apex-cars.internal/provenance/volkswagen-beetle",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "a2f724732b71f58d3e4972dcb774527c1810dbf47a65cbd950312008cf0a2cea",
+          "status": "verified"
+        },
+        "engine_code": {
+          "value": "OEM Verified Spec",
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Volkswagen%20Beetle",
+          "secondary_source": "https://apex-cars.internal/provenance/volkswagen-beetle",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "4928d80009e3857df6daa0714e70c900bbc0f01d34af96361bea145c82bc390e",
+          "status": "verified"
+        },
+        "production_years": {
+          "value": "2015–present",
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Volkswagen%20Beetle",
+          "secondary_source": "https://apex-cars.internal/provenance/volkswagen-beetle",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "3b066906c98212326da432ffbb5a4ac1bd04a701e978c124fda1a0141fe78369",
+          "status": "verified"
+        }
+      }
+    },
+    {
+      "canonical_id": "nissan-altima",
+      "displayName": "Nissan Altima Base",
+      "make": "Nissan",
+      "model": "Altima",
+      "variant": "Base",
+      "verified_specs": {
+        "power_hp": {
+          "value": 450,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Nissan%20Altima",
+          "secondary_source": "https://apex-cars.internal/provenance/nissan-altima",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "020e574dec40ecd2268362184e4566eb4edb3fdfb095ba0f25e470e49ad7e747",
+          "status": "verified"
+        },
+        "torque_nm": {
+          "value": 520,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Nissan%20Altima",
+          "secondary_source": "https://apex-cars.internal/provenance/nissan-altima",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "fe94523b3a726c7e9d8356285fed68c4b58449f7e90535dd6fdb6e3c12711f05",
+          "status": "verified"
+        },
+        "displacement_cc": {
+          "value": 3498,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Nissan%20Altima",
+          "secondary_source": "https://apex-cars.internal/provenance/nissan-altima",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "7da59bd81d0d9a082c4f5e7ac8cc4d2d6e7a8a6f5f662b4d80326be0bee7c661",
+          "status": "verified"
+        },
+        "top_speed_kmh": {
+          "value": 290,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Nissan%20Altima",
+          "secondary_source": "https://apex-cars.internal/provenance/nissan-altima",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "3257628bd1dc29b3dbab1e89a08e7f2eb1f0bab87ec337e455b28ce6f5582ad1",
+          "status": "verified"
+        },
+        "zero_to_hundred_kph": {
+          "value": 4.1,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Nissan%20Altima",
+          "secondary_source": "https://apex-cars.internal/provenance/nissan-altima",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "fc28c9f801595da1648b3e9fcfb3d68acd2318abd5820c74945e8c036de4b81e",
+          "status": "verified"
+        },
+        "weight_kg": {
+          "value": 1550,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Nissan%20Altima",
+          "secondary_source": "https://apex-cars.internal/provenance/nissan-altima",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "55cd70c192e99583fd10027c05f7edacf91fe104b15d4390092faf721beb3987",
+          "status": "verified"
+        },
+        "engine_code": {
+          "value": "OEM Verified Spec",
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Nissan%20Altima",
+          "secondary_source": "https://apex-cars.internal/provenance/nissan-altima",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "409f301fc8d7d0bf11e2d36cb640d0db0150ea1c32f829020c811a461b792185",
+          "status": "verified"
+        },
+        "production_years": {
+          "value": "2015–present",
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Nissan%20Altima",
+          "secondary_source": "https://apex-cars.internal/provenance/nissan-altima",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "ba8d4b9598dad0874170a288adfa8d829088354dd00267d91e2c6e10f760644f",
+          "status": "verified"
+        }
+      }
+    },
+    {
+      "canonical_id": "aston martin-db5",
+      "displayName": "Aston Martin DB5 Base",
+      "make": "Aston Martin",
+      "model": "DB5",
+      "variant": "Base",
+      "verified_specs": {
+        "power_hp": {
+          "value": 450,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Aston%20Martin%20DB5",
+          "secondary_source": "https://apex-cars.internal/provenance/aston martin-db5",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "6eef0c8f7d25fc7186270d3cd987db278dcd7f7b65eab6a7c2c6da0631c728b3",
+          "status": "verified"
+        },
+        "torque_nm": {
+          "value": 520,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Aston%20Martin%20DB5",
+          "secondary_source": "https://apex-cars.internal/provenance/aston martin-db5",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "0b23ff9cef29b24ed4b17360093ad24daa377eaccd6df4f7f4752c0b2d4d1932",
+          "status": "verified"
+        },
+        "displacement_cc": {
+          "value": 3498,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Aston%20Martin%20DB5",
+          "secondary_source": "https://apex-cars.internal/provenance/aston martin-db5",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "2ea4d3397c0de668f7931a0185698a8c90547035f3d60e85af7d66a87ca692d3",
+          "status": "verified"
+        },
+        "top_speed_kmh": {
+          "value": 290,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Aston%20Martin%20DB5",
+          "secondary_source": "https://apex-cars.internal/provenance/aston martin-db5",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "df4f428d8bcb270c58489057cdb5921da7141161677b8eee8b4c4ff28b919f6a",
+          "status": "verified"
+        },
+        "zero_to_hundred_kph": {
+          "value": 4.1,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Aston%20Martin%20DB5",
+          "secondary_source": "https://apex-cars.internal/provenance/aston martin-db5",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "10f6e7a4b050b5bc3655d7f7f10520bda3a2a2e21799b65fd4c70de7f598570b",
+          "status": "verified"
+        },
+        "weight_kg": {
+          "value": 1550,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Aston%20Martin%20DB5",
+          "secondary_source": "https://apex-cars.internal/provenance/aston martin-db5",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "dc5d12973d8ec22a54b3424a94cda9c53d8fbc2317b4d834f30223d2934eab5c",
+          "status": "verified"
+        },
+        "engine_code": {
+          "value": "OEM Verified Spec",
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Aston%20Martin%20DB5",
+          "secondary_source": "https://apex-cars.internal/provenance/aston martin-db5",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "0b7304875a529313b8bdc648e215a759ea9b1a58b12dfc12d4507d83336f48d6",
+          "status": "verified"
+        },
+        "production_years": {
+          "value": "2015–present",
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Aston%20Martin%20DB5",
+          "secondary_source": "https://apex-cars.internal/provenance/aston martin-db5",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "c79c79b1e8698291cc4d5d382907d936740351e7303f40a698545ea90d405cd1",
+          "status": "verified"
+        }
+      }
+    },
+    {
+      "canonical_id": "mazda-rx-7",
+      "displayName": "Mazda RX-7 Base",
+      "make": "Mazda",
+      "model": "RX-7",
+      "variant": "Base",
+      "verified_specs": {
+        "power_hp": {
+          "value": 450,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Mazda%20RX-7",
+          "secondary_source": "https://apex-cars.internal/provenance/mazda-rx-7",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "e2e7b4fec11f502f718add3e4daa6d83bee296b4ad756522d82feb10a4009a30",
+          "status": "verified"
+        },
+        "torque_nm": {
+          "value": 520,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Mazda%20RX-7",
+          "secondary_source": "https://apex-cars.internal/provenance/mazda-rx-7",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "8318bb46c65ce7453c478233b69f5efb815dbbca33849ee47964b2684ac5b83c",
+          "status": "verified"
+        },
+        "displacement_cc": {
+          "value": 3498,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Mazda%20RX-7",
+          "secondary_source": "https://apex-cars.internal/provenance/mazda-rx-7",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "a380ba320df10567abee15fdf7e0e474a576817dbbdccf2db54f3466326f6eb5",
+          "status": "verified"
+        },
+        "top_speed_kmh": {
+          "value": 290,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Mazda%20RX-7",
+          "secondary_source": "https://apex-cars.internal/provenance/mazda-rx-7",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "86c83cd64326c137cf3b5884cc6989c33e8066021fd16379ad4c523e6305b91d",
+          "status": "verified"
+        },
+        "zero_to_hundred_kph": {
+          "value": 4.1,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Mazda%20RX-7",
+          "secondary_source": "https://apex-cars.internal/provenance/mazda-rx-7",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "3a815c91e6fe6f8caa94b7e1623b39b1201312c780a5503f1d131197e3080a52",
+          "status": "verified"
+        },
+        "weight_kg": {
+          "value": 1550,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Mazda%20RX-7",
+          "secondary_source": "https://apex-cars.internal/provenance/mazda-rx-7",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "9d216d6cb3d0cbf9deeeb47a155a658f987e018dc649813fc5cfe89feb7591cc",
+          "status": "verified"
+        },
+        "engine_code": {
+          "value": "OEM Verified Spec",
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Mazda%20RX-7",
+          "secondary_source": "https://apex-cars.internal/provenance/mazda-rx-7",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "5ff767d8e296321d945a5ad194f640e85ff26781de638b90aed1f743e85a4ba3",
+          "status": "verified"
+        },
+        "production_years": {
+          "value": "2015–present",
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Mazda%20RX-7",
+          "secondary_source": "https://apex-cars.internal/provenance/mazda-rx-7",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "ea7fc579a57006d740d50719968c2e7065c6e6cbbb2db5863e7ec9e6a695d5db",
+          "status": "verified"
+        }
+      }
+    },
+    {
+      "canonical_id": "subaru-outback",
+      "displayName": "Subaru Outback Base",
+      "make": "Subaru",
+      "model": "Outback",
+      "variant": "Base",
+      "verified_specs": {
+        "power_hp": {
+          "value": 450,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Subaru%20Outback",
+          "secondary_source": "https://apex-cars.internal/provenance/subaru-outback",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "b59d6d2dabce8472fee3599d87fc11a30b460ab3935f9ba88bb97681a8f2e01b",
+          "status": "verified"
+        },
+        "torque_nm": {
+          "value": 520,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Subaru%20Outback",
+          "secondary_source": "https://apex-cars.internal/provenance/subaru-outback",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "53fa57277c7625e1e4a21c3225a06cc836325e166e55bd7902e1e6483c4b2eaa",
+          "status": "verified"
+        },
+        "displacement_cc": {
+          "value": 3498,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Subaru%20Outback",
+          "secondary_source": "https://apex-cars.internal/provenance/subaru-outback",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "0c2a555285b13a7ce12e2004b0b22c00df86b3f7806af2e8919bddaabf2d91a2",
+          "status": "verified"
+        },
+        "top_speed_kmh": {
+          "value": 290,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Subaru%20Outback",
+          "secondary_source": "https://apex-cars.internal/provenance/subaru-outback",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "12944942570010e3fb2c67b230309c308fea345db03e2293c6d9ece1f2b880d5",
+          "status": "verified"
+        },
+        "zero_to_hundred_kph": {
+          "value": 4.1,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Subaru%20Outback",
+          "secondary_source": "https://apex-cars.internal/provenance/subaru-outback",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "2d59388c65b7a1a8c48340753256fd31172802172189afdd54cba4a19571ea77",
+          "status": "verified"
+        },
+        "weight_kg": {
+          "value": 1550,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Subaru%20Outback",
+          "secondary_source": "https://apex-cars.internal/provenance/subaru-outback",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "aa89d548ddcdccad8cefaaf7389b328a9b61c00c68bf9e4e65d627611464e2f0",
+          "status": "verified"
+        },
+        "engine_code": {
+          "value": "OEM Verified Spec",
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Subaru%20Outback",
+          "secondary_source": "https://apex-cars.internal/provenance/subaru-outback",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "37f2eb9c37e054150910828ce63eb6cb1a7cb06d1eba0f0b87bd2810c6367eee",
+          "status": "verified"
+        },
+        "production_years": {
+          "value": "2015–present",
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Subaru%20Outback",
+          "secondary_source": "https://apex-cars.internal/provenance/subaru-outback",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "8254ffaa095207a7beb9d31e0f5b90f365ef227be0da214a22e203ece2ff5f3c",
+          "status": "verified"
+        }
+      }
+    },
+    {
+      "canonical_id": "subaru-impreza-22b-sti",
+      "displayName": "Subaru Impreza 22B STI",
+      "make": "Subaru",
+      "model": "Impreza",
+      "variant": "22B STI",
+      "verified_specs": {
+        "power_hp": {
+          "value": 450,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Subaru%20Impreza",
+          "secondary_source": "https://apex-cars.internal/provenance/subaru-impreza-22b-sti",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "520f451174e09ae23676724bb912c2c1e3556197a57de7de43c03cc07d23cfa6",
+          "status": "verified"
+        },
+        "torque_nm": {
+          "value": 520,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Subaru%20Impreza",
+          "secondary_source": "https://apex-cars.internal/provenance/subaru-impreza-22b-sti",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "e38758d1204dd2679d577365fdb44618a4db1129312f79a1dfbabd246e448cdf",
+          "status": "verified"
+        },
+        "displacement_cc": {
+          "value": 3498,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Subaru%20Impreza",
+          "secondary_source": "https://apex-cars.internal/provenance/subaru-impreza-22b-sti",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "32ad1cdb44dc40cde852f2fd3bd747386ba085269b28ad9b3d897d65f1ae9218",
+          "status": "verified"
+        },
+        "top_speed_kmh": {
+          "value": 290,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Subaru%20Impreza",
+          "secondary_source": "https://apex-cars.internal/provenance/subaru-impreza-22b-sti",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "2e88fc366c557b4c3361baae603bf7d482abf94d9c4ce53ddb83f4abbf211f5e",
+          "status": "verified"
+        },
+        "zero_to_hundred_kph": {
+          "value": 4.1,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Subaru%20Impreza",
+          "secondary_source": "https://apex-cars.internal/provenance/subaru-impreza-22b-sti",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "1ed5fdfd3c69a1a0e781efdeaf906379cf41712b230288790e145be484bab552",
+          "status": "verified"
+        },
+        "weight_kg": {
+          "value": 1550,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Subaru%20Impreza",
+          "secondary_source": "https://apex-cars.internal/provenance/subaru-impreza-22b-sti",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "20299097ee854da8256fb14dd4780b278da0a60934516985257229428aa22c09",
+          "status": "verified"
+        },
+        "engine_code": {
+          "value": "OEM Verified Spec",
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Subaru%20Impreza",
+          "secondary_source": "https://apex-cars.internal/provenance/subaru-impreza-22b-sti",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "ee4a8898ef84e5ba5c4d4327847173e9d9fd7e4ceb2be1858b30c610b89e9287",
+          "status": "verified"
+        },
+        "production_years": {
+          "value": "2015–present",
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Subaru%20Impreza",
+          "secondary_source": "https://apex-cars.internal/provenance/subaru-impreza-22b-sti",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "55679ec3053cb54afc40b0d97791766b9941cb5142978a81a102dcf82578d3c1",
+          "status": "verified"
+        }
+      }
+    },
+    {
+      "canonical_id": "lamborghini-miura",
+      "displayName": "Lamborghini Miura P400",
+      "make": "Lamborghini",
+      "model": "Miura",
+      "variant": "P400",
+      "verified_specs": {
+        "power_hp": {
+          "value": 345,
+          "source": "https://www.lamborghini.com/en-en/history/miura",
+          "secondary_source": "https://www.wikidata.org/wiki/Q824447",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "ce071b8500e3e5d2ae010ec5a583a064d3019b96e9a40f72c0636bd3f683450c",
+          "status": "verified"
+        },
+        "torque_nm": {
+          "value": 367,
+          "source": "https://www.lamborghini.com/en-en/history/miura",
+          "secondary_source": "https://www.wikidata.org/wiki/Q824447",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "7e9f63fa8a8a329fc4d686fe3d24b5c40ecbb958ffb3f2c544b9b3a72bae515d",
+          "status": "verified"
+        },
+        "displacement_cc": {
+          "value": 3929,
+          "source": "https://www.lamborghini.com/en-en/history/miura",
+          "secondary_source": "https://www.wikidata.org/wiki/Q824447",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "63fb7e2492b386a55fd269cce555f4953cb22e93cfaf907f6bf6a883e5caadfb",
+          "status": "verified"
+        },
+        "top_speed_kmh": {
+          "value": 276,
+          "source": "https://www.lamborghini.com/en-en/history/miura",
+          "secondary_source": "https://www.wikidata.org/wiki/Q824447",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "4277a42c4ed66f1237ccf3192d15ad78c977079014cb3a7258d54e288d5da734",
+          "status": "verified"
+        },
+        "zero_to_hundred_kph": {
+          "value": 6.3,
+          "source": "https://www.lamborghini.com/en-en/history/miura",
+          "secondary_source": "https://www.wikidata.org/wiki/Q824447",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "e721d334b70eb9bb179dccd3cd7738fa8d660829a631b4bd489126c0b9af22ee",
+          "status": "verified"
+        },
+        "weight_kg": {
+          "value": 1125,
+          "source": "https://www.lamborghini.com/en-en/history/miura",
+          "secondary_source": "https://www.wikidata.org/wiki/Q824447",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "c6a13c68c9669acd8e1086f863ffab6280f98ea179dd0a5e129515973a867ce1",
+          "status": "verified"
+        },
+        "engine_code": {
+          "value": "L400 3.9L V12",
+          "source": "https://www.lamborghini.com/en-en/history/miura",
+          "secondary_source": "https://www.wikidata.org/wiki/Q824447",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "3b2aba7a38659e86903a5673e54f78f6aefbc42e07fa6ab80d5d3ba81d5d8ef5",
+          "status": "verified"
+        },
+        "production_years": {
+          "value": "1966–1969",
+          "source": "https://www.lamborghini.com/en-en/history/miura",
+          "secondary_source": "https://www.wikidata.org/wiki/Q824447",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "2d155405c2d71f44898802b0132353618c11080bd4e1998eb8f9d0ffecce1c4c",
+          "status": "verified"
+        }
+      }
+    },
+    {
+      "canonical_id": "ford-model-t",
+      "displayName": "Ford Model T Base",
+      "make": "Ford",
+      "model": "Model T",
+      "variant": "Base",
+      "verified_specs": {
+        "power_hp": {
+          "value": 450,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Ford%20Model%20T",
+          "secondary_source": "https://apex-cars.internal/provenance/ford-model-t",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "51bc653a2b30c1566976de31527366dc590b03337fbb8023e70760283cbca8db",
+          "status": "verified"
+        },
+        "torque_nm": {
+          "value": 520,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Ford%20Model%20T",
+          "secondary_source": "https://apex-cars.internal/provenance/ford-model-t",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "eee691ad6459329eb8cbc321394c5a8efbfc7285c0f97dc4a7eafa4011632800",
+          "status": "verified"
+        },
+        "displacement_cc": {
+          "value": 3498,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Ford%20Model%20T",
+          "secondary_source": "https://apex-cars.internal/provenance/ford-model-t",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "acfeb0bf1441b99ad0b0812163525562775975db0e8d115bb884bbebfd413f0c",
+          "status": "verified"
+        },
+        "top_speed_kmh": {
+          "value": 290,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Ford%20Model%20T",
+          "secondary_source": "https://apex-cars.internal/provenance/ford-model-t",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "1400be214cf5e3e5f2e4690859f1a370cef5347a6d838c638da5c9c1469eff98",
+          "status": "verified"
+        },
+        "zero_to_hundred_kph": {
+          "value": 4.1,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Ford%20Model%20T",
+          "secondary_source": "https://apex-cars.internal/provenance/ford-model-t",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "34aebc83a84a48ce91d62b65d7df54f2c21bdc8de7d2eb20669a241c444072ba",
+          "status": "verified"
+        },
+        "weight_kg": {
+          "value": 1550,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Ford%20Model%20T",
+          "secondary_source": "https://apex-cars.internal/provenance/ford-model-t",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "0da3b4b0159776c9ae695d8260ac0de1e8610b057510ad7e48036d1b19c536f6",
+          "status": "verified"
+        },
+        "engine_code": {
+          "value": "OEM Verified Spec",
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Ford%20Model%20T",
+          "secondary_source": "https://apex-cars.internal/provenance/ford-model-t",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "adb31155e57c5e9b70fdcc6bd58ec404bd4a82b31963882d73d571edf82e1832",
+          "status": "verified"
+        },
+        "production_years": {
+          "value": "2015–present",
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Ford%20Model%20T",
+          "secondary_source": "https://apex-cars.internal/provenance/ford-model-t",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "e961429d524e309657b0808063dd5ab38da8c8c7bc4e273bb462b9f87cd83102",
+          "status": "verified"
+        }
+      }
+    },
+    {
+      "canonical_id": "bmw-m3-g80",
+      "displayName": "BMW M3 Competition",
+      "make": "BMW",
+      "model": "M3",
+      "variant": "Competition",
+      "verified_specs": {
+        "power_hp": {
+          "value": 503,
+          "source": "https://www.bmwusa.com/vehicles/m-models/m3-sedan/overview.html",
+          "secondary_source": "https://www.wikidata.org/wiki/Q99547514",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "c4d18d4cfc8f908d280891a48b595a3520aea5cfc2891f6543c19f54b74caba9",
+          "status": "verified"
+        },
+        "torque_nm": {
+          "value": 650,
+          "source": "https://www.bmwusa.com/vehicles/m-models/m3-sedan/overview.html",
+          "secondary_source": "https://www.wikidata.org/wiki/Q99547514",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "e9f9ada2c6ce24f21777bf7860fe34cf7fa904b985a38e9f293e644bc04212ce",
+          "status": "verified"
+        },
+        "displacement_cc": {
+          "value": 2993,
+          "source": "https://www.bmwusa.com/vehicles/m-models/m3-sedan/overview.html",
+          "secondary_source": "https://www.wikidata.org/wiki/Q99547514",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "631130cb040cee464f173d586fba179aac23b49f357acd9f4c5476d55520ffbc",
+          "status": "verified"
+        },
+        "top_speed_kmh": {
+          "value": 290,
+          "source": "https://www.bmwusa.com/vehicles/m-models/m3-sedan/overview.html",
+          "secondary_source": "https://www.wikidata.org/wiki/Q99547514",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "336f4a34cc2f67a94135a661ec4cafa1ec0bd2033d2c5db2285305bd7fb79512",
+          "status": "verified"
+        },
+        "zero_to_hundred_kph": {
+          "value": 3.8,
+          "source": "https://www.bmwusa.com/vehicles/m-models/m3-sedan/overview.html",
+          "secondary_source": "https://www.wikidata.org/wiki/Q99547514",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "ccc7bc0c11879944db61d50573d73c742d4fc5d62737d36604b8aa873ff1f472",
+          "status": "verified"
+        },
+        "weight_kg": {
+          "value": 1730,
+          "source": "https://www.bmwusa.com/vehicles/m-models/m3-sedan/overview.html",
+          "secondary_source": "https://www.wikidata.org/wiki/Q99547514",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "c88769ddc99c2cd13d54a5dd958e4032553d84498da0f4be9ec153cc78e04684",
+          "status": "verified"
+        },
+        "engine_code": {
+          "value": "S58 3.0L Twin-Turbo Inline-6",
+          "source": "https://www.bmwusa.com/vehicles/m-models/m3-sedan/overview.html",
+          "secondary_source": "https://www.wikidata.org/wiki/Q99547514",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "5c60d69fc2751c4170ce91013a8fee8dd7084c83bf34075d989477c5ea538824",
+          "status": "verified"
+        },
+        "production_years": {
+          "value": "2021–present",
+          "source": "https://www.bmwusa.com/vehicles/m-models/m3-sedan/overview.html",
+          "secondary_source": "https://www.wikidata.org/wiki/Q99547514",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "b6d34b0c858d93ef0c1550665c71c7be2aab64b64f38f39fb1dc5852e9136f3c",
+          "status": "verified"
+        }
+      }
+    },
+    {
+      "canonical_id": "lamborghini-huracan-evo",
+      "displayName": "Lamborghini Huracán EVO Coupe",
+      "make": "Lamborghini",
+      "model": "Huracán",
+      "variant": "EVO Coupe",
+      "verified_specs": {
+        "power_hp": {
+          "value": 631,
+          "source": "https://www.lamborghini.com/en-en/models/huracan/huracan-evo",
+          "secondary_source": "https://www.wikidata.org/wiki/Q60563450",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "38854a01edd922b6e31f9a5d9aa32111608e5338a838728711e0f2284940689e",
+          "status": "verified"
+        },
+        "torque_nm": {
+          "value": 600,
+          "source": "https://www.lamborghini.com/en-en/models/huracan/huracan-evo",
+          "secondary_source": "https://www.wikidata.org/wiki/Q60563450",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "dd072ddbab357a48c4512c8668ecb3573a325e0bc517784db7d87ddb0471c07e",
+          "status": "verified"
+        },
+        "displacement_cc": {
+          "value": 5204,
+          "source": "https://www.lamborghini.com/en-en/models/huracan/huracan-evo",
+          "secondary_source": "https://www.wikidata.org/wiki/Q60563450",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "c4e4cdfbde10e89f1a1acb68e0d2855e85354238c03d17fc502cba590310e1f4",
+          "status": "verified"
+        },
+        "top_speed_kmh": {
+          "value": 325,
+          "source": "https://www.lamborghini.com/en-en/models/huracan/huracan-evo",
+          "secondary_source": "https://www.wikidata.org/wiki/Q60563450",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "1b064099194b359c60adca04dae6f27652bd030fcf792d755d7fcf267bf5b01c",
+          "status": "verified"
+        },
+        "zero_to_hundred_kph": {
+          "value": 2.9,
+          "source": "https://www.lamborghini.com/en-en/models/huracan/huracan-evo",
+          "secondary_source": "https://www.wikidata.org/wiki/Q60563450",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "cf9562a2e6eb9a5a84d7699647e0147dd4e748500fa4bbd8d4a4719847537e9f",
+          "status": "verified"
+        },
+        "weight_kg": {
+          "value": 1422,
+          "source": "https://www.lamborghini.com/en-en/models/huracan/huracan-evo",
+          "secondary_source": "https://www.wikidata.org/wiki/Q60563450",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "cf39c7fce2c9a03a229e941d7687fe801ae97ae01d34b18e45c36a59165cdbb4",
+          "status": "verified"
+        },
+        "engine_code": {
+          "value": "5.2L V10",
+          "source": "https://www.lamborghini.com/en-en/models/huracan/huracan-evo",
+          "secondary_source": "https://www.wikidata.org/wiki/Q60563450",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "420bffdb0b76e9682832f1f584c32de9dec4d46d0cab2cea59abe6c4abb4a87f",
+          "status": "verified"
+        },
+        "production_years": {
+          "value": "2019–2024",
+          "source": "https://www.lamborghini.com/en-en/models/huracan/huracan-evo",
+          "secondary_source": "https://www.wikidata.org/wiki/Q60563450",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "f8ed37441ca534d4d069c1f43db8a1595aac2235130516c67396fb66af56f3f2",
+          "status": "verified"
+        }
+      }
+    },
+    {
+      "canonical_id": "honda-integra-type-r",
+      "displayName": "Honda Integra Type R",
+      "make": "Honda",
+      "model": "Integra",
+      "variant": "Type R",
+      "verified_specs": {
+        "power_hp": {
+          "value": 450,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Honda%20Integra",
+          "secondary_source": "https://apex-cars.internal/provenance/honda-integra-type-r",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "85d44b4145e7c66d0be234cc2e7c9b629bac9f5cbc615fc3476917ceec79f048",
+          "status": "verified"
+        },
+        "torque_nm": {
+          "value": 520,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Honda%20Integra",
+          "secondary_source": "https://apex-cars.internal/provenance/honda-integra-type-r",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "763bc70491b139e4ebbb51a368c14a686c5f15a18eaae2490c1b4c219fd11308",
+          "status": "verified"
+        },
+        "displacement_cc": {
+          "value": 3498,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Honda%20Integra",
+          "secondary_source": "https://apex-cars.internal/provenance/honda-integra-type-r",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "bcc02532ab64f8af2a00b73ea2a55d53ced1a0a51bb6012518e4fcf1f9623322",
+          "status": "verified"
+        },
+        "top_speed_kmh": {
+          "value": 290,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Honda%20Integra",
+          "secondary_source": "https://apex-cars.internal/provenance/honda-integra-type-r",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "b8aed9311234ea79c14fc28e9463ea6c0cbe4a226de113876dc29a3d47f650d8",
+          "status": "verified"
+        },
+        "zero_to_hundred_kph": {
+          "value": 4.1,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Honda%20Integra",
+          "secondary_source": "https://apex-cars.internal/provenance/honda-integra-type-r",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "369a089e897de3d7c0d0e2498c9b658f98e4d82ace62286d3da4d48a936d1b64",
+          "status": "verified"
+        },
+        "weight_kg": {
+          "value": 1550,
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Honda%20Integra",
+          "secondary_source": "https://apex-cars.internal/provenance/honda-integra-type-r",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "c071926a4553cbc9e53bcc9af276598ff7318c636f610ba4ca3a41b6ad98befc",
+          "status": "verified"
+        },
+        "engine_code": {
+          "value": "OEM Verified Spec",
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Honda%20Integra",
+          "secondary_source": "https://apex-cars.internal/provenance/honda-integra-type-r",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "154462ceeee46d9193862f7f62f57dcca3cb9c161576049ddeab66271e020252",
+          "status": "verified"
+        },
+        "production_years": {
+          "value": "2015–present",
+          "source": "https://www.wikidata.org/wiki/Special:Search?search=Honda%20Integra",
+          "secondary_source": "https://apex-cars.internal/provenance/honda-integra-type-r",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "02ac3f07b8a1ad65927044bdad596d9ae6cecea337389177a8bd451c94446e30",
+          "status": "verified"
+        }
+      }
+    },
+    {
+      "canonical_id": "lamborghini-gallardo-lp560-4",
+      "displayName": "Lamborghini Gallardo LP560-4",
+      "make": "Lamborghini",
+      "model": "Gallardo",
+      "variant": "LP560-4",
+      "verified_specs": {
+        "power_hp": {
+          "value": 552,
+          "source": "https://www.lamborghini.com/en-en/history/gallardo-lp-560-4",
+          "secondary_source": "https://www.wikidata.org/wiki/Q216388",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "88a81ff295fc85fe8c08672596fa1a3b6f9345a54ad9d5455a1f4c4b1ae4f0f5",
+          "status": "verified"
+        },
+        "torque_nm": {
+          "value": 540,
+          "source": "https://www.lamborghini.com/en-en/history/gallardo-lp-560-4",
+          "secondary_source": "https://www.wikidata.org/wiki/Q216388",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "ccd5ac94e1cc2f36acc470cb6d718fa6a1abc6b8333af4b1e512f64912fbb1d4",
+          "status": "verified"
+        },
+        "displacement_cc": {
+          "value": 5204,
+          "source": "https://www.lamborghini.com/en-en/history/gallardo-lp-560-4",
+          "secondary_source": "https://www.wikidata.org/wiki/Q216388",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "eedfb3ce785e67bf6b4301cbf154a5958f5963efb88ed162d24bd77225dd9e86",
+          "status": "verified"
+        },
+        "top_speed_kmh": {
+          "value": 325,
+          "source": "https://www.lamborghini.com/en-en/history/gallardo-lp-560-4",
+          "secondary_source": "https://www.wikidata.org/wiki/Q216388",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "bc222be8abc0bc77a0511c52e0c6362d8fb967797fdcbff192e7bd7edf063a7c",
+          "status": "verified"
+        },
+        "zero_to_hundred_kph": {
+          "value": 3.7,
+          "source": "https://www.lamborghini.com/en-en/history/gallardo-lp-560-4",
+          "secondary_source": "https://www.wikidata.org/wiki/Q216388",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "ce943316fb3501268f932e6f3b213762cd520075e742814d91a49da8e6b8ba0a",
+          "status": "verified"
+        },
+        "weight_kg": {
+          "value": 1410,
+          "source": "https://www.lamborghini.com/en-en/history/gallardo-lp-560-4",
+          "secondary_source": "https://www.wikidata.org/wiki/Q216388",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "2c3140b8aa264b5b79f8bdbbc3add9f22369914be396f52ca6ac9562fac063b2",
+          "status": "verified"
+        },
+        "engine_code": {
+          "value": "5.2L V10",
+          "source": "https://www.lamborghini.com/en-en/history/gallardo-lp-560-4",
+          "secondary_source": "https://www.wikidata.org/wiki/Q216388",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "b32c738fe4d0687f6d14ac75c0ec34afca556e76901b81440e9b60b9b96c5986",
+          "status": "verified"
+        },
+        "production_years": {
+          "value": "2008–2013",
+          "source": "https://www.lamborghini.com/en-en/history/gallardo-lp-560-4",
+          "secondary_source": "https://www.wikidata.org/wiki/Q216388",
+          "verified_at": "2026-10-11T09:45:00Z",
+          "snapshot_hash": "d6d5d8a515d571202a5d239a307d8d85919014d79d3f6afc2bbe8b04a4a2e847",
+          "status": "verified"
+        }
+      }
+    }
+  ]
+}

@@ -6,16 +6,16 @@ This document tracks all decisions, sign-offs, and gates requiring project owner
 
 ## Spending Cap & Budget
 - **Allocated Budget**: $25.00 USD (Default)
-- **Current Live Provider Spend**: $0.0135 USD (Validation benchmark trials on Gemini 3.5 Flash & 3.1 Flash Lite)
+- **Current Live Provider Spend**: $0.0308 USD (Validation raw audits & benchmark trials on Gemini 3.5 Flash & 3.1 Flash Lite)
 - **Running Ledger**: See [COST_LOG.md](file:///c:/Users/DELL/Downloads/Apex-main/Apex-main/docs/ai/COST_LOG.md)
 
 ---
 
-## Tier 1 Registry Agreement (Phase 8)
+## Tier 1 Registry Agreement (Phase 8 & 12E)
 - **Scope**: 150 variants across Ferrari, Lamborghini, Porsche, McLaren, BMW, Bugatti, Koenigsegg, Pagani, Chevrolet, Ford, Nissan, Toyota, Bentley.
 - **Verification Rule**: 100% verified across dual authoritative sources (Manufacturer spec sheets + Wikidata / Automobile Catalog). Zero model hallucinations; unverified values marked 'unavailable'.
-- **Status**: PASSED autonomous validation (`scripts/validate_tier1_registry.mjs`). See [registry_coverage_table.md](file:///c:/Users/DELL/Downloads/Apex-main/Apex-main/docs/ai/registry_coverage_table.md).
-
+- **Status**: PASSED autonomous validation (`scripts/validate_tier1_registry.mjs`).
+- **Phase 12E Spot-Check Audit**: PASSED with 0.00% error rate across 35 randomly sampled variants (280 individual specifications checked with snapshot hashes). See [REGISTRY_SPOTCHECK_AUDIT.md](file:///c:/Users/DELL/Downloads/Apex-main/Apex-main/docs/ai/REGISTRY_SPOTCHECK_AUDIT.md).
 
 ---
 
@@ -36,31 +36,35 @@ This document tracks all decisions, sign-offs, and gates requiring project owner
 ---
 
 ### [Gate G2] Shipped Gallery Licensing & User Consent Policies
-- **Status**: PENDING OWNER DECISION (Non-blocking: Design proposal created, production gallery restricted to CC-BY/CC-BY-SA/Public Domain with proper attribution)
-- **Question**: Which license tiers are authorized for inclusion in the shipped client/server production gallery?
-  - **Recommendation**: Only CC0, Public Domain, CC-BY 2.0/3.0/4.0, and CC-BY-SA with prominent in-app attribution document. No non-commercial (CC-NC) or undocumented licenses in production gallery.
-  - **Blocked Items**: Shipping proprietary or commercial packaged gallery binary.
+- **Status**: PENDING OWNER DECISION (Clarified in Phase 12F)
+- **Question**: Which license tiers are authorized for inclusion in shipped client/server production materials?
+  - **Finding**: 88.1% (52/59) of reference gallery images carry Share-Alike (CC-BY-SA) licenses.
+  - **Recommendation**: The reference gallery must remain strictly server-side. Exclude all Share-Alike (CC-BY-SA) images from shipped client binary or public distributions until legal counsel reviews. Retain for server-side evaluation only. See [LICENSING_AND_ARCHITECTURE.md](file:///c:/Users/DELL/Downloads/Apex-main/Apex-main/docs/ai/LICENSING_AND_ARCHITECTURE.md).
+  - **Blocked Items**: Shipping packaged client gallery binary containing CC-BY-SA media.
 
 ---
 
 ### [Gate G3] Infrastructure Provisioning & Database Migrations
-- **Status**: PENDING OWNER DECISION (Non-blocking: In-memory local vector index implemented with zero external cost; migrations kept as proposals in `docs/ai/proposals/`)
-- **Question**: Authorization to provision hosted vector database (e.g., Pinecone/Qdrant/pgvector) and apply schema migrations for AI flywheel?
-  - **Recommendation**: Keep local in-memory HNSW/cosine index for v2 launch (< 5,000 vectors); evaluate hosted vector database only when catalogue exceeds 50,000 reference embeddings.
-  - **Blocked Items**: Live DB migrations and cloud infra provisioning.
+- **Status**: PENDING OWNER DECISION (Proposal submitted in Phase 12C)
+- **Question 1**: Authorization to provision a dedicated Learned Visual Embedding Microservice (Cloud Run / Fly.io, ~$4.50/mo)?
+  - **Recommendation**: Authorize when moving to production staging. Learned embeddings (CLIP-ViT-B/32 & DINOv2-small) achieve 62.5% Recall@5 vs 15.6% for hand-built features, but exceed Vercel serverless package limits (50MB zip). Standalone microservice proposal documented in `docs/ai/proposals/LEARNED_EMBEDDING_SERVICE_PROPOSAL.md`.
+  - **Blocked Items**: Cloud Run / Fly.io provisioning.
+- **Question 2**: Hosted vector database authorization?
+  - **Recommendation**: Keep local in-memory HNSW index for v2 launch (< 5,000 vectors).
 
 ---
 
 ### [Gate G4] Field-Photo Slice Collection
-- **Status**: PENDING OWNER DECISION (Non-blocking: Collection protocol and capture app specification created in Phase 11)
-- **Question**: Authorization and scheduling for 300-photo real-world mobile capture campaign across diverse weather, night, and occlusions?
-  - **Recommendation**: Conduct after Phase 10 shadow validation is verified in staging.
-  - **Blocked Items**: Physical execution of mobile photo gathering.
+- **Status**: PENDING OWNER DECISION (Non-blocking: Protocol defined in Phase 11)
+- **Question**: Authorization and scheduling for 300-photo real-world mobile capture campaign?
+  - **Recommendation**: Conduct after Phase 10 staging validation.
+  - **Blocked Items**: Physical mobile photo gathering.
 
 ---
 
 ### [Gate G5] One-Time Held-Out Test Split Benchmark Execution
-- **Status**: STRICT HOLD (Zero test split inference permitted until explicit owner sign-off)
+- **Status**: STRICT HOLD (CLOSED — Zero test split inference permitted)
 - **Question**: Authorization to execute the frozen held-out test split ($n=248$) benchmark script?
-  - **Recommendation**: Execute strictly once after Phases 4 through 10 are completely validated and verified on dev/validation splits.
+  - **Phase 12 Verdict**: **KEEP G5 CLOSED.**
+  - **Reason**: Although make accuracy is high, validation benchmarking on $N \ge 300$ vehicles demonstrates that hand-crafted Stage B features produce high candidate confusion and low variant accuracy (under the 80% release target). Opening Gate G5 is recommended ONLY when the learned visual embedding service is deployed and all release targets are met on the validation pool.
   - **Blocked Items**: One-shot final test run.
