@@ -279,37 +279,37 @@ export const Card3DDetail: React.FC<Card3DDetailProps> = ({ card, onClose }) => 
                 <div className="space-y-3">
                   <StatGauge
                     label="Power"
-                    value={card.horsepower || 450}
-                    unit="HP"
-                    percentage={((card.horsepower || 450) / 1000) * 100}
+                    value={card.horsepower ? card.horsepower : 'Unavailable'}
+                    unit={card.horsepower ? 'HP' : undefined}
+                    percentage={card.horsepower ? (card.horsepower / 1000) * 100 : 0}
                     rarity={normRarity}
                   />
                   <StatGauge
                     label="Top Speed"
-                    value={card.topSpeedKmH || 260}
-                    unit="km/h"
-                    percentage={((card.topSpeedKmH || 260) / 400) * 100}
+                    value={card.topSpeedKmH ? card.topSpeedKmH : 'Unavailable'}
+                    unit={card.topSpeedKmH ? 'km/h' : undefined}
+                    percentage={card.topSpeedKmH ? (card.topSpeedKmH / 400) * 100 : 0}
                     rarity={normRarity}
                   />
                   <StatGauge
                     label="Acceleration 0-100"
-                    value={(card.zeroToHundredSec || 3.5).toFixed(1)}
-                    unit="s"
-                    percentage={Math.max(0, 100 - ((card.zeroToHundredSec || 3.5) / 6) * 100)}
+                    value={card.zeroToHundredSec ? card.zeroToHundredSec.toFixed(1) : 'Unavailable'}
+                    unit={card.zeroToHundredSec ? 's' : undefined}
+                    percentage={card.zeroToHundredSec ? Math.max(0, 100 - (card.zeroToHundredSec / 6) * 100) : 0}
                     rarity={normRarity}
                   />
                   <StatGauge
                     label="Torque"
-                    value={card.torqueNm || 500}
-                    unit="Nm"
-                    percentage={((card.torqueNm || 500) / 1000) * 100}
+                    value={card.torqueNm ? card.torqueNm : 'Unavailable'}
+                    unit={card.torqueNm ? 'Nm' : undefined}
+                    percentage={card.torqueNm ? (card.torqueNm / 1000) * 100 : 0}
                     rarity={normRarity}
                   />
                   <StatGauge
                     label="Weight"
-                    value={card.kerbWeightKg || 1500}
-                    unit="kg"
-                    percentage={((card.kerbWeightKg || 1500) / 2500) * 100}
+                    value={card.kerbWeightKg ? card.kerbWeightKg : 'Unavailable'}
+                    unit={card.kerbWeightKg ? 'kg' : undefined}
+                    percentage={card.kerbWeightKg ? (card.kerbWeightKg / 2500) * 100 : 0}
                     rarity={normRarity}
                   />
                 </div>

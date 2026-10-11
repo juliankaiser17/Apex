@@ -669,7 +669,7 @@ const createSampleCard = (partial: Partial<CarCard> & { id: string; make: string
   ...partial
 });
 
-export const SAMPLE_FEED_POSTS: FeedPost[] = [
+export const SAMPLE_FEED_POSTS: FeedPost[] = import.meta.env.DEV ? [
   {
     id: 'post-sample-1',
     user: {
@@ -882,7 +882,7 @@ export const SAMPLE_FEED_POSTS: FeedPost[] = [
     isLiked: false,
     createdAt: '2d ago'
   }
-];
+] : [];
 
 const getSavedPosts = (): FeedPost[] => {
   try {
@@ -891,6 +891,9 @@ const getSavedPosts = (): FeedPost[] => {
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
+          if (import.meta.env.PROD) {
+            return parsed;
+          }
           const userPostIds = new Set(parsed.map((p: any) => p.id));
           const nonDuplicateSamples = SAMPLE_FEED_POSTS.filter(s => !userPostIds.has(s.id));
           return [...parsed, ...nonDuplicateSamples];
@@ -898,7 +901,7 @@ const getSavedPosts = (): FeedPost[] => {
       }
     }
   } catch (e) {}
-  return SAMPLE_FEED_POSTS;
+  return import.meta.env.PROD ? [] : SAMPLE_FEED_POSTS;
 };
 
 const getSavedOnboarding = (): boolean => {
@@ -2077,8 +2080,12 @@ export const useApexStore = create<ApexState>((set, get) => ({
         const localOnly = localSaved.filter(p => !serverPostIds.has(p.id));
         const mergedAll = [...localOnly, ...mappedPosts];
         const allPostIds = new Set(mergedAll.map(p => p.id));
-        const nonDuplicateSamples = SAMPLE_FEED_POSTS.filter(s => !allPostIds.has(s.id));
-        set({ feedPosts: [...mergedAll, ...nonDuplicateSamples] });
+        if (import.meta.env.PROD) {
+          set({ feedPosts: mergedAll });
+        } else {
+          const nonDuplicateSamples = SAMPLE_FEED_POSTS.filter(s => !allPostIds.has(s.id));
+          set({ feedPosts: [...mergedAll, ...nonDuplicateSamples] });
+        }
       } else {
         set({ feedPosts: getSavedPosts() });
       }
@@ -2337,24 +2344,36 @@ export const useApexStore = create<ApexState>((set, get) => ({
     }
 
     set((state) => {
-      const updatedGarage = [authoritativeCard, ...state.garage];
-      persistLightweightGarage(state.user.id, updatedGarage);
+      const alreadyInGarage = state.garage.some(c => c.id === authoritativeCard.id || (Boolean(c.imageHash) && Boolean(authoritativeCard.imageHash) && c.imageHash === authoritativeCard.imageHash));
+      const updatedGarage = alreadyInGarage ? state.garage : [authoritativeCard, ...state.garage];
+      if (!alreadyInGarage) {
+        persistLightweightGarage(state.user.id, updatedGarage);
+      }
 
-      const xpResult = processXpGain(state.user, authoritativeXp, `${authoritativeRarity.toUpperCase()} Discovery`);
-      const updatedUser: UserProfile = {
-        ...xpResult.updatedUser,
-        totalSpots: (state.user.totalSpots || 0) + 1
-      };
+      // If already recorded authoritatively or already in garage, avoid double-granting XP
+      let updatedUser = state.user;
+      let leveledUp = false;
+      if (!alreadyInGarage && !(authoritativeCard as any).serverRecorded) {
+        const xpResult = processXpGain(state.user, authoritativeXp, `${authoritativeRarity.toUpperCase()} Discovery`);
+        updatedUser = {
+          ...xpResult.updatedUser,
+          totalSpots: (state.user.totalSpots || 0) + 1
+        };
+        leveledUp = Boolean(xpResult.leveledUp);
+      }
 
-      // Process 3-Tier Quests with real progress tracking
-      const questScanContext = {
-        card: authoritativeCard,
-        scanTimestamp: Date.now(),
-        city: authoritativeCard.city,
-        country: authoritativeCard.country
-      };
-      const questEval = processQuestScan(state.dailyQuests as any, questScanContext);
-      const updatedQuests = questEval.updatedQuests;
+      // Process 3-Tier Quests with real progress tracking only if not already evaluated
+      let updatedQuests = state.dailyQuests;
+      if (!alreadyInGarage) {
+        const questScanContext = {
+          card: authoritativeCard,
+          scanTimestamp: Date.now(),
+          city: authoritativeCard.city,
+          country: authoritativeCard.country
+        };
+        const questEval = processQuestScan(state.dailyQuests as any, questScanContext);
+        updatedQuests = questEval.updatedQuests;
+      }
 
       // Missions must be authoritatively verified and claimed via claimMissionReward
       const updatedMissions = state.dailyMissions;
@@ -2495,7 +2514,7 @@ export const useApexStore = create<ApexState>((set, get) => ({
         garage: updatedGarage,
         user: updatedUser,
         badges: evaluatedBadges,
-        levelUpLevel: xpResult.leveledUp ? updatedUser.level : state.levelUpLevel,
+        levelUpLevel: leveledUp ? updatedUser.level : state.levelUpLevel,
         dailyQuests: updatedQuests,
         activeTimedQuest: updatedTimedQuest,
         dailyMissions: updatedMissions,
@@ -2831,53 +2850,116 @@ export const useApexStore = create<ApexState>((set, get) => ({
         }
 
         const currentUser = get().user;
+        let updatedUser = currentUser;
         if (currentUser && currentUser.id) {
-          const updatedUser: UserProfile = {
+          updatedUser = {
             ...currentUser,
             xp: rpcResult.new_total_xp ?? currentUser.xp,
             level: rpcResult.new_level ?? currentUser.level,
             totalSpots: (currentUser.totalSpots || 0) + 1
           };
-          set({
-            user: updatedUser,
-            leaderboards: computeLeaderboard(updatedUser)
-          });
           registerOrUpdateUser(updatedUser);
         }
+
+        set((state) => {
+          const alreadyInGarage = state.garage.some(c => c.id === card.id || (Boolean(c.imageHash) && Boolean(card.imageHash) && c.imageHash === card.imageHash));
+          const updatedGarage = alreadyInGarage ? state.garage : [card, ...state.garage];
+          if (!alreadyInGarage) {
+            persistLightweightGarage(state.user.id, updatedGarage);
+          }
+
+          const questScanContext = {
+            card,
+            scanTimestamp: Date.now(),
+            city: card.city,
+            country: card.country,
+            isSessionConsecutive: true
+          };
+          const questEval = processQuestScan(state.dailyQuests as any, questScanContext);
+          const updatedQuests = questEval.updatedQuests;
+
+          try {
+            const today = new Date().toISOString().slice(0, 10);
+            const userKey = state.user.id ? `apex_daily_quests_${state.user.id}` : 'apex_daily_quests';
+            const dateKey = state.user.id ? `apex_daily_quests_date_${state.user.id}` : 'apex_daily_quests_date';
+            localStorage.setItem(dateKey, today);
+            localStorage.setItem(userKey, JSON.stringify(updatedQuests));
+          } catch (e) {}
+
+          return {
+            garage: updatedGarage,
+            user: updatedUser,
+            leaderboards: computeLeaderboard(updatedUser),
+            dailyQuests: updatedQuests
+          };
+        });
+        return;
       } else {
         const failureReason = rpcError?.message || rpcResult?.error || 'Database transaction rejected scan';
         console.warn('[onScanCompleted] RPC record_car_scan failure:', failureReason);
         (card as any).serverRecorded = false;
         (card as any).cloudSyncError = failureReason;
+
+        // Offline / Unsynced: atomically store in local garage cache and progress quests
+        set((state) => {
+          const alreadyInGarage = state.garage.some(c => c.id === card.id || (Boolean(c.imageHash) && Boolean(card.imageHash) && c.imageHash === card.imageHash));
+          const updatedGarage = alreadyInGarage ? state.garage : [card, ...state.garage];
+          if (!alreadyInGarage) {
+            persistLightweightGarage(state.user.id, updatedGarage);
+          }
+
+          const questScanContext = {
+            card,
+            scanTimestamp: Date.now(),
+            city: card.city,
+            country: card.country,
+            isSessionConsecutive: true
+          };
+          const questEval = processQuestScan(state.dailyQuests as any, questScanContext);
+          const updatedQuests = questEval.updatedQuests;
+
+          try {
+            const today = new Date().toISOString().slice(0, 10);
+            const userKey = state.user.id ? `apex_daily_quests_${state.user.id}` : 'apex_daily_quests';
+            const dateKey = state.user.id ? `apex_daily_quests_date_${state.user.id}` : 'apex_daily_quests_date';
+            localStorage.setItem(dateKey, today);
+            localStorage.setItem(userKey, JSON.stringify(updatedQuests));
+          } catch (e) {}
+
+          return {
+            garage: updatedGarage,
+            dailyQuests: updatedQuests
+          };
+        });
       }
     } catch (scanErr: any) {
       console.warn('[onScanCompleted] RPC record_car_scan exception:', scanErr?.message || scanErr);
       (card as any).serverRecorded = false;
       (card as any).cloudSyncError = scanErr?.message || 'Network exception during scan recording';
+
+      set((state) => {
+        const alreadyInGarage = state.garage.some(c => c.id === card.id || (Boolean(c.imageHash) && Boolean(card.imageHash) && c.imageHash === card.imageHash));
+        const updatedGarage = alreadyInGarage ? state.garage : [card, ...state.garage];
+        if (!alreadyInGarage) {
+          persistLightweightGarage(state.user.id, updatedGarage);
+        }
+
+        const questScanContext = {
+          card,
+          scanTimestamp: Date.now(),
+          city: card.city,
+          country: card.country,
+          isSessionConsecutive: true
+        };
+        const questEval = processQuestScan(state.dailyQuests as any, questScanContext);
+        const updatedQuests = questEval.updatedQuests;
+
+        return {
+          garage: updatedGarage,
+          dailyQuests: updatedQuests
+        };
+      });
     }
-
-    // 2. Authoritative UI Quest State Update via 3-Tier Quest Engine
-    set((state) => {
-      const questScanContext = {
-        card,
-        scanTimestamp: Date.now(),
-        city: card.city,
-        country: card.country,
-        isSessionConsecutive: true
-      };
-      const questEval = processQuestScan(state.dailyQuests as any, questScanContext);
-      const updatedQuests = questEval.updatedQuests;
-
-      try {
-        const today = new Date().toISOString().slice(0, 10);
-        const userKey = state.user.id ? `apex_daily_quests_${state.user.id}` : 'apex_daily_quests';
-        const dateKey = state.user.id ? `apex_daily_quests_date_${state.user.id}` : 'apex_daily_quests_date';
-        localStorage.setItem(dateKey, today);
-        localStorage.setItem(userKey, JSON.stringify(updatedQuests));
-      } catch (e) {}
-
-      return { dailyQuests: updatedQuests };
-    });
   },
 
   rehydrateCardImages: (cards: CarCard[]) => {

@@ -7,9 +7,9 @@
 ---
 
 ## 1. Current Status Summary
-- **Completed Tracks**: Track R (Stability and Release Engineering), Track A (AI Identification: Phase 13), Track U (UI Redesign: Phases 0–10)
-- **Active Track**: Track F (Functional Audit: Appendix C)
-- **Overall Program State**: Tracks R, A, and U 100% complete with full cryptographic evidence, 0 raw hex violations, 6 Play Store screenshots, and passing test suites. Ready to execute Track F functional baseline and bug fixes.
+- **Completed Tracks**: Track R (Stability and Release Engineering), Track A (AI Identification: Phase 13), Track U (UI Redesign: Phases 0–10), Track F (Functional Audit: Items 1–8)
+- **Active Track**: Track S (Store Readiness: S1–S7)
+- **Overall Program State**: Tracks R, A, U, and F 100% complete with passing test suites, 0 frozen path violations, 0 client bundle leaks, and verified proposals. Ready to execute Track S store readiness.
 
 ---
 
@@ -95,15 +95,15 @@
 - [x] Phase 10: Store screenshot mode (6 funnel Play Store screenshots, icon & feature graphic creative briefs in `docs/store/ASSET_SPECIFICATIONS.md`)
 
 ### Track F: Functional Audit (`fix/functional`)
-- [ ] Full baseline execution across matrix (Android, mobile web)
-- [ ] Item 1: Quest & garage mismatch investigation & fix
-- [ ] Item 2: XP inflation curve simulation & rebalancing proposal
-- [ ] Item 3: Seeded content removal in release builds
-- [ ] Item 4: Report and block user audit & proposal
-- [ ] Item 5: Quest list blank region fix
-- [ ] Item 6: Map tile provider audit & recommendation
-- [ ] Item 7: Dev and admin tools removal in release
-- [ ] Item 8: Card specs restricted to verified registry values
+- [x] Full baseline execution across matrix (`docs/program/TRACK_F_FUNCTIONAL_AUDIT_REPORT.md`)
+- [x] Item 1: Quest & garage mismatch investigation & fix (`scripts/test_quest_garage_mismatch.ts`, `docs/proposals/quest_garage_server_sync.md`)
+- [x] Item 2: XP inflation curve simulation & rebalancing proposal (`scripts/simulate_xp_progression.ts`, `docs/proposals/xp_progression_rebalancing.md`)
+- [x] Item 3: Seeded content removal in release builds (`useApexStore.ts` `SAMPLE_FEED_POSTS` gated behind `import.meta.env.DEV`)
+- [x] Item 4: Report and block user audit & proposal (`scripts/test_moderation_flow.ts`, `docs/proposals/moderation_report_and_block_backend.md`)
+- [x] Item 5: Quest list blank region fix (`HomeScreen.tsx` empty state, dedicated `QuestsScreen`)
+- [x] Item 6: Map tile provider audit & recommendation (`docs/proposals/map_tile_provider.md`)
+- [x] Item 7: Dev and admin tools removal in release (`check-client-bundle.mjs` 0 leaks, 263.5 kB entry)
+- [x] Item 8: Card specs restricted to verified registry values (`scripts/test_verified_specs_only.ts`)
 
 ### Track S: Store Readiness (`release/store-readiness`)
 - [ ] S1: Listing package (`docs/store/LISTING.md`)

@@ -330,37 +330,48 @@ export const HomeScreen: React.FC = () => {
           </button>
         </div>
 
-        <div className="space-y-2.5">
-          {activeQuestsPreview.map((quest) => (
-            <div
-              key={quest.id}
-              onClick={() => setIsQuestsModalOpen(true)}
-              className="p-3.5 rounded-[var(--radius-panel)] border border-[var(--color-line)] bg-[var(--color-panel)] flex items-center justify-between gap-3 cursor-pointer hover:border-[var(--color-text-3)] active:scale-[0.99] transition-all"
-            >
-              <div className="space-y-1 flex-1 min-w-0">
-                <h4 className="text-secondary font-bold text-[var(--color-text)] truncate">
-                  {quest.title}
-                </h4>
-                <p className="text-caption text-[var(--color-text-3)] truncate">
-                  {quest.description}
-                </p>
-                <div className="pt-0.5">
-                  <ProgressTicks
-                    current={quest.currentCount}
-                    total={quest.targetCount}
-                    label="Progress"
-                  />
+        {activeQuestsPreview.length > 0 ? (
+          <div className="space-y-2.5">
+            {activeQuestsPreview.map((quest) => (
+              <div
+                key={quest.id}
+                onClick={() => setIsQuestsModalOpen(true)}
+                className="p-3.5 rounded-[var(--radius-panel)] border border-[var(--color-line)] bg-[var(--color-panel)] flex items-center justify-between gap-3 cursor-pointer hover:border-[var(--color-text-3)] active:scale-[0.99] transition-all"
+              >
+                <div className="space-y-1 flex-1 min-w-0">
+                  <h4 className="text-secondary font-bold text-[var(--color-text)] truncate">
+                    {quest.title}
+                  </h4>
+                  <p className="text-caption text-[var(--color-text-3)] truncate">
+                    {quest.description}
+                  </p>
+                  <div className="pt-0.5">
+                    <ProgressTicks
+                      current={quest.currentCount}
+                      total={quest.targetCount}
+                      label="Progress"
+                    />
+                  </div>
+                </div>
+
+                <div className="text-right shrink-0">
+                  <span className="font-mono text-secondary font-bold text-[var(--color-xp)] tabular-nums">
+                    +{quest.xpReward} XP
+                  </span>
                 </div>
               </div>
-
-              <div className="text-right shrink-0">
-                <span className="font-mono text-secondary font-bold text-[var(--color-xp)] tabular-nums">
-                  +{quest.xpReward} XP
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <div className="p-4 rounded-[var(--radius-panel)] border border-[var(--color-line)] bg-[var(--color-panel)] text-center space-y-1">
+            <p className="text-secondary font-semibold text-[var(--color-text)]">
+              All daily quests completed!
+            </p>
+            <p className="text-caption text-[var(--color-text-3)]">
+              Check back tomorrow for fresh objectives.
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Full Quests Screen Modal */}

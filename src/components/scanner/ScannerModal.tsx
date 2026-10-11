@@ -444,17 +444,17 @@ export const ScannerModal: React.FC = () => {
 
       const finalMake = specResolution.isVerified ? specResolution.make : make;
       const finalModel = specResolution.isVerified ? specResolution.model : model;
-      const generation = specResolution.generation || aiResult?.generation || 'Current';
-      const trim = specResolution.trim || aiResult?.trim || undefined;
-      const horsepower = specResolution.horsepower ?? (aiResult?.horsepower || undefined);
-      const topSpeed = specResolution.topSpeedKmH ?? (aiResult?.top_speed_kmh || undefined);
-      const engine = specResolution.engine || aiResult?.engine || (specResolution.isVerified ? 'Verified Engine' : 'Uncatalogued');
-      const zeroToHundred = specResolution.zeroToHundredSec ?? (aiResult?.zero_to_hundred_seconds || undefined);
-      const torqueNm = specResolution.torqueNm ?? (aiResult?.torque_nm || undefined);
-      const kerbWeightKg = specResolution.kerbWeightKg ?? (aiResult?.kerb_weight_kg || undefined);
-      const productionYears = specResolution.productionYears !== 'N/A' ? specResolution.productionYears : (aiResult?.production_years || 'N/A');
-      const originCountry = specResolution.originCountry !== 'Global' ? specResolution.originCountry : (aiResult?.origin_country || 'Global');
-      const bodyStyle = specResolution.bodyStyle || aiResult?.body_style || 'Coupe';
+      const generation = specResolution.generation || undefined;
+      const trim = specResolution.trim || undefined;
+      const horsepower = specResolution.isVerified ? (specResolution.horsepower ?? undefined) : undefined;
+      const topSpeed = specResolution.isVerified ? (specResolution.topSpeedKmH ?? undefined) : undefined;
+      const engine = specResolution.isVerified ? (specResolution.engine || 'Verified Specs') : 'Unavailable';
+      const zeroToHundred = specResolution.isVerified ? (specResolution.zeroToHundredSec ?? undefined) : undefined;
+      const torqueNm = specResolution.isVerified ? (specResolution.torqueNm ?? undefined) : undefined;
+      const kerbWeightKg = specResolution.isVerified ? (specResolution.kerbWeightKg ?? undefined) : undefined;
+      const productionYears = specResolution.isVerified && specResolution.productionYears !== 'N/A' ? specResolution.productionYears : 'Unavailable';
+      const originCountry = specResolution.isVerified && specResolution.originCountry !== 'Global' ? specResolution.originCountry : 'Unavailable';
+      const bodyStyle = specResolution.isVerified ? (specResolution.bodyStyle || 'Coupe') : 'Unspecified';
       const color = aiResult?.color || 'Unknown';
 
       onAnalysisStageResolved(0, 'Framing & Viewpoint Confirmed');
