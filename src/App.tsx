@@ -20,10 +20,11 @@ const ScannerModal = React.lazy(() => import('./components/scanner/ScannerModal'
 const OnboardingModal = React.lazy(() => import('./components/onboarding/OnboardingModal').then(m => ({ default: m.OnboardingModal })));
 const Card3DDetail = React.lazy(() => import('./components/garage/Card3DDetail').then(m => ({ default: m.Card3DDetail })));
 const ProfileSettingsModal = React.lazy(() => import('./components/profile/ProfileSettingsModal').then(m => ({ default: m.ProfileSettingsModal })));
+const ProfileScreen = React.lazy(() => import('./components/profile/ProfileScreen').then(m => ({ default: m.ProfileScreen })));
 const HuntScreen = React.lazy(() => import('./components/hunts/HuntScreen').then(m => ({ default: m.HuntScreen })));
 
 import { requestRealLocationPermission } from './utils/geolocation';
-import { applyAppTheme } from './utils/theme';
+import { applyAppTheme, THEME_ACCENT_PALETTES } from './utils/theme';
 
 import { logAuthTransition } from './utils/authLogger';
 import { ToastProvider } from './components/ui/Toast';
@@ -164,7 +165,7 @@ export const App: React.FC = () => {
 
   // ─── DYNAMIC APP THEME ENGINE ───
   useEffect(() => {
-    applyAppTheme(cardThemeColor || '#E50914');
+    applyAppTheme(cardThemeColor || THEME_ACCENT_PALETTES[0].hex);
   }, [cardThemeColor]);
 
   // ─── DAILY STREAK AUTO POPUP (Only Once Per Calendar Day If Not Already Claimed) ───
@@ -264,7 +265,7 @@ export const App: React.FC = () => {
           {activeTab === 'profile' && (
             <ModuleErrorBoundary moduleName="Spotter Profile">
               <React.Suspense fallback={null}>
-                <SocialScreen />
+                <ProfileScreen />
               </React.Suspense>
             </ModuleErrorBoundary>
           )}
