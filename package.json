@@ -6,9 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build:api": "node scripts/build_api.mjs",
-    "build": "tsc -b && vite build",
-    "lint": "oxlint",
-    "test": "tsx scripts/test_sha256_verification.ts && tsx scripts/test_cross_scan_independence.ts && tsx scripts/test_cloudflare_provider.ts && tsx src/ai-engine/evaluation/evaluate_accuracy.ts",
+    "build": "tsc -b && vite build && node scripts/check-client-bundle.mjs",
+    "lint": "oxlint && node scripts/lint-boundaries.mjs",
+    "test": "tsx scripts/test_web_crypto.ts && tsx scripts/test_sha256_verification.ts && tsx scripts/test_cross_scan_independence.ts && tsx scripts/test_cloudflare_provider.ts && tsx src/ai-engine/evaluation/evaluate_accuracy.ts && tsx scripts/test_release_forensic_gates.ts && tsx scripts/test_fail_closed_regression.ts && tsx scripts/test_security_input_hardening.ts",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -23,7 +23,11 @@
     "@capacitor/share": "^8.0.1",
     "@capacitor/status-bar": "^8.0.3",
     "@capawesome/capacitor-google-sign-in": "^0.1.2",
+    "@fontsource/big-shoulders-display": "^5.3.0",
+    "@fontsource/inter": "^5.3.0",
+    "@fontsource/jetbrains-mono": "^5.3.0",
     "@supabase/supabase-js": "^2.112.0",
+    "@xenova/transformers": "^2.17.2",
     "canvas-confetti": "^1.9.4",
     "clsx": "^2.1.1",
     "framer-motion": "^12.43.0",

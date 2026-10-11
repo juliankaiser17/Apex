@@ -431,12 +431,29 @@ export class HierarchicalClassifier {
         /\b(sedan|saloon|limousine|panamera|taycan|flying\s+spur|phantom|ghost)\b/i.test(candNameLower);
 
       if (isObservedOpenTop) {
-        const hasOpenTopPeer = raw_candidates.some(c => {
+        const getFamilyToken = (name: string, model?: string | null): string => {
+          if (model) {
+            const cleanModel = model.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+            return cleanModel.split(' ')[0] || cleanModel;
+          }
+          let cleanName = name.toLowerCase().replace(/\([^)]*\)/g, '').trim();
+          if (candidateMake && cleanName.startsWith(candidateMake.toLowerCase())) {
+            cleanName = cleanName.slice(candidateMake.length).trim();
+          }
+          cleanName = cleanName.replace(/^(?:ferrari|porsche|mclaren|koenigsegg|lamborghini|aston\s+martin|bentley|rolls\s+royce|bmw|mercedes\s+benz|mercedes|audi|ford|chevrolet|toyota|nissan|maserati|bugatti)\s+/i, '').trim();
+          return cleanName.split(/[\s-]+/)[0] || cleanName;
+        };
+
+        const candFamily = getFamilyToken(candidate.name, canonCand?.model);
+        const hasOpenTopSibling = raw_candidates.some(c => {
+          if (c.name === candidate.name) return false;
           const cCanon = canonicalVehicleRegistry.lookupByTextOrAlias(c.name, candidateMake || undefined);
+          const cFamily = getFamilyToken(c.name, cCanon?.model);
+          if (cFamily !== candFamily) return false;
           const cBody = (cCanon?.bodyStyle || '').toLowerCase();
           return cBody === 'convertible' || cBody === 'targa' || cBody === 'roadster' || /\b(spider|spyder|cabriolet|convertible|roadster|targa|speedster|boxster|barchetta|miata|cielo)\b/i.test(c.name.toLowerCase());
         });
-        if (isCandidateCoupe && hasOpenTopPeer) {
+        if (isCandidateCoupe && hasOpenTopSibling) {
           candContradictions.push(`Body style mismatch: Observed convertible/open-top architecture vs candidate fixed coupe`);
           score -= 0.60;
         } else if (isCandidateOpenTop) {
@@ -552,7 +569,7 @@ export class HierarchicalClassifier {
       }
 
       const has458Cues = 
-        /\b(triple\s+(?:central\s+)?exhaust|three\s+(?:central\s+)?exhaust|mustache\s+aero|deformable\s+winglets|vertical\s+swept-?back\s+headlights?|flying\s+buttress(?:es)?)\b/i.test(evidenceText);
+        /\b(triple\s+(?:central\s+)?exhaust|three\s+(?:central\s+)?exhaust|mustache\s+aero|deformable\s+winglets|vertical\s+swept-?back\s+headlights?)\b/i.test(evidenceText);
 
       if (has458Cues) {
         if (candNameLower.includes('458')) {
@@ -568,7 +585,10 @@ export class HierarchicalClassifier {
       const has720sCues = /\b(eye-?socket|deep-?set\s+(?:head)?lights?|double-?skinned|p14)\b/i.test(evidenceText);
       // A bare "strakes" mention (e.g. an engine-cover louver) must never corroborate McLaren P11.
       const hasP11CrescentCues = /\b(crescent|p1-?(?:style|inspired)|c-shape(?:d)?|side\s+(?:radiator\s+)?(?:intake|scoop)|p11)\b/i.test(evidenceText);
-      const has675ltCues = /\b(675lt|active\s+longtail|longtail\s+airbrake|longtail|dual\s+high-?exit|titanium\s+circular\s+exhaust|circular\s+titanium|front\s+fender\s+louvers?|carbon\s+endplates?|extended\s+carbon)\b/i.test(evidenceText);
+      // GENERIC-MORPHOLOGY DISCIPLINE (Phase 4 invariant): a bare "front splitter" or "longtail"
+      // mention is not 675LT-specific — every supercar has a splitter and "longtail" wording can
+      // describe any LT generation. Only structurally LT-specific cues may boost 675LT / penalize 650S.
+      const has675ltCues = /\b(675lt|active\s+longtail|longtail\s+airbrake|dual\s+high-?exit|titanium\s+circular\s+exhaust|circular\s+titanium|front\s+fender\s+louvers?|fender\s+louvers?|splitter\s+endplates?|carbon\s+endplates?|extended\s+carbon|upturned\s+endplates|blade\s+with\s+endplates|winglets?\s+at\s+the\s+outer\s+corners)\b/i.test(evidenceText);
 
       if (hasP11CrescentCues) {
         if (candNameLower.includes('650s') || (candNameLower.includes('675lt') && !has720sCues)) {
@@ -909,9 +929,11 @@ export class HierarchicalClassifier {
 
     // EVIDENCE-FLOOR GATE:
     // Exact-model resolution is only defensible when at least one candidate carries observable
-    // MODEL-SPECIFIC or family-grounded support.
+    // MODEL-SPECIFIC support. On the fine-grained path, generic/family-shared supporting strings
+    // are NOT model-specific evidence — counting them here previously let a generic-only match
+    // bypass the specificity honesty guard and canonize a wrong exact model.
     const anyModelSpecificEvidence = fgResult.scoredCandidates.length > 0
-      ? fgResult.scoredCandidates.some((c) => (c.specificEvidenceCount > 0) || (c.supportingEvidence?.length > 0))
+      ? fgResult.scoredCandidates.some((c) => c.specificEvidenceCount > 0)
       : validCandidates.some((c) => (c.supporting_evidence?.length ?? 0) > 0);
 
     const isTiedOrDeadlocked = validCandidates.length >= 2 && separation === 0;
@@ -969,6 +991,19 @@ export class HierarchicalClassifier {
     let reason = 'Vehicle manufacturer identified with high visual confidence.';
     let reasonCustomizedByGate = false;
 
+    // P11 FAMILY-PAIR RESOLUTION (650S vs 675LT):
+    // When the leading candidates are the McLaren P11 pair and the evidence contains NO
+    // Longtail-specific architecture (airbrake, splitter endplates/louvres, high titanium
+    // exhausts), the exact trim is genuinely indistinguishable. The honest resolution is
+    // McLaren Super Series family uncertainty at generation level — never a coin-flip
+    // between the two, and never a raw-provider-biased exact claim.
+    const p11SpecificCueRe = /\b(675lt|active\s+longtail|longtail\s+airbrake|dual\s+high-?exit|titanium\s+circular\s+exhaust|circular\s+titanium|front\s+fender\s+louvers?|fender\s+louvers?|splitter\s+endplates?|carbon\s+endplates?|extended\s+carbon|upturned\s+endplates|blade\s+with\s+endplates|winglets?\s+at\s+the\s+outer\s+corners)\b/i;
+    const isP11Name = (n: string | undefined): boolean => Boolean(n && (n.toLowerCase().includes('650s') || n.toLowerCase().includes('675lt')));
+    const isP11PairContest =
+      isP11Name(topCandidate?.name) &&
+      isP11Name(validCandidates[1]?.name) &&
+      !p11SpecificCueRe.test(evidenceText);
+
     if (allHaveSevereMismatch || (topHasSevereMismatch && (topCandidate?.score || 0) < 0.50)) {
       resolvedMake = null;
       resolvedModelFamily = null;
@@ -977,6 +1012,15 @@ export class HierarchicalClassifier {
       specificity = 'make';
       numericSpecificity = 0;
       reason = 'Severe architectural contradiction detected: observed visual cues directly contradict proposed candidates.';
+    } else if (isP11PairContest) {
+      resolvedModelFamily = null;
+      resolvedGeneration = 'P11';
+      resolvedVariant = null;
+      canonicalRecord = null;
+      specificity = 'generation';
+      numericSpecificity = 2;
+      reason = `Identified as McLaren Super Series (P11). Specific trim (650S vs 675LT) unconfirmed without observable Longtail airbrake, splitter endplates/louvres, or high-mounted titanium exhausts.`;
+      reasonCustomizedByGate = true;
     } else if (!anyModelSpecificEvidence || (isTiedOrDeadlocked && !areTiedCandidatesSameFamily)) {
       // USER MANDATE 1: THE RAW PROVIDER MUST NEVER OVERRIDE AN UNCERTAIN DISCRIMINATOR
       // If the evidence pipeline reaches tie, deadlock, insufficient model-specific evidence,
@@ -1046,7 +1090,7 @@ export class HierarchicalClassifier {
       // Only cap at generation if front view lacks distinguishing front proof
       const isMcLaren675 = topCandidate.name.toLowerCase().includes('675lt');
       const isFrontView = viewpoint === 'front' || viewpoint === 'front_3q';
-      const hasFront675Proof = evidenceText.includes('front fender louver') || evidenceText.includes('carbon endplate') || evidenceText.includes('675lt');
+      const hasFront675Proof = /\b(?:front\s+fender\s+louvers?|fender\s+louvers?|carbon\s+endplates?|splitter\s+endplates?|endplates?|winglets?\s+at\s+the\s+outer\s+corners|upturned\s+endplates|blade\s+with\s+endplates|675lt)\b/i.test(evidenceText);
       if (isMcLaren675 && isFrontView && !hasFront675Proof) {
         resolvedVariant = null;
         if (!resolvedGeneration || resolvedGeneration === 'Current') resolvedGeneration = 'P11';

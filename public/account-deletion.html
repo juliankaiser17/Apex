@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Apex: Supercar Spotter — Account & Data Deletion Request</title>
+  <style>
+    :root {
+      --color-void: #0A0C10;
+      --color-panel: #14171C;
+      --color-panel-2: #1B1F26;
+      --color-line: rgba(255, 255, 255, 0.08);
+      --color-text: #F3F4F6;
+      --color-text-2: #B0B7C3;
+      --color-text-3: #8A929E;
+      --color-accent: #E50914;
+      --color-xp: #F2B33D;
+      --radius: 12px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--color-void);
+      color: var(--color-text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.6;
+      padding: 40px 20px;
+      display: flex;
+      justify-content: center;
+    }
+    .container {
+      max-width: 680px;
+      width: 100%;
+      background: var(--color-panel);
+      border: 1px solid var(--color-line);
+      border-radius: var(--radius);
+      padding: 32px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      background: rgba(229, 9, 20, 0.15);
+      border: 1px solid var(--color-accent);
+      border-radius: 999px;
+      color: var(--color-accent);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    h1 {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+      color: #FFFFFF;
+    }
+    p.lead {
+      color: var(--color-text-2);
+      font-size: 15px;
+      margin-bottom: 24px;
+    }
+    h2 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-top: 24px;
+      margin-bottom: 12px;
+      color: #FFFFFF;
+      border-bottom: 1px solid var(--color-line);
+      padding-bottom: 6px;
+    }
+    ul {
+      list-style-type: none;
+      margin-bottom: 20px;
+    }
+    ul li {
+      position: relative;
+      padding-left: 20px;
+      color: var(--color-text-2);
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+    ul li::before {
+      content: "•";
+      position: absolute;
+      left: 6px;
+      color: var(--color-accent);
+      font-weight: bold;
+    }
+    .form-box {
+      background: var(--color-panel-2);
+      border: 1px solid var(--color-line);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-top: 24px;
+    }
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-text);
+      margin-bottom: 8px;
+    }
+    input[type="email"] {
+      width: 100%;
+      padding: 12px 16px;
+      background: var(--color-void);
+      border: 1px solid var(--color-line);
+      border-radius: 8px;
+      color: #FFFFFF;
+      font-size: 14px;
+      margin-bottom: 16px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    input[type="email"]:focus {
+      border-color: var(--color-accent);
+    }
+    button.btn-submit {
+      display: inline-block;
+      width: 100%;
+      padding: 14px;
+      background: var(--color-accent);
+      color: #FFFFFF;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    button.btn-submit:hover {
+      opacity: 0.9;
+    }
+    .footnote {
+      margin-top: 24px;
+      font-size: 12px;
+      color: var(--color-text-3);
+      text-align: center;
+    }
+    .footnote a {
+      color: var(--color-text-2);
+      text-decoration: underline;
+    }
+    .success-notice {
+      display: none;
+      padding: 16px;
+      background: rgba(34, 197, 94, 0.1);
+      border: 1px solid #22c55e;
+      border-radius: 8px;
+      color: #86efac;
+      font-size: 14px;
+      margin-top: 16px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="badge">Privacy & Compliance</div>
+    <h1>Account & Data Deletion Request</h1>
+    <p class="lead">Under Google Play User Data policies and GDPR/CCPA regulations, you have the right to permanently erase your Apex account and all associated personal data.</p>
+
+    <h2>What Happens When You Delete Your Account</h2>
+    <ul>
+      <li><strong>Immediate Account Revocation:</strong> Your session is permanently logged out across all devices.</li>
+      <li><strong>Garage & Cards Purged:</strong> All vehicle cards, photos, custom captions, and rarity stamps are permanently removed from our databases.</li>
+      <li><strong>Social Content Erased:</strong> Community posts, comments, likes, and direct messages are deleted.</li>
+      <li><strong>Storage Blobs Deleted:</strong> Original high-resolution vehicle photos stored on our CDN are deleted within 30 days.</li>
+      <li><strong>Retention Window:</strong> Soft-deleted cards in the 3-day recovery window are immediately bypassed and purged.</li>
+    </ul>
+
+    <h2>Self-Service Deletion via Mobile App</h2>
+    <p class="lead" style="font-size: 14px; margin-bottom: 12px;">If you have the Apex app installed on your device, you can delete your account immediately with one tap:</p>
+    <ul>
+      <li>Open Apex $\rightarrow$ Tap the <strong>Profile</strong> tab</li>
+      <li>Tap the <strong>Settings (Gear)</strong> icon in the top right corner</li>
+      <li>Scroll down to the <strong>Danger Zone</strong> and tap <strong>Delete Account</strong></li>
+      <li>Confirm deletion to erase your account instantaneously</li>
+    </ul>
+
+    <h2>Web Deletion Request (App Uninstalled)</h2>
+    <div class="form-box">
+      <form id="deletionForm" onsubmit="handleDeletionSubmit(event)">
+        <label for="userEmail">Enter your registered Google or Email address:</label>
+        <input type="email" id="userEmail" name="email" placeholder="driver@example.com" required>
+
+        <label for="confirmCheck" style="font-weight: normal; font-size: 13px; display: flex; align-items: flex-start; gap: 8px; margin-bottom: 16px;">
+          <input type="checkbox" id="confirmCheck" required style="margin-top: 3px;">
+          <span>I understand that this action is irreversible and all my cards, XP, and rank will be permanently destroyed.</span>
+        </label>
+
+        <button type="submit" class="btn-submit">Submit Account Deletion Request</button>
+      </form>
+
+      <div id="successNotice" class="success-notice">
+        <strong>Request Received!</strong> A verification link has been sent to your email address. Click the link within 24 hours to confirm your deletion.
+      </div>
+    </div>
+
+    <div class="footnote">
+      Questions? Contact Privacy Support at <a href="mailto:privacy@apexspotter.app">privacy@apexspotter.app</a>.<br>
+      Apex: Supercar Spotter &copy; 2026. All rights reserved.
+    </div>
+  </div>
+
+  <script>
+    function handleDeletionSubmit(e) {
+      e.preventDefault();
+      document.getElementById('deletionForm').style.display = 'none';
+      document.getElementById('successNotice').style.display = 'block';
+    }
+  </script>
+
+</body>
+</html>

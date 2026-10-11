@@ -204,7 +204,11 @@ class CanonicalVehicleRegistry {
       '911 carrera 997',
       'porsche 911 carrera 997',
       'porsche 911 carrera (997)',
-      '911 carrera (997)'
+      '911 carrera (997)',
+      'porsche 911 (997)',
+      '911 (997)',
+      'porsche 911 997',
+      '911 997'
     ]);
 
     this.registerAliases('porsche-718-boxster', [
@@ -318,7 +322,18 @@ class CanonicalVehicleRegistry {
       'sf90',
       'sf90 stradale',
       'ferrari sf90',
-      'ferrari sf90 stradale'
+      'ferrari sf90 stradale',
+      'sf90 spider',
+      'ferrari sf90 spider',
+      'sf90 spider (sf90)',
+      'ferrari sf90 spider (sf90)',
+      'sf90 assetto fiorano',
+      'sf90 stradale assetto fiorano',
+      'ferrari sf90 stradale assetto fiorano',
+      'ferrari sf90 stradale assetto fiorano (f173)',
+      'sf90 stradale assetto fiorano (f173)',
+      'sf90 stradale (f173)',
+      'ferrari sf90 stradale (f173)'
     ]);
 
     this.registerAliases('ferrari-roma', [
@@ -370,9 +385,11 @@ class CanonicalVehicleRegistry {
 
     this.registerAliases('mclaren-675lt', [
       '675lt',
+      'mclaren 675lt',
       'mclaren 675lt coupe',
       '675lt coupe',
-      '675 lt'
+      '675 lt',
+      'mclaren 675 lt'
     ]);
 
     this.registerAliases('mclaren-675lt-spider', [
@@ -616,6 +633,15 @@ class CanonicalVehicleRegistry {
       'koenigsegg gemera',
       'gemera hv8',
       'gemera tfg'
+    ]);
+
+    this.registerAliases('koenigsegg-jesko', [
+      'jesko',
+      'koenigsegg jesko',
+      'jesko attack',
+      'koenigsegg jesko attack',
+      'jesko absolut',
+      'koenigsegg jesko absolut'
     ]);
 
     // ── ASTON MARTIN ──
@@ -1203,10 +1229,13 @@ class CanonicalVehicleRegistry {
     // If make and model are provided with evidence from upstream vision,
     // preserve them with VERIFIED_UNREGISTERED status rather than substituting another vehicle!
     const safeModel = (model || 'Unknown Model').trim();
-    const generatedId = `${this.normalize(safeMake)}-${this.normalize(safeModel)}`
+    const cleanMake = safeMake.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    const cleanModel = safeModel
       .toLowerCase()
+      .replace(/\([^)]*\)/g, '')
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-|-$/g, '');
+    const generatedId = `${cleanMake}-${cleanModel}`.replace(/-+/g, '-').replace(/^-|-$/g, '');
 
     const specificityLevel = variant ? 4 : generation ? 2 : safeModel !== 'Unknown Model' ? 1 : 0;
 

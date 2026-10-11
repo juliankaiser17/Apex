@@ -1,5 +1,6 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { AlertTriangle, RefreshCw, ChevronDown, ChevronUp } from 'lucide-react';
+import { crashReporter } from '../../services/crashReporter';
 
 interface Props {
   moduleName: string;
@@ -29,6 +30,7 @@ export class ModuleErrorBoundary extends Component<Props, State> {
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error(`[ModuleErrorBoundary:${this.props.moduleName}] Caught unhandled error:`, error, errorInfo);
+    crashReporter.recordError(error, { moduleName: this.props.moduleName, type: 'module_error_boundary' }, errorInfo.componentStack || undefined);
     this.setState({ errorInfo });
   }
 

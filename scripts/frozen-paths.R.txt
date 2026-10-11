@@ -1,0 +1,8 @@
+^api/
+^supabase/
+^src/ai-engine/
+^src/services/(aiVisionService|hunterSceneEngine|offlineRecognitionEngine|userService|playIntegrityService)
+^src/data/vehicleDatabase
+^src/store/useApexStore
+^src/hooks/useScannerStateMachine
+^src/utils/(mastery|localRarityEngine|privacyPipeline)

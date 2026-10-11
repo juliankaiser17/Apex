@@ -8,15 +8,189 @@
     <meta name="theme-color" content="#080808" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <title>APEX — Every Street Is a Track</title>
-    <!-- Google Fonts: ASPHALT Design System -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600&family=Bebas+Neue&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+    <!-- Content Security Policy: Restrictive execution within Android WebView and Web -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' capacitor: http://localhost:* https://*.supabase.co; script-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: capacitor: https://*.supabase.co https://*.tile.openstreetmap.org https://images.unsplash.com https://*.googleusercontent.com; connect-src 'self' capacitor: http://localhost:* https://*.supabase.co wss://*.supabase.co https://accounts.google.com https://*.cloudflare.com https://generativelanguage.googleapis.com; frame-src 'self' https://accounts.google.com; object-src 'none';" />
     <!-- Google Identity Services for Real OAuth -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <style>
+      @keyframes apex-pulse-glow {
+        0%, 100% { transform: scale(1); opacity: 0.8; }
+        50% { transform: scale(1.08); opacity: 1; }
+      }
+      @keyframes apex-spin-ring {
+        to { transform: rotate(360deg); }
+      }
+    </style>
   </head>
-  <body class="bg-[#080808] text-[#F0EBE3] antialiased overflow-x-hidden select-none">
-    <div id="root"></div>
+  <body class="bg-[#0A0C10] text-[#F4F6F8] antialiased overflow-x-hidden select-none">
+    <div id="root">
+      <!-- Fallback Bootloader: Rendered immediately before JavaScript bundle evaluation -->
+      <div id="apex-boot-screen" style="position:fixed;inset:0;background:#0A0C10;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:99999;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#F4F6F8;text-align:center;padding:24px;box-sizing:border-box;">
+        <div style="position:relative;width:68px;height:68px;margin-bottom:24px;display:flex;align-items:center;justify-content:center;">
+          <div style="position:absolute;inset:0;border:2px solid rgba(242,179,61,0.25);border-top:2px solid #F2B33D;border-radius:50%;animation:apex-spin-ring 1s linear infinite;"></div>
+          <div style="width:16px;height:16px;background:#F2B33D;border-radius:50%;box-shadow:0 0 16px rgba(242,179,61,0.6);animation:apex-pulse-glow 1.5s ease-in-out infinite;"></div>
+        </div>
+        <div style="font-size:26px;font-weight:900;letter-spacing:0.2em;color:#F4F6F8;margin-bottom:8px;text-transform:uppercase;">APEX</div>
+        <div style="font-size:11px;font-weight:600;letter-spacing:0.25em;color:#8A929E;text-transform:uppercase;" id="apex-boot-status">STARTING ENGINE...</div>
+      </div>
+    </div>
+
+    <!-- Pre-React Boot Failure & Watchdog Script -->
+    <!-- Pre-React Boot Failure & Staged Watchdog Script -->
+    <script>
+      (function() {
+        var hasMounted = false;
+
+        // 1. Android System WebView Compatibility Check (Tailwind v4 targets Chrome 111+)
+        var ua = navigator.userAgent;
+        var chromeMatch = ua.match(/Chrome\/(\d+)/);
+        if (chromeMatch && parseInt(chromeMatch[1], 10) < 111 && !window.location.search.includes('bypass_webview=true')) {
+          var webviewVer = parseInt(chromeMatch[1], 10);
+          var compatOverlay = document.createElement('div');
+          compatOverlay.id = 'apex-webview-compat-error';
+          compatOverlay.style.cssText = 'position:fixed;inset:0;background:#080808;z-index:1000000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:#F0EBE3;text-align:center;overflow-y:auto;';
+          compatOverlay.innerHTML =
+            '<div style="max-width:440px;width:100%;background:#121216;border:1px solid rgba(255,255,255,0.15);border-radius:18px;padding:28px 22px;box-shadow:0 24px 60px rgba(0,0,0,0.85);">' +
+              '<div style="width:52px;height:52px;background:rgba(242,179,61,0.15);border:1px solid rgba(242,179,61,0.3);border-radius:50%;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;color:#F2B33D;font-size:24px;font-weight:bold;">!</div>' +
+              '<h2 style="font-size:18px;font-weight:800;letter-spacing:0.04em;color:#FFFFFF;margin:0 0 10px;text-transform:uppercase;">Update Android System WebView</h2>' +
+              '<p style="font-size:13px;color:rgba(240,235,227,0.75);margin:0 0 16px;line-height:1.5;">APEX requires Android System WebView version 111 or newer to render automotive shaders and telemetry safely (detected version: ' + webviewVer + ').</p>' +
+              '<div style="background:#09090b;border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:12px;font-size:12px;color:rgba(240,235,227,0.7);text-align:left;margin-bottom:20px;line-height:1.6;">' +
+                '1. Open Google Play Store on this device.<br/>' +
+                '2. Search for <b>Android System WebView</b>.<br/>' +
+                '3. Tap <b>Update</b> and reopen APEX.' +
+              '</div>' +
+              '<div style="display:flex;flex-direction:column;gap:10px;">' +
+                '<a href="market://details?id=com.google.android.webview" style="display:block;background:#E50914;color:#FFFFFF;text-decoration:none;border-radius:10px;padding:12px;font-size:13px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;">OPEN PLAY STORE UPDATE</a>' +
+                '<button onclick="window.location.search=\'?bypass_webview=true\'" style="background:transparent;border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.5);border-radius:10px;padding:9px;font-size:11px;cursor:pointer;">Try Loading Anyway</button>' +
+              '</div>' +
+            '</div>';
+          document.body.appendChild(compatOverlay);
+          return;
+        }
+
+        // 2. Local Boot Failure Recorder (stores sanitized failure details for diagnostics)
+        function recordBootFailureLocally(title, message, details) {
+          try {
+            var logEntry = {
+              timestamp: Date.now(),
+              title: String(title || ''),
+              message: String(message || '').slice(0, 200),
+              details: String(details || '').slice(0, 500),
+              userAgent: navigator.userAgent
+            };
+            localStorage.setItem('apex_last_boot_failure', JSON.stringify(logEntry));
+          } catch (_) {}
+        }
+
+        // 3. Boot Failure Presentation Interface
+        function showBootFailure(title, message, details) {
+          if (hasMounted && !title.includes("CRITICAL")) return;
+          if (document.getElementById('apex-fatal-boot-error')) return;
+
+          recordBootFailureLocally(title, message, details);
+
+          var overlay = document.createElement('div');
+          overlay.id = 'apex-fatal-boot-error';
+          overlay.style.cssText = 'position:fixed;inset:0;background:#080808;z-index:1000000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:#F0EBE3;text-align:center;overflow-y:auto;';
+
+          overlay.innerHTML =
+            '<div style="max-width:440px;width:100%;background:#121216;border:1px solid rgba(229,9,20,0.4);border-radius:18px;padding:28px 22px;box-shadow:0 24px 60px rgba(0,0,0,0.85);">' +
+              '<div style="width:48px;height:48px;background:rgba(229,9,20,0.15);border:1px solid rgba(229,9,20,0.3);border-radius:50%;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;color:#E50914;font-size:22px;font-weight:bold;">!</div>' +
+              '<h2 style="font-size:17px;font-weight:800;letter-spacing:0.06em;color:#FFFFFF;margin:0 0 8px;text-transform:uppercase;">' + (title || 'Application Boot Error') + '</h2>' +
+              '<p style="font-size:13px;color:rgba(240,235,227,0.7);margin:0 0 16px;line-height:1.5;">' + (message || 'The application could not complete initialization.') + '</p>' +
+              (details ? '<div style="background:#09090b;border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:10px;font-size:11px;font-family:monospace;color:#ff6b6b;text-align:left;overflow-x:auto;max-height:120px;margin-bottom:20px;word-break:break-all;">' + details + '</div>' : '') +
+              '<div style="display:flex;flex-direction:column;gap:10px;">' +
+                '<button id="apex-reload-btn" style="background:#E50914;color:#FFFFFF;border:none;border-radius:10px;padding:12px;font-size:13px;font-weight:700;letter-spacing:0.05em;cursor:pointer;text-transform:uppercase;">RETRY BOOT</button>' +
+                '<button id="apex-safe-cache-btn" style="background:rgba(255,255,255,0.08);color:#F0EBE3;border:1px solid rgba(255,255,255,0.14);border-radius:10px;padding:10px;font-size:12px;font-weight:600;cursor:pointer;">CLEAR APP CACHE (KEEP SIGN-IN)</button>' +
+                '<button id="apex-full-reset-btn" style="background:transparent;color:rgba(255,255,255,0.45);border:none;padding:6px;font-size:11px;cursor:pointer;">Reset All & Sign Out...</button>' +
+              '</div>' +
+            '</div>';
+
+          document.body.appendChild(overlay);
+
+          var reloadBtn = document.getElementById('apex-reload-btn');
+          if (reloadBtn) reloadBtn.onclick = function() { window.location.reload(); };
+
+          // Safe cache clear: clears temporary UI state but explicitly preserves auth tokens
+          var safeCacheBtn = document.getElementById('apex-safe-cache-btn');
+          if (safeCacheBtn) {
+            safeCacheBtn.onclick = function() {
+              try {
+                var authTokens = {};
+                for (var i = 0; i < localStorage.length; i++) {
+                  var key = localStorage.key(i);
+                  if (key && (key.indexOf('sb-') === 0 || key.indexOf('auth') !== -1 || key.indexOf('user') !== -1)) {
+                    authTokens[key] = localStorage.getItem(key);
+                  }
+                }
+                localStorage.clear();
+                sessionStorage.clear();
+                for (var savedKey in authTokens) {
+                  localStorage.setItem(savedKey, authTokens[savedKey]);
+                }
+              } catch(e) {}
+              window.location.reload();
+            };
+          }
+
+          // Explicit destructive reset with user confirmation
+          var fullResetBtn = document.getElementById('apex-full-reset-btn');
+          if (fullResetBtn) {
+            fullResetBtn.onclick = function() {
+              if (window.confirm('This will clear all stored offline data and sign you out of APEX. Continue?')) {
+                try { localStorage.clear(); sessionStorage.clear(); } catch(e) {}
+                window.location.reload();
+              }
+            };
+          }
+        }
+
+        window.__showApexBootFailure = showBootFailure;
+        window.__APEX_BOOT_READY__ = function() {
+          hasMounted = true;
+          var bootScreen = document.getElementById('apex-boot-screen');
+          if (bootScreen && bootScreen.parentNode) {
+            bootScreen.parentNode.removeChild(bootScreen);
+          }
+        };
+
+        window.addEventListener('error', function(e) {
+          if (!hasMounted) {
+            var msg = e.message || 'Script resolution error';
+            var details = (e.filename || '') + (e.lineno ? ':' + e.lineno : '') + (e.error && e.error.stack ? '\n' + e.error.stack : '');
+            showBootFailure('Bundle Load / Execution Error', msg, details);
+          }
+        });
+
+        window.addEventListener('unhandledrejection', function(e) {
+          if (!hasMounted) {
+            var reason = e.reason ? (e.reason.message || String(e.reason)) : 'Unhandled Promise Rejection';
+            var details = e.reason && e.reason.stack ? e.reason.stack : '';
+            showBootFailure('Asynchronous Boot Exception', reason, details);
+          }
+        });
+
+        // Staged Watchdog: Stage 1 at 7000ms (calm reassurance), Stage 2 at 20000ms (recovery)
+        setTimeout(function() {
+          if (!hasMounted && !document.getElementById('apex-fatal-boot-error')) {
+            var bootStatus = document.getElementById('apex-boot-status');
+            if (bootStatus) {
+              bootStatus.innerText = 'STILL STARTING (INITIALIZING DEVICE STORAGE)...';
+            }
+          }
+        }, 7000);
+
+        setTimeout(function() {
+          if (!hasMounted && !document.getElementById('apex-fatal-boot-error')) {
+            showBootFailure(
+              'Startup Timeout Exceeded',
+              'The application took longer than expected to initialize. Background storage or native bridge operations may be responding slowly.',
+              'Watchdog alert: React did not mount within 20000ms.'
+            );
+          }
+        }, 20000);
+      })();
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

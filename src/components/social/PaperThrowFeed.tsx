@@ -20,10 +20,12 @@ import {
 } from 'lucide-react';
 import { useApexStore } from '../../store/useApexStore';
 import type { FeedPost, CarCard } from '../../types/apex';
-import { RARITY_CONFIG } from '../../utils/rarity';
 import { sounds } from '../../utils/audio';
 import { getOptimizedImageUrl, imagePrefetchCache } from '../../utils/imageUrl';
 import { ModerationModal } from '../moderation/ModerationModal';
+import { StatChip } from '../ui/StatChip';
+import { RarityBadge, type RarityTier } from '../ui/RarityBadge';
+import { Button } from '../ui/Button';
 
 interface PaperThrowFeedProps {
   posts: FeedPost[];
@@ -410,22 +412,26 @@ export const PaperThrowFeed: React.FC<PaperThrowFeedProps> = ({
   );
   if (effectivePosts.length === 0) {
     return (
-      <div className="text-center py-24 px-6 space-y-5 bg-[#111111] rounded-3xl border border-white/10 shadow-2xl max-w-sm mx-auto my-12">
-        <div className="w-16 h-16 rounded-full bg-black/60 border border-[#E50914] flex items-center justify-center mx-auto text-[#E50914] shadow-lg">
+      <div className="text-center py-24 px-6 space-y-5 bg-[var(--color-panel)] rounded-[var(--radius-panel)] border border-[var(--color-line)] shadow-2xl max-w-sm mx-auto my-12">
+        <div className="w-16 h-16 rounded-full bg-[var(--color-panel-2)] border border-[var(--color-line)] flex items-center justify-center mx-auto text-[var(--color-text-3)] shadow-lg">
           <Search className="w-8 h-8" />
         </div>
         <div className="space-y-2">
-          <h3 className="font-display text-3xl text-white tracking-wide">NO DISCOVERIES YET</h3>
-          <p className="text-xs text-white/60 leading-relaxed max-w-xs mx-auto">
+          <h3 className="font-display text-display-l text-[var(--color-text)] tracking-wide">
+            NO DISCOVERIES YET
+          </h3>
+          <p className="text-secondary text-[var(--color-text-3)] leading-relaxed max-w-xs mx-auto">
             The feed contains real vehicle spots. Spot your first car and post it to make history on APEX.
           </p>
         </div>
-        <button
+        <Button
+          variant="primary"
           onClick={onOpenScanner}
-          className="py-3.5 px-6 rounded-2xl bg-[#E50914] text-white font-bold text-sm tracking-wider shadow-lg hover:bg-[#DC2626] active:scale-95 transition-all inline-flex items-center gap-2"
+          className="mx-auto"
         >
-          <Sparkles className="w-4 h-4" /> OPEN VISION SCANNER
-        </button>
+          <Sparkles className="w-4 h-4" />
+          <span>OPEN VISION SCANNER</span>
+        </Button>
       </div>
     );
   }
@@ -553,7 +559,7 @@ export const PaperThrowFeed: React.FC<PaperThrowFeedProps> = ({
             animate={{ scale: [0, 1.4, 1.1], opacity: [0, 1, 0], y: -40 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.8, ease: 'easeOut' }}
-            className="absolute z-50 pointer-events-none text-[#E50914] drop-shadow-[0_0_24px_rgba(229,9,20,0.9)]"
+            className="absolute z-50 pointer-events-none text-[var(--accent-color)] drop-shadow-[0_0_24px_var(--accent-glow)]"
             style={{ left: likeBurst.x - 40, top: likeBurst.y - 40 }}
           >
             <Heart className="w-20 h-20 fill-current" />
@@ -613,7 +619,6 @@ const DiscoverySheetContent = React.memo<DiscoverySheetContentProps>(({
   isFriend,
   onReportPost
 }) => {
-  const rarityConf = (post.card && RARITY_CONFIG[post.card.rarity]) || RARITY_CONFIG.rare;
   const isMe = post.user.id === user?.id || post.user.username === user?.username;
   const [friendRequested, setFriendRequested] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -644,7 +649,7 @@ const DiscoverySheetContent = React.memo<DiscoverySheetContentProps>(({
   return (
     <div 
       onClick={(e) => onDoubleTap(e, post)}
-      className="relative w-full h-full bg-[#080808] overflow-hidden select-none"
+      className="relative w-full h-full bg-[var(--color-void)] overflow-hidden select-none"
       style={{ contain: 'content' }}
     >
       {/* ─── 1. FULL SCREEN HERO VEHICLE PHOTOGRAPH OR VIDEO ─── */}
@@ -672,28 +677,26 @@ const DiscoverySheetContent = React.memo<DiscoverySheetContentProps>(({
 
       {/* ─── 2. SEAMLESS REELS GRADIENTS ─── */}
       {/* Top Header Vignette */}
-      <div className="absolute top-0 left-0 right-0 h-44 bg-gradient-to-b from-black/85 via-black/35 to-transparent pointer-events-none z-10" />
+      <div className="absolute top-0 left-0 right-0 h-44 bg-gradient-to-b from-[var(--color-void)]/90 via-[var(--color-void)]/40 to-transparent pointer-events-none z-10" />
       {/* Bottom Content Upward Vignette */}
-      <div className="absolute bottom-0 left-0 right-0 h-3/5 bg-gradient-to-t from-black via-black/60 via-45% to-transparent pointer-events-none z-10" />
+      <div className="absolute bottom-0 left-0 right-0 h-3/5 bg-gradient-to-t from-[var(--color-void)] via-[var(--color-void)]/70 via-45% to-transparent pointer-events-none z-10" />
 
       {/* ─── 3. UPPER PORTION: COMPACT INTEGRATED METADATA (CAR POSTS) ─── */}
       {post.card && (
         <div className="absolute top-16 left-4 right-4 z-20 flex items-center justify-between pointer-events-none">
           <div className="flex items-center gap-2">
-            {/* Integrated Rarity Badge */}
-            <span className={`text-[10px] font-bold tracking-wider px-2.5 py-0.5 rounded-full border shadow-md ${rarityConf.badgeBg}`}>
-              {rarityConf.label.toUpperCase()}
-            </span>
+            {/* Integrated Solid Rarity Badge */}
+            <RarityBadge rarity={(post.card.rarity || 'common') as RarityTier} size="sm" />
 
             {/* Year & Make Tag */}
-            <span className="text-[11px] font-semibold text-white/90 drop-shadow">
+            <span className="text-[11px] font-semibold text-[var(--color-text)] drop-shadow">
               {post.card.yearEstimate || '2024'} {post.card.make}
             </span>
           </div>
 
           {/* Location Tag */}
-          <span className="text-[11px] font-medium text-white/70 drop-shadow flex items-center gap-1">
-            <MapPin className="w-3 h-3 text-white/60 shrink-0" />
+          <span className="text-[11px] font-medium text-[var(--color-text-2)] drop-shadow flex items-center gap-1">
+            <MapPin className="w-3 h-3 text-[var(--color-text-3)] shrink-0" />
             <span>{post.card.city || 'Global'}</span>
           </span>
         </div>
@@ -714,7 +717,7 @@ const DiscoverySheetContent = React.memo<DiscoverySheetContentProps>(({
             <img
               src={post.user.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400'}
               alt={post.user.username}
-              className="w-11 h-11 rounded-full object-cover border-2 border-white/40 shadow-xl hover:border-[#E50914] transition-colors"
+              className="w-11 h-11 rounded-full object-cover border-2 border-white/40 shadow-xl hover:border-[var(--color-xp)] transition-colors"
             />
           </button>
           {!isMe && !isFriend && (
@@ -722,8 +725,8 @@ const DiscoverySheetContent = React.memo<DiscoverySheetContentProps>(({
               onClick={handleAddFriend}
               className={`absolute -bottom-1.5 w-5 h-5 rounded-full flex items-center justify-center shadow-lg transition-transform active:scale-90 ${
                 friendRequested
-                  ? 'bg-emerald-500 text-white'
-                  : 'bg-[#E50914] hover:bg-[#DC2626] text-white'
+                  ? 'bg-[var(--color-ok)] text-white'
+                  : 'bg-[var(--accent-color)] hover:brightness-110 text-white'
               }`}
               title="Add Friend"
             >
@@ -743,8 +746,8 @@ const DiscoverySheetContent = React.memo<DiscoverySheetContentProps>(({
         >
           <div className={`w-11 h-11 rounded-full flex items-center justify-center border transition-all ${
             post.isLiked
-              ? 'bg-[#E50914] border-[#E50914] text-white shadow-lg shadow-red-950/60'
-              : 'bg-[#161616]/90 border-white/15 text-white/90 group-hover:text-white group-hover:border-white/30'
+              ? 'bg-[var(--accent-color)] border-[var(--accent-color)] text-white shadow-lg'
+              : 'bg-[var(--color-panel)]/90 border-[var(--color-line)] text-[var(--color-text)] group-hover:border-[var(--color-text-3)]'
           }`}>
             <Heart className={`w-5 h-5 ${post.isLiked ? 'fill-current' : ''}`} />
           </div>
@@ -762,7 +765,7 @@ const DiscoverySheetContent = React.memo<DiscoverySheetContentProps>(({
           }}
           className="flex flex-col items-center group active:scale-90 transition-transform"
         >
-          <div className="w-11 h-11 rounded-full bg-[#161616]/90 border border-white/15 flex items-center justify-center text-white/90 group-hover:text-white group-hover:border-white/30 transition-all">
+          <div className="w-11 h-11 rounded-full bg-[var(--color-panel)]/90 border border-[var(--color-line)] flex items-center justify-center text-[var(--color-text)] group-hover:border-[var(--color-text-3)] transition-all">
             <MessageSquare className="w-5 h-5" />
           </div>
           <span className="text-[10px] font-bold text-white drop-shadow mt-1">
@@ -781,8 +784,8 @@ const DiscoverySheetContent = React.memo<DiscoverySheetContentProps>(({
             className="flex flex-col items-center group active:scale-90 transition-transform"
             title="Inspect 3D Card"
           >
-            <div className="w-11 h-11 rounded-full bg-[#161616]/90 border border-white/15 flex items-center justify-center text-white/90 group-hover:text-white group-hover:border-[#E50914] transition-all">
-              <Box className="w-5 h-5 text-[#E50914]" />
+            <div className="w-11 h-11 rounded-full bg-[var(--color-panel)]/90 border border-[var(--color-line)] flex items-center justify-center text-[var(--color-text)] group-hover:border-[var(--color-xp)] transition-all">
+              <Box className="w-5 h-5 text-[var(--color-xp)]" />
             </div>
             <span className="text-[9px] font-bold text-white/90 drop-shadow mt-1">
               3D Card
@@ -798,7 +801,7 @@ const DiscoverySheetContent = React.memo<DiscoverySheetContentProps>(({
           }}
           className="flex flex-col items-center group active:scale-90 transition-transform"
         >
-          <div className="w-11 h-11 rounded-full bg-[#161616]/90 border border-white/15 flex items-center justify-center text-white/80 group-hover:text-white transition-all">
+          <div className="w-11 h-11 rounded-full bg-[var(--color-panel)]/90 border border-[var(--color-line)] flex items-center justify-center text-[var(--color-text-2)] group-hover:text-[var(--color-text)] transition-all">
             <Share2 className="w-4 h-4" />
           </div>
           <span className="text-[9px] font-bold text-white/80 drop-shadow mt-1">
@@ -815,7 +818,7 @@ const DiscoverySheetContent = React.memo<DiscoverySheetContentProps>(({
                 deletePost(post.id);
               }
             }}
-            className="w-10 h-10 rounded-full bg-[#1f0d0d]/90 border border-red-500/30 flex items-center justify-center text-red-400 hover:text-red-300 transition-all active:scale-90 mt-1"
+            className="w-10 h-10 rounded-full bg-[var(--color-danger)]/20 border border-[var(--color-danger)]/40 flex items-center justify-center text-[var(--color-danger)] hover:brightness-125 transition-all active:scale-90 mt-1"
           >
             <Trash2 className="w-4 h-4" />
           </button>
@@ -828,7 +831,7 @@ const DiscoverySheetContent = React.memo<DiscoverySheetContentProps>(({
               e.stopPropagation();
               onReportPost?.(post);
             }}
-            className="w-10 h-10 rounded-full bg-[#161616]/90 border border-white/15 flex items-center justify-center text-white/60 hover:text-amber-400 hover:border-amber-400/30 transition-all active:scale-90 mt-1"
+            className="w-10 h-10 rounded-full bg-[var(--color-panel)]/90 border border-[var(--color-line)] flex items-center justify-center text-[var(--color-text-3)] hover:text-amber-400 hover:border-amber-400/30 transition-all active:scale-90 mt-1"
             title="Report or Block"
           >
             <Flag className="w-4 h-4" />
@@ -845,7 +848,7 @@ const DiscoverySheetContent = React.memo<DiscoverySheetContentProps>(({
         <div className="flex items-center gap-2">
           <button
             onClick={() => onOpenProfile?.(post.user.id, post.user.username)}
-            className="text-xs font-bold text-white drop-shadow hover:text-[#E50914] hover:underline transition-colors"
+            className="text-xs font-bold text-white drop-shadow hover:text-[var(--color-xp)] hover:underline transition-colors"
           >
             @{post.user.username}
           </button>
@@ -860,16 +863,16 @@ const DiscoverySheetContent = React.memo<DiscoverySheetContentProps>(({
         {/* Model Title & Category (or Standalone Media Post Tag) */}
         {post.card ? (
           <div>
-            <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight leading-tight drop-shadow-md">
+            <h2 className="font-display text-display-l text-[var(--color-text)] tracking-tight leading-tight drop-shadow-md">
               {post.card.model}
             </h2>
-            <p className="text-xs font-semibold text-[#E50914] tracking-wide drop-shadow">
+            <p className="font-sans text-secondary font-semibold text-[var(--color-text-2)] tracking-wide drop-shadow">
               {post.card.make} · {post.card.bodyStyle}
             </p>
           </div>
         ) : (
           <div>
-            <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md text-white border border-white/20 drop-shadow">
+            <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-[var(--color-panel)]/80 backdrop-blur-md text-[var(--color-text)] border border-[var(--color-line)] drop-shadow">
               {post.mediaType === 'video' ? '🎬 CAR EDIT / VIDEO' : '📸 APEX SPOT'}
             </span>
           </div>
@@ -882,28 +885,37 @@ const DiscoverySheetContent = React.memo<DiscoverySheetContentProps>(({
           </p>
         )}
 
-        {/* Key Specifications Row (Rendered if post is linked to a car card) */}
+        {/* Key Specifications Row (Rendered with StatChip primitive) */}
         {post.card && (
           <div className="flex items-center gap-2 pt-1 flex-wrap">
-            <div className="flex items-center gap-1 bg-[#161616]/90 border border-white/10 px-2 py-0.5 rounded-lg text-[10px] font-bold text-white">
-              <Zap className="w-3 h-3 text-[#E50914]" />
-              <span>{post.card.horsepower || 500} HP</span>
-            </div>
-
-            <div className="flex items-center gap-1 bg-[#161616]/90 border border-white/10 px-2 py-0.5 rounded-lg text-[10px] font-bold text-white">
-              <Gauge className="w-3 h-3 text-[#E50914]" />
-              <span>{post.card.topSpeedKmH || 310} KM/H</span>
-            </div>
-
-            <div className="flex items-center gap-1 bg-[#161616]/90 border border-white/10 px-2 py-0.5 rounded-lg text-[10px] font-bold text-white">
-              <Timer className="w-3 h-3 text-[#E50914]" />
-              <span>{post.card.zeroToHundredSec || 3.4}s</span>
-            </div>
-
-            <div className="flex items-center gap-1 bg-[#161616]/90 border border-white/10 px-2 py-0.5 rounded-lg text-[10px] font-bold text-white">
-              <Award className="w-3 h-3 text-[#E50914]" />
-              <span>{post.card.rarityScore || 85} PTS</span>
-            </div>
+            {post.card.horsepower && (
+              <StatChip
+                icon={<Zap size={11} className="text-[var(--color-xp)]" />}
+                value={post.card.horsepower}
+                unit="HP"
+              />
+            )}
+            {post.card.topSpeedKmH && (
+              <StatChip
+                icon={<Gauge size={11} className="text-[var(--color-xp)]" />}
+                value={post.card.topSpeedKmH}
+                unit="KM/H"
+              />
+            )}
+            {post.card.zeroToHundredSec && (
+              <StatChip
+                icon={<Timer size={11} className="text-[var(--color-xp)]" />}
+                value={`${post.card.zeroToHundredSec}s`}
+                label="0-100"
+              />
+            )}
+            {post.card.rarityScore && (
+              <StatChip
+                icon={<Award size={11} className="text-[var(--color-xp)]" />}
+                value={post.card.rarityScore}
+                unit="PTS"
+              />
+            )}
           </div>
         )}
 
@@ -911,7 +923,7 @@ const DiscoverySheetContent = React.memo<DiscoverySheetContentProps>(({
         {!isNextUnderneath && (
           <div className="pt-1 flex items-center gap-2 text-white/40 text-[9px] font-semibold tracking-wider uppercase">
             <div className="flex items-center gap-1">
-              <ChevronUp className="w-3 h-3 text-[#E50914] animate-bounce" />
+              <ChevronUp className="w-3 h-3 text-[var(--color-xp)] animate-bounce" />
               <span>Swipe up for next</span>
             </div>
             {hasPrevious && (

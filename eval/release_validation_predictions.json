@@ -1,0 +1,5690 @@
+[
+  {
+    "id": "REAL_BLIND_000204",
+    "true": {
+      "make": "BMW",
+      "model": "7 Series",
+      "variant": null
+    },
+    "pred": {
+      "make": "McLaren",
+      "model": "720S",
+      "variant": "720S",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 3637,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000205",
+    "true": {
+      "make": "BMW",
+      "model": "7 Series",
+      "variant": null
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "F8 Tributo",
+      "variant": null,
+      "status": "identified_model",
+      "confidence": 0.817
+    },
+    "isModelMatch": false,
+    "latencyMs": 2940,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000206",
+    "true": {
+      "make": "BMW",
+      "model": "7 Series",
+      "variant": null
+    },
+    "pred": {
+      "make": "McLaren",
+      "model": "720S",
+      "variant": "720S",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 3818,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000208",
+    "true": {
+      "make": "BMW",
+      "model": "7 Series",
+      "variant": null
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "296 GTB",
+      "variant": null,
+      "status": "uncertain",
+      "confidence": 0.65
+    },
+    "isModelMatch": false,
+    "latencyMs": 3557,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000209",
+    "true": {
+      "make": "BMW",
+      "model": "7 Series",
+      "variant": null
+    },
+    "pred": {
+      "make": "Lamborghini",
+      "model": "Revuelto",
+      "variant": null,
+      "status": "uncertain",
+      "confidence": 0.65
+    },
+    "isModelMatch": false,
+    "latencyMs": 3054,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000329",
+    "true": {
+      "make": "BMW",
+      "model": "M3",
+      "variant": "M3"
+    },
+    "pred": {
+      "make": "Bugatti",
+      "model": "Chiron",
+      "variant": null,
+      "status": "identified_model",
+      "confidence": 0.744
+    },
+    "isModelMatch": false,
+    "latencyMs": 3386,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000341",
+    "true": {
+      "make": "BMW",
+      "model": "M4",
+      "variant": "CSL"
+    },
+    "pred": {
+      "make": "Porsche",
+      "model": "718 Cayman",
+      "variant": "Cayman",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 3346,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000340",
+    "true": {
+      "make": "BMW",
+      "model": "M4",
+      "variant": "CSL"
+    },
+    "pred": {
+      "make": "McLaren",
+      "model": "570S",
+      "variant": null,
+      "status": "identified_model",
+      "confidence": 0.809
+    },
+    "isModelMatch": false,
+    "latencyMs": 2890,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000711",
+    "true": {
+      "make": "Mercedes-Benz",
+      "model": "G-Class",
+      "variant": "Brabus 800"
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "SF90 Stradale",
+      "variant": "Stradale",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 3468,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000713",
+    "true": {
+      "make": "Mercedes-Benz",
+      "model": "G-Class",
+      "variant": "Brabus 800"
+    },
+    "pred": {
+      "make": "Porsche",
+      "model": "Carrera GT",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 4393,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000714",
+    "true": {
+      "make": "Mercedes-Benz",
+      "model": "G-Class",
+      "variant": "Brabus 800"
+    },
+    "pred": {
+      "make": "Lamborghini",
+      "model": "Huracán",
+      "variant": "LP610-4",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 3254,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000715",
+    "true": {
+      "make": "Mercedes-Benz",
+      "model": "G-Class",
+      "variant": "Brabus 800"
+    },
+    "pred": {
+      "make": null,
+      "model": null,
+      "variant": null,
+      "status": "not_in_catalogue",
+      "confidence": 0.377
+    },
+    "isModelMatch": null,
+    "latencyMs": 91,
+    "costUsd": 0
+  },
+  {
+    "id": "REAL_BLIND_000717",
+    "true": {
+      "make": "Mercedes-Benz",
+      "model": "G-Class",
+      "variant": "Brabus 800"
+    },
+    "pred": {
+      "make": "Porsche",
+      "model": "Carrera GT",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 2550,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000252",
+    "true": {
+      "make": "Lexus",
+      "model": "LS",
+      "variant": null
+    },
+    "pred": {
+      "make": null,
+      "model": null,
+      "variant": null,
+      "status": "not_in_catalogue",
+      "confidence": 0.318
+    },
+    "isModelMatch": null,
+    "latencyMs": 68,
+    "costUsd": 0
+  },
+  {
+    "id": "REAL_BLIND_000253",
+    "true": {
+      "make": "Lexus",
+      "model": "LS",
+      "variant": null
+    },
+    "pred": {
+      "make": "Toyota",
+      "model": "Camry",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.92
+    },
+    "isModelMatch": false,
+    "latencyMs": 2254,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000254",
+    "true": {
+      "make": "Lexus",
+      "model": "LS",
+      "variant": null
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "488",
+      "variant": null,
+      "status": "identified_model",
+      "confidence": 0.775
+    },
+    "isModelMatch": false,
+    "latencyMs": 2880,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000256",
+    "true": {
+      "make": "Lexus",
+      "model": "LS",
+      "variant": null
+    },
+    "pred": {
+      "make": "Bugatti",
+      "model": "Chiron",
+      "variant": null,
+      "status": "identified_model",
+      "confidence": 0.77
+    },
+    "isModelMatch": false,
+    "latencyMs": 3402,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000257",
+    "true": {
+      "make": "Lexus",
+      "model": "LS",
+      "variant": null
+    },
+    "pred": {
+      "make": "Toyota",
+      "model": "Camry",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.9
+    },
+    "isModelMatch": false,
+    "latencyMs": 2804,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000050",
+    "true": {
+      "make": "Volkswagen",
+      "model": "Golf",
+      "variant": null
+    },
+    "pred": {
+      "make": "Toyota",
+      "model": "Camry",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 2900,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000052",
+    "true": {
+      "make": "Volkswagen",
+      "model": "Golf",
+      "variant": null
+    },
+    "pred": {
+      "make": "Toyota",
+      "model": "Camry",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.948
+    },
+    "isModelMatch": false,
+    "latencyMs": 2517,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000053",
+    "true": {
+      "make": "Volkswagen",
+      "model": "Golf",
+      "variant": null
+    },
+    "pred": {
+      "make": "Toyota",
+      "model": "Camry",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 3114,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000054",
+    "true": {
+      "make": "Volkswagen",
+      "model": "Golf",
+      "variant": null
+    },
+    "pred": {
+      "make": "Toyota",
+      "model": "Camry",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 2112,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000056",
+    "true": {
+      "make": "Volkswagen",
+      "model": "Golf",
+      "variant": null
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "488",
+      "variant": "GTB",
+      "status": "identified",
+      "confidence": 0.913
+    },
+    "isModelMatch": false,
+    "latencyMs": 2353,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000045",
+    "true": {
+      "make": "Volkswagen",
+      "model": "Golf",
+      "variant": null
+    },
+    "pred": {
+      "make": "Porsche",
+      "model": "Carrera GT",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.869
+    },
+    "isModelMatch": false,
+    "latencyMs": 3390,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000046",
+    "true": {
+      "make": "Volkswagen",
+      "model": "Golf",
+      "variant": null
+    },
+    "pred": {
+      "make": "Toyota",
+      "model": "Camry",
+      "variant": null,
+      "status": "identified_model",
+      "confidence": 0.777
+    },
+    "isModelMatch": false,
+    "latencyMs": 2979,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000048",
+    "true": {
+      "make": "Volkswagen",
+      "model": "Golf",
+      "variant": null
+    },
+    "pred": {
+      "make": "Porsche",
+      "model": "718 Cayman",
+      "variant": "Cayman",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 3821,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000044",
+    "true": {
+      "make": "Volkswagen",
+      "model": "Golf",
+      "variant": null
+    },
+    "pred": {
+      "make": "Porsche",
+      "model": "Carrera GT",
+      "variant": null,
+      "status": "identified_model",
+      "confidence": 0.797
+    },
+    "isModelMatch": false,
+    "latencyMs": 2337,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000049",
+    "true": {
+      "make": "Volkswagen",
+      "model": "Golf",
+      "variant": null
+    },
+    "pred": {
+      "make": "Toyota",
+      "model": "Camry",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.918
+    },
+    "isModelMatch": false,
+    "latencyMs": 2145,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000855",
+    "true": {
+      "make": "Kia",
+      "model": "Sportage",
+      "variant": null
+    },
+    "pred": {
+      "make": "Porsche",
+      "model": "718 Cayman",
+      "variant": "Cayman",
+      "status": "identified",
+      "confidence": 0.926
+    },
+    "isModelMatch": false,
+    "latencyMs": 2692,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000856",
+    "true": {
+      "make": "Kia",
+      "model": "Sportage",
+      "variant": null
+    },
+    "pred": {
+      "make": "Toyota",
+      "model": "Camry",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.953
+    },
+    "isModelMatch": false,
+    "latencyMs": 2503,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000857",
+    "true": {
+      "make": "Kia",
+      "model": "Sportage",
+      "variant": null
+    },
+    "pred": {
+      "make": "Porsche",
+      "model": "718 Cayman",
+      "variant": "Cayman",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 3317,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000859",
+    "true": {
+      "make": "Kia",
+      "model": "Sportage",
+      "variant": null
+    },
+    "pred": {
+      "make": "Lamborghini",
+      "model": "Revuelto",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.946
+    },
+    "isModelMatch": false,
+    "latencyMs": 2694,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000277",
+    "true": {
+      "make": "Porsche",
+      "model": "911",
+      "variant": "GT3"
+    },
+    "pred": {
+      "make": "Bugatti",
+      "model": "Chiron",
+      "variant": null,
+      "status": "uncertain",
+      "confidence": 0.65
+    },
+    "isModelMatch": false,
+    "latencyMs": 1887,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000278",
+    "true": {
+      "make": "Porsche",
+      "model": "911",
+      "variant": "GT3"
+    },
+    "pred": {
+      "make": "Porsche",
+      "model": "718 Cayman",
+      "variant": "Cayman",
+      "status": "identified",
+      "confidence": 0.884
+    },
+    "isModelMatch": false,
+    "latencyMs": 2353,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000289",
+    "true": {
+      "make": "Porsche",
+      "model": "911",
+      "variant": "Carrera"
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "SF90 Stradale",
+      "variant": "Stradale",
+      "status": "identified",
+      "confidence": 0.846
+    },
+    "isModelMatch": false,
+    "latencyMs": 2965,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000290",
+    "true": {
+      "make": "Porsche",
+      "model": "911",
+      "variant": "Carrera"
+    },
+    "pred": {
+      "make": "Porsche",
+      "model": "Carrera GT",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.847
+    },
+    "isModelMatch": false,
+    "latencyMs": 2558,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000649",
+    "true": {
+      "make": "Porsche",
+      "model": "356",
+      "variant": null
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "250 GTO",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.826
+    },
+    "isModelMatch": false,
+    "latencyMs": 2649,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000650",
+    "true": {
+      "make": "Porsche",
+      "model": "356",
+      "variant": null
+    },
+    "pred": {
+      "make": "Bentley",
+      "model": "Continental GT",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 2682,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000910",
+    "true": {
+      "make": "Porsche",
+      "model": "Cayenne",
+      "variant": null
+    },
+    "pred": {
+      "make": "Porsche",
+      "model": "718 Cayman",
+      "variant": "Cayman",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 7352,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000911",
+    "true": {
+      "make": "Porsche",
+      "model": "Cayenne",
+      "variant": null
+    },
+    "pred": {
+      "make": "Porsche",
+      "model": "718 Cayman",
+      "variant": "Cayman",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 2796,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000292",
+    "true": {
+      "make": "Porsche",
+      "model": "718",
+      "variant": "Cayman"
+    },
+    "pred": {
+      "make": "Porsche",
+      "model": "718 Cayman",
+      "variant": "Cayman",
+      "status": "identified",
+      "confidence": 0.949
+    },
+    "isModelMatch": true,
+    "latencyMs": 4412,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000954",
+    "true": {
+      "make": "Porsche",
+      "model": "Carrera GT",
+      "variant": null
+    },
+    "pred": {
+      "make": "Porsche",
+      "model": "718 Cayman",
+      "variant": "Cayman",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 2937,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000356",
+    "true": {
+      "make": "Toyota",
+      "model": "GR86",
+      "variant": null
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "296 GTB",
+      "variant": "GTB",
+      "status": "identified",
+      "confidence": 0.92
+    },
+    "isModelMatch": false,
+    "latencyMs": 3849,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000357",
+    "true": {
+      "make": "Toyota",
+      "model": "GR86",
+      "variant": null
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "296 GTB",
+      "variant": "GTB",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 3191,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000358",
+    "true": {
+      "make": "Toyota",
+      "model": "GR86",
+      "variant": null
+    },
+    "pred": {
+      "make": "Lamborghini",
+      "model": "Revuelto",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 3095,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000360",
+    "true": {
+      "make": "Toyota",
+      "model": "GR86",
+      "variant": null
+    },
+    "pred": {
+      "make": "Lamborghini",
+      "model": "Revuelto",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.961
+    },
+    "isModelMatch": false,
+    "latencyMs": 3016,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000561",
+    "true": {
+      "make": "Subaru",
+      "model": "Impreza",
+      "variant": "22B STI"
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "296 GTB",
+      "variant": "GTB",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 2838,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000562",
+    "true": {
+      "make": "Subaru",
+      "model": "Impreza",
+      "variant": "22B STI"
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "296 GTB",
+      "variant": "GTB",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 2668,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000563",
+    "true": {
+      "make": "Subaru",
+      "model": "Impreza",
+      "variant": "22B STI"
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "296 GTB",
+      "variant": "GTB",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 2830,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000565",
+    "true": {
+      "make": "Subaru",
+      "model": "Impreza",
+      "variant": "22B STI"
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "296 GTB",
+      "variant": "GTB",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 2416,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000485",
+    "true": {
+      "make": "Koenigsegg",
+      "model": "Jesko",
+      "variant": null
+    },
+    "pred": {
+      "make": "Koenigsegg",
+      "model": "Jesko",
+      "variant": "Attack",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": true,
+    "latencyMs": 2633,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000486",
+    "true": {
+      "make": "Koenigsegg",
+      "model": "Jesko",
+      "variant": null
+    },
+    "pred": {
+      "make": "Koenigsegg",
+      "model": "Jesko",
+      "variant": "Attack",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": true,
+    "latencyMs": 2821,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000487",
+    "true": {
+      "make": "Koenigsegg",
+      "model": "Jesko",
+      "variant": null
+    },
+    "pred": {
+      "make": "Koenigsegg",
+      "model": "Jesko",
+      "variant": "Attack",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": true,
+    "latencyMs": 3754,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000473",
+    "true": {
+      "make": "Bugatti",
+      "model": "Veyron",
+      "variant": null
+    },
+    "pred": {
+      "make": "Lamborghini",
+      "model": "Huracán",
+      "variant": "LP610-4",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 2903,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000474",
+    "true": {
+      "make": "Bugatti",
+      "model": "Veyron",
+      "variant": null
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "SF90 Stradale",
+      "variant": "Stradale",
+      "status": "identified",
+      "confidence": 0.845
+    },
+    "isModelMatch": false,
+    "latencyMs": 2741,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000475",
+    "true": {
+      "make": "Bugatti",
+      "model": "Veyron",
+      "variant": null
+    },
+    "pred": {
+      "make": null,
+      "model": null,
+      "variant": null,
+      "status": "not_in_catalogue",
+      "confidence": 0.379
+    },
+    "isModelMatch": null,
+    "latencyMs": 85,
+    "costUsd": 0
+  },
+  {
+    "id": "REAL_BLIND_000412",
+    "true": {
+      "make": "Ferrari",
+      "model": "SF90 Stradale",
+      "variant": "Stradale"
+    },
+    "pred": {
+      "make": "Bugatti",
+      "model": "Chiron",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.881
+    },
+    "isModelMatch": false,
+    "latencyMs": 3249,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000413",
+    "true": {
+      "make": "Ferrari",
+      "model": "SF90 Stradale",
+      "variant": "Stradale"
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "250 GTO",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 2274,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000416",
+    "true": {
+      "make": "Ferrari",
+      "model": "SF90 Stradale",
+      "variant": "Stradale"
+    },
+    "pred": {
+      "make": null,
+      "model": null,
+      "variant": null,
+      "status": "not_in_catalogue",
+      "confidence": 0.427
+    },
+    "isModelMatch": null,
+    "latencyMs": 93,
+    "costUsd": 0
+  },
+  {
+    "id": "REAL_BLIND_000422",
+    "true": {
+      "make": "Ferrari",
+      "model": "Daytona SP3",
+      "variant": "SP3"
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "Daytona SP3",
+      "variant": "SP3",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": true,
+    "latencyMs": 2662,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000372",
+    "true": {
+      "make": "Nissan",
+      "model": "370Z",
+      "variant": null
+    },
+    "pred": {
+      "make": "McLaren",
+      "model": "570S",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 2448,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000373",
+    "true": {
+      "make": "Nissan",
+      "model": "370Z",
+      "variant": null
+    },
+    "pred": {
+      "make": "McLaren",
+      "model": "570S",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 2790,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000374",
+    "true": {
+      "make": "Nissan",
+      "model": "370Z",
+      "variant": null
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "SF90 Stradale",
+      "variant": "Stradale",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 2509,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000497",
+    "true": {
+      "make": "Nissan",
+      "model": "Skyline GT-R",
+      "variant": "V-Spec"
+    },
+    "pred": {
+      "make": "Porsche",
+      "model": "Carrera GT",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 2369,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000499",
+    "true": {
+      "make": "Nissan",
+      "model": "Skyline GT-R",
+      "variant": "V-Spec"
+    },
+    "pred": {
+      "make": "Lamborghini",
+      "model": "Revuelto",
+      "variant": null,
+      "status": "identified_model",
+      "confidence": 0.818
+    },
+    "isModelMatch": false,
+    "latencyMs": 4588,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000498",
+    "true": {
+      "make": "Nissan",
+      "model": "Skyline GT-R",
+      "variant": "V-Spec"
+    },
+    "pred": {
+      "make": "Porsche",
+      "model": "Carrera GT",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.956
+    },
+    "isModelMatch": false,
+    "latencyMs": 2573,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000627",
+    "true": {
+      "make": "Chevrolet",
+      "model": "Corvette",
+      "variant": "Sting Ray"
+    },
+    "pred": {
+      "make": "Lamborghini",
+      "model": "Huracán",
+      "variant": "LP610-4",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 3135,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000629",
+    "true": {
+      "make": "Chevrolet",
+      "model": "Corvette",
+      "variant": "Sting Ray"
+    },
+    "pred": {
+      "make": "Lamborghini",
+      "model": "Huracán",
+      "variant": "LP610-4",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 3168,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000630",
+    "true": {
+      "make": "Chevrolet",
+      "model": "Corvette",
+      "variant": "Sting Ray"
+    },
+    "pred": {
+      "make": "McLaren",
+      "model": "720S",
+      "variant": "720S",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 3848,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000633",
+    "true": {
+      "make": "Ferrari",
+      "model": "250 GTO",
+      "variant": null
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "250 GTO",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": true,
+    "latencyMs": 2550,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000634",
+    "true": {
+      "make": "Ferrari",
+      "model": "250 GTO",
+      "variant": null
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "250 GTO",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": true,
+    "latencyMs": 2986,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000635",
+    "true": {
+      "make": "Ferrari",
+      "model": "250 GTO",
+      "variant": null
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "250 GTO",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": true,
+    "latencyMs": 3371,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000665",
+    "true": {
+      "make": "Datsun",
+      "model": "240Z",
+      "variant": null
+    },
+    "pred": {
+      "make": "McLaren",
+      "model": "570S",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.956
+    },
+    "isModelMatch": false,
+    "latencyMs": 2984,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000669",
+    "true": {
+      "make": "Datsun",
+      "model": "240Z",
+      "variant": null
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "Daytona SP3",
+      "variant": "SP3",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 3527,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000670",
+    "true": {
+      "make": "Datsun",
+      "model": "240Z",
+      "variant": null
+    },
+    "pred": {
+      "make": "Porsche",
+      "model": "Carrera GT",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.953
+    },
+    "isModelMatch": false,
+    "latencyMs": 2435,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000429",
+    "true": {
+      "make": "Lamborghini",
+      "model": "Aventador",
+      "variant": "LP700-4"
+    },
+    "pred": {
+      "make": "Lamborghini",
+      "model": "Aventador",
+      "variant": "LP700-4",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": true,
+    "latencyMs": 3346,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000430",
+    "true": {
+      "make": "Lamborghini",
+      "model": "Aventador",
+      "variant": "LP700-4"
+    },
+    "pred": {
+      "make": "Lamborghini",
+      "model": "Aventador",
+      "variant": "LP700-4",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": true,
+    "latencyMs": 2797,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000431",
+    "true": {
+      "make": "Lamborghini",
+      "model": "Aventador",
+      "variant": "LP700-4"
+    },
+    "pred": {
+      "make": "Lamborghini",
+      "model": "Aventador",
+      "variant": "LP700-4",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": true,
+    "latencyMs": 3223,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000434",
+    "true": {
+      "make": "Lamborghini",
+      "model": "Aventador",
+      "variant": "LP700-4"
+    },
+    "pred": {
+      "make": "Lamborghini",
+      "model": "Aventador",
+      "variant": "LP700-4",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": true,
+    "latencyMs": 3111,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000435",
+    "true": {
+      "make": "Lamborghini",
+      "model": "Aventador",
+      "variant": "LP700-4"
+    },
+    "pred": {
+      "make": "Lamborghini",
+      "model": "Aventador",
+      "variant": "LP700-4",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": true,
+    "latencyMs": 2583,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000449",
+    "true": {
+      "make": "McLaren",
+      "model": "720S",
+      "variant": null
+    },
+    "pred": {
+      "make": "McLaren",
+      "model": "720S",
+      "variant": "720S",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": true,
+    "latencyMs": 2974,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000450",
+    "true": {
+      "make": "McLaren",
+      "model": "720S",
+      "variant": null
+    },
+    "pred": {
+      "make": "McLaren",
+      "model": "720S",
+      "variant": "720S",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": true,
+    "latencyMs": 2848,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000451",
+    "true": {
+      "make": "McLaren",
+      "model": "720S",
+      "variant": null
+    },
+    "pred": {
+      "make": "McLaren",
+      "model": "720S",
+      "variant": "720S",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": true,
+    "latencyMs": 3250,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000455",
+    "true": {
+      "make": "McLaren",
+      "model": "720S",
+      "variant": null
+    },
+    "pred": {
+      "make": "McLaren",
+      "model": "720S",
+      "variant": "720S",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": true,
+    "latencyMs": 3323,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000893",
+    "true": {
+      "make": "Rolls-Royce",
+      "model": "Wraith",
+      "variant": null
+    },
+    "pred": {
+      "make": "Bentley",
+      "model": "Continental GT",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.951
+    },
+    "isModelMatch": false,
+    "latencyMs": 2181,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000894",
+    "true": {
+      "make": "Rolls-Royce",
+      "model": "Wraith",
+      "variant": null
+    },
+    "pred": {
+      "make": "Bentley",
+      "model": "Continental GT",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.906
+    },
+    "isModelMatch": false,
+    "latencyMs": 2830,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000130",
+    "true": {
+      "make": "Ford",
+      "model": "Explorer",
+      "variant": null
+    },
+    "pred": {
+      "make": "Bugatti",
+      "model": "Chiron",
+      "variant": null,
+      "status": "uncertain",
+      "confidence": 0.65
+    },
+    "isModelMatch": false,
+    "latencyMs": 1846,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000131",
+    "true": {
+      "make": "Ford",
+      "model": "Explorer",
+      "variant": null
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "296 GTB",
+      "variant": null,
+      "status": "uncertain",
+      "confidence": 0.65
+    },
+    "isModelMatch": false,
+    "latencyMs": 2813,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000985",
+    "true": {
+      "make": "Ford",
+      "model": "GT40",
+      "variant": "Mk I/Mk II"
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "488",
+      "variant": "GTB",
+      "status": "identified",
+      "confidence": 0.917
+    },
+    "isModelMatch": false,
+    "latencyMs": 2525,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000610",
+    "true": {
+      "make": "Mercedes-Benz",
+      "model": "300 SL",
+      "variant": "Gullwing"
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "488",
+      "variant": null,
+      "status": "identified_model",
+      "confidence": 0.699
+    },
+    "isModelMatch": false,
+    "latencyMs": 2413,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000611",
+    "true": {
+      "make": "Mercedes-Benz",
+      "model": "300 SL",
+      "variant": "Gullwing"
+    },
+    "pred": {
+      "make": "Bugatti",
+      "model": "Chiron",
+      "variant": null,
+      "status": "identified_model",
+      "confidence": 0.66
+    },
+    "isModelMatch": false,
+    "latencyMs": 2338,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000193",
+    "true": {
+      "make": "Mercedes-Benz",
+      "model": "S-Class",
+      "variant": null
+    },
+    "pred": {
+      "make": "Bugatti",
+      "model": "Chiron",
+      "variant": null,
+      "status": "identified_model",
+      "confidence": 0.709
+    },
+    "isModelMatch": false,
+    "latencyMs": 2631,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000200",
+    "true": {
+      "make": "Mercedes-Maybach",
+      "model": "S-Class",
+      "variant": "Maybach"
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "296 GTB",
+      "variant": null,
+      "status": "uncertain",
+      "confidence": 0.65
+    },
+    "isModelMatch": false,
+    "latencyMs": 2513,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000201",
+    "true": {
+      "make": "Mercedes-Maybach",
+      "model": "S-Class",
+      "variant": "Maybach"
+    },
+    "pred": {
+      "make": "Bugatti",
+      "model": "Chiron",
+      "variant": null,
+      "status": "uncertain",
+      "confidence": 0.65
+    },
+    "isModelMatch": false,
+    "latencyMs": 2106,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000405",
+    "true": {
+      "make": "Ferrari",
+      "model": "296 GTB",
+      "variant": "GTB"
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "296 GTB",
+      "variant": "GTB",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": true,
+    "latencyMs": 2539,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000406",
+    "true": {
+      "make": "Ferrari",
+      "model": "296 GTB",
+      "variant": "GTB"
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "296 GTB",
+      "variant": "GTB",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": true,
+    "latencyMs": 2720,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000642",
+    "true": {
+      "make": "Ferrari",
+      "model": "328",
+      "variant": "GTS"
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "488",
+      "variant": null,
+      "status": "uncertain",
+      "confidence": 0.65
+    },
+    "isModelMatch": false,
+    "latencyMs": 2914,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000401",
+    "true": {
+      "make": "Ferrari",
+      "model": "F8 Tributo",
+      "variant": "Tributo"
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "488",
+      "variant": "GTB",
+      "status": "identified",
+      "confidence": 0.931
+    },
+    "isModelMatch": false,
+    "latencyMs": 2537,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000852",
+    "true": {
+      "make": "Hyundai",
+      "model": "Tucson",
+      "variant": null
+    },
+    "pred": {
+      "make": "Toyota",
+      "model": "Camry",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 2519,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000853",
+    "true": {
+      "make": "Hyundai",
+      "model": "Tucson",
+      "variant": null
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "296 GTB",
+      "variant": "GTB",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 3677,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000181",
+    "true": {
+      "make": "Maruti Suzuki",
+      "model": "Brezza",
+      "variant": null
+    },
+    "pred": {
+      "make": "McLaren",
+      "model": "720S",
+      "variant": "720S",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 3399,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000182",
+    "true": {
+      "make": "Maruti Suzuki",
+      "model": "Brezza",
+      "variant": null
+    },
+    "pred": {
+      "make": "McLaren",
+      "model": "570S",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.872
+    },
+    "isModelMatch": false,
+    "latencyMs": 2953,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000871",
+    "true": {
+      "make": "Mazda",
+      "model": "Mazda3",
+      "variant": null
+    },
+    "pred": {
+      "make": "Bugatti",
+      "model": "Chiron",
+      "variant": null,
+      "status": "uncertain",
+      "confidence": 0.65
+    },
+    "isModelMatch": false,
+    "latencyMs": 2026,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000873",
+    "true": {
+      "make": "Mazda",
+      "model": "Mazda3",
+      "variant": null
+    },
+    "pred": {
+      "make": "Toyota",
+      "model": "Camry",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.922
+    },
+    "isModelMatch": false,
+    "latencyMs": 2067,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000594",
+    "true": {
+      "make": "Jaguar",
+      "model": "E-Type",
+      "variant": null
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "488",
+      "variant": "GTB",
+      "status": "identified",
+      "confidence": 0.853
+    },
+    "isModelMatch": false,
+    "latencyMs": 1994,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000595",
+    "true": {
+      "make": "Jaguar",
+      "model": "E-Type",
+      "variant": null
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "SF90 Stradale",
+      "variant": null,
+      "status": "identified_model",
+      "confidence": 0.776
+    },
+    "isModelMatch": false,
+    "latencyMs": 3633,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000990",
+    "true": {
+      "make": "Austin / Morris / MINI",
+      "model": "Mini",
+      "variant": "Cooper"
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "296 GTB",
+      "variant": "GTB",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 2889,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000991",
+    "true": {
+      "make": "Austin / Morris / MINI",
+      "model": "Mini",
+      "variant": "Cooper"
+    },
+    "pred": {
+      "make": "Lamborghini",
+      "model": "Huracán",
+      "variant": "LP610-4",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 3135,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000324",
+    "true": {
+      "make": "Ford",
+      "model": "Mustang",
+      "variant": "GT"
+    },
+    "pred": {
+      "make": "Porsche",
+      "model": "Carrera GT",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 2464,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000325",
+    "true": {
+      "make": "Ford",
+      "model": "Mustang",
+      "variant": "GT"
+    },
+    "pred": {
+      "make": "Porsche",
+      "model": "Carrera GT",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 3130,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000677",
+    "true": {
+      "make": "Shelby",
+      "model": "Cobra",
+      "variant": null
+    },
+    "pred": {
+      "make": "McLaren",
+      "model": "720S",
+      "variant": "720S",
+      "status": "identified",
+      "confidence": 0.856
+    },
+    "isModelMatch": false,
+    "latencyMs": 2729,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000678",
+    "true": {
+      "make": "Shelby",
+      "model": "Cobra",
+      "variant": null
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "SF90 Stradale",
+      "variant": "Stradale",
+      "status": "identified",
+      "confidence": 0.874
+    },
+    "isModelMatch": false,
+    "latencyMs": 3059,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000033",
+    "true": {
+      "make": "Honda",
+      "model": "Accord",
+      "variant": null
+    },
+    "pred": {
+      "make": "Toyota",
+      "model": "Camry",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 2369,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000034",
+    "true": {
+      "make": "Honda",
+      "model": "Accord",
+      "variant": null
+    },
+    "pred": {
+      "make": "Toyota",
+      "model": "Camry",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 2554,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000035",
+    "true": {
+      "make": "Honda",
+      "model": "Accord",
+      "variant": null
+    },
+    "pred": {
+      "make": "Toyota",
+      "model": "Camry",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 2120,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000997",
+    "true": {
+      "make": "Nissan",
+      "model": "180SX",
+      "variant": null
+    },
+    "pred": {
+      "make": "Porsche",
+      "model": "Carrera GT",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 2459,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000999",
+    "true": {
+      "make": "Nissan",
+      "model": "180SX",
+      "variant": null
+    },
+    "pred": {
+      "make": "McLaren",
+      "model": "570S",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.873
+    },
+    "isModelMatch": false,
+    "latencyMs": 3619,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000507",
+    "true": {
+      "make": "Nissan",
+      "model": "Skyline GT-R",
+      "variant": null
+    },
+    "pred": {
+      "make": null,
+      "model": null,
+      "variant": null,
+      "status": "not_in_catalogue",
+      "confidence": 0.437
+    },
+    "isModelMatch": null,
+    "latencyMs": 127,
+    "costUsd": 0
+  },
+  {
+    "id": "REAL_BLIND_000502",
+    "true": {
+      "make": "Nissan",
+      "model": "Skyline GT-R",
+      "variant": null
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "296 GTB",
+      "variant": null,
+      "status": "identified_model",
+      "confidence": 0.778
+    },
+    "isModelMatch": false,
+    "latencyMs": 3241,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000478",
+    "true": {
+      "make": "Pagani",
+      "model": "Huayra",
+      "variant": null
+    },
+    "pred": {
+      "make": "Porsche",
+      "model": "Carrera GT",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.942
+    },
+    "isModelMatch": false,
+    "latencyMs": 2326,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000479",
+    "true": {
+      "make": "Pagani",
+      "model": "Huayra",
+      "variant": null
+    },
+    "pred": {
+      "make": "Lamborghini",
+      "model": "Huracán",
+      "variant": "LP610-4",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 3359,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000481",
+    "true": {
+      "make": "Pagani",
+      "model": "Huayra",
+      "variant": null
+    },
+    "pred": {
+      "make": "Pagani",
+      "model": "Huayra",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": true,
+    "latencyMs": 2925,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000939",
+    "true": {
+      "make": "Pagani",
+      "model": "Zonda",
+      "variant": null
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "250 GTO",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 2210,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000938",
+    "true": {
+      "make": "Pagani",
+      "model": "Zonda",
+      "variant": null
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "Daytona SP3",
+      "variant": "SP3",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 2650,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000466",
+    "true": {
+      "make": "Bugatti",
+      "model": "Chiron",
+      "variant": null
+    },
+    "pred": {
+      "make": "Bugatti",
+      "model": "Chiron",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": true,
+    "latencyMs": 2648,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000467",
+    "true": {
+      "make": "Bugatti",
+      "model": "Chiron",
+      "variant": null
+    },
+    "pred": {
+      "make": "Bugatti",
+      "model": "Chiron",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": true,
+    "latencyMs": 3403,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_001017",
+    "true": {
+      "make": "Mazda",
+      "model": "RX-8",
+      "variant": null
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "488",
+      "variant": "GTB",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 2016,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_001018",
+    "true": {
+      "make": "Mazda",
+      "model": "RX-8",
+      "variant": null
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "488",
+      "variant": "GTB",
+      "status": "identified",
+      "confidence": 0.899
+    },
+    "isModelMatch": false,
+    "latencyMs": 3054,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000702",
+    "true": {
+      "make": "Ford",
+      "model": "1932 Ford",
+      "variant": "Hot Rod"
+    },
+    "pred": {
+      "make": "Porsche",
+      "model": "Carrera GT",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.845
+    },
+    "isModelMatch": false,
+    "latencyMs": 2605,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000705",
+    "true": {
+      "make": "Ford",
+      "model": "1932 Ford",
+      "variant": "Hot Rod"
+    },
+    "pred": {
+      "make": "Lamborghini",
+      "model": "Huracán",
+      "variant": "LP610-4",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 2706,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000690",
+    "true": {
+      "make": "Nissan",
+      "model": "GT-R",
+      "variant": "LB-Works"
+    },
+    "pred": {
+      "make": "McLaren",
+      "model": "P1",
+      "variant": null,
+      "status": "identified_model",
+      "confidence": 0.768
+    },
+    "isModelMatch": false,
+    "latencyMs": 2877,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000691",
+    "true": {
+      "make": "Nissan",
+      "model": "GT-R",
+      "variant": "LB-Works"
+    },
+    "pred": {
+      "make": "McLaren",
+      "model": "P1",
+      "variant": null,
+      "status": "uncertain",
+      "confidence": 0.65
+    },
+    "isModelMatch": false,
+    "latencyMs": 2271,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000575",
+    "true": {
+      "make": "Nissan",
+      "model": "Silvia",
+      "variant": "Spec-R"
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "F8 Tributo",
+      "variant": "Tributo",
+      "status": "identified",
+      "confidence": 0.872
+    },
+    "isModelMatch": false,
+    "latencyMs": 2932,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000506",
+    "true": {
+      "make": "Nissan",
+      "model": "Skyline GT-R",
+      "variant": null
+    },
+    "pred": {
+      "make": "Porsche",
+      "model": "Carrera GT",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.899
+    },
+    "isModelMatch": false,
+    "latencyMs": 2579,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000905",
+    "true": {
+      "make": "Genesis",
+      "model": "GV80",
+      "variant": null
+    },
+    "pred": {
+      "make": "Bugatti",
+      "model": "Chiron",
+      "variant": null,
+      "status": "uncertain",
+      "confidence": 0.65
+    },
+    "isModelMatch": false,
+    "latencyMs": 2559,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000906",
+    "true": {
+      "make": "Genesis",
+      "model": "GV80",
+      "variant": null
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "296 GTB",
+      "variant": "GTB",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 2694,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000907",
+    "true": {
+      "make": "Genesis",
+      "model": "GV80",
+      "variant": null
+    },
+    "pred": {
+      "make": "Lamborghini",
+      "model": "Revuelto",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.878
+    },
+    "isModelMatch": false,
+    "latencyMs": 3197,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000260",
+    "true": {
+      "make": "Genesis",
+      "model": "G90",
+      "variant": null
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "SF90 Stradale",
+      "variant": "Stradale",
+      "status": "identified",
+      "confidence": 0.907
+    },
+    "isModelMatch": false,
+    "latencyMs": 3505,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000248",
+    "true": {
+      "make": "Bentley",
+      "model": "Bentayga",
+      "variant": null
+    },
+    "pred": {
+      "make": "Bentley",
+      "model": "Continental GT",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 2336,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000249",
+    "true": {
+      "make": "Bentley",
+      "model": "Bentayga",
+      "variant": null
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "488",
+      "variant": "GTB",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 2689,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000245",
+    "true": {
+      "make": "Bentley",
+      "model": "Bentayga",
+      "variant": null
+    },
+    "pred": {
+      "make": "Bentley",
+      "model": "Continental GT",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.933
+    },
+    "isModelMatch": false,
+    "latencyMs": 1891,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000396",
+    "true": {
+      "make": "Ferrari",
+      "model": "F8 Tributo",
+      "variant": "Tributo"
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "F8 Tributo",
+      "variant": "Tributo",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": true,
+    "latencyMs": 2423,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000397",
+    "true": {
+      "make": "Ferrari",
+      "model": "F8 Tributo",
+      "variant": "Tributo"
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "F8 Tributo",
+      "variant": "Tributo",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": true,
+    "latencyMs": 3113,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000643",
+    "true": {
+      "make": "Ferrari",
+      "model": "328",
+      "variant": "GTS"
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "328",
+      "variant": "GTS",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": true,
+    "latencyMs": 3602,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000725",
+    "true": {
+      "make": "Ferrari",
+      "model": "812 Superfast",
+      "variant": "Mansory Stallone"
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "SF90 Stradale",
+      "variant": "Stradale",
+      "status": "identified",
+      "confidence": 0.918
+    },
+    "isModelMatch": false,
+    "latencyMs": 2427,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000421",
+    "true": {
+      "make": "Ferrari",
+      "model": "Daytona SP3",
+      "variant": "SP3"
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "Daytona SP3",
+      "variant": "SP3",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": true,
+    "latencyMs": 2752,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000410",
+    "true": {
+      "make": "Ferrari",
+      "model": "SF90 Stradale",
+      "variant": "Stradale"
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "SF90 Stradale",
+      "variant": null,
+      "status": "identified_model",
+      "confidence": 0.78
+    },
+    "isModelMatch": true,
+    "latencyMs": 3432,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000400",
+    "true": {
+      "make": "Ferrari",
+      "model": "F8 Tributo",
+      "variant": "Tributo"
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "F8 Tributo",
+      "variant": "Tributo",
+      "status": "identified",
+      "confidence": 0.903
+    },
+    "isModelMatch": true,
+    "latencyMs": 2405,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000134",
+    "true": {
+      "make": "Tata",
+      "model": "Harrier",
+      "variant": null
+    },
+    "pred": {
+      "make": "Bentley",
+      "model": "Continental GT",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 3029,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000135",
+    "true": {
+      "make": "Tata",
+      "model": "Harrier",
+      "variant": null
+    },
+    "pred": {
+      "make": "Toyota",
+      "model": "Camry",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.945
+    },
+    "isModelMatch": false,
+    "latencyMs": 2014,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000156",
+    "true": {
+      "make": "Tata",
+      "model": "Altroz",
+      "variant": null
+    },
+    "pred": {
+      "make": "Toyota",
+      "model": "Camry",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 1929,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000885",
+    "true": {
+      "make": "Aston Martin",
+      "model": "DB11",
+      "variant": null
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "296 GTB",
+      "variant": "GTB",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 2323,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000214",
+    "true": {
+      "make": "Audi",
+      "model": "A8",
+      "variant": null
+    },
+    "pred": {
+      "make": "Toyota",
+      "model": "Camry",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 2395,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000963",
+    "true": {
+      "make": "Ferrari",
+      "model": "Dino 246",
+      "variant": "246 GT"
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "488",
+      "variant": null,
+      "status": "identified_model",
+      "confidence": 0.645
+    },
+    "isModelMatch": false,
+    "latencyMs": 3133,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000404",
+    "true": {
+      "make": "Ferrari",
+      "model": "296 GTB",
+      "variant": "GTB"
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "488",
+      "variant": "GTB",
+      "status": "identified",
+      "confidence": 0.824
+    },
+    "isModelMatch": false,
+    "latencyMs": 2103,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000402",
+    "true": {
+      "make": "Ferrari",
+      "model": "F8 Tributo",
+      "variant": "Tributo"
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "488",
+      "variant": "GTB",
+      "status": "identified",
+      "confidence": 0.848
+    },
+    "isModelMatch": false,
+    "latencyMs": 3534,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000102",
+    "true": {
+      "make": "Honda",
+      "model": "CR-V",
+      "variant": null
+    },
+    "pred": {
+      "make": "McLaren",
+      "model": "720S",
+      "variant": "720S",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 3177,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000108",
+    "true": {
+      "make": "Mazda",
+      "model": "CX-5",
+      "variant": null
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "SF90 Stradale",
+      "variant": "Stradale",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 3521,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_001003",
+    "true": {
+      "make": "Nissan",
+      "model": "300ZX",
+      "variant": null
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "488",
+      "variant": "GTB",
+      "status": "identified",
+      "confidence": 0.942
+    },
+    "isModelMatch": false,
+    "latencyMs": 2209,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000083",
+    "true": {
+      "make": "Nissan",
+      "model": "Sentra",
+      "variant": null
+    },
+    "pred": {
+      "make": "Bugatti",
+      "model": "Chiron",
+      "variant": null,
+      "status": "uncertain",
+      "confidence": 0.65
+    },
+    "isModelMatch": false,
+    "latencyMs": 2371,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000224",
+    "true": {
+      "make": "Rolls-Royce",
+      "model": "Phantom",
+      "variant": null
+    },
+    "pred": {
+      "make": "Bugatti",
+      "model": "Chiron",
+      "variant": null,
+      "status": "identified_model",
+      "confidence": 0.611
+    },
+    "isModelMatch": false,
+    "latencyMs": 3045,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000094",
+    "true": {
+      "make": "Toyota",
+      "model": "RAV4",
+      "variant": null
+    },
+    "pred": {
+      "make": "Lamborghini",
+      "model": "Revuelto",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 3250,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000092",
+    "true": {
+      "make": "Toyota",
+      "model": "RAV4",
+      "variant": null
+    },
+    "pred": {
+      "make": "McLaren",
+      "model": "720S",
+      "variant": null,
+      "status": "uncertain",
+      "confidence": 0.65
+    },
+    "isModelMatch": false,
+    "latencyMs": 1842,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000446",
+    "true": {
+      "make": "Lamborghini",
+      "model": "Revuelto",
+      "variant": null
+    },
+    "pred": {
+      "make": "Lamborghini",
+      "model": "Revuelto",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": true,
+    "latencyMs": 3153,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000443",
+    "true": {
+      "make": "Lamborghini",
+      "model": "Revuelto",
+      "variant": null
+    },
+    "pred": {
+      "make": "Lamborghini",
+      "model": "Revuelto",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.87
+    },
+    "isModelMatch": true,
+    "latencyMs": 3048,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000445",
+    "true": {
+      "make": "Lamborghini",
+      "model": "Revuelto",
+      "variant": null
+    },
+    "pred": {
+      "make": "Lamborghini",
+      "model": "Aventador",
+      "variant": "LP700-4",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 3563,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000961",
+    "true": {
+      "make": "Lamborghini",
+      "model": "Miura",
+      "variant": "P400"
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "328",
+      "variant": "GTS",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 2831,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000366",
+    "true": {
+      "make": "Mazda",
+      "model": "MX-5 Miata",
+      "variant": null
+    },
+    "pred": {
+      "make": "McLaren",
+      "model": "720S",
+      "variant": "720S",
+      "status": "identified",
+      "confidence": 0.917
+    },
+    "isModelMatch": false,
+    "latencyMs": 2781,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000110",
+    "true": {
+      "make": "Mazda",
+      "model": "CX-5",
+      "variant": null
+    },
+    "pred": {
+      "make": "Lamborghini",
+      "model": "Huracán",
+      "variant": null,
+      "status": "uncertain",
+      "confidence": 0.65
+    },
+    "isModelMatch": false,
+    "latencyMs": 2188,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000569",
+    "true": {
+      "make": "Mitsubishi",
+      "model": "Lancer Evolution",
+      "variant": null
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "296 GTB",
+      "variant": "GTB",
+      "status": "identified",
+      "confidence": 0.888
+    },
+    "isModelMatch": false,
+    "latencyMs": 2561,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000526",
+    "true": {
+      "make": "Mazda",
+      "model": "RX-7",
+      "variant": null
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "488",
+      "variant": "GTB",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 2382,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000161",
+    "true": {
+      "make": "Mahindra",
+      "model": "Scorpio-N",
+      "variant": null
+    },
+    "pred": {
+      "make": "Toyota",
+      "model": "Camry",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 3433,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000070",
+    "true": {
+      "make": "Hyundai",
+      "model": "Sonata",
+      "variant": null
+    },
+    "pred": {
+      "make": "Lamborghini",
+      "model": "Huracán",
+      "variant": "LP610-4",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 3675,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000590",
+    "true": {
+      "make": "Ford",
+      "model": "Model T",
+      "variant": null
+    },
+    "pred": {
+      "make": "Bentley",
+      "model": "Continental GT",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 2235,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000583",
+    "true": {
+      "make": "Toyota",
+      "model": "Chaser",
+      "variant": "Tourer V"
+    },
+    "pred": {
+      "make": "Bentley",
+      "model": "Continental GT",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.923
+    },
+    "isModelMatch": false,
+    "latencyMs": 2518,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000582",
+    "true": {
+      "make": "Toyota",
+      "model": "Chaser",
+      "variant": "Tourer V"
+    },
+    "pred": {
+      "make": "Lamborghini",
+      "model": "Aventador",
+      "variant": "LP700-4",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 2969,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000581",
+    "true": {
+      "make": "Toyota",
+      "model": "Chaser",
+      "variant": "Tourer V"
+    },
+    "pred": {
+      "make": null,
+      "model": null,
+      "variant": null,
+      "status": "not_in_catalogue",
+      "confidence": 0.43
+    },
+    "isModelMatch": null,
+    "latencyMs": 83,
+    "costUsd": 0
+  },
+  {
+    "id": "REAL_BLIND_000439",
+    "true": {
+      "make": "Lamborghini",
+      "model": "Huracán",
+      "variant": "LP610-4"
+    },
+    "pred": {
+      "make": "Lamborghini",
+      "model": "Huracán",
+      "variant": "LP610-4",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": true,
+    "latencyMs": 3446,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000438",
+    "true": {
+      "make": "Lamborghini",
+      "model": "Huracán",
+      "variant": "LP610-4"
+    },
+    "pred": {
+      "make": "Lamborghini",
+      "model": "Huracán",
+      "variant": "LP610-4",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": true,
+    "latencyMs": 2069,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000388",
+    "true": {
+      "make": "Alpine",
+      "model": "A110",
+      "variant": null
+    },
+    "pred": {
+      "make": "Lamborghini",
+      "model": "Huracán",
+      "variant": "LP610-4",
+      "status": "identified",
+      "confidence": 0.941
+    },
+    "isModelMatch": false,
+    "latencyMs": 2677,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000349",
+    "true": {
+      "make": "Toyota",
+      "model": "Supra",
+      "variant": "GR Supra"
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "SF90 Stradale",
+      "variant": "Stradale",
+      "status": "identified",
+      "confidence": 0.905
+    },
+    "isModelMatch": false,
+    "latencyMs": 3703,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000970",
+    "true": {
+      "make": "Chevrolet",
+      "model": "Camero",
+      "variant": "1969"
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "488",
+      "variant": "GTB",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 2227,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000986",
+    "true": {
+      "make": "Ford",
+      "model": "GT40",
+      "variant": "Mk I/Mk II"
+    },
+    "pred": {
+      "make": "Lamborghini",
+      "model": "Huracán",
+      "variant": "LP610-4",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 3473,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000589",
+    "true": {
+      "make": "Ford",
+      "model": "Model T",
+      "variant": null
+    },
+    "pred": {
+      "make": "Bentley",
+      "model": "Continental GT",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 2924,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000493",
+    "true": {
+      "make": "Ford",
+      "model": "GT",
+      "variant": null
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "F8 Tributo",
+      "variant": "Tributo",
+      "status": "identified",
+      "confidence": 0.843
+    },
+    "isModelMatch": false,
+    "latencyMs": 3333,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000322",
+    "true": {
+      "make": "Ford",
+      "model": "Mustang",
+      "variant": "GT"
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "488",
+      "variant": "GTB",
+      "status": "identified",
+      "confidence": 0.956
+    },
+    "isModelMatch": false,
+    "latencyMs": 2032,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000929",
+    "true": {
+      "make": "Land Rover",
+      "model": "Range Rover",
+      "variant": null
+    },
+    "pred": {
+      "make": "Lamborghini",
+      "model": "Huracán",
+      "variant": "LP610-4",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 2895,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000925",
+    "true": {
+      "make": "Land Rover",
+      "model": "Range Rover",
+      "variant": null
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "Daytona SP3",
+      "variant": null,
+      "status": "uncertain",
+      "confidence": 0.65
+    },
+    "isModelMatch": false,
+    "latencyMs": 1674,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000926",
+    "true": {
+      "make": "Land Rover",
+      "model": "Range Rover",
+      "variant": null
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "F8 Tributo",
+      "variant": null,
+      "status": "uncertain",
+      "confidence": 0.65
+    },
+    "isModelMatch": false,
+    "latencyMs": 3474,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000146",
+    "true": {
+      "make": "Tata",
+      "model": "Punch",
+      "variant": null
+    },
+    "pred": {
+      "make": "McLaren",
+      "model": "720S",
+      "variant": null,
+      "status": "uncertain",
+      "confidence": 0.6
+    },
+    "isModelMatch": false,
+    "latencyMs": 2770,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000917",
+    "true": {
+      "make": "Porsche",
+      "model": "Macan",
+      "variant": null
+    },
+    "pred": {
+      "make": "Porsche",
+      "model": "718 Cayman",
+      "variant": "Cayman",
+      "status": "identified",
+      "confidence": 0.881
+    },
+    "isModelMatch": false,
+    "latencyMs": 2848,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000270",
+    "true": {
+      "make": "Porsche",
+      "model": "Panamera",
+      "variant": null
+    },
+    "pred": {
+      "make": "Porsche",
+      "model": "Carrera GT",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.949
+    },
+    "isModelMatch": false,
+    "latencyMs": 2846,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000268",
+    "true": {
+      "make": "Porsche",
+      "model": "Panamera",
+      "variant": null
+    },
+    "pred": {
+      "make": "Bentley",
+      "model": "Continental GT",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 3553,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000269",
+    "true": {
+      "make": "Porsche",
+      "model": "Panamera",
+      "variant": null
+    },
+    "pred": {
+      "make": "Porsche",
+      "model": "Carrera GT",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 2735,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000914",
+    "true": {
+      "make": "Porsche",
+      "model": "Cayenne",
+      "variant": null
+    },
+    "pred": {
+      "make": "Bentley",
+      "model": "Continental GT",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.879
+    },
+    "isModelMatch": false,
+    "latencyMs": 2680,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000799",
+    "true": {
+      "make": "Vespa",
+      "model": "Scooter",
+      "variant": null
+    },
+    "pred": {
+      "make": null,
+      "model": null,
+      "variant": null,
+      "status": "not_in_catalogue",
+      "confidence": 0.353
+    },
+    "isModelMatch": null,
+    "latencyMs": 69,
+    "costUsd": 0
+  },
+  {
+    "id": "REAL_BLIND_000039",
+    "true": {
+      "make": "Ford",
+      "model": "F-150",
+      "variant": null
+    },
+    "pred": {
+      "make": "Toyota",
+      "model": "Camry",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 4078,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000603",
+    "true": {
+      "make": "Aston Martin",
+      "model": "DB5",
+      "variant": null
+    },
+    "pred": {
+      "make": "Porsche",
+      "model": "Carrera GT",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 2267,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000785",
+    "true": {
+      "make": "Ducati",
+      "model": "Panigale",
+      "variant": null
+    },
+    "pred": {
+      "make": "Porsche",
+      "model": "Carrera GT",
+      "variant": null,
+      "status": "uncertain",
+      "confidence": 0.65
+    },
+    "isModelMatch": false,
+    "latencyMs": 1865,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000935",
+    "true": {
+      "make": "McLaren",
+      "model": "570S",
+      "variant": null
+    },
+    "pred": {
+      "make": "McLaren",
+      "model": "570S",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": true,
+    "latencyMs": 2622,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000659",
+    "true": {
+      "make": "Citroën",
+      "model": "DS",
+      "variant": null
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "Daytona SP3",
+      "variant": null,
+      "status": "uncertain",
+      "confidence": 0.65
+    },
+    "isModelMatch": false,
+    "latencyMs": 2430,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000710",
+    "true": {
+      "make": "BMW",
+      "model": "3 Series",
+      "variant": "Stance Custom"
+    },
+    "pred": {
+      "make": "Bentley",
+      "model": "Continental GT",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.846
+    },
+    "isModelMatch": false,
+    "latencyMs": 4454,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000189",
+    "true": {
+      "make": "Hindustan Motors",
+      "model": "Ambassador",
+      "variant": null
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "250 GTO",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 3257,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000140",
+    "true": {
+      "make": "Tata",
+      "model": "Safari",
+      "variant": null
+    },
+    "pred": {
+      "make": "Porsche",
+      "model": "Carrera GT",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 2401,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000380",
+    "true": {
+      "make": "Nissan",
+      "model": "Z",
+      "variant": null
+    },
+    "pred": {
+      "make": "Bugatti",
+      "model": "Chiron",
+      "variant": null,
+      "status": "uncertain",
+      "confidence": 0.65
+    },
+    "isModelMatch": false,
+    "latencyMs": 1977,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000381",
+    "true": {
+      "make": "Nissan",
+      "model": "Z",
+      "variant": null
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "488",
+      "variant": null,
+      "status": "uncertain",
+      "confidence": 0.65
+    },
+    "isModelMatch": false,
+    "latencyMs": 2533,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000377",
+    "true": {
+      "make": "Nissan",
+      "model": "Z",
+      "variant": null
+    },
+    "pred": {
+      "make": "Porsche",
+      "model": "718 Cayman",
+      "variant": "Cayman",
+      "status": "identified",
+      "confidence": 0.838
+    },
+    "isModelMatch": false,
+    "latencyMs": 3029,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000376",
+    "true": {
+      "make": "Nissan",
+      "model": "Z",
+      "variant": null
+    },
+    "pred": {
+      "make": "Toyota",
+      "model": "Camry",
+      "variant": null,
+      "status": "identified_model",
+      "confidence": 0.791
+    },
+    "isModelMatch": false,
+    "latencyMs": 2623,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000378",
+    "true": {
+      "make": "Nissan",
+      "model": "Z",
+      "variant": null
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "488",
+      "variant": "GTB",
+      "status": "identified",
+      "confidence": 0.843
+    },
+    "isModelMatch": false,
+    "latencyMs": 2129,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000394",
+    "true": {
+      "make": "Ferrari",
+      "model": "488",
+      "variant": "GTB"
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "488",
+      "variant": "GTB",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": true,
+    "latencyMs": 2509,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000165",
+    "true": {
+      "make": "Mahindra",
+      "model": "XUV700",
+      "variant": null
+    },
+    "pred": {
+      "make": "Toyota",
+      "model": "Camry",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 2481,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000899",
+    "true": {
+      "make": "Lexus",
+      "model": "LC",
+      "variant": "LC 500"
+    },
+    "pred": {
+      "make": "Lamborghini",
+      "model": "Revuelto",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.9
+    },
+    "isModelMatch": false,
+    "latencyMs": 2088,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000346",
+    "true": {
+      "make": "Audi",
+      "model": "RS5",
+      "variant": null
+    },
+    "pred": {
+      "make": "Porsche",
+      "model": "Carrera GT",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 2819,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000978",
+    "true": {
+      "make": "Dodge",
+      "model": "Charger",
+      "variant": "1969"
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "296 GTB",
+      "variant": "GTB",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 4769,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000124",
+    "true": {
+      "make": "Kia",
+      "model": "Forte",
+      "variant": null
+    },
+    "pred": {
+      "make": "Lamborghini",
+      "model": "Revuelto",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.864
+    },
+    "isModelMatch": false,
+    "latencyMs": 2646,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000122",
+    "true": {
+      "make": "Kia",
+      "model": "Forte",
+      "variant": null
+    },
+    "pred": {
+      "make": "Toyota",
+      "model": "Camry",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 2553,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000123",
+    "true": {
+      "make": "Kia",
+      "model": "Forte",
+      "variant": null
+    },
+    "pred": {
+      "make": "Lamborghini",
+      "model": "Revuelto",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.935
+    },
+    "isModelMatch": false,
+    "latencyMs": 2941,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000126",
+    "true": {
+      "make": "Kia",
+      "model": "Forte",
+      "variant": null
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "250 GTO",
+      "variant": null,
+      "status": "uncertain",
+      "confidence": 0.65
+    },
+    "isModelMatch": false,
+    "latencyMs": 2788,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000653",
+    "true": {
+      "make": "Volkswagen",
+      "model": "Beetle",
+      "variant": null
+    },
+    "pred": {
+      "make": "Lamborghini",
+      "model": "Revuelto",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 2651,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000654",
+    "true": {
+      "make": "Volkswagen",
+      "model": "Beetle",
+      "variant": null
+    },
+    "pred": {
+      "make": "Lamborghini",
+      "model": "Huracán",
+      "variant": "LP610-4",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 3782,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000651",
+    "true": {
+      "make": "Volkswagen",
+      "model": "Beetle",
+      "variant": null
+    },
+    "pred": {
+      "make": "Lamborghini",
+      "model": "Huracán",
+      "variant": "LP610-4",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 2782,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000241",
+    "true": {
+      "make": "Bentley",
+      "model": "Continental GT",
+      "variant": null
+    },
+    "pred": {
+      "make": "Bentley",
+      "model": "Continental GT",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": true,
+    "latencyMs": 3296,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000240",
+    "true": {
+      "make": "Bentley",
+      "model": "Continental GT",
+      "variant": null
+    },
+    "pred": {
+      "make": "Bentley",
+      "model": "Continental GT",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": true,
+    "latencyMs": 2475,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000244",
+    "true": {
+      "make": "Bentley",
+      "model": "Continental GT",
+      "variant": null
+    },
+    "pred": {
+      "make": "Bentley",
+      "model": "Continental GT",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": true,
+    "latencyMs": 2366,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000242",
+    "true": {
+      "make": "Bentley",
+      "model": "Continental GT",
+      "variant": null
+    },
+    "pred": {
+      "make": "Bentley",
+      "model": "Continental GT",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": true,
+    "latencyMs": 3958,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000272",
+    "true": {
+      "make": "Cadillac",
+      "model": "Escalade",
+      "variant": null
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "250 GTO",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.906
+    },
+    "isModelMatch": false,
+    "latencyMs": 3311,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000274",
+    "true": {
+      "make": "Cadillac",
+      "model": "Escalade",
+      "variant": null
+    },
+    "pred": {
+      "make": "Lamborghini",
+      "model": "Revuelto",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.897
+    },
+    "isModelMatch": false,
+    "latencyMs": 2781,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000276",
+    "true": {
+      "make": "Cadillac",
+      "model": "Escalade",
+      "variant": null
+    },
+    "pred": {
+      "make": "Porsche",
+      "model": "Carrera GT",
+      "variant": null,
+      "status": "identified_model",
+      "confidence": 0.808
+    },
+    "isModelMatch": false,
+    "latencyMs": 3113,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000273",
+    "true": {
+      "make": "Cadillac",
+      "model": "Escalade",
+      "variant": null
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "SF90 Stradale",
+      "variant": "Stradale",
+      "status": "identified",
+      "confidence": 0.842
+    },
+    "isModelMatch": false,
+    "latencyMs": 3681,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000218",
+    "true": {
+      "make": "Rolls-Royce",
+      "model": "Ghost",
+      "variant": null
+    },
+    "pred": {
+      "make": "Lamborghini",
+      "model": "Revuelto",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 2962,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000217",
+    "true": {
+      "make": "Rolls-Royce",
+      "model": "Ghost",
+      "variant": null
+    },
+    "pred": {
+      "make": "McLaren",
+      "model": "570S",
+      "variant": null,
+      "status": "uncertain",
+      "confidence": 0.6
+    },
+    "isModelMatch": false,
+    "latencyMs": 2429,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000221",
+    "true": {
+      "make": "Rolls-Royce",
+      "model": "Ghost",
+      "variant": null
+    },
+    "pred": {
+      "make": "Porsche",
+      "model": "Carrera GT",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 3306,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000222",
+    "true": {
+      "make": "Rolls-Royce",
+      "model": "Ghost",
+      "variant": null
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "Daytona SP3",
+      "variant": "SP3",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 4011,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000220",
+    "true": {
+      "make": "Rolls-Royce",
+      "model": "Ghost",
+      "variant": null
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "296 GTB",
+      "variant": "GTB",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 4574,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000087",
+    "true": {
+      "make": "Chevrolet",
+      "model": "Malibu",
+      "variant": null
+    },
+    "pred": {
+      "make": "Toyota",
+      "model": "Camry",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 2422,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000088",
+    "true": {
+      "make": "Chevrolet",
+      "model": "Malibu",
+      "variant": null
+    },
+    "pred": {
+      "make": "Toyota",
+      "model": "Camry",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.922
+    },
+    "isModelMatch": false,
+    "latencyMs": 2983,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000091",
+    "true": {
+      "make": "Chevrolet",
+      "model": "Malibu",
+      "variant": null
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "F8 Tributo",
+      "variant": "Tributo",
+      "status": "identified",
+      "confidence": 0.895
+    },
+    "isModelMatch": false,
+    "latencyMs": 4337,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000086",
+    "true": {
+      "make": "Chevrolet",
+      "model": "Malibu",
+      "variant": null
+    },
+    "pred": {
+      "make": "Toyota",
+      "model": "Camry",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 6486,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000090",
+    "true": {
+      "make": "Chevrolet",
+      "model": "Malibu",
+      "variant": null
+    },
+    "pred": {
+      "make": "Toyota",
+      "model": "Camry",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 2903,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000022",
+    "true": {
+      "make": "Honda",
+      "model": "Civic",
+      "variant": null
+    },
+    "pred": {
+      "make": "Toyota",
+      "model": "Camry",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 3656,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000025",
+    "true": {
+      "make": "Honda",
+      "model": "Civic",
+      "variant": null
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "488",
+      "variant": null,
+      "status": "identified_model",
+      "confidence": 0.677
+    },
+    "isModelMatch": false,
+    "latencyMs": 2485,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000026",
+    "true": {
+      "make": "Honda",
+      "model": "Civic",
+      "variant": null
+    },
+    "pred": {
+      "make": "Toyota",
+      "model": "Camry",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.855
+    },
+    "isModelMatch": false,
+    "latencyMs": 2381,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000015",
+    "true": {
+      "make": "Honda",
+      "model": "Civic",
+      "variant": null
+    },
+    "pred": {
+      "make": "Toyota",
+      "model": "Camry",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 3426,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000017",
+    "true": {
+      "make": "Honda",
+      "model": "Civic",
+      "variant": null
+    },
+    "pred": {
+      "make": "Toyota",
+      "model": "Camry",
+      "variant": null,
+      "status": "identified_model",
+      "confidence": 0.633
+    },
+    "isModelMatch": false,
+    "latencyMs": 2036,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000019",
+    "true": {
+      "make": "Honda",
+      "model": "Civic",
+      "variant": null
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "488",
+      "variant": "GTB",
+      "status": "identified",
+      "confidence": 0.881
+    },
+    "isModelMatch": false,
+    "latencyMs": 2245,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000021",
+    "true": {
+      "make": "Honda",
+      "model": "Civic",
+      "variant": null
+    },
+    "pred": {
+      "make": "Lamborghini",
+      "model": "Revuelto",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.82
+    },
+    "isModelMatch": false,
+    "latencyMs": 3052,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000104",
+    "true": {
+      "make": "Honda",
+      "model": "CR-V",
+      "variant": null
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "488",
+      "variant": "GTB",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 3528,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000023",
+    "true": {
+      "make": "Honda",
+      "model": "Civic",
+      "variant": null
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "488",
+      "variant": "GTB",
+      "status": "identified",
+      "confidence": 0.854
+    },
+    "isModelMatch": false,
+    "latencyMs": 2318,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000027",
+    "true": {
+      "make": "Honda",
+      "model": "Civic",
+      "variant": null
+    },
+    "pred": {
+      "make": "Toyota",
+      "model": "Camry",
+      "variant": null,
+      "status": "identified_model",
+      "confidence": 0.773
+    },
+    "isModelMatch": false,
+    "latencyMs": 2962,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000018",
+    "true": {
+      "make": "Honda",
+      "model": "Civic",
+      "variant": null
+    },
+    "pred": {
+      "make": "Toyota",
+      "model": "Camry",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 1981,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000103",
+    "true": {
+      "make": "Honda",
+      "model": "CR-V",
+      "variant": null
+    },
+    "pred": {
+      "make": "McLaren",
+      "model": "720S",
+      "variant": null,
+      "status": "uncertain",
+      "confidence": 0.65
+    },
+    "isModelMatch": false,
+    "latencyMs": 1624,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000062",
+    "true": {
+      "make": "Hyundai",
+      "model": "Elantra",
+      "variant": null
+    },
+    "pred": {
+      "make": "Toyota",
+      "model": "Camry",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 2444,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000058",
+    "true": {
+      "make": "Hyundai",
+      "model": "Elantra",
+      "variant": null
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "F8 Tributo",
+      "variant": "Tributo",
+      "status": "identified",
+      "confidence": 0.953
+    },
+    "isModelMatch": false,
+    "latencyMs": 3064,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000060",
+    "true": {
+      "make": "Hyundai",
+      "model": "Elantra",
+      "variant": null
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "F8 Tributo",
+      "variant": "Tributo",
+      "status": "identified",
+      "confidence": 0.911
+    },
+    "isModelMatch": false,
+    "latencyMs": 3634,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000065",
+    "true": {
+      "make": "Hyundai",
+      "model": "Sonata",
+      "variant": null
+    },
+    "pred": {
+      "make": "Porsche",
+      "model": "718 Cayman",
+      "variant": "Cayman",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 2750,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000066",
+    "true": {
+      "make": "Hyundai",
+      "model": "Sonata",
+      "variant": null
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "328",
+      "variant": "GTS",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 3547,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000069",
+    "true": {
+      "make": "Hyundai",
+      "model": "Sonata",
+      "variant": null
+    },
+    "pred": {
+      "make": "Toyota",
+      "model": "Camry",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 2148,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000851",
+    "true": {
+      "make": "Hyundai",
+      "model": "Tucson",
+      "variant": null
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "296 GTB",
+      "variant": "GTB",
+      "status": "identified",
+      "confidence": 0.829
+    },
+    "isModelMatch": false,
+    "latencyMs": 2960,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000057",
+    "true": {
+      "make": "Hyundai",
+      "model": "Elantra",
+      "variant": null
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "F8 Tributo",
+      "variant": "Tributo",
+      "status": "identified",
+      "confidence": 0.925
+    },
+    "isModelMatch": false,
+    "latencyMs": 2491,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000061",
+    "true": {
+      "make": "Hyundai",
+      "model": "Elantra",
+      "variant": null
+    },
+    "pred": {
+      "make": "Porsche",
+      "model": "718 Cayman",
+      "variant": "Cayman",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 3284,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000068",
+    "true": {
+      "make": "Hyundai",
+      "model": "Sonata",
+      "variant": null
+    },
+    "pred": {
+      "make": "Toyota",
+      "model": "Camry",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.872
+    },
+    "isModelMatch": false,
+    "latencyMs": 2840,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000077",
+    "true": {
+      "make": "Nissan",
+      "model": "Altima",
+      "variant": null
+    },
+    "pred": {
+      "make": "Toyota",
+      "model": "Camry",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.826
+    },
+    "isModelMatch": false,
+    "latencyMs": 2759,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000072",
+    "true": {
+      "make": "Nissan",
+      "model": "Altima",
+      "variant": null
+    },
+    "pred": {
+      "make": "Toyota",
+      "model": "Camry",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 2924,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000074",
+    "true": {
+      "make": "Nissan",
+      "model": "Altima",
+      "variant": null
+    },
+    "pred": {
+      "make": "Toyota",
+      "model": "Camry",
+      "variant": null,
+      "status": "identified_model",
+      "confidence": 0.729
+    },
+    "isModelMatch": false,
+    "latencyMs": 3494,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000076",
+    "true": {
+      "make": "Nissan",
+      "model": "Altima",
+      "variant": null
+    },
+    "pred": {
+      "make": "Toyota",
+      "model": "Camry",
+      "variant": null,
+      "status": "identified_model",
+      "confidence": 0.694
+    },
+    "isModelMatch": false,
+    "latencyMs": 2649,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000073",
+    "true": {
+      "make": "Nissan",
+      "model": "Altima",
+      "variant": null
+    },
+    "pred": {
+      "make": "Toyota",
+      "model": "Camry",
+      "variant": null,
+      "status": "identified_model",
+      "confidence": 0.784
+    },
+    "isModelMatch": false,
+    "latencyMs": 3080,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000881",
+    "true": {
+      "make": "Subaru",
+      "model": "Forester",
+      "variant": null
+    },
+    "pred": {
+      "make": "McLaren",
+      "model": "570S",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 4122,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000114",
+    "true": {
+      "make": "Subaru",
+      "model": "Outback",
+      "variant": null
+    },
+    "pred": {
+      "make": "Bugatti",
+      "model": "Chiron",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 2643,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000115",
+    "true": {
+      "make": "Subaru",
+      "model": "Outback",
+      "variant": null
+    },
+    "pred": {
+      "make": "Bentley",
+      "model": "Continental GT",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 3369,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000118",
+    "true": {
+      "make": "Subaru",
+      "model": "Outback",
+      "variant": null
+    },
+    "pred": {
+      "make": "Toyota",
+      "model": "Camry",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.907
+    },
+    "isModelMatch": false,
+    "latencyMs": 3474,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000119",
+    "true": {
+      "make": "Subaru",
+      "model": "Outback",
+      "variant": null
+    },
+    "pred": {
+      "make": "Toyota",
+      "model": "Camry",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 3364,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000878",
+    "true": {
+      "make": "Subaru",
+      "model": "Forester",
+      "variant": null
+    },
+    "pred": {
+      "make": "Bugatti",
+      "model": "Chiron",
+      "variant": null,
+      "status": "identified_model",
+      "confidence": 0.639
+    },
+    "isModelMatch": false,
+    "latencyMs": 3745,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000877",
+    "true": {
+      "make": "Subaru",
+      "model": "Forester",
+      "variant": null
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "SF90 Stradale",
+      "variant": "Stradale",
+      "status": "identified",
+      "confidence": 0.853
+    },
+    "isModelMatch": false,
+    "latencyMs": 3954,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000116",
+    "true": {
+      "make": "Subaru",
+      "model": "Outback",
+      "variant": null
+    },
+    "pred": {
+      "make": "Toyota",
+      "model": "Camry",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.906
+    },
+    "isModelMatch": false,
+    "latencyMs": 3401,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000001",
+    "true": {
+      "make": "Toyota",
+      "model": "Camry",
+      "variant": null
+    },
+    "pred": {
+      "make": "Toyota",
+      "model": "Camry",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": true,
+    "latencyMs": 2121,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000006",
+    "true": {
+      "make": "Toyota",
+      "model": "Camry",
+      "variant": null
+    },
+    "pred": {
+      "make": "Toyota",
+      "model": "Camry",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": true,
+    "latencyMs": 2297,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000007",
+    "true": {
+      "make": "Toyota",
+      "model": "Camry",
+      "variant": null
+    },
+    "pred": {
+      "make": "Toyota",
+      "model": "Camry",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": true,
+    "latencyMs": 2765,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000003",
+    "true": {
+      "make": "Toyota",
+      "model": "Camry",
+      "variant": null
+    },
+    "pred": {
+      "make": "Toyota",
+      "model": "Camry",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": true,
+    "latencyMs": 3535,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000011",
+    "true": {
+      "make": "Toyota",
+      "model": "Corolla",
+      "variant": null
+    },
+    "pred": {
+      "make": "Toyota",
+      "model": "Camry",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 3045,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000010",
+    "true": {
+      "make": "Toyota",
+      "model": "Corolla",
+      "variant": null
+    },
+    "pred": {
+      "make": "Toyota",
+      "model": "Camry",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 3925,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000013",
+    "true": {
+      "make": "Toyota",
+      "model": "Corolla",
+      "variant": null
+    },
+    "pred": {
+      "make": "Toyota",
+      "model": "Camry",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 2514,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000005",
+    "true": {
+      "make": "Toyota",
+      "model": "Camry",
+      "variant": null
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "SF90 Stradale",
+      "variant": null,
+      "status": "identified_model",
+      "confidence": 0.78
+    },
+    "isModelMatch": false,
+    "latencyMs": 3044,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000002",
+    "true": {
+      "make": "Toyota",
+      "model": "Camry",
+      "variant": null
+    },
+    "pred": {
+      "make": "Toyota",
+      "model": "Camry",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": true,
+    "latencyMs": 2190,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000014",
+    "true": {
+      "make": "Toyota",
+      "model": "Corolla",
+      "variant": null
+    },
+    "pred": {
+      "make": "Toyota",
+      "model": "Camry",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 2425,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000148",
+    "true": {
+      "make": "Tata",
+      "model": "Tiago",
+      "variant": null
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "F8 Tributo",
+      "variant": "Tributo",
+      "status": "identified",
+      "confidence": 0.922
+    },
+    "isModelMatch": false,
+    "latencyMs": 4077,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000149",
+    "true": {
+      "make": "Tata",
+      "model": "Tiago",
+      "variant": null
+    },
+    "pred": {
+      "make": "Pagani",
+      "model": "Huayra",
+      "variant": null,
+      "status": "uncertain",
+      "confidence": 0.65
+    },
+    "isModelMatch": false,
+    "latencyMs": 2039,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000863",
+    "true": {
+      "make": "Nissan",
+      "model": "Rogue",
+      "variant": null
+    },
+    "pred": {
+      "make": "Porsche",
+      "model": "718 Cayman",
+      "variant": "Cayman",
+      "status": "identified",
+      "confidence": 0.89
+    },
+    "isModelMatch": false,
+    "latencyMs": 3703,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000553",
+    "true": {
+      "make": "Honda",
+      "model": "S2000",
+      "variant": null
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "296 GTB",
+      "variant": "GTB",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 3246,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000459",
+    "true": {
+      "make": "McLaren",
+      "model": "P1",
+      "variant": null
+    },
+    "pred": {
+      "make": "McLaren",
+      "model": "P1",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": true,
+    "latencyMs": 3912,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000458",
+    "true": {
+      "make": "McLaren",
+      "model": "P1",
+      "variant": null
+    },
+    "pred": {
+      "make": "McLaren",
+      "model": "P1",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": true,
+    "latencyMs": 5250,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000461",
+    "true": {
+      "make": "McLaren",
+      "model": "P1",
+      "variant": null
+    },
+    "pred": {
+      "make": "Bugatti",
+      "model": "Chiron",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.833
+    },
+    "isModelMatch": false,
+    "latencyMs": 4609,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_001007",
+    "true": {
+      "make": "Toyota",
+      "model": "MR2",
+      "variant": null
+    },
+    "pred": {
+      "make": "Porsche",
+      "model": "Carrera GT",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.952
+    },
+    "isModelMatch": false,
+    "latencyMs": 5188,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_001010",
+    "true": {
+      "make": "Toyota",
+      "model": "MR2",
+      "variant": null
+    },
+    "pred": {
+      "make": "McLaren",
+      "model": "P1",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 2908,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_001009",
+    "true": {
+      "make": "Toyota",
+      "model": "MR2",
+      "variant": null
+    },
+    "pred": {
+      "make": "Porsche",
+      "model": "Carrera GT",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.946
+    },
+    "isModelMatch": false,
+    "latencyMs": 3272,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000793",
+    "true": {
+      "make": "Yamaha",
+      "model": "YZF-R1",
+      "variant": null
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "Daytona SP3",
+      "variant": "SP3",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 4019,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000173",
+    "true": {
+      "make": "Mahindra",
+      "model": "Bolero",
+      "variant": null
+    },
+    "pred": {
+      "make": "Lamborghini",
+      "model": "Huracán",
+      "variant": "LP610-4",
+      "status": "identified",
+      "confidence": 0.938
+    },
+    "isModelMatch": false,
+    "latencyMs": 3432,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000529",
+    "true": {
+      "make": "Toyota",
+      "model": "Supra",
+      "variant": null
+    },
+    "pred": {
+      "make": "Toyota",
+      "model": "Camry",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 2625,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000530",
+    "true": {
+      "make": "Toyota",
+      "model": "Supra",
+      "variant": null
+    },
+    "pred": {
+      "make": "Toyota",
+      "model": "Camry",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 3561,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000531",
+    "true": {
+      "make": "Toyota",
+      "model": "Supra",
+      "variant": null
+    },
+    "pred": {
+      "make": "McLaren",
+      "model": "720S",
+      "variant": "720S",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 3626,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000693",
+    "true": {
+      "make": "Toyota",
+      "model": "86",
+      "variant": "Pandem / Rocket Bunny"
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "328",
+      "variant": "GTS",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 5082,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000533",
+    "true": {
+      "make": "Toyota",
+      "model": "Supra",
+      "variant": null
+    },
+    "pred": {
+      "make": "McLaren",
+      "model": "720S",
+      "variant": "720S",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 3015,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000550",
+    "true": {
+      "make": "Honda",
+      "model": "Integra",
+      "variant": "Type R"
+    },
+    "pred": {
+      "make": "Lamborghini",
+      "model": "Huracán",
+      "variant": "LP610-4",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 3848,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000559",
+    "true": {
+      "make": "Honda",
+      "model": "S2000",
+      "variant": null
+    },
+    "pred": {
+      "make": "Porsche",
+      "model": "718 Cayman",
+      "variant": "Cayman",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 3422,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000551",
+    "true": {
+      "make": "Honda",
+      "model": "Integra",
+      "variant": "Type R"
+    },
+    "pred": {
+      "make": "McLaren",
+      "model": "720S",
+      "variant": "720S",
+      "status": "identified",
+      "confidence": 0.921
+    },
+    "isModelMatch": false,
+    "latencyMs": 2616,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000535",
+    "true": {
+      "make": "Honda",
+      "model": "NSX",
+      "variant": null
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "328",
+      "variant": null,
+      "status": "uncertain",
+      "confidence": 0.65
+    },
+    "isModelMatch": false,
+    "latencyMs": 2394,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000537",
+    "true": {
+      "make": "Honda",
+      "model": "NSX",
+      "variant": null
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "SF90 Stradale",
+      "variant": "Stradale",
+      "status": "identified",
+      "confidence": 0.873
+    },
+    "isModelMatch": false,
+    "latencyMs": 2896,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000539",
+    "true": {
+      "make": "Honda",
+      "model": "NSX",
+      "variant": null
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "250 GTO",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.903
+    },
+    "isModelMatch": false,
+    "latencyMs": 3019,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000558",
+    "true": {
+      "make": "Honda",
+      "model": "S2000",
+      "variant": null
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "SF90 Stradale",
+      "variant": "Stradale",
+      "status": "identified",
+      "confidence": 0.838
+    },
+    "isModelMatch": false,
+    "latencyMs": 3487,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000534",
+    "true": {
+      "make": "Honda",
+      "model": "NSX",
+      "variant": null
+    },
+    "pred": {
+      "make": "Ferrari",
+      "model": "328",
+      "variant": "GTS",
+      "status": "identified",
+      "confidence": 0.943
+    },
+    "isModelMatch": false,
+    "latencyMs": 2409,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000538",
+    "true": {
+      "make": "Honda",
+      "model": "NSX",
+      "variant": null
+    },
+    "pred": {
+      "make": "McLaren",
+      "model": "720S",
+      "variant": "720S",
+      "status": "identified",
+      "confidence": 0.864
+    },
+    "isModelMatch": false,
+    "latencyMs": 3754,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000557",
+    "true": {
+      "make": "Honda",
+      "model": "S2000",
+      "variant": null
+    },
+    "pred": {
+      "make": "Lamborghini",
+      "model": "Huracán",
+      "variant": "LP610-4",
+      "status": "identified",
+      "confidence": 0.869
+    },
+    "isModelMatch": false,
+    "latencyMs": 4322,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000613",
+    "true": {
+      "make": "Mercedes-Benz",
+      "model": "SL-Class",
+      "variant": "280 SL"
+    },
+    "pred": {
+      "make": "McLaren",
+      "model": "720S",
+      "variant": "720S",
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 3887,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000614",
+    "true": {
+      "make": "Mercedes-Benz",
+      "model": "SL-Class",
+      "variant": "280 SL"
+    },
+    "pred": {
+      "make": "Porsche",
+      "model": "Carrera GT",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 3857,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000615",
+    "true": {
+      "make": "Mercedes-Benz",
+      "model": "SL-Class",
+      "variant": "280 SL"
+    },
+    "pred": {
+      "make": "Bentley",
+      "model": "Continental GT",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.933
+    },
+    "isModelMatch": false,
+    "latencyMs": 3200,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000617",
+    "true": {
+      "make": "Mercedes-Benz",
+      "model": "SL-Class",
+      "variant": "280 SL"
+    },
+    "pred": {
+      "make": "Bentley",
+      "model": "Continental GT",
+      "variant": null,
+      "status": "identified",
+      "confidence": 0.962
+    },
+    "isModelMatch": false,
+    "latencyMs": 2758,
+    "costUsd": 0.0016
+  },
+  {
+    "id": "REAL_BLIND_000423",
+    "true": {
+      "make": "Ferrari",
+      "model": "LaFerrari",
+      "variant": null
+    },
+    "pred": {
+      "make": null,
+      "model": null,
+      "variant": null,
+      "status": "not_in_catalogue",
+      "confidence": 0.465
+    },
+    "isModelMatch": null,
+    "latencyMs": 58,
+    "costUsd": 0
+  }
+]

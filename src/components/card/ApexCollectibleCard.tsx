@@ -38,12 +38,12 @@ export const ApexCollectibleCard: React.FC<ApexCollectibleCardProps> = React.mem
 }) => {
   const rarityConf = RARITY_CONFIG[card.rarity] || RARITY_CONFIG.rare;
 
-  // Spec Values
-  const topSpeedNum = card.topSpeedKmH || 296;
-  const hpNum = card.horsepower || 525;
-  const zeroToHundredNum = card.zeroToHundredSec || 3.2;
-  const torqueNum = card.torqueNm || 465;
-  const weightNum = card.kerbWeightKg || 1450;
+  // Spec Values (Strictly from verified registry; 0 if unverified)
+  const topSpeedNum = card.topSpeedKmH || 0;
+  const hpNum = card.horsepower || 0;
+  const zeroToHundredNum = card.zeroToHundredSec || 0;
+  const torqueNum = card.torqueNm || 0;
+  const weightNum = card.kerbWeightKg || 0;
   
   // Grounded Market Value
   const valuation = useMemo(() => {
@@ -149,8 +149,12 @@ export const ApexCollectibleCard: React.FC<ApexCollectibleCardProps> = React.mem
                   className="h-full bg-white/90 rounded-full transition-all duration-500"
                 />
               </div>
-              <span className="w-14 text-right font-data font-semibold text-white">
-                {topSpeedNum} <span className="text-[10px] text-white/50 font-normal">km/h</span>
+              <span className="w-18 text-right font-data font-semibold text-white">
+                {topSpeedNum > 0 ? (
+                  <>{topSpeedNum} <span className="text-[10px] text-white/50 font-normal">km/h</span></>
+                ) : (
+                  <span className="text-white/40 text-[10px]">Unavailable</span>
+                )}
               </span>
             </div>
 
@@ -163,8 +167,12 @@ export const ApexCollectibleCard: React.FC<ApexCollectibleCardProps> = React.mem
                   className="h-full bg-[#E50914] rounded-full transition-all duration-500"
                 />
               </div>
-              <span className="w-14 text-right font-data font-semibold text-white">
-                {hpNum} <span className="text-[10px] text-white/50 font-normal">hp</span>
+              <span className="w-18 text-right font-data font-semibold text-white">
+                {hpNum > 0 ? (
+                  <>{hpNum} <span className="text-[10px] text-white/50 font-normal">hp</span></>
+                ) : (
+                  <span className="text-white/40 text-[10px]">Unavailable</span>
+                )}
               </span>
             </div>
 
@@ -177,8 +185,12 @@ export const ApexCollectibleCard: React.FC<ApexCollectibleCardProps> = React.mem
                   className="h-full bg-emerald-500 rounded-full transition-all duration-500"
                 />
               </div>
-              <span className="w-14 text-right font-data font-semibold text-white">
-                {zeroToHundredNum.toFixed(1)} <span className="text-[10px] text-white/50 font-normal">s</span>
+              <span className="w-18 text-right font-data font-semibold text-white">
+                {zeroToHundredNum > 0 ? (
+                  <>{zeroToHundredNum.toFixed(1)} <span className="text-[10px] text-white/50 font-normal">s</span></>
+                ) : (
+                  <span className="text-white/40 text-[10px]">Unavailable</span>
+                )}
               </span>
             </div>
 
@@ -191,8 +203,12 @@ export const ApexCollectibleCard: React.FC<ApexCollectibleCardProps> = React.mem
                   className="h-full bg-amber-500 rounded-full transition-all duration-500"
                 />
               </div>
-              <span className="w-14 text-right font-data font-semibold text-white">
-                {torqueNum} <span className="text-[10px] text-white/50 font-normal">Nm</span>
+              <span className="w-18 text-right font-data font-semibold text-white">
+                {torqueNum > 0 ? (
+                  <>{torqueNum} <span className="text-[10px] text-white/50 font-normal">Nm</span></>
+                ) : (
+                  <span className="text-white/40 text-[10px]">Unavailable</span>
+                )}
               </span>
             </div>
 
@@ -205,8 +221,12 @@ export const ApexCollectibleCard: React.FC<ApexCollectibleCardProps> = React.mem
                   className="h-full bg-sky-500 rounded-full transition-all duration-500"
                 />
               </div>
-              <span className="w-14 text-right font-data font-semibold text-white">
-                {weightNum} <span className="text-[10px] text-white/50 font-normal">kg</span>
+              <span className="w-18 text-right font-data font-semibold text-white">
+                {weightNum > 0 ? (
+                  <>{weightNum} <span className="text-[10px] text-white/50 font-normal">kg</span></>
+                ) : (
+                  <span className="text-white/40 text-[10px]">Unavailable</span>
+                )}
               </span>
             </div>
           </div>

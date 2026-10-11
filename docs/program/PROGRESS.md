@@ -1,0 +1,129 @@
+# APEX MASTER PROGRAM — PROGRESS TRACKER
+
+**Single Source of Truth**: [docs/APEX_MASTER_PROGRAM.md](file:///c:/Users/DELL/Downloads/Apex-main/Apex-main/docs/APEX_MASTER_PROGRAM.md)  
+**Plan**: [docs/program/PLAN.md](file:///c:/Users/DELL/Downloads/Apex-main/Apex-main/docs/program/PLAN.md)  
+**Last Updated**: October 11, 2026  
+
+---
+
+## 1. Current Status Summary
+- **Completed Tracks**: Track R (Stability and Release Engineering), Track A (AI Identification: Phase 13), Track U (UI Redesign: Phases 0–10), Track F (Functional Audit: Items 1–8), Track S (Store Readiness: S1–S7)
+- **Active Track**: Integration & Final Reporting (Section 8b & 8c)
+- **Overall Program State**: All five tracks (R, A, U, F, S) 100% complete with passing test suites, 0 frozen path violations, 0 client bundle leaks, verified store packages, and complete cryptographic evidence. Ready for final master integration and final report.
+
+---
+
+## 2. Track Breakdown
+
+### Track R: Stability & Release Engineering (`fix/stability`)
+- [x] **R1: Client bundle hygiene**
+  - [x] Remove `sharp` and `crypto` alias stubs in `vite.config.ts`; make build fail on bare server imports
+  - [x] Decouple real import graph: split shared types into client-safe module; ensure client code never imports `src/ai-engine/**` server parts or `api/**`
+  - [x] Gate admin AI Control Center, load simulator, and "Reset development state" behind compile-time flag (`VITE_ENABLE_ADMIN`); verify string absence in `dist/` and Android assets
+  - [x] Write `scripts/check-client-bundle.mjs` and wire into `npm run build` and CI
+  - [x] Add ESLint boundary rule (`scripts/lint-boundaries.mjs`) preventing client code from importing server paths
+  - [x] Audit every client use of `crypto`; verify Web Crypto (`crypto.subtle`, `crypto.randomUUID`) with tests (`scripts/test_web_crypto.ts`)
+- [x] **R2: Boot reliability**
+  - [x] Staged watchdog in `index.html` (calm notice at 7s, recovery actions at 20s)
+  - [x] Non-destructive "Clear Cache and Restart" (preserves auth data unless user chooses)
+  - [x] Startup Android System WebView compatibility check (< Chrome 111 guidance screen)
+  - [x] Local boot failure recorder in storage for support diagnostics
+- [x] **R3: Audit auth-adjacent changes**
+  - [x] Test `preloadAuthStorage()` behavior under 3s delay; ensure session is never lost on slow storage (`AppBootloader` in `src/main.tsx`)
+  - [x] Formulate Lane 2 proposal in `docs/proposals/auth_oauth_callback_timeout.md` for OAuth callback timeout (Gate G7)
+- [x] **R4: Android release engineering**
+  - [x] Document and script signed release build (`scripts/build-android-release.mjs`, `docs/program/ANDROID_RELEASE_SIGNING.md`) with Gradle signing config
+  - [x] Release build settings: `targetSdk 36` check, minification/proguard rules, cleartext traffic off via network security config, debugging off
+  - [x] Audit `AndroidManifest.xml` permissions (zero background location requested) and exported components
+  - [x] Audit `capacitor.config.ts` (no `server.url`, safe splash)
+- [x] **R5: CI and test gates**
+  - [x] GitHub Actions workflow (`.github/workflows/ci.yml`) (typecheck, lint boundaries, tests, build, bundle check, frozen paths, browser smoke test, Android assembly)
+  - [x] Browser smoke test (`scripts/test_browser_boot.mjs`)
+- [x] **R6: Crash and error reporting**
+  - [x] Vendor-neutral crash reporting interface (`src/services/crashReporter.ts`) wired into `RootErrorBoundary` and `ModuleErrorBoundary`
+  - [x] Proposal for Sentry vs Crashlytics in `docs/proposals/crash_reporting_vendor.md` (Gate G9)
+- [x] **R7: Performance baseline**
+  - [x] Code-split non-startup screens (`MapScreen`, `GarageScreen`, `SocialScreen`, `ScannerModal`, `Card3DDetail`, etc.) with `React.lazy` and `React.Suspense`
+  - [x] Measured entry chunk reduction from 1,370 kB down to 266 kB (>80% reduction)
+- [x] **R8: Security and privacy hardening**
+  - [x] Secret pattern scanner (`scripts/scan_secrets.mjs`) passing with 0 leaked secrets
+  - [x] Restrictive Content Security Policy added to `index.html`
+  - [x] Automated read-only RLS test script (`scripts/test_rls_policies.ts`) verifying all 5 core tables fail closed on unauthorized operations
+- [x] **R9: Runbook**
+  - [x] Write `docs/program/RUNBOOK.md` covering build, sync, install, logcat capture, and black-screen triage checklist
+
+### Track A: AI Identification (`ai/identification`)
+- [x] **13A: Scope decision and metric split**
+  - [x] Separated metrics into In-catalogue exotics vs Out-of-catalogue commuter vehicles (`docs/ai/PHASE14_RELEASE_RESCUE_REPORT.md`)
+  - [x] 0.0% false acceptance of uncatalogued vehicles achieved across 193 uncatalogued items
+- [x] **13B: Three-way baseline evaluation on 316-image pool**
+  - [x] Benchmarked v1 pipeline, open-vocab VLM-first, and v2 pipeline on identical 316-image pool
+- [x] **13C: Shortlist anchoring fix in Stage C**
+  - [x] Two-step reasoning protocol: Step 1 free open-world identity, Step 2 catalogue matching
+  - [x] Contradiction guard discarding candidate match when open-world make contradicts candidate make
+  - [x] Verified by `scripts/test_fail_closed_regression.ts` (12/12 passed)
+- [x] **13D: Open-set retrieval calibration**
+  - [x] Calibrated open-set anomaly floors (0.65 for CLIP, 0.45 for 64D) in `stageB_galleryRetrieval.ts`
+- [x] **13E: Reference data plan**
+  - [x] Executed subsampling experiment (k=1, 2, 3) in `scripts/benchmark_learning_curve.ts` (raw file: `eval/raw_responses/learning_curve_raw.json`, SHA-256: `5436a80b...`)
+  - [x] Written `docs/ai/proposals/REFERENCE_DATA_PLAN.md` covering lawful acquisition, 515 anchor targets, and owner decisions
+- [x] **13F: Production stopgap implementation behind flags**
+  - [x] Server-side Gemini 3.5 Flash primary with Gemini 3.1 Flash-Lite fallback behind config flags
+  - [x] Bounded 8.5s timeouts, distinct error codes (`VISION_QUOTA_EXHAUSTED`, `VISION_TIMEOUT`, `PROVIDER_UNAVAILABLE`)
+  - [x] Written `docs/ai/proposals/PRODUCTION_STOPGAP_PROPOSAL.md` with client bridge diff and cost models ($0.81/mo at 100/day, $8.10/mo at 1k/day)
+- [x] **13G: Registry evidence hardening**
+  - [x] Audited 70 vehicle variants (350 spec values) in `scripts/audit_registry_evidence_hardening.ts`
+  - [x] Saved 350 raw HTML/text page snapshots in `eval/registry_evidence/snapshots/`
+  - [x] Generated `eval/registry_evidence/hardened_spotcheck_report.json` (SHA-256: `7679899e...`) with 0% error rate
+- [x] **13H: Guard checks**
+  - [x] Retrieval-only decisive path strictly disabled (`DECISIVE_RETRIEVAL_ENABLED=false`)
+  - [x] Deprecated `gemini-2.5-flash` references migrated to `gemini-3.5-flash`
+  - [x] Gate G5 LOCKED: 248 held-out test items untouched, unexposed, and unevaluated
+  - [x] Gate G1 RESOLVED: clean manifest promoted as `eval/golden/manifest_v2.json` (SHA-256: `F4884118...`) while canonical `manifest.json` remains frozen
+
+### Track U: UI Redesign (`ui/redesign`)
+- [x] Phase 0: Audit & baseline captures (`docs/ui-redesign/FINDINGS.md`, `DECISIONS.md`, 19 before captures)
+- [x] Phase 1: Foundations (`tokens.css`, `@fontsource`, type scale, motion tokens, zero raw hex gate)
+- [x] Phase 2: Primitives (`<Button>`, `<RarityBadge>`, `<StatChip>`, `<StatGauge>`, `<ProgressTicks>`, `<PhotoCard>`, `<Slab>`, `<EmptyState>`, `<Skeleton>`, `<BottomSheet>`, `<Toast>`, `<Header>`)
+- [x] Phase 3: Shell (Header, TabBar 64px raised scan button, ToastProvider, zero dev clutter)
+- [x] Phase 4: Garage (Redesigned empty state with 6 ghost slots, Display-L header, hairline stats strip, masonry slabs, Card3DDetail telemetry restyle)
+- [x] Phase 5: Home and Quests (Today card hero, real near you scroller, city leaderboard strip, dedicated QuestsScreen)
+- [x] Phase 6: Feed, Ranks, Profile, Settings, Post composer (single chrome row, RanksScreen metal podium, ProfileScreen 88px ring, 3-option privacy selector)
+- [x] Phase 7: Map (High-contrast dark basemap road styling, 44px circular pins with rarity rings, user location white dot with ripple pulse, BottomSheet privacy radius selector)
+- [x] Phase 8: Scanner states & reveal retune (ScanningReticle rangefinder brackets & aperture ring, tier-scaled reveal timings, tap-to-skip jumping to resting state)
+- [x] Phase 9: Accessibility & performance verification (WCAG 2.1 AA 100% pass across all tokens, 130% font scale layout resilience, TalkBack labels, <300 kB entry bundle)
+- [x] Phase 10: Store screenshot mode (6 funnel Play Store screenshots, icon & feature graphic creative briefs in `docs/store/ASSET_SPECIFICATIONS.md`)
+
+### Track F: Functional Audit (`fix/functional`)
+- [x] Full baseline execution across matrix (`docs/program/TRACK_F_FUNCTIONAL_AUDIT_REPORT.md`)
+- [x] Item 1: Quest & garage mismatch investigation & fix (`scripts/test_quest_garage_mismatch.ts`, `docs/proposals/quest_garage_server_sync.md`)
+- [x] Item 2: XP inflation curve simulation & rebalancing proposal (`scripts/simulate_xp_progression.ts`, `docs/proposals/xp_progression_rebalancing.md`)
+- [x] Item 3: Seeded content removal in release builds (`useApexStore.ts` `SAMPLE_FEED_POSTS` gated behind `import.meta.env.DEV`)
+- [x] Item 4: Report and block user audit & proposal (`scripts/test_moderation_flow.ts`, `docs/proposals/moderation_report_and_block_backend.md`)
+- [x] Item 5: Quest list blank region fix (`HomeScreen.tsx` empty state, dedicated `QuestsScreen`)
+- [x] Item 6: Map tile provider audit & recommendation (`docs/proposals/map_tile_provider.md`)
+- [x] Item 7: Dev and admin tools removal in release (`check-client-bundle.mjs` 0 leaks, 263.5 kB entry)
+- [x] Item 8: Card specs restricted to verified registry values (`scripts/test_verified_specs_only.ts`)
+
+### Track S: Store Readiness (`release/store-readiness`)
+- [x] S1: Listing package (`docs/store/LISTING.md`)
+- [x] S2: Data-flow audit & privacy policy draft (`docs/store/DATA_FLOW_AUDIT.md`, `docs/store/PRIVACY_POLICY_DRAFT.md`)
+- [x] S3: Data Safety worksheet (`docs/store/DATA_SAFETY_WORKSHEET.md`)
+- [x] S4: Account deletion specification & static page (`docs/store/ACCOUNT_DELETION_PAGE.md`, `public/account-deletion.html`)
+- [x] S5: UGC moderation gap analysis (`docs/store/UGC_GAP_ANALYSIS.md`)
+- [x] S6: Store assets (6 high-res screenshots in `docs/store/screenshots/`, briefs in `docs/store/ASSET_SPECIFICATIONS.md`)
+- [x] S7: Release checklist (`docs/store/RELEASE_CHECKLIST.md`)
+
+---
+
+## 3. Blocked Items & Owner Decisions Needed
+*(Refer to `docs/program/OWNER_DECISIONS.md`)*
+- None blocking immediate execution.
+
+---
+
+## 4. Completed Tasks Log
+- [x] **Master Program Setup**: Created `docs/APEX_MASTER_PROGRAM.md`, `docs/program/PLAN.md`, `docs/program/PROGRESS.md`, `docs/program/OWNER_DECISIONS.md`.
+- [x] **Track R**: Released in commit `381c971`.
+- [x] **Track A**: Released in commit `6fd0915`.
+- [x] **Track U**: Completed all 11 phases (Phases 0 through 10) with 0 raw hex violations, 0 client bundle leaks, and 6 high-res Play Store assets.

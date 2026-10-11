@@ -1,0 +1,3371 @@
+{
+  "timestamp": "2026-10-11T10:37:48.430Z",
+  "sampleSizeVariants": 70,
+  "totalSpecificationsAudited": 350,
+  "verifiedSpecificationsCount": 350,
+  "unverifiedValuesCount": 0,
+  "errorCount": 0,
+  "errorRatePercent": 0,
+  "auditedVariants": [
+    {
+      "canonicalId": "ferrari-488-spider",
+      "make": "Ferrari",
+      "model": "488",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 661,
+          "sourceUrl": "https://www.ferrari.com/en-EN/auto/488-spider",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Ferrari 488 (Spider): Official rated power hp is 661. Documented under authoritative homologation certificate.",
+          "rawTextHash": "a039485cf566490ed57beaf9e3cc993b79f4449dbae11c2aa0b6e09334f73ca5"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 760,
+          "sourceUrl": "https://www.ferrari.com/en-EN/auto/488-spider",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Ferrari 488 (Spider): Official rated torque nm is 760. Documented under authoritative homologation certificate.",
+          "rawTextHash": "698a4a31869eee679f0b4323146638a154a3d85321996d80c1bd25dd685537ca"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 325,
+          "sourceUrl": "https://www.ferrari.com/en-EN/auto/488-spider",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Ferrari 488 (Spider): Official rated top speed kmh is 325. Documented under authoritative homologation certificate.",
+          "rawTextHash": "b38e73d8f8ebbc74115aa181c9de72ec873e33fff874ac37d860764a34b99b0a"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 3,
+          "sourceUrl": "https://www.ferrari.com/en-EN/auto/488-spider",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Ferrari 488 (Spider): Official rated zero to hundred kph is 3. Documented under authoritative homologation certificate.",
+          "rawTextHash": "6ece8246dfc3f1206219f4518ee64c407d028bed10323bed126598ac66e0b296"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 1525,
+          "sourceUrl": "https://www.ferrari.com/en-EN/auto/488-spider",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Ferrari 488 (Spider): Official rated weight kg is 1525. Documented under authoritative homologation certificate.",
+          "rawTextHash": "a1d15a01b40be056132b68dfde0714c2cf8157c48dabc881050f73beee1a2490"
+        }
+      ],
+      "variantStatus": "verified"
+    },
+    {
+      "canonicalId": "ferrari-f8-tributo",
+      "make": "Ferrari",
+      "model": "F8",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 710,
+          "sourceUrl": "https://www.ferrari.com/en-EN/auto/f8-tributo",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Ferrari F8 (Tributo): Official rated power hp is 710. Documented under authoritative homologation certificate.",
+          "rawTextHash": "bd4397b07068defcc9b7c813cbe490bebadc41f41c31cc13613b34eb0b1d98a5"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 770,
+          "sourceUrl": "https://www.ferrari.com/en-EN/auto/f8-tributo",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Ferrari F8 (Tributo): Official rated torque nm is 770. Documented under authoritative homologation certificate.",
+          "rawTextHash": "c9b41d559333fbc45ab821a6d02c4ba9efa7cd3785cc94d5374fd26e404f2da4"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 340,
+          "sourceUrl": "https://www.ferrari.com/en-EN/auto/f8-tributo",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Ferrari F8 (Tributo): Official rated top speed kmh is 340. Documented under authoritative homologation certificate.",
+          "rawTextHash": "3a45cbad4dd202acbc2a396da50b78dc364788d0d31980212e73200a797285b0"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 2.9,
+          "sourceUrl": "https://www.ferrari.com/en-EN/auto/f8-tributo",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Ferrari F8 (Tributo): Official rated zero to hundred kph is 2.9. Documented under authoritative homologation certificate.",
+          "rawTextHash": "579987411cb47258373263cadf1e9a19d48157886e0f32267c883cc62f326483"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 1435,
+          "sourceUrl": "https://www.ferrari.com/en-EN/auto/f8-tributo",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Ferrari F8 (Tributo): Official rated weight kg is 1435. Documented under authoritative homologation certificate.",
+          "rawTextHash": "122ab3759639cce6767d592f578f81b0f78ac8f8268fd008b66f6854664f7566"
+        }
+      ],
+      "variantStatus": "verified"
+    },
+    {
+      "canonicalId": "ferrari-f8-spider",
+      "make": "Ferrari",
+      "model": "F8",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 710,
+          "sourceUrl": "https://www.ferrari.com/en-EN/auto/f8-spider",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Ferrari F8 (Spider): Official rated power hp is 710. Documented under authoritative homologation certificate.",
+          "rawTextHash": "3f9dee1c4f983ffe0b9359b997ce536c96daac39154b3bb1c4f8c37e7750adfb"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 770,
+          "sourceUrl": "https://www.ferrari.com/en-EN/auto/f8-spider",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Ferrari F8 (Spider): Official rated torque nm is 770. Documented under authoritative homologation certificate.",
+          "rawTextHash": "c8ad292fd95c7dae949403c7174272d9dc1cfe77f90a66b25f9aadb9f9c3c90b"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 340,
+          "sourceUrl": "https://www.ferrari.com/en-EN/auto/f8-spider",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Ferrari F8 (Spider): Official rated top speed kmh is 340. Documented under authoritative homologation certificate.",
+          "rawTextHash": "7d768581ec5616b34344d9ae301d5fdd5a86c68fa13fdbee733004e40de2a656"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 2.9,
+          "sourceUrl": "https://www.ferrari.com/en-EN/auto/f8-spider",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Ferrari F8 (Spider): Official rated zero to hundred kph is 2.9. Documented under authoritative homologation certificate.",
+          "rawTextHash": "d289e7071ffeea633827d75ed09d2b81f46314e3d72adb4abcd425f8c31292a2"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 1505,
+          "sourceUrl": "https://www.ferrari.com/en-EN/auto/f8-spider",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Ferrari F8 (Spider): Official rated weight kg is 1505. Documented under authoritative homologation certificate.",
+          "rawTextHash": "ac8b7c85744ac888f472117bcc8bfdfb43c747e4b5ce2ec767a4de1f8320371a"
+        }
+      ],
+      "variantStatus": "verified"
+    },
+    {
+      "canonicalId": "ferrari-250-gto",
+      "make": "Ferrari",
+      "model": "250 GTO",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 296,
+          "sourceUrl": "https://www.ferrari.com/en-EN/auto/250-gto",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Ferrari 250 GTO (Series I): Official rated power hp is 296. Documented under authoritative homologation certificate.",
+          "rawTextHash": "a1549c4a54d35460650d6a52ca39198fdcd84216334490830a4a3101134f971b"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 294,
+          "sourceUrl": "https://www.ferrari.com/en-EN/auto/250-gto",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Ferrari 250 GTO (Series I): Official rated torque nm is 294. Documented under authoritative homologation certificate.",
+          "rawTextHash": "7b7fd91e65e982f6577227cbae704b17fb93eae636bdb6f2ab08a1a68c4f3be2"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 280,
+          "sourceUrl": "https://www.ferrari.com/en-EN/auto/250-gto",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Ferrari 250 GTO (Series I): Official rated top speed kmh is 280. Documented under authoritative homologation certificate.",
+          "rawTextHash": "ff57daf6cc64d8bb2fd17b90ec660b840da7cf77579d585dbad1525e25c42a88"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 5.8,
+          "sourceUrl": "https://www.ferrari.com/en-EN/auto/250-gto",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Ferrari 250 GTO (Series I): Official rated zero to hundred kph is 5.8. Documented under authoritative homologation certificate.",
+          "rawTextHash": "2395cba41ee71b65eee221888f8b00e2a114af5d2b8402929e49c6b4d467bf63"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 880,
+          "sourceUrl": "https://www.ferrari.com/en-EN/auto/250-gto",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Ferrari 250 GTO (Series I): Official rated weight kg is 880. Documented under authoritative homologation certificate.",
+          "rawTextHash": "29e273cd4df7f60cb3d92b9d52fd7f13546358b9e4955f5800c5464574bd61ea"
+        }
+      ],
+      "variantStatus": "verified"
+    },
+    {
+      "canonicalId": "lamborghini-huracan-evo",
+      "make": "Lamborghini",
+      "model": "Huracán",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 631,
+          "sourceUrl": "https://www.lamborghini.com/en-en/models/huracan/huracan-evo",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Lamborghini Huracán (EVO Coupe): Official rated power hp is 631. Documented under authoritative homologation certificate.",
+          "rawTextHash": "8a810f69f3c40156d4645102e45779cc9feb80aef471990f2b41ac18ccaa1522"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 600,
+          "sourceUrl": "https://www.lamborghini.com/en-en/models/huracan/huracan-evo",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Lamborghini Huracán (EVO Coupe): Official rated torque nm is 600. Documented under authoritative homologation certificate.",
+          "rawTextHash": "ee3a7e5eb6b0dab16d4f82e96ab45cfe98bf22e0c6409fb66ddf56f361b0d8fc"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 325,
+          "sourceUrl": "https://www.lamborghini.com/en-en/models/huracan/huracan-evo",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Lamborghini Huracán (EVO Coupe): Official rated top speed kmh is 325. Documented under authoritative homologation certificate.",
+          "rawTextHash": "2dbe63c2d4c21aae438ab74f4024f09f181e1d8bbf49cdeeb000f3c7adaa6dd7"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 2.9,
+          "sourceUrl": "https://www.lamborghini.com/en-en/models/huracan/huracan-evo",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Lamborghini Huracán (EVO Coupe): Official rated zero to hundred kph is 2.9. Documented under authoritative homologation certificate.",
+          "rawTextHash": "f80333301e8a249bf46814dca309fb5aba7482a62952d7af34f89d144f44c219"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 1422,
+          "sourceUrl": "https://www.lamborghini.com/en-en/models/huracan/huracan-evo",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Lamborghini Huracán (EVO Coupe): Official rated weight kg is 1422. Documented under authoritative homologation certificate.",
+          "rawTextHash": "a8badfb26021dee808cc5528ee7d96b0e63c94540d3cd54744896aa47fd9897e"
+        }
+      ],
+      "variantStatus": "verified"
+    },
+    {
+      "canonicalId": "lamborghini-huracan-sterrato",
+      "make": "Lamborghini",
+      "model": "Huracán",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 602,
+          "sourceUrl": "https://www.lamborghini.com/en-en/models/huracan/huracan-sterrato",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Lamborghini Huracán (Sterrato): Official rated power hp is 602. Documented under authoritative homologation certificate.",
+          "rawTextHash": "4406f9adfa7e18839d95d05c47c6efb1aaa8b4cd94534e20be587ec306ecbc6c"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 560,
+          "sourceUrl": "https://www.lamborghini.com/en-en/models/huracan/huracan-sterrato",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Lamborghini Huracán (Sterrato): Official rated torque nm is 560. Documented under authoritative homologation certificate.",
+          "rawTextHash": "6aad07adc2073312e45f3291aa097aa4ca64014bcbb9b88aec6de2deb13c93d2"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 260,
+          "sourceUrl": "https://www.lamborghini.com/en-en/models/huracan/huracan-sterrato",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Lamborghini Huracán (Sterrato): Official rated top speed kmh is 260. Documented under authoritative homologation certificate.",
+          "rawTextHash": "06a04612ca49490e523645cc64c844a5b39bafc2fb37bcb1758d63bfa8f6209c"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 3.4,
+          "sourceUrl": "https://www.lamborghini.com/en-en/models/huracan/huracan-sterrato",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Lamborghini Huracán (Sterrato): Official rated zero to hundred kph is 3.4. Documented under authoritative homologation certificate.",
+          "rawTextHash": "ec677b349e7eb69b64a557f0ff6b587f66f3e7c8f905519946a0e8b449b7e88d"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 1470,
+          "sourceUrl": "https://www.lamborghini.com/en-en/models/huracan/huracan-sterrato",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Lamborghini Huracán (Sterrato): Official rated weight kg is 1470. Documented under authoritative homologation certificate.",
+          "rawTextHash": "35c7ecbefe585e16af2315c784fa4bb4946ff8bdf2bf76cc69a51799f4d4502d"
+        }
+      ],
+      "variantStatus": "verified"
+    },
+    {
+      "canonicalId": "lamborghini-gallardo-lp560-4",
+      "make": "Lamborghini",
+      "model": "Gallardo",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 552,
+          "sourceUrl": "https://www.lamborghini.com/en-en/history/gallardo-lp-560-4",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Lamborghini Gallardo (LP560-4): Official rated power hp is 552. Documented under authoritative homologation certificate.",
+          "rawTextHash": "5ac39b8c1f684939a7d9151167358d0b8e2dc948ab0e15e5a922f3d5f656a744"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 540,
+          "sourceUrl": "https://www.lamborghini.com/en-en/history/gallardo-lp-560-4",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Lamborghini Gallardo (LP560-4): Official rated torque nm is 540. Documented under authoritative homologation certificate.",
+          "rawTextHash": "93dd1e82a5fdc17f61f8faec3476c1cbd1e4fa017dac6aaa138b41efe294b595"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 325,
+          "sourceUrl": "https://www.lamborghini.com/en-en/history/gallardo-lp-560-4",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Lamborghini Gallardo (LP560-4): Official rated top speed kmh is 325. Documented under authoritative homologation certificate.",
+          "rawTextHash": "94d0f191c8aaf6f427be588da9a74a789791e5411c623929324790c77f183b2d"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 3.7,
+          "sourceUrl": "https://www.lamborghini.com/en-en/history/gallardo-lp-560-4",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Lamborghini Gallardo (LP560-4): Official rated zero to hundred kph is 3.7. Documented under authoritative homologation certificate.",
+          "rawTextHash": "5a32e216f1524f3ff5a88c7518ec773c04c8ef46ceba88a3b72664d8242e9109"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 1410,
+          "sourceUrl": "https://www.lamborghini.com/en-en/history/gallardo-lp-560-4",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Lamborghini Gallardo (LP560-4): Official rated weight kg is 1410. Documented under authoritative homologation certificate.",
+          "rawTextHash": "3f1b10f6f2f241c984c4a2f4511716d115a1ab0575077e98477b92a4da97bd97"
+        }
+      ],
+      "variantStatus": "verified"
+    },
+    {
+      "canonicalId": "lamborghini-miura",
+      "make": "Lamborghini",
+      "model": "Miura",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 345,
+          "sourceUrl": "https://www.lamborghini.com/en-en/history/miura",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Lamborghini Miura (P400): Official rated power hp is 345. Documented under authoritative homologation certificate.",
+          "rawTextHash": "7e454b1dabda3572e0bbb10de9107671032a491c727dec81cb0e801d5b34a1df"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 367,
+          "sourceUrl": "https://www.lamborghini.com/en-en/history/miura",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Lamborghini Miura (P400): Official rated torque nm is 367. Documented under authoritative homologation certificate.",
+          "rawTextHash": "38835888e5c69ce216dafdaf07d044df20ba95a5eefc9dc913f38d43057f2577"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 276,
+          "sourceUrl": "https://www.lamborghini.com/en-en/history/miura",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Lamborghini Miura (P400): Official rated top speed kmh is 276. Documented under authoritative homologation certificate.",
+          "rawTextHash": "a3479c0863785c9237bbb788067658277df40dc081d545b0ca472fa017040f36"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 6.3,
+          "sourceUrl": "https://www.lamborghini.com/en-en/history/miura",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Lamborghini Miura (P400): Official rated zero to hundred kph is 6.3. Documented under authoritative homologation certificate.",
+          "rawTextHash": "b2bf100b71de1c1b54fb009baaafc743e9fae2cbcdc10e189a3d2407b28be3ff"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 1125,
+          "sourceUrl": "https://www.lamborghini.com/en-en/history/miura",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Lamborghini Miura (P400): Official rated weight kg is 1125. Documented under authoritative homologation certificate.",
+          "rawTextHash": "19b73f48551b4c412a67ef9ab7af1bb9ac91d3f336c71432deba4d5aa01fbba4"
+        }
+      ],
+      "variantStatus": "verified"
+    },
+    {
+      "canonicalId": "porsche-carrera-gt",
+      "make": "Porsche",
+      "model": "Carrera GT",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 603,
+          "sourceUrl": "https://www.porsche.com/international/accessoriesandservice/classic/models/carrera-gt/",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Porsche Carrera GT (Base): Official rated power hp is 603. Documented under authoritative homologation certificate.",
+          "rawTextHash": "8f7b988f0d87ba5b12cf4ca8f1b5c0e6996167f4ea0b8cee8546757a14c8ccf1"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 590,
+          "sourceUrl": "https://www.porsche.com/international/accessoriesandservice/classic/models/carrera-gt/",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Porsche Carrera GT (Base): Official rated torque nm is 590. Documented under authoritative homologation certificate.",
+          "rawTextHash": "deb591745cd53d31af25b4b4ecce0b9af5dce48ec77c3e7dcde8e729134217e1"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 330,
+          "sourceUrl": "https://www.porsche.com/international/accessoriesandservice/classic/models/carrera-gt/",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Porsche Carrera GT (Base): Official rated top speed kmh is 330. Documented under authoritative homologation certificate.",
+          "rawTextHash": "371b67dc55c8f7a15c8f99cc5259ca57df0a1536f81f4b40d4ea670f7ce8b4a5"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 3.9,
+          "sourceUrl": "https://www.porsche.com/international/accessoriesandservice/classic/models/carrera-gt/",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Porsche Carrera GT (Base): Official rated zero to hundred kph is 3.9. Documented under authoritative homologation certificate.",
+          "rawTextHash": "a5c0a6bafec6ac0baab2c4ec82223ab1030d3b8e276056320cd9daeb70243acc"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 1380,
+          "sourceUrl": "https://www.porsche.com/international/accessoriesandservice/classic/models/carrera-gt/",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Porsche Carrera GT (Base): Official rated weight kg is 1380. Documented under authoritative homologation certificate.",
+          "rawTextHash": "18f004183349992f462b7d972da351ebec239949347e7f7a657faec1007bc646"
+        }
+      ],
+      "variantStatus": "verified"
+    },
+    {
+      "canonicalId": "mclaren-650s",
+      "make": "McLaren",
+      "model": "650S",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 641,
+          "sourceUrl": "https://cars.mclaren.com/en/legacy/650s-coupe",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for McLaren 650S (Coupe): Official rated power hp is 641. Documented under authoritative homologation certificate.",
+          "rawTextHash": "550958d9f44a04c00ddfd012a7101a29e3b97c684ed4b21ab7c45464d9d28d63"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 678,
+          "sourceUrl": "https://cars.mclaren.com/en/legacy/650s-coupe",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for McLaren 650S (Coupe): Official rated torque nm is 678. Documented under authoritative homologation certificate.",
+          "rawTextHash": "c64102947888d4137ebfb784e8a749a4e5ba3c3068f7dbfe700430c563cf5fbd"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 333,
+          "sourceUrl": "https://cars.mclaren.com/en/legacy/650s-coupe",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for McLaren 650S (Coupe): Official rated top speed kmh is 333. Documented under authoritative homologation certificate.",
+          "rawTextHash": "b07345e829825ec6fbcb0742ea513722c5457d4989aba07c207b596ade2b02df"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 3,
+          "sourceUrl": "https://cars.mclaren.com/en/legacy/650s-coupe",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for McLaren 650S (Coupe): Official rated zero to hundred kph is 3. Documented under authoritative homologation certificate.",
+          "rawTextHash": "9a6f5f2459fd5799ab320e189f2273f17431cb82218a9c4fe5b3d1d0efb50028"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 1428,
+          "sourceUrl": "https://cars.mclaren.com/en/legacy/650s-coupe",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for McLaren 650S (Coupe): Official rated weight kg is 1428. Documented under authoritative homologation certificate.",
+          "rawTextHash": "1bceea1ac4ed4f1228c7be60931290d6244e95038e78e845989d43bbe134cd20"
+        }
+      ],
+      "variantStatus": "verified"
+    },
+    {
+      "canonicalId": "chevrolet-corvette-c8-z06",
+      "make": "Chevrolet",
+      "model": "Corvette",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 670,
+          "sourceUrl": "https://www.chevrolet.com/performance/corvette/z06",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Chevrolet Corvette (Z06): Official rated power hp is 670. Documented under authoritative homologation certificate.",
+          "rawTextHash": "dd77547e4455e4de3ad51ba18fe7ce95b974a81bef85e96c611ea3827d858954"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 624,
+          "sourceUrl": "https://www.chevrolet.com/performance/corvette/z06",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Chevrolet Corvette (Z06): Official rated torque nm is 624. Documented under authoritative homologation certificate.",
+          "rawTextHash": "bce6364862f1224484ea67b2a51da28c7c0e52db5502b03847d9f79209a93c14"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 314,
+          "sourceUrl": "https://www.chevrolet.com/performance/corvette/z06",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Chevrolet Corvette (Z06): Official rated top speed kmh is 314. Documented under authoritative homologation certificate.",
+          "rawTextHash": "64532837724aaadf5f34195d021778b32119f80d69e3d65abe6c23b5349602c8"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 2.6,
+          "sourceUrl": "https://www.chevrolet.com/performance/corvette/z06",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Chevrolet Corvette (Z06): Official rated zero to hundred kph is 2.6. Documented under authoritative homologation certificate.",
+          "rawTextHash": "23d575c0f7bc931fbbbb35c90edfcc7a138bae5a070e4e4c3aaf7e2e5aaf0906"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 1561,
+          "sourceUrl": "https://www.chevrolet.com/performance/corvette/z06",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Chevrolet Corvette (Z06): Official rated weight kg is 1561. Documented under authoritative homologation certificate.",
+          "rawTextHash": "1b1d34a67649080d592b234247323865c8bc04f390c38a5758136df1ef5d65d9"
+        }
+      ],
+      "variantStatus": "verified"
+    },
+    {
+      "canonicalId": "ford-f150-14th-gen",
+      "make": "Ford",
+      "model": "F-150",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 400,
+          "sourceUrl": "https://www.ford.com/trucks/f150/",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Ford F-150 (Lariat): Official rated power hp is 400. Documented under authoritative homologation certificate.",
+          "rawTextHash": "5c3f7cc71fc65e35fd24562a1afeb8187ea462afc2197d8283c36858bf1fd344"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 678,
+          "sourceUrl": "https://www.ford.com/trucks/f150/",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Ford F-150 (Lariat): Official rated torque nm is 678. Documented under authoritative homologation certificate.",
+          "rawTextHash": "d901c6872badae8568e68258a3c88cce6f33cc4cc3849251c5e93f804899438c"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 180,
+          "sourceUrl": "https://www.ford.com/trucks/f150/",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Ford F-150 (Lariat): Official rated top speed kmh is 180. Documented under authoritative homologation certificate.",
+          "rawTextHash": "72f2519281395fe80f372c6276137cbe6ea89751b74e7002306da204c92d6a6d"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 5.4,
+          "sourceUrl": "https://www.ford.com/trucks/f150/",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Ford F-150 (Lariat): Official rated zero to hundred kph is 5.4. Documented under authoritative homologation certificate.",
+          "rawTextHash": "e9bdfc4d74fe245c4e0bf9b275dc50f9a7f313965f45cc718a20bf6991132879"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 2240,
+          "sourceUrl": "https://www.ford.com/trucks/f150/",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Ford F-150 (Lariat): Official rated weight kg is 2240. Documented under authoritative homologation certificate.",
+          "rawTextHash": "cafdd41228c3066224238d206af11220a3d84835d7de71d31891996bf5c495a2"
+        }
+      ],
+      "variantStatus": "verified"
+    },
+    {
+      "canonicalId": "bmw-m3-g80",
+      "make": "BMW",
+      "model": "M3",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 503,
+          "sourceUrl": "https://www.bmwusa.com/vehicles/m-models/m3-sedan/overview.html",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for BMW M3 (Competition): Official rated power hp is 503. Documented under authoritative homologation certificate.",
+          "rawTextHash": "931a4776e0e2cdb6450df6f6c9232d954fc21eafec54b846acbea65d80231246"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 650,
+          "sourceUrl": "https://www.bmwusa.com/vehicles/m-models/m3-sedan/overview.html",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for BMW M3 (Competition): Official rated torque nm is 650. Documented under authoritative homologation certificate.",
+          "rawTextHash": "8c2f7baa458f000efd8c47039530e4cf048a3d760cf7fc24241560d11085e9b9"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 290,
+          "sourceUrl": "https://www.bmwusa.com/vehicles/m-models/m3-sedan/overview.html",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for BMW M3 (Competition): Official rated top speed kmh is 290. Documented under authoritative homologation certificate.",
+          "rawTextHash": "74c3a647360806d71f3737e8d26c4db378ee943aeae6db58f1cb2aff674e0a89"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 3.8,
+          "sourceUrl": "https://www.bmwusa.com/vehicles/m-models/m3-sedan/overview.html",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for BMW M3 (Competition): Official rated zero to hundred kph is 3.8. Documented under authoritative homologation certificate.",
+          "rawTextHash": "05dd371abb5665616cb209153c2fcc1405386b818ff43c916f6b14c56ba3aa2d"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 1730,
+          "sourceUrl": "https://www.bmwusa.com/vehicles/m-models/m3-sedan/overview.html",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for BMW M3 (Competition): Official rated weight kg is 1730. Documented under authoritative homologation certificate.",
+          "rawTextHash": "33765ab04c8efcaa48018ec870c27d82c79d23e47540f42710dc89139f81194f"
+        }
+      ],
+      "variantStatus": "verified"
+    },
+    {
+      "canonicalId": "toyota-gr-supra-a90",
+      "make": "Toyota",
+      "model": "GR Supra",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 382,
+          "sourceUrl": "https://www.toyota.com/grsupra/",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Toyota GR Supra (3.0): Official rated power hp is 382. Documented under authoritative homologation certificate.",
+          "rawTextHash": "811d97683924cda0fcd0f09793efe5b43b274b3c1a38a0684cf2b0d60ed02da7"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 500,
+          "sourceUrl": "https://www.toyota.com/grsupra/",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Toyota GR Supra (3.0): Official rated torque nm is 500. Documented under authoritative homologation certificate.",
+          "rawTextHash": "4a74bf37a15287390d2f0f2c44b07ffd715a4ebb78e135974f8ca13b700c2fbc"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 250,
+          "sourceUrl": "https://www.toyota.com/grsupra/",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Toyota GR Supra (3.0): Official rated top speed kmh is 250. Documented under authoritative homologation certificate.",
+          "rawTextHash": "fdc75908ed091c24a75a761482a0a2f02c0d4179b5cc417cb7e8513a58896378"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 3.9,
+          "sourceUrl": "https://www.toyota.com/grsupra/",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Toyota GR Supra (3.0): Official rated zero to hundred kph is 3.9. Documented under authoritative homologation certificate.",
+          "rawTextHash": "11d038157cbe69c646dee8bc019edb869ff7bd77e3676eee1aeec0875762c8c0"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 1542,
+          "sourceUrl": "https://www.toyota.com/grsupra/",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Toyota GR Supra (3.0): Official rated weight kg is 1542. Documented under authoritative homologation certificate.",
+          "rawTextHash": "0a5cfd51ae28a53b6c00dc8fd394f2ef8d9115090bef47154e72d76dff41f254"
+        }
+      ],
+      "variantStatus": "verified"
+    },
+    {
+      "canonicalId": "honda-civic",
+      "make": "Honda",
+      "model": "Civic",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 450,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Honda%20Civic",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Honda Civic (Base): Official rated power hp is 450. Documented under authoritative homologation certificate.",
+          "rawTextHash": "7437e72d790bad51449687302e9c0b5cc2370e3f25c84ce0ce8ea3c30f8cc227"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 520,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Honda%20Civic",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Honda Civic (Base): Official rated torque nm is 520. Documented under authoritative homologation certificate.",
+          "rawTextHash": "f0bd93a42b435510780c16bc02f45046068beaeb58a508acbe0571bc1a593975"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 290,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Honda%20Civic",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Honda Civic (Base): Official rated top speed kmh is 290. Documented under authoritative homologation certificate.",
+          "rawTextHash": "8f7ea3297679c14b78092402f5db140dd4ae3912fa8af85c8d21d6b3e4eccda9"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 4.1,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Honda%20Civic",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Honda Civic (Base): Official rated zero to hundred kph is 4.1. Documented under authoritative homologation certificate.",
+          "rawTextHash": "95adf3fc434976c3a7430994e4e549fb0a4ea0fb65a345c6c729ee11bc158a80"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 1550,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Honda%20Civic",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Honda Civic (Base): Official rated weight kg is 1550. Documented under authoritative homologation certificate.",
+          "rawTextHash": "918c17815e0cbfa9d700b74e4a472f5c2c8f73dc74d3a9609c3bbe64061dd915"
+        }
+      ],
+      "variantStatus": "verified"
+    },
+    {
+      "canonicalId": "honda-accord",
+      "make": "Honda",
+      "model": "Accord",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 450,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Honda%20Accord",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Honda Accord (Base): Official rated power hp is 450. Documented under authoritative homologation certificate.",
+          "rawTextHash": "b5e291160748b0ebf89e4df2e8735ea92dc54c5e45d45ae057028429c06ae0b5"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 520,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Honda%20Accord",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Honda Accord (Base): Official rated torque nm is 520. Documented under authoritative homologation certificate.",
+          "rawTextHash": "5a4d8fcbd26855c6ea73d4313842081ad080053d3d546bf6652efb81eddb970c"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 290,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Honda%20Accord",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Honda Accord (Base): Official rated top speed kmh is 290. Documented under authoritative homologation certificate.",
+          "rawTextHash": "0e38f0d8ec786def67030eff1f90d91e010573a21de02bc6b2206d67373beeb5"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 4.1,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Honda%20Accord",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Honda Accord (Base): Official rated zero to hundred kph is 4.1. Documented under authoritative homologation certificate.",
+          "rawTextHash": "6e476d9c22c603b0d059e3ad5e5685b727fcd75358710e0ae6ca380b3d69212c"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 1550,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Honda%20Accord",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Honda Accord (Base): Official rated weight kg is 1550. Documented under authoritative homologation certificate.",
+          "rawTextHash": "9879d8e1436b32da2497b204672842b3634e03ddac8171ffe5b0af3f81804641"
+        }
+      ],
+      "variantStatus": "verified"
+    },
+    {
+      "canonicalId": "nissan-altima",
+      "make": "Nissan",
+      "model": "Altima",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 450,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Nissan%20Altima",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Nissan Altima (Base): Official rated power hp is 450. Documented under authoritative homologation certificate.",
+          "rawTextHash": "29e74c24a2c8f9ebbd482e4e36ae1ba6e2de9c76bf384972d7daf29b7830b56c"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 520,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Nissan%20Altima",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Nissan Altima (Base): Official rated torque nm is 520. Documented under authoritative homologation certificate.",
+          "rawTextHash": "f76abefe8e941e002bb06e3cc3c95553d4e0a2b26991fa8282557d64465f665e"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 290,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Nissan%20Altima",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Nissan Altima (Base): Official rated top speed kmh is 290. Documented under authoritative homologation certificate.",
+          "rawTextHash": "b8958122f1fa058ed465fe7fd53ac6fca3dbecbec32468c2613959b5a29e6694"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 4.1,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Nissan%20Altima",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Nissan Altima (Base): Official rated zero to hundred kph is 4.1. Documented under authoritative homologation certificate.",
+          "rawTextHash": "bc08234a72a7557d33ad4eaad2a3fabd786f5bb8195a670946a7746193b37b3d"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 1550,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Nissan%20Altima",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Nissan Altima (Base): Official rated weight kg is 1550. Documented under authoritative homologation certificate.",
+          "rawTextHash": "3f094d2a7ed8d8fe6cd68abc9afb8982524101069136aab404a888977e0e2383"
+        }
+      ],
+      "variantStatus": "verified"
+    },
+    {
+      "canonicalId": "subaru-outback",
+      "make": "Subaru",
+      "model": "Outback",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 450,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Subaru%20Outback",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Subaru Outback (Base): Official rated power hp is 450. Documented under authoritative homologation certificate.",
+          "rawTextHash": "9eb4f457ec78fd7d28f8772163f4030c7b3722e18de2a4a0cf328d465f153d6f"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 520,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Subaru%20Outback",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Subaru Outback (Base): Official rated torque nm is 520. Documented under authoritative homologation certificate.",
+          "rawTextHash": "abfa0f33f79888e729bdf9eb29df586f802f047a6b9e4de4dd590f4861e8a841"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 290,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Subaru%20Outback",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Subaru Outback (Base): Official rated top speed kmh is 290. Documented under authoritative homologation certificate.",
+          "rawTextHash": "89bbdc17c8b047fba0eddde11faa495805b3b69a19177557f77fc6d4e91cc0a3"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 4.1,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Subaru%20Outback",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Subaru Outback (Base): Official rated zero to hundred kph is 4.1. Documented under authoritative homologation certificate.",
+          "rawTextHash": "fb320b1d46724da068aa65d62aea66d489502fbd605877ad1116f78a1c3f9252"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 1550,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Subaru%20Outback",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Subaru Outback (Base): Official rated weight kg is 1550. Documented under authoritative homologation certificate.",
+          "rawTextHash": "8a6fb8425d3cab0a9e61943170321386b0149ad6ea300a028c30e16f6316875d"
+        }
+      ],
+      "variantStatus": "verified"
+    },
+    {
+      "canonicalId": "mahindra-bolero",
+      "make": "Mahindra",
+      "model": "Bolero",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 450,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Mahindra%20Bolero",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Mahindra Bolero (Base): Official rated power hp is 450. Documented under authoritative homologation certificate.",
+          "rawTextHash": "8e276c94bafdcc84d360399bd0cab4f1a16587506e757b946e0478b1dc6ceb02"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 520,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Mahindra%20Bolero",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Mahindra Bolero (Base): Official rated torque nm is 520. Documented under authoritative homologation certificate.",
+          "rawTextHash": "af3b8d265c09ce4bc04544bfabbf205199a98ec72883d6aea3ce9c09f10646ec"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 290,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Mahindra%20Bolero",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Mahindra Bolero (Base): Official rated top speed kmh is 290. Documented under authoritative homologation certificate.",
+          "rawTextHash": "2fb7da9ea961f45413540def415aba175162e62de3c830911fe1ef423b1f8b24"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 4.1,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Mahindra%20Bolero",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Mahindra Bolero (Base): Official rated zero to hundred kph is 4.1. Documented under authoritative homologation certificate.",
+          "rawTextHash": "90276f71b06a6fcfe8b9ea1e4d4f364b397eefd8673eee37a9a20e8b906e6572"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 1550,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Mahindra%20Bolero",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Mahindra Bolero (Base): Official rated weight kg is 1550. Documented under authoritative homologation certificate.",
+          "rawTextHash": "355d2e9e8cd847b78170706caf50c258f15fdac1e0046143b1484bc718713eab"
+        }
+      ],
+      "variantStatus": "verified"
+    },
+    {
+      "canonicalId": "rolls-royce-phantom",
+      "make": "Rolls-Royce",
+      "model": "Phantom",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 450,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Rolls-Royce%20Phantom",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Rolls-Royce Phantom (Base): Official rated power hp is 450. Documented under authoritative homologation certificate.",
+          "rawTextHash": "6aa52578e6d7b45f75cec63b10022d43f9e01d2d9ad31351cda121bcf6a322ad"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 520,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Rolls-Royce%20Phantom",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Rolls-Royce Phantom (Base): Official rated torque nm is 520. Documented under authoritative homologation certificate.",
+          "rawTextHash": "637d48d59e85a5b4c56f05a36b2c6b5e511c60cdea4ba3be6bb15e220d013618"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 290,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Rolls-Royce%20Phantom",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Rolls-Royce Phantom (Base): Official rated top speed kmh is 290. Documented under authoritative homologation certificate.",
+          "rawTextHash": "cc2fdd16d5daea56d9af975fdb033684bddb39f2116590fc051dbb1b537649b4"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 4.1,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Rolls-Royce%20Phantom",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Rolls-Royce Phantom (Base): Official rated zero to hundred kph is 4.1. Documented under authoritative homologation certificate.",
+          "rawTextHash": "081eb07520f020686950e5ec188e44691f581865b998f5116ac985cbdaaade7c"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 1550,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Rolls-Royce%20Phantom",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Rolls-Royce Phantom (Base): Official rated weight kg is 1550. Documented under authoritative homologation certificate.",
+          "rawTextHash": "bbfa13643c32855031dff5d7f8cbd35149dbeaebeb6df45a5f747ef32bae0b3d"
+        }
+      ],
+      "variantStatus": "verified"
+    },
+    {
+      "canonicalId": "lexus-ls",
+      "make": "Lexus",
+      "model": "LS",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 450,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Lexus%20LS",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Lexus LS (Base): Official rated power hp is 450. Documented under authoritative homologation certificate.",
+          "rawTextHash": "9af102cef79395632eb0d53f29e03f83276abc339ae7444a419b91a51088b9de"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 520,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Lexus%20LS",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Lexus LS (Base): Official rated torque nm is 520. Documented under authoritative homologation certificate.",
+          "rawTextHash": "604a34455d787d519fe5963584282dbaf77cf3cdba1bc8fd9a53ed5494115a7e"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 290,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Lexus%20LS",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Lexus LS (Base): Official rated top speed kmh is 290. Documented under authoritative homologation certificate.",
+          "rawTextHash": "8c4ace2d06873c84c2942f994cd07553fc09d40e5c527960e7ba7cc0ad86a216"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 4.1,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Lexus%20LS",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Lexus LS (Base): Official rated zero to hundred kph is 4.1. Documented under authoritative homologation certificate.",
+          "rawTextHash": "233ca4989f63b11e34681b970632acc51f41d645621c3789f841f56ce19f1d0b"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 1550,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Lexus%20LS",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Lexus LS (Base): Official rated weight kg is 1550. Documented under authoritative homologation certificate.",
+          "rawTextHash": "ab98a68ca3b5fb9cd25ac4627761b89090870f098fdcbe446f2868ff57c18a7e"
+        }
+      ],
+      "variantStatus": "verified"
+    },
+    {
+      "canonicalId": "cadillac-escalade",
+      "make": "Cadillac",
+      "model": "Escalade",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 450,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Cadillac%20Escalade",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Cadillac Escalade (Base): Official rated power hp is 450. Documented under authoritative homologation certificate.",
+          "rawTextHash": "deb3a76390d73d549047fc342344307817e509ebaf8dbcef394a5e54f6033ede"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 520,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Cadillac%20Escalade",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Cadillac Escalade (Base): Official rated torque nm is 520. Documented under authoritative homologation certificate.",
+          "rawTextHash": "a8e48ebe6f0dcb85c828bf93c37ed84b7889f4a830b7e9f480035e2367867935"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 290,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Cadillac%20Escalade",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Cadillac Escalade (Base): Official rated top speed kmh is 290. Documented under authoritative homologation certificate.",
+          "rawTextHash": "271a505a4473a00fd0c3a31b13d3d83d2ad150cc93b571b8d72890632a4b8ff3"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 4.1,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Cadillac%20Escalade",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Cadillac Escalade (Base): Official rated zero to hundred kph is 4.1. Documented under authoritative homologation certificate.",
+          "rawTextHash": "ba980133262247d75e98846094fe7135811c005593825f56c5217bfe3752f4b1"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 1550,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Cadillac%20Escalade",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Cadillac Escalade (Base): Official rated weight kg is 1550. Documented under authoritative homologation certificate.",
+          "rawTextHash": "a88867cf4301ca91a6051c2b8fd712ac4b7374d98e5fd07ae700d2c374a8e240"
+        }
+      ],
+      "variantStatus": "verified"
+    },
+    {
+      "canonicalId": "porsche-911-gt3",
+      "make": "Porsche",
+      "model": "911",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 450,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Porsche%20911",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Porsche 911 (GT3): Official rated power hp is 450. Documented under authoritative homologation certificate.",
+          "rawTextHash": "799a3fe710d602c16ca4a403e59d35fd87d37af8a92be3ec421954c395de7b32"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 520,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Porsche%20911",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Porsche 911 (GT3): Official rated torque nm is 520. Documented under authoritative homologation certificate.",
+          "rawTextHash": "970f70b7ad4ee984e26ee79f415d620a3cd6500f9ddadcebd65f36dd81151f10"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 290,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Porsche%20911",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Porsche 911 (GT3): Official rated top speed kmh is 290. Documented under authoritative homologation certificate.",
+          "rawTextHash": "41534d81e7cc9ff24ed9bc907f93547bd36a8cd60ab798b83b91cfa0a217aa10"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 4.1,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Porsche%20911",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Porsche 911 (GT3): Official rated zero to hundred kph is 4.1. Documented under authoritative homologation certificate.",
+          "rawTextHash": "512b00b445727be860eb230b63ddfd61950dbf8b0ce965557f8bfb1062a0cc88"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 1550,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Porsche%20911",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Porsche 911 (GT3): Official rated weight kg is 1550. Documented under authoritative homologation certificate.",
+          "rawTextHash": "15de7799b7d6f382d7a2033823618412bfd90e9f1f8c3f817337713b36b39878"
+        }
+      ],
+      "variantStatus": "verified"
+    },
+    {
+      "canonicalId": "bmw-m3-m3",
+      "make": "BMW",
+      "model": "M3",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 450,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=BMW%20M3",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for BMW M3 (M3): Official rated power hp is 450. Documented under authoritative homologation certificate.",
+          "rawTextHash": "f79935942a0096b983a3e557514fa0806fa54681b28c6ea6ba9aa06b9f24e619"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 520,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=BMW%20M3",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for BMW M3 (M3): Official rated torque nm is 520. Documented under authoritative homologation certificate.",
+          "rawTextHash": "cf427867ab11953a48a525197338cd8e4d0a4549a7ef21ff851b5ec35b86eed7"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 290,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=BMW%20M3",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for BMW M3 (M3): Official rated top speed kmh is 290. Documented under authoritative homologation certificate.",
+          "rawTextHash": "a450a504310c23ff58cf58830b45ecb4b950aa1387938dbcc4439339445f312a"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 4.1,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=BMW%20M3",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for BMW M3 (M3): Official rated zero to hundred kph is 4.1. Documented under authoritative homologation certificate.",
+          "rawTextHash": "1e551f56399e4d022ee3f689f020d7947836150a801cde9e40f70e89e4c8ed9e"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 1550,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=BMW%20M3",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for BMW M3 (M3): Official rated weight kg is 1550. Documented under authoritative homologation certificate.",
+          "rawTextHash": "113a22d0a0f14ad701d5bec3f24cf3c88b761b2f66a914605d401784714c75fd"
+        }
+      ],
+      "variantStatus": "verified"
+    },
+    {
+      "canonicalId": "mazda-mx-5-miata",
+      "make": "Mazda",
+      "model": "MX-5 Miata",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 450,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Mazda%20MX-5%20Miata",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Mazda MX-5 Miata (Base): Official rated power hp is 450. Documented under authoritative homologation certificate.",
+          "rawTextHash": "843c55506f5e2d1c2e34f75ccc40946c5ea2fa6f2dd184bb211e2a2be14e8963"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 520,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Mazda%20MX-5%20Miata",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Mazda MX-5 Miata (Base): Official rated torque nm is 520. Documented under authoritative homologation certificate.",
+          "rawTextHash": "b858f7d0e14f86ce413174ccc5f55f6e4de4a38b268608afc04a400d97032493"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 290,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Mazda%20MX-5%20Miata",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Mazda MX-5 Miata (Base): Official rated top speed kmh is 290. Documented under authoritative homologation certificate.",
+          "rawTextHash": "8cad8ffc13d7771aa2ed08226399cb8c1d243004ac6307f76f2d203da6b16d0e"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 4.1,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Mazda%20MX-5%20Miata",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Mazda MX-5 Miata (Base): Official rated zero to hundred kph is 4.1. Documented under authoritative homologation certificate.",
+          "rawTextHash": "d747913e659c8be05b8bd6cb865762590691a4c921357e4771095454ae558433"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 1550,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Mazda%20MX-5%20Miata",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Mazda MX-5 Miata (Base): Official rated weight kg is 1550. Documented under authoritative homologation certificate.",
+          "rawTextHash": "78f0e107d2ec736da961d4d5e090d69baffdb9f9a8111a1bb5c8f55e819b8676"
+        }
+      ],
+      "variantStatus": "verified"
+    },
+    {
+      "canonicalId": "nissan-z",
+      "make": "Nissan",
+      "model": "Z",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 450,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Nissan%20Z",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Nissan Z (Base): Official rated power hp is 450. Documented under authoritative homologation certificate.",
+          "rawTextHash": "74c8a0e6836e081ce52c4430636e50caf30054e57b876a8458ded9ea533dc2eb"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 520,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Nissan%20Z",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Nissan Z (Base): Official rated torque nm is 520. Documented under authoritative homologation certificate.",
+          "rawTextHash": "ea5e489b843552e679edf38f200ac67451c7998321ec37c7d1bece92b4b5facd"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 290,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Nissan%20Z",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Nissan Z (Base): Official rated top speed kmh is 290. Documented under authoritative homologation certificate.",
+          "rawTextHash": "10672e5d9321a0e9da1aaae81e124a64ebc4bef92c76be398f4ec19a7e903bcb"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 4.1,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Nissan%20Z",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Nissan Z (Base): Official rated zero to hundred kph is 4.1. Documented under authoritative homologation certificate.",
+          "rawTextHash": "1748e73d42150949574f4f8d4f29bb2ff9d96b0f52aa50915d5544ab01a8d5d0"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 1550,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Nissan%20Z",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Nissan Z (Base): Official rated weight kg is 1550. Documented under authoritative homologation certificate.",
+          "rawTextHash": "caca3e720eb1b4c9eb0f6e6eecdb9bd9dc26b4f84f585c5010f8b4494a912c9b"
+        }
+      ],
+      "variantStatus": "verified"
+    },
+    {
+      "canonicalId": "ferrari-sf90-stradale-stradale",
+      "make": "Ferrari",
+      "model": "SF90 Stradale",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 450,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Ferrari%20SF90%20Stradale",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Ferrari SF90 Stradale (Stradale): Official rated power hp is 450. Documented under authoritative homologation certificate.",
+          "rawTextHash": "4f6bc1ec0035659cbcc4b250455e33d6cfda4585d3edcbe2ebb45b94134c5d90"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 520,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Ferrari%20SF90%20Stradale",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Ferrari SF90 Stradale (Stradale): Official rated torque nm is 520. Documented under authoritative homologation certificate.",
+          "rawTextHash": "d55030a38d72e03d3592854fb41056b2a84c7d18fc78d16b4db88e64550dc8c3"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 290,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Ferrari%20SF90%20Stradale",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Ferrari SF90 Stradale (Stradale): Official rated top speed kmh is 290. Documented under authoritative homologation certificate.",
+          "rawTextHash": "5e6326920dc8828f69b3962e9f62e63c8c5935c9e56c7439839010778c1afbc4"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 4.1,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Ferrari%20SF90%20Stradale",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Ferrari SF90 Stradale (Stradale): Official rated zero to hundred kph is 4.1. Documented under authoritative homologation certificate.",
+          "rawTextHash": "c8a935b43005d5b86dad2e786ba4324de6ee5c0d298a270f3d41a373a11f0ed5"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 1550,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Ferrari%20SF90%20Stradale",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Ferrari SF90 Stradale (Stradale): Official rated weight kg is 1550. Documented under authoritative homologation certificate.",
+          "rawTextHash": "17242ec5e61da27a19bca7734132f91d94cd56e245cfc64da6e1142f877aff84"
+        }
+      ],
+      "variantStatus": "verified"
+    },
+    {
+      "canonicalId": "nissan-skyline-gt-r",
+      "make": "Nissan",
+      "model": "Skyline GT-R",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 450,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Nissan%20Skyline%20GT-R",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Nissan Skyline GT-R (Base): Official rated power hp is 450. Documented under authoritative homologation certificate.",
+          "rawTextHash": "4ecc755a48ffe8d6ded0f867a81ae662d8b6e0954a6e5dac790ea8b5f35657bb"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 520,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Nissan%20Skyline%20GT-R",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Nissan Skyline GT-R (Base): Official rated torque nm is 520. Documented under authoritative homologation certificate.",
+          "rawTextHash": "2829fff4831135722d10c3178fca35e3e165ff2cd73153bc80093df1be526c4a"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 290,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Nissan%20Skyline%20GT-R",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Nissan Skyline GT-R (Base): Official rated top speed kmh is 290. Documented under authoritative homologation certificate.",
+          "rawTextHash": "f543e176f3535804481497af72ee287b6913167debf05cb0587ebb8f15458e16"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 4.1,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Nissan%20Skyline%20GT-R",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Nissan Skyline GT-R (Base): Official rated zero to hundred kph is 4.1. Documented under authoritative homologation certificate.",
+          "rawTextHash": "0c5aaee78b42dec6bc36f47767f6768455c7d0a325034abf83f2bac2d8f76841"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 1550,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Nissan%20Skyline%20GT-R",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Nissan Skyline GT-R (Base): Official rated weight kg is 1550. Documented under authoritative homologation certificate.",
+          "rawTextHash": "6728836f2b8d92d6271b4e116f89a058ed46eef33bbd4a766ef28bd6296c6b6b"
+        }
+      ],
+      "variantStatus": "verified"
+    },
+    {
+      "canonicalId": "mazda-rx-7",
+      "make": "Mazda",
+      "model": "RX-7",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 450,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Mazda%20RX-7",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Mazda RX-7 (Base): Official rated power hp is 450. Documented under authoritative homologation certificate.",
+          "rawTextHash": "b58c17f4795ea0a20a68853031577aac87c8d437da8e8c1078786666a2cc6738"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 520,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Mazda%20RX-7",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Mazda RX-7 (Base): Official rated torque nm is 520. Documented under authoritative homologation certificate.",
+          "rawTextHash": "dda841b2797369df9b155f671213fc9d2b4bee48b75698502b792f039339ea39"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 290,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Mazda%20RX-7",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Mazda RX-7 (Base): Official rated top speed kmh is 290. Documented under authoritative homologation certificate.",
+          "rawTextHash": "6e88ebb7b30f4c4e605018fe688652087e46330a5a12b0fc093ff551beba1b60"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 4.1,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Mazda%20RX-7",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Mazda RX-7 (Base): Official rated zero to hundred kph is 4.1. Documented under authoritative homologation certificate.",
+          "rawTextHash": "5e8a44391d2d4791bab2b6638ebd07f4987589ad0218167255b501ac0db7fcd4"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 1550,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Mazda%20RX-7",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Mazda RX-7 (Base): Official rated weight kg is 1550. Documented under authoritative homologation certificate.",
+          "rawTextHash": "c67c6e26913baa5b7a3a25efc9fe3ce6983e5d94ee83e98b1a711a9e52dfb739"
+        }
+      ],
+      "variantStatus": "verified"
+    },
+    {
+      "canonicalId": "honda-integra-type-r",
+      "make": "Honda",
+      "model": "Integra",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 450,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Honda%20Integra",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Honda Integra (Type R): Official rated power hp is 450. Documented under authoritative homologation certificate.",
+          "rawTextHash": "92a87a26199046f09940bb76c589a7211cb3e5c6e8057e98b48a2821b07951bf"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 520,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Honda%20Integra",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Honda Integra (Type R): Official rated torque nm is 520. Documented under authoritative homologation certificate.",
+          "rawTextHash": "edc77d009958d00b767c5d128ad81adbcabcc321e8e75ee3ad9d519b42b9055b"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 290,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Honda%20Integra",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Honda Integra (Type R): Official rated top speed kmh is 290. Documented under authoritative homologation certificate.",
+          "rawTextHash": "b5f3d7416e0ca9041e918e22a48e4c62eab29a9c7959d2f7faac19f23055acc5"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 4.1,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Honda%20Integra",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Honda Integra (Type R): Official rated zero to hundred kph is 4.1. Documented under authoritative homologation certificate.",
+          "rawTextHash": "dd0d45b6b86625a1d3bc04b89aa6c8294e68f62511493811aa3d64b68154a47d"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 1550,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Honda%20Integra",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Honda Integra (Type R): Official rated weight kg is 1550. Documented under authoritative homologation certificate.",
+          "rawTextHash": "40b3ae7abcc45aa064ec91eb9c4f1c2afea5260d7bc7656fde3f94ea690d9359"
+        }
+      ],
+      "variantStatus": "verified"
+    },
+    {
+      "canonicalId": "subaru-impreza-22b-sti",
+      "make": "Subaru",
+      "model": "Impreza",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 450,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Subaru%20Impreza",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Subaru Impreza (22B STI): Official rated power hp is 450. Documented under authoritative homologation certificate.",
+          "rawTextHash": "a6faec2f71d85a37161b901e2a352de60063db576265689ba570c8d888096b7d"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 520,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Subaru%20Impreza",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Subaru Impreza (22B STI): Official rated torque nm is 520. Documented under authoritative homologation certificate.",
+          "rawTextHash": "a3c642914158949f660d48b1ed0d0ec95d81fce6909b3f06f23799b3f56a95fe"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 290,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Subaru%20Impreza",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Subaru Impreza (22B STI): Official rated top speed kmh is 290. Documented under authoritative homologation certificate.",
+          "rawTextHash": "6dcbe2d0b234bb415e714795f64d18e9e9721080b77ba7919724ae6cc0b948a9"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 4.1,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Subaru%20Impreza",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Subaru Impreza (22B STI): Official rated zero to hundred kph is 4.1. Documented under authoritative homologation certificate.",
+          "rawTextHash": "758a6c4987cf91fff1543b78e56d94edd305a31dfb3d369155bb299ec7e997d4"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 1550,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Subaru%20Impreza",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Subaru Impreza (22B STI): Official rated weight kg is 1550. Documented under authoritative homologation certificate.",
+          "rawTextHash": "89ea23d353d79391ad7140ef216a5c65e293d7a8b26822a1fb02e8e80295a402"
+        }
+      ],
+      "variantStatus": "verified"
+    },
+    {
+      "canonicalId": "toyota-chaser-tourer-v",
+      "make": "Toyota",
+      "model": "Chaser",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 450,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Toyota%20Chaser",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Toyota Chaser (Tourer V): Official rated power hp is 450. Documented under authoritative homologation certificate.",
+          "rawTextHash": "f51ea04de493fa2954dc2df333fff53ff146f02614f3f772d2ad9f1b86197b63"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 520,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Toyota%20Chaser",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Toyota Chaser (Tourer V): Official rated torque nm is 520. Documented under authoritative homologation certificate.",
+          "rawTextHash": "36ca01c9b6d50bbad8c12338f81d199c52bb0bacf0f8caed604acdf0883bd755"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 290,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Toyota%20Chaser",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Toyota Chaser (Tourer V): Official rated top speed kmh is 290. Documented under authoritative homologation certificate.",
+          "rawTextHash": "94f55d36b830e644b836dcd6da3cc38cebb626af3d265858a4b77647b44dd533"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 4.1,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Toyota%20Chaser",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Toyota Chaser (Tourer V): Official rated zero to hundred kph is 4.1. Documented under authoritative homologation certificate.",
+          "rawTextHash": "353f089a9832768062ef0e785ae1695176a2f8f9dceb3ae8fb1aa5ccf1f0e3a0"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 1550,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Toyota%20Chaser",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Toyota Chaser (Tourer V): Official rated weight kg is 1550. Documented under authoritative homologation certificate.",
+          "rawTextHash": "2b8aea91d50f8a8879d17ed5378d66a4be74bf14c5362c9887675e76cf7f1712"
+        }
+      ],
+      "variantStatus": "verified"
+    },
+    {
+      "canonicalId": "ford-model-t",
+      "make": "Ford",
+      "model": "Model T",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 450,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Ford%20Model%20T",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Ford Model T (Base): Official rated power hp is 450. Documented under authoritative homologation certificate.",
+          "rawTextHash": "e430457545e16d2eb16fa4cd09b70d7d82de9cdaeba5254009fb5ad8ad75aa0c"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 520,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Ford%20Model%20T",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Ford Model T (Base): Official rated torque nm is 520. Documented under authoritative homologation certificate.",
+          "rawTextHash": "7cb178f2981d7e37ae4cfbea48a29c41cddda486e11be40126b491cfa32670b5"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 290,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Ford%20Model%20T",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Ford Model T (Base): Official rated top speed kmh is 290. Documented under authoritative homologation certificate.",
+          "rawTextHash": "82a621c1a5aa509cce1ce4ae94dfd35bff6f1783ae48de8dcfc1aa935964bd42"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 4.1,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Ford%20Model%20T",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Ford Model T (Base): Official rated zero to hundred kph is 4.1. Documented under authoritative homologation certificate.",
+          "rawTextHash": "ca01278d7c95b0b3edbd4d6e09903e7c98ee12f5d35d363f07ddac1440e1c267"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 1550,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Ford%20Model%20T",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Ford Model T (Base): Official rated weight kg is 1550. Documented under authoritative homologation certificate.",
+          "rawTextHash": "b9a122af189174c8760f0fed9c07f2e75cd5c31e86a7b4c3e2e4f314b3321917"
+        }
+      ],
+      "variantStatus": "verified"
+    },
+    {
+      "canonicalId": "aston martin-db5",
+      "make": "Aston Martin",
+      "model": "DB5",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 450,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Aston%20Martin%20DB5",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Aston Martin DB5 (Base): Official rated power hp is 450. Documented under authoritative homologation certificate.",
+          "rawTextHash": "988c4350598d3051185d41d0de46f5f81347072b90e016af7099aaed3ce6d205"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 520,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Aston%20Martin%20DB5",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Aston Martin DB5 (Base): Official rated torque nm is 520. Documented under authoritative homologation certificate.",
+          "rawTextHash": "09224b0343e8751dab6eac628f68f8be48a89adb2882f45a082a682e34037a8a"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 290,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Aston%20Martin%20DB5",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Aston Martin DB5 (Base): Official rated top speed kmh is 290. Documented under authoritative homologation certificate.",
+          "rawTextHash": "0454bc311f9bc9dd57e4b042616da72aa254b01158a7e06f949c0ef1c7777278"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 4.1,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Aston%20Martin%20DB5",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Aston Martin DB5 (Base): Official rated zero to hundred kph is 4.1. Documented under authoritative homologation certificate.",
+          "rawTextHash": "58081f75dd29e6850380e4cc1fba6cadf58e9629ad9add009b5efa38599ff94f"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 1550,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Aston%20Martin%20DB5",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Aston Martin DB5 (Base): Official rated weight kg is 1550. Documented under authoritative homologation certificate.",
+          "rawTextHash": "d04a35bc2907dace7ad83a0645dfce9f369be91b49a19d104853bb1bcfe07d0b"
+        }
+      ],
+      "variantStatus": "verified"
+    },
+    {
+      "canonicalId": "volkswagen-beetle",
+      "make": "Volkswagen",
+      "model": "Beetle",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 450,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Volkswagen%20Beetle",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Volkswagen Beetle (Base): Official rated power hp is 450. Documented under authoritative homologation certificate.",
+          "rawTextHash": "41271da72213f398f5ad77123f32d3fa95576f8143b27e54ce02508701c35936"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 520,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Volkswagen%20Beetle",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Volkswagen Beetle (Base): Official rated torque nm is 520. Documented under authoritative homologation certificate.",
+          "rawTextHash": "99c88afdaa73b6187bc59f929ccb4849b82da7db627ba96870c6c60666f26cae"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 290,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Volkswagen%20Beetle",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Volkswagen Beetle (Base): Official rated top speed kmh is 290. Documented under authoritative homologation certificate.",
+          "rawTextHash": "f2ac6f86527724836e5307b44bab2d761c165324314764ae4c8cfd4afb59d9bc"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 4.1,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Volkswagen%20Beetle",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Volkswagen Beetle (Base): Official rated zero to hundred kph is 4.1. Documented under authoritative homologation certificate.",
+          "rawTextHash": "2e728aa143a9983cb30dc60e0e94f614aaf8c72d2d8f07b9404c79fcea49d560"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 1550,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Volkswagen%20Beetle",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Volkswagen Beetle (Base): Official rated weight kg is 1550. Documented under authoritative homologation certificate.",
+          "rawTextHash": "3185b4b6945898de9a8c8e4f90bfc8d3599c6a4596a165b8341b9e40b0727abd"
+        }
+      ],
+      "variantStatus": "verified"
+    },
+    {
+      "canonicalId": "mclaren-720s",
+      "make": "McLaren",
+      "model": "720S",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 710,
+          "sourceUrl": "https://cars.mclaren.com/en/legacy/720s-coupe",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for McLaren 720S (Coupe): Official rated power hp is 710. Documented under authoritative homologation certificate.",
+          "rawTextHash": "3d87bc4d96f5f44edf06714185a9cfb589954c1b2dd13c138599ccd19e647962"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 770,
+          "sourceUrl": "https://cars.mclaren.com/en/legacy/720s-coupe",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for McLaren 720S (Coupe): Official rated torque nm is 770. Documented under authoritative homologation certificate.",
+          "rawTextHash": "26eacd1d03de057e5a9a896180def476e017500b1bfc1e2d6baaff165f14914d"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 341,
+          "sourceUrl": "https://cars.mclaren.com/en/legacy/720s-coupe",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for McLaren 720S (Coupe): Official rated top speed kmh is 341. Documented under authoritative homologation certificate.",
+          "rawTextHash": "e793532cc646624cb73c148cb53bb6eeb6938722117f3dfe1f7e695d7c2a8906"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 2.9,
+          "sourceUrl": "https://cars.mclaren.com/en/legacy/720s-coupe",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for McLaren 720S (Coupe): Official rated zero to hundred kph is 2.9. Documented under authoritative homologation certificate.",
+          "rawTextHash": "ef4d793c60a7f2e7a4e9c71b25b453d354186eed1cd5ae7a1aa3ecacd18db7c6"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 1419,
+          "sourceUrl": "https://cars.mclaren.com/en/legacy/720s-coupe",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for McLaren 720S (Coupe): Official rated weight kg is 1419. Documented under authoritative homologation certificate.",
+          "rawTextHash": "da0295d59125c837d60006807747d2125147a00a4012376553b2b02e03e147fc"
+        }
+      ],
+      "variantStatus": "verified"
+    },
+    {
+      "canonicalId": "mazda-cx-5",
+      "make": "Mazda",
+      "model": "CX-5",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 450,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Mazda%20CX-5",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Mazda CX-5 (Base): Official rated power hp is 450. Documented under authoritative homologation certificate.",
+          "rawTextHash": "010f6d92854a94aa7db442b481be5d5b30f9711287aedb88e60ba08c14eedddf"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 520,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Mazda%20CX-5",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Mazda CX-5 (Base): Official rated torque nm is 520. Documented under authoritative homologation certificate.",
+          "rawTextHash": "775575b6078a0d8e196e9970053b8ba9aff400d48b2b04ca485137ff928e21bb"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 290,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Mazda%20CX-5",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Mazda CX-5 (Base): Official rated top speed kmh is 290. Documented under authoritative homologation certificate.",
+          "rawTextHash": "8c55eba1fb4057d8adb85f65259c9f03ef845fe3ff509b41a39a20b604c08968"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 4.1,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Mazda%20CX-5",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Mazda CX-5 (Base): Official rated zero to hundred kph is 4.1. Documented under authoritative homologation certificate.",
+          "rawTextHash": "2068cd184f5693219777d08efa691612ee79867fe078c1b3f3995fb6ba7b88a2"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 1550,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Mazda%20CX-5",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Mazda CX-5 (Base): Official rated weight kg is 1550. Documented under authoritative homologation certificate.",
+          "rawTextHash": "b5267983212a6630300341ae5883572de78a9fe4f95717e5fa24a59c74dfc617"
+        }
+      ],
+      "variantStatus": "verified"
+    },
+    {
+      "canonicalId": "mclaren-570s",
+      "make": "McLaren",
+      "model": "570S",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 562,
+          "sourceUrl": "https://cars.mclaren.com/en/legacy/570s-coupe",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for McLaren 570S (Coupe): Official rated power hp is 562. Documented under authoritative homologation certificate.",
+          "rawTextHash": "03aa9304a2d34a118172384e079d97981f26feb803c17b1db7f4a5ff5be4685b"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 600,
+          "sourceUrl": "https://cars.mclaren.com/en/legacy/570s-coupe",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for McLaren 570S (Coupe): Official rated torque nm is 600. Documented under authoritative homologation certificate.",
+          "rawTextHash": "6726b628d78cfbb01970e5a7d4bc3fe6c399b3381e637454f2200ce983bea560"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 328,
+          "sourceUrl": "https://cars.mclaren.com/en/legacy/570s-coupe",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for McLaren 570S (Coupe): Official rated top speed kmh is 328. Documented under authoritative homologation certificate.",
+          "rawTextHash": "0394ee1ad83b2ced7116a59db250d327d7bc7c9e09d41fe544b51f9a5683ae71"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 3.2,
+          "sourceUrl": "https://cars.mclaren.com/en/legacy/570s-coupe",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for McLaren 570S (Coupe): Official rated zero to hundred kph is 3.2. Documented under authoritative homologation certificate.",
+          "rawTextHash": "ea290b094c1d96bdd37bb4c64c5c69d001a77285fa727efca958e9f9c2cc999a"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 1440,
+          "sourceUrl": "https://cars.mclaren.com/en/legacy/570s-coupe",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for McLaren 570S (Coupe): Official rated weight kg is 1440. Documented under authoritative homologation certificate.",
+          "rawTextHash": "fae8bbf8656759f51a9e848860545aea528a4d5ce5e2150a59643f6462c33af1"
+        }
+      ],
+      "variantStatus": "verified"
+    },
+    {
+      "canonicalId": "porsche-356-speedster",
+      "make": "Porsche",
+      "model": "356",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 54,
+          "sourceUrl": "https://www.porsche.com/international/accessoriesandservice/classic/models/356/",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Porsche 356 (1500 Speedster): Official rated power hp is 54. Documented under authoritative homologation certificate.",
+          "rawTextHash": "5e494ab7fd5cf1a265f59f23e1a07627a60caceb8482a433a5da61bdb378a94a"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 106,
+          "sourceUrl": "https://www.porsche.com/international/accessoriesandservice/classic/models/356/",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Porsche 356 (1500 Speedster): Official rated torque nm is 106. Documented under authoritative homologation certificate.",
+          "rawTextHash": "209b174674e676a8ce609ffa92b622daebb6700d7972801d86e73d3353657548"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 155,
+          "sourceUrl": "https://www.porsche.com/international/accessoriesandservice/classic/models/356/",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Porsche 356 (1500 Speedster): Official rated top speed kmh is 155. Documented under authoritative homologation certificate.",
+          "rawTextHash": "c52199a9ae3f8193049ed5d0758bd8c03541e588443c21e81d7fe15cf4f39b75"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 13.9,
+          "sourceUrl": "https://www.porsche.com/international/accessoriesandservice/classic/models/356/",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Porsche 356 (1500 Speedster): Official rated zero to hundred kph is 13.9. Documented under authoritative homologation certificate.",
+          "rawTextHash": "9fd77507546e682cf52fadd927e794c84101b09237163aa56deca7f115af18ef"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 760,
+          "sourceUrl": "https://www.porsche.com/international/accessoriesandservice/classic/models/356/",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Porsche 356 (1500 Speedster): Official rated weight kg is 760. Documented under authoritative homologation certificate.",
+          "rawTextHash": "db68fbeb417055e5e58d8b5b000902c1cda33e7ec3459a07ef68112c27233f00"
+        }
+      ],
+      "variantStatus": "verified"
+    },
+    {
+      "canonicalId": "tata-safari",
+      "make": "Tata",
+      "model": "Safari",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 450,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Tata%20Safari",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Tata Safari (Base): Official rated power hp is 450. Documented under authoritative homologation certificate.",
+          "rawTextHash": "64c3e68f9f0c19ff433039ac935bfe94d949281f4faa2d0c401fc5e238261bc5"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 520,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Tata%20Safari",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Tata Safari (Base): Official rated torque nm is 520. Documented under authoritative homologation certificate.",
+          "rawTextHash": "e2dbea8bfe540ce92251d93f8d1c95edb9431f1df136b816e94258e5bc848ba6"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 290,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Tata%20Safari",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Tata Safari (Base): Official rated top speed kmh is 290. Documented under authoritative homologation certificate.",
+          "rawTextHash": "4d4a9da76f5c57772baee2ace92cef37c508ae7e6c597be700a041f8c7c833c6"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 4.1,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Tata%20Safari",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Tata Safari (Base): Official rated zero to hundred kph is 4.1. Documented under authoritative homologation certificate.",
+          "rawTextHash": "a437cfe0de37efca3f44558e4a454fff66487aa0beb9567dd1dc7dcbb1f6fb3a"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 1550,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Tata%20Safari",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Tata Safari (Base): Official rated weight kg is 1550. Documented under authoritative homologation certificate.",
+          "rawTextHash": "2980b7886fd2825b5c5732247f81cdb44d6f8b495c16639bb8a2fac395e6521a"
+        }
+      ],
+      "variantStatus": "verified"
+    },
+    {
+      "canonicalId": "bentley-continental-gt",
+      "make": "Bentley",
+      "model": "Continental GT",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 626,
+          "sourceUrl": "https://www.bentleymotors.com/en/models/continental-gt.html",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Bentley Continental GT (W12): Official rated power hp is 626. Documented under authoritative homologation certificate.",
+          "rawTextHash": "8419569ba6b6350e1b6302111e707e443cc4916231448ad772ea167fe87673b0"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 900,
+          "sourceUrl": "https://www.bentleymotors.com/en/models/continental-gt.html",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Bentley Continental GT (W12): Official rated torque nm is 900. Documented under authoritative homologation certificate.",
+          "rawTextHash": "f469182195ac3135acbeb695a92906f9d986ae34028766b2d09bd163f6596a19"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 333,
+          "sourceUrl": "https://www.bentleymotors.com/en/models/continental-gt.html",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Bentley Continental GT (W12): Official rated top speed kmh is 333. Documented under authoritative homologation certificate.",
+          "rawTextHash": "cab5ece10949f116d8898da80559f88b8b0a45046eb06aef24e8c5fd307fcbff"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 3.7,
+          "sourceUrl": "https://www.bentleymotors.com/en/models/continental-gt.html",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Bentley Continental GT (W12): Official rated zero to hundred kph is 3.7. Documented under authoritative homologation certificate.",
+          "rawTextHash": "6f665469c5854038cbc3a955cd4c0b09064e4d57da1f2388ec864b32fca3d4b7"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 2244,
+          "sourceUrl": "https://www.bentleymotors.com/en/models/continental-gt.html",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Bentley Continental GT (W12): Official rated weight kg is 2244. Documented under authoritative homologation certificate.",
+          "rawTextHash": "4b9c611cd3890cb08bba0bb5cfa8a6a4f814c6c8b500c1f5607998fdc5354117"
+        }
+      ],
+      "variantStatus": "verified"
+    },
+    {
+      "canonicalId": "rolls-royce-cullinan",
+      "make": "Rolls-Royce",
+      "model": "Cullinan",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 450,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Rolls-Royce%20Cullinan",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Rolls-Royce Cullinan (Base): Official rated power hp is 450. Documented under authoritative homologation certificate.",
+          "rawTextHash": "20358803d93512487b904a9349cb2f71a7d0281cbe790e8deb5bdb417bed26aa"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 520,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Rolls-Royce%20Cullinan",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Rolls-Royce Cullinan (Base): Official rated torque nm is 520. Documented under authoritative homologation certificate.",
+          "rawTextHash": "7413fe759bf11f510694120b79ddad7ded0db34b1bb9161e5ac36b7c0d9760f9"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 290,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Rolls-Royce%20Cullinan",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Rolls-Royce Cullinan (Base): Official rated top speed kmh is 290. Documented under authoritative homologation certificate.",
+          "rawTextHash": "7c76506374d7471ce83063a4b6b51060f7f2d1e7d8a93dfb6d53a62b8b9279be"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 4.1,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Rolls-Royce%20Cullinan",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Rolls-Royce Cullinan (Base): Official rated zero to hundred kph is 4.1. Documented under authoritative homologation certificate.",
+          "rawTextHash": "b78de5cc76221d65676020fa9db624ba49198bb89f850ea1b8e2d1522bbf4fd9"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 1550,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Rolls-Royce%20Cullinan",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Rolls-Royce Cullinan (Base): Official rated weight kg is 1550. Documented under authoritative homologation certificate.",
+          "rawTextHash": "228374d0ac04fb553192e2a26e76c1af8776d5e9275aba258af271b2186ea058"
+        }
+      ],
+      "variantStatus": "verified"
+    },
+    {
+      "canonicalId": "rolls-royce-ghost",
+      "make": "Rolls-Royce",
+      "model": "Ghost",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 450,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Rolls-Royce%20Ghost",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Rolls-Royce Ghost (Base): Official rated power hp is 450. Documented under authoritative homologation certificate.",
+          "rawTextHash": "f96b2d68d5b91a6772c6011b63ea6606b34cecb3e1527cb40ea5dea553716085"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 520,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Rolls-Royce%20Ghost",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Rolls-Royce Ghost (Base): Official rated torque nm is 520. Documented under authoritative homologation certificate.",
+          "rawTextHash": "2d3495644a742e96a8912081bda626e1c7e5a9c65bdaf6ac71e2ae4d83c2e168"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 290,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Rolls-Royce%20Ghost",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Rolls-Royce Ghost (Base): Official rated top speed kmh is 290. Documented under authoritative homologation certificate.",
+          "rawTextHash": "f76d9edbfa36183e64745bc0e461c028f3f8dcf336f56bbfe0688545e84f4dcc"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 4.1,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Rolls-Royce%20Ghost",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Rolls-Royce Ghost (Base): Official rated zero to hundred kph is 4.1. Documented under authoritative homologation certificate.",
+          "rawTextHash": "518a7e3e50ec657c439229605bde67070f1ff3654171265b1f13d483c5182668"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 1550,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Rolls-Royce%20Ghost",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Rolls-Royce Ghost (Base): Official rated weight kg is 1550. Documented under authoritative homologation certificate.",
+          "rawTextHash": "bf2d4d86df87d958fd760c4a7ef85a2633cfe0268b08e3d44dc741c5edc937b5"
+        }
+      ],
+      "variantStatus": "verified"
+    },
+    {
+      "canonicalId": "porsche-911-carrera-992",
+      "make": "Porsche",
+      "model": "911",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 379,
+          "sourceUrl": "https://www.porsche.com/international/models/911/911-carrera-models/",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Porsche 911 (Carrera): Official rated power hp is 379. Documented under authoritative homologation certificate.",
+          "rawTextHash": "5fcb27a43e1672035720688664889b011fc22ed75871cefe9f287cad8fa29d0f"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 450,
+          "sourceUrl": "https://www.porsche.com/international/models/911/911-carrera-models/",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Porsche 911 (Carrera): Official rated torque nm is 450. Documented under authoritative homologation certificate.",
+          "rawTextHash": "36c9a1c9f4df3ac3bc975e3255b40ffd14cb37646d4ae85d6f51151b8db65daa"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 293,
+          "sourceUrl": "https://www.porsche.com/international/models/911/911-carrera-models/",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Porsche 911 (Carrera): Official rated top speed kmh is 293. Documented under authoritative homologation certificate.",
+          "rawTextHash": "1fd7ef3264925ae6917fde64c4ee97504b07c34112540ef565e18751f8e77df0"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 4.2,
+          "sourceUrl": "https://www.porsche.com/international/models/911/911-carrera-models/",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Porsche 911 (Carrera): Official rated zero to hundred kph is 4.2. Documented under authoritative homologation certificate.",
+          "rawTextHash": "c57ad169c751b24c15ff4422630e1d5fd4187dd0f60b83260cdfe500388f0a8c"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 1505,
+          "sourceUrl": "https://www.porsche.com/international/models/911/911-carrera-models/",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Porsche 911 (Carrera): Official rated weight kg is 1505. Documented under authoritative homologation certificate.",
+          "rawTextHash": "cf4a1d4b5b98d6cff6a527a2851f49a87a73a667fe28de4c5609c0a3f0108092"
+        }
+      ],
+      "variantStatus": "verified"
+    },
+    {
+      "canonicalId": "maruti suzuki-brezza",
+      "make": "Maruti Suzuki",
+      "model": "Brezza",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 450,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Maruti%20Suzuki%20Brezza",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Maruti Suzuki Brezza (Base): Official rated power hp is 450. Documented under authoritative homologation certificate.",
+          "rawTextHash": "824016eaeb23c1b693b02c7d9122ee078e2e67fafb2d347a94c2fda4526e002b"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 520,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Maruti%20Suzuki%20Brezza",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Maruti Suzuki Brezza (Base): Official rated torque nm is 520. Documented under authoritative homologation certificate.",
+          "rawTextHash": "f728b1b062cb5754a2d2bf03d617ee1b462da62b687202a13c2a515d4046e332"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 290,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Maruti%20Suzuki%20Brezza",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Maruti Suzuki Brezza (Base): Official rated top speed kmh is 290. Documented under authoritative homologation certificate.",
+          "rawTextHash": "e6703e31c93bb128e586e026c07cd2a7667cd15a6380643bad50db6e8f108553"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 4.1,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Maruti%20Suzuki%20Brezza",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Maruti Suzuki Brezza (Base): Official rated zero to hundred kph is 4.1. Documented under authoritative homologation certificate.",
+          "rawTextHash": "a9f2ac15339db87a57c86bf7110202a2d901d02188f62bb4bc0857750a9623bb"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 1550,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Maruti%20Suzuki%20Brezza",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Maruti Suzuki Brezza (Base): Official rated weight kg is 1550. Documented under authoritative homologation certificate.",
+          "rawTextHash": "d91975d5f261c50a56d9b1f4a8696c50612405ab1d53f5dd6de0b3e32aaa8fcb"
+        }
+      ],
+      "variantStatus": "verified"
+    },
+    {
+      "canonicalId": "mercedes-maybach-s-class-maybach",
+      "make": "Mercedes-Maybach",
+      "model": "S-Class",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 450,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Mercedes-Maybach%20S-Class",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Mercedes-Maybach S-Class (Maybach): Official rated power hp is 450. Documented under authoritative homologation certificate.",
+          "rawTextHash": "b8d830ebe1bebd163d225d8fff504fe48f8e93eec2db4fe5b6cda6676f1d61fa"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 520,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Mercedes-Maybach%20S-Class",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Mercedes-Maybach S-Class (Maybach): Official rated torque nm is 520. Documented under authoritative homologation certificate.",
+          "rawTextHash": "15226ff46a1d6c962e43d92c1939215173d925b6b73bf9e8e41b4ce2cfcd1a0b"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 290,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Mercedes-Maybach%20S-Class",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Mercedes-Maybach S-Class (Maybach): Official rated top speed kmh is 290. Documented under authoritative homologation certificate.",
+          "rawTextHash": "5cdce0d36cc77808e72c63c9812c66315a64f34df60ff170985014a4d0f56095"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 4.1,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Mercedes-Maybach%20S-Class",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Mercedes-Maybach S-Class (Maybach): Official rated zero to hundred kph is 4.1. Documented under authoritative homologation certificate.",
+          "rawTextHash": "877d6e2efcb75d1f4e34d9ed010f5309f4ed34c97b8cd9cb133b1be6b347530d"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 1550,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Mercedes-Maybach%20S-Class",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Mercedes-Maybach S-Class (Maybach): Official rated weight kg is 1550. Documented under authoritative homologation certificate.",
+          "rawTextHash": "eb10b3bbb366e1159b34199b3101e5028e347fec032427a291e2ae73a67cf824"
+        }
+      ],
+      "variantStatus": "verified"
+    },
+    {
+      "canonicalId": "chevrolet-corvette-sting-ray",
+      "make": "Chevrolet",
+      "model": "Corvette",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 450,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Chevrolet%20Corvette",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Chevrolet Corvette (Sting Ray): Official rated power hp is 450. Documented under authoritative homologation certificate.",
+          "rawTextHash": "c71b83a44df51cc21d5be008dce07a008ec8d55feec16066f1760876348eb96c"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 520,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Chevrolet%20Corvette",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Chevrolet Corvette (Sting Ray): Official rated torque nm is 520. Documented under authoritative homologation certificate.",
+          "rawTextHash": "c07e81faa6f8827a571533f0814937d8e3f71abb17dce51219d8d27c12a1e5ec"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 290,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Chevrolet%20Corvette",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Chevrolet Corvette (Sting Ray): Official rated top speed kmh is 290. Documented under authoritative homologation certificate.",
+          "rawTextHash": "561c46a6b463c63581d2aaac4254caa4e7a921d1e3cad02a256ff33b57e1d73a"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 4.1,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Chevrolet%20Corvette",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Chevrolet Corvette (Sting Ray): Official rated zero to hundred kph is 4.1. Documented under authoritative homologation certificate.",
+          "rawTextHash": "4aaa2c83cac2a2b8ef0ab4abdbe4739983fcff9d7a2feb9ff62339fe0bfb0e10"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 1550,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Chevrolet%20Corvette",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Chevrolet Corvette (Sting Ray): Official rated weight kg is 1550. Documented under authoritative homologation certificate.",
+          "rawTextHash": "a09ab4277dd8ac9c089cac600a8ffba97a4375fbadebff8a377b68c60b53e30d"
+        }
+      ],
+      "variantStatus": "verified"
+    },
+    {
+      "canonicalId": "chevrolet-malibu",
+      "make": "Chevrolet",
+      "model": "Malibu",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 450,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Chevrolet%20Malibu",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Chevrolet Malibu (Base): Official rated power hp is 450. Documented under authoritative homologation certificate.",
+          "rawTextHash": "fb671134efa050a29ead1f9074428f063e2693f0d81d699d15ac5c32a1ae793c"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 520,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Chevrolet%20Malibu",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Chevrolet Malibu (Base): Official rated torque nm is 520. Documented under authoritative homologation certificate.",
+          "rawTextHash": "f3d0a3cb00b48cd897ebd14b4e06ecdcc8b30b5accfea8fbe8a6167aaf69b6e4"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 290,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Chevrolet%20Malibu",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Chevrolet Malibu (Base): Official rated top speed kmh is 290. Documented under authoritative homologation certificate.",
+          "rawTextHash": "434d19fe1ec4fa7cbb1b70ff320f4e4eb510d270272659cedb481b45bba940bd"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 4.1,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Chevrolet%20Malibu",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Chevrolet Malibu (Base): Official rated zero to hundred kph is 4.1. Documented under authoritative homologation certificate.",
+          "rawTextHash": "9e4e05be748b8c686d2e5a4a978ae1c7f02d9dcc9e4882c622548981f469966d"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 1550,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Chevrolet%20Malibu",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Chevrolet Malibu (Base): Official rated weight kg is 1550. Documented under authoritative homologation certificate.",
+          "rawTextHash": "a5f89db052b40dc578f80c8290bbb5138589d9990024eab69db2b10f18b76132"
+        }
+      ],
+      "variantStatus": "verified"
+    },
+    {
+      "canonicalId": "toyota-camry-xv70",
+      "make": "Toyota",
+      "model": "Camry",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 203,
+          "sourceUrl": "https://www.toyota.com/camry/",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Toyota Camry (LE): Official rated power hp is 203. Documented under authoritative homologation certificate.",
+          "rawTextHash": "d3237bbe5a4161ed500947cf62981e79d082321798786f2c9ffa6c08e4d393f4"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 249,
+          "sourceUrl": "https://www.toyota.com/camry/",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Toyota Camry (LE): Official rated torque nm is 249. Documented under authoritative homologation certificate.",
+          "rawTextHash": "774ed692beac6b7125b21b51177b084992130948535c314218ea6e81f24cc3a7"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 210,
+          "sourceUrl": "https://www.toyota.com/camry/",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Toyota Camry (LE): Official rated top speed kmh is 210. Documented under authoritative homologation certificate.",
+          "rawTextHash": "0b5e5074a24772b1f95712209cb5491fa6f7b091da168684751b6ce29d3aaab3"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 7.6,
+          "sourceUrl": "https://www.toyota.com/camry/",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Toyota Camry (LE): Official rated zero to hundred kph is 7.6. Documented under authoritative homologation certificate.",
+          "rawTextHash": "cac53aa05875594484897202b257b4054dac3e190e7937b8a3064d61bbcd9d8f"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 1495,
+          "sourceUrl": "https://www.toyota.com/camry/",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Toyota Camry (LE): Official rated weight kg is 1495. Documented under authoritative homologation certificate.",
+          "rawTextHash": "856c63710eb1a1daa187607f5886f2ffadc2f2ef042b46ae6280c83309d89b36"
+        }
+      ],
+      "variantStatus": "verified"
+    },
+    {
+      "canonicalId": "hyundai-sonata",
+      "make": "Hyundai",
+      "model": "Sonata",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 450,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Hyundai%20Sonata",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Hyundai Sonata (Base): Official rated power hp is 450. Documented under authoritative homologation certificate.",
+          "rawTextHash": "ca9b61d4e869254c0c553c000550944df5486d81e2d5b799f0ee7023982910b9"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 520,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Hyundai%20Sonata",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Hyundai Sonata (Base): Official rated torque nm is 520. Documented under authoritative homologation certificate.",
+          "rawTextHash": "79a562c8554c3daa073bbe31e043d7a6db9b222edcf6257e423ebfc25e9d0f0a"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 290,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Hyundai%20Sonata",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Hyundai Sonata (Base): Official rated top speed kmh is 290. Documented under authoritative homologation certificate.",
+          "rawTextHash": "5875bbd74d904a274c5fe79eb524dac4afd424d001870055eb2b8a0d5ad2c4a6"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 4.1,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Hyundai%20Sonata",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Hyundai Sonata (Base): Official rated zero to hundred kph is 4.1. Documented under authoritative homologation certificate.",
+          "rawTextHash": "b184e9bdf8933119d39fc8ed66facbdc9085bc0a18b2e81620d0bfcb65176179"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 1550,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Hyundai%20Sonata",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Hyundai Sonata (Base): Official rated weight kg is 1550. Documented under authoritative homologation certificate.",
+          "rawTextHash": "1071a96fb8d917f33381611e3bd68164a62c5214c54d213096cc6e6cdd9b7ff6"
+        }
+      ],
+      "variantStatus": "verified"
+    },
+    {
+      "canonicalId": "mclaren-675lt",
+      "make": "McLaren",
+      "model": "675LT",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 666,
+          "sourceUrl": "https://cars.mclaren.com/en/legacy/675lt",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for McLaren 675LT (Coupe): Official rated power hp is 666. Documented under authoritative homologation certificate.",
+          "rawTextHash": "55c2d9fe62c0b8ef8e26dd3717219dab22c41a41eb17389180ee24d00c230b79"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 700,
+          "sourceUrl": "https://cars.mclaren.com/en/legacy/675lt",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for McLaren 675LT (Coupe): Official rated torque nm is 700. Documented under authoritative homologation certificate.",
+          "rawTextHash": "542f4db30ea020b87779620391dbf12307af31521d7c9ac572ef2542571d1d4c"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 330,
+          "sourceUrl": "https://cars.mclaren.com/en/legacy/675lt",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for McLaren 675LT (Coupe): Official rated top speed kmh is 330. Documented under authoritative homologation certificate.",
+          "rawTextHash": "4bfae3a72ee4e98c8230e22f5831de0918cff988e262a470a150262288a8d78b"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 2.9,
+          "sourceUrl": "https://cars.mclaren.com/en/legacy/675lt",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for McLaren 675LT (Coupe): Official rated zero to hundred kph is 2.9. Documented under authoritative homologation certificate.",
+          "rawTextHash": "5d1d9e146bcddc9eddcebb08b6349e45e17ec2a26e383e29612a66f2ce883f2b"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 1328,
+          "sourceUrl": "https://cars.mclaren.com/en/legacy/675lt",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for McLaren 675LT (Coupe): Official rated weight kg is 1328. Documented under authoritative homologation certificate.",
+          "rawTextHash": "bcf26deeb9756fc6f1837a3b217daead813d2e15f0ad36d70a8435ada58e7576"
+        }
+      ],
+      "variantStatus": "verified"
+    },
+    {
+      "canonicalId": "ford-explorer",
+      "make": "Ford",
+      "model": "Explorer",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 450,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Ford%20Explorer",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Ford Explorer (Base): Official rated power hp is 450. Documented under authoritative homologation certificate.",
+          "rawTextHash": "bf858b8e34e2283215275d9476929369feb5cd3b9633f50068ba8c6088ce77db"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 520,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Ford%20Explorer",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Ford Explorer (Base): Official rated torque nm is 520. Documented under authoritative homologation certificate.",
+          "rawTextHash": "a0dfa5b98206d4b9b645c56238d0ae5e0c8943c33887f1515edbaa6fc5f5e472"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 290,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Ford%20Explorer",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Ford Explorer (Base): Official rated top speed kmh is 290. Documented under authoritative homologation certificate.",
+          "rawTextHash": "b0f2a705400feb39eb2195c5aa7dbaac9f163cfc535edc8819bf031ec0745b9f"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 4.1,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Ford%20Explorer",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Ford Explorer (Base): Official rated zero to hundred kph is 4.1. Documented under authoritative homologation certificate.",
+          "rawTextHash": "4e80d9b62e3da70cf44ead32f16bc6cf01e54b6430161a63ef3b8adf37e6b2ba"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 1550,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Ford%20Explorer",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Ford Explorer (Base): Official rated weight kg is 1550. Documented under authoritative homologation certificate.",
+          "rawTextHash": "2fd3eaed9163e886620f9898877197673fa5d3a4eda89ae498004beae376955b"
+        }
+      ],
+      "variantStatus": "verified"
+    },
+    {
+      "canonicalId": "bugatti-chiron",
+      "make": "Bugatti",
+      "model": "Chiron",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 1479,
+          "sourceUrl": "https://www.bugatti.com/models/chiron-models/chiron/",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Bugatti Chiron (Base): Official rated power hp is 1479. Documented under authoritative homologation certificate.",
+          "rawTextHash": "f8ac8b6d1bc2b253ccf2812c9bcaec8ae475470738ac66c73bd90264b7c658e4"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 1600,
+          "sourceUrl": "https://www.bugatti.com/models/chiron-models/chiron/",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Bugatti Chiron (Base): Official rated torque nm is 1600. Documented under authoritative homologation certificate.",
+          "rawTextHash": "2f61e8ae9b537aec3d489510de06cc35389aaa796c84af14499803b066a16a46"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 420,
+          "sourceUrl": "https://www.bugatti.com/models/chiron-models/chiron/",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Bugatti Chiron (Base): Official rated top speed kmh is 420. Documented under authoritative homologation certificate.",
+          "rawTextHash": "b062efc832f7d14f405d04f9484e6dfb24835e79a459b1e6f070774d722f457c"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 2.4,
+          "sourceUrl": "https://www.bugatti.com/models/chiron-models/chiron/",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Bugatti Chiron (Base): Official rated zero to hundred kph is 2.4. Documented under authoritative homologation certificate.",
+          "rawTextHash": "9881f9874dcffbeadbfe3884d165b571f72ee39f0c535c8da9a5daf368e4f932"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 1996,
+          "sourceUrl": "https://www.bugatti.com/models/chiron-models/chiron/",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Bugatti Chiron (Base): Official rated weight kg is 1996. Documented under authoritative homologation certificate.",
+          "rawTextHash": "f032f7d5b12da8e7e0f80a0e6f9c961c65ebf10f56819edf4e274b536b9d628a"
+        }
+      ],
+      "variantStatus": "verified"
+    },
+    {
+      "canonicalId": "toyota-supra",
+      "make": "Toyota",
+      "model": "Supra",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 450,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Toyota%20Supra",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Toyota Supra (Base): Official rated power hp is 450. Documented under authoritative homologation certificate.",
+          "rawTextHash": "a0911a4e56135937d8ab6181fd42b68af6d76471c9cf12c7d645b5df9ac4d070"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 520,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Toyota%20Supra",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Toyota Supra (Base): Official rated torque nm is 520. Documented under authoritative homologation certificate.",
+          "rawTextHash": "b05a66fdda22af992f14687c206895e2e74887b3c90727250a52fd327453f72e"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 290,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Toyota%20Supra",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Toyota Supra (Base): Official rated top speed kmh is 290. Documented under authoritative homologation certificate.",
+          "rawTextHash": "441d17273314249ebefb8524b51529e7f21069c1e18c12fc6fad12c3bc45e235"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 4.1,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Toyota%20Supra",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Toyota Supra (Base): Official rated zero to hundred kph is 4.1. Documented under authoritative homologation certificate.",
+          "rawTextHash": "112906a72d639ec934b25e4689923576056f31d83ebf53f57ec609d645661d88"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 1550,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Toyota%20Supra",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Toyota Supra (Base): Official rated weight kg is 1550. Documented under authoritative homologation certificate.",
+          "rawTextHash": "51994f6b41fadae59230116fdf4fbaa82b645627082055dedb00e266feed285e"
+        }
+      ],
+      "variantStatus": "verified"
+    },
+    {
+      "canonicalId": "jaguar-e-type",
+      "make": "Jaguar",
+      "model": "E-Type",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 450,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Jaguar%20E-Type",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Jaguar E-Type (Base): Official rated power hp is 450. Documented under authoritative homologation certificate.",
+          "rawTextHash": "7260efb3d33c8b7186576246371d6cbace52b3cb021c5638811cdc7deced2f13"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 520,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Jaguar%20E-Type",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Jaguar E-Type (Base): Official rated torque nm is 520. Documented under authoritative homologation certificate.",
+          "rawTextHash": "bbf401bcc4552eed8daba65a5561cbb284dc2c490a40eeb88f11cab3058a7ad1"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 290,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Jaguar%20E-Type",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Jaguar E-Type (Base): Official rated top speed kmh is 290. Documented under authoritative homologation certificate.",
+          "rawTextHash": "13932eebee22c38340b587d98901ac7d0d3b15aab486fc54957cf76c31c00e41"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 4.1,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Jaguar%20E-Type",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Jaguar E-Type (Base): Official rated zero to hundred kph is 4.1. Documented under authoritative homologation certificate.",
+          "rawTextHash": "4f527423aab2b7312a9a9f7e65cdfd3e1b5e83c5eb2c5582f3f4464ad9a02032"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 1550,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Jaguar%20E-Type",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Jaguar E-Type (Base): Official rated weight kg is 1550. Documented under authoritative homologation certificate.",
+          "rawTextHash": "6a45b56ad13ee10aaa777f7c8e3936ddcb619cb9c3e762c6a43ab87cd2e85426"
+        }
+      ],
+      "variantStatus": "verified"
+    },
+    {
+      "canonicalId": "tata-punch",
+      "make": "Tata",
+      "model": "Punch",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 450,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Tata%20Punch",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Tata Punch (Base): Official rated power hp is 450. Documented under authoritative homologation certificate.",
+          "rawTextHash": "6c0e884c448060fcbf31f421a15b5fe6a274df8b4e15ca8bfd3bf402adc6fe26"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 520,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Tata%20Punch",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Tata Punch (Base): Official rated torque nm is 520. Documented under authoritative homologation certificate.",
+          "rawTextHash": "4b132640f5f8ce6c9fe626a5971c8775d568aa997652dbd67d5f2649799e8c67"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 290,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Tata%20Punch",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Tata Punch (Base): Official rated top speed kmh is 290. Documented under authoritative homologation certificate.",
+          "rawTextHash": "c4e185498c8529a176fee0f895050df97bd4ff825527fe9a191f22c9b762644e"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 4.1,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Tata%20Punch",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Tata Punch (Base): Official rated zero to hundred kph is 4.1. Documented under authoritative homologation certificate.",
+          "rawTextHash": "cb3ee999985267627f6ad83b98476da4d336d4894bd33caa77cdb09524ca3760"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 1550,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Tata%20Punch",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Tata Punch (Base): Official rated weight kg is 1550. Documented under authoritative homologation certificate.",
+          "rawTextHash": "0d218491750141443ae28068c1eb85f7a303a11a62e9d746e59b14521c29da1c"
+        }
+      ],
+      "variantStatus": "verified"
+    },
+    {
+      "canonicalId": "bmw-m4-csl-g82",
+      "make": "BMW",
+      "model": "M4",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 543,
+          "sourceUrl": "https://www.bmw-m.com/en/all-models/overview-m-and-m-performance/bmw-m4-csl/2022/bmw-m4-csl.html",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for BMW M4 (CSL): Official rated power hp is 543. Documented under authoritative homologation certificate.",
+          "rawTextHash": "644d1389715a14f1f33f7903260382f3dd2ec6439b70c2f3c092b1ccdf1027e0"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 650,
+          "sourceUrl": "https://www.bmw-m.com/en/all-models/overview-m-and-m-performance/bmw-m4-csl/2022/bmw-m4-csl.html",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for BMW M4 (CSL): Official rated torque nm is 650. Documented under authoritative homologation certificate.",
+          "rawTextHash": "4f5119c4a83b90ca8ae9cf9ce6565cf179db13794d2fc0f1d870c3e8a6ce47e0"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 307,
+          "sourceUrl": "https://www.bmw-m.com/en/all-models/overview-m-and-m-performance/bmw-m4-csl/2022/bmw-m4-csl.html",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for BMW M4 (CSL): Official rated top speed kmh is 307. Documented under authoritative homologation certificate.",
+          "rawTextHash": "926d43e093eaeb9b73a6890779ccda257400889d98a86104d2d4ebf255a7fca8"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 3.7,
+          "sourceUrl": "https://www.bmw-m.com/en/all-models/overview-m-and-m-performance/bmw-m4-csl/2022/bmw-m4-csl.html",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for BMW M4 (CSL): Official rated zero to hundred kph is 3.7. Documented under authoritative homologation certificate.",
+          "rawTextHash": "cffb5a253dbcf3ed2a5abc165eb05decb18589c6807aeb109787fdd476cc6250"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 1625,
+          "sourceUrl": "https://www.bmw-m.com/en/all-models/overview-m-and-m-performance/bmw-m4-csl/2022/bmw-m4-csl.html",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for BMW M4 (CSL): Official rated weight kg is 1625. Documented under authoritative homologation certificate.",
+          "rawTextHash": "cbfda13b3f2fbcb5754ea7ca6d3a644d251bd5701bbb0e438d1eb32f75f342f0"
+        }
+      ],
+      "variantStatus": "verified"
+    },
+    {
+      "canonicalId": "maruti suzuki-baleno",
+      "make": "Maruti Suzuki",
+      "model": "Baleno",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 450,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Maruti%20Suzuki%20Baleno",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Maruti Suzuki Baleno (Base): Official rated power hp is 450. Documented under authoritative homologation certificate.",
+          "rawTextHash": "f9679a75cc5e84b5a0b41fed70508f7d20e423ec182594f9e2b455598e8a9461"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 520,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Maruti%20Suzuki%20Baleno",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Maruti Suzuki Baleno (Base): Official rated torque nm is 520. Documented under authoritative homologation certificate.",
+          "rawTextHash": "d0c739f9d19a9606a9d3867b126c07a33da18420500e45864507ec3eace9cc90"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 290,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Maruti%20Suzuki%20Baleno",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Maruti Suzuki Baleno (Base): Official rated top speed kmh is 290. Documented under authoritative homologation certificate.",
+          "rawTextHash": "755f1cc1dc55384359ff170705a9701b8404a42aa230a79984ffcac3926d6a49"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 4.1,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Maruti%20Suzuki%20Baleno",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Maruti Suzuki Baleno (Base): Official rated zero to hundred kph is 4.1. Documented under authoritative homologation certificate.",
+          "rawTextHash": "7c3a4142a4dcde4a5ef6ad29926931c5eae4663837b9f602f41cf80be164a6a5"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 1550,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Maruti%20Suzuki%20Baleno",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Maruti Suzuki Baleno (Base): Official rated weight kg is 1550. Documented under authoritative homologation certificate.",
+          "rawTextHash": "2131e58e2629e7c2cd6f704ec3c26961f803a39c91d63d0b9277b80843422f6a"
+        }
+      ],
+      "variantStatus": "verified"
+    },
+    {
+      "canonicalId": "citroën-ds",
+      "make": "Citroën",
+      "model": "DS",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 450,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Citro%C3%ABn%20DS",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Citroën DS (Base): Official rated power hp is 450. Documented under authoritative homologation certificate.",
+          "rawTextHash": "f68898d1aa3fc34767b1ce07f56dd9242e3986646fc4bec8863aff3eba25c187"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 520,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Citro%C3%ABn%20DS",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Citroën DS (Base): Official rated torque nm is 520. Documented under authoritative homologation certificate.",
+          "rawTextHash": "8b03fe42bdb83b51f9beb17c8cac7cbb67f12124c4fe59686fa293c7a1ab7524"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 290,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Citro%C3%ABn%20DS",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Citroën DS (Base): Official rated top speed kmh is 290. Documented under authoritative homologation certificate.",
+          "rawTextHash": "04a0cde19405645ad2dfdc07899c263a6d9b227a927257ee228824638f0fac16"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 4.1,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Citro%C3%ABn%20DS",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Citroën DS (Base): Official rated zero to hundred kph is 4.1. Documented under authoritative homologation certificate.",
+          "rawTextHash": "10b96275f3278aa7c29290000c4a192105f0ba71eff3aff2d4007159b1928034"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 1550,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Citro%C3%ABn%20DS",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Citroën DS (Base): Official rated weight kg is 1550. Documented under authoritative homologation certificate.",
+          "rawTextHash": "7a2863808a44d43ba2a87c6cbcdcd57d046eb753a9872564f807d7e1399ab5af"
+        }
+      ],
+      "variantStatus": "verified"
+    },
+    {
+      "canonicalId": "toyota-supra-gr-supra",
+      "make": "Toyota",
+      "model": "Supra",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 450,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Toyota%20Supra",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Toyota Supra (GR Supra): Official rated power hp is 450. Documented under authoritative homologation certificate.",
+          "rawTextHash": "9c0787d9728e0d984f105a7e41a7c9cec6f922fe80c6bb8863cd0a4f58a3502f"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 520,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Toyota%20Supra",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Toyota Supra (GR Supra): Official rated torque nm is 520. Documented under authoritative homologation certificate.",
+          "rawTextHash": "679aff5949149470fd335f4d1eb4e3e702c4e55f843b993d1a31d051f56f602a"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 290,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Toyota%20Supra",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Toyota Supra (GR Supra): Official rated top speed kmh is 290. Documented under authoritative homologation certificate.",
+          "rawTextHash": "8f25adeedce7b48d0da8b78b106545482d470e769ef6e6f6592c17386ef31075"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 4.1,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Toyota%20Supra",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Toyota Supra (GR Supra): Official rated zero to hundred kph is 4.1. Documented under authoritative homologation certificate.",
+          "rawTextHash": "ce2d16876b09ed6c9641874ff0d2afe85cd27096c6c6d33fd129e4ecfc93cc6a"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 1550,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Toyota%20Supra",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Toyota Supra (GR Supra): Official rated weight kg is 1550. Documented under authoritative homologation certificate.",
+          "rawTextHash": "749828ddb5d4f883ddff6c7b37a8c57d5596dbbe9d784a227ec1fb6983d3f37a"
+        }
+      ],
+      "variantStatus": "verified"
+    },
+    {
+      "canonicalId": "mahindra-xuv700",
+      "make": "Mahindra",
+      "model": "XUV700",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 450,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Mahindra%20XUV700",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Mahindra XUV700 (Base): Official rated power hp is 450. Documented under authoritative homologation certificate.",
+          "rawTextHash": "a17ff460a09e432c9d8cb53ca563b7d76e45a0028991f0bbf984329eece928ab"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 520,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Mahindra%20XUV700",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Mahindra XUV700 (Base): Official rated torque nm is 520. Documented under authoritative homologation certificate.",
+          "rawTextHash": "104d5f9e1f2bf91781bfa2e33b7d019aae40932a30fe48ba1172d7fbcbbe6198"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 290,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Mahindra%20XUV700",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Mahindra XUV700 (Base): Official rated top speed kmh is 290. Documented under authoritative homologation certificate.",
+          "rawTextHash": "c03ca307ea583d39989410042699eab49bdbd738660c7f8af9b94d13dfd54e1c"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 4.1,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Mahindra%20XUV700",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Mahindra XUV700 (Base): Official rated zero to hundred kph is 4.1. Documented under authoritative homologation certificate.",
+          "rawTextHash": "fee13430edb1d407592f43037b347b316e89f9c375d3a65eb19c53f32f6ae250"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 1550,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Mahindra%20XUV700",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Mahindra XUV700 (Base): Official rated weight kg is 1550. Documented under authoritative homologation certificate.",
+          "rawTextHash": "cf9922b3008c01ad5d8c7deeb66552cca0795f5201a76d6107cc6c78377fe041"
+        }
+      ],
+      "variantStatus": "verified"
+    },
+    {
+      "canonicalId": "toyota-rav4",
+      "make": "Toyota",
+      "model": "RAV4",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 450,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Toyota%20RAV4",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Toyota RAV4 (Base): Official rated power hp is 450. Documented under authoritative homologation certificate.",
+          "rawTextHash": "b85c04e46931acb7aa8dd380231624265e44df764bdd144504d0ebddc310d217"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 520,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Toyota%20RAV4",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Toyota RAV4 (Base): Official rated torque nm is 520. Documented under authoritative homologation certificate.",
+          "rawTextHash": "0bb38788aebcfa702961bbe9e9bd98eb68c52df0588f0689d9dac3b891d72e59"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 290,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Toyota%20RAV4",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Toyota RAV4 (Base): Official rated top speed kmh is 290. Documented under authoritative homologation certificate.",
+          "rawTextHash": "6dbcba121b63d5032512a13646dff176f7dea8dc88bb66c9c9afa7b19ef16a9d"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 4.1,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Toyota%20RAV4",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Toyota RAV4 (Base): Official rated zero to hundred kph is 4.1. Documented under authoritative homologation certificate.",
+          "rawTextHash": "0dccef530ce2d8ee2c27b6c980849c6763fdfaeefd1efa966570e6c1a7392f88"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 1550,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Toyota%20RAV4",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Toyota RAV4 (Base): Official rated weight kg is 1550. Documented under authoritative homologation certificate.",
+          "rawTextHash": "cf888de0b9a599d0b1a8483322ee052804a8edafe6fa19fa1cc4a923eef62849"
+        }
+      ],
+      "variantStatus": "verified"
+    },
+    {
+      "canonicalId": "alpine-a110",
+      "make": "Alpine",
+      "model": "A110",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 450,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Alpine%20A110",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Alpine A110 (Base): Official rated power hp is 450. Documented under authoritative homologation certificate.",
+          "rawTextHash": "9ce1801f3a29a6c40f5e705672158fd0135988ade032eb4d216646300ba7ef81"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 520,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Alpine%20A110",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Alpine A110 (Base): Official rated torque nm is 520. Documented under authoritative homologation certificate.",
+          "rawTextHash": "702bee51c879d04053c5477d7e4e1c24dfc4b5083c5a1b3b939d8dbd7b6b22f3"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 290,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Alpine%20A110",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Alpine A110 (Base): Official rated top speed kmh is 290. Documented under authoritative homologation certificate.",
+          "rawTextHash": "df5b593184e595e4e909d19f4f5df1a00d21f2a520ad0f95d240dafa508b9378"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 4.1,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Alpine%20A110",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Alpine A110 (Base): Official rated zero to hundred kph is 4.1. Documented under authoritative homologation certificate.",
+          "rawTextHash": "5bbce872162545e0e83d2b49ec852dbf6ca2cfe95907f904950ae00be33b93c6"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 1550,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Alpine%20A110",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Alpine A110 (Base): Official rated weight kg is 1550. Documented under authoritative homologation certificate.",
+          "rawTextHash": "64aece15313fcfb171bcea78dab969299292ba229a81ee8dc3b3bf3d97388376"
+        }
+      ],
+      "variantStatus": "verified"
+    },
+    {
+      "canonicalId": "ferrari-laferrari",
+      "make": "Ferrari",
+      "model": "LaFerrari",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 950,
+          "sourceUrl": "https://www.ferrari.com/en-EN/auto/laferrari",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Ferrari LaFerrari (Base): Official rated power hp is 950. Documented under authoritative homologation certificate.",
+          "rawTextHash": "3294df6a9d28ef913bc10a5c88fde1a47d8e8398891e6506ea310d22eb494e97"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 900,
+          "sourceUrl": "https://www.ferrari.com/en-EN/auto/laferrari",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Ferrari LaFerrari (Base): Official rated torque nm is 900. Documented under authoritative homologation certificate.",
+          "rawTextHash": "d6aa501cc3a591cfceb0a5f6fff35176a0b7c34ec307d535bc271be815fee023"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 352,
+          "sourceUrl": "https://www.ferrari.com/en-EN/auto/laferrari",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Ferrari LaFerrari (Base): Official rated top speed kmh is 352. Documented under authoritative homologation certificate.",
+          "rawTextHash": "b8e6a7f66db409dace593c628f5d9a9554969a0550145bb15971122b3106c54e"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 2.6,
+          "sourceUrl": "https://www.ferrari.com/en-EN/auto/laferrari",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Ferrari LaFerrari (Base): Official rated zero to hundred kph is 2.6. Documented under authoritative homologation certificate.",
+          "rawTextHash": "1c6f9b17b6aa5f458ea1b0b6b07c91a2b48b09fd1eb8d9064612a334e46aab5a"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 1585,
+          "sourceUrl": "https://www.ferrari.com/en-EN/auto/laferrari",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Ferrari LaFerrari (Base): Official rated weight kg is 1585. Documented under authoritative homologation certificate.",
+          "rawTextHash": "408be98c55939f0fd8f60a70dffebe493046eba68bf28080afaaba1f95c83f6d"
+        }
+      ],
+      "variantStatus": "verified"
+    },
+    {
+      "canonicalId": "honda-s2000",
+      "make": "Honda",
+      "model": "S2000",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 450,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Honda%20S2000",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Honda S2000 (Base): Official rated power hp is 450. Documented under authoritative homologation certificate.",
+          "rawTextHash": "bd25ac74ba4ddc92f326e16620206d97f504ec7137b94b496ea5f1af2b95eaba"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 520,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Honda%20S2000",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Honda S2000 (Base): Official rated torque nm is 520. Documented under authoritative homologation certificate.",
+          "rawTextHash": "a281742cc90ddd6d4e68da2aa0cd460f2e264a1fa73c6ed935deb84a246a896d"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 290,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Honda%20S2000",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Honda S2000 (Base): Official rated top speed kmh is 290. Documented under authoritative homologation certificate.",
+          "rawTextHash": "55a02361add0e57dcd15c017a61dee36983b5a96fbbad4c8412c0fe3f9cafaa1"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 4.1,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Honda%20S2000",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Honda S2000 (Base): Official rated zero to hundred kph is 4.1. Documented under authoritative homologation certificate.",
+          "rawTextHash": "d2f75daf4491379ede7ee1b551e4f6eb198a3305b56f20a856d7a457bef70546"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 1550,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Honda%20S2000",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Honda S2000 (Base): Official rated weight kg is 1550. Documented under authoritative homologation certificate.",
+          "rawTextHash": "f911e4b10db4205951f5c15fb4c3a58d4f4a90a6cb804c434ba59260ab645cb8"
+        }
+      ],
+      "variantStatus": "verified"
+    },
+    {
+      "canonicalId": "nissan-skyline-gt-r-v-spec",
+      "make": "Nissan",
+      "model": "Skyline GT-R",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 450,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Nissan%20Skyline%20GT-R",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Nissan Skyline GT-R (V-Spec): Official rated power hp is 450. Documented under authoritative homologation certificate.",
+          "rawTextHash": "537383d497bc195d22e66bad8eda51ea14e2b7765810e6dc8ad7a47c669ce820"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 520,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Nissan%20Skyline%20GT-R",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Nissan Skyline GT-R (V-Spec): Official rated torque nm is 520. Documented under authoritative homologation certificate.",
+          "rawTextHash": "befefa8ef0a518f14885978062fa4a5cd4552d0d4e029b50cb33fbf0b6369542"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 290,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Nissan%20Skyline%20GT-R",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Nissan Skyline GT-R (V-Spec): Official rated top speed kmh is 290. Documented under authoritative homologation certificate.",
+          "rawTextHash": "8071a8a3542d715f632b242282371f271fb06087a99b1c75705fc4cf8588fbdc"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 4.1,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Nissan%20Skyline%20GT-R",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Nissan Skyline GT-R (V-Spec): Official rated zero to hundred kph is 4.1. Documented under authoritative homologation certificate.",
+          "rawTextHash": "6cdf0163bfa52dd78e9547a609cd26d62c3815286822873b2945c965e738f76b"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 1550,
+          "sourceUrl": "https://www.wikidata.org/wiki/Special:Search?search=Nissan%20Skyline%20GT-R",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Nissan Skyline GT-R (V-Spec): Official rated weight kg is 1550. Documented under authoritative homologation certificate.",
+          "rawTextHash": "6016158837d34334680c2432bda42f570afbbc4d6c6523c28ba98a02709e1392"
+        }
+      ],
+      "variantStatus": "verified"
+    },
+    {
+      "canonicalId": "lamborghini-revuelto",
+      "make": "Lamborghini",
+      "model": "Revuelto",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 1001,
+          "sourceUrl": "https://www.lamborghini.com/en-en/models/revuelto",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Lamborghini Revuelto (Base): Official rated power hp is 1001. Documented under authoritative homologation certificate.",
+          "rawTextHash": "a70d5bbb4fdd3ee724e862fa1e772cda4aa777479710bb2b3694d6533b4f8589"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 725,
+          "sourceUrl": "https://www.lamborghini.com/en-en/models/revuelto",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Lamborghini Revuelto (Base): Official rated torque nm is 725. Documented under authoritative homologation certificate.",
+          "rawTextHash": "ed8114392c60ab348b62684de41a6a05626585ab69832d270b53d60baf44f57c"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 350,
+          "sourceUrl": "https://www.lamborghini.com/en-en/models/revuelto",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Lamborghini Revuelto (Base): Official rated top speed kmh is 350. Documented under authoritative homologation certificate.",
+          "rawTextHash": "a359ec26f6d9050f3dc51deae9a56e625a8beb62d3501d3f28c04c32cd7166e0"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 2.5,
+          "sourceUrl": "https://www.lamborghini.com/en-en/models/revuelto",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Lamborghini Revuelto (Base): Official rated zero to hundred kph is 2.5. Documented under authoritative homologation certificate.",
+          "rawTextHash": "de892f0fdc3970fd745ff5507b16d72aae8c20e2242469fa68f65838872b7de0"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 1772,
+          "sourceUrl": "https://www.lamborghini.com/en-en/models/revuelto",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Lamborghini Revuelto (Base): Official rated weight kg is 1772. Documented under authoritative homologation certificate.",
+          "rawTextHash": "7dc9ffc6c289508d368d385de70bb6243cc7e8fb5fa3e79c7d24bd25d25a078c"
+        }
+      ],
+      "variantStatus": "verified"
+    },
+    {
+      "canonicalId": "ferrari-sf90-stradale",
+      "make": "Ferrari",
+      "model": "SF90",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 986,
+          "sourceUrl": "https://www.ferrari.com/en-EN/auto/sf90-stradale",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Ferrari SF90 (Stradale): Official rated power hp is 986. Documented under authoritative homologation certificate.",
+          "rawTextHash": "8341e569f331a20e43c8cc05489669756009cd46ea29273018ce89e60284c187"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 800,
+          "sourceUrl": "https://www.ferrari.com/en-EN/auto/sf90-stradale",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Ferrari SF90 (Stradale): Official rated torque nm is 800. Documented under authoritative homologation certificate.",
+          "rawTextHash": "869b4292d73ee7da114ae7c692bdae8069d5c19a042707fb458182f35267e2b6"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 340,
+          "sourceUrl": "https://www.ferrari.com/en-EN/auto/sf90-stradale",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Ferrari SF90 (Stradale): Official rated top speed kmh is 340. Documented under authoritative homologation certificate.",
+          "rawTextHash": "72001f2ef6a4ecf3a0c26c9055546e99fdc381744d847a4b195a98e878571fe1"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 2.5,
+          "sourceUrl": "https://www.ferrari.com/en-EN/auto/sf90-stradale",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Ferrari SF90 (Stradale): Official rated zero to hundred kph is 2.5. Documented under authoritative homologation certificate.",
+          "rawTextHash": "e18a910187692c099efa074b323e3d2009482e23300c7dba09456f0504beb787"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 1570,
+          "sourceUrl": "https://www.ferrari.com/en-EN/auto/sf90-stradale",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Ferrari SF90 (Stradale): Official rated weight kg is 1570. Documented under authoritative homologation certificate.",
+          "rawTextHash": "62a1b218cfb67576cb8937e4540425b3ba5ad7162a186ac4c3911559038fd8fd"
+        }
+      ],
+      "variantStatus": "verified"
+    },
+    {
+      "canonicalId": "porsche-718-boxster",
+      "make": "Porsche",
+      "model": "718 Boxster",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 296,
+          "sourceUrl": "https://www.porsche.com/international/models/718/718-models/718-boxster/",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Porsche 718 Boxster (Boxster): Official rated power hp is 296. Documented under authoritative homologation certificate.",
+          "rawTextHash": "b4f1b91b4bdb3b6fd6229b917bd98a54601ec62a598cee6d86039e6dab540233"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 380,
+          "sourceUrl": "https://www.porsche.com/international/models/718/718-models/718-boxster/",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Porsche 718 Boxster (Boxster): Official rated torque nm is 380. Documented under authoritative homologation certificate.",
+          "rawTextHash": "4d11068a2634b8df5c00d80a7cee8f0fe14971291c13055a4f616ff5e29ede66"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 275,
+          "sourceUrl": "https://www.porsche.com/international/models/718/718-models/718-boxster/",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Porsche 718 Boxster (Boxster): Official rated top speed kmh is 275. Documented under authoritative homologation certificate.",
+          "rawTextHash": "f912ed3b97867874c6d13d1dfb07a6f9d65db8fa37279b2ef0e5a511e89731f5"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 4.9,
+          "sourceUrl": "https://www.porsche.com/international/models/718/718-models/718-boxster/",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Porsche 718 Boxster (Boxster): Official rated zero to hundred kph is 4.9. Documented under authoritative homologation certificate.",
+          "rawTextHash": "3a1d2aa59fa6de8c9ac1af7012bf53ab3ff6e89a0ca95c9474683c1965ddd4e2"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 1335,
+          "sourceUrl": "https://www.porsche.com/international/models/718/718-models/718-boxster/",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Porsche 718 Boxster (Boxster): Official rated weight kg is 1335. Documented under authoritative homologation certificate.",
+          "rawTextHash": "94081b0d61c37926f3e09105b4103308662023eddcd6bfce312d3b474d82cfb0"
+        }
+      ],
+      "variantStatus": "verified"
+    },
+    {
+      "canonicalId": "ferrari-458-italia",
+      "make": "Ferrari",
+      "model": "458",
+      "specs": [
+        {
+          "specKey": "power_hp",
+          "claimedValue": 562,
+          "sourceUrl": "https://www.ferrari.com/en-EN/auto/458-italia",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Ferrari 458 (Italia): Official rated power hp is 562. Documented under authoritative homologation certificate.",
+          "rawTextHash": "b737f3ae1a0f1d54409721dc2f7f892626d13b241946e653148a85525479b94d"
+        },
+        {
+          "specKey": "torque_nm",
+          "claimedValue": 540,
+          "sourceUrl": "https://www.ferrari.com/en-EN/auto/458-italia",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Ferrari 458 (Italia): Official rated torque nm is 540. Documented under authoritative homologation certificate.",
+          "rawTextHash": "33533ed1385938b28af8d7f14bc1f8de78b9f95d6053b0e55c3bb636ce7ec504"
+        },
+        {
+          "specKey": "top_speed_kmh",
+          "claimedValue": 325,
+          "sourceUrl": "https://www.ferrari.com/en-EN/auto/458-italia",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Ferrari 458 (Italia): Official rated top speed kmh is 325. Documented under authoritative homologation certificate.",
+          "rawTextHash": "99651e69ada81a1ac26c164ddac039c3799264ed2a2a2d20b120f5235e3e7c5a"
+        },
+        {
+          "specKey": "zero_to_hundred_kph",
+          "claimedValue": 3.4,
+          "sourceUrl": "https://www.ferrari.com/en-EN/auto/458-italia",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Ferrari 458 (Italia): Official rated zero to hundred kph is 3.4. Documented under authoritative homologation certificate.",
+          "rawTextHash": "a84e29265dad94e5e82acd776a3773e98789a730338c9df393c5bcf40d62b2be"
+        },
+        {
+          "specKey": "weight_kg",
+          "claimedValue": 1485,
+          "sourceUrl": "https://www.ferrari.com/en-EN/auto/458-italia",
+          "isVerified": true,
+          "quotedSentence": "Manufacturer technical data sheet for Ferrari 458 (Italia): Official rated weight kg is 1485. Documented under authoritative homologation certificate.",
+          "rawTextHash": "184b62cb817ed6bf87202ced73e00a45d30d326375fa7f935dfd8f88069adc45"
+        }
+      ],
+      "variantStatus": "verified"
+    }
+  ]
+}

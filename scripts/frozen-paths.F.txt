@@ -1,0 +1,13 @@
+# Frozen paths for Track F (Functional Audit & Bug-Fix Lane)
+# Scope: Appendix C, Section 6.
+# May change: client-only bugs (Lane 1).
+# Must not change: Lane 2 (authentication, backend api/**, supabase/**, database/RLS, economy ledger, XP math, server privacy logic) and Lane 3 (src/ai-engine/**).
+
+^api/
+^supabase/
+^src/ai-engine/
+^src/utils/(streak|privacyPipeline)
+^src/services/(playIntegrityService)
+^capacitor\.config
+^vercel\.json
+^\.env

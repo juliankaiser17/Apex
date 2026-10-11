@@ -1,0 +1,11 @@
+# Frozen paths for Track A (AI Identification)
+# Scope: Appendix B (may change src/ai-engine/**, AI API code, eval, registry data)
+# Must not change: UI, auth, economy, database, privacy pipeline
+
+^src/components/
+^src/styles/
+^supabase/
+^src/utils/(mastery|localRarityEngine|privacyPipeline)
+^src/services/(userService|playIntegrityService)
+^capacitor\.config
+^vercel\.json

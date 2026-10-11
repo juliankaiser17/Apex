@@ -2,6 +2,7 @@ import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 
+
 function apexVisionApiPlugin() {
   return {
     name: 'apex-vision-api',
@@ -191,12 +192,42 @@ Return strict JSON matching this schema:
   };
 }
 
+function adminToolsPlugin() {
+  const virtualModuleId = 'virtual:ai-control-modal';
+  const resolvedVirtualModuleId = '\0' + virtualModuleId;
+
+  return {
+    name: 'admin-tools-plugin',
+    resolveId(id: string) {
+      if (id === virtualModuleId) {
+        return resolvedVirtualModuleId;
+      }
+    },
+    load(id: string) {
+      if (id === resolvedVirtualModuleId) {
+        const env = loadEnv('', process.cwd(), '');
+        const isEnabled = env.VITE_ENABLE_ADMIN === 'true' || process.env.VITE_ENABLE_ADMIN === 'true';
+        if (isEnabled) {
+          return `export { AiControlCenterModal } from '/src/components/admin/AiControlCenterModal.tsx';`;
+        } else {
+          return `export const AiControlCenterModal = () => null;`;
+        }
+      }
+    }
+  };
+}
+
 export default defineConfig(() => {
   return {
-    plugins: [react(), tailwindcss(), apexVisionApiPlugin()],
+    plugins: [react(), tailwindcss(), apexVisionApiPlugin(), adminToolsPlugin()],
     server: {
       host: true,
       port: 5173
+    },
+
+    build: {
+      target: 'es2020',
+      rollupOptions: {}
     }
   };
 });

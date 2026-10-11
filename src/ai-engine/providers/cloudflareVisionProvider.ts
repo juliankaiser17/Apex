@@ -320,10 +320,12 @@ CRITICAL INVARIANTS:
     const cleanUserPrompt = `Analyze the primary foreground vehicle (the closest, most prominent vehicle occupying the center/foreground of the frame) in this image following evidentiary discipline.
 Pass 1 — Visual perception only. Record what is plainly visible on the primary foreground vehicle. Do not attempt to identify the car yet.
 Describe each field in your own words, plainly and concretely (shape, count, position, material).
+- viewpoint: camera angle relative to the vehicle: "front" (direct front), "front_3q" (front three-quarters), "rear" (direct rear), "rear_3q" (rear three-quarters), "side" (side profile), or "unknown"
 - body_silhouette: the overall shape and number of doors
 - dominant_color: the exterior paint colour
 - lighting_cues: the outline and layout of the front and rear lamps exactly as they appear
-- intake_and_grille_cues: the openings in the front and rear bumper as they appear, including any aerodynamic winglets, fins, or splitter details
+- intake_and_grille_cues: the openings in the front and rear bumper as they appear, including any aerodynamic winglets, fins, or splitter details. For the lower front lip, state whether it is a deep dark carbon blade and whether its outer corners rise upward into endplates/winglets, or whether it is a plain body-colour lip. Also note any louvres or vents on the front fenders
+- exhaust_and_rear_lamps: the number, shape, and exit position of the exhaust pipes — state explicitly whether they exit low in the centre of the rear diffuser, high up on the engine deck above the bumper, or split to the outer corners — plus the shape and arrangement of the rear lamps
 - hood_aerodynamics: the hood surface (cooling vents, louvers, air extractors, scoop, or smooth clean surface)
 - aero_and_bodywork: lower front splitter, side air intakes or scoops, side sills, rear wing or diffuser
 - distinctive_road_cues: any road, track, weather, or location context
@@ -337,12 +339,13 @@ Output flat valid JSON with this exact structure:
 {
   "status": "identified",
   "vehicle_present": true,
-  "viewpoint": "front_3q",
+  "viewpoint": "front_3q | front | rear | side | rear_3q | unknown",
   "pass1_observations": {
     "body_silhouette": "your own description of the body shape",
     "dominant_color": "your own description of the exterior colour",
     "lighting_cues": "your own description of the lamp outlines",
     "intake_and_grille_cues": "your own description of the bumper openings",
+    "exhaust_and_rear_lamps": "your own description of exhaust pipe count/shape/exit position and rear lamp shape",
     "hood_aerodynamics": "your own description of the hood surface, vents, or louvers",
     "aero_and_bodywork": "your own description of front splitter, side scoops, or spoiler",
     "distinctive_design_cues": ["your own description of an unusual feature"]
@@ -585,6 +588,7 @@ Rules:
         pass1.headlight_and_drl_signature,
         pass1.intake_and_grille_cues,
         pass1.front_fascia_and_intakes,
+        pass1.exhaust_and_rear_lamps,
         pass1.windshield_and_mirrors,
         pass1.greenhouse_and_roofline,
         pass1.hood_aerodynamics,
@@ -612,16 +616,22 @@ Rules:
       const rawGrille = pass1.grille || pass1.intake_and_grille_cues || pass1.front_fascia_and_intakes || (evidenceList.find((e: string) => /grille|intake|splitter|strake/i.test(e)) ?? null);
       const separatedIntake = rawGrille ? evidenceNormalizer.separateIntakeAndAeroCues(rawGrille) : { frontGrille: '', rearDiffuser: '' };
 
+      // Dedicated rear-lower extraction: split rear lamps from exhaust outlets so that
+      // decisive exhaust-position evidence (e.g. a low central diffuser exit) is captured
+      // as zoned exhaust evidence instead of being lost in generic taillight wording.
+      const rawRearLower = pass1.exhaust_and_rear_lamps || null;
+      const separatedRearLower = rawRearLower ? evidenceNormalizer.separateRearLowerCues(rawRearLower) : { taillights: '', exhaust: '' };
+
       const visualEvidence: VisualEvidence = {
         body_style: pass1.body_silhouette || parsed.body_style || pass1.body_style || null,
         grille: separatedIntake.frontGrille || (rawGrille && !separatedIntake.rearDiffuser ? rawGrille : null),
         headlights: separatedLighting.headlights || (rawLighting && !separatedLighting.taillights ? rawLighting : null),
-        taillights: pass1.taillights || (separatedLighting.taillights || null) || (evidenceList.find((e: string) => /taillight/i.test(e)) ?? null),
+        taillights: separatedRearLower.taillights || pass1.taillights || (separatedLighting.taillights || null) || (evidenceList.find((e: string) => /taillight/i.test(e)) ?? null),
         hood: pass1.hood || pass1.hood_aerodynamics || null,
         roofline: pass1.roofline || pass1.greenhouse_and_roofline || pass1.windshield_and_mirrors || (/soft[\s-]?top|canvas|fabric/i.test(pass1.dominant_color || '') ? pass1.dominant_color : null),
         windows: pass1.windows || pass1.greenhouse_and_roofline || pass1.windshield_and_mirrors || null,
         wheels: pass1.wheels || pass1.mirror_and_wheel_cues || pass1.windshield_and_mirrors || null,
-        exhaust: pass1.exhaust || null,
+        exhaust: separatedRearLower.exhaust || pass1.exhaust || (evidenceList.find((e: string) => /exhaust|tailpipe|\bpipes?\b/i.test(e)) ?? null),
         aero: pass1.aero || (separatedIntake.rearDiffuser ? `rear diffuser: ${separatedIntake.rearDiffuser}` : null) || pass1.aero_and_bodywork || (evidenceList.find((e: string) => /spoiler|wing|splitter|diffuser|strake/i.test(e)) ?? null),
         badges: pass1.badges || pass1.badges_and_text || (evidenceList.find((e: string) => /badge|emblem|roundel|script/i.test(e)) ?? null),
         text: pass1.text || pass1.badges_and_text || null,
@@ -879,38 +889,91 @@ Rules:
         )
       );
 
-      const shouldTriggerNeutralVerification = !verificationConsumed && viableCandidates.length >= 2 && !classResult.gate_customized && (
-        Boolean(classResult.needs_neutral_verification) ||
-        Boolean(classResult.raw_conflict) ||
-        (classResult.candidate_separation < 0.15 && classResult.top_candidate && classResult.top_candidate.score >= 0.50 && Boolean(classResult.evidence_grounded))
-      );
+      let candA: string | null = null;
+      let candB: string | null = null;
 
-      if (shouldTriggerNeutralVerification) {
+      if (classResult.raw_conflict && rawModel) {
+        const rawNorm = rawModel.toLowerCase();
+        const rawTokens = rawNorm.split(/[^a-z0-9]+/).filter((t) => t.length >= 3 && t !== 'ferrari' && t !== 'porsche' && t !== 'mclaren' && t !== 'koenigsegg' && t !== 'spider' && t !== 'coupe');
+        const rawCand = viableCandidates.find((c) => {
+          const cLower = c.name.toLowerCase();
+          if (cLower.includes(rawNorm) || rawNorm.includes(cLower)) return true;
+          return rawTokens.some((t) => cLower.includes(t));
+        });
+        const discCand = (classResult.identification.model_family && viableCandidates.find((c) =>
+          c.name.toLowerCase().includes(classResult.identification.model_family!.toLowerCase())
+        )) || viableCandidates[0];
+
+        if (rawCand && discCand && rawCand.name !== discCand.name) {
+          const swap = Math.random() < 0.5;
+          candA = swap ? rawCand.name : discCand.name;
+          candB = swap ? discCand.name : rawCand.name;
+        } else if (viableCandidates.length >= 2 && (classResult.needs_neutral_verification || (classResult.candidate_separation < 0.15 && (viableCandidates[1].score > 0.50 || (viableCandidates[1].supporting_evidence?.length ?? 0) > 0)))) {
+          const swap = Math.random() < 0.5;
+          candA = swap ? viableCandidates[1].name : viableCandidates[0].name;
+          candB = swap ? viableCandidates[0].name : viableCandidates[1].name;
+        }
+      } else if (viableCandidates.length >= 2 && (classResult.needs_neutral_verification || (classResult.candidate_separation < 0.15 && (viableCandidates[1].score > 0.50 || (viableCandidates[1].supporting_evidence?.length ?? 0) > 0)))) {
+        const swap = Math.random() < 0.5;
+        candA = swap ? viableCandidates[1].name : viableCandidates[0].name;
+        candB = swap ? viableCandidates[0].name : viableCandidates[1].name;
+      }
+
+      const shouldTriggerNeutralVerification = !verificationConsumed && !classResult.gate_customized && Boolean(classResult.evidence_grounded) && Boolean(candA && candB);
+
+      if (shouldTriggerNeutralVerification && candA && candB) {
         // INVARIANT 8: PAIRWISE VERIFIER
         // Candidate A and Candidate B are completely unordered peers from viable uncontradicted candidates.
         // Alternate presentation order to eliminate positional bias.
-        const swapPresentation = Math.random() < 0.5;
-        const candA = swapPresentation ? viableCandidates[1].name : viableCandidates[0].name;
-        const candB = swapPresentation ? viableCandidates[0].name : viableCandidates[1].name;
         console.log(`[CloudflareVisionProvider] Invoking neutral pairwise verification between "${candA}" and "${candB}" (raw conflict: ${Boolean(classResult.raw_conflict)}, separation: ${classResult.candidate_separation})...`);
         verificationConsumed = true;
         try {
           const getCandidateDecisiveCues = (name: string): string => {
             const n = name.toLowerCase();
+            if (n.includes('amalfi')) {
+              return '- Amalfi decisive architecture: front-mid engine 2+2 grand tourer with long sweeping hood, monolithic body-color perforated front grille, quad round exhaust in dual outer clusters. Contradicted by: mid-engine proportions, central exhaust in diffuser, horizontal strakes, C-shaped headlights.';
+            }
             if (n.includes('daytona') || n.includes('sp3')) {
               return '- Daytona SP3 decisive architecture: horizontal blade/strake architecture across lower front fascia, horizontal eyelid/slit headlights, dual hood air extractor chimneys, wraparound helmet-visor windshield canopy, fender/door-top mounted mirrors, full-width horizontal rear strakes. Contradicted by: vertical swept-back headlights, C-shaped headlights, front mustache winglets, central hood S-duct.';
             }
             if (n.includes('sf90')) {
-              return '- SF90 Stradale decisive architecture: C-shaped / annular matrix LED headlights, deep central S-duct hood extractor channel, shut-off Gurney flap, high-mounted twin central exhaust. Contradicted by: horizontal eyelid/slit headlights, full-width front strakes, front mustache winglets.';
+              return '- SF90 Stradale decisive architecture: C-shaped / annular matrix LED headlights, deep central S-duct hood extractor channel, shut-off Gurney flap, high-mounted twin central exhaust. Contradicted by: horizontal eyelid/slit headlights, full-width front strakes, front mustache winglets, triple central exhaust.';
             }
             if (n.includes('458')) {
-              return '- 458 Italia/Spider decisive architecture: elongated vertical swept-back headlights running up fenders, single wide front intake with deformable aero mustache winglets, triple central exhaust, single round taillights. Contradicted by: horizontal slit headlights, C-shaped headlights, horizontal strakes.';
+              return '- 458 Italia/Spider decisive architecture: elongated vertical swept-back headlights running up fenders, single wide front intake with deformable aero mustache winglets, triple central exhaust, single round taillights. Contradicted by: horizontal slit headlights, C-shaped headlights, horizontal strakes, high-mounted twin central exhaust.';
             }
             if (n.includes('296')) {
-              return '- 296 GTB decisive architecture: teardrop horizontal headlights with integrated brake cooling scoops, short low nose with wide mesh mouth without slats, flying buttress rear deck, single central exhaust in diffuser.';
+              return '- 296 GTB decisive architecture: teardrop horizontal headlights with integrated brake cooling scoops, short low nose with wide mesh mouth without slats, flying buttress rear deck, single central exhaust in diffuser. Contradicted by: high-mounted twin central exhaust, elongated vertical headlights, C-shaped headlights.';
             }
             if (n.includes('pista')) {
               return '- 488 Pista decisive architecture: prominent front hood S-Duct channel, swept-back projector headlights, dual side intake splitters, raised twin circular exhausts.';
+            }
+            if (n.includes('agera')) {
+              return '- Agera RS decisive architecture: bottom-mounted rear wing supported by pylons from underneath the wing blade, twin hood extractor vents, dihedral synchro-helix doors. Contradicted by: gigantic top-mounted boomerang rear wing hanging from twin carbon pylons mounted to the roof/spine.';
+            }
+            if (n.includes('jesko')) {
+              return '- Jesko decisive architecture: gigantic top-mounted active boomerang rear wing hanging from twin carbon pylons mounted to the roof/engine spine, low-slung 2-seater track hypercar stance, deep front carbon splitter, high-mounted central exhaust. Contradicted by: bottom-mounted rear wing supported from underneath, four-seater extended wheelbase GT architecture.';
+            }
+            if (n.includes('gemera')) {
+              return '- Gemera decisive architecture: four-seater Mega-GT extended wheelbase, elongated roofline accommodating rear adult seats, giant B-pillarless twisted synchro-helix doors spanning both rows, top-exit exhausts above rear engine glass. Contradicted by: giant top-mounted boomerang rear wing, compact 2-seat track cockpit.';
+            }
+            if (n.includes('boxster')) {
+              return '- 718 Boxster decisive architecture: compact mid-engine 2-seater roadster with fabric soft-top, side air intakes on rear quarter fenders, central/dual lower exhaust in rear bumper diffuser. Contradicted by: upward top-pipe exhaust exiting on top engine deck behind headrests, fixed coupe roof, hypercar monocoque.';
+            }
+            if (n.includes('918')) {
+              return '- 918 Spyder decisive architecture: hypercar with upward top-pipe exhaust exiting directly on top rear deck behind headrests, mid-engine hybrid monocoque with exposed carbon aero. Contradicted by: lower bumper exhaust outlets, conventional roadster soft-top.';
+            }
+            if (n.includes('675lt') || n.includes('675 lt')) {
+              return '- 675LT decisive architecture: extended carbon front splitter with upturned endplates/winglets, optional front fender louvres, active Longtail rear airbrake, and high-mounted circular titanium exhausts. SEPARATION DISCIPLINE: From a front-only viewpoint, rear airbrake and exhausts are NOT_VISIBLE and must contribute ZERO contradiction. A candidate is contradicted ONLY IF the photo plainly shows opposing geometry (e.g. a plain non-extended lip without endplates/winglets). If distinguishing cues are not visible or ambiguous, note UNCERTAIN.';
+            }
+            if (n.includes('650s')) {
+              return '- 650S decisive architecture: P1-style front bumper with standard lower lip without endplates/winglets, standard door sills, standard mid-height exhausts. Contradicted if the photo plainly shows an extended carbon front splitter with upturned endplates/winglets, fender louvres, or Longtail airbrake. If distinguishing cues are not visible or ambiguous, note UNCERTAIN.';
+            }
+            if (n.includes('997')) {
+              return '- 911 Carrera (997) decisive architecture: classic circular/oval 911 headlights (distinct from 996 fried-egg lenses), horizontal LED front turn signals below headlights in bumper, traditional 911 rear flyline. Contradicted by: integrated fried-egg unified headlight/turn signal assemblies (996), full-width rear LED lightbar (992).';
+            }
+            if (n.includes('996')) {
+              return '- 911 Carrera (996) decisive architecture: distinctive "fried-egg" composite headlights integrating headlights and turn signals into a single teardrop/notched lens unit. Contradicted by: separate traditional circular headlights with bumper turn signals below (997).';
             }
             return '';
           };
@@ -922,15 +985,19 @@ Rules:
           const neutralVerifyPrompt = `Inspect the focal vehicle in this photo with rigorous neutral forensic scrutiny.
 Compare Candidate A: "${candA}" and Candidate B: "${candB}" against the visible exterior features in the image.
 
-${decisiveNotes ? `CANDIDATE-SPECIFIC STRUCTURAL CRITERIA TO EXAMINE:\n${decisiveNotes}\n` : ''}CRITICAL INVARIANTS:
+${decisiveNotes ? `CANDIDATE-SPECIFIC STRUCTURAL CRITERIA TO EXAMINE (context only — never copy this text into your observations):\n${decisiveNotes}\n` : ''}CRITICAL INVARIANTS:
 1. Candidate A and Candidate B are completely unordered peers. Neither candidate has any default priority, advantage, or baseline preference.
-2. Ground analysis exclusively in visible exterior features (headlights, front grille, hood geometry, side air scoops/tendons, fender louvers, roofline/greenhouse, rear wing/spoiler, rear exhaust).
-3. If a feature zone is NOT_VISIBLE or OCCLUDED from this viewpoint, it contributes exactly ZERO evidence, ZERO contradiction, and ZERO penalty.
-4. Model-discriminating traits (e.g. hood extractor nostrils, swan-neck wing, body-color perforated grille, horizontal eyelid covers) have high weight; generic body styles have low weight.
-5. Identify which candidate has decisive positive evidence and which has contradictions.
+2. For EACH of the eight zones (headlights, front_grille_intake, hood, front_aero_splitter, side_architecture, greenhouse_roof, rear_architecture, exhaust) describe exactly what you physically see, or write "NOT_VISIBLE" if the zone is out of frame/occluded from this viewpoint.
+3. If a feature zone is NOT_VISIBLE or OCCLUDED, it contributes exactly ZERO evidence, ZERO contradiction, and ZERO penalty. "NOT_VISIBLE" is NEVER a contradiction.
+4. Record a contradiction ONLY when the photo directly shows geometry that structurally excludes a candidate (you can point to the actual lamp shape, exhaust layout, or bumper lip in the image). Never claim a feature is absent merely because it was not described or cannot be seen. If unsure, treat the feature as UNCERTAIN, not absent.
+5. Do not infer rear-deck, spoiler, or exhaust architecture from a front-only view.
+6. Describe zones in your own words from the photograph. Never reuse the criteria text as an observation. Do not use your candidate preference as evidence.
+7. Model-discriminating structural traits (lamp geometry, exhaust count/position, splitter endplates, fender louvres, roof mechanics) have high weight; generic body-style wording has low weight.
 
 Output flat valid JSON only:
 {
+  "candidate_a_zones": {"headlights": "...|NOT_VISIBLE", "front_grille_intake": "...|NOT_VISIBLE", "hood": "...|NOT_VISIBLE", "front_aero_splitter": "...|NOT_VISIBLE", "side_architecture": "...|NOT_VISIBLE", "greenhouse_roof": "...|NOT_VISIBLE", "rear_architecture": "...|NOT_VISIBLE", "exhaust": "...|NOT_VISIBLE"},
+  "candidate_b_zones": {"headlights": "...|NOT_VISIBLE", "front_grille_intake": "...|NOT_VISIBLE", "hood": "...|NOT_VISIBLE", "front_aero_splitter": "...|NOT_VISIBLE", "side_architecture": "...|NOT_VISIBLE", "greenhouse_roof": "...|NOT_VISIBLE", "rear_architecture": "...|NOT_VISIBLE", "exhaust": "...|NOT_VISIBLE"},
   "selected_winner": "Candidate A" | "Candidate B" | "neither",
   "winner_name": "${candA}" | "${candB}" | null,
   "confidence": 0.88,
@@ -938,7 +1005,7 @@ Output flat valid JSON only:
   "candidate_a_matches": ["visible trait 1"],
   "candidate_a_contradictions": [],
   "candidate_b_matches": [],
-  "candidate_b_contradictions": ["visible trait contradicted"],
+  "candidate_b_contradictions": ["only a directly observed contradiction"],
   "evidence": ["observable cue 1", "observable cue 2"],
   "reason": "Neutral comparison rationale"
 }
@@ -972,6 +1039,10 @@ Rules:
           let verifyJson = verifyResult.json;
           if (verifyJson && typeof verifyJson.response === 'object' && verifyJson.response !== null) {
             verifyJson = verifyJson.response;
+          }
+          // DEBUG-GATED: diagnostic pairwise dump must never appear in production logs.
+          if (typeof process !== 'undefined' && process.env?.APEX_DEBUG_VISION === '1') {
+            console.log('[Pairwise Result JSON]', JSON.stringify(verifyJson));
           }
 
           let winner: string | null = null;
@@ -1007,11 +1078,33 @@ Rules:
               ? candB
               : null;
 
-            if (winningCandidateName) {
-              const targetCand = viableCandidates.find((c) => c.name === winningCandidateName);
+            // GROUNDED-OBSERVATION GUARD: a structured verifier answer whose winning side carries
+            // as many claimed contradictions as positive matches is not a grounded promotion —
+            // free-form verifier assertions must never override discriminator observations.
+            const winnerIsA = winningCandidateName === candA;
+            const winnerMatches = (verifyJson && Array.isArray(winnerIsA ? verifyJson.candidate_a_matches : verifyJson.candidate_b_matches))
+              ? (winnerIsA ? verifyJson.candidate_a_matches : verifyJson.candidate_b_matches)
+              : null;
+            const winnerContras = (verifyJson && Array.isArray(winnerIsA ? verifyJson.candidate_a_contradictions : verifyJson.candidate_b_contradictions))
+              ? (winnerIsA ? verifyJson.candidate_a_contradictions : verifyJson.candidate_b_contradictions)
+              : null;
+            const isGroundedPromotion = !winnerMatches || (winnerMatches.length > (winnerContras?.length ?? 0));
+
+            const otherCandName = winningCandidateName === candA ? candB : candA;
+            const otherCand = viableCandidates.find((c) => c.name === otherCandName);
+            const targetCand = viableCandidates.find((c) => c.name === winningCandidateName);
+            const winnerHasPrimaryEvidence = Boolean(targetCand && ((targetCand.score > 0.50) || ((targetCand.supporting_evidence?.length ?? 0) > 0)));
+            const otherHasPrimaryEvidence = Boolean(otherCand && ((otherCand.score > 0.50) || ((otherCand.supporting_evidence?.length ?? 0) > 0)));
+            const unevidencedBaselineOvertake = !winnerHasPrimaryEvidence && otherHasPrimaryEvidence && (!winnerMatches || winnerMatches.length === 0);
+
+            if (winningCandidateName && isGroundedPromotion && !unevidencedBaselineOvertake) {
               if (targetCand) {
                 targetCand.score = Math.min(0.99, targetCand.score + 0.20);
               }
+            } else if (winningCandidateName && unevidencedBaselineOvertake) {
+              console.warn('[CloudflareVisionProvider] Neutral verification winner rejected: unevidenced baseline candidate attempted to overtake evidenced discriminator candidate without verifiable matches.');
+            } else if (winningCandidateName && !isGroundedPromotion) {
+              console.warn('[CloudflareVisionProvider] Neutral verification winner rejected: claimed contradictions outnumber observed matches for the winning candidate.');
             }
 
             viableCandidates.sort((a, b) => b.score - a.score);
@@ -1056,6 +1149,23 @@ Rules:
                 classResult.specificity_level = finalVariant ? 'variant' : (finalGen ? 'generation' : 'model_family');
                 classResult.specificity_level_numeric = finalVariant ? 4 : (finalGen ? 2 : 1);
                 classResult.reason = `Verified via neutral pairwise forensic examination: ${finalMake} ${finalModel}.`;
+
+                // Recalculate confidence & status to reflect the verified model and resolved candidate separation
+                const updatedWinnerContradictions = classResult.top_candidate?.contradictions || [];
+                const updatedConf = confidenceEngine.computeHierarchicalConfidence({
+                  image_quality_score: parsed.image_quality?.score ?? (typeof parsed.confidence === 'number' ? parsed.confidence : 0.90),
+                  evidence_strength: 0.90,
+                  candidate_separation: classResult.candidate_separation,
+                  top_candidate_contradictions: updatedWinnerContradictions,
+                  global_contradictions: globalContradictions,
+                  contradiction_count: updatedWinnerContradictions.length + globalContradictions.length,
+                  top_candidate_score: classResult.top_candidate?.score || 0.85,
+                  specificity_level: classResult.specificity_level,
+                  has_vehicle: true
+                });
+                calibConf.status = updatedConf.status === 'uncertain' ? 'probable' : updatedConf.status;
+                calibConf.confidence = updatedConf.confidence;
+                calibConf.needs_retake = updatedConf.needs_retake;
               }
             }
           }

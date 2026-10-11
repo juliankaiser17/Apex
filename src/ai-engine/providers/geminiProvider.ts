@@ -30,8 +30,11 @@ declare const process: any;
 export const MAX_GEMINI_REQUESTS_PER_SCAN = 2;
 
 export class GeminiProvider implements AIProvider {
-  public name = 'GeminiProvider';
-  private defaultModel = 'gemini-2.5-flash';
+  public readonly name: string = 'GeminiProvider';
+  // MIGRATED: gemini-2.5-flash shutting down 16 Oct 2026. Upgraded to gemini-3.5-flash
+  private defaultModel = (typeof process !== 'undefined' && process.env?.GEMINI_MODEL)
+    ? process.env.GEMINI_MODEL.trim()
+    : 'gemini-3.5-flash';
   private apiKey: string;
 
   constructor(apiKey?: string) {
@@ -580,7 +583,7 @@ OUTPUT STRICT JSON ONLY:
     }
   }
 
-  private async executeGeminiRequest(
+  public async executeGeminiRequest(
     model: string,
     prompt: string,
     base64Data: string,

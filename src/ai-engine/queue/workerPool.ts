@@ -15,6 +15,9 @@ import { deterministicValidator } from '../validation/deterministicValidator';
 import { confidenceEngine } from '../validation/confidenceEngine';
 import { identificationCache, buildCacheKey } from '../caching/identificationCache';
 import { tracer } from '../observability/tracer';
+import { v2Pipeline } from '../v2/v2Pipeline';
+import { pipelineConfig } from '../config/pipelineConfig';
+import { aiTelemetry } from '../v2/telemetry';
 
 export class WorkerPool {
   private isRunning: boolean = false;
@@ -117,7 +120,110 @@ export class WorkerPool {
         return cachedResult;
       }
 
-      // ─── STAGE 2: PRE-AI QUALITY GATING ───
+      // ─── PIPELINE MODE: V2 RETRIEVAL-FIRST PIPELINE ───
+      if (pipelineConfig.mode === 'v2') {
+        const v2Res = await v2Pipeline.execute({
+          imageDataUrl: job.imageDataUrl,
+          traceId: job.traceId,
+          userId: job.userId,
+          sessionFramesCount: job.multiFrames ? job.multiFrames.length + 1 : 1
+        });
+
+        const finalStatus: ScanJobStatus =
+          v2Res.status === 'rejected' || v2Res.status === 'invalid_image'
+            ? 'abstained'
+            : v2Res.status === 'uncertain' || v2Res.status === 'retrieval_unavailable' || v2Res.status === 'invalid_provider_response'
+            ? 'uncertain'
+            : v2Res.status === 'provider_error'
+            ? 'failed'
+            : 'completed';
+
+        const finalResult: IdentificationResult = {
+          scanId: job.id,
+          idempotencyKey: job.idempotencyKey,
+          userId: job.userId,
+          status: finalStatus,
+          canonicalVehicleId: (v2Res.status === 'identified' || v2Res.status === 'identified_model') ? (v2Res.canonicalVehicleId || undefined) : undefined,
+          make: v2Res.make || 'Unknown Make',
+          model: v2Res.status === 'not_in_catalogue' ? (v2Res.model || 'Uncatalogued Model') : (v2Res.model || (v2Res.status === 'identified_model' ? v2Res.displayName : 'Model Family Uncertain')),
+          generation: v2Res.generation || 'Unknown',
+          trim: v2Res.variant || undefined,
+          yearEstimate: v2Res.verifiedSpecs?.productionYears?.split('–')[0] || 'Unknown',
+          color: 'Silver',
+          rarity: (v2Res.verifiedSpecs?.baselineRarity as any) || 'rare',
+          engine: v2Res.verifiedSpecs?.engine || 'Standard Engine',
+          horsepower: v2Res.verifiedSpecs?.horsepower || 0,
+          torqueNm: v2Res.verifiedSpecs?.torqueNm || 0,
+          topSpeedKmH: v2Res.verifiedSpecs?.topSpeedKmH || 0,
+          zeroToHundredSec: v2Res.verifiedSpecs?.zeroToHundredSec || 0,
+          kerbWeightKg: v2Res.verifiedSpecs?.kerbWeightKg || 0,
+          productionYears: v2Res.verifiedSpecs?.productionYears || 'Unknown',
+          originCountry: v2Res.verifiedSpecs?.originCountry || 'Global',
+          bodyStyle: v2Res.verifiedSpecs?.bodyStyle || 'Coupe',
+          historicalInformation: '',
+          interestingFacts: '',
+          aftermarketPartsDetected: [],
+          confidence: {
+            totalScore: v2Res.calibratedConfidence.overall,
+            isConfident: (v2Res.status === 'identified' || v2Res.status === 'identified_model') && v2Res.calibratedConfidence.overall >= 0.70,
+            shouldAbstain: v2Res.status !== 'identified' && v2Res.status !== 'identified_model' && v2Res.status !== 'not_in_catalogue',
+            abstentionReason: v2Res.status === 'needs_more_views'
+              ? (v2Res.guidedRecovery?.userPrompt || undefined)
+              : v2Res.status === 'not_in_catalogue'
+              ? `Spotted ${v2Res.displayName}! This vehicle is not currently in Apex's launch collectible catalogue.`
+              : (v2Res.status === 'uncertain' ? 'Visual evidence insufficient for definitive identification' : undefined),
+            breakdown: {
+              visualSimilarityWeight: 0.8,
+              modelAgreementWeight: 0.8,
+              candidateMarginWeight: 0.8,
+              frameAgreementWeight: 0.8,
+              databaseConsistencyWeight: 0.8,
+              qualityPenalty: 0.0
+            }
+          },
+          quality: {
+            isUsable: v2Res.qualityStage.isVehiclePresent,
+            blurScore: v2Res.qualityStage.blurScore,
+            luminanceScore: v2Res.qualityStage.brightnessScore,
+            contrastScore: 0.8,
+            aspectRatio: 1.33,
+            vehicleBoundingEstimated: Boolean(v2Res.qualityStage.cropBox),
+            viewpoint: v2Res.qualityStage.estimatedViewpoint
+          },
+          topCandidates: v2Res.candidateOptions?.map((c: any) => ({
+            vehicleId: c.canonicalId,
+            make: v2Res.make || '',
+            model: c.displayName,
+            generation: '',
+            bodyStyle: (v2Res.verifiedSpecs?.bodyStyle || 'Coupe') as any,
+            yearStart: 2020,
+            variant: c.variant || '',
+            yearRange: '',
+            rarity: 'rare',
+            visualSimilarityScore: c.confidenceScore,
+            distinguishingFeatures: c.distinguishingFeatures,
+            thumbnailUrl: '',
+            specSnippet: ''
+          })) || [],
+          processedAt: new Date().toISOString(),
+          processingDurationMs: v2Res.totalLatencyMs,
+          modelVersion: 'v2-retrieval-adjudication',
+          promptVersion: 'apex-v2-prompt',
+          pipelineVersion: 'v2.0.0-retrieval-first',
+          cached: false,
+          traceId: job.traceId,
+          v2Result: v2Res
+        };
+
+        jobQueue.completeJob(job.id, finalStatus);
+        job.result = finalResult;
+        if (finalStatus !== 'failed' && v2Res.status !== 'provider_error') {
+          identificationCache.setResult(job.imageHash, finalResult, 'cloudflare', 'v2-pipeline');
+        }
+        return finalResult;
+      }
+
+      // ─── STAGE 2: PRE-AI QUALITY GATING (v1 Fallback) ───
       quality = await qualityGate.evaluateImageQuality(job.imageDataUrl, job.fileName);
       if (!quality.isUsable) {
         const abstainedResult: IdentificationResult = {
@@ -441,6 +547,48 @@ export class WorkerPool {
 
       jobQueue.completeJob(job.id, finalStatus);
       job.result = finalResult;
+
+      // ─── SHADOW MODE BACKGROUND EXECUTION & DISAGREEMENT LOGGING ───
+      if (pipelineConfig.mode === 'shadow') {
+        v2Pipeline.execute({
+          imageDataUrl: job.imageDataUrl,
+          traceId: job.traceId,
+          userId: job.userId
+        }).then(v2Res => {
+          const disagrees = finalResult.make !== v2Res.make || finalResult.model !== v2Res.model;
+          aiTelemetry.recordShadowDisagreement(
+            job.traceId,
+            job.imageHash || 'unknown_hash',
+            { status: finalStatus, make: finalResult.make, model: finalResult.model },
+            { status: v2Res.status, make: v2Res.make, model: v2Res.model, variant: v2Res.variant, confidence: v2Res.calibratedConfidence.overall },
+            {
+              stageA_quality_ms: 0,
+              stageB_retrieval_ms: 0,
+              stageC_adjudication_ms: 0,
+              stageD_fusion_ms: 0,
+              stageE_policy_ms: 0,
+              stageF_specs_ms: 0,
+              total_ms: v2Res.totalLatencyMs
+            },
+            v2Res.vlmCallsCount,
+            v2Res.estimatedCostUsd,
+            false // Privacy invariant: image hashes only, zero pixel retention without consent
+          );
+
+          if (disagrees) {
+            console.log('[SHADOW DISAGREEMENT LOG]', {
+              traceId: job.traceId,
+              imageHash: job.imageHash?.substring(0, 16),
+              v1: `${finalResult.make} ${finalResult.model}`,
+              v2: `${v2Res.make} ${v2Res.model} (${v2Res.variant})`,
+              v2Status: v2Res.status
+            });
+          }
+        }).catch((e) => {
+          console.warn('[SHADOW EXECUTION ERROR]:', e?.message);
+        });
+      }
+
       return finalResult;
     } catch (err: any) {
       console.warn(`Job ${job.id} failed on attempt ${job.attempts}:`, err);
