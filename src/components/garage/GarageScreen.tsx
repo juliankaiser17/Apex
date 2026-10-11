@@ -1,232 +1,122 @@
 import React, { useState, useMemo, useDeferredValue, useCallback } from 'react';
-import { 
-  Search, 
-  Grid, 
-  List, 
-  Plus, 
-  Gauge, 
-  Zap, 
-  Trophy, 
-  Sparkles, 
-  X, 
-  ChevronRight,
-  ChevronDown,
-  Clock,
-  CloudOff
-} from 'lucide-react';
+import { Search, Grid, List, X, Sparkles, AlertCircle } from 'lucide-react';
 import { useApexStore } from '../../store/useApexStore';
-import type { CarCard, RarityTier } from '../../types/apex';
-import { RARITY_CONFIG } from '../../utils/rarity';
+import type { CarCard } from '../../types/apex';
 import { sounds } from '../../utils/audio';
-import { getOptimizedImageUrl } from '../../utils/imageUrl';
-import { hapticTap, hapticImpact } from '../../utils/haptics';
+import { hapticTap } from '../../utils/haptics';
 import { computeAuthoritativeStats } from '../../utils/userStats';
+import { Slab } from '../ui/Slab';
+import { RarityBadge, type RarityTier } from '../ui/RarityBadge';
+import { Button } from '../ui/Button';
 
 const INITIAL_RENDER_LIMIT = 24;
 
-/* ══════════════════════════════════════════════════════════════════ */
-/* MEMOIZED GRID CARD ITEM                                            */
-/* ══════════════════════════════════════════════════════════════════ */
-const GarageGridCard = React.memo<{ card: CarCard; onClick: (card: CarCard) => void }>(({ card, onClick }) => {
-  const rarityConf = RARITY_CONFIG[card.rarity] || RARITY_CONFIG.rare;
-  const topSpeed = card.topSpeedKmH || 260;
-  const hp = card.horsepower || 450;
-  const optimizedUrl = getOptimizedImageUrl(card.imageUrl, 'card');
+const GHOST_TIERS: RarityTier[] = ['common', 'uncommon', 'rare', 'epic', 'legendary', 'mythic'];
 
-  return (
-    <div
-      onClick={() => onClick(card)}
-      className={`relative rounded-2xl overflow-hidden glass-card-spatial border hover:border-white/[0.25] active:scale-[0.97] transition-all cursor-pointer group flex flex-col shadow-xl ${
-        card.pendingDeletionUntil ? 'border-amber-500/50 ring-1 ring-amber-500/30' : 'border-white/[0.09]'
-      }`}
-    >
-      {/* Vehicle Image Container */}
-      <div className="relative aspect-[4/3] bg-black overflow-hidden">
-        <img 
-          src={optimizedUrl} 
-          alt={card.model} 
-          loading="lazy"
-          decoding="async"
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#101010] via-transparent to-transparent opacity-90" />
+// Example Mythic car fixture (strictly static demonstration asset; never saved to user store)
+const EXAMPLE_MYTHIC_FIXTURE: CarCard = {
+  id: 'fixture-mythic-example',
+  make: 'Bugatti',
+  model: 'Chiron Super Sport 300+',
+  yearEstimate: '2021',
+  color: 'Black / Orange',
+  bodyStyle: 'Coupe',
+  rarity: 'mythic',
+  rarityScore: 99,
+  cardNumber: 'APX-M001',
+  imageUrl: '/bugatti-chiron.png',
+  city: 'Molsheim',
+  country: 'France',
+  originCountry: 'France',
+  horsepower: 1600,
+  topSpeedKmH: 490,
+  zeroToHundredSec: 2.4,
+  kerbWeightKg: 1978,
+  torqueNm: 1600,
+  interestingFact: 'First production car to break 300 mph barrier.',
+  briefHistory: 'Limited edition longtail hypercar engineered for high-speed aerodynamics.',
+  modsDetected: [],
+  latApprox: 48.5,
+  lngApprox: 7.5,
+  xpEarned: 1500,
+  marketValueLowUsd: 3800000,
+  marketValueHighUsd: 4200000,
+  scanValidated: true,
+  isPublic: true,
+  huntTriggered: false,
+  privacyLevel: 'public_blurred',
+  aiConfidence: 0.99,
+  createdAt: '2026-10-11T00:00:00Z',
+};
 
-        {/* Floating Rarity Badge */}
-        <div className="absolute top-2 left-2">
-          <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full border shadow-lg backdrop-blur-md ${rarityConf.badgeBg}`}>
-            {rarityConf.label}
-          </span>
-        </div>
-
-        {/* Pending Deletion Grace Period Indicator */}
-        {card.pendingDeletionUntil && (
-          <div className="absolute bottom-2 left-2 right-2 z-10">
-            <span className="text-[9px] font-bold px-2 py-0.5 rounded-lg bg-amber-500/95 text-black shadow-md flex items-center justify-center gap-1 font-data">
-              <Clock className="w-2.5 h-2.5" /> Deleting in 3d · Tap to Restore
-            </span>
-          </div>
-        )}
-
-        {/* Unconfirmed Cloud Persistence / Local Cache Indicator */}
-        {(card.serverRecorded === false || card.cloudSyncError) && !card.pendingDeletionUntil && (
-          <div className="absolute bottom-2 left-2 right-2 z-10">
-            <span className="text-[9px] font-bold px-2 py-0.5 rounded-lg bg-amber-500/95 text-black shadow-md flex items-center justify-center gap-1 font-data">
-              <CloudOff className="w-2.5 h-2.5" /> Cloud Sync Pending
-            </span>
-          </div>
-        )}
-
-        {card.generation && (
-          <div className="absolute top-2 right-2">
-            <span className="text-[9px] font-data bg-black/70 backdrop-blur-md text-white/80 px-1.5 py-0.5 rounded border border-white/10">
-              {card.generation}
-            </span>
-          </div>
-        )}
-      </div>
-
-      {/* Vehicle Details */}
-      <div className="p-3 bg-gradient-to-b from-[#141414] to-[#0d0d0d] space-y-1.5 flex-1 flex flex-col justify-between">
-        <div>
-          <span className="text-[10px] font-semibold text-white/50 uppercase tracking-wider block truncate">
-            {card.make}
-          </span>
-          <h3 className="text-xs font-bold text-white leading-tight truncate">
-            {card.model}
-          </h3>
-        </div>
-
-        {/* Key Performance Indicators */}
-        <div className="pt-2 border-t border-white/[0.06] flex items-center justify-between text-[10px] text-white/70 font-data">
-          <span className="font-semibold text-white/90">{hp} HP</span>
-          <div className="w-1 h-1 rounded-full bg-white/30" />
-          <span>{topSpeed} KM/H</span>
-        </div>
-      </div>
-    </div>
-  );
-});
-
-GarageGridCard.displayName = 'GarageGridCard';
-
-/* ══════════════════════════════════════════════════════════════════ */
-/* MEMOIZED LIST CARD ITEM                                            */
-/* ══════════════════════════════════════════════════════════════════ */
-const GarageListCard = React.memo<{ card: CarCard; onClick: (card: CarCard) => void }>(({ card, onClick }) => {
-  const rarityConf = RARITY_CONFIG[card.rarity] || RARITY_CONFIG.rare;
-  const optimizedUrl = getOptimizedImageUrl(card.imageUrl, 'thumbnail');
-
-  return (
-    <div
-      onClick={() => onClick(card)}
-      className={`p-3 rounded-2xl glass-panel border hover:border-white/[0.2] active:scale-[0.98] flex items-center justify-between transition-all cursor-pointer group shadow-lg ${
-        card.pendingDeletionUntil ? 'border-amber-500/50 ring-1 ring-amber-500/30' : 'border-white/[0.09]'
-      }`}
-    >
-      <div className="flex items-center gap-3.5 min-w-0">
-        <img 
-          src={optimizedUrl} 
-          alt={card.model} 
-          loading="lazy"
-          decoding="async"
-          className="w-16 h-16 rounded-xl object-cover border border-white/[0.1] bg-black shrink-0 shadow-md"
-        />
-        <div className="min-w-0">
-          <div className="flex items-center gap-2">
-            <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full border backdrop-blur-md ${rarityConf.badgeBg}`}>
-              {rarityConf.label}
-            </span>
-            {card.generation && (
-              <span className="text-[10px] text-white/40 font-data">
-                {card.generation}
-              </span>
-            )}
-            {card.pendingDeletionUntil && (
-              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-500/90 text-black flex items-center gap-0.5 font-data">
-                <Clock className="w-2.5 h-2.5" /> Deleting in 3d
-              </span>
-            )}
-            {(card.serverRecorded === false || card.cloudSyncError) && !card.pendingDeletionUntil && (
-              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-500/90 text-black flex items-center gap-0.5 font-data">
-                <CloudOff className="w-2.5 h-2.5" /> Sync Pending
-              </span>
-            )}
-          </div>
-          <h3 className="text-sm font-bold text-white truncate mt-1">
-            {card.make} {card.model}
-          </h3>
-          <p className="text-xs text-white/50 font-data mt-0.5">
-            {card.horsepower || 450} hp • {card.topSpeedKmH || 260} km/h • {card.engine || 'ICE'}
-          </p>
-        </div>
-      </div>
-
-      <ChevronRight className="w-4 h-4 text-white/30 group-hover:text-white shrink-0 ml-2 transition-colors" />
-    </div>
-  );
-});
-
-GarageListCard.displayName = 'GarageListCard';
-
-/* ══════════════════════════════════════════════════════════════════ */
-/* MAIN GARAGE SCREEN                                                 */
-/* ══════════════════════════════════════════════════════════════════ */
 export const GarageScreen: React.FC = () => {
   const garage = useApexStore(s => s.garage);
   const badges = useApexStore(s => s.badges);
   const user = useApexStore(s => s.user);
   const setScannerOpen = useApexStore(s => s.setScannerOpen);
   const setSelectedCardForDetail = useApexStore(s => s.setSelectedCardForDetail);
+
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchQuery, setSearchQuery] = useState('');
+  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const [selectedRarity, setSelectedRarity] = useState<RarityTier | 'all'>('all');
   const [visibleCount, setVisibleCount] = useState(INITIAL_RENDER_LIMIT);
+  const [isExampleModalOpen, setIsExampleModalOpen] = useState(false);
 
-  // Non-blocking concurrent search input scheduling
   const deferredSearch = useDeferredValue(searchQuery);
 
-  // Authoritative Unified Aggregation for Stats & Rarity Counts
-  const { stats, rarityCounts } = useMemo(() => {
+  // Authoritative metrics aggregation
+  const { stats, rarityCounts, existingTiers } = useMemo(() => {
     const authStats = computeAuthoritativeStats(garage, badges, user);
+    const counts: Record<RarityTier, number> = {
+      mythic: authStats.mythicCount,
+      legendary: authStats.legendaryCount,
+      epic: authStats.epicCount,
+      rare: authStats.rareCount,
+      uncommon: authStats.uncommonCount,
+      common: authStats.commonCount,
+    };
+
+    // Filter only tiers with at least 1 car
+    const active = GHOST_TIERS.filter(t => (counts[t] || 0) > 0);
+
     return {
       stats: {
+        highestTier: (garage.length > 0
+          ? (authStats.highestTierLabel.toLowerCase() as RarityTier)
+          : 'common'),
+        topSpeed: authStats.topSpeedKmH,
         totalHp: authStats.totalHorsepower,
-        topSpeedMax: authStats.topSpeedKmH,
-        highestTierLabel: authStats.highestTierLabel,
-        topSpeedLabel: authStats.topSpeedLabel,
-        totalHorsepowerLabel: authStats.totalHorsepowerLabel
       },
-      rarityCounts: {
-        mythic: authStats.mythicCount,
-        legendary: authStats.legendaryCount,
-        epic: authStats.epicCount,
-        rare: authStats.rareCount,
-        uncommon: authStats.uncommonCount,
-        common: authStats.commonCount
-      }
+      rarityCounts: counts,
+      existingTiers: active,
     };
   }, [garage, badges, user]);
 
-  // Memoized Filtered Garage Cards
+  // Filtered Cards
   const filteredGarage = useMemo(() => {
     const cleanSearch = deferredSearch.toLowerCase().trim();
     return garage.filter((card) => {
-      const matchesSearch = !cleanSearch || `${card.make} ${card.model} ${card.generation || ''}`.toLowerCase().includes(cleanSearch);
+      const matchesSearch =
+        !cleanSearch ||
+        `${card.make} ${card.model} ${card.generation || ''}`.toLowerCase().includes(cleanSearch);
       const matchesRarity = selectedRarity === 'all' || card.rarity === selectedRarity;
       return matchesSearch && matchesRarity;
     });
   }, [garage, deferredSearch, selectedRarity]);
 
-  // Windowed visible slice
   const visibleCards = useMemo(() => {
     return filteredGarage.slice(0, visibleCount);
   }, [filteredGarage, visibleCount]);
 
-  const handleCardClick = useCallback((card: CarCard) => {
-    hapticTap();
-    sounds.playTargetLock();
-    setSelectedCardForDetail(card);
-  }, [setSelectedCardForDetail]);
+  const handleCardClick = useCallback(
+    (card: CarCard) => {
+      hapticTap();
+      sounds.playTargetLock();
+      setSelectedCardForDetail(card);
+    },
+    [setSelectedCardForDetail]
+  );
 
   const handleLoadMore = () => {
     hapticTap();
@@ -235,257 +125,305 @@ export const GarageScreen: React.FC = () => {
   };
 
   return (
-    <div className="flex-1 w-full pb-36 px-4 pt-3 space-y-4 font-sans bg-black max-w-lg mx-auto">
-      
-      {/* ─── 1. TOP MOBILE HEADER & METRICS SUMMARY BAR ─── */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div 
-              className="w-1.5 h-6 rounded-full" 
-              style={{ backgroundColor: 'var(--accent-color)', boxShadow: '0 0 10px var(--accent-color)' }}
-            />
-            <div>
-              <h1 className="text-2xl font-bold text-white tracking-tight leading-none">
-                Showroom Vault
-              </h1>
-              <p className="text-[11px] text-white/50 font-data mt-1 uppercase tracking-wider">
-                {garage.length} Vehicles Collected
-              </p>
-            </div>
-          </div>
-
-          {/* View Mode Switcher + Add Button */}
-          <div className="flex items-center gap-2">
-            <div className="flex items-center bg-black/50 p-1 rounded-2xl border border-white/[0.08] backdrop-blur-md">
-              <button
-                onClick={() => { 
-                  hapticImpact('light');
-                  sounds.playTargetLock(); 
-                  setViewMode('grid'); 
-                }}
-                className={`p-1.5 rounded-xl transition-all cursor-pointer ${
-                  viewMode === 'grid' 
-                    ? 'text-white shadow-md' 
-                    : 'text-white/40 hover:text-white'
-                }`}
-                style={viewMode === 'grid' ? { backgroundColor: 'var(--accent-color)' } : undefined}
-                title="Grid View"
-              >
-                <Grid className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => { 
-                  hapticImpact('light');
-                  sounds.playTargetLock(); 
-                  setViewMode('list'); 
-                }}
-                className={`p-1.5 rounded-xl transition-all cursor-pointer ${
-                  viewMode === 'list' 
-                    ? 'text-white shadow-md' 
-                    : 'text-white/40 hover:text-white'
-                }`}
-                style={viewMode === 'list' ? { backgroundColor: 'var(--accent-color)' } : undefined}
-                title="List View"
-              >
-                <List className="w-4 h-4" />
-              </button>
-            </div>
-
-            <button
-              onClick={() => { 
-                hapticImpact('medium');
-                sounds.playTargetLock(); 
-                setScannerOpen(true); 
-              }}
-              className="p-2.5 rounded-2xl text-white shadow-xl active:scale-95 transition-all cursor-pointer border border-white/15"
-              style={{
-                backgroundColor: 'var(--accent-color)',
-                boxShadow: '0 4px 16px var(--accent-glow)'
-              }}
-              title="Scan New Vehicle"
-            >
-              <Plus className="w-4 h-4" />
-            </button>
-          </div>
+    <div className="flex-1 w-full pb-36 px-4 pt-3 space-y-6 font-sans bg-[var(--color-void)] max-w-lg mx-auto select-none">
+      {/* ─── 1. HEADER (Display-L, Mono Count, View Toggle) ─── */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="font-display text-display-l text-[var(--color-text)] tracking-tight uppercase leading-none">
+            Garage
+          </h1>
+          <p className="font-mono text-secondary text-[var(--color-text-3)] mt-1 tabular-nums">
+            {garage.length} {garage.length === 1 ? 'car' : 'cars'}
+          </p>
         </div>
 
-        {/* Dynamic Telemetry Stats Pill Bar */}
-        <div className="glass-panel grid grid-cols-3 gap-2 p-2.5 rounded-3xl border border-white/[0.09] shadow-xl">
-          <div className="text-center p-2 rounded-2xl bg-black/40 border border-white/[0.05]">
-            <span className="text-[9px] font-data text-white/40 uppercase block">HIGHEST TIER</span>
-            <span 
-              className="text-xs font-bold flex items-center justify-center gap-1 mt-0.5"
-              style={{ color: 'var(--accent-color)' }}
+        {/* Controls: Search Toggle + Grid/List View */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => {
+              hapticTap();
+              setIsSearchExpanded(prev => !prev);
+            }}
+            aria-label="Toggle search"
+            className="w-10 h-10 rounded-[var(--radius-button)] bg-[var(--color-panel-2)] border border-[var(--color-line)] flex items-center justify-center text-[var(--color-text-2)] hover:text-[var(--color-text)] cursor-pointer active:scale-95 transition-transform"
+          >
+            <Search size={16} />
+          </button>
+
+          <div className="flex items-center bg-[var(--color-panel-2)] p-1 rounded-[var(--radius-button)] border border-[var(--color-line)]">
+            <button
+              onClick={() => {
+                hapticTap();
+                setViewMode('grid');
+              }}
+              aria-label="Grid view"
+              className={`p-2 rounded-[var(--radius-chip)] transition-all cursor-pointer ${
+                viewMode === 'grid'
+                  ? 'bg-[var(--color-panel)] text-[var(--color-text)] shadow-sm'
+                  : 'text-[var(--color-text-3)] hover:text-[var(--color-text)]'
+              }`}
             >
-              <Trophy className="w-3 h-3" style={{ color: 'var(--accent-color)' }} />
-              {stats.highestTierLabel}
-            </span>
-          </div>
-
-          <div className="text-center p-2 rounded-2xl bg-black/40 border border-white/[0.05]">
-            <span className="text-[9px] font-data text-white/40 uppercase block">TOP SPEED</span>
-            <span className="text-xs font-bold text-white flex items-center justify-center gap-1 mt-0.5">
-              <Gauge className="w-3 h-3 text-white/50" />
-              {stats.topSpeedLabel}
-            </span>
-          </div>
-
-          <div className="text-center p-2 rounded-2xl bg-black/40 border border-white/[0.05]">
-            <span className="text-[9px] font-data text-white/40 uppercase block">TOTAL POWER</span>
-            <span className="text-xs font-bold text-white flex items-center justify-center gap-1 mt-0.5">
-              <Zap className="w-3 h-3 text-yellow-400" />
-              {stats.totalHorsepowerLabel}
-            </span>
+              <Grid size={16} />
+            </button>
+            <button
+              onClick={() => {
+                hapticTap();
+                setViewMode('list');
+              }}
+              aria-label="List view"
+              className={`p-2 rounded-[var(--radius-chip)] transition-all cursor-pointer ${
+                viewMode === 'list'
+                  ? 'bg-[var(--color-panel)] text-[var(--color-text)] shadow-sm'
+                  : 'text-[var(--color-text-3)] hover:text-[var(--color-text)]'
+              }`}
+            >
+              <List size={16} />
+            </button>
           </div>
         </div>
       </div>
 
-      {/* ─── 2. SEARCH & FILTER SECTION ─── */}
-      <div className="space-y-2.5">
-        <div className="relative flex items-center">
-          <Search className="absolute left-3.5 w-4 h-4 text-white/40 pointer-events-none" />
+      {/* Expandable Search Input */}
+      {isSearchExpanded && (
+        <div className="relative flex items-center animate-fadeIn">
+          <Search size={16} className="absolute left-3.5 text-[var(--color-text-3)] pointer-events-none" />
           <input
             type="text"
             placeholder="Search make, model, or year..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-[#141414]/90 backdrop-blur-md border border-white/[0.09] rounded-2xl pl-10 pr-9 py-2.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-white/30 transition-colors shadow-inner"
+            className="w-full bg-[var(--color-panel-2)] border border-[var(--color-line)] rounded-[var(--radius-button)] pl-10 pr-9 py-2.5 text-secondary text-[var(--color-text)] placeholder-[var(--color-text-off)] focus:outline-none focus:border-[var(--color-text-3)] transition-colors"
           />
           {searchQuery && (
             <button
-              onClick={() => {
-                hapticTap();
-                setSearchQuery('');
-              }}
-              className="absolute right-3 p-1 text-white/40 hover:text-white"
+              onClick={() => setSearchQuery('')}
+              className="absolute right-3 p-1 text-[var(--color-text-3)] hover:text-[var(--color-text)]"
             >
-              <X className="w-3.5 h-3.5" />
+              <X size={14} />
             </button>
           )}
         </div>
+      )}
 
-        {/* Scrollable Rarity Filter Chips */}
-        <div className="flex gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+      {/* ─── 2. STATS STRIP (Only when garage.length > 0) ─── */}
+      {garage.length > 0 && (
+        <div className="rounded-[var(--radius-panel)] border border-[var(--color-line)] bg-[var(--color-panel)] grid grid-cols-3 divide-x divide-[var(--color-line)] py-3 px-2">
+          {/* Highest Tier */}
+          <div className="flex flex-col items-center justify-center px-2 text-center">
+            <span className="text-[11px] font-medium text-[var(--color-text-3)] uppercase tracking-wider mb-1">
+              Top Tier
+            </span>
+            <RarityBadge rarity={stats.highestTier} size="sm" />
+          </div>
+
+          {/* Top Speed */}
+          <div className="flex flex-col items-center justify-center px-2 text-center">
+            <span className="text-[11px] font-medium text-[var(--color-text-3)] uppercase tracking-wider mb-0.5">
+              Top Speed
+            </span>
+            <div className="font-mono text-display-m font-bold text-[var(--color-text)] tabular-nums leading-none">
+              {stats.topSpeed}
+              <span className="font-sans text-[11px] font-normal text-[var(--color-text-3)] ml-1">
+                km/h
+              </span>
+            </div>
+          </div>
+
+          {/* Total Power */}
+          <div className="flex flex-col items-center justify-center px-2 text-center">
+            <span className="text-[11px] font-medium text-[var(--color-text-3)] uppercase tracking-wider mb-0.5">
+              Total Power
+            </span>
+            <div className="font-mono text-display-m font-bold text-[var(--color-text)] tabular-nums leading-none">
+              {stats.totalHp.toLocaleString()}
+              <span className="font-sans text-[11px] font-normal text-[var(--color-text-3)] ml-1">
+                HP
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── 3. FILTERS (Only existing tiers, no zero chips) ─── */}
+      {garage.length > 0 && existingTiers.length > 1 && (
+        <div className="flex gap-2 overflow-x-auto no-scrollbar py-0.5">
           <button
-            onClick={() => { 
+            onClick={() => {
               hapticTap();
-              sounds.playTargetLock(); 
-              setSelectedRarity('all'); 
+              setSelectedRarity('all');
             }}
-            className={`flex-shrink-0 px-3 py-1.5 rounded-xl text-xs transition-all border whitespace-nowrap active:scale-95 cursor-pointer ${
-              selectedRarity === 'all' 
-                ? 'text-white font-semibold shadow-md' 
-                : 'bg-black/40 text-white/60 border-white/[0.08] hover:border-white/20'
+            className={`px-3 py-1.5 rounded-[var(--radius-chip)] text-secondary transition-all cursor-pointer whitespace-nowrap ${
+              selectedRarity === 'all'
+                ? 'bg-[var(--color-text)] text-[var(--color-void)] font-bold'
+                : 'bg-[var(--color-panel-2)] text-[var(--color-text-2)] border border-[var(--color-line)]'
             }`}
-            style={selectedRarity === 'all' ? {
-              backgroundColor: 'var(--accent-color)',
-              borderColor: 'var(--accent-color)',
-              boxShadow: '0 2px 10px var(--accent-glow)'
-            } : undefined}
           >
             All ({garage.length})
           </button>
-          {(['mythic', 'legendary', 'epic', 'rare', 'uncommon', 'common'] as const).map((r) => {
-            const count = rarityCounts[r] || 0;
-            const rConf = RARITY_CONFIG[r];
-            const isSelected = selectedRarity === r;
+          {existingTiers.map((tier) => {
+            const count = rarityCounts[tier] || 0;
+            const isSelected = selectedRarity === tier;
             return (
               <button
-                key={r}
-                onClick={() => { 
+                key={tier}
+                onClick={() => {
                   hapticTap();
-                  sounds.playTargetLock(); 
-                  setSelectedRarity(r); 
+                  setSelectedRarity(tier);
                 }}
-                className={`flex-shrink-0 px-3 py-1.5 rounded-xl text-xs transition-all border whitespace-nowrap active:scale-95 cursor-pointer ${
-                  isSelected 
-                    ? 'text-white font-semibold shadow-md' 
-                    : 'bg-black/40 text-white/60 border-white/[0.08] hover:border-white/20'
+                className={`px-3 py-1.5 rounded-[var(--radius-chip)] text-secondary transition-all cursor-pointer whitespace-nowrap capitalize ${
+                  isSelected
+                    ? 'bg-[var(--color-text)] text-[var(--color-void)] font-bold'
+                    : 'bg-[var(--color-panel-2)] text-[var(--color-text-2)] border border-[var(--color-line)]'
                 }`}
-                style={isSelected ? {
-                  backgroundColor: 'var(--accent-color)',
-                  borderColor: 'var(--accent-color)',
-                  boxShadow: '0 2px 10px var(--accent-glow)'
-                } : undefined}
               >
-                {rConf.label} ({count})
+                {tier} ({count})
               </button>
             );
           })}
         </div>
-      </div>
+      )}
 
-      {/* ─── 3. CARDS DISPLAY (GRID OR LIST VIEW WITH WINDOWING) ─── */}
-      {filteredGarage.length > 0 ? (
+      {/* ─── 4. COLLECTIBLE CARDS (Populated or Designed Empty State) ─── */}
+      {garage.length > 0 ? (
         <div className="space-y-4">
-          {viewMode === 'grid' ? (
-            <div className="grid grid-cols-2 gap-3 pt-1">
-              {visibleCards.map((card) => (
-                <GarageGridCard 
-                  key={card.id} 
-                  card={card} 
-                  onClick={handleCardClick} 
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="space-y-2.5 pt-1">
-              {visibleCards.map((card) => (
-                <GarageListCard 
-                  key={card.id} 
-                  card={card} 
-                  onClick={handleCardClick} 
-                />
-              ))}
-            </div>
-          )}
+          <div className="grid grid-cols-2 gap-3">
+            {visibleCards.map((card) => {
+              const isHero = card.rarity === 'legendary' || card.rarity === 'mythic';
+              return (
+                <div key={card.id} className={isHero ? 'col-span-2' : 'col-span-1'}>
+                  <Slab
+                    rarity={card.rarity as RarityTier}
+                    serial={card.cardNumber || 'APX-0000'}
+                    imageUrl={card.imageUrl}
+                    carName={card.model}
+                    make={card.make}
+                    city={card.city}
+                    isHero={isHero}
+                    onClick={() => handleCardClick(card)}
+                    stats={{
+                      hp: card.horsepower,
+                      topSpeed: card.topSpeedKmH,
+                      zeroToHundred: card.zeroToHundredSec,
+                      weight: card.kerbWeightKg,
+                    }}
+                  />
+                </div>
+              );
+            })}
+          </div>
 
-          {/* Load More Window for large garages */}
+          {/* Load More Window */}
           {visibleCards.length < filteredGarage.length && (
-            <button
-              onClick={handleLoadMore}
-              className="w-full py-3 rounded-2xl glass-panel border border-white/[0.09] hover:border-white/20 text-white/80 hover:text-white font-medium text-xs flex items-center justify-center gap-1.5 transition-all shadow-md active:scale-[0.99] cursor-pointer"
-            >
-              <span>Show More Vehicles ({filteredGarage.length - visibleCards.length} remaining)</span>
-              <ChevronDown className="w-3.5 h-3.5" />
-            </button>
+            <Button variant="secondary" onClick={handleLoadMore} className="w-full">
+              Show More Vehicles ({filteredGarage.length - visibleCards.length} remaining)
+            </Button>
           )}
         </div>
       ) : (
-        /* Empty State */
-        <div className="text-center py-16 space-y-4 glass-panel border border-white/[0.09] rounded-3xl p-6 shadow-2xl">
-          <div className="w-14 h-14 rounded-2xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center mx-auto shadow-inner">
-            <Sparkles className="w-6 h-6" style={{ color: 'var(--accent-color)' }} />
+        /* ─── 5. DESIGNED EMPTY STATE (6 Ghost Slots + Honest Guidance) ─── */
+        <div className="space-y-6 pt-2">
+          {/* 6 Ghost Slots in 2x3 Layout */}
+          <div className="grid grid-cols-2 gap-3">
+            {GHOST_TIERS.map((tier) => (
+              <div
+                key={tier}
+                data-rarity={tier}
+                className="rounded-[var(--radius-slab)] border border-dashed border-[var(--color-line)] bg-[var(--color-panel)]/40 p-3.5 aspect-[4/5] flex flex-col justify-between items-center text-center select-none"
+              >
+                <div className="w-full flex justify-between items-center">
+                  <span className="font-mono text-[10px] text-[var(--color-text-off)]">
+                    SLOT--
+                  </span>
+                  <div className="w-2 h-2 rounded-full bg-[var(--r)] shadow-[0_0_6px_var(--r-glow)]" />
+                </div>
+
+                <div className="w-12 h-12 rounded-full border border-[var(--r)]/30 flex items-center justify-center bg-[var(--color-panel-2)]/60">
+                  <Sparkles size={18} className="text-[var(--r)] opacity-70" />
+                </div>
+
+                <span className="font-mono text-[11px] font-bold uppercase tracking-wider text-[var(--r)]">
+                  {tier}
+                </span>
+              </div>
+            ))}
           </div>
-          <div className="space-y-1">
-            <h3 className="text-base font-bold text-white">
-              {searchQuery ? 'No matching vehicles' : 'Your Garage is Empty'}
+
+          {/* Seductive Copy & Action */}
+          <div className="text-center space-y-2 max-w-sm mx-auto">
+            <h3 className="font-display text-display-m text-[var(--color-text)]">
+              Nothing here yet.
             </h3>
-            <p className="text-xs text-white/50 max-w-xs mx-auto">
-              {searchQuery 
-                ? `No cars found for "${searchQuery}". Try a different search term.` 
-                : 'Point your camera scanner at real vehicles on the street to start building your collection.'}
+            <p className="text-secondary text-[var(--color-text-3)] leading-relaxed">
+              Your first scan lands here as a card. Rarer cars look very different.
             </p>
           </div>
-          
-          <button
-            onClick={() => {
-              hapticImpact('medium');
-              sounds.playTargetLock();
-              if (searchQuery) setSearchQuery('');
-              else setScannerOpen(true);
-            }}
-            className="px-6 py-3 rounded-2xl text-white font-semibold text-xs transition-all shadow-xl active:scale-95 inline-flex items-center gap-2 cursor-pointer border border-white/10"
-            style={{
-              backgroundColor: 'var(--accent-color)',
-              boxShadow: '0 4px 16px var(--accent-glow)'
-            }}
-          >
-            {searchQuery ? 'Clear Search' : 'Scan Your First Car →'}
-          </button>
+
+          <div className="space-y-3 max-w-xs mx-auto">
+            <Button
+              variant="primary"
+              className="w-full"
+              onClick={() => {
+                hapticTap();
+                setScannerOpen(true);
+              }}
+            >
+              Scan your first car
+            </Button>
+
+            <button
+              onClick={() => setIsExampleModalOpen(true)}
+              className="w-full text-secondary text-[var(--color-text-3)] hover:text-[var(--color-text)] transition-colors py-2 cursor-pointer font-medium underline underline-offset-4"
+            >
+              See what a Mythic looks like
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ─── 6. EXAMPLE MYTHIC MODAL (Visibly Labelled Static Asset) ─── */}
+      {isExampleModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+          <div className="w-full max-w-sm space-y-4 animate-scalePop">
+            <div className="flex items-center justify-between px-1">
+              <span className="font-mono text-caption text-amber-400 font-bold uppercase tracking-wider bg-amber-500/10 border border-amber-500/30 px-2 py-0.5 rounded-full flex items-center gap-1">
+                <AlertCircle size={12} /> Example Demonstration Specimen
+              </span>
+              <button
+                onClick={() => setIsExampleModalOpen(false)}
+                className="w-8 h-8 rounded-full bg-[var(--color-panel-2)] border border-[var(--color-line)] flex items-center justify-center text-[var(--color-text)] cursor-pointer"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <Slab
+              rarity="mythic"
+              serial="SAMPLE-000"
+              imageUrl={EXAMPLE_MYTHIC_FIXTURE.imageUrl}
+              carName={EXAMPLE_MYTHIC_FIXTURE.model}
+              make={EXAMPLE_MYTHIC_FIXTURE.make}
+              city="Molsheim"
+              isHero
+              stats={{
+                hp: EXAMPLE_MYTHIC_FIXTURE.horsepower,
+                topSpeed: EXAMPLE_MYTHIC_FIXTURE.topSpeedKmH,
+                zeroToHundred: EXAMPLE_MYTHIC_FIXTURE.zeroToHundredSec,
+                weight: EXAMPLE_MYTHIC_FIXTURE.kerbWeightKg,
+              }}
+            />
+
+            <Button
+              variant="secondary"
+              className="w-full"
+              onClick={() => setIsExampleModalOpen(false)}
+            >
+              Close Specimen
+            </Button>
+          </div>
         </div>
       )}
     </div>
   );
 };
+
+GarageScreen.displayName = 'GarageScreen';
