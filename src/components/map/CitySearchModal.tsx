@@ -66,22 +66,22 @@ export const CitySearchModal: React.FC<CitySearchModalProps> = ({ isOpen, onClos
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 bg-black/90 flex items-start justify-center pt-16 px-4" style={{ contain: 'content' }}>
+      <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-start justify-center pt-16 px-4" style={{ contain: 'content' }}>
         <motion.div
           initial={{ opacity: 0, y: -20, scale: 0.96 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: -20, scale: 0.96 }}
-          className="w-full max-w-md bg-[#111111] border border-orange-500/50 rounded-3xl p-5 space-y-4 shadow-[0_0_50px_rgba(255,85,0,0.3)]"
+          className="w-full max-w-md bg-[var(--color-panel)] border border-[var(--color-line)] rounded-[var(--radius-panel)] p-5 space-y-4 shadow-2xl"
         >
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-white/10 pb-3">
+          <div className="flex items-center justify-between border-b border-[var(--color-line)] pb-3">
             <div className="flex items-center gap-2">
-              <Globe className="w-5 h-5 text-[#FF5500]" />
-              <h3 className="font-display text-2xl text-white tracking-wide">LOCATION SEARCH</h3>
+              <Globe className="w-5 h-5 text-[var(--color-accent)]" />
+              <h3 className="font-display text-display-m text-[var(--color-text)] tracking-wide">LOCATION SEARCH</h3>
             </div>
             <button
               onClick={onClose}
-              className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20"
+              className="w-8 h-8 rounded-full bg-[var(--color-panel-2)] border border-[var(--color-line)] flex items-center justify-center text-[var(--color-text-2)] hover:text-[var(--color-text)] cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>
@@ -95,14 +95,14 @@ export const CitySearchModal: React.FC<CitySearchModalProps> = ({ isOpen, onClos
               onChange={e => setQuery(e.target.value)}
               placeholder="Search any city or place (e.g. Tokyo, Dubai, Paris)..."
               autoFocus
-              className="w-full bg-white/5 border border-white/15 rounded-2xl py-3 pl-11 pr-4 text-sm text-white placeholder-slate-400 focus:outline-none focus:border-[#FF5500] font-sans transition-colors"
+              className="w-full bg-[var(--color-panel-2)] border border-[var(--color-line)] rounded-[var(--radius-button)] py-3 pl-11 pr-4 text-sm text-[var(--color-text)] placeholder-[var(--color-text-3)] focus:outline-none focus:border-[var(--color-accent)] font-sans transition-colors"
             />
-            <Search className="w-5 h-5 text-[#FF5500] absolute left-3.5 top-3.5" />
+            <Search className="w-5 h-5 text-[var(--color-accent)] absolute left-3.5 top-3.5" />
           </form>
 
           {/* Featured Global Cities List */}
           <div className="space-y-2 max-h-80 overflow-y-auto pr-1 no-scrollbar">
-            <span className="text-[10px] font-mono text-slate-400 uppercase tracking-widest block">
+            <span className="text-[10px] font-mono text-[var(--color-text-3)] uppercase tracking-widest block">
               POPULAR GLOBAL HOTSPOTS ({filteredCities.length})
             </span>
 
@@ -110,22 +110,22 @@ export const CitySearchModal: React.FC<CitySearchModalProps> = ({ isOpen, onClos
               <div
                 key={city.name}
                 onClick={() => handleSelect(city)}
-                className="p-3 rounded-2xl bg-white/5 border border-white/10 hover:border-[#FF5500] hover:bg-orange-950/30 transition-all cursor-pointer flex items-center justify-between group"
+                className="p-3 rounded-[var(--radius-panel)] bg-[var(--color-panel-2)]/60 border border-[var(--color-line)] hover:border-[var(--color-accent)] hover:bg-[var(--color-panel-2)] transition-all cursor-pointer flex items-center justify-between group"
               >
                 <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-xl bg-orange-950/60 border border-orange-500/40 text-[#FF5500] group-hover:scale-110 transition-transform">
+                  <div className="p-2.5 rounded-[var(--radius-chip)] bg-[var(--color-void)] border border-[var(--color-line)] text-[var(--color-accent)] group-hover:scale-110 transition-transform">
                     <MapPin className="w-4 h-4" />
                   </div>
                   <div>
-                    <h4 className="font-display text-lg text-white group-hover:text-[#FF5500] transition-colors leading-none">
-                      {city.name}, <span className="text-xs font-sans text-slate-300 font-normal">{city.country}</span>
+                    <h4 className="font-display text-lg text-[var(--color-text)] group-hover:text-[var(--color-accent)] transition-colors leading-none">
+                      {city.name}, <span className="text-xs font-sans text-[var(--color-text-2)] font-normal">{city.country}</span>
                     </h4>
-                    <p className="text-[11px] text-slate-400 font-mono mt-0.5">{city.tagline}</p>
+                    <p className="text-[11px] text-[var(--color-text-3)] font-mono mt-0.5">{city.tagline}</p>
                   </div>
                 </div>
 
                 <div className="text-right">
-                  <Navigation className="w-4 h-4 text-slate-400 ml-auto group-hover:text-[#FF5500]" />
+                  <Navigation className="w-4 h-4 text-[var(--color-text-3)] ml-auto group-hover:text-[var(--color-accent)]" />
                 </div>
               </div>
             ))}
