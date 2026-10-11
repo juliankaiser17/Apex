@@ -5,21 +5,22 @@ import { HeaderBar } from './components/common/HeaderBar';
 import { TabBar } from './components/common/TabBar';
 import { AmbientBackground } from './components/common/AmbientBackground';
 import { HomeScreen } from './components/home/HomeScreen';
-import { MapScreen } from './components/map/MapScreen';
-import { GarageScreen } from './components/garage/GarageScreen';
-import { SocialScreen } from './components/social/SocialScreen';
-import { ScannerModal } from './components/scanner/ScannerModal';
-import { OnboardingModal } from './components/onboarding/OnboardingModal';
 import { ActiveHuntNotification } from './components/hunts/ActiveHuntNotification';
 import { EnthusiastModal } from './components/premium/EnthusiastModal';
-import { HuntScreen } from './components/hunts/HuntScreen';
-import { Card3DDetail } from './components/garage/Card3DDetail';
-import { ProfileSettingsModal } from './components/profile/ProfileSettingsModal';
 import { LevelUpModal } from './components/common/LevelUpModal';
 import { DailyStreakModal } from './components/common/DailyStreakModal';
 import { NotificationCenterModal } from './components/common/NotificationCenterModal';
 import { AuthDiagnosticPanel } from './components/admin/AuthDiagnosticPanel';
 import { ModuleErrorBoundary } from './components/common/ModuleErrorBoundary';
+
+const MapScreen = React.lazy(() => import('./components/map/MapScreen').then(m => ({ default: m.MapScreen })));
+const GarageScreen = React.lazy(() => import('./components/garage/GarageScreen').then(m => ({ default: m.GarageScreen })));
+const SocialScreen = React.lazy(() => import('./components/social/SocialScreen').then(m => ({ default: m.SocialScreen })));
+const ScannerModal = React.lazy(() => import('./components/scanner/ScannerModal').then(m => ({ default: m.ScannerModal })));
+const OnboardingModal = React.lazy(() => import('./components/onboarding/OnboardingModal').then(m => ({ default: m.OnboardingModal })));
+const Card3DDetail = React.lazy(() => import('./components/garage/Card3DDetail').then(m => ({ default: m.Card3DDetail })));
+const ProfileSettingsModal = React.lazy(() => import('./components/profile/ProfileSettingsModal').then(m => ({ default: m.ProfileSettingsModal })));
+const HuntScreen = React.lazy(() => import('./components/hunts/HuntScreen').then(m => ({ default: m.HuntScreen })));
 
 import { requestRealLocationPermission } from './utils/geolocation';
 import { applyAppTheme } from './utils/theme';
@@ -239,22 +240,30 @@ export const App: React.FC = () => {
           )}
           {activeTab === 'map' && (
             <ModuleErrorBoundary moduleName="Radar Map">
-              <MapScreen />
+              <React.Suspense fallback={null}>
+                <MapScreen />
+              </React.Suspense>
             </ModuleErrorBoundary>
           )}
           {activeTab === 'garage' && (
             <ModuleErrorBoundary moduleName="Garage Vault">
-              <GarageScreen />
+              <React.Suspense fallback={null}>
+                <GarageScreen />
+              </React.Suspense>
             </ModuleErrorBoundary>
           )}
           {activeTab === 'social' && (
             <ModuleErrorBoundary moduleName="Spotter Feed">
-              <SocialScreen />
+              <React.Suspense fallback={null}>
+                <SocialScreen />
+              </React.Suspense>
             </ModuleErrorBoundary>
           )}
           {activeTab === 'profile' && (
             <ModuleErrorBoundary moduleName="Spotter Profile">
-              <SocialScreen />
+              <React.Suspense fallback={null}>
+                <SocialScreen />
+              </React.Suspense>
             </ModuleErrorBoundary>
           )}
         </main>
@@ -266,25 +275,31 @@ export const App: React.FC = () => {
       {/* Global 3D Card Detail Modal (accessible from Map, Home, Garage & Social) */}
       {selectedCardForDetail && (
         <ModuleErrorBoundary moduleName="3D Card Viewer">
-          <Card3DDetail
-            card={selectedCardForDetail}
-            onClose={() => setSelectedCardForDetail(null)}
-          />
+          <React.Suspense fallback={null}>
+            <Card3DDetail
+              card={selectedCardForDetail}
+              onClose={() => setSelectedCardForDetail(null)}
+            />
+          </React.Suspense>
         </ModuleErrorBoundary>
       )}
 
       {/* Modals & Overlays */}
       <ModuleErrorBoundary moduleName="Vision Scanner">
-        <ScannerModal />
+        <React.Suspense fallback={null}>
+          <ScannerModal />
+        </React.Suspense>
       </ModuleErrorBoundary>
       <ActiveHuntNotification />
       <EnthusiastModal />
 
       {/* Profile & Privacy Settings Modal */}
-      <ProfileSettingsModal
-        isOpen={settingsModalOpen}
-        onClose={() => setSettingsModalOpen(false)}
-      />
+      <React.Suspense fallback={null}>
+        <ProfileSettingsModal
+          isOpen={settingsModalOpen}
+          onClose={() => setSettingsModalOpen(false)}
+        />
+      </React.Suspense>
 
       {/* Daily Streak & Rewards Box */}
       <DailyStreakModal />
@@ -293,14 +308,16 @@ export const App: React.FC = () => {
       <NotificationCenterModal />
 
       {/* Dedicated Full-Screen Hunt Experience */}
-      <HuntScreen
-        hunt={activeHuntModal}
-        onClose={closeHuntModal}
-        onOpenScanner={() => {
-          closeHuntModal();
-          setScannerOpen(true);
-        }}
-      />
+      <React.Suspense fallback={null}>
+        <HuntScreen
+          hunt={activeHuntModal}
+          onClose={closeHuntModal}
+          onOpenScanner={() => {
+            closeHuntModal();
+            setScannerOpen(true);
+          }}
+        />
+      </React.Suspense>
       
       <LevelUpModal />
       <AuthDiagnosticPanel />

@@ -3,7 +3,9 @@ import { Flame, Zap, Settings, Bell, Cpu } from 'lucide-react';
 import { useApexStore } from '../../store/useApexStore';
 import { getProgressToNextLevel } from '../../utils/mastery';
 import { sounds } from '../../utils/audio';
-import { AiControlCenterModal } from '../admin/AiControlCenterModal';
+
+import { AiControlCenterModal } from 'virtual:ai-control-modal';
+const isAiAdminEnabled = import.meta.env.VITE_ENABLE_ADMIN === 'true';
 
 import { hapticTap } from '../../utils/haptics';
 
@@ -117,23 +119,25 @@ export const HeaderBar: React.FC = React.memo(() => {
                 </span>
               </div>
 
-              {/* AI Fleet Control Center Button */}
-              <button
-                onClick={() => {
-                  hapticTap();
-                  sounds.playTargetLock();
-                  setIsAiControlOpen(true);
-                }}
-                className="w-8 h-8 rounded-full border flex items-center justify-center transition-colors active:scale-95 shadow-sm cursor-pointer"
-                style={{
-                  backgroundColor: 'var(--accent-subtle)',
-                  borderColor: 'var(--accent-border)',
-                  color: 'var(--accent-color)'
-                }}
-                title="AI Fleet Control Center"
-              >
-                <Cpu className="w-3.5 h-3.5" />
-              </button>
+              {/* AI Fleet Control Center Button (Admin Only) */}
+              {isAiAdminEnabled && (
+                <button
+                  onClick={() => {
+                    hapticTap();
+                    sounds.playTargetLock();
+                    setIsAiControlOpen(true);
+                  }}
+                  className="w-8 h-8 rounded-full border flex items-center justify-center transition-colors active:scale-95 shadow-sm cursor-pointer"
+                  style={{
+                    backgroundColor: 'var(--accent-subtle)',
+                    borderColor: 'var(--accent-border)',
+                    color: 'var(--accent-color)'
+                  }}
+                  title="AI Fleet Control Center"
+                >
+                  <Cpu className="w-3.5 h-3.5" />
+                </button>
+              )}
 
               {/* Profile & Privacy Settings Button */}
               <button
@@ -152,11 +156,13 @@ export const HeaderBar: React.FC = React.memo(() => {
         </div>
       </header>
 
-      {/* AI Fleet Control Center Modal */}
-      <AiControlCenterModal
-        isOpen={isAiControlOpen}
-        onClose={() => setIsAiControlOpen(false)}
-      />
+      {/* AI Fleet Control Center Modal (Compile-Time Gated) */}
+      {isAiAdminEnabled && isAiControlOpen && (
+        <AiControlCenterModal
+          isOpen={isAiControlOpen}
+          onClose={() => setIsAiControlOpen(false)}
+        />
+      )}
     </>
   );
 });
