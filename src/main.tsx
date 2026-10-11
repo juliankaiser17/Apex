@@ -1,6 +1,12 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import 'leaflet/dist/leaflet.css';
+import '@fontsource/big-shoulders-display/latin-700';
+import '@fontsource/big-shoulders-display/latin-900';
+import '@fontsource/inter/latin-400';
+import '@fontsource/inter/latin-500';
+import '@fontsource/inter/latin-600';
+import '@fontsource/jetbrains-mono/latin-600';
 import App from './App.tsx';
 import './index.css';
 import { preloadAuthStorage } from './lib/capacitorStorage';
