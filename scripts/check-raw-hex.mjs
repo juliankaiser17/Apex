@@ -11,32 +11,40 @@ const TARGET_DIRS = process.argv.slice(2).length > 0 ? process.argv.slice(2) : [
 
 let violations = 0;
 
-function scanDir(dir) {
-  if (!fs.existsSync(dir)) return;
-  for (const item of fs.readdirSync(dir, { withFileTypes: true })) {
-    const full = path.join(dir, item.name);
+function scanPath(targetPath) {
+  if (!fs.existsSync(targetPath)) return;
+  const stat = fs.statSync(targetPath);
+  if (stat.isFile()) {
+    checkFile(targetPath);
+    return;
+  }
+  for (const item of fs.readdirSync(targetPath, { withFileTypes: true })) {
+    const full = path.join(targetPath, item.name);
     if (item.isDirectory()) {
-      scanDir(full);
-    } else if (/\.(tsx|ts|jsx|js|css)$/.test(item.name) && !item.name.includes('tokens.css')) {
-      const lines = fs.readFileSync(full, 'utf8').split('\n');
-      lines.forEach((line, idx) => {
-        // Match raw hex codes #fff, #123456, etc., ignoring URL encoded # or comments if needed
-        const matches = line.match(/#[0-9a-fA-F]{3,8}\b/g);
-        if (matches) {
-          // Allow exceptions if explicitly marked with /* hex-allowed */ or inside SVG namespaces
-          const isAllowed = line.includes('/* hex-allowed */') || line.includes('xmlns=');
-          if (!isAllowed) {
-            console.error(`❌ [Hex Violation] ${full}:${idx + 1}: ${line.trim()}`);
-            violations += matches.length;
-          }
-        }
-      });
+      scanPath(full);
+    } else {
+      checkFile(full);
     }
   }
 }
 
+function checkFile(full) {
+  if (!/\.(tsx|ts|jsx|js|css)$/.test(full) || full.includes('tokens.css')) return;
+  const lines = fs.readFileSync(full, 'utf8').split('\n');
+  lines.forEach((line, idx) => {
+    const matches = line.match(/#[0-9a-fA-F]{3,8}\b/g);
+    if (matches) {
+      const isAllowed = line.includes('/* hex-allowed */') || line.includes('xmlns=');
+      if (!isAllowed) {
+        console.error(`❌ [Hex Violation] ${full}:${idx + 1}: ${line.trim()}`);
+        violations += matches.length;
+      }
+    }
+  });
+}
+
 for (const target of TARGET_DIRS) {
-  scanDir(target);
+  scanPath(target);
 }
 
 if (violations > 0) {

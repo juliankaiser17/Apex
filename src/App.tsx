@@ -26,6 +26,7 @@ import { requestRealLocationPermission } from './utils/geolocation';
 import { applyAppTheme } from './utils/theme';
 
 import { logAuthTransition } from './utils/authLogger';
+import { ToastProvider } from './components/ui/Toast';
 
 export const App: React.FC = () => {
   const [isAuthReady, setIsAuthReady] = useState(false);
@@ -194,18 +195,18 @@ export const App: React.FC = () => {
 
   if (!isAuthReady) {
     return (
-      <div className="min-h-[100dvh] bg-[#080808] flex flex-col items-center justify-center select-none font-sans">
+      <div className="min-h-[100dvh] bg-[var(--color-void)] flex flex-col items-center justify-center select-none font-sans">
         <div className="relative flex flex-col items-center">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#1a1a1a] to-[#0d0d0d] border border-white/10 flex items-center justify-center shadow-2xl relative overflow-hidden">
-            <div className="w-8 h-8 rounded-lg bg-[#E50914] flex items-center justify-center shadow-lg shadow-red-950/60 font-black text-white text-base tracking-tighter">
+          <div className="w-16 h-16 rounded-2xl bg-[var(--color-panel-2)] border border-[var(--color-line)] flex items-center justify-center shadow-2xl relative overflow-hidden">
+            <div className="w-8 h-8 rounded-lg bg-[var(--color-accent)] flex items-center justify-center shadow-lg font-black text-white text-base tracking-tighter">
               A
             </div>
             <div className="absolute inset-0 apex-skeleton opacity-20 pointer-events-none" />
           </div>
-          <span className="mt-4 text-xs font-black tracking-[0.25em] text-white/70 uppercase">
+          <span className="mt-4 text-caption font-black tracking-[0.25em] text-[var(--color-text)] uppercase font-display">
             APEX
           </span>
-          <span className="text-[10px] text-white/30 tracking-wider mt-1">
+          <span className="text-[10px] text-[var(--color-text-3)] tracking-wider mt-1 font-sans">
             EVERY STREET IS A TRACK
           </span>
         </div>
@@ -216,14 +217,15 @@ export const App: React.FC = () => {
   // If user has not completed onboarding, display the onboarding experience exclusively
   if (!onboardingCompleted) {
     return (
-      <div className="fixed inset-0 z-50 bg-[#080808] overflow-hidden">
+      <div className="fixed inset-0 z-50 bg-[var(--color-void)] overflow-hidden">
         <OnboardingModal isOpen={true} onClose={() => {}} />
       </div>
     );
   }
 
   return (
-    <div className="min-h-[100dvh] bg-transparent text-[#F0EBE3] flex flex-col selection:bg-[#FF4500] selection:text-white relative z-0 pb-[110px]" style={{ fontFamily: 'DM Sans' }}>
+    <ToastProvider>
+      <div className="min-h-[100dvh] bg-[var(--color-void)] text-[var(--color-text)] flex flex-col selection:bg-[var(--color-accent)] selection:text-white relative z-0 pb-[100px] font-sans">
       {/* Ambient Background (Omitted while scanner active to ensure full transparency) */}
       {!scannerOpen && <AmbientBackground />}
 
@@ -322,6 +324,7 @@ export const App: React.FC = () => {
       <LevelUpModal />
       <AuthDiagnosticPanel />
     </div>
+  </ToastProvider>
   );
 };
 
