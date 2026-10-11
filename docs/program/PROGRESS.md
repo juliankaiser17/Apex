@@ -7,9 +7,9 @@
 ---
 
 ## 1. Current Status Summary
-- **Completed Tracks**: Track R (Stability and Release Engineering), Track A (AI Identification: Phase 13)
-- **Active Track**: Track U (UI Redesign: Appendix A)
-- **Overall Program State**: Track R & Track A completed with full cryptographic evidence and tests passing. Starting Track U (UI Redesign: Tokens, Components, Screens).
+- **Completed Tracks**: Track R (Stability and Release Engineering), Track A (AI Identification: Phase 13), Track U (UI Redesign: Phases 0–10)
+- **Active Track**: Track F (Functional Audit: Appendix C)
+- **Overall Program State**: Tracks R, A, and U 100% complete with full cryptographic evidence, 0 raw hex violations, 6 Play Store screenshots, and passing test suites. Ready to execute Track F functional baseline and bug fixes.
 
 ---
 
@@ -82,17 +82,17 @@
   - [x] Gate G1 RESOLVED: clean manifest promoted as `eval/golden/manifest_v2.json` (SHA-256: `F4884118...`) while canonical `manifest.json` remains frozen
 
 ### Track U: UI Redesign (`ui/redesign`)
-- [ ] Phase 0: Audit & baseline captures
-- [ ] Phase 1: Foundations (`tokens.css`, `@fontsource`, type scale, motion tokens)
-- [ ] Phase 2: Primitives (`<Button>`, `<RarityBadge>`, `<StatChip>`, `<Slab>`, etc.)
-- [ ] Phase 3: Shell (Header, Bottom nav, navigation restructure, dev-tool gating)
-- [ ] Phase 4: Garage (Empty, populated, detail)
-- [ ] Phase 5: Home and Quests
-- [ ] Phase 6: Feed, Ranks, Profile, Settings, Post composer
-- [ ] Phase 7: Map
-- [ ] Phase 8: Scanner states & reveal retune
-- [ ] Phase 9: Accessibility & performance verification
-- [ ] Phase 10: Store screenshot mode
+- [x] Phase 0: Audit & baseline captures (`docs/ui-redesign/FINDINGS.md`, `DECISIONS.md`, 19 before captures)
+- [x] Phase 1: Foundations (`tokens.css`, `@fontsource`, type scale, motion tokens, zero raw hex gate)
+- [x] Phase 2: Primitives (`<Button>`, `<RarityBadge>`, `<StatChip>`, `<StatGauge>`, `<ProgressTicks>`, `<PhotoCard>`, `<Slab>`, `<EmptyState>`, `<Skeleton>`, `<BottomSheet>`, `<Toast>`, `<Header>`)
+- [x] Phase 3: Shell (Header, TabBar 64px raised scan button, ToastProvider, zero dev clutter)
+- [x] Phase 4: Garage (Redesigned empty state with 6 ghost slots, Display-L header, hairline stats strip, masonry slabs, Card3DDetail telemetry restyle)
+- [x] Phase 5: Home and Quests (Today card hero, real near you scroller, city leaderboard strip, dedicated QuestsScreen)
+- [x] Phase 6: Feed, Ranks, Profile, Settings, Post composer (single chrome row, RanksScreen metal podium, ProfileScreen 88px ring, 3-option privacy selector)
+- [x] Phase 7: Map (High-contrast dark basemap road styling, 44px circular pins with rarity rings, user location white dot with ripple pulse, BottomSheet privacy radius selector)
+- [x] Phase 8: Scanner states & reveal retune (ScanningReticle rangefinder brackets & aperture ring, tier-scaled reveal timings, tap-to-skip jumping to resting state)
+- [x] Phase 9: Accessibility & performance verification (WCAG 2.1 AA 100% pass across all tokens, 130% font scale layout resilience, TalkBack labels, <300 kB entry bundle)
+- [x] Phase 10: Store screenshot mode (6 funnel Play Store screenshots, icon & feature graphic creative briefs in `docs/store/ASSET_SPECIFICATIONS.md`)
 
 ### Track F: Functional Audit (`fix/functional`)
 - [ ] Full baseline execution across matrix (Android, mobile web)
@@ -118,9 +118,12 @@
 
 ## 3. Blocked Items & Owner Decisions Needed
 *(Refer to `docs/program/OWNER_DECISIONS.md`)*
-- None blocking immediate Track R execution.
+- None blocking immediate execution.
 
 ---
 
 ## 4. Completed Tasks Log
 - [x] **Master Program Setup**: Created `docs/APEX_MASTER_PROGRAM.md`, `docs/program/PLAN.md`, `docs/program/PROGRESS.md`, `docs/program/OWNER_DECISIONS.md`.
+- [x] **Track R**: Released in commit `381c971`.
+- [x] **Track A**: Released in commit `6fd0915`.
+- [x] **Track U**: Completed all 11 phases (Phases 0 through 10) with 0 raw hex violations, 0 client bundle leaks, and 6 high-res Play Store assets.
