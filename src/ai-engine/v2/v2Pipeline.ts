@@ -33,6 +33,7 @@ import { decisionPolicyEngine } from './stageE_decisionPolicy';
 import { specResolutionEngine } from './stageF_specResolver';
 import { aiTelemetry } from './telemetry';
 import type { V2IdentificationResult, VlmAdjudicationOutput } from './types';
+import { vlmFirstEngine } from './vlmFirstEngine';
 import crypto from 'crypto';
 
 export interface V2ScanInput {
@@ -58,6 +59,21 @@ export class V2IdentificationPipeline {
   public async execute(input: V2ScanInput): Promise<V2IdentificationResult> {
     const t0 = performance.now();
     const traceId = input.traceId || `trace_v2_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+
+    // Phase 15 VLM-First Feature Flag:
+    // Production behaviour remains completely unchanged until this flag is enabled!
+    if (
+      (typeof process !== 'undefined' && process.env?.VLM_FIRST_ENABLED === 'true') ||
+      (typeof process !== 'undefined' && process.env?.AI_PIPELINE === 'vlm-first')
+    ) {
+      return vlmFirstEngine.execute({
+        imageDataUrl: input.imageDataUrl,
+        traceId,
+        customVlmCaller: input.customVlmCaller,
+        enableSecondOpinion: typeof process !== 'undefined' && process.env?.EXPENSIVE_VERIFICATION_ENABLED !== 'false'
+      });
+    }
+
     const imageHash = crypto.createHash('sha256').update(input.imageDataUrl).digest('hex');
     let vlmCallsCount = 0;
 

@@ -1,0 +1,243 @@
+{
+  "eval31": {
+    "policyName": "gemini-3.1-flash-lite",
+    "inCatalogue": {
+      "N": 135,
+      "answeredCount": 62,
+      "answerRate": {
+        "rate": 0.45925925925925926,
+        "count": 62,
+        "ci95": [
+          0.3775,
+          0.5433
+        ]
+      },
+      "makeAccuracy": {
+        "rate": 0.967741935483871,
+        "count": 60,
+        "ci95": [
+          0.8898,
+          0.9911
+        ]
+      },
+      "modelAccuracy": {
+        "rate": 0.9354838709677419,
+        "count": 58,
+        "ci95": [
+          0.8455,
+          0.9746
+        ]
+      },
+      "variantAccuracy": {
+        "rate": 0.45,
+        "count": 18,
+        "N_var": 40,
+        "ci95": [
+          0.3071,
+          0.6017
+        ]
+      },
+      "wrongModelConfident": {
+        "rate": 0.02962962962962963,
+        "count": 4,
+        "ci95": [
+          0.0116,
+          0.0737
+        ]
+      },
+      "wrongVariantConfident": {
+        "rate": 0.007407407407407408,
+        "count": 1,
+        "ci95": [
+          0.0013,
+          0.0408
+        ]
+      },
+      "wrongFinestConfident": {
+        "rate": 0.037037037037037035,
+        "count": 5,
+        "ci95": [
+          0.0159,
+          0.0838
+        ]
+      }
+    },
+    "outOfCatalogue": {
+      "N": 110,
+      "correctRejectionRate": {
+        "rate": 0.8727272727272727,
+        "count": 96,
+        "ci95": [
+          0.7976,
+          0.9227
+        ]
+      },
+      "falseAcceptRate": {
+        "rate": 0.00909090909090909,
+        "count": 1,
+        "upper95": 0.0497
+      }
+    }
+  },
+  "eval35": {
+    "policyName": "gemini-3.5-flash-lite",
+    "inCatalogue": {
+      "N": 135,
+      "answeredCount": 48,
+      "answerRate": {
+        "rate": 0.35555555555555557,
+        "count": 48,
+        "ci95": [
+          0.2798,
+          0.4393
+        ]
+      },
+      "makeAccuracy": {
+        "rate": 1,
+        "count": 48,
+        "ci95": [
+          0.9259,
+          1
+        ]
+      },
+      "modelAccuracy": {
+        "rate": 0.9791666666666666,
+        "count": 47,
+        "ci95": [
+          0.891,
+          0.9963
+        ]
+      },
+      "variantAccuracy": {
+        "rate": 0.43333333333333335,
+        "count": 13,
+        "N_var": 30,
+        "ci95": [
+          0.2738,
+          0.608
+        ]
+      },
+      "wrongModelConfident": {
+        "rate": 0.007407407407407408,
+        "count": 1,
+        "ci95": [
+          0.0013,
+          0.0408
+        ]
+      },
+      "wrongVariantConfident": {
+        "rate": 0.02962962962962963,
+        "count": 4,
+        "ci95": [
+          0.0116,
+          0.0737
+        ]
+      },
+      "wrongFinestConfident": {
+        "rate": 0.037037037037037035,
+        "count": 5,
+        "ci95": [
+          0.0159,
+          0.0838
+        ]
+      }
+    },
+    "outOfCatalogue": {
+      "N": 110,
+      "correctRejectionRate": {
+        "rate": 0.9272727272727272,
+        "count": 102,
+        "ci95": [
+          0.863,
+          0.9627
+        ]
+      },
+      "falseAcceptRate": {
+        "rate": 0.02727272727272727,
+        "count": 3,
+        "upper95": 0.0771
+      }
+    }
+  },
+  "evalCombined": {
+    "policyName": "combined-policy (3.5-first -> 3.1 fallback) [SELECTED ON VALIDATION DATA]",
+    "inCatalogue": {
+      "N": 135,
+      "answeredCount": 75,
+      "answerRate": {
+        "rate": 0.5555555555555556,
+        "count": 75,
+        "ci95": [
+          0.4714,
+          0.6367
+        ]
+      },
+      "makeAccuracy": {
+        "rate": 0.9733333333333334,
+        "count": 73,
+        "ci95": [
+          0.9079,
+          0.9927
+        ]
+      },
+      "modelAccuracy": {
+        "rate": 0.9466666666666667,
+        "count": 71,
+        "ci95": [
+          0.8707,
+          0.9791
+        ]
+      },
+      "variantAccuracy": {
+        "rate": 0.391304347826087,
+        "count": 18,
+        "N_var": 46,
+        "ci95": [
+          0.2639,
+          0.5354
+        ]
+      },
+      "wrongModelConfident": {
+        "rate": 0.02962962962962963,
+        "count": 4,
+        "ci95": [
+          0.0116,
+          0.0737
+        ]
+      },
+      "wrongVariantConfident": {
+        "rate": 0.02962962962962963,
+        "count": 4,
+        "ci95": [
+          0.0116,
+          0.0737
+        ]
+      },
+      "wrongFinestConfident": {
+        "rate": 0.05925925925925926,
+        "count": 8,
+        "ci95": [
+          0.0303,
+          0.1126
+        ]
+      }
+    },
+    "outOfCatalogue": {
+      "N": 110,
+      "correctRejectionRate": {
+        "rate": 0.8727272727272727,
+        "count": 96,
+        "ci95": [
+          0.7976,
+          0.9227
+        ]
+      },
+      "falseAcceptRate": {
+        "rate": 0.02727272727272727,
+        "count": 3,
+        "upper95": 0.0771
+      }
+    }
+  },
+  "timestamp": "2026-10-12T09:03:56.674Z"
+}

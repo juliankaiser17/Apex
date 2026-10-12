@@ -15,6 +15,7 @@
 import type { BodyStyle, RarityTier } from '../../types/apex';
 import type { OpenCanonicalIdentity } from '../types';
 import { APEX_LOCAL_VEHICLE_DATABASE } from '../../data/vehicleDatabase';
+import tier1RegistryData from './tier1Registry.json';
 
 export interface CanonicalVehicleRecord {
   vehicleId: string;
@@ -150,6 +151,75 @@ class CanonicalVehicleRegistry {
 
       this.registerVehicle(record);
     });
+
+    // 1b. Ingest Tier 1 Canonical Registry Variants (122 launch exotic/sports variants)
+    const excludedCommuterModels = new Set([
+      'corolla', 'camry', 'golf', 'altima', 'elantra', 'accord', 'sentra', 'malibu',
+      'rav4', 'crv', 'cx5', 'outback', 'forte', 'explorer', 'f150', 'harrier',
+      'safari', 'punch', 'tiago', 'altroz', 'scorpion', 'xuv700', 'bolero', 'brezza', 'baleno', 'ambassador'
+    ]);
+
+    if (tier1RegistryData && Array.isArray((tier1RegistryData as any).variants)) {
+      for (const v of (tier1RegistryData as any).variants) {
+        const normModel = this.normalize(v.model);
+        if (excludedCommuterModels.has(normModel) && !(normModel === 'civic' && this.normalize(v.variant) === 'typer')) {
+          continue;
+        }
+
+        const vehicleId = v.canonical_id;
+        const existing = this.registry.get(vehicleId);
+
+        const rec: CanonicalVehicleRecord = existing || {
+          vehicleId,
+          make: v.make,
+          model: v.model,
+          generation: v.generation_code || 'Base',
+          trim: v.variant || undefined,
+          bodyStyle: (v.body_styles?.[0] || 'Coupe') as BodyStyle,
+          yearStart: parseInt(v.production_years?.split('–')?.[0] || '2020', 10) || 2020,
+          yearEnd: v.production_years?.includes('–') ? parseInt(v.production_years.split('–')[1], 10) : undefined,
+          engine: v.engine_code || v.engine_layout || 'High-performance engine',
+          displacementCc: v.displacement_cc,
+          aspiration: 'Naturally Aspirated',
+          horsepower: v.power_hp || 500,
+          torqueNm: v.torque_nm || 500,
+          topSpeedKmH: v.top_speed_kmh || 300,
+          zeroToHundredSec: v.zero_to_hundred_kph || 3.5,
+          kerbWeightKg: v.weight_kg || 1500,
+          productionYears: v.production_years || '',
+          originCountry: 'International',
+          baselineRarity: (v.base_rarity || 'Rare') as RarityTier,
+          visualFeatures: [],
+          aliases: [],
+          notableFacts: `${v.make} ${v.model} ${v.variant || ''}`.trim(),
+          historicalInformation: `${v.make} ${v.model} produced ${v.production_years || ''}.`,
+          referenceImages: [],
+          displayName: `${v.make} ${v.model}${v.variant ? ' ' + v.variant : ''}`.trim(),
+          specificityLevel: v.variant ? 4 : 1
+        };
+
+        if (existing) {
+          if (v.variant && (!existing.trim || existing.trim === 'Base')) {
+            existing.trim = v.variant;
+            existing.displayName = `${existing.make} ${existing.model} ${v.variant}`;
+          }
+        } else {
+          this.registerVehicle(rec);
+        }
+
+        const extraAliases = [
+          `${v.make} ${v.model} ${v.variant || ''}`.trim(),
+          `${v.make} ${v.model}`,
+          `${v.model} ${v.variant || ''}`.trim(),
+          `${v.make} ${v.variant || ''}`.trim(),
+          v.model,
+          vehicleId,
+          vehicleId.replace(/-/g, ' ')
+        ];
+        if (v.variant) extraAliases.push(v.variant);
+        this.registerAliases(vehicleId, extraAliases);
+      }
+    }
 
     // 2. Add extra aliases with strict manufacturer scoping
     // ── PORSCHE ──

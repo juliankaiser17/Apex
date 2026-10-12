@@ -1,0 +1,68 @@
+{
+  "subsetSize": 60,
+  "inCatalogueN": 35,
+  "outOfCatalogueN": 25,
+  "preprocessing": "768px, 82% JPEG",
+  "model": "gemini-3.5-flash-lite",
+  "preprocessedMetrics": {
+    "answerRate": {
+      "count": 14,
+      "rate": 0.4,
+      "ci95": [
+        0.2555,
+        0.5643
+      ]
+    },
+    "modelAccuracy": {
+      "count": 13,
+      "totalAnswered": 14,
+      "rate": 0.9285714285714286,
+      "ci95": [
+        0.6853,
+        0.9873
+      ]
+    },
+    "variantAccuracy": {
+      "count": 6,
+      "totalVarAnswered": 10,
+      "rate": 0.6
+    },
+    "wrongModelConfident": {
+      "count": 0,
+      "rate": 0,
+      "ci95": [
+        0,
+        0.0989
+      ]
+    },
+    "wrongVariantConfident": {
+      "count": 2,
+      "rate": 0.05714285714285714
+    },
+    "correctRejectionRate": {
+      "count": 22,
+      "rate": 0.88,
+      "ci95": [
+        0.7004,
+        0.9583
+      ]
+    },
+    "falseAcceptRate": {
+      "count": 1,
+      "rate": 0.04,
+      "ci95": [
+        0.0071,
+        0.1954
+      ]
+    }
+  },
+  "rawBaselineComparison": {
+    "matchedComparisons": 35,
+    "rawAnswerRate": 0.4857142857142857,
+    "preprocessedAnswerRate": 0.4,
+    "rawModelAcc": 1,
+    "preprocessedModelAcc": 0.9285714285714286,
+    "exactMatchConsistency": 0.7428571428571429
+  },
+  "timestamp": "2026-10-12T09:17:24.415Z"
+}

@@ -413,19 +413,67 @@ export async function identifyVehicleWithAi(
 
     if (res.status === 429) {
       const data = await res.json().catch(() => ({}));
+      const reasonMsg = data.code === 'USER_DAILY_LIMIT_EXCEEDED'
+        ? 'Daily scan limit reached. Resets tomorrow!'
+        : data.code === 'SCANNER_BUSY'
+        ? 'Scanner busy, please try tomorrow!'
+        : (data.error || 'Scan rate limit reached. Please wait a few moments before scanning again.');
       return {
         ...getEmptyPayload(),
         status: 'uncertain',
         is_car: true,
         needs_better_angle: false,
-        reason: data.error || 'Scan rate limit reached. Please wait a few moments before scanning again.',
-        rejection_reason: 'rate_limit_exceeded',
+        reason: reasonMsg,
+        rejection_reason: data.code === 'USER_DAILY_LIMIT_EXCEEDED' ? 'user_daily_limit_exceeded' : 'rate_limit_exceeded',
         confidence: 0
       };
     }
 
+    if (res.status === 400) {
+      const data = await res.json().catch(() => ({}));
+      if (data.code === 'PHOTO_TOO_DARK') {
+        return {
+          ...getEmptyPayload(),
+          status: 'uncertain',
+          is_car: false,
+          needs_better_angle: true,
+          reason: 'Photo is too dark. Please turn on flashlight or find better lighting.',
+          rejection_reason: 'photo_too_dark',
+          confidence: 0
+        };
+      }
+      if (data.code === 'PHOTO_UNCLEAR') {
+        return {
+          ...getEmptyPayload(),
+          status: 'uncertain',
+          is_car: true,
+          needs_better_angle: true,
+          reason: "Couldn't tell what car that is. Try capturing from another angle.",
+          rejection_reason: 'couldnt_tell',
+          confidence: 0
+        };
+      }
+    }
+
     if (res.status === 503) {
       const data = await res.json().catch(() => ({}));
+      if (data.code === 'SCANNER_BUSY') {
+        return {
+          ...getEmptyPayload(),
+          status: 'uncertain',
+          is_car: true,
+          needs_better_angle: false,
+          reason: 'Scanner busy, please try tomorrow!',
+          rejection_reason: 'scanner_busy',
+          confidence: 0
+        };
+      }
+      // Server unavailable: invoke offline optical matcher as resilient fallback
+      console.log('[Apex AI Vision] Server returned HTTP 503, falling back to offline matcher...');
+      const offlineMatch = await identifyVehicleOffline(photoDataUrl);
+      if (offlineMatch.canonical_vehicle_id || offlineMatch.status === 'identified' || (offlineMatch.confidence && offlineMatch.confidence >= 0.65)) {
+        return offlineMatch;
+      }
       return {
         ...getEmptyPayload(),
         status: 'uncertain',
@@ -440,13 +488,21 @@ export async function identifyVehicleWithAi(
     if (!res.ok) {
       const errData = await res.json().catch(() => ({}));
       console.warn(`[Apex AI Vision Telemetry] Remote analyze returned HTTP ${res.status}:`, errData);
+      if (res.status !== 401) {
+        // Invoke offline matcher on 5xx server errors
+        console.log(`[Apex AI Vision] Server returned HTTP ${res.status}, falling back to offline matcher...`);
+        const offlineMatch = await identifyVehicleOffline(photoDataUrl);
+        if (offlineMatch.canonical_vehicle_id || offlineMatch.status === 'identified' || (offlineMatch.confidence && offlineMatch.confidence >= 0.65)) {
+          return offlineMatch;
+        }
+      }
       return {
         ...getEmptyPayload(),
         status: 'uncertain',
         is_car: true,
         needs_better_angle: false,
-        reason: errData.error || (res.status === 401 ? 'Your session expired. Please sign in again.' : 'Connection failed. Try again.'),
-        rejection_reason: res.status === 401 ? 'auth_session_expired' : 'backend_error',
+        reason: errData.error || (res.status === 401 ? 'Your session expired. Please sign in again.' : "Server error. Couldn't tell what car that is."),
+        rejection_reason: res.status === 401 ? 'auth_session_expired' : 'server_error',
         confidence: 0
       };
     }
@@ -477,13 +533,17 @@ export async function identifyVehicleWithAi(
   } catch (err: any) {
     clearTimeout(timeoutId);
     const isTimeout = err?.name === 'AbortError' || err?.message?.includes('timed out');
-    console.warn(`[Apex AI Vision Telemetry] Remote analyze request failed (timeout=${isTimeout}):`, err?.message);
+    console.warn(`[Apex AI Vision Telemetry] Remote analyze request failed (timeout=${isTimeout}), falling back to offline matcher:`, err?.message);
+    const offlineMatch = await identifyVehicleOffline(photoDataUrl);
+    if (offlineMatch.canonical_vehicle_id || offlineMatch.status === 'identified' || (offlineMatch.confidence && offlineMatch.confidence >= 0.65)) {
+      return offlineMatch;
+    }
     return {
       ...getEmptyPayload(),
       status: 'uncertain',
       is_car: true,
       needs_better_angle: false,
-      reason: 'Connection failed. Try again.',
+      reason: isTimeout ? 'Scanning timed out. Switched to offline matcher.' : 'Connection failed. Switched to offline matcher.',
       rejection_reason: isTimeout ? 'timeout' : 'network_error',
       confidence: 0
     };

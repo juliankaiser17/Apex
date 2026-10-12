@@ -10,9 +10,11 @@
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
+import crypto from 'crypto';
 import { apexEngine } from '../ai-engine/engine';
 import { VISION_PIPELINE_VERSION } from '../ai-engine/caching/identificationCache';
 import { canonicalVehicleRegistry } from '../ai-engine/canonical/canonicalVehicleRegistry';
+import { pipelineConfig } from '../ai-engine/config/pipelineConfig';
 
 export const config = {
   api: {
@@ -21,6 +23,31 @@ export const config = {
     },
   },
 };
+
+// ── Image-Hash Cache (Prevents duplicate expensive VLM calls on identical images) ──
+interface CachedScanEntry {
+  responsePayload: any;
+  timestamp: number;
+}
+const scanResultImageCache = new Map<string, CachedScanEntry>();
+
+// ── Global Daily Free-Tier Budget Tracking ──
+let freeTierGlobalDailyCounter = 0;
+let freeTierGlobalResetDay = new Date().getUTCDate();
+
+function checkAndConsumeFreeTierGlobalBudget(): boolean {
+  const currentDay = new Date().getUTCDate();
+  if (currentDay !== freeTierGlobalResetDay) {
+    freeTierGlobalDailyCounter = 0;
+    freeTierGlobalResetDay = currentDay;
+  }
+  const maxBudget = pipelineConfig.freeTierBudgets.globalDailyScanBudget;
+  if (freeTierGlobalDailyCounter >= maxBudget) {
+    return false;
+  }
+  freeTierGlobalDailyCounter++;
+  return true;
+}
 
 // Server-side Supabase client for distributed rate limiting
 const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
@@ -417,7 +444,7 @@ function formatScanResponse(r: any) {
       distinguishingFeatures: c.distinguishingFeatures || []
     })),
     session_frame_count: v2?.sessionFrameCount || 1,
-    pipeline_mode: process.env.AI_PIPELINE || 'v2'
+    pipeline_mode: process.env.AI_PIPELINE || 'v1'
   };
 }
 
@@ -436,7 +463,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   // Safe Diagnostic Logging (Never log token or secret values)
   console.log('[api/analyze] Diagnostics:', {
-    provider: (process.env.VISION_PROVIDER || 'cloudflare').toLowerCase().trim(),
+    provider: (process.env.VISION_PROVIDER || 'gemini').toLowerCase().trim(),
     cloudflareAccountConfigured: Boolean(process.env.CLOUDFLARE_ACCOUNT_ID),
     cloudflareTokenConfigured: Boolean(process.env.CLOUDFLARE_AUTH_TOKEN),
     scanningEnabled: process.env.CLOUDFLARE_SCANNING_ENABLED !== 'false',
@@ -445,13 +472,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   });
 
   // 1.1 Server-Side Provider Validation & Emergency AI Kill Switch
-  const rawProvider = (process.env.VISION_PROVIDER || 'cloudflare').toLowerCase().trim();
+  const rawProvider = (process.env.VISION_PROVIDER || 'gemini').toLowerCase().trim();
   if (rawProvider !== 'cloudflare' && rawProvider !== 'gemini') {
     return res.status(500).json({
       error: `Server misconfiguration: Invalid VISION_PROVIDER="${rawProvider}". Supported values are "cloudflare" or "gemini". Application fails closed.`
     });
   }
+
   const isCloudflare = rawProvider === 'cloudflare';
+  if (isCloudflare && process.env.CLOUDFLARE_SCANNING_ENABLED !== 'true') {
+    return res.status(503).json({
+      error: 'Cloudflare vision provider is disabled for free tier. Gemini is the active vision provider.',
+      code: 'PROVIDER_DISABLED'
+    });
+  }
+
   const isKilled = process.env.VISION_SCANNING_ENABLED === 'false' ||
     (isCloudflare ? process.env.CLOUDFLARE_SCANNING_ENABLED === 'false' : process.env.GEMINI_SCANNING_ENABLED === 'false');
 
@@ -561,6 +596,63 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     ? imageBase64
     : `data:${sanitizedMime};base64,${imageBase64}`;
 
+  // 4.1 Server-Side User Daily Scan Cap Enforcement
+  if (authenticatedUserId && supabase) {
+    try {
+      const { data: prof } = await supabase
+        .from('profiles')
+        .select('daily_scans_count, daily_scans_reset_at')
+        .eq('id', authenticatedUserId)
+        .single();
+      if (prof) {
+        const resetAt = prof.daily_scans_reset_at ? new Date(prof.daily_scans_reset_at).getTime() : 0;
+        const isStale = (Date.now() - resetAt) > 86400000;
+        const effectiveScans = isStale ? 0 : (prof.daily_scans_count || 0);
+        const userCap = pipelineConfig.freeTierBudgets.userDailyScanCap;
+        if (effectiveScans >= userCap) {
+          console.warn(`[api/analyze] User daily scan limit reached: ${effectiveScans}/${userCap} for user: ${authenticatedUserId}`);
+          return res.status(429).json({
+            error: `You have reached your daily scan limit of ${userCap} scans. Limit resets tomorrow.`,
+            code: 'USER_DAILY_LIMIT_EXCEEDED',
+            retryAfter: 86400
+          });
+        }
+      }
+    } catch (err: any) {
+      console.warn('[api/analyze] User daily scan cap check error:', err?.message);
+    }
+  }
+
+  // 4.2 Global Daily Free-Tier Budget Guard (Enforced BEFORE any AI provider call)
+  if (!checkAndConsumeFreeTierGlobalBudget()) {
+    console.warn('[api/analyze] Global daily free-tier scan budget exhausted. Failing closed with SCANNER_BUSY.');
+    return res.status(503).json({
+      error: 'Scanner busy, daily community quota reached. Please try tomorrow!',
+      code: 'SCANNER_BUSY',
+      maintenance: false
+    });
+  }
+
+  // 4.3 Stage A Quality Gate (Decoded byte length & basic image sanity)
+  if (decodedByteLength < 1024) {
+    return res.status(400).json({
+      error: 'Photo is too dark or empty. Please capture a clear photo of a vehicle.',
+      code: 'PHOTO_TOO_DARK'
+    });
+  }
+
+  // 4.4 Image-Hash Cache (Instant resolution on duplicate images without calling AI provider)
+  const imageSha256 = crypto.createHash('sha256').update(rawBase64).digest('hex');
+  const cachedScan = scanResultImageCache.get(imageSha256);
+  if (cachedScan && (Date.now() - cachedScan.timestamp < 86400000)) {
+    console.log(`[api/analyze] Image SHA256 cache HIT for ${imageSha256.slice(0, 12)} (zero provider calls consumed)`);
+    return res.status(200).json({
+      ...cachedScan.responsePayload,
+      cached: true,
+      trace_id: `cached_${imageSha256.slice(0, 8)}`
+    });
+  }
+
   try {
     console.log('[BACKEND] vision_provider_request_started', {
       provider: rawProvider,
@@ -598,6 +690,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         }
         if (current.status === 'failed') {
           console.warn('[BACKEND] vision_provider_response: failed', { error: current.error });
+          const errStr = String(current.error || '');
+          if (errStr.includes('429') || errStr.toLowerCase().includes('quota') || errStr.includes('RESOURCE_EXHAUSTED')) {
+            return res.status(503).json({
+              error: 'Scanner busy, daily community quota reached. Please try tomorrow!',
+              code: 'SCANNER_BUSY'
+            });
+          }
           return res.status(500).json({
             error: current.error || 'Vehicle identification failed.',
             scan_id: ingestion.scanId,
@@ -617,6 +716,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Return immediate or awaited completed result
     if (finalResult) {
+      if (
+        finalResult.error_code === 'VISION_QUOTA_EXHAUSTED' ||
+        String(finalResult.error || '').includes('429') ||
+        String(finalResult.v2Result?.guidedRecovery?.userPrompt || '').includes('429')
+      ) {
+        return res.status(503).json({
+          error: 'Scanner busy, daily community quota reached. Please try tomorrow!',
+          code: 'SCANNER_BUSY'
+        });
+      }
       const responsePayload = formatScanResponse(finalResult);
 
       // Non-sensitive production debug trace (never logs secrets, auth tokens, or base64)
@@ -638,6 +747,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         specRecordId: responsePayload.canonical_vehicle_id || 'default'
       });
 
+      scanResultImageCache.set(imageSha256, {
+        responsePayload,
+        timestamp: Date.now()
+      });
+
       return res.status(200).json(responsePayload);
     }
 
@@ -650,6 +764,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       trace_id: ingestion.traceId
     });
   } catch (err: any) {
+    const errStr = String(err?.message || err || '');
+    if (err?.status === 429 || errStr.includes('429') || errStr.toLowerCase().includes('quota') || errStr.includes('RESOURCE_EXHAUSTED')) {
+      return res.status(503).json({
+        error: 'Scanner busy, daily community quota reached. Please try tomorrow!',
+        code: 'SCANNER_BUSY'
+      });
+    }
     return res.status(500).json({
       error: 'Vehicle identification failed.',
       message: err?.message

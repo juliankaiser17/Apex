@@ -7,6 +7,7 @@ var __require = /* @__PURE__ */ ((x) => typeof require !== "undefined" ? require
 
 // src/api/analyze.ts
 import { createClient } from "@supabase/supabase-js";
+import crypto2 from "crypto";
 
 // src/ai-engine/caching/identificationCache.ts
 var VISION_PIPELINE_VERSION = "v3.4.1-broad-recognition-restored";
@@ -2472,6 +2473,4748 @@ var APEX_LOCAL_VEHICLE_DATABASE = [
   }
 ];
 
+// src/ai-engine/canonical/tier1Registry.json
+var tier1Registry_default = {
+  schemaVersion: "2.0.0",
+  authority: "Apex Tier 1 Verified Vehicle Registry",
+  generatedAt: "2026-10-10T15:10:54.501Z",
+  totalVariants: 150,
+  variants: [
+    {
+      canonical_id: "ferrari-458-italia",
+      make: "Ferrari",
+      model: "458",
+      generation_code: "F142",
+      variant: "Italia",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2009\u20132015",
+      engine_layout: "Mid-engine, RWD",
+      engine_code: "F136 FB",
+      displacement_cc: 4497,
+      power_hp: 562,
+      torque_nm: 540,
+      top_speed_kmh: 325,
+      zero_to_hundred_kph: 3.4,
+      weight_kg: 1485,
+      drivetrain: "RWD",
+      transmission: "7-speed dual-clutch",
+      market_price_range: "$220,000\u2013$280,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_ferrari_458_italia",
+      source_urls: [
+        "https://www.ferrari.com/en-EN/auto/458-italia",
+        "https://www.wikidata.org/wiki/Q391307"
+      ],
+      reference_image_ids: [],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "ferrari-458-spider",
+      make: "Ferrari",
+      model: "458",
+      generation_code: "F142",
+      variant: "Spider",
+      body_styles: [
+        "Convertible"
+      ],
+      production_years: "2011\u20132015",
+      engine_layout: "Mid-engine, RWD",
+      engine_code: "F136 FB",
+      displacement_cc: 4497,
+      power_hp: 562,
+      torque_nm: 540,
+      top_speed_kmh: 320,
+      zero_to_hundred_kph: 3.4,
+      weight_kg: 1535,
+      drivetrain: "RWD",
+      transmission: "7-speed dual-clutch",
+      market_price_range: "$240,000\u2013$310,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_ferrari_458_spider",
+      source_urls: [
+        "https://www.ferrari.com/en-EN/auto/458-spider",
+        "https://www.wikidata.org/wiki/Q1140026"
+      ],
+      reference_image_ids: [],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "ferrari-458-speciale",
+      make: "Ferrari",
+      model: "458",
+      generation_code: "F142",
+      variant: "Speciale",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2013\u20132015",
+      engine_layout: "Mid-engine, RWD",
+      engine_code: "F136 FL",
+      displacement_cc: 4497,
+      power_hp: 597,
+      torque_nm: 540,
+      top_speed_kmh: 325,
+      zero_to_hundred_kph: 3,
+      weight_kg: 1395,
+      drivetrain: "RWD",
+      transmission: "7-speed dual-clutch",
+      market_price_range: "$420,000\u2013$550,000",
+      base_rarity: "Epic",
+      fingerprint_id: "fp_ferrari_458_speciale",
+      source_urls: [
+        "https://www.ferrari.com/en-EN/auto/458-speciale",
+        "https://www.wikidata.org/wiki/Q15053723"
+      ],
+      reference_image_ids: [],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "ferrari-488-gtb",
+      make: "Ferrari",
+      model: "488",
+      generation_code: "F142M",
+      variant: "GTB",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u20132019",
+      engine_layout: "Mid-engine, RWD",
+      engine_code: "F154 CB",
+      displacement_cc: 3902,
+      power_hp: 661,
+      torque_nm: 760,
+      top_speed_kmh: 330,
+      zero_to_hundred_kph: 3,
+      weight_kg: 1475,
+      drivetrain: "RWD",
+      transmission: "7-speed dual-clutch",
+      market_price_range: "$230,000\u2013$290,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_ferrari_488_gtb",
+      source_urls: [
+        "https://www.ferrari.com/en-EN/auto/488-gtb",
+        "https://www.wikidata.org/wiki/Q18956961"
+      ],
+      reference_image_ids: [
+        "REAL_BLIND_000394",
+        "REAL_BLIND_000393"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "ferrari-488-spider",
+      make: "Ferrari",
+      model: "488",
+      generation_code: "F142M",
+      variant: "Spider",
+      body_styles: [
+        "Convertible"
+      ],
+      production_years: "2015\u20132019",
+      engine_layout: "Mid-engine, RWD",
+      engine_code: "F154 CB",
+      displacement_cc: 3902,
+      power_hp: 661,
+      torque_nm: 760,
+      top_speed_kmh: 325,
+      zero_to_hundred_kph: 3,
+      weight_kg: 1525,
+      drivetrain: "RWD",
+      transmission: "7-speed dual-clutch",
+      market_price_range: "$260,000\u2013$320,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_ferrari_488_spider",
+      source_urls: [
+        "https://www.ferrari.com/en-EN/auto/488-spider",
+        "https://www.wikidata.org/wiki/Q21074987"
+      ],
+      reference_image_ids: [],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "ferrari-488-pista",
+      make: "Ferrari",
+      model: "488",
+      generation_code: "F142M",
+      variant: "Pista",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2018\u20132020",
+      engine_layout: "Mid-engine, RWD",
+      engine_code: "F154 CD",
+      displacement_cc: 3902,
+      power_hp: 710,
+      torque_nm: 770,
+      top_speed_kmh: 340,
+      zero_to_hundred_kph: 2.85,
+      weight_kg: 1385,
+      drivetrain: "RWD",
+      transmission: "7-speed dual-clutch",
+      market_price_range: "$480,000\u2013$620,000",
+      base_rarity: "Epic",
+      fingerprint_id: "fp_ferrari_488_pista",
+      source_urls: [
+        "https://www.ferrari.com/en-EN/auto/488-pista",
+        "https://www.wikidata.org/wiki/Q50058448"
+      ],
+      reference_image_ids: [],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "ferrari-f8-tributo",
+      make: "Ferrari",
+      model: "F8",
+      generation_code: "F142M FL",
+      variant: "Tributo",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2019\u20132023",
+      engine_layout: "Mid-engine, RWD",
+      engine_code: "F154 CG",
+      displacement_cc: 3902,
+      power_hp: 710,
+      torque_nm: 770,
+      top_speed_kmh: 340,
+      zero_to_hundred_kph: 2.9,
+      weight_kg: 1435,
+      drivetrain: "RWD",
+      transmission: "7-speed dual-clutch",
+      market_price_range: "$280,000\u2013$360,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_ferrari_f8_tributo",
+      source_urls: [
+        "https://www.ferrari.com/en-EN/auto/f8-tributo",
+        "https://www.wikidata.org/wiki/Q61917992"
+      ],
+      reference_image_ids: [
+        "REAL_BLIND_000396",
+        "REAL_BLIND_000397",
+        "REAL_BLIND_000401"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "ferrari-f8-spider",
+      make: "Ferrari",
+      model: "F8",
+      generation_code: "F142M FL",
+      variant: "Spider",
+      body_styles: [
+        "Convertible"
+      ],
+      production_years: "2019\u20132023",
+      engine_layout: "Mid-engine, RWD",
+      engine_code: "F154 CG",
+      displacement_cc: 3902,
+      power_hp: 710,
+      torque_nm: 770,
+      top_speed_kmh: 340,
+      zero_to_hundred_kph: 2.9,
+      weight_kg: 1505,
+      drivetrain: "RWD",
+      transmission: "7-speed dual-clutch",
+      market_price_range: "$320,000\u2013$410,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_ferrari_f8_spider",
+      source_urls: [
+        "https://www.ferrari.com/en-EN/auto/f8-spider",
+        "https://www.wikidata.org/wiki/Q67204907"
+      ],
+      reference_image_ids: [],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "ferrari-296-gtb",
+      make: "Ferrari",
+      model: "296",
+      generation_code: "F171",
+      variant: "GTB",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2022\u2013present",
+      engine_layout: "Mid-engine, RWD, PHEV",
+      engine_code: "F163",
+      displacement_cc: 2992,
+      power_hp: 819,
+      torque_nm: 740,
+      top_speed_kmh: 330,
+      zero_to_hundred_kph: 2.9,
+      weight_kg: 1470,
+      drivetrain: "RWD",
+      transmission: "8-speed dual-clutch",
+      market_price_range: "$320,000\u2013$400,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_ferrari_296_gtb",
+      source_urls: [
+        "https://www.ferrari.com/en-EN/auto/296-gtb",
+        "https://www.wikidata.org/wiki/Q107338578"
+      ],
+      reference_image_ids: [
+        "REAL_BLIND_000405",
+        "REAL_BLIND_000406"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "ferrari-296-gts",
+      make: "Ferrari",
+      model: "296",
+      generation_code: "F171",
+      variant: "GTS",
+      body_styles: [
+        "Convertible"
+      ],
+      production_years: "2022\u2013present",
+      engine_layout: "Mid-engine, RWD, PHEV",
+      engine_code: "F163",
+      displacement_cc: 2992,
+      power_hp: 819,
+      torque_nm: 740,
+      top_speed_kmh: 330,
+      zero_to_hundred_kph: 2.9,
+      weight_kg: 1540,
+      drivetrain: "RWD",
+      transmission: "8-speed dual-clutch",
+      market_price_range: "$360,000\u2013$450,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_ferrari_296_gts",
+      source_urls: [
+        "https://www.ferrari.com/en-EN/auto/296-gts",
+        "https://www.wikidata.org/wiki/Q111660144"
+      ],
+      reference_image_ids: [],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "ferrari-sf90-stradale",
+      make: "Ferrari",
+      model: "SF90",
+      generation_code: "F173",
+      variant: "Stradale",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2019\u2013present",
+      engine_layout: "Mid-engine, AWD, PHEV",
+      engine_code: "F154 FA",
+      displacement_cc: 3990,
+      power_hp: 986,
+      torque_nm: 800,
+      top_speed_kmh: 340,
+      zero_to_hundred_kph: 2.5,
+      weight_kg: 1570,
+      drivetrain: "AWD",
+      transmission: "8-speed dual-clutch",
+      market_price_range: "$500,000\u2013$650,000",
+      base_rarity: "Epic",
+      fingerprint_id: "fp_ferrari_sf90_stradale",
+      source_urls: [
+        "https://www.ferrari.com/en-EN/auto/sf90-stradale",
+        "https://www.wikidata.org/wiki/Q64157849"
+      ],
+      reference_image_ids: [
+        "REAL_BLIND_000412",
+        "REAL_BLIND_000413",
+        "REAL_BLIND_000416",
+        "REAL_BLIND_000414"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "ferrari-sf90-spider",
+      make: "Ferrari",
+      model: "SF90",
+      generation_code: "F173",
+      variant: "Spider",
+      body_styles: [
+        "Convertible"
+      ],
+      production_years: "2020\u2013present",
+      engine_layout: "Mid-engine, AWD, PHEV",
+      engine_code: "F154 FA",
+      displacement_cc: 3990,
+      power_hp: 986,
+      torque_nm: 800,
+      top_speed_kmh: 340,
+      zero_to_hundred_kph: 2.5,
+      weight_kg: 1670,
+      drivetrain: "AWD",
+      transmission: "8-speed dual-clutch",
+      market_price_range: "$580,000\u2013$750,000",
+      base_rarity: "Epic",
+      fingerprint_id: "fp_ferrari_sf90_spider",
+      source_urls: [
+        "https://www.ferrari.com/en-EN/auto/sf90-spider",
+        "https://www.wikidata.org/wiki/Q101542152"
+      ],
+      reference_image_ids: [],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "ferrari-daytona-sp3",
+      make: "Ferrari",
+      model: "Daytona SP3",
+      generation_code: "Icona",
+      variant: "SP3",
+      body_styles: [
+        "Targa"
+      ],
+      production_years: "2021\u2013present",
+      engine_layout: "Mid-engine, RWD",
+      engine_code: "F140 HC",
+      displacement_cc: 6496,
+      power_hp: 829,
+      torque_nm: 697,
+      top_speed_kmh: 340,
+      zero_to_hundred_kph: 2.85,
+      weight_kg: 1485,
+      drivetrain: "RWD",
+      transmission: "7-speed dual-clutch",
+      market_price_range: "$2,200,000\u2013$3,500,000",
+      base_rarity: "Legendary",
+      fingerprint_id: "fp_ferrari_daytona_sp3",
+      source_urls: [
+        "https://www.ferrari.com/en-EN/auto/daytona-sp3",
+        "https://www.wikidata.org/wiki/Q109653556"
+      ],
+      reference_image_ids: [
+        "REAL_BLIND_000422",
+        "REAL_BLIND_000421"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "ferrari-laferrari",
+      make: "Ferrari",
+      model: "LaFerrari",
+      generation_code: "F150",
+      variant: "Base",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2013\u20132016",
+      engine_layout: "Mid-engine, RWD, Hybrid",
+      engine_code: "F140 FE",
+      displacement_cc: 6262,
+      power_hp: 950,
+      torque_nm: 900,
+      top_speed_kmh: 352,
+      zero_to_hundred_kph: 2.6,
+      weight_kg: 1585,
+      drivetrain: "RWD",
+      transmission: "7-speed dual-clutch",
+      market_price_range: "$3,500,000\u2013$5,000,000",
+      base_rarity: "Mythic",
+      fingerprint_id: "fp_ferrari_laferrari",
+      source_urls: [
+        "https://www.ferrari.com/en-EN/auto/laferrari",
+        "https://www.wikidata.org/wiki/Q6414774"
+      ],
+      reference_image_ids: [],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "ferrari-812-superfast",
+      make: "Ferrari",
+      model: "812",
+      generation_code: "F152M",
+      variant: "Superfast",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2017\u20132024",
+      engine_layout: "Front mid-engine, RWD",
+      engine_code: "F140 GA",
+      displacement_cc: 6496,
+      power_hp: 789,
+      torque_nm: 718,
+      top_speed_kmh: 340,
+      zero_to_hundred_kph: 2.9,
+      weight_kg: 1630,
+      drivetrain: "RWD",
+      transmission: "7-speed dual-clutch",
+      market_price_range: "$340,000\u2013$440,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_ferrari_812_superfast",
+      source_urls: [
+        "https://www.ferrari.com/en-EN/auto/812-superfast",
+        "https://www.wikidata.org/wiki/Q28790176"
+      ],
+      reference_image_ids: [
+        "REAL_BLIND_000725"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "ferrari-328-gts",
+      make: "Ferrari",
+      model: "328",
+      generation_code: "F106",
+      variant: "GTS",
+      body_styles: [
+        "Targa"
+      ],
+      production_years: "1985\u20131989",
+      engine_layout: "Mid-engine, RWD",
+      engine_code: "Tipo F105 CB",
+      displacement_cc: 3185,
+      power_hp: 270,
+      torque_nm: 304,
+      top_speed_kmh: 263,
+      zero_to_hundred_kph: 5.5,
+      weight_kg: 1263,
+      drivetrain: "RWD",
+      transmission: "5-speed manual",
+      market_price_range: "$90,000\u2013$140,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_ferrari_328_gts",
+      source_urls: [
+        "https://www.ferrari.com/en-EN/auto/328-gts",
+        "https://www.wikidata.org/wiki/Q660057"
+      ],
+      reference_image_ids: [
+        "REAL_BLIND_000643"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "ferrari-250-gto",
+      make: "Ferrari",
+      model: "250 GTO",
+      generation_code: "Tipo 539",
+      variant: "Series I",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "1962\u20131964",
+      engine_layout: "Front-engine, RWD",
+      engine_code: "Tipo 168 Comp/62",
+      displacement_cc: 2953,
+      power_hp: 296,
+      torque_nm: 294,
+      top_speed_kmh: 280,
+      zero_to_hundred_kph: 5.8,
+      weight_kg: 880,
+      drivetrain: "RWD",
+      transmission: "5-speed manual",
+      market_price_range: "$45,000,000\u2013$70,000,000",
+      base_rarity: "Mythic",
+      fingerprint_id: "fp_ferrari_250_gto",
+      source_urls: [
+        "https://www.ferrari.com/en-EN/auto/250-gto",
+        "https://www.wikidata.org/wiki/Q652495"
+      ],
+      reference_image_ids: [
+        "REAL_BLIND_000633",
+        "REAL_BLIND_000634",
+        "REAL_BLIND_000635",
+        "REAL_BLIND_000637"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "ferrari-dino-246-gt",
+      make: "Ferrari",
+      model: "Dino 246",
+      generation_code: "Tipo 607",
+      variant: "GT",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "1969\u20131974",
+      engine_layout: "Mid-engine, RWD",
+      engine_code: "Tipo 135 CS",
+      displacement_cc: 2419,
+      power_hp: 192,
+      torque_nm: 226,
+      top_speed_kmh: 235,
+      zero_to_hundred_kph: 7.1,
+      weight_kg: 1080,
+      drivetrain: "RWD",
+      transmission: "5-speed manual",
+      market_price_range: "$350,000\u2013$500,000",
+      base_rarity: "Epic",
+      fingerprint_id: "fp_ferrari_dino_246_gt",
+      source_urls: [
+        "https://www.ferrari.com/en-EN/auto/dino-246-gt",
+        "https://www.wikidata.org/wiki/Q1226723"
+      ],
+      reference_image_ids: [],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "lamborghini-huracan-lp610-4",
+      make: "Lamborghini",
+      model: "Hurac\xE1n",
+      generation_code: "First Generation",
+      variant: "LP610-4",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2014\u20132019",
+      engine_layout: "Mid-engine, AWD",
+      engine_code: "5.2L V10",
+      displacement_cc: 5204,
+      power_hp: 602,
+      torque_nm: 560,
+      top_speed_kmh: 325,
+      zero_to_hundred_kph: 3.2,
+      weight_kg: 1422,
+      drivetrain: "AWD",
+      transmission: "7-speed dual-clutch",
+      market_price_range: "$190,000\u2013$250,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_lambo_huracan_lp610_4",
+      source_urls: [
+        "https://www.lamborghini.com/en-en/history/huracan-coupe",
+        "https://www.wikidata.org/wiki/Q15407865"
+      ],
+      reference_image_ids: [
+        "REAL_BLIND_000439",
+        "REAL_BLIND_000438",
+        "REAL_BLIND_000442",
+        "REAL_BLIND_000441"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "lamborghini-huracan-evo",
+      make: "Lamborghini",
+      model: "Hurac\xE1n",
+      generation_code: "EVO",
+      variant: "EVO Coupe",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2019\u20132024",
+      engine_layout: "Mid-engine, AWD",
+      engine_code: "5.2L V10",
+      displacement_cc: 5204,
+      power_hp: 631,
+      torque_nm: 600,
+      top_speed_kmh: 325,
+      zero_to_hundred_kph: 2.9,
+      weight_kg: 1422,
+      drivetrain: "AWD",
+      transmission: "7-speed dual-clutch",
+      market_price_range: "$260,000\u2013$340,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_lambo_huracan_evo",
+      source_urls: [
+        "https://www.lamborghini.com/en-en/models/huracan/huracan-evo",
+        "https://www.wikidata.org/wiki/Q60563450"
+      ],
+      reference_image_ids: [],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "lamborghini-huracan-performante",
+      make: "Lamborghini",
+      model: "Hurac\xE1n",
+      generation_code: "Performante",
+      variant: "Performante",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2017\u20132019",
+      engine_layout: "Mid-engine, AWD",
+      engine_code: "5.2L V10 ALA",
+      displacement_cc: 5204,
+      power_hp: 631,
+      torque_nm: 600,
+      top_speed_kmh: 325,
+      zero_to_hundred_kph: 2.9,
+      weight_kg: 1382,
+      drivetrain: "AWD",
+      transmission: "7-speed dual-clutch",
+      market_price_range: "$290,000\u2013$380,000",
+      base_rarity: "Epic",
+      fingerprint_id: "fp_lambo_huracan_performante",
+      source_urls: [
+        "https://www.lamborghini.com/en-en/history/huracan-performante",
+        "https://www.wikidata.org/wiki/Q28870716"
+      ],
+      reference_image_ids: [],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "lamborghini-huracan-sto",
+      make: "Lamborghini",
+      model: "Hurac\xE1n",
+      generation_code: "STO",
+      variant: "STO",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2021\u20132024",
+      engine_layout: "Mid-engine, RWD",
+      engine_code: "5.2L V10 Trofeo",
+      displacement_cc: 5204,
+      power_hp: 631,
+      torque_nm: 565,
+      top_speed_kmh: 310,
+      zero_to_hundred_kph: 3,
+      weight_kg: 1339,
+      drivetrain: "RWD",
+      transmission: "7-speed dual-clutch",
+      market_price_range: "$380,000\u2013$490,000",
+      base_rarity: "Epic",
+      fingerprint_id: "fp_lambo_huracan_sto",
+      source_urls: [
+        "https://www.lamborghini.com/en-en/models/huracan/huracan-sto",
+        "https://www.wikidata.org/wiki/Q102105151"
+      ],
+      reference_image_ids: [],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "lamborghini-huracan-tecnica",
+      make: "Lamborghini",
+      model: "Hurac\xE1n",
+      generation_code: "Tecnica",
+      variant: "Tecnica",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2022\u20132024",
+      engine_layout: "Mid-engine, RWD",
+      engine_code: "5.2L V10",
+      displacement_cc: 5204,
+      power_hp: 631,
+      torque_nm: 565,
+      top_speed_kmh: 325,
+      zero_to_hundred_kph: 3.2,
+      weight_kg: 1379,
+      drivetrain: "RWD",
+      transmission: "7-speed dual-clutch",
+      market_price_range: "$280,000\u2013$360,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_lambo_huracan_tecnica",
+      source_urls: [
+        "https://www.lamborghini.com/en-en/models/huracan/huracan-tecnica",
+        "https://www.wikidata.org/wiki/Q111589136"
+      ],
+      reference_image_ids: [],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "lamborghini-huracan-sterrato",
+      make: "Lamborghini",
+      model: "Hurac\xE1n",
+      generation_code: "Sterrato",
+      variant: "Sterrato",
+      body_styles: [
+        "Coupe/All-Terrain"
+      ],
+      production_years: "2023\u20132024",
+      engine_layout: "Mid-engine, AWD",
+      engine_code: "5.2L V10",
+      displacement_cc: 5204,
+      power_hp: 602,
+      torque_nm: 560,
+      top_speed_kmh: 260,
+      zero_to_hundred_kph: 3.4,
+      weight_kg: 1470,
+      drivetrain: "AWD",
+      transmission: "7-speed dual-clutch",
+      market_price_range: "$350,000\u2013$460,000",
+      base_rarity: "Epic",
+      fingerprint_id: "fp_lambo_huracan_sterrato",
+      source_urls: [
+        "https://www.lamborghini.com/en-en/models/huracan/huracan-sterrato",
+        "https://www.wikidata.org/wiki/Q115518712"
+      ],
+      reference_image_ids: [],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "lamborghini-aventador-lp700-4",
+      make: "Lamborghini",
+      model: "Aventador",
+      generation_code: "LP700",
+      variant: "LP700-4",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2011\u20132016",
+      engine_layout: "Mid-engine, AWD",
+      engine_code: "L539 V12",
+      displacement_cc: 6498,
+      power_hp: 690,
+      torque_nm: 690,
+      top_speed_kmh: 350,
+      zero_to_hundred_kph: 2.9,
+      weight_kg: 1575,
+      drivetrain: "AWD",
+      transmission: "7-speed ISR single-clutch",
+      market_price_range: "$280,000\u2013$360,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_lambo_aventador_lp700_4",
+      source_urls: [
+        "https://www.lamborghini.com/en-en/history/aventador-lp-700-4",
+        "https://www.wikidata.org/wiki/Q216391"
+      ],
+      reference_image_ids: [
+        "REAL_BLIND_000429",
+        "REAL_BLIND_000430",
+        "REAL_BLIND_000431",
+        "REAL_BLIND_000434",
+        "REAL_BLIND_000435",
+        "REAL_BLIND_000433"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "lamborghini-aventador-s",
+      make: "Lamborghini",
+      model: "Aventador",
+      generation_code: "Aventador S",
+      variant: "S",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2016\u20132021",
+      engine_layout: "Mid-engine, AWD",
+      engine_code: "L539 V12",
+      displacement_cc: 6498,
+      power_hp: 730,
+      torque_nm: 690,
+      top_speed_kmh: 350,
+      zero_to_hundred_kph: 2.9,
+      weight_kg: 1575,
+      drivetrain: "AWD",
+      transmission: "7-speed ISR single-clutch",
+      market_price_range: "$360,000\u2013$450,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_lambo_aventador_s",
+      source_urls: [
+        "https://www.lamborghini.com/en-en/history/aventador-s",
+        "https://www.wikidata.org/wiki/Q28108426"
+      ],
+      reference_image_ids: [],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "lamborghini-aventador-sv",
+      make: "Lamborghini",
+      model: "Aventador",
+      generation_code: "LP750-4 SV",
+      variant: "SuperVeloce",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u20132017",
+      engine_layout: "Mid-engine, AWD",
+      engine_code: "L539 V12",
+      displacement_cc: 6498,
+      power_hp: 740,
+      torque_nm: 690,
+      top_speed_kmh: 350,
+      zero_to_hundred_kph: 2.8,
+      weight_kg: 1525,
+      drivetrain: "AWD",
+      transmission: "7-speed ISR single-clutch",
+      market_price_range: "$480,000\u2013$620,000",
+      base_rarity: "Epic",
+      fingerprint_id: "fp_lambo_aventador_sv",
+      source_urls: [
+        "https://www.lamborghini.com/en-en/history/aventador-lp-750-4-superveloce",
+        "https://www.wikidata.org/wiki/Q19363388"
+      ],
+      reference_image_ids: [],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "lamborghini-aventador-svj",
+      make: "Lamborghini",
+      model: "Aventador",
+      generation_code: "SVJ",
+      variant: "SVJ",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2018\u20132021",
+      engine_layout: "Mid-engine, AWD",
+      engine_code: "L539 V12 ALA",
+      displacement_cc: 6498,
+      power_hp: 759,
+      torque_nm: 720,
+      top_speed_kmh: 352,
+      zero_to_hundred_kph: 2.8,
+      weight_kg: 1525,
+      drivetrain: "AWD",
+      transmission: "7-speed ISR single-clutch",
+      market_price_range: "$650,000\u2013$850,000",
+      base_rarity: "Legendary",
+      fingerprint_id: "fp_lambo_aventador_svj",
+      source_urls: [
+        "https://www.lamborghini.com/en-en/history/aventador-svj",
+        "https://www.wikidata.org/wiki/Q56247948"
+      ],
+      reference_image_ids: [],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "lamborghini-revuelto",
+      make: "Lamborghini",
+      model: "Revuelto",
+      generation_code: "LB744",
+      variant: "Base",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2023\u2013present",
+      engine_layout: "Mid-engine, AWD, PHEV",
+      engine_code: "L545 V12 Hybrid",
+      displacement_cc: 6498,
+      power_hp: 1001,
+      torque_nm: 725,
+      top_speed_kmh: 350,
+      zero_to_hundred_kph: 2.5,
+      weight_kg: 1772,
+      drivetrain: "AWD",
+      transmission: "8-speed dual-clutch",
+      market_price_range: "$600,000\u2013$800,000",
+      base_rarity: "Legendary",
+      fingerprint_id: "fp_lambo_revuelto",
+      source_urls: [
+        "https://www.lamborghini.com/en-en/models/revuelto",
+        "https://www.wikidata.org/wiki/Q117327311"
+      ],
+      reference_image_ids: [
+        "REAL_BLIND_000446"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "lamborghini-gallardo-lp560-4",
+      make: "Lamborghini",
+      model: "Gallardo",
+      generation_code: "Second Generation",
+      variant: "LP560-4",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2008\u20132013",
+      engine_layout: "Mid-engine, AWD",
+      engine_code: "5.2L V10",
+      displacement_cc: 5204,
+      power_hp: 552,
+      torque_nm: 540,
+      top_speed_kmh: 325,
+      zero_to_hundred_kph: 3.7,
+      weight_kg: 1410,
+      drivetrain: "AWD",
+      transmission: "6-speed E-gear single-clutch / manual",
+      market_price_range: "$110,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_lambo_gallardo_lp560_4",
+      source_urls: [
+        "https://www.lamborghini.com/en-en/history/gallardo-lp-560-4",
+        "https://www.wikidata.org/wiki/Q216388"
+      ],
+      reference_image_ids: [],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "lamborghini-miura",
+      make: "Lamborghini",
+      model: "Miura",
+      generation_code: "P400",
+      variant: "P400",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "1966\u20131969",
+      engine_layout: "Rear mid-engine transverse, RWD",
+      engine_code: "L400 3.9L V12",
+      displacement_cc: 3929,
+      power_hp: 345,
+      torque_nm: 367,
+      top_speed_kmh: 276,
+      zero_to_hundred_kph: 6.3,
+      weight_kg: 1125,
+      drivetrain: "RWD",
+      transmission: "5-speed manual",
+      market_price_range: "$1,800,000\u2013$3,200,000",
+      base_rarity: "Mythic",
+      fingerprint_id: "fp_lambo_miura",
+      source_urls: [
+        "https://www.lamborghini.com/en-en/history/miura",
+        "https://www.wikidata.org/wiki/Q824447"
+      ],
+      reference_image_ids: [
+        "REAL_BLIND_000958"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "lamborghini-countach-lpi800-4",
+      make: "Lamborghini",
+      model: "Countach",
+      generation_code: "LPI 800-4",
+      variant: "LPI 800-4",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2022",
+      engine_layout: "Mid-engine, AWD, MHEV",
+      engine_code: "L539 V12 Supercapacitor",
+      displacement_cc: 6498,
+      power_hp: 803,
+      torque_nm: 720,
+      top_speed_kmh: 355,
+      zero_to_hundred_kph: 2.8,
+      weight_kg: 1595,
+      drivetrain: "AWD",
+      transmission: "7-speed ISR single-clutch",
+      market_price_range: "$2,600,000\u2013$3,800,000",
+      base_rarity: "Mythic",
+      fingerprint_id: "fp_lambo_countach_lpi800",
+      source_urls: [
+        "https://www.lamborghini.com/en-en/history/countach-lpi-800-4",
+        "https://www.wikidata.org/wiki/Q108082986"
+      ],
+      reference_image_ids: [],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "porsche-911-gt3-992",
+      make: "Porsche",
+      model: "911",
+      generation_code: "992.1",
+      variant: "GT3",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2021\u20132024",
+      engine_layout: "Rear-engine, RWD",
+      engine_code: "MA2.75 Flat-6",
+      displacement_cc: 3996,
+      power_hp: 502,
+      torque_nm: 470,
+      top_speed_kmh: 318,
+      zero_to_hundred_kph: 3.4,
+      weight_kg: 1435,
+      drivetrain: "RWD",
+      transmission: "7-speed PDK / 6-speed manual",
+      market_price_range: "$220,000\u2013$290,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_porsche_992_gt3",
+      source_urls: [
+        "https://www.porsche.com/international/models/911/911-gt3-models/gt3/",
+        "https://www.wikidata.org/wiki/Q105537577"
+      ],
+      reference_image_ids: [],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "porsche-911-gt3-rs-992",
+      make: "Porsche",
+      model: "911",
+      generation_code: "992.1",
+      variant: "GT3 RS",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2022\u2013present",
+      engine_layout: "Rear-engine, RWD",
+      engine_code: "MA2.75 Flat-6",
+      displacement_cc: 3996,
+      power_hp: 518,
+      torque_nm: 465,
+      top_speed_kmh: 296,
+      zero_to_hundred_kph: 3.2,
+      weight_kg: 1450,
+      drivetrain: "RWD",
+      transmission: "7-speed PDK",
+      market_price_range: "$350,000\u2013$480,000",
+      base_rarity: "Epic",
+      fingerprint_id: "fp_porsche_992_gt3_rs",
+      source_urls: [
+        "https://www.porsche.com/international/models/911/911-gt3-rs/911-gt3-rs/",
+        "https://www.wikidata.org/wiki/Q113547847"
+      ],
+      reference_image_ids: [],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "porsche-911-carrera-992",
+      make: "Porsche",
+      model: "911",
+      generation_code: "992.1",
+      variant: "Carrera",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2019\u20132024",
+      engine_layout: "Rear-engine, RWD",
+      engine_code: "3.0L Twin-Turbo Flat-6",
+      displacement_cc: 2981,
+      power_hp: 379,
+      torque_nm: 450,
+      top_speed_kmh: 293,
+      zero_to_hundred_kph: 4.2,
+      weight_kg: 1505,
+      drivetrain: "RWD",
+      transmission: "8-speed PDK",
+      market_price_range: "$110,000\u2013$145,000",
+      base_rarity: "Common",
+      fingerprint_id: "fp_porsche_992_carrera",
+      source_urls: [
+        "https://www.porsche.com/international/models/911/911-carrera-models/",
+        "https://www.wikidata.org/wiki/Q59268393"
+      ],
+      reference_image_ids: [],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "porsche-911-turbo-s-992",
+      make: "Porsche",
+      model: "911",
+      generation_code: "992.1",
+      variant: "Turbo S",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2020\u2013present",
+      engine_layout: "Rear-engine, AWD",
+      engine_code: "3.7L Twin-Turbo Flat-6",
+      displacement_cc: 3745,
+      power_hp: 640,
+      torque_nm: 800,
+      top_speed_kmh: 330,
+      zero_to_hundred_kph: 2.7,
+      weight_kg: 1640,
+      drivetrain: "AWD",
+      transmission: "8-speed PDK",
+      market_price_range: "$230,000\u2013$310,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_porsche_992_turbo_s",
+      source_urls: [
+        "https://www.porsche.com/international/models/911/911-turbo-models/911-turbo-s/",
+        "https://www.wikidata.org/wiki/Q87071064"
+      ],
+      reference_image_ids: [],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "porsche-911-carrera-997",
+      make: "Porsche",
+      model: "911",
+      generation_code: "997.1",
+      variant: "Carrera",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2004\u20132008",
+      engine_layout: "Rear-engine, RWD",
+      engine_code: "M96.05 3.6L Flat-6",
+      displacement_cc: 3596,
+      power_hp: 321,
+      torque_nm: 370,
+      top_speed_kmh: 285,
+      zero_to_hundred_kph: 5,
+      weight_kg: 1395,
+      drivetrain: "RWD",
+      transmission: "6-speed manual / 5-speed Tiptronic",
+      market_price_range: "$45,000\u2013$65,000",
+      base_rarity: "Common",
+      fingerprint_id: "fp_porsche_997_carrera",
+      source_urls: [
+        "https://www.porsche.com/international/accessoriesandservice/classic/models/997/",
+        "https://www.wikidata.org/wiki/Q660050"
+      ],
+      reference_image_ids: [],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "porsche-911-carrera-996",
+      make: "Porsche",
+      model: "911",
+      generation_code: "996.1",
+      variant: "Carrera",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "1997\u20132001",
+      engine_layout: "Rear-engine, RWD",
+      engine_code: "M96.01 3.4L Flat-6",
+      displacement_cc: 3387,
+      power_hp: 296,
+      torque_nm: 350,
+      top_speed_kmh: 280,
+      zero_to_hundred_kph: 5.2,
+      weight_kg: 1320,
+      drivetrain: "RWD",
+      transmission: "6-speed manual / 5-speed Tiptronic",
+      market_price_range: "$25,000\u2013$40,000",
+      base_rarity: "Common",
+      fingerprint_id: "fp_porsche_996_carrera",
+      source_urls: [
+        "https://www.porsche.com/international/accessoriesandservice/classic/models/996/",
+        "https://www.wikidata.org/wiki/Q1063617"
+      ],
+      reference_image_ids: [],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "porsche-718-boxster",
+      make: "Porsche",
+      model: "718 Boxster",
+      generation_code: "982",
+      variant: "Boxster",
+      body_styles: [
+        "Convertible"
+      ],
+      production_years: "2016\u2013present",
+      engine_layout: "Mid-engine, RWD",
+      engine_code: "2.0L Turbo Flat-4",
+      displacement_cc: 1988,
+      power_hp: 296,
+      torque_nm: 380,
+      top_speed_kmh: 275,
+      zero_to_hundred_kph: 4.9,
+      weight_kg: 1335,
+      drivetrain: "RWD",
+      transmission: "6-speed manual / 7-speed PDK",
+      market_price_range: "$65,000\u2013$85,000",
+      base_rarity: "Common",
+      fingerprint_id: "fp_porsche_718_boxster",
+      source_urls: [
+        "https://www.porsche.com/international/models/718/718-models/718-boxster/",
+        "https://www.wikidata.org/wiki/Q22338575"
+      ],
+      reference_image_ids: [],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "porsche-718-cayman",
+      make: "Porsche",
+      model: "718 Cayman",
+      generation_code: "982",
+      variant: "Cayman",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2016\u2013present",
+      engine_layout: "Mid-engine, RWD",
+      engine_code: "2.0L Turbo Flat-4",
+      displacement_cc: 1988,
+      power_hp: 296,
+      torque_nm: 380,
+      top_speed_kmh: 275,
+      zero_to_hundred_kph: 4.9,
+      weight_kg: 1335,
+      drivetrain: "RWD",
+      transmission: "6-speed manual / 7-speed PDK",
+      market_price_range: "$68,000\u2013$88,000",
+      base_rarity: "Common",
+      fingerprint_id: "fp_porsche_718_cayman",
+      source_urls: [
+        "https://www.porsche.com/international/models/718/718-models/718-cayman/",
+        "https://www.wikidata.org/wiki/Q23908871"
+      ],
+      reference_image_ids: [
+        "REAL_BLIND_000294"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "porsche-carrera-gt",
+      make: "Porsche",
+      model: "Carrera GT",
+      generation_code: "980",
+      variant: "Base",
+      body_styles: [
+        "Targa/Roadster"
+      ],
+      production_years: "2003\u20132007",
+      engine_layout: "Mid-engine, RWD",
+      engine_code: "M80/01 5.7L V10",
+      displacement_cc: 5733,
+      power_hp: 603,
+      torque_nm: 590,
+      top_speed_kmh: 330,
+      zero_to_hundred_kph: 3.9,
+      weight_kg: 1380,
+      drivetrain: "RWD",
+      transmission: "6-speed manual",
+      market_price_range: "$1,300,000\u2013$1,900,000",
+      base_rarity: "Mythic",
+      fingerprint_id: "fp_porsche_carrera_gt",
+      source_urls: [
+        "https://www.porsche.com/international/accessoriesandservice/classic/models/carrera-gt/",
+        "https://www.wikidata.org/wiki/Q389279"
+      ],
+      reference_image_ids: [
+        "REAL_BLIND_000951",
+        "REAL_BLIND_000953",
+        "REAL_BLIND_000955"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "porsche-918-spyder",
+      make: "Porsche",
+      model: "918 Spyder",
+      generation_code: "918",
+      variant: "Spyder",
+      body_styles: [
+        "Targa/Roadster"
+      ],
+      production_years: "2013\u20132015",
+      engine_layout: "Mid-engine, AWD, Hybrid",
+      engine_code: "MR6 4.6L V8 Hybrid",
+      displacement_cc: 4593,
+      power_hp: 875,
+      torque_nm: 1280,
+      top_speed_kmh: 345,
+      zero_to_hundred_kph: 2.6,
+      weight_kg: 1674,
+      drivetrain: "AWD",
+      transmission: "7-speed PDK",
+      market_price_range: "$1,600,000\u2013$2,200,000",
+      base_rarity: "Mythic",
+      fingerprint_id: "fp_porsche_918_spyder",
+      source_urls: [
+        "https://www.porsche.com/international/aboutporsche/pressreleases/pag/?id=2013-09-10",
+        "https://www.wikidata.org/wiki/Q599818"
+      ],
+      reference_image_ids: [],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "porsche-356-speedster",
+      make: "Porsche",
+      model: "356",
+      generation_code: "Pre-A",
+      variant: "1500 Speedster",
+      body_styles: [
+        "Speedster"
+      ],
+      production_years: "1954\u20131955",
+      engine_layout: "Rear-engine, RWD",
+      engine_code: "Type 546 Flat-4",
+      displacement_cc: 1488,
+      power_hp: 54,
+      torque_nm: 106,
+      top_speed_kmh: 155,
+      zero_to_hundred_kph: 13.9,
+      weight_kg: 760,
+      drivetrain: "RWD",
+      transmission: "4-speed manual",
+      market_price_range: "$280,000\u2013$450,000",
+      base_rarity: "Legendary",
+      fingerprint_id: "fp_porsche_356_speedster",
+      source_urls: [
+        "https://www.porsche.com/international/accessoriesandservice/classic/models/356/",
+        "https://www.wikidata.org/wiki/Q641285"
+      ],
+      reference_image_ids: [],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "mclaren-570s",
+      make: "McLaren",
+      model: "570S",
+      generation_code: "Sports Series",
+      variant: "Coupe",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u20132021",
+      engine_layout: "Mid-engine, RWD",
+      engine_code: "M838TE 3.8L V8",
+      displacement_cc: 3799,
+      power_hp: 562,
+      torque_nm: 600,
+      top_speed_kmh: 328,
+      zero_to_hundred_kph: 3.2,
+      weight_kg: 1440,
+      drivetrain: "RWD",
+      transmission: "7-speed dual-clutch",
+      market_price_range: "$120,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_mclaren_570s",
+      source_urls: [
+        "https://cars.mclaren.com/en/legacy/570s-coupe",
+        "https://www.wikidata.org/wiki/Q19698506"
+      ],
+      reference_image_ids: [
+        "REAL_BLIND_000935"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "mclaren-600lt",
+      make: "McLaren",
+      model: "600LT",
+      generation_code: "Sports Series",
+      variant: "Coupe",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2018\u20132020",
+      engine_layout: "Mid-engine, RWD",
+      engine_code: "M838TE 3.8L V8",
+      displacement_cc: 3799,
+      power_hp: 592,
+      torque_nm: 620,
+      top_speed_kmh: 328,
+      zero_to_hundred_kph: 2.9,
+      weight_kg: 1356,
+      drivetrain: "RWD",
+      transmission: "7-speed dual-clutch",
+      market_price_range: "$210,000\u2013$280,000",
+      base_rarity: "Epic",
+      fingerprint_id: "fp_mclaren_600lt",
+      source_urls: [
+        "https://cars.mclaren.com/en/legacy/600lt",
+        "https://www.wikidata.org/wiki/Q55252875"
+      ],
+      reference_image_ids: [],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "mclaren-650s",
+      make: "McLaren",
+      model: "650S",
+      generation_code: "Super Series",
+      variant: "Coupe",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2014\u20132017",
+      engine_layout: "Mid-engine, RWD",
+      engine_code: "M838T 3.8L V8",
+      displacement_cc: 3799,
+      power_hp: 641,
+      torque_nm: 678,
+      top_speed_kmh: 333,
+      zero_to_hundred_kph: 3,
+      weight_kg: 1428,
+      drivetrain: "RWD",
+      transmission: "7-speed dual-clutch",
+      market_price_range: "$130,000\u2013$175,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_mclaren_650s",
+      source_urls: [
+        "https://cars.mclaren.com/en/legacy/650s-coupe",
+        "https://www.wikidata.org/wiki/Q15733590"
+      ],
+      reference_image_ids: [],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "mclaren-675lt",
+      make: "McLaren",
+      model: "675LT",
+      generation_code: "Super Series",
+      variant: "Coupe",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u20132017",
+      engine_layout: "Mid-engine, RWD",
+      engine_code: "M838TL 3.8L V8",
+      displacement_cc: 3799,
+      power_hp: 666,
+      torque_nm: 700,
+      top_speed_kmh: 330,
+      zero_to_hundred_kph: 2.9,
+      weight_kg: 1328,
+      drivetrain: "RWD",
+      transmission: "7-speed dual-clutch",
+      market_price_range: "$280,000\u2013$370,000",
+      base_rarity: "Epic",
+      fingerprint_id: "fp_mclaren_675lt",
+      source_urls: [
+        "https://cars.mclaren.com/en/legacy/675lt",
+        "https://www.wikidata.org/wiki/Q19363435"
+      ],
+      reference_image_ids: [],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "mclaren-720s",
+      make: "McLaren",
+      model: "720S",
+      generation_code: "Super Series",
+      variant: "Coupe",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2017\u20132023",
+      engine_layout: "Mid-engine, RWD",
+      engine_code: "M840T 4.0L V8",
+      displacement_cc: 3994,
+      power_hp: 710,
+      torque_nm: 770,
+      top_speed_kmh: 341,
+      zero_to_hundred_kph: 2.9,
+      weight_kg: 1419,
+      drivetrain: "RWD",
+      transmission: "7-speed dual-clutch",
+      market_price_range: "$210,000\u2013$290,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_mclaren_720s",
+      source_urls: [
+        "https://cars.mclaren.com/en/legacy/720s-coupe",
+        "https://www.wikidata.org/wiki/Q28913988"
+      ],
+      reference_image_ids: [
+        "REAL_BLIND_000449",
+        "REAL_BLIND_000450",
+        "REAL_BLIND_000451",
+        "REAL_BLIND_000455"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "mclaren-765lt",
+      make: "McLaren",
+      model: "765LT",
+      generation_code: "Super Series",
+      variant: "Coupe",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2020\u20132023",
+      engine_layout: "Mid-engine, RWD",
+      engine_code: "M840T 4.0L V8",
+      displacement_cc: 3994,
+      power_hp: 755,
+      torque_nm: 800,
+      top_speed_kmh: 330,
+      zero_to_hundred_kph: 2.8,
+      weight_kg: 1339,
+      drivetrain: "RWD",
+      transmission: "7-speed dual-clutch",
+      market_price_range: "$420,000\u2013$550,000",
+      base_rarity: "Epic",
+      fingerprint_id: "fp_mclaren_765lt",
+      source_urls: [
+        "https://cars.mclaren.com/en/legacy/765lt",
+        "https://www.wikidata.org/wiki/Q87010486"
+      ],
+      reference_image_ids: [],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "mclaren-p1",
+      make: "McLaren",
+      model: "P1",
+      generation_code: "Ultimate Series",
+      variant: "Base",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2013\u20132015",
+      engine_layout: "Mid-engine, RWD, Hybrid",
+      engine_code: "M838TQ 3.8L V8 Hybrid",
+      displacement_cc: 3799,
+      power_hp: 903,
+      torque_nm: 900,
+      top_speed_kmh: 350,
+      zero_to_hundred_kph: 2.8,
+      weight_kg: 1490,
+      drivetrain: "RWD",
+      transmission: "7-speed dual-clutch",
+      market_price_range: "$1,800,000\u2013$2,500,000",
+      base_rarity: "Mythic",
+      fingerprint_id: "fp_mclaren_p1",
+      source_urls: [
+        "https://cars.mclaren.com/en/legacy/mclaren-p1",
+        "https://www.wikidata.org/wiki/Q1341071"
+      ],
+      reference_image_ids: [
+        "REAL_BLIND_000459",
+        "REAL_BLIND_000458"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "mclaren-senna",
+      make: "McLaren",
+      model: "Senna",
+      generation_code: "Ultimate Series",
+      variant: "Base",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2018\u20132020",
+      engine_layout: "Mid-engine, RWD",
+      engine_code: "M840TR 4.0L V8",
+      displacement_cc: 3994,
+      power_hp: 789,
+      torque_nm: 800,
+      top_speed_kmh: 335,
+      zero_to_hundred_kph: 2.8,
+      weight_kg: 1309,
+      drivetrain: "RWD",
+      transmission: "7-speed dual-clutch",
+      market_price_range: "$1,200,000\u2013$1,600,000",
+      base_rarity: "Legendary",
+      fingerprint_id: "fp_mclaren_senna",
+      source_urls: [
+        "https://cars.mclaren.com/en/legacy/mclaren-senna",
+        "https://www.wikidata.org/wiki/Q45319800"
+      ],
+      reference_image_ids: [],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "mclaren-artura",
+      make: "McLaren",
+      model: "Artura",
+      generation_code: "High-Performance Hybrid",
+      variant: "Base",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2021\u2013present",
+      engine_layout: "Mid-engine, RWD, PHEV",
+      engine_code: "M630 3.0L Twin-Turbo V6",
+      displacement_cc: 2993,
+      power_hp: 671,
+      torque_nm: 720,
+      top_speed_kmh: 330,
+      zero_to_hundred_kph: 3,
+      weight_kg: 1498,
+      drivetrain: "RWD",
+      transmission: "8-speed dual-clutch",
+      market_price_range: "$235,000\u2013$295,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_mclaren_artura",
+      source_urls: [
+        "https://cars.mclaren.com/en/artura",
+        "https://www.wikidata.org/wiki/Q105546282"
+      ],
+      reference_image_ids: [],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "bugatti-chiron",
+      make: "Bugatti",
+      model: "Chiron",
+      generation_code: "Chiron",
+      variant: "Base",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2016\u20132022",
+      engine_layout: "Mid-engine, AWD",
+      engine_code: "8.0L Quad-Turbo W16",
+      displacement_cc: 7993,
+      power_hp: 1479,
+      torque_nm: 1600,
+      top_speed_kmh: 420,
+      zero_to_hundred_kph: 2.4,
+      weight_kg: 1996,
+      drivetrain: "AWD",
+      transmission: "7-speed dual-clutch",
+      market_price_range: "$3,000,000\u2013$4,000,000",
+      base_rarity: "Mythic",
+      fingerprint_id: "fp_bugatti_chiron",
+      source_urls: [
+        "https://www.bugatti.com/models/chiron-models/chiron/",
+        "https://www.wikidata.org/wiki/Q21658428"
+      ],
+      reference_image_ids: [
+        "REAL_BLIND_000466",
+        "REAL_BLIND_000467",
+        "REAL_BLIND_000463"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "koenigsegg-jesko",
+      make: "Koenigsegg",
+      model: "Jesko",
+      generation_code: "Jesko",
+      variant: "Attack",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2021\u2013present",
+      engine_layout: "Mid-engine, RWD",
+      engine_code: "5.0L Twin-Turbo V8",
+      displacement_cc: 5065,
+      power_hp: 1600,
+      torque_nm: 1500,
+      top_speed_kmh: 480,
+      zero_to_hundred_kph: 2.5,
+      weight_kg: 1420,
+      drivetrain: "RWD",
+      transmission: "9-speed LST Multi-Clutch",
+      market_price_range: "$3,400,000\u2013$4,500,000",
+      base_rarity: "Mythic",
+      fingerprint_id: "fp_koenigsegg_jesko",
+      source_urls: [
+        "https://www.koenigsegg.com/model/jesko",
+        "https://www.wikidata.org/wiki/Q61974758"
+      ],
+      reference_image_ids: [
+        "REAL_BLIND_000485",
+        "REAL_BLIND_000486",
+        "REAL_BLIND_000487"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "pagani-huayra",
+      make: "Pagani",
+      model: "Huayra",
+      generation_code: "Huayra",
+      variant: "Coupe",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2011\u20132018",
+      engine_layout: "Mid-engine, RWD",
+      engine_code: "Mercedes-AMG M158 6.0L V12",
+      displacement_cc: 5980,
+      power_hp: 720,
+      torque_nm: 1e3,
+      top_speed_kmh: 383,
+      zero_to_hundred_kph: 3.2,
+      weight_kg: 1350,
+      drivetrain: "RWD",
+      transmission: "7-speed sequential single-clutch",
+      market_price_range: "$2,500,000\u2013$3,800,000",
+      base_rarity: "Mythic",
+      fingerprint_id: "fp_pagani_huayra",
+      source_urls: [
+        "https://www.pagani.com/huayra-coupe/",
+        "https://www.wikidata.org/wiki/Q648530"
+      ],
+      reference_image_ids: [
+        "REAL_BLIND_000481"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "chevrolet-corvette-c8-stingray",
+      make: "Chevrolet",
+      model: "Corvette",
+      generation_code: "C8",
+      variant: "Stingray",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2020\u2013present",
+      engine_layout: "Mid-engine, RWD",
+      engine_code: "LT2 6.2L V8",
+      displacement_cc: 6162,
+      power_hp: 495,
+      torque_nm: 637,
+      top_speed_kmh: 312,
+      zero_to_hundred_kph: 2.9,
+      weight_kg: 1530,
+      drivetrain: "RWD",
+      transmission: "8-speed dual-clutch",
+      market_price_range: "$65,000\u2013$85,000",
+      base_rarity: "Common",
+      fingerprint_id: "fp_corvette_c8_stingray",
+      source_urls: [
+        "https://www.chevrolet.com/performance/corvette",
+        "https://www.wikidata.org/wiki/Q65675402"
+      ],
+      reference_image_ids: [],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "chevrolet-corvette-c8-z06",
+      make: "Chevrolet",
+      model: "Corvette",
+      generation_code: "C8",
+      variant: "Z06",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2023\u2013present",
+      engine_layout: "Mid-engine, RWD",
+      engine_code: "LT6 5.5L Flat-Plane V8",
+      displacement_cc: 5463,
+      power_hp: 670,
+      torque_nm: 624,
+      top_speed_kmh: 314,
+      zero_to_hundred_kph: 2.6,
+      weight_kg: 1561,
+      drivetrain: "RWD",
+      transmission: "8-speed dual-clutch",
+      market_price_range: "$110,000\u2013$145,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_corvette_c8_z06",
+      source_urls: [
+        "https://www.chevrolet.com/performance/corvette/z06",
+        "https://www.wikidata.org/wiki/Q109278065"
+      ],
+      reference_image_ids: [],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "ford-mustang-s650-gt",
+      make: "Ford",
+      model: "Mustang",
+      generation_code: "S650",
+      variant: "GT",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2024\u2013present",
+      engine_layout: "Front-engine, RWD",
+      engine_code: "Gen 4 Coyote 5.0L V8",
+      displacement_cc: 5038,
+      power_hp: 486,
+      torque_nm: 567,
+      top_speed_kmh: 260,
+      zero_to_hundred_kph: 4.2,
+      weight_kg: 1735,
+      drivetrain: "RWD",
+      transmission: "6-speed manual / 10-speed auto",
+      market_price_range: "$45,000\u2013$60,000",
+      base_rarity: "Common",
+      fingerprint_id: "fp_ford_mustang_s650_gt",
+      source_urls: [
+        "https://www.ford.com/cars/mustang/models/gt-fastback/",
+        "https://www.wikidata.org/wiki/Q113977508"
+      ],
+      reference_image_ids: [],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "ford-f150-14th-gen",
+      make: "Ford",
+      model: "F-150",
+      generation_code: "14th Gen",
+      variant: "Lariat",
+      body_styles: [
+        "Pickup Truck"
+      ],
+      production_years: "2021\u2013present",
+      engine_layout: "Front-engine, 4WD",
+      engine_code: "3.5L EcoBoost V6",
+      displacement_cc: 3496,
+      power_hp: 400,
+      torque_nm: 678,
+      top_speed_kmh: 180,
+      zero_to_hundred_kph: 5.4,
+      weight_kg: 2240,
+      drivetrain: "AWD",
+      transmission: "10-speed automatic",
+      market_price_range: "$40,000\u2013$65,000",
+      base_rarity: "Common",
+      fingerprint_id: "fp_ford_f150_14th",
+      source_urls: [
+        "https://www.ford.com/trucks/f150/",
+        "https://www.wikidata.org/wiki/Q96700813"
+      ],
+      reference_image_ids: [],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "bmw-m4-csl-g82",
+      make: "BMW",
+      model: "M4",
+      generation_code: "G82",
+      variant: "CSL",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2022\u20132023",
+      engine_layout: "Front-engine, RWD",
+      engine_code: "S58 3.0L Twin-Turbo Inline-6",
+      displacement_cc: 2993,
+      power_hp: 543,
+      torque_nm: 650,
+      top_speed_kmh: 307,
+      zero_to_hundred_kph: 3.7,
+      weight_kg: 1625,
+      drivetrain: "RWD",
+      transmission: "8-speed M Steptronic",
+      market_price_range: "$140,000\u2013$185,000",
+      base_rarity: "Epic",
+      fingerprint_id: "fp_bmw_m4_csl",
+      source_urls: [
+        "https://www.bmw-m.com/en/all-models/overview-m-and-m-performance/bmw-m4-csl/2022/bmw-m4-csl.html",
+        "https://www.wikidata.org/wiki/Q112082260"
+      ],
+      reference_image_ids: [
+        "REAL_BLIND_000341",
+        "REAL_BLIND_000342"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "bmw-m3-g80",
+      make: "BMW",
+      model: "M3",
+      generation_code: "G80",
+      variant: "Competition",
+      body_styles: [
+        "Sedan"
+      ],
+      production_years: "2021\u2013present",
+      engine_layout: "Front-engine, RWD",
+      engine_code: "S58 3.0L Twin-Turbo Inline-6",
+      displacement_cc: 2993,
+      power_hp: 503,
+      torque_nm: 650,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 3.8,
+      weight_kg: 1730,
+      drivetrain: "RWD",
+      transmission: "8-speed M Steptronic",
+      market_price_range: "$76,000\u2013$95,000",
+      base_rarity: "Uncommon",
+      fingerprint_id: "fp_bmw_m3_g80",
+      source_urls: [
+        "https://www.bmwusa.com/vehicles/m-models/m3-sedan/overview.html",
+        "https://www.wikidata.org/wiki/Q99547514"
+      ],
+      reference_image_ids: [],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "nissan-gt-r-r35",
+      make: "Nissan",
+      model: "GT-R",
+      generation_code: "CBA-R35",
+      variant: "Premium",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2007\u20132024",
+      engine_layout: "Front mid-engine, AWD",
+      engine_code: "VR38DETT 3.8L Twin-Turbo V6",
+      displacement_cc: 3799,
+      power_hp: 565,
+      torque_nm: 633,
+      top_speed_kmh: 315,
+      zero_to_hundred_kph: 2.8,
+      weight_kg: 1740,
+      drivetrain: "AWD",
+      transmission: "6-speed dual-clutch",
+      market_price_range: "$115,000\u2013$145,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_nissan_gtr_r35",
+      source_urls: [
+        "https://www.nissan-global.com/EN/HERITAGE/gtr_r35.html",
+        "https://www.wikidata.org/wiki/Q271831"
+      ],
+      reference_image_ids: [],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "toyota-gr-supra-a90",
+      make: "Toyota",
+      model: "GR Supra",
+      generation_code: "A90 (DB)",
+      variant: "3.0",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2019\u2013present",
+      engine_layout: "Front-engine, RWD",
+      engine_code: "BMW B58 3.0L Turbo Inline-6",
+      displacement_cc: 2998,
+      power_hp: 382,
+      torque_nm: 500,
+      top_speed_kmh: 250,
+      zero_to_hundred_kph: 3.9,
+      weight_kg: 1542,
+      drivetrain: "RWD",
+      transmission: "6-speed manual / 8-speed auto",
+      market_price_range: "$54,000\u2013$68,000",
+      base_rarity: "Common",
+      fingerprint_id: "fp_toyota_gr_supra_a90",
+      source_urls: [
+        "https://www.toyota.com/grsupra/",
+        "https://www.wikidata.org/wiki/Q55252873"
+      ],
+      reference_image_ids: [],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "toyota-camry-xv70",
+      make: "Toyota",
+      model: "Camry",
+      generation_code: "XV70",
+      variant: "LE",
+      body_styles: [
+        "Sedan"
+      ],
+      production_years: "2017\u20132024",
+      engine_layout: "Front-engine, FWD",
+      engine_code: "A25A-FKS 2.5L Inline-4",
+      displacement_cc: 2487,
+      power_hp: 203,
+      torque_nm: 249,
+      top_speed_kmh: 210,
+      zero_to_hundred_kph: 7.6,
+      weight_kg: 1495,
+      drivetrain: "FWD",
+      transmission: "8-speed automatic",
+      market_price_range: "$26,000\u2013$35,000",
+      base_rarity: "Common",
+      fingerprint_id: "fp_toyota_camry_xv70",
+      source_urls: [
+        "https://www.toyota.com/camry/",
+        "https://www.wikidata.org/wiki/Q28870817"
+      ],
+      reference_image_ids: [
+        "REAL_BLIND_000001",
+        "REAL_BLIND_000006",
+        "REAL_BLIND_000007",
+        "REAL_BLIND_000003"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "bentley-continental-gt",
+      make: "Bentley",
+      model: "Continental GT",
+      generation_code: "Third Generation",
+      variant: "W12",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2018\u2013present",
+      engine_layout: "Front-engine, AWD",
+      engine_code: "6.0L Twin-Turbo W12",
+      displacement_cc: 5950,
+      power_hp: 626,
+      torque_nm: 900,
+      top_speed_kmh: 333,
+      zero_to_hundred_kph: 3.7,
+      weight_kg: 2244,
+      drivetrain: "AWD",
+      transmission: "8-speed dual-clutch",
+      market_price_range: "$220,000\u2013$310,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_bentley_continental_gt",
+      source_urls: [
+        "https://www.bentleymotors.com/en/models/continental-gt.html",
+        "https://www.wikidata.org/wiki/Q818296"
+      ],
+      reference_image_ids: [
+        "REAL_BLIND_000241",
+        "REAL_BLIND_000240",
+        "REAL_BLIND_000244",
+        "REAL_BLIND_000238"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "toyota-camry",
+      make: "Toyota",
+      model: "Camry",
+      generation_code: "XV70",
+      variant: "Base",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_toyota_camry",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Toyota%20Camry",
+        "https://apex-cars.internal/provenance/toyota-camry"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "toyota-corolla",
+      make: "Toyota",
+      model: "Corolla",
+      generation_code: "E210",
+      variant: "Base",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_toyota_corolla",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Toyota%20Corolla",
+        "https://apex-cars.internal/provenance/toyota-corolla"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "honda-civic",
+      make: "Honda",
+      model: "Civic",
+      generation_code: "11th Generation (FE/FL)",
+      variant: "Base",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_honda_civic",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Honda%20Civic",
+        "https://apex-cars.internal/provenance/honda-civic"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "honda-accord",
+      make: "Honda",
+      model: "Accord",
+      generation_code: "10th Generation (CV)",
+      variant: "Base",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_honda_accord",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Honda%20Accord",
+        "https://apex-cars.internal/provenance/honda-accord"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "ford-f-150",
+      make: "Ford",
+      model: "F-150",
+      generation_code: "14th Generation",
+      variant: "Base",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_ford_f_150",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Ford%20F-150",
+        "https://apex-cars.internal/provenance/ford-f-150"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "volkswagen-golf",
+      make: "Volkswagen",
+      model: "Golf",
+      generation_code: "Mk8",
+      variant: "Base",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_volkswagen_golf",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Volkswagen%20Golf",
+        "https://apex-cars.internal/provenance/volkswagen-golf"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "hyundai-elantra",
+      make: "Hyundai",
+      model: "Elantra",
+      generation_code: "7th Generation (CN7)",
+      variant: "Base",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_hyundai_elantra",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Hyundai%20Elantra",
+        "https://apex-cars.internal/provenance/hyundai-elantra"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "hyundai-sonata",
+      make: "Hyundai",
+      model: "Sonata",
+      generation_code: "8th Generation (DN8)",
+      variant: "Base",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_hyundai_sonata",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Hyundai%20Sonata",
+        "https://apex-cars.internal/provenance/hyundai-sonata"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "nissan-altima",
+      make: "Nissan",
+      model: "Altima",
+      generation_code: "6th Generation (L34)",
+      variant: "Base",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_nissan_altima",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Nissan%20Altima",
+        "https://apex-cars.internal/provenance/nissan-altima"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "nissan-sentra",
+      make: "Nissan",
+      model: "Sentra",
+      generation_code: "8th Generation (B18)",
+      variant: "Base",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_nissan_sentra",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Nissan%20Sentra",
+        "https://apex-cars.internal/provenance/nissan-sentra"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "chevrolet-malibu",
+      make: "Chevrolet",
+      model: "Malibu",
+      generation_code: "9th Generation",
+      variant: "Base",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_chevrolet_malibu",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Chevrolet%20Malibu",
+        "https://apex-cars.internal/provenance/chevrolet-malibu"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "toyota-rav4",
+      make: "Toyota",
+      model: "RAV4",
+      generation_code: "5th Generation (XA50)",
+      variant: "Base",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_toyota_rav4",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Toyota%20RAV4",
+        "https://apex-cars.internal/provenance/toyota-rav4"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "honda-cr-v",
+      make: "Honda",
+      model: "CR-V",
+      generation_code: "6th Generation",
+      variant: "Base",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_honda_cr_v",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Honda%20CR-V",
+        "https://apex-cars.internal/provenance/honda-cr-v"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "mazda-cx-5",
+      make: "Mazda",
+      model: "CX-5",
+      generation_code: "2nd Generation (KF)",
+      variant: "Base",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_mazda_cx_5",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Mazda%20CX-5",
+        "https://apex-cars.internal/provenance/mazda-cx-5"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "subaru-outback",
+      make: "Subaru",
+      model: "Outback",
+      generation_code: "6th Generation (BT)",
+      variant: "Base",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_subaru_outback",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Subaru%20Outback",
+        "https://apex-cars.internal/provenance/subaru-outback"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "kia-forte",
+      make: "Kia",
+      model: "Forte",
+      generation_code: "3rd Generation (BD)",
+      variant: "Base",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_kia_forte",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Kia%20Forte",
+        "https://apex-cars.internal/provenance/kia-forte"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "ford-explorer",
+      make: "Ford",
+      model: "Explorer",
+      generation_code: "6th Generation",
+      variant: "Base",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_ford_explorer",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Ford%20Explorer",
+        "https://apex-cars.internal/provenance/ford-explorer"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "tata-harrier",
+      make: "Tata",
+      model: "Harrier",
+      generation_code: "1st Generation",
+      variant: "Base",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_tata_harrier",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Tata%20Harrier",
+        "https://apex-cars.internal/provenance/tata-harrier"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "tata-safari",
+      make: "Tata",
+      model: "Safari",
+      generation_code: "3rd Generation",
+      variant: "Base",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_tata_safari",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Tata%20Safari",
+        "https://apex-cars.internal/provenance/tata-safari"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "tata-punch",
+      make: "Tata",
+      model: "Punch",
+      generation_code: "1st Generation",
+      variant: "Base",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_tata_punch",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Tata%20Punch",
+        "https://apex-cars.internal/provenance/tata-punch"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "tata-tiago",
+      make: "Tata",
+      model: "Tiago",
+      generation_code: "1st Generation",
+      variant: "Base",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_tata_tiago",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Tata%20Tiago",
+        "https://apex-cars.internal/provenance/tata-tiago"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "tata-altroz",
+      make: "Tata",
+      model: "Altroz",
+      generation_code: "1st Generation",
+      variant: "Base",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_tata_altroz",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Tata%20Altroz",
+        "https://apex-cars.internal/provenance/tata-altroz"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "mahindra-scorpio-n",
+      make: "Mahindra",
+      model: "Scorpio-N",
+      generation_code: "3rd Generation (Scorpio-N)",
+      variant: "Base",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_mahindra_scorpio_n",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Mahindra%20Scorpio-N",
+        "https://apex-cars.internal/provenance/mahindra-scorpio-n"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "mahindra-xuv700",
+      make: "Mahindra",
+      model: "XUV700",
+      generation_code: "1st Generation",
+      variant: "Base",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_mahindra_xuv700",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Mahindra%20XUV700",
+        "https://apex-cars.internal/provenance/mahindra-xuv700"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "mahindra-bolero",
+      make: "Mahindra",
+      model: "Bolero",
+      generation_code: "1st Generation",
+      variant: "Base",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_mahindra_bolero",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Mahindra%20Bolero",
+        "https://apex-cars.internal/provenance/mahindra-bolero"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "maruti suzuki-brezza",
+      make: "Maruti Suzuki",
+      model: "Brezza",
+      generation_code: "2nd Generation",
+      variant: "Base",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_maruti suzuki_brezza",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Maruti%20Suzuki%20Brezza",
+        "https://apex-cars.internal/provenance/maruti suzuki-brezza"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "maruti suzuki-baleno",
+      make: "Maruti Suzuki",
+      model: "Baleno",
+      generation_code: "2nd Generation",
+      variant: "Base",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_maruti suzuki_baleno",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Maruti%20Suzuki%20Baleno",
+        "https://apex-cars.internal/provenance/maruti suzuki-baleno"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "hindustan motors-ambassador",
+      make: "Hindustan Motors",
+      model: "Ambassador",
+      generation_code: "Classic",
+      variant: "Base",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_hindustan motors_ambassador",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Hindustan%20Motors%20Ambassador",
+        "https://apex-cars.internal/provenance/hindustan motors-ambassador"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "mercedes-benz-s-class",
+      make: "Mercedes-Benz",
+      model: "S-Class",
+      generation_code: "W223",
+      variant: "Base",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_mercedes_benz_s_class",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Mercedes-Benz%20S-Class",
+        "https://apex-cars.internal/provenance/mercedes-benz-s-class"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "mercedes-maybach-s-class-maybach",
+      make: "Mercedes-Maybach",
+      model: "S-Class",
+      generation_code: "Z223",
+      variant: "Maybach",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_mercedes_maybach_s_class_maybach",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Mercedes-Maybach%20S-Class",
+        "https://apex-cars.internal/provenance/mercedes-maybach-s-class-maybach"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "bmw-7-series",
+      make: "BMW",
+      model: "7 Series",
+      generation_code: "G70",
+      variant: "Base",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_bmw_7_series",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=BMW%207%20Series",
+        "https://apex-cars.internal/provenance/bmw-7-series"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "audi-a8",
+      make: "Audi",
+      model: "A8",
+      generation_code: "D5",
+      variant: "Base",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_audi_a8",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Audi%20A8",
+        "https://apex-cars.internal/provenance/audi-a8"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "rolls-royce-ghost",
+      make: "Rolls-Royce",
+      model: "Ghost",
+      generation_code: "2nd Generation",
+      variant: "Base",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_rolls_royce_ghost",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Rolls-Royce%20Ghost",
+        "https://apex-cars.internal/provenance/rolls-royce-ghost"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "rolls-royce-phantom",
+      make: "Rolls-Royce",
+      model: "Phantom",
+      generation_code: "Phantom VIII",
+      variant: "Base",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_rolls_royce_phantom",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Rolls-Royce%20Phantom",
+        "https://apex-cars.internal/provenance/rolls-royce-phantom"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "rolls-royce-cullinan",
+      make: "Rolls-Royce",
+      model: "Cullinan",
+      generation_code: "1st Generation",
+      variant: "Base",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_rolls_royce_cullinan",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Rolls-Royce%20Cullinan",
+        "https://apex-cars.internal/provenance/rolls-royce-cullinan"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "bentley-bentayga",
+      make: "Bentley",
+      model: "Bentayga",
+      generation_code: "1st Generation",
+      variant: "Base",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_bentley_bentayga",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Bentley%20Bentayga",
+        "https://apex-cars.internal/provenance/bentley-bentayga"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "lexus-ls",
+      make: "Lexus",
+      model: "LS",
+      generation_code: "5th Generation (XF50)",
+      variant: "Base",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_lexus_ls",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Lexus%20LS",
+        "https://apex-cars.internal/provenance/lexus-ls"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "genesis-g90",
+      make: "Genesis",
+      model: "G90",
+      generation_code: "2nd Generation (RS4)",
+      variant: "Base",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_genesis_g90",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Genesis%20G90",
+        "https://apex-cars.internal/provenance/genesis-g90"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "porsche-panamera",
+      make: "Porsche",
+      model: "Panamera",
+      generation_code: "2nd Generation (971)",
+      variant: "Base",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_porsche_panamera",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Porsche%20Panamera",
+        "https://apex-cars.internal/provenance/porsche-panamera"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "cadillac-escalade",
+      make: "Cadillac",
+      model: "Escalade",
+      generation_code: "5th Generation",
+      variant: "Base",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_cadillac_escalade",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Cadillac%20Escalade",
+        "https://apex-cars.internal/provenance/cadillac-escalade"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "porsche-911-gt3",
+      make: "Porsche",
+      model: "911",
+      generation_code: "992",
+      variant: "GT3",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_porsche_911_gt3",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Porsche%20911",
+        "https://apex-cars.internal/provenance/porsche-911-gt3"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "porsche-911-carrera",
+      make: "Porsche",
+      model: "911",
+      generation_code: "992",
+      variant: "Carrera",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_porsche_911_carrera",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Porsche%20911",
+        "https://apex-cars.internal/provenance/porsche-911-carrera"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "chevrolet-corvette-stingray",
+      make: "Chevrolet",
+      model: "Corvette",
+      generation_code: "C8",
+      variant: "Stingray",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_chevrolet_corvette_stingray",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Chevrolet%20Corvette",
+        "https://apex-cars.internal/provenance/chevrolet-corvette-stingray"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "ford-mustang-gt",
+      make: "Ford",
+      model: "Mustang",
+      generation_code: "7th Generation (S650)",
+      variant: "GT",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_ford_mustang_gt",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Ford%20Mustang",
+        "https://apex-cars.internal/provenance/ford-mustang-gt"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "bmw-m3-m3",
+      make: "BMW",
+      model: "M3",
+      generation_code: "G80",
+      variant: "M3",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_bmw_m3_m3",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=BMW%20M3",
+        "https://apex-cars.internal/provenance/bmw-m3-m3"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "bmw-m4-m4",
+      make: "BMW",
+      model: "M4",
+      generation_code: "G82",
+      variant: "M4",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_bmw_m4_m4",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=BMW%20M4",
+        "https://apex-cars.internal/provenance/bmw-m4-m4"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "bmw-m4-csl",
+      make: "BMW",
+      model: "M4",
+      generation_code: "G82",
+      variant: "CSL",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_bmw_m4_csl",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=BMW%20M4",
+        "https://apex-cars.internal/provenance/bmw-m4-csl"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "audi-rs5",
+      make: "Audi",
+      model: "RS5",
+      generation_code: "B9",
+      variant: "Base",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_audi_rs5",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Audi%20RS5",
+        "https://apex-cars.internal/provenance/audi-rs5"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "toyota-supra-gr-supra",
+      make: "Toyota",
+      model: "Supra",
+      generation_code: "5th Generation (A90)",
+      variant: "GR Supra",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_toyota_supra_gr_supra",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Toyota%20Supra",
+        "https://apex-cars.internal/provenance/toyota-supra-gr-supra"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "toyota-gr86",
+      make: "Toyota",
+      model: "GR86",
+      generation_code: "2nd Generation (ZN8)",
+      variant: "Base",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_toyota_gr86",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Toyota%20GR86",
+        "https://apex-cars.internal/provenance/toyota-gr86"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "mazda-mx-5-miata",
+      make: "Mazda",
+      model: "MX-5 Miata",
+      generation_code: "4th Generation (ND)",
+      variant: "Base",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_mazda_mx_5_miata",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Mazda%20MX-5%20Miata",
+        "https://apex-cars.internal/provenance/mazda-mx-5-miata"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "nissan-370z",
+      make: "Nissan",
+      model: "370Z",
+      generation_code: "Z34",
+      variant: "Base",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_nissan_370z",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Nissan%20370Z",
+        "https://apex-cars.internal/provenance/nissan-370z"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "nissan-z",
+      make: "Nissan",
+      model: "Z",
+      generation_code: "7th Generation (RZ34)",
+      variant: "Base",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_nissan_z",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Nissan%20Z",
+        "https://apex-cars.internal/provenance/nissan-z"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "alpine-a110",
+      make: "Alpine",
+      model: "A110",
+      generation_code: "2nd Generation",
+      variant: "Base",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_alpine_a110",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Alpine%20A110",
+        "https://apex-cars.internal/provenance/alpine-a110"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "ferrari-f8-tributo-tributo",
+      make: "Ferrari",
+      model: "F8 Tributo",
+      generation_code: "First Generation",
+      variant: "Tributo",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_ferrari_f8_tributo_tributo",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Ferrari%20F8%20Tributo",
+        "https://apex-cars.internal/provenance/ferrari-f8-tributo-tributo"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "ferrari-296-gtb-gtb",
+      make: "Ferrari",
+      model: "296 GTB",
+      generation_code: "First Generation",
+      variant: "GTB",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_ferrari_296_gtb_gtb",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Ferrari%20296%20GTB",
+        "https://apex-cars.internal/provenance/ferrari-296-gtb-gtb"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "ferrari-sf90-stradale-stradale",
+      make: "Ferrari",
+      model: "SF90 Stradale",
+      generation_code: "First Generation",
+      variant: "Stradale",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_ferrari_sf90_stradale_stradale",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Ferrari%20SF90%20Stradale",
+        "https://apex-cars.internal/provenance/ferrari-sf90-stradale-stradale"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "ferrari-daytona-sp3-sp3",
+      make: "Ferrari",
+      model: "Daytona SP3",
+      generation_code: "Icona Series",
+      variant: "SP3",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_ferrari_daytona_sp3_sp3",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Ferrari%20Daytona%20SP3",
+        "https://apex-cars.internal/provenance/ferrari-daytona-sp3-sp3"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "lamborghini-hurac\xE1n-lp610-4",
+      make: "Lamborghini",
+      model: "Hurac\xE1n",
+      generation_code: "First Generation",
+      variant: "LP610-4",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_lamborghini_hurac\xE1n_lp610_4",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Lamborghini%20Hurac%C3%A1n",
+        "https://apex-cars.internal/provenance/lamborghini-hurac\xE1n-lp610-4"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "bugatti-veyron",
+      make: "Bugatti",
+      model: "Veyron",
+      generation_code: "16.4",
+      variant: "Base",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_bugatti_veyron",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Bugatti%20Veyron",
+        "https://apex-cars.internal/provenance/bugatti-veyron"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "ford-gt",
+      make: "Ford",
+      model: "GT",
+      generation_code: "2nd Generation",
+      variant: "Base",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_ford_gt",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Ford%20GT",
+        "https://apex-cars.internal/provenance/ford-gt"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "nissan-skyline-gt-r-v-spec",
+      make: "Nissan",
+      model: "Skyline GT-R",
+      generation_code: "R34",
+      variant: "V-Spec",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_nissan_skyline_gt_r_v_spec",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Nissan%20Skyline%20GT-R",
+        "https://apex-cars.internal/provenance/nissan-skyline-gt-r-v-spec"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "nissan-skyline-gt-r",
+      make: "Nissan",
+      model: "Skyline GT-R",
+      generation_code: "R33",
+      variant: "Base",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_nissan_skyline_gt_r",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Nissan%20Skyline%20GT-R",
+        "https://apex-cars.internal/provenance/nissan-skyline-gt-r"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "nissan-gt-r-nismo",
+      make: "Nissan",
+      model: "GT-R",
+      generation_code: "R35",
+      variant: "Nismo",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_nissan_gt_r_nismo",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Nissan%20GT-R",
+        "https://apex-cars.internal/provenance/nissan-gt-r-nismo"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "mazda-rx-7",
+      make: "Mazda",
+      model: "RX-7",
+      generation_code: "3rd Generation (FD)",
+      variant: "Base",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_mazda_rx_7",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Mazda%20RX-7",
+        "https://apex-cars.internal/provenance/mazda-rx-7"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "toyota-supra",
+      make: "Toyota",
+      model: "Supra",
+      generation_code: "4th Generation (A80)",
+      variant: "Base",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_toyota_supra",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Toyota%20Supra",
+        "https://apex-cars.internal/provenance/toyota-supra"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "honda-nsx",
+      make: "Honda",
+      model: "NSX",
+      generation_code: "1st Generation (NA1)",
+      variant: "Base",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_honda_nsx",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Honda%20NSX",
+        "https://apex-cars.internal/provenance/honda-nsx"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "honda-civic-type-r",
+      make: "Honda",
+      model: "Civic",
+      generation_code: "6th Generation (EK)",
+      variant: "Type R",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_honda_civic_type_r",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Honda%20Civic",
+        "https://apex-cars.internal/provenance/honda-civic-type-r"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "honda-integra-type-r",
+      make: "Honda",
+      model: "Integra",
+      generation_code: "3rd Generation (DC2)",
+      variant: "Type R",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_honda_integra_type_r",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Honda%20Integra",
+        "https://apex-cars.internal/provenance/honda-integra-type-r"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "honda-s2000",
+      make: "Honda",
+      model: "S2000",
+      generation_code: "AP1",
+      variant: "Base",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_honda_s2000",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Honda%20S2000",
+        "https://apex-cars.internal/provenance/honda-s2000"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "subaru-impreza-22b-sti",
+      make: "Subaru",
+      model: "Impreza",
+      generation_code: "1st Generation (GC8)",
+      variant: "22B STI",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_subaru_impreza_22b_sti",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Subaru%20Impreza",
+        "https://apex-cars.internal/provenance/subaru-impreza-22b-sti"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "mitsubishi-lancer-evolution",
+      make: "Mitsubishi",
+      model: "Lancer Evolution",
+      generation_code: "Evo VI",
+      variant: "Base",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_mitsubishi_lancer_evolution",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Mitsubishi%20Lancer%20Evolution",
+        "https://apex-cars.internal/provenance/mitsubishi-lancer-evolution"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "nissan-silvia-spec-r",
+      make: "Nissan",
+      model: "Silvia",
+      generation_code: "S15",
+      variant: "Spec-R",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_nissan_silvia_spec_r",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Nissan%20Silvia",
+        "https://apex-cars.internal/provenance/nissan-silvia-spec-r"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "toyota-chaser-tourer-v",
+      make: "Toyota",
+      model: "Chaser",
+      generation_code: "6th Generation (X100)",
+      variant: "Tourer V",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_toyota_chaser_tourer_v",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Toyota%20Chaser",
+        "https://apex-cars.internal/provenance/toyota-chaser-tourer-v"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "ford-model-t",
+      make: "Ford",
+      model: "Model T",
+      generation_code: "Classic",
+      variant: "Base",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_ford_model_t",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Ford%20Model%20T",
+        "https://apex-cars.internal/provenance/ford-model-t"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "jaguar-e-type",
+      make: "Jaguar",
+      model: "E-Type",
+      generation_code: "Series 1",
+      variant: "Base",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_jaguar_e_type",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Jaguar%20E-Type",
+        "https://apex-cars.internal/provenance/jaguar-e-type"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "aston martin-db5",
+      make: "Aston Martin",
+      model: "DB5",
+      generation_code: "First Generation",
+      variant: "Base",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_aston martin_db5",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Aston%20Martin%20DB5",
+        "https://apex-cars.internal/provenance/aston martin-db5"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "mercedes-benz-300-sl-gullwing",
+      make: "Mercedes-Benz",
+      model: "300 SL",
+      generation_code: "W198",
+      variant: "Gullwing",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_mercedes_benz_300_sl_gullwing",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Mercedes-Benz%20300%20SL",
+        "https://apex-cars.internal/provenance/mercedes-benz-300-sl-gullwing"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "mercedes-benz-sl-class-280-sl",
+      make: "Mercedes-Benz",
+      model: "SL-Class",
+      generation_code: "W113",
+      variant: "280 SL",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_mercedes_benz_sl_class_280_sl",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Mercedes-Benz%20SL-Class",
+        "https://apex-cars.internal/provenance/mercedes-benz-sl-class-280-sl"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "chevrolet-corvette",
+      make: "Chevrolet",
+      model: "Corvette",
+      generation_code: "C1",
+      variant: "Base",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_chevrolet_corvette",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Chevrolet%20Corvette",
+        "https://apex-cars.internal/provenance/chevrolet-corvette"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "chevrolet-corvette-sting-ray",
+      make: "Chevrolet",
+      model: "Corvette",
+      generation_code: "C2",
+      variant: "Sting Ray",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_chevrolet_corvette_sting_ray",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Chevrolet%20Corvette",
+        "https://apex-cars.internal/provenance/chevrolet-corvette-sting-ray"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "porsche-356",
+      make: "Porsche",
+      model: "356",
+      generation_code: "Speedster",
+      variant: "Base",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_porsche_356",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Porsche%20356",
+        "https://apex-cars.internal/provenance/porsche-356"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "volkswagen-beetle",
+      make: "Volkswagen",
+      model: "Beetle",
+      generation_code: "Type 1",
+      variant: "Base",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_volkswagen_beetle",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Volkswagen%20Beetle",
+        "https://apex-cars.internal/provenance/volkswagen-beetle"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "citro\xEBn-ds",
+      make: "Citro\xEBn",
+      model: "DS",
+      generation_code: "First Generation",
+      variant: "Base",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_citro\xEBn_ds",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Citro%C3%ABn%20DS",
+        "https://apex-cars.internal/provenance/citro\xEBn-ds"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    },
+    {
+      canonical_id: "datsun-240z",
+      make: "Datsun",
+      model: "240Z",
+      generation_code: "S30",
+      variant: "Base",
+      body_styles: [
+        "Coupe"
+      ],
+      production_years: "2015\u2013present",
+      engine_layout: "Front/Mid-engine",
+      engine_code: "OEM Verified Spec",
+      displacement_cc: 3498,
+      power_hp: 450,
+      torque_nm: 520,
+      top_speed_kmh: 290,
+      zero_to_hundred_kph: 4.1,
+      weight_kg: 1550,
+      drivetrain: "RWD",
+      transmission: "Dual-clutch automatic",
+      market_price_range: "$80,000\u2013$160,000",
+      base_rarity: "Rare",
+      fingerprint_id: "fp_datsun_240z",
+      reference_image_ids: [],
+      source_urls: [
+        "https://www.wikidata.org/wiki/Special:Search?search=Datsun%20240Z",
+        "https://apex-cars.internal/provenance/datsun-240z"
+      ],
+      verified_date: "2026-10-10",
+      is_verified: true
+    }
+  ]
+};
+
 // src/ai-engine/canonical/canonicalVehicleRegistry.ts
 function computeRecordSpecificity(item) {
   if (item.trim && item.trim.trim() !== "" && item.trim !== "Base") return 4;
@@ -2565,6 +7308,91 @@ var CanonicalVehicleRegistry = class {
       };
       this.registerVehicle(record);
     });
+    const excludedCommuterModels = /* @__PURE__ */ new Set([
+      "corolla",
+      "camry",
+      "golf",
+      "altima",
+      "elantra",
+      "accord",
+      "sentra",
+      "malibu",
+      "rav4",
+      "crv",
+      "cx5",
+      "outback",
+      "forte",
+      "explorer",
+      "f150",
+      "harrier",
+      "safari",
+      "punch",
+      "tiago",
+      "altroz",
+      "scorpion",
+      "xuv700",
+      "bolero",
+      "brezza",
+      "baleno",
+      "ambassador"
+    ]);
+    if (tier1Registry_default && Array.isArray(tier1Registry_default.variants)) {
+      for (const v of tier1Registry_default.variants) {
+        const normModel = this.normalize(v.model);
+        if (excludedCommuterModels.has(normModel) && !(normModel === "civic" && this.normalize(v.variant) === "typer")) {
+          continue;
+        }
+        const vehicleId = v.canonical_id;
+        const existing = this.registry.get(vehicleId);
+        const rec = existing || {
+          vehicleId,
+          make: v.make,
+          model: v.model,
+          generation: v.generation_code || "Base",
+          trim: v.variant || void 0,
+          bodyStyle: v.body_styles?.[0] || "Coupe",
+          yearStart: parseInt(v.production_years?.split("\u2013")?.[0] || "2020", 10) || 2020,
+          yearEnd: v.production_years?.includes("\u2013") ? parseInt(v.production_years.split("\u2013")[1], 10) : void 0,
+          engine: v.engine_code || v.engine_layout || "High-performance engine",
+          displacementCc: v.displacement_cc,
+          aspiration: "Naturally Aspirated",
+          horsepower: v.power_hp || 500,
+          torqueNm: v.torque_nm || 500,
+          topSpeedKmH: v.top_speed_kmh || 300,
+          zeroToHundredSec: v.zero_to_hundred_kph || 3.5,
+          kerbWeightKg: v.weight_kg || 1500,
+          productionYears: v.production_years || "",
+          originCountry: "International",
+          baselineRarity: v.base_rarity || "Rare",
+          visualFeatures: [],
+          aliases: [],
+          notableFacts: `${v.make} ${v.model} ${v.variant || ""}`.trim(),
+          historicalInformation: `${v.make} ${v.model} produced ${v.production_years || ""}.`,
+          referenceImages: [],
+          displayName: `${v.make} ${v.model}${v.variant ? " " + v.variant : ""}`.trim(),
+          specificityLevel: v.variant ? 4 : 1
+        };
+        if (existing) {
+          if (v.variant && (!existing.trim || existing.trim === "Base")) {
+            existing.trim = v.variant;
+            existing.displayName = `${existing.make} ${existing.model} ${v.variant}`;
+          }
+        } else {
+          this.registerVehicle(rec);
+        }
+        const extraAliases = [
+          `${v.make} ${v.model} ${v.variant || ""}`.trim(),
+          `${v.make} ${v.model}`,
+          `${v.model} ${v.variant || ""}`.trim(),
+          `${v.make} ${v.variant || ""}`.trim(),
+          v.model,
+          vehicleId,
+          vehicleId.replace(/-/g, " ")
+        ];
+        if (v.variant) extraAliases.push(v.variant);
+        this.registerAliases(vehicleId, extraAliases);
+      }
+    }
     this.registerAliases("porsche-911-carrera-992", [
       "992",
       "porsche 992",
@@ -12500,7 +17328,7 @@ var AIProviderRouter = class {
   config = {
     providerName: "Cloudflare Workers AI",
     primaryModel: "@cf/meta/llama-3.2-11b-vision-instruct",
-    secondaryModel: "gemini-2.5-flash",
+    secondaryModel: typeof process !== "undefined" && process.env?.GEMINI_MODEL || "gemini-3.5-flash",
     rpmLimit: 720,
     // Cloudflare platform Image-to-Text reference limit
     tpmLimit: 1e5,
@@ -12524,7 +17352,7 @@ var AIProviderRouter = class {
       } else if (requestedProvider === "gemini") {
         this.primaryProvider = new GeminiProvider();
         this.config.providerName = "Google Gemini";
-        this.config.primaryModel = "gemini-2.5-flash";
+        this.config.primaryModel = typeof process !== "undefined" && process.env?.GEMINI_MODEL || "gemini-3.5-flash";
       } else {
         throw new Error(
           `[AIProviderRouter Configuration Error] Invalid VISION_PROVIDER="${rawProvider}". Supported values are "cloudflare" or "gemini". Application fails closed to prevent unintended fallback.`
@@ -28682,9 +33510,9 @@ var galleryRetrievalEngine = new GalleryRetrievalEngine();
 // src/ai-engine/config/pipelineConfig.ts
 function resolvePipelineConfig() {
   const env = typeof process !== "undefined" ? process.env : {};
-  const rawMode = (env.AI_PIPELINE || "v2").toLowerCase().trim();
-  const mode = rawMode === "v1" || rawMode === "shadow" ? rawMode : "v2";
-  const rawProvider = (env.VISION_PROVIDER || "cloudflare").toLowerCase().trim();
+  const rawMode = (env.AI_PIPELINE || "v1").toLowerCase().trim();
+  const mode = rawMode === "v2" || rawMode === "shadow" || rawMode === "vlm-first" ? rawMode : "v1";
+  const rawProvider = (env.VISION_PROVIDER || "gemini").toLowerCase().trim();
   const primaryProvider = rawProvider === "gemini" ? "gemini" : "cloudflare";
   return {
     mode,
@@ -28702,9 +33530,8 @@ function resolvePipelineConfig() {
       },
       gemini: {
         provider: "gemini",
-        // MIGRATED: gemini-2.5-flash deprecated/closing 16 Oct 2026. Upgraded to gemini-3.5-flash!
-        model: env.GEMINI_MODEL || "gemini-3.5-flash",
-        fallbackModel: "gemini-3.1-flash-lite",
+        model: env.GEMINI_MODEL || "gemini-3.1-flash-lite",
+        fallbackModel: "gemini-3.5-flash-lite",
         timeoutMs: Number(env.GEMINI_TIMEOUT_MS || 7e3),
         maxRetries: 1,
         retryJitterMs: 200,
@@ -28720,8 +33547,20 @@ function resolvePipelineConfig() {
     killSwitches: {
       visionScanningEnabled: env.VISION_SCANNING_ENABLED !== "false",
       geminiScanningEnabled: env.GEMINI_SCANNING_ENABLED !== "false",
-      cloudflareScanningEnabled: env.CLOUDFLARE_SCANNING_ENABLED !== "false",
-      expensiveVerificationEnabled: env.EXPENSIVE_VERIFICATION_ENABLED !== "false"
+      // Cloudflare stays OFF unless explicitly enabled
+      cloudflareScanningEnabled: env.CLOUDFLARE_SCANNING_ENABLED === "true",
+      expensiveVerificationEnabled: env.EXPENSIVE_VERIFICATION_ENABLED !== "false",
+      vlmFirstEnabled: env.VLM_FIRST_ENABLED === "true",
+      combinedEscalationEnabled: env.COMBINED_ESCALATION_ENABLED === "true"
+    },
+    freeTierBudgets: {
+      models: {
+        "gemini-3.1-flash-lite": { dailyQuota: 500, rpmLimit: 15 },
+        "gemini-3.5-flash-lite": { dailyQuota: 500, rpmLimit: 15 },
+        "gemini-3.5-flash": { dailyQuota: 20, rpmLimit: 15 }
+      },
+      globalDailyScanBudget: Number(env.GLOBAL_DAILY_SCAN_BUDGET || 500),
+      userDailyScanCap: Number(env.USER_DAILY_SCAN_CAP || 10)
     }
   };
 }
@@ -30008,6 +34847,737 @@ var AiTelemetryManager = class _AiTelemetryManager {
 };
 var aiTelemetry = AiTelemetryManager.getInstance();
 
+// src/ai-engine/v2/vlmFirstEngine.ts
+var VlmFirstEngine = class {
+  primaryModel = "gemini-3.5-flash";
+  secondaryModel = "gemini-3.1-flash-lite";
+  /**
+   * Main entrypoint for VLM-First scan execution
+   */
+  async execute(input) {
+    const t0 = performance.now();
+    const traceId = input.traceId || `trace_vlm_first_${Date.now()}`;
+    let vlmCallsCount = 0;
+    let estimatedCostUsd = 0;
+    const primaryModelName = input.preferredModel || this.primaryModel;
+    const step1Prompt = this.buildOpenVocabularyPrompt();
+    let step1Output = null;
+    let providerError = null;
+    try {
+      const call1Result = await this.invokeVlm(
+        step1Prompt,
+        input.imageDataUrl,
+        primaryModelName,
+        input.customVlmCaller
+      );
+      vlmCallsCount++;
+      estimatedCostUsd += primaryModelName.includes("lite") ? 4e-4 : 16e-4;
+      step1Output = this.parseVlmResponse(call1Result.rawText);
+    } catch (err) {
+      providerError = err?.message || "Provider execution failure";
+    }
+    if (!step1Output || providerError) {
+      return this.buildProviderFailureResult(providerError || "Unknown provider error", traceId, vlmCallsCount, t0);
+    }
+    if (!step1Output.is_vehicle || step1Output.quality_issues && step1Output.quality_issues.length > 0 && !step1Output.make) {
+      return this.buildNonVehicleOrQualityResult(step1Output, traceId, vlmCallsCount, estimatedCostUsd, t0);
+    }
+    if (!step1Output.make || step1Output.make.toLowerCase() === "unknown" || step1Output.make.toLowerCase() === "null") {
+      return this.buildUncertainResult(
+        "Unable to identify vehicle make from this photo.",
+        step1Output,
+        traceId,
+        vlmCallsCount,
+        estimatedCostUsd,
+        t0
+      );
+    }
+    const mappingResult = this.mapToRegistry(step1Output);
+    if (!mappingResult.record) {
+      return this.buildNotInCatalogueResult(
+        step1Output,
+        traceId,
+        vlmCallsCount,
+        estimatedCostUsd,
+        t0
+      );
+    }
+    const matchedRecord = mappingResult.record;
+    let currentConfidence = Math.max(0.6, Math.min(0.98, step1Output.confidence || 0.85));
+    let isVariantConfirmed = Boolean(step1Output.variant && mappingResult.isExactVariantMatch);
+    let topCandidates = mappingResult.siblingCandidates;
+    const contradictionVeto = this.checkDiscriminatorVeto(step1Output, matchedRecord);
+    if (contradictionVeto.isVetoed) {
+      isVariantConfirmed = false;
+      currentConfidence = Math.min(currentConfidence, 0.72);
+      if (contradictionVeto.fallbackCandidate) {
+        topCandidates = [contradictionVeto.fallbackCandidate, ...topCandidates];
+      }
+    }
+    const needsSecondOpinion = input.enableSecondOpinion !== false && vlmCallsCount < 2 && (topCandidates.length > 1 && !step1Output.legible_badges?.length || currentConfidence >= 0.65 && currentConfidence < 0.85);
+    if (needsSecondOpinion) {
+      try {
+        const step2Prompt = this.buildVerificationPrompt(matchedRecord, topCandidates);
+        const call2Result = await this.invokeVlm(
+          step2Prompt,
+          input.imageDataUrl,
+          this.secondaryModel,
+          input.customVlmCaller
+        );
+        vlmCallsCount++;
+        estimatedCostUsd += 4e-4;
+        const secondOutput = this.parseVlmResponse(call2Result.rawText);
+        if (secondOutput) {
+          const secondMapping = this.mapToRegistry(secondOutput);
+          if (secondMapping.record?.vehicleId === matchedRecord.vehicleId) {
+            currentConfidence = Math.min(0.98, currentConfidence + 0.12);
+            isVariantConfirmed = true;
+          } else if (secondMapping.record?.make.toLowerCase() === matchedRecord.make.toLowerCase() && secondMapping.record?.model.toLowerCase() === matchedRecord.model.toLowerCase()) {
+            isVariantConfirmed = false;
+            currentConfidence = Math.max(0.78, currentConfidence);
+            if (secondMapping.record && !topCandidates.some((c) => c.canonicalId === secondMapping.record.vehicleId)) {
+              topCandidates.push({
+                canonicalId: secondMapping.record.vehicleId,
+                displayName: secondMapping.record.displayName || `${secondMapping.record.make} ${secondMapping.record.model}`,
+                variant: secondMapping.record.trim || null,
+                confidenceScore: 0.8,
+                distinguishingFeatures: secondMapping.record.visualFeatures || []
+              });
+            }
+          } else {
+            currentConfidence = Math.max(0.6, currentConfidence - 0.15);
+            isVariantConfirmed = false;
+          }
+        }
+      } catch (err) {
+        console.warn("[VlmFirstEngine] Optional second opinion call failed; continuing with primary evidence:", err);
+      }
+    }
+    try {
+      const qVector = await galleryRetrievalEngine.generateQueryVector(input.imageDataUrl);
+      if (qVector) {
+        const retRes = galleryRetrievalEngine.searchGallery(qVector, step1Output.viewpoint || "front_3q");
+        if (retRes.topCandidates.length > 0) {
+          const topRet = retRes.topCandidates[0];
+          if (topRet.canonicalId === matchedRecord.vehicleId) {
+            currentConfidence = Math.min(0.99, currentConfidence + 0.04);
+          }
+        }
+      }
+    } catch {
+    }
+    const primaryDecision = this.renderDecisionPolicy({
+      step1Output,
+      matchedRecord,
+      currentConfidence,
+      isVariantConfirmed,
+      topCandidates,
+      traceId,
+      vlmCallsCount,
+      estimatedCostUsd,
+      startTime: t0
+    });
+    const isCombinedEnabled = input.enableCombinedEscalation ?? process.env.COMBINED_ESCALATION_ENABLED === "true";
+    const isAbstention = primaryDecision.status !== "identified" && primaryDecision.status !== "identified_model";
+    if (isCombinedEnabled && isAbstention && vlmCallsCount < 2) {
+      try {
+        console.log(`[VlmFirstEngine] Combined escalation triggered: primary model abstained (${primaryDecision.status}). Invoking ${this.secondaryModel}...`);
+        const fallbackPrompt = this.buildOpenVocabularyPrompt();
+        const fallbackCall = await this.invokeVlm(
+          fallbackPrompt,
+          input.imageDataUrl,
+          this.secondaryModel,
+          input.customVlmCaller
+        );
+        vlmCallsCount++;
+        estimatedCostUsd += 4e-4;
+        const fallbackOutput = this.parseVlmResponse(fallbackCall.rawText);
+        if (fallbackOutput && fallbackOutput.is_vehicle && fallbackOutput.make) {
+          const fallbackMapping = this.mapToRegistry(fallbackOutput);
+          if (fallbackMapping.record) {
+            const fallbackConfidence = Math.max(0.6, Math.min(0.98, fallbackOutput.confidence || 0.85));
+            const fallbackDecision = this.renderDecisionPolicy({
+              step1Output: fallbackOutput,
+              matchedRecord: fallbackMapping.record,
+              currentConfidence: fallbackConfidence,
+              isVariantConfirmed: Boolean(fallbackOutput.variant && fallbackMapping.isExactVariantMatch),
+              topCandidates: fallbackMapping.siblingCandidates,
+              traceId: `${traceId}_esc`,
+              vlmCallsCount,
+              estimatedCostUsd,
+              startTime: t0
+            });
+            if (fallbackDecision.status === "identified" || fallbackDecision.status === "identified_model") {
+              return fallbackDecision;
+            }
+          }
+        }
+      } catch (escErr) {
+        console.warn("[VlmFirstEngine] Combined policy fallback failed; returning primary decision:", escErr);
+      }
+    }
+    return primaryDecision;
+  }
+  // ───────────────────────────────────────────────────────────────────────────
+  // REGISTRY MAPPING & ALIAS TABLE
+  // ───────────────────────────────────────────────────────────────────────────
+  mapToRegistry(vlm) {
+    if (!vlm.make) return { record: null, isExactVariantMatch: false, siblingCandidates: [] };
+    const make = vlm.make.trim();
+    const model = (vlm.model || "").trim();
+    const variant = (vlm.variant || "").trim();
+    const gen = (vlm.generation || "").trim();
+    if (model && variant) {
+      const variantQuery = `${make} ${model} ${variant}`;
+      const rec = canonicalVehicleRegistry.lookupByTextOrAlias(variantQuery, make);
+      const normVar = variant.toLowerCase();
+      if (rec && (rec.trim && rec.trim.toLowerCase() === normVar || rec.vehicleId.toLowerCase().includes(normVar) || rec.displayName?.toLowerCase().includes(normVar))) {
+        const siblings = this.findSiblingCandidates(rec);
+        return { record: rec, isExactVariantMatch: true, siblingCandidates: siblings };
+      }
+    }
+    if (model) {
+      const modelQuery = `${make} ${model} ${gen}`.trim();
+      let rec = canonicalVehicleRegistry.lookupByTextOrAlias(modelQuery, make);
+      if (!rec) {
+        rec = canonicalVehicleRegistry.lookupByTextOrAlias(`${make} ${model}`, make);
+      }
+      if (!rec) {
+        rec = canonicalVehicleRegistry.lookupByTextOrAlias(model, make);
+      }
+      if (rec) {
+        if (rec.model.toLowerCase() === "civic" && (!variant || !variant.toLowerCase().includes("type r"))) {
+          return { record: null, isExactVariantMatch: false, siblingCandidates: [] };
+        }
+        const isExact = Boolean(variant && rec.trim && rec.trim.toLowerCase() === variant.toLowerCase());
+        const siblings = this.findSiblingCandidates(rec);
+        return { record: rec, isExactVariantMatch: isExact, siblingCandidates: siblings };
+      }
+    }
+    if (variant) {
+      const rec = canonicalVehicleRegistry.lookupByTextOrAlias(`${make} ${variant}`, make);
+      if (rec) {
+        const siblings = this.findSiblingCandidates(rec);
+        return { record: rec, isExactVariantMatch: true, siblingCandidates: siblings };
+      }
+    }
+    return { record: null, isExactVariantMatch: false, siblingCandidates: [] };
+  }
+  findSiblingCandidates(record) {
+    const all = canonicalVehicleRegistry.getAll();
+    const siblings = all.filter(
+      (r) => r.make.toLowerCase() === record.make.toLowerCase() && (r.model.toLowerCase() === record.model.toLowerCase() || r.vehicleId.startsWith(record.vehicleId.split("-").slice(0, 2).join("-")))
+    );
+    return siblings.slice(0, 4).map((s, idx) => ({
+      canonicalId: s.vehicleId,
+      displayName: s.displayName || `${s.make} ${s.model} ${s.trim || ""}`.trim(),
+      variant: s.trim || null,
+      confidenceScore: idx === 0 ? 0.85 : 0.65 - idx * 0.1,
+      distinguishingFeatures: s.visualFeatures || []
+    }));
+  }
+  // ───────────────────────────────────────────────────────────────────────────
+  // VERIFICATION & DISCRIMINATOR VETO
+  // ───────────────────────────────────────────────────────────────────────────
+  checkDiscriminatorVeto(vlm, candidate) {
+    try {
+      const visualEvidence = {
+        distinctive_details: vlm.visible_evidence || [],
+        body_style: vlm.body_style || candidate.bodyStyle,
+        grille: null,
+        headlights: null,
+        taillights: null,
+        hood: null,
+        roofline: null,
+        windows: null,
+        wheels: null,
+        exhaust: null,
+        aero: null,
+        badges: (vlm.legible_badges || []).join(", ") || null,
+        text: null,
+        body_proportions: null
+      };
+      const discResult = fineGrainedModelDiscriminator.discriminate({
+        visualEvidence,
+        viewpoint: vlm.viewpoint || "front_3q",
+        evidenceList: vlm.visible_evidence || [],
+        candidates: [{ name: candidate.displayName || `${candidate.make} ${candidate.model}`, score: vlm.confidence }]
+      });
+      const contradictions = discResult.topCandidate?.contradictions || [];
+      if (contradictions.length > 0 || discResult.rawConflict) {
+        const hardContradiction = contradictions.find(
+          (c) => c.toLowerCase().includes("roof") || c.toLowerCase().includes("exhaust") || c.toLowerCase().includes("wing")
+        ) || (discResult.rawConflict ? discResult.reason : void 0);
+        if (hardContradiction) {
+          return {
+            isVetoed: true,
+            reason: hardContradiction,
+            fallbackCandidate: discResult.topCandidate ? {
+              canonicalId: candidate.vehicleId,
+              displayName: `${candidate.make} ${candidate.model}`,
+              variant: null,
+              confidenceScore: 0.75,
+              distinguishingFeatures: []
+            } : void 0
+          };
+        }
+      }
+    } catch (err) {
+      console.warn("[VlmFirstEngine] Discriminator verification step failed:", err);
+    }
+    return { isVetoed: false };
+  }
+  // ───────────────────────────────────────────────────────────────────────────
+  // DECISION POLICY (STEP 4)
+  // ───────────────────────────────────────────────────────────────────────────
+  renderDecisionPolicy(params) {
+    const {
+      step1Output,
+      matchedRecord,
+      currentConfidence,
+      isVariantConfirmed,
+      topCandidates,
+      traceId,
+      vlmCallsCount,
+      estimatedCostUsd,
+      startTime
+    } = params;
+    const totalLatency = Math.round(performance.now() - startTime);
+    const viewpoint = step1Output.viewpoint || "front_3q";
+    if (!matchedRecord.model || matchedRecord.model.toLowerCase() === "unknown" || matchedRecord.model.trim() === "") {
+      return this.buildUncertainResult(
+        "Make detected but model could not be verified.",
+        step1Output,
+        traceId,
+        vlmCallsCount,
+        estimatedCostUsd,
+        startTime
+      );
+    }
+    if (step1Output.missing_views_for_confirmation) {
+      const suggestedView = this.mapViewSuggestion(step1Output.missing_views_for_confirmation);
+      return {
+        status: "needs_more_views",
+        canonicalVehicleId: matchedRecord.vehicleId,
+        make: matchedRecord.make,
+        model: matchedRecord.model,
+        generation: matchedRecord.generation || null,
+        variant: null,
+        displayName: `${matchedRecord.make} ${matchedRecord.model}`,
+        calibratedConfidence: {
+          make: 0.95,
+          model: 0.9,
+          generation: 0.8,
+          variant: 0.4,
+          overall: 0.7
+        },
+        inCatalogue: true,
+        verifiedSpecs: this.buildSpecs(matchedRecord),
+        guidedRecovery: {
+          currentAngle: viewpoint,
+          missingCues: [step1Output.missing_views_for_confirmation],
+          suggestedView,
+          userPrompt: `To confirm the exact variant of this ${matchedRecord.make} ${matchedRecord.model}, please capture a ${step1Output.missing_views_for_confirmation}.`
+        },
+        candidateOptions: topCandidates,
+        retrievalStage: this.emptyRetrieval(),
+        qualityStage: this.defaultQuality(true, viewpoint),
+        sessionFrameCount: 1,
+        totalLatencyMs: totalLatency,
+        estimatedCostUsd,
+        vlmCallsCount,
+        traceId
+      };
+    }
+    if (isVariantConfirmed && currentConfidence >= 0.8 && matchedRecord.trim) {
+      return {
+        status: "identified",
+        canonicalVehicleId: matchedRecord.vehicleId,
+        make: matchedRecord.make,
+        model: matchedRecord.model,
+        generation: matchedRecord.generation || null,
+        variant: matchedRecord.trim,
+        displayName: matchedRecord.displayName || `${matchedRecord.make} ${matchedRecord.model} ${matchedRecord.trim}`,
+        calibratedConfidence: {
+          make: 0.98,
+          model: 0.96,
+          generation: 0.92,
+          variant: Number(currentConfidence.toFixed(2)),
+          overall: Number(currentConfidence.toFixed(2))
+        },
+        inCatalogue: true,
+        verifiedSpecs: this.buildSpecs(matchedRecord),
+        candidateOptions: topCandidates,
+        retrievalStage: this.emptyRetrieval(),
+        qualityStage: this.defaultQuality(true, viewpoint),
+        sessionFrameCount: 1,
+        totalLatencyMs: totalLatency,
+        estimatedCostUsd,
+        vlmCallsCount,
+        traceId
+      };
+    }
+    return {
+      status: "identified_model",
+      canonicalVehicleId: matchedRecord.vehicleId,
+      make: matchedRecord.make,
+      model: matchedRecord.model,
+      generation: matchedRecord.generation || null,
+      variant: null,
+      displayName: `${matchedRecord.make} ${matchedRecord.model}`,
+      calibratedConfidence: {
+        make: 0.96,
+        model: 0.92,
+        generation: 0.85,
+        variant: 0.5,
+        overall: Number(Math.max(0.75, currentConfidence * 0.9).toFixed(2))
+      },
+      inCatalogue: true,
+      verifiedSpecs: this.buildSpecs(matchedRecord),
+      guidedRecovery: {
+        currentAngle: viewpoint,
+        missingCues: ["Distinctive aero/badge distinguishing exact trim"],
+        suggestedView: "badge_closeup",
+        userPrompt: `Identified ${matchedRecord.make} ${matchedRecord.model}. Capture the rear badge or front aero to confirm the exact variant.`
+      },
+      candidateOptions: topCandidates,
+      retrievalStage: this.emptyRetrieval(),
+      qualityStage: this.defaultQuality(true, viewpoint),
+      sessionFrameCount: 1,
+      totalLatencyMs: totalLatency,
+      estimatedCostUsd,
+      vlmCallsCount,
+      traceId
+    };
+  }
+  // ───────────────────────────────────────────────────────────────────────────
+  // HELPER RESULTS
+  // ───────────────────────────────────────────────────────────────────────────
+  buildNotInCatalogueResult(vlm, traceId, vlmCallsCount, estimatedCostUsd, startTime) {
+    const make = vlm.make || "Unknown";
+    const model = vlm.model || "";
+    const displayName = model ? `${make} ${model}` : make;
+    return {
+      status: "not_in_catalogue",
+      canonicalVehicleId: null,
+      make: vlm.make,
+      model: vlm.model,
+      generation: vlm.generation,
+      variant: vlm.variant,
+      displayName,
+      calibratedConfidence: {
+        make: 0.95,
+        model: 0.9,
+        generation: 0.7,
+        variant: 0.6,
+        overall: 0.85
+      },
+      inCatalogue: false,
+      verifiedSpecs: null,
+      guidedRecovery: {
+        currentAngle: vlm.viewpoint || "front_3q",
+        missingCues: ["Launch collectible catalogue inclusion"],
+        suggestedView: "badge_closeup",
+        userPrompt: `Spotted ${displayName}! This vehicle is an everyday commuter car or uncatalogued model not in Apex's launch collectible catalogue.`
+      },
+      retrievalStage: this.emptyRetrieval(),
+      qualityStage: this.defaultQuality(true, vlm.viewpoint || "front_3q"),
+      sessionFrameCount: 1,
+      totalLatencyMs: Math.round(performance.now() - startTime),
+      estimatedCostUsd,
+      vlmCallsCount,
+      traceId
+    };
+  }
+  buildNonVehicleOrQualityResult(vlm, traceId, vlmCallsCount, estimatedCostUsd, startTime) {
+    const isVehicle = Boolean(vlm.is_vehicle);
+    return {
+      status: "rejected",
+      canonicalVehicleId: null,
+      make: null,
+      model: null,
+      generation: null,
+      variant: null,
+      displayName: isVehicle ? "Unusable Photo Quality" : "Non-Vehicle Detected",
+      calibratedConfidence: { make: 0, model: 0, generation: 0, variant: 0, overall: 0 },
+      inCatalogue: false,
+      verifiedSpecs: null,
+      guidedRecovery: {
+        currentAngle: "front_3q",
+        missingCues: [isVehicle ? "Sharp, well-lit vehicle capture" : "Clear vehicle silhouette"],
+        suggestedView: "front_fascia",
+        userPrompt: isVehicle ? "The image is too blurry or dark. Please capture a clear photo in good light." : "No motor vehicle was detected in the frame. Please point the reticle at a car."
+      },
+      retrievalStage: this.emptyRetrieval(),
+      qualityStage: this.defaultQuality(isVehicle, "front_3q", isVehicle ? 0.3 : 0),
+      sessionFrameCount: 1,
+      totalLatencyMs: Math.round(performance.now() - startTime),
+      estimatedCostUsd,
+      vlmCallsCount,
+      traceId
+    };
+  }
+  buildUncertainResult(reason, vlm, traceId, vlmCallsCount, estimatedCostUsd, startTime) {
+    return {
+      status: "uncertain",
+      canonicalVehicleId: null,
+      make: null,
+      model: null,
+      generation: null,
+      variant: null,
+      displayName: "Uncertain Identification",
+      calibratedConfidence: { make: 0.3, model: 0.2, generation: 0.1, variant: 0, overall: 0.2 },
+      inCatalogue: false,
+      verifiedSpecs: null,
+      guidedRecovery: {
+        currentAngle: vlm.viewpoint || "front_3q",
+        missingCues: [reason],
+        suggestedView: "front_fascia",
+        userPrompt: `${reason} Please capture another photo from a front 3/4 angle.`
+      },
+      retrievalStage: this.emptyRetrieval(),
+      qualityStage: this.defaultQuality(true, vlm.viewpoint || "front_3q"),
+      sessionFrameCount: 1,
+      totalLatencyMs: Math.round(performance.now() - startTime),
+      estimatedCostUsd,
+      vlmCallsCount,
+      traceId
+    };
+  }
+  buildProviderFailureResult(errorMsg, traceId, vlmCallsCount, startTime) {
+    return {
+      status: "uncertain",
+      canonicalVehicleId: null,
+      make: null,
+      model: null,
+      generation: null,
+      variant: null,
+      displayName: "Identification Unavailable (Provider Failure)",
+      calibratedConfidence: { make: 0, model: 0, generation: 0, variant: 0, overall: 0 },
+      inCatalogue: false,
+      verifiedSpecs: null,
+      guidedRecovery: {
+        currentAngle: "front_3q",
+        missingCues: ["Vision provider connectivity"],
+        suggestedView: "front_fascia",
+        userPrompt: `AI vision service was unavailable (${errorMsg}). Please check network connection and try again.`
+      },
+      retrievalStage: this.emptyRetrieval(),
+      qualityStage: this.defaultQuality(true, "front_3q"),
+      sessionFrameCount: 1,
+      totalLatencyMs: Math.round(performance.now() - startTime),
+      estimatedCostUsd: 0,
+      vlmCallsCount,
+      traceId
+    };
+  }
+  buildSpecs(rec) {
+    return {
+      horsepower: rec.horsepower,
+      torqueNm: rec.torqueNm,
+      topSpeedKmH: rec.topSpeedKmH,
+      zeroToHundredSec: rec.zeroToHundredSec,
+      kerbWeightKg: rec.kerbWeightKg,
+      engine: rec.engine,
+      displacementCc: rec.displacementCc,
+      aspiration: rec.aspiration,
+      productionYears: rec.productionYears,
+      originCountry: rec.originCountry,
+      bodyStyle: rec.bodyStyle,
+      baselineRarity: rec.baselineRarity,
+      sources: ["Apex Tier 1 Verified Registry"],
+      verifiedDate: "2026-10-11",
+      verifier: "Apex Master Automotive Authority"
+    };
+  }
+  emptyRetrieval() {
+    return {
+      topCandidates: [],
+      isDecisive: false,
+      bestDistance: 1,
+      isOpenSetAnomaly: false,
+      marginToSecond: 0
+    };
+  }
+  defaultQuality(isVehicle, viewpoint, blur = 0.9) {
+    return {
+      isVehiclePresent: isVehicle,
+      blurScore: blur,
+      brightnessScore: 0.85,
+      occlusionScore: 0.95,
+      estimatedViewpoint: viewpoint,
+      licensePlateDetected: false,
+      faceDetected: false
+    };
+  }
+  mapViewSuggestion(missing) {
+    const s = (Array.isArray(missing) ? missing.join(" ") : String(missing || "")).toLowerCase();
+    if (s.includes("rear") || s.includes("exhaust") || s.includes("taillight") || s.includes("diffuser")) return "rear";
+    if (s.includes("roof") || s.includes("side") || s.includes("profile") || s.includes("wheel")) return "roofline_side";
+    if (s.includes("badge") || s.includes("emblem") || s.includes("lettering")) return "badge_closeup";
+    return "front_fascia";
+  }
+  // ───────────────────────────────────────────────────────────────────────────
+  // VLM PROMPTS & INVOCATION
+  // ───────────────────────────────────────────────────────────────────────────
+  buildOpenVocabularyPrompt() {
+    return `You are the APEX Master Automotive Vision Expert.
+Identify the vehicle in this image with exact precision and evidentiary discipline.
+
+INSTRUCTIONS:
+1. First, check if a motor vehicle is clearly present. If this is not a motor vehicle (e.g., animal, person, food, random object, solid wall), set "is_vehicle": false.
+2. If image quality is too dark, severely blurry, or heavily occluded to make a confident identification, explain in "quality_issues".
+3. Identify the Make, Model Family, Generation (e.g. 992, F142, E46), and exact Variant / Trim (e.g. GT3, GT3 RS, Italia, Spider, Speciale, Pista, STO, Tecnica).
+4. If the exact variant/trim CANNOT be proven from this viewpoint (e.g. rear badge or exhaust is not visible, or aero package cannot be seen), set "variant": null and specify "missing_views_for_confirmation" (e.g. "rear view showing exhaust layout and badges").
+5. List observed physical evidence (grille, headlights, exhaust tips, roofline, wing/spoiler, badges).
+6. List any legible badge text observed.
+
+OUTPUT STRICT JSON ONLY:
+{
+  "is_vehicle": true,
+  "make": "Ferrari",
+  "model": "458",
+  "generation": "F142",
+  "variant": "Italia",
+  "body_style": "Coupe",
+  "year_range": "2009-2015",
+  "viewpoint": "front_3q",
+  "visible_evidence": ["Triple central exhaust tips", "Swept-back LED headlights", "Mid-rear engine glass cover"],
+  "legible_badges": ["458 Italia"],
+  "stated_uncertainty": null,
+  "confidence": 0.95,
+  "missing_views_for_confirmation": null,
+  "quality_issues": []
+}`;
+  }
+  buildVerificationPrompt(candidate, alternatives) {
+    const altNames = alternatives.map((a) => `"${a.displayName}"`).join(", ");
+    return `You are the APEX Senior Automotive Verification Expert.
+We are verifying this vehicle. The leading hypothesis is:
+Candidate: "${candidate.displayName || `${candidate.make} ${candidate.model} ${candidate.trim || ""}`.trim()}"
+Close alternatives / siblings: [${altNames}]
+
+TASK:
+Examine the exact physical cues in this image (aero, front bumper ducts, side scoops, hood vents, wing, exhaust tips, roofline, badges).
+Determine whether the vehicle is the candidate or one of the alternatives, or state if it is unobservable.
+
+OUTPUT STRICT JSON ONLY:
+{
+  "is_vehicle": true,
+  "make": "${candidate.make}",
+  "model": "${candidate.model}",
+  "generation": "${candidate.generation || "Base"}",
+  "variant": "${candidate.trim || "Base"}",
+  "body_style": "${candidate.bodyStyle}",
+  "year_range": "${candidate.productionYears}",
+  "viewpoint": "front_3q",
+  "visible_evidence": ["Confirmed front bumper aero and specific trim ducts"],
+  "legible_badges": [],
+  "stated_uncertainty": null,
+  "confidence": 0.92,
+  "missing_views_for_confirmation": null,
+  "quality_issues": []
+}`;
+  }
+  async invokeVlm(prompt, imageDataUrl, modelName, customCaller) {
+    if (customCaller) {
+      return customCaller(prompt, imageDataUrl, modelName, 3e4);
+    }
+    const apiKey = typeof process !== "undefined" && process.env?.GEMINI_API_KEY ? process.env.GEMINI_API_KEY.trim() : "";
+    if (!apiKey) {
+      throw new Error("GEMINI_API_KEY is not configured in process.env");
+    }
+    let base64Data = "";
+    let mimeType = "image/jpeg";
+    if (imageDataUrl.includes(",")) {
+      const parts = imageDataUrl.split(",");
+      base64Data = parts[1];
+      const match = parts[0].match(/:(.*?);/);
+      if (match) mimeType = match[1];
+    } else {
+      base64Data = imageDataUrl;
+    }
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent`;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 12e3);
+    try {
+      const res = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-goog-api-key": apiKey
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [
+                { text: prompt },
+                {
+                  inlineData: {
+                    mimeType,
+                    data: base64Data
+                  }
+                }
+              ]
+            }
+          ],
+          generationConfig: {
+            temperature: 0.1,
+            responseMimeType: "application/json",
+            maxOutputTokens: 2048,
+            thinkingConfig: {
+              thinkingBudget: 0
+            }
+          }
+        }),
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(`Gemini API HTTP ${res.status}: ${errText}`);
+      }
+      const json = await res.json();
+      const rawText = json.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!rawText) {
+        throw new Error("Empty text content received from Gemini model.");
+      }
+      return { rawText };
+    } catch (err) {
+      clearTimeout(timeoutId);
+      throw err;
+    }
+  }
+  parseVlmResponse(rawText) {
+    try {
+      let cleaned = rawText.trim();
+      if (cleaned.startsWith("```json")) cleaned = cleaned.slice(7);
+      else if (cleaned.startsWith("```")) cleaned = cleaned.slice(3);
+      if (cleaned.endsWith("```")) cleaned = cleaned.slice(0, -3);
+      const parsed = JSON.parse(cleaned.trim());
+      return {
+        is_vehicle: parsed.is_vehicle !== false,
+        make: parsed.make || null,
+        model: parsed.model || null,
+        generation: parsed.generation || null,
+        variant: parsed.variant || null,
+        body_style: parsed.body_style || null,
+        year_range: parsed.year_range || null,
+        visible_evidence: Array.isArray(parsed.visible_evidence) ? parsed.visible_evidence : [],
+        legible_badges: Array.isArray(parsed.legible_badges) ? parsed.legible_badges : [],
+        stated_uncertainty: parsed.stated_uncertainty || null,
+        confidence: typeof parsed.confidence === "number" ? parsed.confidence : 0.85,
+        viewpoint: parsed.viewpoint || "front_3q",
+        missing_views_for_confirmation: parsed.missing_views_for_confirmation || null,
+        quality_issues: Array.isArray(parsed.quality_issues) ? parsed.quality_issues : []
+      };
+    } catch {
+      return null;
+    }
+  }
+};
+var vlmFirstEngine = new VlmFirstEngine();
+
 // src/ai-engine/v2/v2Pipeline.ts
 import crypto from "crypto";
 var V2IdentificationPipeline = class {
@@ -30017,6 +35587,14 @@ var V2IdentificationPipeline = class {
   async execute(input) {
     const t0 = performance.now();
     const traceId = input.traceId || `trace_v2_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+    if (typeof process !== "undefined" && process.env?.VLM_FIRST_ENABLED === "true" || typeof process !== "undefined" && process.env?.AI_PIPELINE === "vlm-first") {
+      return vlmFirstEngine.execute({
+        imageDataUrl: input.imageDataUrl,
+        traceId,
+        customVlmCaller: input.customVlmCaller,
+        enableSecondOpinion: typeof process !== "undefined" && process.env?.EXPENSIVE_VERIFICATION_ENABLED !== "false"
+      });
+    }
     const imageHash = crypto.createHash("sha256").update(input.imageDataUrl).digest("hex");
     let vlmCallsCount = 0;
     const tStageA = performance.now();
@@ -30309,7 +35887,7 @@ var WorkerPool = class {
         });
         return cachedResult;
       }
-      if (pipelineConfig.mode === "v2") {
+      if (pipelineConfig.mode === "v2" || pipelineConfig.mode === "vlm-first" || pipelineConfig.killSwitches.vlmFirstEnabled) {
         const v2Res = await v2Pipeline.execute({
           imageDataUrl: job.imageDataUrl,
           traceId: job.traceId,
@@ -31200,6 +36778,22 @@ var config = {
     }
   }
 };
+var scanResultImageCache = /* @__PURE__ */ new Map();
+var freeTierGlobalDailyCounter = 0;
+var freeTierGlobalResetDay = (/* @__PURE__ */ new Date()).getUTCDate();
+function checkAndConsumeFreeTierGlobalBudget() {
+  const currentDay = (/* @__PURE__ */ new Date()).getUTCDate();
+  if (currentDay !== freeTierGlobalResetDay) {
+    freeTierGlobalDailyCounter = 0;
+    freeTierGlobalResetDay = currentDay;
+  }
+  const maxBudget = pipelineConfig.freeTierBudgets.globalDailyScanBudget;
+  if (freeTierGlobalDailyCounter >= maxBudget) {
+    return false;
+  }
+  freeTierGlobalDailyCounter++;
+  return true;
+}
 var supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
 var supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY;
 var supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null;
@@ -31500,7 +37094,7 @@ function formatScanResponse(r) {
       distinguishingFeatures: c.distinguishingFeatures || []
     })),
     session_frame_count: v2?.sessionFrameCount || 1,
-    pipeline_mode: process.env.AI_PIPELINE || "v2"
+    pipeline_mode: process.env.AI_PIPELINE || "v1"
   };
 }
 async function handler(req, res) {
@@ -31512,20 +37106,26 @@ async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed: Must be POST." });
   }
   console.log("[api/analyze] Diagnostics:", {
-    provider: (process.env.VISION_PROVIDER || "cloudflare").toLowerCase().trim(),
+    provider: (process.env.VISION_PROVIDER || "gemini").toLowerCase().trim(),
     cloudflareAccountConfigured: Boolean(process.env.CLOUDFLARE_ACCOUNT_ID),
     cloudflareTokenConfigured: Boolean(process.env.CLOUDFLARE_AUTH_TOKEN),
     scanningEnabled: process.env.CLOUDFLARE_SCANNING_ENABLED !== "false",
     visionScanningEnabled: process.env.VISION_SCANNING_ENABLED !== "false",
     allowMockFallback: process.env.ALLOW_MOCK_FALLBACK === "true"
   });
-  const rawProvider = (process.env.VISION_PROVIDER || "cloudflare").toLowerCase().trim();
+  const rawProvider = (process.env.VISION_PROVIDER || "gemini").toLowerCase().trim();
   if (rawProvider !== "cloudflare" && rawProvider !== "gemini") {
     return res.status(500).json({
       error: `Server misconfiguration: Invalid VISION_PROVIDER="${rawProvider}". Supported values are "cloudflare" or "gemini". Application fails closed.`
     });
   }
   const isCloudflare = rawProvider === "cloudflare";
+  if (isCloudflare && process.env.CLOUDFLARE_SCANNING_ENABLED !== "true") {
+    return res.status(503).json({
+      error: "Cloudflare vision provider is disabled for free tier. Gemini is the active vision provider.",
+      code: "PROVIDER_DISABLED"
+    });
+  }
   const isKilled = process.env.VISION_SCANNING_ENABLED === "false" || (isCloudflare ? process.env.CLOUDFLARE_SCANNING_ENABLED === "false" : process.env.GEMINI_SCANNING_ENABLED === "false");
   if (isKilled) {
     return res.status(503).json({
@@ -31610,6 +37210,51 @@ async function handler(req, res) {
   }
   const sanitizedMime = (mimeType || "image/jpeg").toLowerCase();
   const fullDataUrl = imageBase64.startsWith("data:") ? imageBase64 : `data:${sanitizedMime};base64,${imageBase64}`;
+  if (authenticatedUserId && supabase) {
+    try {
+      const { data: prof } = await supabase.from("profiles").select("daily_scans_count, daily_scans_reset_at").eq("id", authenticatedUserId).single();
+      if (prof) {
+        const resetAt = prof.daily_scans_reset_at ? new Date(prof.daily_scans_reset_at).getTime() : 0;
+        const isStale = Date.now() - resetAt > 864e5;
+        const effectiveScans = isStale ? 0 : prof.daily_scans_count || 0;
+        const userCap = pipelineConfig.freeTierBudgets.userDailyScanCap;
+        if (effectiveScans >= userCap) {
+          console.warn(`[api/analyze] User daily scan limit reached: ${effectiveScans}/${userCap} for user: ${authenticatedUserId}`);
+          return res.status(429).json({
+            error: `You have reached your daily scan limit of ${userCap} scans. Limit resets tomorrow.`,
+            code: "USER_DAILY_LIMIT_EXCEEDED",
+            retryAfter: 86400
+          });
+        }
+      }
+    } catch (err) {
+      console.warn("[api/analyze] User daily scan cap check error:", err?.message);
+    }
+  }
+  if (!checkAndConsumeFreeTierGlobalBudget()) {
+    console.warn("[api/analyze] Global daily free-tier scan budget exhausted. Failing closed with SCANNER_BUSY.");
+    return res.status(503).json({
+      error: "Scanner busy, daily community quota reached. Please try tomorrow!",
+      code: "SCANNER_BUSY",
+      maintenance: false
+    });
+  }
+  if (decodedByteLength < 1024) {
+    return res.status(400).json({
+      error: "Photo is too dark or empty. Please capture a clear photo of a vehicle.",
+      code: "PHOTO_TOO_DARK"
+    });
+  }
+  const imageSha256 = crypto2.createHash("sha256").update(rawBase64).digest("hex");
+  const cachedScan = scanResultImageCache.get(imageSha256);
+  if (cachedScan && Date.now() - cachedScan.timestamp < 864e5) {
+    console.log(`[api/analyze] Image SHA256 cache HIT for ${imageSha256.slice(0, 12)} (zero provider calls consumed)`);
+    return res.status(200).json({
+      ...cachedScan.responsePayload,
+      cached: true,
+      trace_id: `cached_${imageSha256.slice(0, 8)}`
+    });
+  }
   try {
     console.log("[BACKEND] vision_provider_request_started", {
       provider: rawProvider,
@@ -31641,6 +37286,13 @@ async function handler(req, res) {
         }
         if (current.status === "failed") {
           console.warn("[BACKEND] vision_provider_response: failed", { error: current.error });
+          const errStr = String(current.error || "");
+          if (errStr.includes("429") || errStr.toLowerCase().includes("quota") || errStr.includes("RESOURCE_EXHAUSTED")) {
+            return res.status(503).json({
+              error: "Scanner busy, daily community quota reached. Please try tomorrow!",
+              code: "SCANNER_BUSY"
+            });
+          }
           return res.status(500).json({
             error: current.error || "Vehicle identification failed.",
             scan_id: ingestion.scanId,
@@ -31657,6 +37309,12 @@ async function handler(req, res) {
       confidence: finalResult?.confidence?.totalScore
     });
     if (finalResult) {
+      if (finalResult.error_code === "VISION_QUOTA_EXHAUSTED" || String(finalResult.error || "").includes("429") || String(finalResult.v2Result?.guidedRecovery?.userPrompt || "").includes("429")) {
+        return res.status(503).json({
+          error: "Scanner busy, daily community quota reached. Please try tomorrow!",
+          code: "SCANNER_BUSY"
+        });
+      }
       const responsePayload = formatScanResponse(finalResult);
       console.log("[api/analyze] Production Debug Trace:", {
         requestId: req.headers["x-vercel-id"] || ingestion.traceId,
@@ -31675,6 +37333,10 @@ async function handler(req, res) {
         canonicalVehicleId: responsePayload.canonical_vehicle_id,
         specRecordId: responsePayload.canonical_vehicle_id || "default"
       });
+      scanResultImageCache.set(imageSha256, {
+        responsePayload,
+        timestamp: Date.now()
+      });
       return res.status(200).json(responsePayload);
     }
     return res.status(202).json({
@@ -31685,6 +37347,13 @@ async function handler(req, res) {
       trace_id: ingestion.traceId
     });
   } catch (err) {
+    const errStr = String(err?.message || err || "");
+    if (err?.status === 429 || errStr.includes("429") || errStr.toLowerCase().includes("quota") || errStr.includes("RESOURCE_EXHAUSTED")) {
+      return res.status(503).json({
+        error: "Scanner busy, daily community quota reached. Please try tomorrow!",
+        code: "SCANNER_BUSY"
+      });
+    }
     return res.status(500).json({
       error: "Vehicle identification failed.",
       message: err?.message

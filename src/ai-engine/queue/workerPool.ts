@@ -120,8 +120,8 @@ export class WorkerPool {
         return cachedResult;
       }
 
-      // ─── PIPELINE MODE: V2 RETRIEVAL-FIRST PIPELINE ───
-      if (pipelineConfig.mode === 'v2') {
+      // ─── PIPELINE MODE: V2 OR VLM-FIRST PIPELINE ───
+      if (pipelineConfig.mode === 'v2' || pipelineConfig.mode === 'vlm-first' || pipelineConfig.killSwitches.vlmFirstEnabled) {
         const v2Res = await v2Pipeline.execute({
           imageDataUrl: job.imageDataUrl,
           traceId: job.traceId,

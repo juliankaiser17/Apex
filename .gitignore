@@ -36,4 +36,5 @@ src/components/onboarding/OnboardingModalNew.tsx
 *.jks
 *.p12
 *.aab
+keystore.properties
 

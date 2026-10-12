@@ -9,7 +9,7 @@
  * 4. Hard Cost Invariant: Max 2 VLM requests per scan, max $0.0050 ceiling.
  */
 
-export type PipelineMode = 'v1' | 'v2' | 'shadow';
+export type PipelineMode = 'v1' | 'v2' | 'shadow' | 'vlm-first';
 export type VisionProviderType = 'cloudflare' | 'gemini' | 'mock' | 'retrieval_only';
 
 export interface ProviderEndpointConfig {
@@ -41,16 +41,29 @@ export interface PipelineConfig {
     geminiScanningEnabled: boolean;
     cloudflareScanningEnabled: boolean;
     expensiveVerificationEnabled: boolean;
+    vlmFirstEnabled: boolean;
+    combinedEscalationEnabled: boolean;
+  };
+  freeTierBudgets: {
+    models: {
+      'gemini-3.1-flash-lite': { dailyQuota: number; rpmLimit: number };
+      'gemini-3.5-flash-lite': { dailyQuota: number; rpmLimit: number };
+      'gemini-3.5-flash': { dailyQuota: number; rpmLimit: number };
+    };
+    globalDailyScanBudget: number;
+    userDailyScanCap: number;
   };
 }
 
 export function resolvePipelineConfig(): PipelineConfig {
   const env = (typeof process !== 'undefined' ? process.env : {}) as Record<string, string | undefined>;
 
-  const rawMode = (env.AI_PIPELINE || 'v2').toLowerCase().trim();
-  const mode: PipelineMode = rawMode === 'v1' || rawMode === 'shadow' ? rawMode : 'v2';
+  // Safe Default Invariant 1: AI_PIPELINE defaults to 'v1'
+  const rawMode = (env.AI_PIPELINE || 'v1').toLowerCase().trim();
+  const mode: PipelineMode = (rawMode === 'v2' || rawMode === 'shadow' || rawMode === 'vlm-first') ? rawMode : 'v1';
 
-  const rawProvider = (env.VISION_PROVIDER || 'cloudflare').toLowerCase().trim();
+  // Safe Default Invariant 2: Cloudflare Llama stays off. Provider defaults to 'gemini'.
+  const rawProvider = (env.VISION_PROVIDER || 'gemini').toLowerCase().trim();
   const primaryProvider: VisionProviderType = rawProvider === 'gemini' ? 'gemini' : 'cloudflare';
 
   return {
@@ -69,9 +82,8 @@ export function resolvePipelineConfig(): PipelineConfig {
       },
       gemini: {
         provider: 'gemini',
-        // MIGRATED: gemini-2.5-flash deprecated/closing 16 Oct 2026. Upgraded to gemini-3.5-flash!
-        model: env.GEMINI_MODEL || 'gemini-3.5-flash',
-        fallbackModel: 'gemini-3.1-flash-lite',
+        model: env.GEMINI_MODEL || 'gemini-3.1-flash-lite',
+        fallbackModel: 'gemini-3.5-flash-lite',
         timeoutMs: Number(env.GEMINI_TIMEOUT_MS || 7000),
         maxRetries: 1,
         retryJitterMs: 200,
@@ -87,8 +99,20 @@ export function resolvePipelineConfig(): PipelineConfig {
     killSwitches: {
       visionScanningEnabled: env.VISION_SCANNING_ENABLED !== 'false',
       geminiScanningEnabled: env.GEMINI_SCANNING_ENABLED !== 'false',
-      cloudflareScanningEnabled: env.CLOUDFLARE_SCANNING_ENABLED !== 'false',
-      expensiveVerificationEnabled: env.EXPENSIVE_VERIFICATION_ENABLED !== 'false'
+      // Cloudflare stays OFF unless explicitly enabled
+      cloudflareScanningEnabled: env.CLOUDFLARE_SCANNING_ENABLED === 'true',
+      expensiveVerificationEnabled: env.EXPENSIVE_VERIFICATION_ENABLED !== 'false',
+      vlmFirstEnabled: env.VLM_FIRST_ENABLED === 'true',
+      combinedEscalationEnabled: env.COMBINED_ESCALATION_ENABLED === 'true'
+    },
+    freeTierBudgets: {
+      models: {
+        'gemini-3.1-flash-lite': { dailyQuota: 500, rpmLimit: 15 },
+        'gemini-3.5-flash-lite': { dailyQuota: 500, rpmLimit: 15 },
+        'gemini-3.5-flash': { dailyQuota: 20, rpmLimit: 15 }
+      },
+      globalDailyScanBudget: Number(env.GLOBAL_DAILY_SCAN_BUDGET || 500),
+      userDailyScanCap: Number(env.USER_DAILY_SCAN_CAP || 10)
     }
   };
 }
