@@ -5,32 +5,26 @@ import { HeaderBar } from './components/common/HeaderBar';
 import { TabBar } from './components/common/TabBar';
 import { AmbientBackground } from './components/common/AmbientBackground';
 import { HomeScreen } from './components/home/HomeScreen';
+import { MapScreen } from './components/map/MapScreen';
+import { GarageScreen } from './components/garage/GarageScreen';
+import { SocialScreen } from './components/social/SocialScreen';
+import { ScannerModal } from './components/scanner/ScannerModal';
+import { OnboardingModal } from './components/onboarding/OnboardingModal';
 import { ActiveHuntNotification } from './components/hunts/ActiveHuntNotification';
 import { EnthusiastModal } from './components/premium/EnthusiastModal';
+import { HuntScreen } from './components/hunts/HuntScreen';
+import { Card3DDetail } from './components/garage/Card3DDetail';
+import { ProfileSettingsModal } from './components/profile/ProfileSettingsModal';
 import { LevelUpModal } from './components/common/LevelUpModal';
 import { DailyStreakModal } from './components/common/DailyStreakModal';
 import { NotificationCenterModal } from './components/common/NotificationCenterModal';
 import { AuthDiagnosticPanel } from './components/admin/AuthDiagnosticPanel';
 import { ModuleErrorBoundary } from './components/common/ModuleErrorBoundary';
 
-const MapScreen = React.lazy(() => import('./components/map/MapScreen').then(m => ({ default: m.MapScreen })));
-const GarageScreen = React.lazy(() => import('./components/garage/GarageScreen').then(m => ({ default: m.GarageScreen })));
-const SocialScreen = React.lazy(() => import('./components/social/SocialScreen').then(m => ({ default: m.SocialScreen })));
-const ScannerModal = React.lazy(() => import('./components/scanner/ScannerModal').then(m => ({ default: m.ScannerModal })));
-const OnboardingModal = React.lazy(() => import('./components/onboarding/OnboardingModal').then(m => ({ default: m.OnboardingModal })));
-const Card3DDetail = React.lazy(() => import('./components/garage/Card3DDetail').then(m => ({ default: m.Card3DDetail })));
-const ProfileSettingsModal = React.lazy(() => import('./components/profile/ProfileSettingsModal').then(m => ({ default: m.ProfileSettingsModal })));
-const ProfileScreen = React.lazy(() => import('./components/profile/ProfileScreen').then(m => ({ default: m.ProfileScreen })));
-const HuntScreen = React.lazy(() => import('./components/hunts/HuntScreen').then(m => ({ default: m.HuntScreen })));
-const StoreScreenshotFixtures = import.meta.env.DEV 
-  ? React.lazy(() => import('./components/dev/StoreScreenshotFixtures').then(m => ({ default: m.StoreScreenshotFixtures }))) 
-  : null;
-
 import { requestRealLocationPermission } from './utils/geolocation';
-import { applyAppTheme, THEME_ACCENT_PALETTES } from './utils/theme';
+import { applyAppTheme } from './utils/theme';
 
 import { logAuthTransition } from './utils/authLogger';
-import { ToastProvider } from './components/ui/Toast';
 
 export const App: React.FC = () => {
   const [isAuthReady, setIsAuthReady] = useState(false);
@@ -168,7 +162,7 @@ export const App: React.FC = () => {
 
   // ─── DYNAMIC APP THEME ENGINE ───
   useEffect(() => {
-    applyAppTheme(cardThemeColor || THEME_ACCENT_PALETTES[0].hex);
+    applyAppTheme(cardThemeColor || '#E50914');
   }, [cardThemeColor]);
 
   // ─── DAILY STREAK AUTO POPUP (Only Once Per Calendar Day If Not Already Claimed) ───
@@ -197,29 +191,20 @@ export const App: React.FC = () => {
     }
   }, [onboardingCompleted, userId, userUsername, userStreakDays, userStreakLastAt]);
 
-  // Dev-only store screenshot mode (0 network calls, local static fixtures)
-  if (import.meta.env.DEV && StoreScreenshotFixtures && typeof window !== 'undefined' && window.location.search.includes('fixture=screenshot')) {
-    return (
-      <React.Suspense fallback={null}>
-        <StoreScreenshotFixtures />
-      </React.Suspense>
-    );
-  }
-
   if (!isAuthReady) {
     return (
-      <div className="min-h-[100dvh] bg-[var(--color-void)] flex flex-col items-center justify-center select-none font-sans">
+      <div className="min-h-[100dvh] bg-[#080808] flex flex-col items-center justify-center select-none font-sans">
         <div className="relative flex flex-col items-center">
-          <div className="w-16 h-16 rounded-2xl bg-[var(--color-panel-2)] border border-[var(--color-line)] flex items-center justify-center shadow-2xl relative overflow-hidden">
-            <div className="w-8 h-8 rounded-lg bg-[var(--color-accent)] flex items-center justify-center shadow-lg font-black text-white text-base tracking-tighter">
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#1a1a1a] to-[#0d0d0d] border border-white/10 flex items-center justify-center shadow-2xl relative overflow-hidden">
+            <div className="w-8 h-8 rounded-lg bg-[#E50914] flex items-center justify-center shadow-lg shadow-red-950/60 font-black text-white text-base tracking-tighter">
               A
             </div>
             <div className="absolute inset-0 apex-skeleton opacity-20 pointer-events-none" />
           </div>
-          <span className="mt-4 text-caption font-black tracking-[0.25em] text-[var(--color-text)] uppercase font-display">
+          <span className="mt-4 text-xs font-black tracking-[0.25em] text-white/70 uppercase">
             APEX
           </span>
-          <span className="text-[10px] text-[var(--color-text-3)] tracking-wider mt-1 font-sans">
+          <span className="text-[10px] text-white/30 tracking-wider mt-1">
             EVERY STREET IS A TRACK
           </span>
         </div>
@@ -230,15 +215,14 @@ export const App: React.FC = () => {
   // If user has not completed onboarding, display the onboarding experience exclusively
   if (!onboardingCompleted) {
     return (
-      <div className="fixed inset-0 z-50 bg-[var(--color-void)] overflow-hidden">
+      <div className="fixed inset-0 z-50 bg-[#080808] overflow-hidden">
         <OnboardingModal isOpen={true} onClose={() => {}} />
       </div>
     );
   }
 
   return (
-    <ToastProvider>
-      <div className="min-h-[100dvh] bg-[var(--color-void)] text-[var(--color-text)] flex flex-col selection:bg-[var(--color-accent)] selection:text-white relative z-0 pb-[100px] font-sans">
+    <div className="min-h-[100dvh] bg-transparent text-[#F0EBE3] flex flex-col selection:bg-[#FF4500] selection:text-white relative z-0 pb-[110px]" style={{ fontFamily: 'DM Sans' }}>
       {/* Ambient Background (Omitted while scanner active to ensure full transparency) */}
       {!scannerOpen && <AmbientBackground />}
 
@@ -255,30 +239,22 @@ export const App: React.FC = () => {
           )}
           {activeTab === 'map' && (
             <ModuleErrorBoundary moduleName="Radar Map">
-              <React.Suspense fallback={null}>
-                <MapScreen />
-              </React.Suspense>
+              <MapScreen />
             </ModuleErrorBoundary>
           )}
           {activeTab === 'garage' && (
             <ModuleErrorBoundary moduleName="Garage Vault">
-              <React.Suspense fallback={null}>
-                <GarageScreen />
-              </React.Suspense>
+              <GarageScreen />
             </ModuleErrorBoundary>
           )}
           {activeTab === 'social' && (
             <ModuleErrorBoundary moduleName="Spotter Feed">
-              <React.Suspense fallback={null}>
-                <SocialScreen />
-              </React.Suspense>
+              <SocialScreen />
             </ModuleErrorBoundary>
           )}
           {activeTab === 'profile' && (
             <ModuleErrorBoundary moduleName="Spotter Profile">
-              <React.Suspense fallback={null}>
-                <ProfileScreen />
-              </React.Suspense>
+              <SocialScreen />
             </ModuleErrorBoundary>
           )}
         </main>
@@ -290,31 +266,25 @@ export const App: React.FC = () => {
       {/* Global 3D Card Detail Modal (accessible from Map, Home, Garage & Social) */}
       {selectedCardForDetail && (
         <ModuleErrorBoundary moduleName="3D Card Viewer">
-          <React.Suspense fallback={null}>
-            <Card3DDetail
-              card={selectedCardForDetail}
-              onClose={() => setSelectedCardForDetail(null)}
-            />
-          </React.Suspense>
+          <Card3DDetail
+            card={selectedCardForDetail}
+            onClose={() => setSelectedCardForDetail(null)}
+          />
         </ModuleErrorBoundary>
       )}
 
       {/* Modals & Overlays */}
       <ModuleErrorBoundary moduleName="Vision Scanner">
-        <React.Suspense fallback={null}>
-          <ScannerModal />
-        </React.Suspense>
+        <ScannerModal />
       </ModuleErrorBoundary>
       <ActiveHuntNotification />
       <EnthusiastModal />
 
       {/* Profile & Privacy Settings Modal */}
-      <React.Suspense fallback={null}>
-        <ProfileSettingsModal
-          isOpen={settingsModalOpen}
-          onClose={() => setSettingsModalOpen(false)}
-        />
-      </React.Suspense>
+      <ProfileSettingsModal
+        isOpen={settingsModalOpen}
+        onClose={() => setSettingsModalOpen(false)}
+      />
 
       {/* Daily Streak & Rewards Box */}
       <DailyStreakModal />
@@ -323,21 +293,18 @@ export const App: React.FC = () => {
       <NotificationCenterModal />
 
       {/* Dedicated Full-Screen Hunt Experience */}
-      <React.Suspense fallback={null}>
-        <HuntScreen
-          hunt={activeHuntModal}
-          onClose={closeHuntModal}
-          onOpenScanner={() => {
-            closeHuntModal();
-            setScannerOpen(true);
-          }}
-        />
-      </React.Suspense>
+      <HuntScreen
+        hunt={activeHuntModal}
+        onClose={closeHuntModal}
+        onOpenScanner={() => {
+          closeHuntModal();
+          setScannerOpen(true);
+        }}
+      />
       
       <LevelUpModal />
       <AuthDiagnosticPanel />
     </div>
-  </ToastProvider>
   );
 };
 

@@ -77,21 +77,6 @@ export const ScannerModal: React.FC = () => {
   const { sampleCoarseLocation } = useLocalRarity();
   const [shutterFlash, setShutterFlash] = useState(false);
   const [captureError, setCaptureError] = useState<string | null>(null);
-  const [hasConsent, setHasConsent] = useState<boolean>(() => {
-    try {
-      return typeof window !== 'undefined' && localStorage.getItem('apex_scanner_consent_v1') === 'true';
-    } catch {
-      return false;
-    }
-  });
-
-  const handleGrantConsent = () => {
-    try {
-      localStorage.setItem('apex_scanner_consent_v1', 'true');
-    } catch {}
-    setHasConsent(true);
-  };
-
   const activeScanIdRef = useRef<string | null>(null);
   const isCapturingRef = useRef<boolean>(false);
 
@@ -219,8 +204,9 @@ export const ScannerModal: React.FC = () => {
   };
 
   // Helper: Fast Client-Side Image Preprocessor
-  // Free-tier optimization: downscales to 768px (JPEG 0.82) to minimize token footprint and network latency
-  const optimizeScanImage = async (dataUrl: string, maxDimension = 768, quality = 0.82): Promise<string> => {
+  // Preserves high-resolution visual cues (up to 1600px, JPEG 0.90) for fine-grained morphological discrimination
+  // Bypasses canvas re-encoding when native CameraX frame is already optimal (< 2.5MB, <= 1600px)
+  const optimizeScanImage = async (dataUrl: string, maxDimension = 1600, quality = 0.90): Promise<string> => {
     return new Promise((resolve) => {
       if (!dataUrl || !dataUrl.startsWith('data:image')) {
         resolve(dataUrl);
@@ -234,9 +220,9 @@ export const ScannerModal: React.FC = () => {
           let { width, height } = img;
           const maxSide = Math.max(width, height);
 
-          // BYPASS: If image is already appropriately sized (maxSide <= 768 and byte size < 300KB),
-          // send directly without decoding -> canvas -> re-compressing
-          if (maxSide <= maxDimension && rawByteEstimate < 300000) {
+          // BYPASS: If image is already appropriately sized (maxSide <= 1600 and byte size < 2.5MB),
+          // send directly without decoding -> canvas -> re-compressing to avoid generational JPEG artifacts
+          if (maxSide <= maxDimension && rawByteEstimate < 2500000) {
             console.log('[CAMERA] optimizeScanImage bypassed (already optimal):', {
               width,
               height,
@@ -331,15 +317,9 @@ export const ScannerModal: React.FC = () => {
       if (aiResult && (
         infraReason === 'BACKEND_UNREACHABLE' ||
         infraReason === 'BACKEND_ERROR' ||
-        infraReason === 'SERVER_ERROR' ||
         infraReason === 'SERVICE_UNAVAILABLE' ||
         infraReason === 'RATE_LIMIT_EXCEEDED' ||
-        infraReason === 'USER_DAILY_LIMIT_EXCEEDED' ||
-        infraReason === 'SCANNER_BUSY' ||
-        infraReason === 'PHOTO_TOO_DARK' ||
-        infraReason === 'COULDNT_TELL' ||
         infraReason === 'NETWORK_TIMEOUT' ||
-        infraReason === 'TIMEOUT' ||
         infraReason === 'RATE_LIMITED' ||
         infraReason === 'AUTH_REQUIRED' ||
         infraReason === 'AUTH_SESSION_EXPIRED' ||
@@ -350,15 +330,11 @@ export const ScannerModal: React.FC = () => {
       )) {
         onIdentificationFailed(
           aiResult.reason ||
-          (infraReason === 'SCANNER_BUSY' ? 'Scanner busy, please try tomorrow!' :
-           infraReason === 'USER_DAILY_LIMIT_EXCEEDED' ? 'Daily scan limit reached. Resets tomorrow!' :
-           infraReason === 'PHOTO_TOO_DARK' ? 'Photo is too dark. Please turn on flashlight or find better lighting.' :
-           infraReason === 'COULDNT_TELL' ? "Couldn't tell what car that is. Try capturing from another angle." :
-           infraReason === 'AUTH_REQUIRED' ? 'Please sign in to scan and collect vehicles.' :
+          (infraReason === 'AUTH_REQUIRED' ? 'Please sign in to scan and collect vehicles.' :
            infraReason === 'AUTH_SESSION_EXPIRED' ? 'Authentication session expired. Please sign in to scan.' :
            infraReason === 'AUTH_REFRESH_FAILED' ? 'Unable to refresh authentication session. Please sign in.' :
            (infraReason === 'RATE_LIMITED' || infraReason === 'RATE_LIMIT_EXCEEDED') ? 'Apex is temporarily rate-limited. Please try again shortly.' :
-           (infraReason === 'NETWORK_TIMEOUT' || infraReason === 'TIMEOUT') ? 'Scanning timed out. Switched to offline matcher.' :
+           infraReason === 'NETWORK_TIMEOUT' ? 'The vision request timed out. Please retry.' :
            aiResult.rejection_reason === 'actual_device_offline' ? 'You’re offline, so Apex is using offline identification.' :
            'Apex’s vision service is temporarily unreachable. Please retry.')
         );
@@ -468,25 +444,17 @@ export const ScannerModal: React.FC = () => {
 
       const finalMake = specResolution.isVerified ? specResolution.make : make;
       const finalModel = specResolution.isVerified ? specResolution.model : model;
-      const generation = specResolution.generation || undefined;
-      // Safe Variant Gating: Never assert a trim/variant if the AI engine resolved to model_family,
-      // abstained on variant, or if variant confidence is below threshold (< 0.70).
-      const isVariantAsserted = (aiResult?.status === 'identified' || !aiResult?.status) &&
-        aiResult?.specificity_level !== 'model_family' &&
-        aiResult?.status !== 'identified_model' &&
-        Boolean(aiResult?.trim || aiResult?.variant || specResolution.trim) &&
-        (aiResult?.calibrated_confidence?.variant ?? aiResult?.confidence ?? 1.0) >= 0.70;
-
-      const trim = isVariantAsserted ? (aiResult?.trim || aiResult?.variant || specResolution.trim || undefined) : undefined;
-      const horsepower = specResolution.isVerified ? (specResolution.horsepower ?? undefined) : undefined;
-      const topSpeed = specResolution.isVerified ? (specResolution.topSpeedKmH ?? undefined) : undefined;
-      const engine = specResolution.isVerified ? (specResolution.engine || 'Verified Specs') : 'Unavailable';
-      const zeroToHundred = specResolution.isVerified ? (specResolution.zeroToHundredSec ?? undefined) : undefined;
-      const torqueNm = specResolution.isVerified ? (specResolution.torqueNm ?? undefined) : undefined;
-      const kerbWeightKg = specResolution.isVerified ? (specResolution.kerbWeightKg ?? undefined) : undefined;
-      const productionYears = specResolution.isVerified && specResolution.productionYears !== 'N/A' ? specResolution.productionYears : 'Unavailable';
-      const originCountry = specResolution.isVerified && specResolution.originCountry !== 'Global' ? specResolution.originCountry : 'Unavailable';
-      const bodyStyle = specResolution.isVerified ? (specResolution.bodyStyle || 'Coupe') : 'Unspecified';
+      const generation = specResolution.generation || aiResult?.generation || 'Current';
+      const trim = specResolution.trim || aiResult?.trim || undefined;
+      const horsepower = specResolution.horsepower ?? (aiResult?.horsepower || undefined);
+      const topSpeed = specResolution.topSpeedKmH ?? (aiResult?.top_speed_kmh || undefined);
+      const engine = specResolution.engine || aiResult?.engine || (specResolution.isVerified ? 'Verified Engine' : 'Uncatalogued');
+      const zeroToHundred = specResolution.zeroToHundredSec ?? (aiResult?.zero_to_hundred_seconds || undefined);
+      const torqueNm = specResolution.torqueNm ?? (aiResult?.torque_nm || undefined);
+      const kerbWeightKg = specResolution.kerbWeightKg ?? (aiResult?.kerb_weight_kg || undefined);
+      const productionYears = specResolution.productionYears !== 'N/A' ? specResolution.productionYears : (aiResult?.production_years || 'N/A');
+      const originCountry = specResolution.originCountry !== 'Global' ? specResolution.originCountry : (aiResult?.origin_country || 'Global');
+      const bodyStyle = specResolution.bodyStyle || aiResult?.body_style || 'Coupe';
       const color = aiResult?.color || 'Unknown';
 
       onAnalysisStageResolved(0, 'Framing & Viewpoint Confirmed');
@@ -708,52 +676,6 @@ export const ScannerModal: React.FC = () => {
 
       {shutterFlash && (
         <div className="absolute inset-0 z-50 bg-white/25 pointer-events-none transition-opacity duration-75" />
-      )}
-
-      {/* 0. ONE-TIME AI PRIVACY & DATA USAGE CONSENT SCREEN (Item 4) */}
-      {!hasConsent && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-5 bg-black/90 backdrop-blur-md select-none font-sans">
-          <div className="w-full max-w-sm bg-[#121214] border border-white/15 rounded-3xl p-6 shadow-2xl space-y-4 text-white">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-[#E50914]/15 border border-[#E50914]/30 flex items-center justify-center text-[#E50914]">
-                <AlertTriangle className="w-5 h-5" />
-              </div>
-              <div>
-                <h3 className="text-base font-bold tracking-tight">AI Vehicle Scanner</h3>
-                <span className="px-1.5 py-0.5 text-[9px] font-bold bg-[#E50914] text-white rounded-full uppercase tracking-wider">
-                  Beta Notice
-                </span>
-              </div>
-            </div>
-
-            <div className="text-xs text-white/80 space-y-2.5 leading-relaxed">
-              <p>
-                • <strong>Cloud AI Processing:</strong> Vehicle photos you capture are sent to an external AI service to recognize make, model, and trim.
-              </p>
-              <p>
-                • <strong>Free Tier Terms:</strong> Under the free beta tier, the AI service provider may process and use submitted content in accordance with their terms.
-              </p>
-              <p>
-                • <strong>Privacy Rule:</strong> Please photograph only vehicles. Do <strong>NOT</strong> photograph people, faces, or license plates.
-              </p>
-            </div>
-
-            <div className="pt-2 flex flex-col gap-2">
-              <button
-                onClick={handleGrantConsent}
-                className="w-full py-3 rounded-2xl bg-[#E50914] hover:bg-[#DC2626] active:scale-98 text-white font-semibold text-xs transition-all shadow-lg cursor-pointer"
-              >
-                I Understand & Agree
-              </button>
-              <button
-                onClick={handleCloseScanner}
-                className="w-full py-2.5 rounded-2xl bg-white/[0.08] hover:bg-white/[0.14] text-white/70 hover:text-white font-medium text-xs transition-all cursor-pointer"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
       )}
 
       {/* 1. LIVE HARDWARE CAMERA STREAM WITH GOOGLE LENS CONTROLS */}

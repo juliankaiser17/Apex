@@ -1,57 +1,77 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Flame, 
   Trophy, 
   Users, 
   User, 
+  Zap, 
+  Crown, 
+  Award, 
+  Search, 
+  Target, 
+  Flag, 
+  Globe, 
   UserPlus, 
   X, 
   Check, 
-  Clock, 
-  Plus, 
-  MessageSquare,
-  Search
+  UserCheck, 
+  AlertCircle,
+  Clock,
+  Plus,
+  Sparkles,
+  Video,
+  Play
 } from 'lucide-react';
-import { useApexStore } from '../../store/useApexStore';
-import type { FeedPost, CarCard } from '../../types/apex';
+import { useApexStore, SAMPLE_FEED_POSTS } from '../../store/useApexStore';
+import type { FeedPost, CarCard, LeaderboardEntry } from '../../types/apex';
+import { Card3DDetail } from '../garage/Card3DDetail';
 import { CommentsModal } from './CommentsModal';
 import { PaperThrowFeed } from './PaperThrowFeed';
 import { MediaPostComposerModal } from './MediaPostComposerModal';
 import { PublicProfileModal } from '../profile/PublicProfileModal';
 import { DirectMessageModal } from './DirectMessageModal';
 import { SpatialCreationSheet } from './SpatialCreationSheet';
-import { RanksScreen } from '../ranks/RanksScreen';
-import { ProfileScreen } from '../profile/ProfileScreen';
+import { ProfileCustomizationModal } from '../profile/ProfileCustomizationModal';
+import { BadgesModal } from '../profile/BadgesModal';
 import { sounds } from '../../utils/audio';
 import { hapticImpact, hapticTap } from '../../utils/haptics';
-import { Button } from '../ui/Button';
+import { getProgressToNextLevel } from '../../utils/mastery';
+import { computeAuthoritativeStats } from '../../utils/userStats';
 
-interface SocialScreenProps {
-  initialSubTab?: 'activity' | 'leaderboard' | 'friends' | 'profile';
-}
-
-export const SocialScreen: React.FC<SocialScreenProps> = ({ initialSubTab = 'activity' }) => {
+export const SocialScreen: React.FC = () => {
+  const user = useApexStore(s => s.user);
+  const garage = useApexStore(s => s.garage);
   const feedPosts = useApexStore(s => s.feedPosts);
+  const leaderboards = useApexStore(s => s.leaderboards);
+  const badges = useApexStore(s => s.badges);
   const friends = useApexStore(s => s.friends);
+  const removeFriend = useApexStore(s => s.removeFriend);
   const setScannerOpen = useApexStore(s => s.setScannerOpen);
   const incomingRequests = useApexStore(s => s.incomingRequests);
+  const outgoingRequests = useApexStore(s => s.outgoingRequests);
   const fetchFriendRequests = useApexStore(s => s.fetchFriendRequests);
   const sendFriendRequest = useApexStore(s => s.sendFriendRequest);
   const acceptFriendRequest = useApexStore(s => s.acceptFriendRequest);
   const denyFriendRequest = useApexStore(s => s.denyFriendRequest);
+  const cancelFriendRequest = useApexStore(s => s.cancelFriendRequest);
   const setSelectedCardForDetail = useApexStore(s => s.setSelectedCardForDetail);
 
-  const [subTab, setSubTab] = useState<'activity' | 'leaderboard' | 'friends' | 'profile'>(initialSubTab);
-  const [, setSelectedCard] = useState<CarCard | null>(null);
+  const [subTab, setSubTab] = useState<'activity' | 'leaderboard' | 'friends' | 'profile'>('activity');
+  const [selectedCard, setSelectedCard] = useState<CarCard | null>(null);
   const [selectedPostForComments, setSelectedPostForComments] = useState<FeedPost | null>(null);
+  const [leaderboardFilter, setLeaderboardFilter] = useState<'global' | 'city' | 'country' | 'friends'>('global');
   const [friendSearch, setFriendSearch] = useState('');
-
-  // Creation & Modals
+  
+  // New Social Flow States
   const [isCreationSheetOpen, setIsCreationSheetOpen] = useState(false);
   const [isMediaComposerOpen, setIsMediaComposerOpen] = useState(false);
   const [composerInitialPhoto, setComposerInitialPhoto] = useState<string | null>(null);
   const [selectedUserForProfile, setSelectedUserForProfile] = useState<{ userId?: string; username?: string } | null>(null);
   const [activeConversationUser, setActiveConversationUser] = useState<{ id: string; username: string; displayName: string; avatarUrl: string; level: number } | null>(null);
+
+  // Profile Customization & Badges Modals
+  const [isCustomizationOpen, setIsCustomizationOpen] = useState(false);
+  const [isBadgesModalOpen, setIsBadgesModalOpen] = useState(false);
 
   // Add Friend Modal State
   const [isAddFriendModalOpen, setIsAddFriendModalOpen] = useState(false);
@@ -59,12 +79,37 @@ export const SocialScreen: React.FC<SocialScreenProps> = ({ initialSubTab = 'act
   const [friendModalFeedback, setFriendModalFeedback] = useState<{ type: 'success' | 'error' | ''; message: string }>({ type: '', message: '' });
   const [isSearchingFriend, setIsSearchingFriend] = useState(false);
 
-  useEffect(() => {
-    if (initialSubTab) {
-      setSubTab(initialSubTab);
-    }
-  }, [initialSubTab]);
+  // Filter leaderboard by scope (Global, City, Country, Friends)
+  const filteredLeaderboard = useMemo(() => {
+    let list = [...leaderboards];
 
+    if (leaderboardFilter === 'friends') {
+      const friendHandles = new Set(friends.map(f => f.username.toLowerCase()));
+      list = list.filter(entry => 
+        entry.isUser || 
+        entry.username.toLowerCase() === (user.username || '').toLowerCase() || 
+        friendHandles.has(entry.username.toLowerCase())
+      );
+    } else if (leaderboardFilter === 'city') {
+      const userCity = (user.city || '').toLowerCase();
+      if (userCity) {
+        list = list.filter(entry => (entry.city || '').toLowerCase() === userCity || entry.isUser);
+      }
+    } else if (leaderboardFilter === 'country') {
+      const userCountry = (user.country || '').toLowerCase();
+      if (userCountry) {
+        list = list.filter(entry => (entry.country || '').toLowerCase() === userCountry || entry.isUser);
+      }
+    }
+
+    return list.map((entry, idx) => ({
+      ...entry,
+      scopedRank: idx + 1,
+      isFriend: friends.some(f => f.username.toLowerCase() === entry.username.toLowerCase())
+    }));
+  }, [leaderboards, leaderboardFilter, user.city, user.country, user.username, friends]);
+
+  // Poll / refresh friend requests when opening friends tab
   useEffect(() => {
     fetchFriendRequests();
   }, [subTab, fetchFriendRequests]);
@@ -74,23 +119,22 @@ export const SocialScreen: React.FC<SocialScreenProps> = ({ initialSubTab = 'act
     const cleanHandle = targetUsernameInput.trim().replace(/^@/, '').toLowerCase();
     if (!cleanHandle) return;
 
+    sounds.playTargetLock();
     setIsSearchingFriend(true);
     setFriendModalFeedback({ type: '', message: '' });
 
     try {
       const res = await sendFriendRequest(cleanHandle);
       if (res.success) {
-        setFriendModalFeedback({ 
-          type: 'success', 
-          message: `Friend request sent to @${cleanHandle}!` 
-        });
+        sounds.playXpPop();
+        setFriendModalFeedback({ type: 'success', message: res.message });
         setTargetUsernameInput('');
-        fetchFriendRequests();
+        setTimeout(() => {
+          setIsAddFriendModalOpen(false);
+          setFriendModalFeedback({ type: '', message: '' });
+        }, 2200);
       } else {
-        setFriendModalFeedback({ 
-          type: 'error', 
-          message: res.error || `Could not find @${cleanHandle}.` 
-        });
+        setFriendModalFeedback({ type: 'error', message: res.message });
       }
     } catch (err: any) {
       setFriendModalFeedback({ 
@@ -102,26 +146,20 @@ export const SocialScreen: React.FC<SocialScreenProps> = ({ initialSubTab = 'act
     }
   };
 
-  // Filter out seeded mock posts in production
-  const activeFeedPosts = feedPosts.filter(p => {
-    if (import.meta.env.PROD && (p.id.startsWith('mock_') || p.id.startsWith('sample_'))) {
-      return false;
-    }
-    return true;
-  });
+  const activeFeedPosts = (feedPosts && feedPosts.length > 0) ? feedPosts : SAMPLE_FEED_POSTS;
 
   return (
     <>
       {subTab === 'activity' ? (
-        <div className="fixed inset-0 top-[calc(var(--sat,28px)+54px)] bottom-[74px] z-10 w-full bg-[var(--color-void)] overflow-hidden select-none font-sans">
-          {/* Single Clean Chrome Row (Top Bar over feed) */}
-          <div className="absolute top-2.5 left-3 right-3 z-50 max-w-sm mx-auto flex items-center justify-between pointer-events-auto">
-            {/* 3-Tab Pill Switcher: Feed | Ranks | Friends */}
-            <div className="flex bg-[var(--color-panel)]/90 backdrop-blur-xl p-1 rounded-[var(--radius-button)] border border-[var(--color-line)] shadow-xl">
+        <div className="fixed inset-0 top-[calc(var(--sat,28px)+54px)] bottom-[74px] z-10 w-full bg-black overflow-hidden select-none font-sans">
+          {/* Floating Top 4-Way Segmented Navigation Bar + New Post + Button */}
+          <div className="absolute top-2.5 left-3 right-3 z-50 max-w-sm mx-auto flex items-center gap-2">
+            <div className="flex-1 flex bg-black/85 backdrop-blur-2xl p-1 rounded-2xl border border-white/20 shadow-2xl">
               {[
-                { id: 'activity', label: 'Feed', icon: Flame, badge: 0 },
+                { id: 'activity', label: 'Activity', icon: Flame, badge: 0 },
                 { id: 'leaderboard', label: 'Ranks', icon: Trophy, badge: 0 },
                 { id: 'friends', label: 'Friends', icon: Users, badge: incomingRequests.length },
+                { id: 'profile', label: 'Profile', icon: User, badge: 0 },
               ].map((tab) => {
                 const Icon = tab.icon;
                 const isActive = subTab === tab.id;
@@ -132,16 +170,23 @@ export const SocialScreen: React.FC<SocialScreenProps> = ({ initialSubTab = 'act
                       sounds.playTargetLock();
                       setSubTab(tab.id as any);
                     }}
-                    className={`py-1.5 px-3 rounded-[var(--radius-chip)] text-caption font-semibold flex items-center gap-1.5 transition-all relative active:scale-95 cursor-pointer ${
+                    className={`flex-1 py-1.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all relative active:scale-95 ${
                       isActive
-                        ? 'bg-[var(--color-panel-2)] text-[var(--color-text)] shadow-sm'
-                        : 'text-[var(--color-text-3)] hover:text-[var(--color-text)]'
+                        ? 'text-white shadow-lg font-bold'
+                        : 'text-white/60 hover:text-white'
                     }`}
+                    style={isActive ? {
+                      backgroundColor: 'var(--accent-color)',
+                      boxShadow: '0 2px 12px var(--accent-glow)'
+                    } : undefined}
                   >
-                    <Icon size={14} className={isActive ? 'text-[var(--color-xp)]' : ''} />
+                    <Icon className="w-3.5 h-3.5" />
                     <span>{tab.label}</span>
                     {tab.badge > 0 && (
-                      <span className="w-4 h-4 rounded-full bg-[var(--accent-color)] text-white text-[9px] font-bold flex items-center justify-center">
+                      <span 
+                        className="w-4 h-4 rounded-full bg-white text-[9px] font-bold flex items-center justify-center"
+                        style={{ color: 'var(--accent-color)' }}
+                      >
                         {tab.badge}
                       </span>
                     )}
@@ -158,10 +203,14 @@ export const SocialScreen: React.FC<SocialScreenProps> = ({ initialSubTab = 'act
                 setIsCreationSheetOpen(true);
               }}
               aria-label="Create Post"
-              className="w-10 h-10 rounded-[var(--radius-button)] flex items-center justify-center text-white shadow-xl active:scale-90 transition-all border border-white/20 shrink-0 bg-[var(--accent-color)] hover:brightness-110 cursor-pointer"
+              className="w-10 h-10 rounded-2xl flex items-center justify-center text-white shadow-xl active:scale-90 transition-all border border-white/20 shrink-0 hover:scale-105"
+              style={{
+                backgroundColor: 'var(--accent-color)',
+                boxShadow: '0 2px 14px var(--accent-glow)'
+              }}
               title="Create Post"
             >
-              <Plus size={18} />
+              <Plus className="w-5 h-5" />
             </button>
           </div>
 
@@ -178,346 +227,833 @@ export const SocialScreen: React.FC<SocialScreenProps> = ({ initialSubTab = 'act
           />
         </div>
       ) : (
-        <div className="flex-1 w-full pb-36 px-4 pt-2 space-y-4 font-sans bg-[var(--color-void)] max-w-lg mx-auto select-none">
-          {/* Top Single Chrome Row for non-feed tabs */}
-          <div className="flex items-center gap-2">
-            <div className="flex-1 flex bg-[var(--color-panel)] p-1 rounded-[var(--radius-button)] border border-[var(--color-line)]">
-              {[
-                { id: 'activity', label: 'Feed', icon: Flame, badge: 0 },
-                { id: 'leaderboard', label: 'Ranks', icon: Trophy, badge: 0 },
-                { id: 'friends', label: 'Friends', icon: Users, badge: incomingRequests.length },
-                { id: 'profile', label: 'Profile', icon: User, badge: 0 },
-              ].map((tab) => {
-                const Icon = tab.icon;
-                const isActive = subTab === tab.id;
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => {
-                      hapticTap();
-                      sounds.playTargetLock();
-                      setSubTab(tab.id as any);
-                    }}
-                    className={`flex-1 py-1.5 rounded-[var(--radius-chip)] text-caption font-semibold flex items-center justify-center gap-1.5 transition-all relative cursor-pointer ${
-                      isActive
-                        ? 'bg-[var(--color-panel-2)] text-[var(--color-text)] shadow-sm'
-                        : 'text-[var(--color-text-3)] hover:text-[var(--color-text)]'
-                    }`}
+        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 pb-28 font-sans max-w-md mx-auto">
+      {/* Top 4-Way Segmented Tabs + New Post Button */}
+      <div className="flex items-center gap-2">
+        <div className="flex-1 flex bg-[#141414] p-1 rounded-2xl border border-white/[0.08]">
+          {[
+            { id: 'activity', label: 'Activity', icon: Flame, badge: 0 },
+            { id: 'leaderboard', label: 'Ranks', icon: Trophy, badge: 0 },
+            { id: 'friends', label: 'Friends', icon: Users, badge: incomingRequests.length },
+            { id: 'profile', label: 'Profile', icon: User, badge: 0 },
+          ].map((tab) => {
+            const Icon = tab.icon;
+            const isActive = subTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setSubTab(tab.id as any)}
+                className={`flex-1 py-2 rounded-xl text-xs font-medium flex items-center justify-center gap-1.5 transition-colors relative ${
+                  isActive
+                    ? 'text-white font-semibold'
+                    : 'text-white/50 hover:text-white'
+                }`}
+                style={isActive ? {
+                  backgroundColor: 'var(--accent-color)',
+                  boxShadow: '0 2px 10px var(--accent-glow)'
+                } : undefined}
+              >
+                <Icon className="w-3.5 h-3.5" />
+                <span>{tab.label}</span>
+                {tab.badge > 0 && (
+                  <span 
+                    className="w-4 h-4 rounded-full bg-white text-[9px] font-bold flex items-center justify-center"
+                    style={{ color: 'var(--accent-color)' }}
                   >
-                    <Icon size={14} className={isActive ? 'text-[var(--color-xp)]' : ''} />
-                    <span>{tab.label}</span>
-                    {tab.badge > 0 && (
-                      <span className="w-4 h-4 rounded-full bg-[var(--accent-color)] text-white text-[9px] font-bold flex items-center justify-center">
-                        {tab.badge}
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
+                    {tab.badge}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
 
-            {/* + Button for Post Creation */}
-            <button
-              onClick={() => {
-                hapticImpact('medium');
-                sounds.playTargetLock();
-                setIsCreationSheetOpen(true);
-              }}
-              aria-label="Create Post"
-              className="w-10 h-10 rounded-[var(--radius-button)] flex items-center justify-center text-white shadow-xl active:scale-90 transition-all border border-white/20 shrink-0 bg-[var(--accent-color)] hover:brightness-110 cursor-pointer"
-            >
-              <Plus size={18} />
-            </button>
+        {/* + Button for Standalone Media Post Creation */}
+        <button
+          onClick={() => {
+            hapticImpact('medium');
+            sounds.playTargetLock();
+            setIsCreationSheetOpen(true);
+          }}
+          aria-label="Create Post"
+          className="w-10 h-10 rounded-2xl flex items-center justify-center text-white shadow-xl active:scale-90 transition-all border border-white/20 shrink-0 hover:scale-105"
+          style={{
+            backgroundColor: 'var(--accent-color)',
+            boxShadow: '0 2px 14px var(--accent-glow)'
+          }}
+          title="Create Post"
+        >
+          <Plus className="w-5 h-5" />
+        </button>
+      </div>
+
+      {/* SUB-TAB 2: LEADERBOARD */}
+      {subTab === 'leaderboard' && (
+        <div className="space-y-4">
+          {/* Leaderboard Scope Filters */}
+          <div className="grid grid-cols-4 gap-1.5">
+            {[
+              { id: 'global', label: 'Global' },
+              { id: 'city', label: user.city || 'City' },
+              { id: 'country', label: user.country || 'Country' },
+              { id: 'friends', label: `Friends (${friends.length})` }
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setLeaderboardFilter(tab.id as any)}
+                className={`py-2 px-1 rounded-lg text-[11px] font-data uppercase border transition-all text-center truncate ${
+                  leaderboardFilter === tab.id 
+                    ? 'bg-black/60 text-[#FFA500] border-[#FFA500]/60 font-bold shadow-[0_0_12px_rgba(255,165,0,0.2)]' 
+                    : 'bg-[#111111] text-[#9A9088] border-white/10 hover:border-white/20'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
           </div>
 
-          {/* SUB-TAB: LEADERBOARD */}
-          {subTab === 'leaderboard' && (
-            <RanksScreen
-              onOpenProfile={(userId, username) => setSelectedUserForProfile({ userId, username })}
-            />
-          )}
-
-          {/* SUB-TAB: USER PROFILE */}
-          {subTab === 'profile' && (
-            <ProfileScreen />
-          )}
-
-          {/* SUB-TAB: FRIENDS */}
-          {subTab === 'friends' && (
-            <div className="space-y-4">
-              {/* Friends Header & Add Friend CTA */}
-              <div className="p-4 rounded-[var(--radius-panel)] border border-[var(--color-line)] bg-[var(--color-panel)] flex items-center justify-between">
-                <div>
-                  <h3 className="font-display text-display-m text-[var(--color-text)] uppercase leading-none">
-                    Spotter Friends
-                  </h3>
-                  <p className="font-mono text-caption text-[var(--color-text-3)] mt-0.5">
-                    {friends.length} confirmed connections
+          <div className="bg-[#111111] border border-white/10 rounded-xl p-3 space-y-2">
+            {filteredLeaderboard.length === 0 ? (
+              <div className="text-center py-8 text-[#9A9088] font-data text-xs space-y-2">
+                <p>No spotters in this ranking yet.</p>
+                {leaderboardFilter === 'friends' && (
+                  <p className="text-[11px] text-[#FF4500]">
+                    Add friends in the Friends tab to compete against them!
                   </p>
-                </div>
-                <Button
-                  variant="primary"
-                  size="sm"
-                  onClick={() => {
-                    hapticTap();
-                    setIsAddFriendModalOpen(true);
-                  }}
-                >
-                  <UserPlus size={14} />
-                  <span>Add Friend</span>
-                </Button>
+                )}
               </div>
-
-              {/* Friend Search Bar */}
-              {friends.length > 3 && (
-                <div className="relative">
-                  <Search size={14} className="absolute left-3 top-3 text-[var(--color-text-3)]" />
-                  <input
-                    type="text"
-                    value={friendSearch}
-                    onChange={(e) => setFriendSearch(e.target.value)}
-                    placeholder="Search friends by name or handle..."
-                    className="w-full bg-[var(--color-panel)] border border-[var(--color-line)] rounded-[var(--radius-button)] pl-9 pr-4 py-2 text-secondary text-[var(--color-text)] placeholder-[var(--color-text-3)] focus:border-[var(--color-text-2)] outline-none"
-                  />
-                </div>
-              )}
-
-              {/* Incoming Friend Requests */}
-              {incomingRequests.length > 0 && (
-                <div className="p-4 rounded-[var(--radius-panel)] border border-amber-500/30 bg-amber-500/10 space-y-3">
-                  <div className="flex items-center gap-1.5 font-mono text-caption font-bold text-amber-300 uppercase tracking-wider">
-                    <Clock size={13} />
-                    <span>Pending Requests ({incomingRequests.length})</span>
-                  </div>
-
-                  <div className="space-y-2">
-                    {incomingRequests.map((req) => (
-                      <div
-                        key={req.id}
-                        className="p-3 rounded-[var(--radius-panel)] bg-[var(--color-panel)] border border-[var(--color-line)] flex items-center justify-between"
-                      >
-                        <div className="flex items-center gap-2.5">
-                          <img
-                            src={req.fromAvatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400'}
-                            alt={req.fromUsername}
-                            className="w-9 h-9 rounded-full object-cover border border-[var(--color-line)]"
-                          />
-                          <div>
-                            <span className="font-semibold text-secondary text-[var(--color-text)] block">
-                              {req.fromDisplayName}
-                            </span>
-                            <span className="font-mono text-caption text-[var(--color-text-3)]">
-                              @{req.fromUsername} · Lvl {req.fromLevel}
-                            </span>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-1.5">
-                          <button
-                            onClick={async () => {
-                              hapticTap();
-                              await acceptFriendRequest(req.id);
-                            }}
-                            className="p-2 rounded-[var(--radius-chip)] bg-[var(--color-ok)]/20 border border-[var(--color-ok)]/30 text-[var(--color-ok)] hover:bg-[var(--color-ok)]/30 cursor-pointer"
-                            title="Accept"
-                          >
-                            <Check size={14} />
-                          </button>
-                          <button
-                            onClick={async () => {
-                              hapticTap();
-                              await denyFriendRequest(req.id);
-                            }}
-                            className="p-2 rounded-[var(--radius-chip)] bg-[var(--color-danger)]/20 border border-[var(--color-danger)]/40 text-[var(--color-danger)] hover:bg-[var(--color-danger)]/30 cursor-pointer"
-                            title="Decline"
-                          >
-                            <X size={14} />
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Confirmed Friends List */}
-              {friends.length > 0 ? (
-                <div className="rounded-[var(--radius-panel)] border border-[var(--color-line)] bg-[var(--color-panel)] divide-y divide-[var(--color-line)] overflow-hidden">
-                  {friends
-                    .filter(f => f.username.toLowerCase().includes(friendSearch.toLowerCase()) || f.displayName.toLowerCase().includes(friendSearch.toLowerCase()))
-                    .map((friend) => (
-                      <div
-                        key={friend.username}
-                        className="p-3.5 flex items-center justify-between hover:bg-[var(--color-panel-2)] transition-colors"
-                      >
-                        <div
-                          onClick={() => setSelectedUserForProfile({ userId: friend.id, username: friend.username })}
-                          className="flex items-center gap-3 cursor-pointer group min-w-0"
-                        >
-                          <img
-                            src={friend.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400'}
-                            alt={friend.username}
-                            className="w-10 h-10 rounded-full object-cover border border-[var(--color-line)] group-hover:border-[var(--color-xp)] transition-colors shrink-0"
-                          />
-                          <div className="min-w-0">
-                            <span className="font-semibold text-secondary text-[var(--color-text)] group-hover:text-[var(--color-xp)] transition-colors truncate block">
-                              {friend.displayName}
-                            </span>
-                            <span className="font-mono text-caption text-[var(--color-text-3)] truncate block">
-                              @{friend.username} · Level {friend.level} {friend.city ? `· ${friend.city}` : ''}
-                            </span>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-2 shrink-0">
-                          <button
-                            onClick={() => setActiveConversationUser(friend)}
-                            className="p-2 rounded-[var(--radius-chip)] bg-[var(--color-panel-2)] border border-[var(--color-line)] text-[var(--color-text-2)] hover:text-[var(--color-text)] cursor-pointer"
-                            title="Message"
-                          >
-                            <MessageSquare size={14} />
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                </div>
-              ) : (
-                <div className="p-8 rounded-[var(--radius-panel)] border border-[var(--color-line)] bg-[var(--color-panel)] text-center space-y-3">
-                  <div className="w-12 h-12 rounded-full bg-[var(--color-panel-2)] border border-[var(--color-line)] flex items-center justify-center mx-auto text-[var(--color-text-3)]">
-                    <Users size={20} />
-                  </div>
-                  <div className="space-y-1">
-                    <h4 className="font-display text-display-m text-[var(--color-text)]">
-                      No Friends Added Yet
-                    </h4>
-                    <p className="text-secondary text-[var(--color-text-3)] max-w-xs mx-auto">
-                      Connect with spotters to compare sightings and compete on friend leaderboards.
-                    </p>
-                  </div>
-                  <Button
-                    variant="primary"
-                    size="sm"
-                    onClick={() => setIsAddFriendModalOpen(true)}
+            ) : (
+              filteredLeaderboard.map((entry: LeaderboardEntry & { scopedRank: number; isFriend?: boolean }) => {
+                const isMe = entry.isUser || entry.username.toLowerCase() === (user.username || '').toLowerCase();
+                return (
+                  <div
+                    key={entry.username}
+                    onClick={() => {
+                      if (!isMe) {
+                        sounds.playTargetLock();
+                        setSelectedUserForProfile({ username: entry.username });
+                      }
+                    }}
+                    className={`p-3 rounded-lg flex items-center justify-between border transition-all ${
+                      isMe 
+                        ? 'bg-black/60 border-[#FF4500] glow-orange' 
+                        : 'bg-black/20 border-white/5 hover:border-white/15 cursor-pointer active:scale-[0.99]'
+                    }`}
                   >
-                    <UserPlus size={14} />
-                    <span>Send Friend Request</span>
-                  </Button>
-                </div>
-              )}
-            </div>
-          )}
+                    <div className="flex items-center gap-3">
+                      <span className={`font-display text-lg w-6 text-center ${
+                        entry.scopedRank === 1 ? 'text-[#FFA500] font-bold' :
+                        entry.scopedRank === 2 ? 'text-[#F0EBE3]' :
+                        entry.scopedRank === 3 ? 'text-[#E8A020]' : 'text-[#5A5550]'
+                      }`}>
+                        #{entry.scopedRank}
+                      </span>
+
+                      <img src={entry.avatarUrl} alt={entry.displayName} className="w-10 h-10 rounded-full object-cover border border-[#2C2C2C]" />
+
+                      <div>
+                        <h4 className="text-sm font-semibold text-[#F0EBE3] flex items-center gap-1.5">
+                          {entry.displayName} 
+                          {isMe && <span className="text-[10px] text-[#FF4500] font-data font-semibold">(YOU)</span>}
+                          {entry.isFriend && !isMe && (
+                            <span className="text-[9px] bg-[#3B82F6]/20 text-[#60A5FA] border border-[#3B82F6]/40 px-1.5 py-0.5 rounded font-data font-semibold">
+                              FRIEND
+                            </span>
+                          )}
+                        </h4>
+                        <p className="text-[10px] text-[#9A9088] font-data">
+                          Level {entry.level} · {entry.city || 'Global'} · Rarest: {entry.rarestCard}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="text-right">
+                      <span className="text-sm font-data font-semibold text-[#FF4500] block">{entry.xp.toLocaleString()} XP</span>
+                      <span className="text-[9px] font-data text-[#2ECC71]">Rank #{entry.scopedRank}</span>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
         </div>
       )}
 
-      {/* Add Friend Modal */}
+      {/* SUB-TAB 3: FRIENDS & FRIEND REQUESTS */}
+      {subTab === 'friends' && (
+        <div className="space-y-4">
+          {/* Top action bar: Filter + Add Friend Button */}
+          <div className="flex gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9A9088]" />
+              <input
+                type="text"
+                placeholder="Filter your friends list..."
+                value={friendSearch}
+                onChange={(e) => setFriendSearch(e.target.value)}
+                className="w-full bg-[#111111] border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-xs text-[#F0EBE3] placeholder-[#5A5550] focus:border-[#FF4500] outline-none font-data"
+              />
+            </div>
+            <button
+              onClick={() => {
+                sounds.playTargetLock();
+                setIsAddFriendModalOpen(true);
+              }}
+              className="px-3.5 py-2 rounded-xl bg-[#FF4500] text-white font-sans text-xs font-semibold uppercase tracking-wider flex items-center gap-1.5 shadow-[0_0_12px_rgba(255,69,0,0.3)] hover:bg-[#FF5500] transition-all active:scale-95 shrink-0"
+            >
+              <UserPlus className="w-3.5 h-3.5" /> ADD FRIEND
+            </button>
+          </div>
+
+          {/* 1. INCOMING FRIEND REQUESTS SECTION */}
+          {incomingRequests.length > 0 && (
+            <div className="p-4 rounded-2xl bg-[#141414] border border-[#FF4500]/40 space-y-3 shadow-[0_0_20px_rgba(255,69,0,0.15)]">
+              <div className="flex items-center justify-between pb-1 border-b border-white/10">
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 rounded-full bg-[#FF4500]/20 flex items-center justify-center text-[#FF4500]">
+                    <Users className="w-3.5 h-3.5" />
+                  </div>
+                  <h4 className="font-display text-sm text-[#F0EBE3] tracking-wide">
+                    INCOMING FRIEND REQUESTS ({incomingRequests.length})
+                  </h4>
+                </div>
+                <span className="text-[10px] font-data text-[#FF4500] font-semibold uppercase">Action Required</span>
+              </div>
+
+              <div className="space-y-2.5">
+                {incomingRequests.map((req) => (
+                  <div 
+                    key={req.id}
+                    className="p-3 rounded-xl bg-[#0D0D0D] border border-white/10 flex items-center justify-between gap-3"
+                  >
+                    <div 
+                      onClick={() => {
+                        sounds.playTargetLock();
+                        setSelectedUserForProfile({ userId: req.fromUserId, username: req.fromUsername });
+                      }}
+                      className="flex items-center gap-2.5 min-w-0 cursor-pointer group"
+                    >
+                      <img
+                        src={req.fromAvatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400'}
+                        alt={req.fromUsername}
+                        className="w-10 h-10 rounded-full object-cover border border-[#FF4500]/60 group-hover:border-white transition-colors shrink-0"
+                      />
+                      <div className="min-w-0">
+                        <h5 className="text-xs font-semibold text-[#F0EBE3] group-hover:text-[#FF4500] transition-colors truncate">
+                          {req.fromDisplayName || req.fromUsername}
+                        </h5>
+                        <p className="text-[10px] font-data text-[#9A9088] truncate">
+                          @{req.fromUsername} · Level {req.fromLevel}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 shrink-0">
+                      <button
+                        onClick={async () => {
+                          await acceptFriendRequest(req.id);
+                        }}
+                        className="px-3 py-1.5 rounded-xl bg-[#2ECC71] hover:bg-[#27ae60] text-black font-data text-xs font-bold flex items-center gap-1 shadow-md transition-colors"
+                      >
+                        <Check className="w-3.5 h-3.5" /> Accept
+                      </button>
+                      <button
+                        onClick={async () => {
+                          sounds.playTargetLock();
+                          await denyFriendRequest(req.id);
+                        }}
+                        className="px-2.5 py-1.5 rounded-xl bg-[#1F1F1F] hover:bg-rose-950/60 border border-white/10 hover:border-rose-600/50 text-[#9A9088] hover:text-rose-300 font-data text-xs transition-colors"
+                      >
+                        <X className="w-3.5 h-3.5" /> Deny
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 2. PENDING SENT REQUESTS SECTION */}
+          {outgoingRequests.length > 0 && (
+            <div className="p-3.5 rounded-2xl bg-[#111111] border border-white/10 space-y-2.5">
+              <div className="flex items-center gap-2 pb-1 border-b border-white/5">
+                <Clock className="w-3.5 h-3.5 text-[#9A9088]" />
+                <h5 className="font-display text-xs text-[#9A9088] tracking-wider uppercase">
+                  SENT REQUESTS PENDING ({outgoingRequests.length})
+                </h5>
+              </div>
+              <div className="space-y-1.5">
+                {outgoingRequests.map((req) => (
+                  <div
+                    key={req.id}
+                    className="p-2.5 rounded-xl bg-black/40 border border-white/5 flex items-center justify-between text-xs"
+                  >
+                    <div>
+                      <span className="text-[#F0EBE3] font-semibold">@{req.toUsername}</span>
+                      <span className="text-[10px] text-[#9A9088] font-data ml-2">Waiting for approval</span>
+                    </div>
+                    <button
+                      onClick={async () => {
+                        sounds.playTargetLock();
+                        await cancelFriendRequest(req.id);
+                      }}
+                      className="text-[10px] font-data text-rose-400 hover:text-rose-300 px-2 py-0.5 rounded bg-rose-950/20 border border-rose-900/40"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 3. CONFIRMED FRIENDS LIST */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between px-1">
+              <span className="text-[11px] font-data font-semibold text-[#9A9088] uppercase tracking-wider">
+                MY FRIENDS ({friends.length})
+              </span>
+            </div>
+
+            {friends.length > 0 ? (
+              <div className="space-y-2">
+                {friends
+                  .filter(f => f.username.toLowerCase().includes(friendSearch.toLowerCase()) || f.displayName.toLowerCase().includes(friendSearch.toLowerCase()))
+                  .map((friend) => (
+                    <div
+                      key={friend.username}
+                      className="p-3 rounded-2xl bg-[#111111] border border-white/10 flex items-center justify-between shadow-lg"
+                    >
+                      <div 
+                        onClick={() => {
+                          sounds.playTargetLock();
+                          setSelectedUserForProfile({ userId: friend.id, username: friend.username });
+                        }}
+                        className="flex items-center gap-3 cursor-pointer group"
+                      >
+                        <img
+                          src={friend.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400'}
+                          alt={friend.username}
+                          className="w-10 h-10 rounded-full object-cover border border-[#FF4500]/60 group-hover:border-white transition-colors"
+                        />
+                        <div>
+                          <h4 className="text-xs font-semibold text-[#F0EBE3] group-hover:text-[#FF4500] transition-colors">{friend.displayName}</h4>
+                          <p className="text-[10px] font-data text-[#9A9088]">
+                            @{friend.username} · Level {friend.level} {friend.city ? `· ${friend.city}` : ''}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-data text-[#2ECC71] bg-[#2ECC71]/10 px-2 py-0.5 rounded border border-[#2ECC71]/30 font-semibold flex items-center gap-1">
+                          <Check className="w-3 h-3" /> FRIEND
+                        </span>
+                        <button
+                          onClick={() => {
+                            if (window.confirm(`Remove @${friend.username} from your friends?`)) {
+                              sounds.playTargetLock();
+                              removeFriend(friend.username);
+                            }
+                          }}
+                          className="text-[10px] font-data text-rose-400 hover:text-rose-300 p-1"
+                          title="Remove Friend"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            ) : (
+              <div className="text-center py-12 px-6 space-y-4 bg-[#111111] rounded-2xl border border-white/10 shadow-2xl">
+                <div className="w-14 h-14 rounded-full bg-black/60 border border-[#FF4500] flex items-center justify-center mx-auto text-[#FF4500] shadow-[0_0_20px_rgba(255,69,0,0.3)]">
+                  <Users className="w-7 h-7" />
+                </div>
+                <div className="space-y-1">
+                  <h4 className="font-display text-2xl text-[#F0EBE3]">NO FRIENDS ADDED YET</h4>
+                  <p className="text-xs text-[#9A9088] leading-relaxed max-w-xs mx-auto pb-2">
+                    Send a friend request to any real registered user by their username. Once they accept, they will appear here.
+                  </p>
+                </div>
+                
+                <button
+                  onClick={() => {
+                    sounds.playTargetLock();
+                    setIsAddFriendModalOpen(true);
+                  }}
+                  className="px-4 py-2 rounded-xl bg-[#FF4500] text-white font-sans text-xs font-semibold shadow-md inline-flex items-center gap-1.5 hover:bg-[#FF5500] active:scale-95 transition-all"
+                >
+                  <UserPlus className="w-3.5 h-3.5" /> Send Friend Request
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* SUB-TAB 4: USER PROFILE */}
+      {subTab === 'profile' && (() => {
+        const mastery = getProgressToNextLevel(user.level, user.xp);
+        const authStats = computeAuthoritativeStats(garage, badges, user);
+        const unlockedBadges = badges.filter(b => b.isUnlocked);
+        const previewBadges = unlockedBadges.length > 0 ? unlockedBadges.slice(0, 6) : badges.slice(0, 6);
+
+        return (
+          <div className="space-y-4">
+            {/* Main Profile Header Card */}
+            <div 
+              className="p-6 rounded-2xl bg-[#111111] border text-center space-y-4 relative overflow-hidden transition-colors"
+              style={{ borderColor: user.cardThemeColor ? `${user.cardThemeColor}40` : 'rgba(255,255,255,0.1)' }}
+            >
+              {/* Ambient Glow */}
+              <div 
+                className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-24 blur-3xl pointer-events-none rounded-full opacity-25"
+                style={{ backgroundColor: user.cardThemeColor || '#E50914' }}
+              />
+
+              <div className="relative inline-block mx-auto">
+                <img 
+                  src={user.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400'} 
+                  alt={user.username} 
+                  className="w-20 h-20 rounded-full border-2 object-cover mx-auto shadow-xl" 
+                  style={{ borderColor: user.cardThemeColor || 'var(--accent-color)', boxShadow: '0 0 16px var(--accent-glow)' }}
+                />
+                <span className={`absolute -bottom-2 left-1/2 -translate-x-1/2 px-2.5 py-0.5 rounded-full text-[9px] font-bold tracking-wider uppercase border shadow-md whitespace-nowrap ${mastery.tierConfig.badgeBg} ${mastery.tierConfig.badgeBorder} ${mastery.tierConfig.textColor}`}>
+                  {mastery.tierConfig.label}
+                </span>
+              </div>
+              
+              <div className="pt-1 space-y-1">
+                <div className="flex items-center justify-center gap-2">
+                  <h2 className="text-2xl font-bold text-white tracking-tight">{user.displayName || 'Apex Member'}</h2>
+                  {user.driverTitle && (
+                    <span 
+                      className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border"
+                      style={{ 
+                        color: user.cardThemeColor || 'var(--accent-color)',
+                        backgroundColor: `${user.cardThemeColor || '#E50914'}15`,
+                        borderColor: `${user.cardThemeColor || '#E50914'}30`
+                      }}
+                    >
+                      {user.driverTitle}
+                    </span>
+                  )}
+                </div>
+
+                <p className="text-xs text-white/50 font-data">
+                  @{user.username || 'driver'} · {user.city || 'Global'}
+                </p>
+
+                {user.bio && (
+                  <p className="text-xs text-white/80 italic mt-1 max-w-sm mx-auto">
+                    "{user.bio}"
+                  </p>
+                )}
+
+                {(user.favoriteCar || user.favoriteBrand) && (
+                  <div className="flex items-center justify-center gap-3 pt-1.5 text-[11px] text-white/60">
+                    <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white/[0.04] border border-white/[0.06]">
+                      🏎️ <span className="text-white/40">Dream Machine:</span> <strong className="text-white font-medium">{[user.favoriteBrand, user.favoriteCar].filter(Boolean).join(' ')}</strong>
+                    </span>
+                  </div>
+                )}
+
+                {/* Profile Customization CTA */}
+                <div className="pt-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      hapticTap();
+                      sounds.playTargetLock();
+                      setIsCustomizationOpen(true);
+                    }}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold text-white shadow-xl active:scale-95 transition-all cursor-pointer border border-white/20 hover:scale-[1.02]"
+                    style={{
+                      backgroundColor: user.cardThemeColor || 'var(--accent-color)',
+                      boxShadow: '0 4px 16px var(--accent-glow)'
+                    }}
+                  >
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>Customize Profile</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* ─── SPOTTER LEVEL & MASTERY PROGRESSION ─── */}
+              <div className="p-4 rounded-xl bg-black/60 border border-white/[0.08] space-y-3 text-left">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="text-[10px] font-bold text-white/40 tracking-[0.2em] uppercase block">
+                      SPOTTER LEVEL
+                    </span>
+                    <div className="flex items-baseline gap-2 mt-0.5">
+                      <span className="text-2xl font-black text-white tracking-tight font-display">
+                        LEVEL {mastery.level}
+                      </span>
+                      <span className={`text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 rounded-full border ${mastery.tierConfig.badgeBg} ${mastery.tierConfig.badgeBorder} ${mastery.tierConfig.textColor}`}>
+                        {mastery.tierConfig.label}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="text-right">
+                    <span className="text-xs font-bold text-white font-data">
+                      {mastery.isMaxLevel ? 'MAX' : `${mastery.percentage}%`}
+                    </span>
+                    <span className="text-[10px] text-white/40 block">
+                      {mastery.isMaxLevel ? 'Level 100 Reached' : `to Level ${mastery.level + 1}`}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Progress Bar to Next Level */}
+                <div>
+                  <div className="w-full h-2.5 bg-white/[0.06] rounded-full overflow-hidden p-0.5 border border-white/[0.08]">
+                    <div 
+                      className="h-full rounded-full transition-all duration-500 shadow-sm"
+                      style={{ 
+                        width: `${mastery.percentage}%`,
+                        backgroundColor: user.cardThemeColor || 'var(--accent-color)',
+                        boxShadow: `0 0 8px ${user.cardThemeColor || 'var(--accent-color)'}`
+                      }}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between text-[10px] text-white/50 font-data mt-1.5">
+                    <span>Progress to Next Level</span>
+                    <span className="font-semibold text-white/80">
+                      {mastery.currentXp.toLocaleString()} / {mastery.requiredXp.toLocaleString()} XP
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* ─── 6-METRIC AUTHORITATIVE DISCOVERY STATS GRID ─── */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 pt-1 text-left font-data">
+                <div className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+                  <span className="text-white/40 text-[10px] block uppercase font-medium">Cars Spotted</span>
+                  <span className="text-white font-bold text-lg">{authStats.totalCarsSpotted}</span>
+                </div>
+                <div className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+                  <span className="text-white/40 text-[10px] block uppercase font-medium">Unique Cars</span>
+                  <span className="text-[#FF4500] font-bold text-lg">{authStats.uniqueFindsCount}</span>
+                </div>
+                <div className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+                  <span className="text-white/40 text-[10px] block uppercase font-medium">Rare Finds</span>
+                  <span className="text-blue-400 font-bold text-lg">{authStats.rareCount}</span>
+                </div>
+                <div className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+                  <span className="text-white/40 text-[10px] block uppercase font-medium">Epic Finds</span>
+                  <span className="text-purple-400 font-bold text-lg">{authStats.epicCount}</span>
+                </div>
+                <div className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+                  <span className="text-white/40 text-[10px] block uppercase font-medium">Legendary Finds</span>
+                  <span className="text-amber-400 font-bold text-lg">{authStats.legendaryCount}</span>
+                </div>
+                <div className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+                  <span className="text-white/40 text-[10px] block uppercase font-medium">Badges Unlocked</span>
+                  <span className="text-emerald-400 font-bold text-lg">{authStats.badgesUnlockedCount}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Badges Showcase Section */}
+            <div className="bg-[#111111] border border-white/10 rounded-xl p-5 space-y-4">
+              <div className="flex items-center justify-between pb-1 border-b border-white/10">
+                <div className="flex items-center gap-2">
+                  <Award className="w-5 h-5 text-[#FFA500]" />
+                  <h3 className="font-display text-lg text-[#F0EBE3] tracking-wide">
+                    BADGES UNLOCKED ({authStats.badgesUnlockedCount} / {badges.length})
+                  </h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    hapticTap();
+                    sounds.playTargetLock();
+                    setIsBadgesModalOpen(true);
+                  }}
+                  className="text-xs font-bold text-[#FFA500] hover:text-amber-300 transition-colors flex items-center gap-1 cursor-pointer bg-amber-500/10 px-2.5 py-1 rounded-lg border border-amber-500/20 active:scale-95"
+                >
+                  <span>View All ({badges.length})</span> →
+                </button>
+              </div>
+
+              <div className="grid grid-cols-3 gap-2.5">
+                {previewBadges.map((badge) => {
+                  const IconComponent = 
+                    badge.icon === 'Target' ? Target :
+                    badge.icon === 'Zap' ? Zap :
+                    badge.icon === 'Flag' ? Flag :
+                    badge.icon === 'Crown' ? Crown :
+                    badge.icon === 'Flame' ? Flame :
+                    badge.icon === 'Globe' ? Globe : Award;
+                    
+                  return (
+                    <div
+                      key={badge.id}
+                      onClick={() => {
+                        hapticTap();
+                        sounds.playTargetLock();
+                        setIsBadgesModalOpen(true);
+                      }}
+                      className={`p-3 rounded-xl border flex flex-col items-center text-center space-y-1 transition-all cursor-pointer hover:border-amber-500/40 active:scale-95 ${
+                        badge.isUnlocked 
+                          ? 'bg-black/60 border-[#FFA500]/40 shadow-sm' 
+                          : 'bg-black/20 border-white/5 opacity-40 grayscale'
+                      }`}
+                    >
+                      <IconComponent className="w-7 h-7 mb-1 text-[#FFA500]" />
+                      <h4 className="font-display text-xs text-[#F0EBE3] truncate w-full">{badge.name}</h4>
+                      <span className="text-[9px] font-data text-[#FFA500]">+{badge.xpBonus} XP</span>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Full Catalog Button */}
+              <button
+                type="button"
+                onClick={() => {
+                  hapticTap();
+                  sounds.playTargetLock();
+                  setIsBadgesModalOpen(true);
+                }}
+                className="w-full py-2.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-white/80 hover:text-white text-xs font-semibold flex items-center justify-center gap-2 transition-all active:scale-[0.99] cursor-pointer"
+              >
+                <Award className="w-4 h-4 text-amber-400" />
+                <span>Open Full 100+ Badge Showcase</span>
+              </button>
+            </div>
+
+            {/* My Media & Video Uploads Showcase Section */}
+            {(() => {
+              const myUploads = feedPosts.filter(p => 
+                p.user?.id === user.id || 
+                (p.user?.username && user.username && p.user.username.toLowerCase() === user.username.toLowerCase())
+              );
+
+              return (
+                <div className="bg-[#111111] border border-white/10 rounded-xl p-5 space-y-4">
+                  <div className="flex items-center justify-between pb-1 border-b border-white/10">
+                    <div className="flex items-center gap-2">
+                      <Video className="w-5 h-5 text-[#FF4500]" />
+                      <h3 className="font-display text-lg text-[#F0EBE3] tracking-wide">
+                        MY MEDIA & UPLOADS ({myUploads.length})
+                      </h3>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setIsMediaComposerOpen(true)}
+                      className="text-xs font-bold text-[#FF4500] hover:text-orange-400 transition-colors flex items-center gap-1 cursor-pointer bg-[#FF4500]/10 px-2.5 py-1 rounded-lg border border-[#FF4500]/20 active:scale-95"
+                    >
+                      <Plus className="w-3.5 h-3.5" /> Post Media
+                    </button>
+                  </div>
+
+                  {myUploads.length === 0 ? (
+                    <div className="text-center py-6 text-white/40 text-xs">
+                      <p>No video or photo uploads yet.</p>
+                      <p className="text-[10px] text-white/30 mt-1">Capture videos or pictures of spotted cars to feature them here.</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                      {myUploads.map(post => (
+                        <div 
+                          key={post.id}
+                          onClick={() => {
+                            hapticTap();
+                            setSelectedPostForComments(post);
+                          }}
+                          className="relative rounded-xl overflow-hidden aspect-[4/3] bg-black/60 border border-white/10 group cursor-pointer hover:border-white/30 transition-all"
+                        >
+                          {post.mediaType === 'video' ? (
+                            <>
+                              <img 
+                                src={post.thumbnailUrl || post.mediaUrl} 
+                                alt={post.caption || 'Video upload'} 
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
+                              />
+                              <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                                <div className="w-8 h-8 rounded-full bg-black/60 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white">
+                                  <Play className="w-4 h-4 fill-white ml-0.5" />
+                                </div>
+                              </div>
+                              <span className="absolute top-2 left-2 px-1.5 py-0.5 rounded bg-black/70 backdrop-blur-sm text-[9px] font-bold text-amber-400 border border-white/10 uppercase font-data flex items-center gap-1">
+                                <Video className="w-2.5 h-2.5" /> Video
+                              </span>
+                            </>
+                          ) : (
+                            <img 
+                              src={post.mediaUrl || post.card?.imageUrl} 
+                              alt={post.caption || 'Photo upload'} 
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
+                            />
+                          )}
+                          {post.caption && (
+                            <div className="absolute inset-x-0 bottom-0 p-2 bg-gradient-to-t from-black/90 via-black/50 to-transparent">
+                              <p className="text-[10px] text-white/90 truncate font-medium">
+                                {post.caption}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
+          </div>
+        );
+      })()}
+    </div>
+  )}
+
+      {/* 3D Card Detail Modal */}
+      <Card3DDetail 
+        card={selectedCard} 
+        onClose={() => {
+          setSelectedCard(null);
+          setSelectedCardForDetail(null);
+        }} 
+      />
+
+      {/* Comments Discussion Modal */}
+      <CommentsModal
+        post={selectedPostForComments}
+        onClose={() => setSelectedPostForComments(null)}
+        onOpenProfile={(userId, username) => setSelectedUserForProfile({ userId, username })}
+      />
+
+      {/* Spatial Creation Action Sheet */}
+      <SpatialCreationSheet
+        isOpen={isCreationSheetOpen}
+        onClose={() => setIsCreationSheetOpen(false)}
+        onOpenScanner={() => setScannerOpen(true)}
+        onOpenMediaComposer={(initialPhoto) => {
+          setComposerInitialPhoto(initialPhoto || null);
+          setIsMediaComposerOpen(true);
+        }}
+      />
+
+      {/* Media Post Composer Modal */}
+      <MediaPostComposerModal
+        isOpen={isMediaComposerOpen}
+        initialPhotoUrl={composerInitialPhoto}
+        onClose={() => {
+          setIsMediaComposerOpen(false);
+          setComposerInitialPhoto(null);
+        }}
+      />
+
+      {/* Public Profile Modal */}
+      <PublicProfileModal
+        userId={selectedUserForProfile?.userId}
+        username={selectedUserForProfile?.username}
+        isOpen={Boolean(selectedUserForProfile)}
+        onClose={() => setSelectedUserForProfile(null)}
+        onOpenConversation={(recipient) => setActiveConversationUser(recipient)}
+        onOpenCardDetail={(card) => setSelectedCard(card)}
+      />
+
+      {/* Direct Message Modal */}
+      <DirectMessageModal
+        recipient={activeConversationUser}
+        isOpen={Boolean(activeConversationUser)}
+        onClose={() => setActiveConversationUser(null)}
+        onOpenProfile={(userId, username) => setSelectedUserForProfile({ userId, username })}
+      />
+
+      {/* ADD NEW FRIEND / SEND FRIEND REQUEST MODAL */}
       {isAddFriendModalOpen && (
-        <div className="fixed inset-0 z-50 bg-[var(--color-void)]/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="w-full max-w-sm bg-[var(--color-panel)] border border-[var(--color-line)] rounded-[var(--radius-panel)] p-6 space-y-4 shadow-2xl relative">
-            <div className="flex items-center justify-between pb-2 border-b border-[var(--color-line)]">
-              <h3 className="font-display text-display-m text-[var(--color-text)] uppercase">
-                Send Friend Request
-              </h3>
+        <div className="fixed inset-0 z-50 bg-[#080808]/90 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="w-full max-w-sm bg-[#111111] border border-white/15 rounded-3xl p-6 space-y-4 shadow-2xl relative">
+            <div className="flex items-center justify-between border-b border-white/10 pb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-[#FF4500]/10 border border-[#FF4500]/30 flex items-center justify-center text-[#FF4500]">
+                  <UserPlus className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="font-display text-xl text-[#F0EBE3] leading-tight">SEND FRIEND REQUEST</h3>
+                  <span className="text-[10px] font-data text-[#9A9088] uppercase tracking-wider block">
+                    CONNECT WITH REAL REGISTERED USERS
+                  </span>
+                </div>
+              </div>
               <button
                 onClick={() => {
                   setIsAddFriendModalOpen(false);
                   setFriendModalFeedback({ type: '', message: '' });
                 }}
-                className="w-7 h-7 rounded-full bg-[var(--color-panel-2)] border border-[var(--color-line)] flex items-center justify-center text-[var(--color-text-3)] hover:text-[var(--color-text)] cursor-pointer"
+                className="w-8 h-8 rounded-full bg-[#1A1A1A] border border-white/10 flex items-center justify-center text-[#9A9088] hover:text-white"
               >
-                <X size={14} />
+                <X className="w-4 h-4" />
               </button>
             </div>
 
-            <form onSubmit={handleSendFriendRequest} className="space-y-3">
+            <form onSubmit={handleSendFriendRequest} className="space-y-3.5">
               <div>
-                <label className="font-mono text-caption text-[var(--color-text-3)] uppercase block mb-1">
-                  Spotter Username
+                <label className="text-[10px] font-data font-semibold text-[#9A9088] uppercase tracking-wider block mb-1">
+                  ENTER REGISTERED @USERNAME
                 </label>
-                <input
-                  type="text"
-                  value={targetUsernameInput}
-                  onChange={(e) => setTargetUsernameInput(e.target.value)}
-                  placeholder="Enter @username"
-                  className="w-full bg-[var(--color-panel-2)] border border-[var(--color-line)] rounded-[var(--radius-button)] px-3 py-2 text-secondary text-[var(--color-text)] placeholder-[var(--color-text-3)] focus:border-[var(--color-text-2)] outline-none font-mono"
-                  autoFocus
-                />
+                <div className="relative">
+                  <span className="absolute left-3.5 top-3 text-[#FF4500] font-data text-xs">@</span>
+                  <input
+                    type="text"
+                    required
+                    autoFocus
+                    value={targetUsernameInput}
+                    onChange={(e) => setTargetUsernameInput(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
+                    placeholder="e.g. speed_demon"
+                    className="w-full h-11 bg-[#1A1A1A] border border-white/10 rounded-xl pl-8 pr-4 text-xs text-white focus:border-[#FF4500] outline-none font-data"
+                  />
+                </div>
+                <p className="text-[10px] text-[#9A9088] mt-1.5">
+                  The recipient must be a registered APEX user and will receive a request to accept or deny.
+                </p>
               </div>
 
               {friendModalFeedback.message && (
-                <p className={`text-caption font-semibold ${
-                  friendModalFeedback.type === 'success' ? 'text-[var(--color-ok)]' : 'text-[var(--color-danger)]'
+                <div className={`p-3 rounded-xl border text-xs flex items-start gap-2.5 ${
+                  friendModalFeedback.type === 'success'
+                    ? 'bg-[#2ECC71]/10 border-[#2ECC71]/30 text-[#2ECC71]'
+                    : 'bg-rose-950/40 border-rose-600/40 text-rose-300'
                 }`}>
-                  {friendModalFeedback.message}
-                </p>
+                  {friendModalFeedback.type === 'success' ? (
+                    <Check className="w-4 h-4 shrink-0 mt-0.5 text-[#2ECC71]" />
+                  ) : (
+                    <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-400" />
+                  )}
+                  <span className="leading-snug">{friendModalFeedback.message}</span>
+                </div>
               )}
 
-              <Button
-                variant="primary"
-                type="submit"
-                disabled={isSearchingFriend || !targetUsernameInput.trim()}
-                className="w-full"
-              >
-                {isSearchingFriend ? 'Sending...' : 'Send Request'}
-              </Button>
+              <div className="pt-2">
+                <button
+                  type="submit"
+                  disabled={isSearchingFriend || !targetUsernameInput.trim()}
+                  className="w-full h-10 rounded-xl bg-[#FF4500] hover:bg-[#FF5500] disabled:opacity-40 text-white font-sans font-medium text-xs shadow-md flex items-center justify-center gap-2 transition-all active:scale-[0.99]"
+                >
+                  <UserCheck className="w-4 h-4" />
+                  <span>{isSearchingFriend ? 'Sending Request...' : 'Send Friend Request'}</span>
+                </button>
+              </div>
             </form>
           </div>
         </div>
       )}
 
-      {/* Creation Sheet & Modals */}
-      <SpatialCreationSheet
-        isOpen={isCreationSheetOpen}
-        onClose={() => setIsCreationSheetOpen(false)}
-        onOpenScanner={() => {
-          setIsCreationSheetOpen(false);
-          setScannerOpen(true);
-        }}
-        onOpenMediaComposer={(photoUrl) => {
-          setIsCreationSheetOpen(false);
-          setComposerInitialPhoto(photoUrl || null);
-          setIsMediaComposerOpen(true);
-        }}
+      {/* Profile Customization Modal */}
+      <ProfileCustomizationModal
+        isOpen={isCustomizationOpen}
+        onClose={() => setIsCustomizationOpen(false)}
       />
 
-      <MediaPostComposerModal
-        isOpen={isMediaComposerOpen}
-        onClose={() => {
-          setIsMediaComposerOpen(false);
-          setComposerInitialPhoto(null);
-        }}
-        initialPhotoUrl={composerInitialPhoto}
+      {/* 100+ Badges Full Showcase Modal */}
+      <BadgesModal
+        isOpen={isBadgesModalOpen}
+        onClose={() => setIsBadgesModalOpen(false)}
       />
-
-      {/* Comments Modal */}
-      {selectedPostForComments && (
-        <CommentsModal
-          post={selectedPostForComments}
-          onClose={() => setSelectedPostForComments(null)}
-          onOpenProfile={(userId, username) => setSelectedUserForProfile({ userId, username })}
-        />
-      )}
-
-      {/* Public Profile Modal */}
-      {selectedUserForProfile && (
-        <PublicProfileModal
-          isOpen={selectedUserForProfile !== null}
-          onClose={() => setSelectedUserForProfile(null)}
-          userId={selectedUserForProfile.userId}
-          username={selectedUserForProfile.username}
-        />
-      )}
-
-      {/* Direct Messaging Modal */}
-      {activeConversationUser && (
-        <DirectMessageModal
-          isOpen={activeConversationUser !== null}
-          onClose={() => setActiveConversationUser(null)}
-          recipient={activeConversationUser}
-          onOpenProfile={(userId, username) => setSelectedUserForProfile({ userId, username })}
-        />
-      )}
     </>
   );
 };
-
-SocialScreen.displayName = 'SocialScreen';

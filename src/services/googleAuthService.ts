@@ -108,11 +108,13 @@ let isNativeGoogleInitialized = false;
 
 async function ensureNativeGoogleInitialized(clientId: string): Promise<void> {
   if (!isNativeGoogleInitialized) {
+    console.log('[AuthDiag:Google] 1. Initializing native GoogleSignIn plugin (scopes: [])...');
     await GoogleSignIn.initialize({
       clientId,
-      scopes: ['profile', 'email']
+      scopes: []
     });
     isNativeGoogleInitialized = true;
+    console.log('[AuthDiag:Google] 2. Native GoogleSignIn plugin initialized successfully.');
   }
 }
 
@@ -126,24 +128,33 @@ export async function triggerGoogleSignIn(
   // 1. NATIVE ANDROID / IOS IN-APP SIGN-IN (Capacitor Google Sign-In)
   // ══════════════════════════════════════════════════════════════════════════
   if (Capacitor.isNativePlatform()) {
+    console.log('[AuthDiag:Google] Native platform detected. Opening in-app Credential Manager dialog...');
     try {
       await ensureNativeGoogleInitialized(clientId);
 
-      // Show native Google Play Services Account Picker dialog
+      console.log('[AuthDiag:Google] 3. Calling GoogleSignIn.signIn(). Awaiting account selection...');
       const result = await GoogleSignIn.signIn();
 
       if (!result) {
-        // User closed or cancelled dialog
+        console.log('[AuthDiag:Google] Account picker returned null (user cancelled).');
         return;
       }
 
+      console.log('[AuthDiag:Google] 4. Account picker result received.', {
+        hasIdToken: Boolean(result.idToken),
+        hasEmail: Boolean(result.email),
+        hasDisplayName: Boolean(result.displayName)
+      });
+
       // If user cancelled, graceful return
       if (!result.idToken && !result.email) {
+        console.log('[AuthDiag:Google] User cancelled or no credentials returned.');
         return;
       }
 
       // Exchange ID Token with Supabase — this is MANDATORY for real auth
       if (result.idToken) {
+        console.log('[AuthDiag:Google] 5. Exchanging Google ID token with Supabase auth...');
         try {
           const { data: supabaseSession, error: supabaseError } = await supabase.auth.signInWithIdToken({
             provider: 'google',
@@ -152,13 +163,13 @@ export async function triggerGoogleSignIn(
           });
 
           if (supabaseError || !supabaseSession?.user) {
-            console.error('Supabase signInWithIdToken failed:', supabaseError);
-            onError?.('Failed to authenticate with server. Please try again or use email sign in.');
+            console.error('[AuthDiag:Google] Supabase signInWithIdToken error:', supabaseError?.message);
+            onError?.(supabaseError?.message || 'Failed to authenticate with server. Please try again or use email sign in.');
             return;
           }
 
-          // Use Supabase auth user ID — NOT the Google user ID
           const supabaseUserId = supabaseSession.user.id;
+          console.log('[AuthDiag:Google] 6. Supabase session created successfully. User ID prefix:', supabaseUserId.substring(0, 8));
 
           const userData: GoogleUserData = {
             id: supabaseUserId,
@@ -169,23 +180,29 @@ export async function triggerGoogleSignIn(
             picture: result.imageUrl || ''
           };
 
+          console.log('[AuthDiag:Google] 7. Invoking onSuccess callback to complete app onboarding...');
           onSuccess(userData);
           return;
         } catch (supabaseErr: any) {
-          console.error('Supabase signInWithIdToken exception:', supabaseErr);
+          console.error('[AuthDiag:Google] Supabase signInWithIdToken exception:', supabaseErr?.message || supabaseErr);
           onError?.('Server authentication failed. Please try again or use email sign in.');
           return;
         }
       } else {
-        // No ID token — cannot create Supabase session
+        console.warn('[AuthDiag:Google] No ID token in GoogleSignIn result.');
         onError?.('Google did not provide an authentication token. Please try again or use email sign in.');
         return;
       }
     } catch (nativeErr: any) {
-      console.warn('Native Google Sign-In notice:', nativeErr);
+      console.warn('[AuthDiag:Google] Native Google Sign-In caught error:', nativeErr);
       const errMessage = nativeErr?.message || String(nativeErr);
-      if (errMessage.includes('12501') || errMessage.toLowerCase().includes('cancel')) {
-        // User closed or cancelled native account picker dialog
+      if (
+        errMessage.includes('12501') || 
+        errMessage.includes('SIGN_IN_CANCELED') || 
+        errMessage.toLowerCase().includes('cancel')
+      ) {
+        console.log('[AuthDiag:Google] Native account picker was cancelled or aborted by Google Play Services.');
+        onError?.('Google Sign-In was cancelled or rejected by Google Play Services. If this persists, please use Guest Spotter or Email.');
         return;
       }
       onError?.(errMessage || 'Google Sign-In failed. Please sign in with email and password.');

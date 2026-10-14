@@ -35,7 +35,6 @@ export const MediaPostComposerModal: React.FC<MediaPostComposerModalProps> = ({
   const [mediaType, setMediaType] = useState<'image' | 'video'>('image');
   const [thumbnailDataUrl, setThumbnailDataUrl] = useState<string | null>(null);
   const [caption, setCaption] = useState('');
-  const [locationPrivacy, setLocationPrivacy] = useState<'exact_delayed' | 'approximate' | 'hidden'>('approximate');
 
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -353,26 +352,29 @@ export const MediaPostComposerModal: React.FC<MediaPostComposerModalProps> = ({
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: '100%', opacity: 0 }}
           transition={{ type: 'spring', damping: 26, stiffness: 300 }}
-          className="relative z-10 w-full max-w-lg bg-[var(--color-void)] border border-[var(--color-line)] rounded-t-[28px] sm:rounded-2xl max-h-[92dvh] flex flex-col overflow-hidden shadow-2xl"
+          className="relative z-10 w-full max-w-lg bg-[#111111] border border-white/15 rounded-t-[28px] sm:rounded-2xl max-h-[92dvh] flex flex-col overflow-hidden shadow-2xl"
           style={{
             paddingBottom: 'max(14px, env(safe-area-inset-bottom, 14px))'
           }}
         >
           {/* Header */}
-          <div className="px-5 py-4 border-b border-[var(--color-line)] flex items-center justify-between bg-[var(--color-panel)]">
+          <div className="px-5 py-4 border-b border-white/10 flex items-center justify-between bg-[#141414]">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl flex items-center justify-center border border-[var(--color-line)] bg-[var(--color-panel-2)]">
-                <Sparkles className="w-4 h-4 text-[var(--color-xp)]" />
+              <div 
+                className="w-8 h-8 rounded-xl flex items-center justify-center border border-white/10"
+                style={{ backgroundColor: 'rgba(229,9,20,0.15)' }}
+              >
+                <Sparkles className="w-4 h-4 text-[#E50914]" />
               </div>
-              <h3 className="font-display text-base font-bold text-[var(--color-text)] tracking-wide uppercase">
-                New Apex Discovery
+              <h3 className="font-display text-base font-bold text-white tracking-wide">
+                NEW APEX DISCOVERY
               </h3>
             </div>
             <button
               onClick={handleClose}
               disabled={isUploading}
               aria-label="Close composer"
-              className="w-10 h-10 rounded-full bg-[var(--color-panel-2)] text-[var(--color-text-3)] hover:text-[var(--color-text)] transition-colors flex items-center justify-center min-h-[44px] min-w-[44px] cursor-pointer"
+              className="w-10 h-10 rounded-full bg-white/10 text-white/60 hover:text-white transition-colors flex items-center justify-center min-h-[44px] min-w-[44px]"
             >
               <X className="w-5 h-5" />
             </button>
@@ -391,8 +393,8 @@ export const MediaPostComposerModal: React.FC<MediaPostComposerModalProps> = ({
           <div className="flex-1 overflow-y-auto p-5 space-y-4 no-scrollbar">
             {/* Error Message Toast */}
             {errorMessage && (
-              <div className="p-3.5 rounded-xl bg-[var(--color-danger)]/15 border border-[var(--color-danger)]/30 text-[var(--color-danger)] text-xs flex items-start gap-2.5">
-                <AlertCircle className="w-4 h-4 text-[var(--color-danger)] shrink-0 mt-0.5" />
+              <div className="p-3.5 rounded-xl bg-red-950/50 border border-red-500/40 text-red-200 text-xs flex items-start gap-2.5">
+                <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
                 <span className="leading-relaxed">{errorMessage}</span>
               </div>
             )}
@@ -403,21 +405,21 @@ export const MediaPostComposerModal: React.FC<MediaPostComposerModalProps> = ({
                 {/* Primary Card: Direct Camera Capture */}
                 <div 
                   onClick={handleTakeCameraPhoto}
-                  className="w-full p-5 rounded-2xl border border-[var(--color-line)] hover:border-[var(--color-text-2)] bg-[var(--color-panel)] flex items-center gap-4 cursor-pointer transition-all active:scale-[0.98] group shadow-lg"
+                  className="w-full p-5 rounded-2xl border border-[#E50914]/40 hover:border-[#E50914] bg-gradient-to-r from-[#E50914]/20 via-[#E50914]/10 to-transparent flex items-center gap-4 cursor-pointer transition-all active:scale-[0.98] group shadow-lg shadow-red-950/20"
                 >
-                  <div className="w-13 h-13 rounded-2xl bg-[var(--color-panel-2)] border border-[var(--color-line)] flex items-center justify-center text-[var(--color-text)] shadow-md shrink-0 group-hover:scale-105 transition-transform">
-                    <CameraIcon className="w-6 h-6 text-[var(--color-xp)]" />
+                  <div className="w-13 h-13 rounded-2xl bg-[#E50914] flex items-center justify-center text-white shadow-lg shadow-red-950/50 shrink-0 group-hover:scale-105 transition-transform">
+                    <CameraIcon className="w-6 h-6" />
                   </div>
                   <div className="flex-1 min-w-0 text-left">
                     <div className="flex items-center gap-2">
-                      <h4 className="font-display text-sm font-bold text-[var(--color-text)] tracking-wide">
+                      <h4 className="font-display text-sm font-bold text-white tracking-wide">
                         TAKE VEHICLE PHOTO
                       </h4>
-                      <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-[var(--color-xp)] text-black uppercase">
+                      <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-[#E50914] text-white uppercase">
                         CAMERA
                       </span>
                     </div>
-                    <p className="text-xs text-[var(--color-text-3)] leading-snug mt-0.5">
+                    <p className="text-xs text-white/70 leading-snug mt-0.5">
                       Prompts camera permission & opens native camera
                     </p>
                   </div>
@@ -426,16 +428,16 @@ export const MediaPostComposerModal: React.FC<MediaPostComposerModalProps> = ({
                 {/* Secondary Card: Choose from Library */}
                 <div 
                   onClick={() => fileInputRef.current?.click()}
-                  className="w-full p-5 rounded-2xl border border-[var(--color-line)] hover:border-[var(--color-text-2)] bg-[var(--color-panel)] flex items-center gap-4 cursor-pointer transition-all active:scale-[0.98] group shadow-lg"
+                  className="w-full p-5 rounded-2xl border border-white/15 hover:border-white/30 bg-[#161616] flex items-center gap-4 cursor-pointer transition-all active:scale-[0.98] group"
                 >
-                  <div className="w-13 h-13 rounded-2xl bg-[var(--color-panel-2)] flex items-center justify-center text-[var(--color-text-2)] border border-[var(--color-line)] shrink-0 group-hover:border-[var(--color-text-3)] transition-colors">
+                  <div className="w-13 h-13 rounded-2xl bg-white/10 flex items-center justify-center text-white/90 border border-white/10 shrink-0 group-hover:border-white/25 transition-colors">
                     <Upload className="w-6 h-6" />
                   </div>
                   <div className="flex-1 min-w-0 text-left">
-                    <h4 className="font-display text-sm font-bold text-[var(--color-text)] tracking-wide">
+                    <h4 className="font-display text-sm font-bold text-white tracking-wide">
                       SELECT FROM GALLERY
                     </h4>
-                    <p className="text-xs text-[var(--color-text-3)] leading-snug mt-0.5">
+                    <p className="text-xs text-white/50 leading-snug mt-0.5">
                       Upload photo or rolling video (up to 50MB)
                     </p>
                   </div>
@@ -444,7 +446,7 @@ export const MediaPostComposerModal: React.FC<MediaPostComposerModalProps> = ({
             ) : (
               <div className="space-y-3">
                 {/* Media Preview Player/Canvas */}
-                <div className="relative w-full h-64 rounded-2xl overflow-hidden bg-black border border-[var(--color-line)] shadow-inner flex items-center justify-center">
+                <div className="relative w-full h-64 rounded-2xl overflow-hidden bg-black border border-white/20 shadow-inner flex items-center justify-center">
                   {mediaType === 'video' ? (
                     <video
                       src={previewUrl}
@@ -468,22 +470,22 @@ export const MediaPostComposerModal: React.FC<MediaPostComposerModalProps> = ({
                         setPreviewUrl(null);
                         setThumbnailDataUrl(null);
                       }}
-                      className="absolute top-3 right-3 px-3 py-1.5 rounded-xl bg-[var(--color-panel)]/80 backdrop-blur-md border border-[var(--color-line)] text-xs font-bold text-[var(--color-text)] hover:bg-[var(--color-panel)] active:scale-90 transition-all cursor-pointer"
+                      className="absolute top-3 right-3 px-3 py-1.5 rounded-xl bg-black/70 backdrop-blur-md border border-white/20 text-xs font-bold text-white hover:bg-black/90 active:scale-90 transition-all"
                     >
                       Change
                     </button>
                   )}
 
                   {/* Media Type Badge */}
-                  <div className="absolute bottom-3 left-3 px-2.5 py-1 rounded-lg bg-[var(--color-panel)]/80 backdrop-blur-md border border-[var(--color-line)] flex items-center gap-1.5 text-[10px] font-bold text-[var(--color-text)]">
+                  <div className="absolute bottom-3 left-3 px-2.5 py-1 rounded-lg bg-black/70 backdrop-blur-md border border-white/20 flex items-center gap-1.5 text-[10px] font-bold text-white">
                     {mediaType === 'video' ? (
                       <>
-                        <VideoIcon className="w-3 h-3 text-[var(--color-xp)]" />
+                        <VideoIcon className="w-3 h-3 text-[#E50914]" />
                         <span>VIDEO POST</span>
                       </>
                     ) : (
                       <>
-                        <ImageIcon className="w-3 h-3 text-[var(--color-xp)]" />
+                        <ImageIcon className="w-3 h-3 text-[#E50914]" />
                         <span>PHOTO POST</span>
                       </>
                     )}
@@ -492,7 +494,7 @@ export const MediaPostComposerModal: React.FC<MediaPostComposerModalProps> = ({
 
                 {/* Caption Input */}
                 <div>
-                  <label className="block text-xs font-semibold text-[var(--color-text-2)] mb-1.5">
+                  <label className="block text-xs font-semibold text-white/70 mb-1.5">
                     Caption (optional)
                   </label>
                   <textarea
@@ -502,59 +504,27 @@ export const MediaPostComposerModal: React.FC<MediaPostComposerModalProps> = ({
                     rows={3}
                     maxLength={300}
                     disabled={isUploading}
-                    className="w-full bg-[var(--color-panel-2)] border border-[var(--color-line)] rounded-xl p-3 text-xs text-[var(--color-text)] placeholder-[var(--color-text-3)] focus:outline-none focus:border-[var(--color-text-2)] transition-all resize-none"
+                    className="w-full bg-[#181818] border border-white/15 rounded-xl p-3 text-xs text-white placeholder-white/40 focus:outline-none focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] transition-all resize-none"
                   />
-                  <div className="flex justify-between items-center text-[10px] text-[var(--color-text-3)] mt-1 font-mono">
+                  <div className="flex justify-between items-center text-[10px] text-white/40 mt-1">
                     <span>Direct community feed post</span>
                     <span>{caption.length}/300</span>
                   </div>
-                </div>
-
-                {/* 3-Option Location Privacy Selector */}
-                <div className="space-y-1.5 pt-1">
-                  <label className="block text-caption font-semibold text-[var(--color-text-2)] uppercase tracking-wider">
-                    Location Privacy
-                  </label>
-                  <div className="grid grid-cols-3 gap-1.5 p-1 rounded-[var(--radius-button)] bg-[var(--color-panel-2)] border border-[var(--color-line)]">
-                    {[
-                      { id: 'exact_delayed' as const, label: '15m Delay' },
-                      { id: 'approximate' as const, label: 'City Zone' },
-                      { id: 'hidden' as const, label: 'Hidden' },
-                    ].map((mode) => (
-                      <button
-                        key={mode.id}
-                        type="button"
-                        onClick={() => setLocationPrivacy(mode.id)}
-                        className={`py-1.5 rounded-[var(--radius-chip)] text-[11px] font-semibold transition-all cursor-pointer ${
-                          locationPrivacy === mode.id
-                            ? 'bg-[var(--color-panel)] text-[var(--color-text)] shadow-sm'
-                            : 'text-[var(--color-text-3)] hover:text-[var(--color-text)]'
-                        }`}
-                      >
-                        {mode.label}
-                      </button>
-                    ))}
-                  </div>
-                  <p className="text-[10px] text-[var(--color-text-3)] leading-relaxed">
-                    {locationPrivacy === 'exact_delayed' && 'Exact coordinates revealed after 15 minutes.'}
-                    {locationPrivacy === 'approximate' && 'Shows general city or district area without exact coordinates.'}
-                    {locationPrivacy === 'hidden' && 'Hidden from radar map and public coordinates.'}
-                  </p>
                 </div>
 
                 {/* Upload Progress Bar */}
                 {isUploading && (
                   <div className="space-y-1.5 pt-2">
                     <div className="flex justify-between text-xs font-bold">
-                      <span className="text-[var(--color-text)] flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-[var(--accent-color)] animate-ping" />
+                      <span className="text-white flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-[#E50914] animate-ping" />
                         Uploading to Apex Feed...
                       </span>
-                      <span className="text-[var(--accent-color)] font-mono">{uploadProgress}%</span>
+                      <span className="text-[#E50914] font-mono">{uploadProgress}%</span>
                     </div>
-                    <div className="w-full h-2 rounded-full bg-[var(--color-panel-2)] overflow-hidden">
+                    <div className="w-full h-2 rounded-full bg-white/10 overflow-hidden">
                       <motion.div
-                        className="h-full bg-[var(--accent-color)]"
+                        className="h-full bg-[#E50914]"
                         animate={{ width: `${uploadProgress}%` }}
                         transition={{ ease: 'easeOut', duration: 0.2 }}
                       />
@@ -567,12 +537,12 @@ export const MediaPostComposerModal: React.FC<MediaPostComposerModalProps> = ({
 
           {/* Modal Footer Actions */}
           {previewUrl && (
-            <div className="p-4 border-t border-[var(--color-line)] bg-[var(--color-panel)] flex items-center gap-3">
+            <div className="p-4 border-t border-white/10 bg-[#141414] flex items-center gap-3">
               <button
                 type="button"
                 onClick={handleClose}
                 disabled={isUploading}
-                className="flex-1 py-3 px-4 rounded-xl border border-[var(--color-line)] text-xs font-bold text-[var(--color-text-2)] hover:text-[var(--color-text)] active:scale-95 transition-all min-h-[44px] cursor-pointer"
+                className="flex-1 py-3 px-4 rounded-xl border border-white/15 text-xs font-bold text-white/70 hover:text-white active:scale-95 transition-all min-h-[44px]"
               >
                 Cancel
               </button>
@@ -580,10 +550,10 @@ export const MediaPostComposerModal: React.FC<MediaPostComposerModalProps> = ({
                 type="button"
                 onClick={handleSubmitPost}
                 disabled={isUploading || !selectedFile}
-                className={`flex-1 py-3 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 text-white active:scale-95 transition-all min-h-[44px] cursor-pointer ${
+                className={`flex-1 py-3 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 text-white active:scale-95 transition-all min-h-[44px] ${
                   isUploading || !selectedFile
-                    ? 'bg-[var(--color-panel-2)] text-[var(--color-text-3)] cursor-not-allowed'
-                    : 'bg-[var(--accent-color)] hover:brightness-110 shadow-lg'
+                    ? 'bg-white/10 text-white/40 cursor-not-allowed'
+                    : 'bg-[#E50914] hover:bg-[#DC2626] shadow-lg shadow-red-950/60'
                 }`}
               >
                 {isUploading ? (

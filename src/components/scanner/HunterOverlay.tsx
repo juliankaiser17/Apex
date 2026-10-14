@@ -75,21 +75,12 @@ export const HunterOverlay: React.FC<HunterOverlayProps> = ({
           <X className="w-5 h-5" />
         </button>
 
-        {/* Status Pill Badge with Beta Tag & Daily Scans Remaining */}
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-2 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/15 shadow-lg">
-            <span className="w-2 h-2 rounded-full bg-[#E50914] animate-pulse" />
-            <span className="text-xs font-semibold text-white tracking-wide">
-              {isRearCamera ? 'Live Viewfinder' : 'Front Viewfinder'}
-            </span>
-            <span className="px-1.5 py-0.5 text-[9px] font-bold bg-[#E50914] text-white rounded-full uppercase tracking-wider">
-              Beta
-            </span>
-          </div>
-
-          <div className="hidden sm:flex items-center bg-black/60 backdrop-blur-md px-2.5 py-1.5 rounded-full border border-white/15 shadow-lg text-[11px] font-semibold text-white/80">
-            <span>{Math.max(0, 10 - ((useApexStore.getState().user as any)?.daily_scans_count || 0))} scans left today</span>
-          </div>
+        {/* Status Pill Badge */}
+        <div className="flex items-center gap-2 bg-black/60 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/15 shadow-lg">
+          <span className="w-2 h-2 rounded-full bg-[#E50914] animate-pulse" />
+          <span className="text-xs font-semibold text-white tracking-wide">
+            {isRearCamera ? 'Live Viewfinder' : 'Front Viewfinder'}
+          </span>
         </div>
 
         {/* Top Right Action Cluster: Torch & Camera Switch */}

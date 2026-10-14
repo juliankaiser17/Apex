@@ -33,8 +33,8 @@ android {
             if (releaseSigningConfig.storeFile && releaseSigningConfig.storeFile.exists()) {
                 signingConfig releaseSigningConfig
             }
-            minifyEnabled true
-            shrinkResources true
+            minifyEnabled false
+            shrinkResources false
             debuggable false
             jniDebuggable false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'

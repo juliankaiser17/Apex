@@ -22,18 +22,18 @@ export const TabBar: React.FC = React.memo(() => {
 
   return (
     <nav 
-      className="fixed bottom-0 left-0 right-0 z-30 pb-safe select-none font-sans pointer-events-none px-4 mb-2.5"
+      className="fixed bottom-0 left-0 right-0 z-30 pb-safe select-none font-sans pointer-events-none px-4 mb-2"
       aria-label="Main Navigation"
     >
       <div className="max-w-md mx-auto pointer-events-auto">
-        <div className="h-14 rounded-[var(--radius-pill)] bg-[var(--color-panel)]/96 border border-[var(--color-line)] shadow-[0_12px_36px_rgba(0,0,0,0.7)] backdrop-blur-md px-3 flex items-center justify-around relative">
+        <div className="apple-dock rounded-[28px] px-2 py-1.5 flex items-center justify-around relative">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = !tab.isCenter && activeTab === tab.id;
 
             if (tab.isCenter) {
               return (
-                <div key="scan" className="flex flex-col items-center -mt-6">
+                <div key="scan" className="flex flex-col items-center -mt-4">
                   <button
                     onClick={() => {
                       hapticImpact('medium');
@@ -41,11 +41,16 @@ export const TabBar: React.FC = React.memo(() => {
                       setScannerOpen(true);
                     }}
                     aria-label="Instant AI Vehicle Scanner"
-                    className="relative w-16 h-16 rounded-full active:scale-95 text-white flex items-center justify-center transition-transform duration-150 cursor-pointer shadow-[0_4px_24px_var(--accent-glow)] bg-[var(--color-accent)] border-2 border-white/20 group"
+                    className="relative w-12 h-12 rounded-full active:scale-95 text-white flex items-center justify-center transition-transform duration-150 cursor-pointer shadow-lg group"
+                    style={{
+                      background: 'linear-gradient(180deg, var(--accent-color) 0%, #B80710 100%)',
+                      border: '0.5px solid rgba(255, 255, 255, 0.35)',
+                      boxShadow: '0 4px 14px rgba(0, 0, 0, 0.4), inset 0 1px 0.5px rgba(255, 255, 255, 0.38)'
+                    }}
                   >
-                    <Camera className="w-6 h-6 text-white group-hover:scale-105 transition-transform" />
+                    <Camera className="w-5 h-5 text-white drop-shadow-sm group-hover:scale-105 transition-transform" />
                   </button>
-                  <span className="text-caption font-bold tracking-wider mt-1 text-[var(--color-text-2)] uppercase">
+                  <span className="text-[9px] font-bold tracking-wider mt-0.5 text-white/80 uppercase">
                     Scan
                   </span>
                 </div>
@@ -64,23 +69,22 @@ export const TabBar: React.FC = React.memo(() => {
                 }}
                 aria-label={tab.label}
                 aria-selected={isActive}
-                className="flex flex-col items-center justify-center py-1 px-2 min-w-[52px] min-h-[48px] rounded-[var(--radius-chip)] transition-all duration-150 active:scale-95 cursor-pointer group"
+                className="flex flex-col items-center justify-center py-1 px-2.5 min-w-[50px] min-h-[44px] rounded-xl transition-all duration-150 active:scale-92 cursor-pointer group"
               >
                 <Icon 
                   className={`w-5 h-5 transition-transform duration-150 ${
-                    isActive
-                      ? 'text-[var(--color-text)] fill-current scale-105'
-                      : 'text-[var(--color-text-3)] group-hover:text-[var(--color-text-2)]'
+                    isActive ? 'scale-105' : 'group-hover:text-white/70'
                   }`} 
+                  style={isActive ? { color: 'var(--accent-color)' } : { color: 'rgba(255, 255, 255, 0.45)' }}
                 />
                 
                 <span 
-                  className={`text-caption tracking-tight mt-0.5 transition-colors flex items-center gap-1 ${
-                    isActive ? 'font-semibold text-[var(--color-text)]' : 'font-normal text-[var(--color-text-3)]'
+                  className={`text-[10px] tracking-tight mt-0.5 transition-colors ${
+                    isActive ? 'font-semibold' : 'font-medium'
                   }`}
+                  style={isActive ? { color: '#FFFFFF' } : { color: 'rgba(255, 255, 255, 0.45)' }}
                 >
                   {tab.label}
-                  {isActive && <span className="w-1 h-1 rounded-full bg-[var(--color-accent)] inline-block" />}
                 </span>
               </button>
             );

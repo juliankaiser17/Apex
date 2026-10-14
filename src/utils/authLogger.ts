@@ -27,19 +27,19 @@ export function logAuthTransition(
   email?: string | null,
   details?: Record<string, any>
 ): void {
-  const isDev = (typeof import.meta !== 'undefined' && import.meta.env?.DEV) || (typeof process !== 'undefined' && process.env?.NODE_ENV !== 'production');
-  if (!isDev) return;
-
   const timestamp = new Date().toLocaleTimeString();
   const sanitizedEmail = email ? email.replace(/^(.{2})(.*)(@.*)$/, '$1***$3') : 'none';
   const shortId = userId ? `${userId.substring(0, 8)}...` : 'anonymous';
 
-  console.groupCollapsed(`%c[APEX AUTH] %c${event} %c@ ${timestamp}`, 'color: #E50914; font-weight: bold;', 'color: #00FF66; font-weight: bold;', 'color: #888;');
-  console.log('Event:', event);
-  console.log('User ID:', shortId);
-  console.log('Email:', sanitizedEmail);
+  console.log(`[APEX AUTH] ${event} @ ${timestamp} | user: ${shortId} | email: ${sanitizedEmail}`);
   if (details) {
-    console.log('Details:', details);
+    const sanitizedDetails = { ...details };
+    // Redact any possible token / secret fields
+    delete sanitizedDetails.token;
+    delete sanitizedDetails.access_token;
+    delete sanitizedDetails.refresh_token;
+    delete sanitizedDetails.idToken;
+    delete sanitizedDetails.id_token;
+    console.log('  Details:', sanitizedDetails);
   }
-  console.groupEnd();
 }

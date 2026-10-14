@@ -321,8 +321,10 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
     setAuthError('');
 
     try {
+      console.log('[AuthDiag:Google] Triggering Google Sign-In flow from OnboardingModal...');
       await triggerGoogleSignIn(
         async (gUser) => {
+          console.log('[AuthDiag:Google] 8. Received authenticated user in OnboardingModal. Initializing session...');
           if (gUser && gUser.email) {
             const cleanEmail = normalizeEmail(gUser.email);
             const userEmail = cleanEmail;
@@ -334,26 +336,51 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
               username: uName
             });
 
+            // 1. Authoritative check: if onboarding already completed
             if (useApexStore.getState().onboardingCompleted) {
+              console.log('[AuthDiag:Google] 9a. Onboarding already completed. Dismissing modal...');
+              useApexStore.getState().completeOnboarding();
               onClose();
               setIsAuthLoading(false);
               return;
             }
 
+            // 2. Established user profile check (returning user)
             const currentUser = useApexStore.getState().user;
+            const isProfileEstablished = Boolean(
+              useApexStore.getState().onboardingCompleted ||
+              (currentUser.totalSpots && currentUser.totalSpots > 0) ||
+              (currentUser.xp && currentUser.xp > 0) ||
+              (currentUser.level && currentUser.level > 1) ||
+              (currentUser.username && !currentUser.username.startsWith('spotter_') && !currentUser.username.startsWith('user_'))
+            );
+
+            if (isProfileEstablished) {
+              console.log('[AuthDiag:Google] 9b. Established profile detected for returning user. Completing onboarding...');
+              useApexStore.getState().completeOnboarding();
+              onClose();
+              setIsAuthLoading(false);
+              return;
+            }
+
+            // 3. New account without configured profile: navigate to profile setup
+            console.log('[AuthDiag:Google] 9c. New profile setup required. Routing to profile_setup step...');
             setDisplayNameInput(currentUser.displayName || dName);
             setUsernameInput(currentUser.username || uName);
+            setSelectedCity(currentUser.city || '');
+            setSelectedCountry(currentUser.country || '');
             setStep('profile_setup');
           }
           setIsAuthLoading(false);
         },
         (errMsg) => {
+          console.error('[AuthDiag:Google] Sign in failed callback:', errMsg);
           setIsAuthLoading(false);
           setAuthError(errMsg || 'Google sign in failed. Please try again or use Email.');
         }
       );
     } catch (e: any) {
-      console.warn('Google sign in handler notice:', e);
+      console.warn('[AuthDiag:Google] Google sign in handler notice:', e);
       setIsAuthLoading(false);
     } finally {
       setIsAuthLoading(false);

@@ -104,6 +104,13 @@ try {
 
     console.log(`✅ Release APK generated: ${targetApk} (${(stats.size / 1024 / 1024).toFixed(2)} MB)`);
     console.log(`   SHA-256: ${apkSha256}`);
+
+    const desktopDir = path.resolve(process.env.USERPROFILE || process.env.HOME || '', 'Desktop');
+    if (fs.existsSync(desktopDir)) {
+      const desktopApk = path.resolve(desktopDir, 'Apex-Beta-v1.0.apk');
+      fs.copyFileSync(targetApk, desktopApk);
+      console.log(`📱 Copied release APK to Desktop: ${desktopApk}`);
+    }
   }
 } catch (err) {
   console.error('❌ Gradle assembleRelease failed:', err.message);

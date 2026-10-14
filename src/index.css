@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@import "./styles/tokens.css";
 
 @layer base {
   * {
@@ -8,9 +7,8 @@
   }
   
   html, body {
-    background-color: var(--color-void);
-    color: var(--color-text);
-    font-family: var(--font-sans);
+    background-color: #050505;
+    color: #F0EBE3;
     overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
     touch-action: pan-x pan-y;
@@ -21,30 +19,14 @@
   }
 }
 
-/* ═══ TYPOGRAPHY INSTRUMENTS & DISPLAY UTILITIES ═══ */
-.font-display { font-family: var(--font-display); }
-.font-sans { font-family: var(--font-sans); }
-.font-mono, .font-data { 
-  font-family: var(--font-mono); 
-  font-variant-numeric: tabular-nums; 
-}
-
-/* ═══ TYPE SCALE UTILITIES ═══ */
-.text-display-xl { font-size: 40px; line-height: 40px; font-weight: 900; }
-.text-display-l { font-size: 28px; line-height: 30px; font-weight: 700; }
-.text-display-m { font-size: 22px; line-height: 24px; font-weight: 700; }
-.text-body { font-size: 15px; line-height: 22px; }
-.text-secondary { font-size: 13px; line-height: 18px; }
-.text-caption { font-size: 12px; line-height: 16px; }
-
-/* ═══ LEAFLET MAP OVERRIDES & DARK ROADMAP TILES ═══ */
+/* ═══ LEAFLET MAP OVERRIDES & 100% KEYLESS DARK MATTER TILES ═══ */
 .leaflet-container,
 .leaflet-pane,
 .leaflet-tile-pane,
 .leaflet-layer,
 .leaflet-map-pane {
-  background: var(--color-void) !important;
-  background-color: var(--color-void) !important;
+  background: #080808 !important;
+  background-color: #080808 !important;
 }
 
 .leaflet-container {
@@ -61,40 +43,36 @@
 
 /* High-Contrast Cyber Dark Roadmap Tile Filter */
 .dark-tiles .leaflet-tile {
-  filter: invert(100%) hue-rotate(180deg) brightness(80%) contrast(140%) grayscale(45%) !important;
+  filter: invert(100%) hue-rotate(180deg) brightness(85%) contrast(125%) grayscale(35%) !important;
   will-change: transform;
   transform: translateZ(0);
   backface-visibility: hidden;
 }
 
-/* Leaflet Dark Popup */
-.dark-popup .leaflet-popup-content-wrapper {
-  background: var(--color-panel) !important;
-  color: var(--color-text) !important;
-  border: 1px solid var(--color-line) !important;
-  border-radius: var(--radius-panel) !important;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.7) !important;
-  padding: 0 !important;
-  overflow: hidden;
-}
-.dark-popup .leaflet-popup-tip {
-  background: var(--color-panel) !important;
-}
-.dark-popup .leaflet-popup-content {
+/* ═══ SUBTLE DARK GLASSMORPHIC MAP ATTRIBUTION ═══ */
+.leaflet-control-attribution {
+  background: rgba(10, 10, 10, 0.75) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  color: rgba(240, 235, 227, 0.45) !important;
+  font-size: 9px !important;
+  line-height: 1.4 !important;
+  padding: 2px 7px !important;
+  border-top-left-radius: 6px !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-right: none !important;
+  border-bottom: none !important;
   margin: 0 !important;
-  line-height: inherit !important;
 }
 
-/* ═══ MAP GPS RIPPLE ANIMATION ═══ */
-@keyframes mapRipple {
-  0% {
-    transform: scale(0.7);
-    opacity: 0.9;
-  }
-  100% {
-    transform: scale(2.4);
-    opacity: 0;
-  }
+.leaflet-control-attribution a {
+  color: rgba(240, 235, 227, 0.65) !important;
+  text-decoration: none !important;
+}
+
+.leaflet-control-attribution a:hover {
+  color: #FF4500 !important;
+  text-decoration: underline !important;
 }
 
 /* ═══ SMOOTH 60FPS MOBILE SCROLLING UTILITIES ═══ */
@@ -115,8 +93,8 @@
   --sab: max(16px, env(safe-area-inset-bottom, 16px));
   
   /* Dynamic Accent Theme System (Black Primary + Dynamic Accent) */
-  --accent-color: #E50914; /* hex-allowed */
-  --accent-hover: #c70811; /* hex-allowed */
+  --accent-color: #E50914;
+  --accent-hover: #c70811;
   --accent-rgb: 229, 9, 20;
   --accent-glow: rgba(229, 9, 20, 0.4);
   --accent-glow-strong: rgba(229, 9, 20, 0.75);

@@ -3,113 +3,67 @@ import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from 'react-le
 import L from 'leaflet';
 import { ShieldAlert, Crosshair, Eye, Search, Flame, ArrowLeft, Globe, Shield, EyeOff, MapPin, Navigation } from 'lucide-react';
 import { useApexStore } from '../../store/useApexStore';
+import { RARITY_CONFIG } from '../../utils/rarity';
 import type { CarCard } from '../../types/apex';
 import { CitySearchModal } from './CitySearchModal';
 import type { CityLocation } from './CitySearchModal';
 import { Gta5SatelliteHud } from './Gta5SatelliteHud';
 import { sounds } from '../../utils/audio';
 import { requestRealLocationPermission, watchUserLocation } from '../../utils/geolocation';
-import { BottomSheet } from '../ui/BottomSheet';
-import { Button } from '../ui/Button';
-import { RarityBadge } from '../ui/RarityBadge';
-import { StatChip } from '../ui/StatChip';
-
-// Rarity color variable mapping for 44px circular pins
-const RARITY_COLOR_MAP: Record<string, string> = {
-  common: 'var(--color-common)',
-  uncommon: 'var(--color-uncommon)',
-  rare: 'var(--color-rare)',
-  epic: 'var(--color-epic)',
-  legendary: 'var(--color-legendary)',
-  mythic: 'var(--color-xp)',
-};
-
-// Rarity stroke rgba mapping for Leaflet perimeter circles
-const RARITY_STROKE_MAP: Record<string, string> = {
-  common: 'rgba(139, 147, 160, 0.6)',
-  uncommon: 'rgba(63, 167, 150, 0.7)',
-  rare: 'rgba(79, 125, 240, 0.7)',
-  epic: 'rgba(168, 98, 240, 0.7)',
-  legendary: 'rgba(232, 168, 56, 0.8)',
-  mythic: 'rgba(255, 79, 216, 0.85)',
-};
 
 // Cache for Leaflet DivIcons to prevent garbage collection churn and re-creation
 const pinIconCache = new Map<string, L.DivIcon>();
 
-// 44px Circular Pin with Rarity Ring
-const getCachedPinIcon = (rarity: string, imageUrl?: string): L.DivIcon => {
+const getCachedPinIcon = (color: string, imageUrl?: string): L.DivIcon => {
   const safeImg = imageUrl || '';
-  const key = `${rarity}_${safeImg}`;
+  const key = `${color}_${safeImg}`;
   const existing = pinIconCache.get(key);
   if (existing) return existing;
 
-  const colorVar = RARITY_COLOR_MAP[rarity] || 'var(--color-common)';
-
   const icon = L.divIcon({
-    className: 'custom-pin-44',
+    className: 'custom-pin',
     html: `
       <div style="
-        width: 44px; height: 44px; position: relative; cursor: pointer;
-        display: flex; align-items: center; justify-content: center;
-        border-radius: 50%;
-        background: var(--color-void);
-        border: 2.5px solid ${colorVar};
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.7), 0 0 10px rgba(0, 0, 0, 0.4);
-        overflow: hidden;
+        width: 50px; height: 62px; position: relative; cursor: pointer;
+        filter: drop-shadow(0 2px 5px rgba(0,0,0,0.6));
       ">
-        ${safeImg
-          ? `<img src="${safeImg}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.style.display='none'" />`
-          : `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: var(--color-panel-2); color: var(--color-text-2);">
-               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                 <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/>
-                 <circle cx="7" cy="17" r="2"/>
-                 <path d="M9 17h6"/>
-                 <circle cx="17" cy="17" r="2"/>
-               </svg>
-             </div>`
-        }
+        <div style="
+          width: 50px; height: 46px; border-radius: 9px;
+          background: #111111; border: 2px solid ${color};
+          overflow: hidden; position: relative;
+        ">
+          ${safeImg ? `<img src="${safeImg}" style="width:100%;height:34px;object-fit:cover;border-radius:6px 6px 0 0;" onerror="this.style.display='none'" />` : '<div style="width:100%;height:34px;background:#1A1A1A;display:flex;align-items:center;justify-content:center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg></div>'}
+          <div style="height:4px;width:100%;background:${color};position:absolute;bottom:0;left:0;"></div>
+        </div>
+        <div style="
+          width: 0; height: 0;
+          border-left: 7px solid transparent; border-right: 7px solid transparent;
+          border-top: 11px solid ${color};
+          margin: 0 auto; position: relative; top: -1px;
+        "></div>
       </div>
     `,
-    iconSize: [44, 44],
-    iconAnchor: [22, 22],
-    popupAnchor: [0, -26]
+    iconSize: [50, 62],
+    iconAnchor: [25, 62],
+    popupAnchor: [0, -62]
   });
 
   pinIconCache.set(key, icon);
   return icon;
 };
 
-// User Live GPS Icon: Solid white center dot with expanding ripple pulse
+// User Live GPS Icon with glowing beacon (Exact Mode)
 const userGpsIcon = L.divIcon({
   className: 'custom-user-gps-marker',
   html: `
-    <div style="position: relative; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;">
-      <!-- Outer expanding ripple pulse -->
-      <div style="
-        position: absolute; width: 36px; height: 36px; border-radius: 50%;
-        background: rgba(255, 255, 255, 0.2);
-        border: 1px solid rgba(255, 255, 255, 0.35);
-        animation: mapRipple 2.2s cubic-bezier(0, 0.2, 0.8, 1) infinite;
-      "></div>
-      <!-- Middle subtle aura ring -->
-      <div style="
-        position: absolute; width: 20px; height: 20px; border-radius: 50%;
-        background: rgba(255, 255, 255, 0.15);
-        border: 1px solid rgba(255, 255, 255, 0.5);
-      "></div>
-      <!-- Center solid white dot -->
-      <div style="
-        width: 10px; height: 10px; border-radius: 50%;
-        background: var(--color-text);
-        border: 2px solid var(--color-void);
-        box-shadow: 0 0 10px rgba(255, 255, 255, 0.95);
-        z-index: 2;
-      "></div>
+    <div style="position: relative; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
+      <div style="position: absolute; width: 32px; height: 32px; border-radius: 50%; background: rgba(255,69,0,0.25); animation: mapGlow 2s infinite ease-in-out;"></div>
+      <div style="position: absolute; width: 18px; height: 18px; border-radius: 50%; background: rgba(255,69,0,0.4); border: 1.5px solid rgba(255,69,0,0.8);"></div>
+      <div style="width: 10px; height: 10px; border-radius: 50%; background: #FF4500; border: 2px solid #FFFFFF; box-shadow: 0 0 10px rgba(255,69,0,0.95); z-index: 2;"></div>
     </div>
   `,
-  iconSize: [36, 36],
-  iconAnchor: [18, 18]
+  iconSize: [32, 32],
+  iconAnchor: [16, 16]
 });
 
 // GTA V Camera Controller sub-component using useMap
@@ -223,7 +177,6 @@ export const MapScreen: React.FC = () => {
   } = useApexStore();
   const [selectedPin, setSelectedPin] = useState<MapSpotPin | null>(null);
   const [searchModalOpen, setSearchModalOpen] = useState(false);
-  const [privacySheetOpen, setPrivacySheetOpen] = useState(false);
   const [selectedCity, setSelectedCity] = useState<CityLocation | null>(null);
   const [gtaAnimationPhase, setGtaAnimationPhase] = useState<'ascent' | 'pan' | 'descent' | null>(null);
   const [recenterTarget, setRecenterTarget] = useState<{ lat: number; lng: number; zoom?: number; timestamp: number } | null>(null);
@@ -367,7 +320,7 @@ export const MapScreen: React.FC = () => {
   };
 
   return (
-    <div className="relative w-full h-[calc(100dvh-130px)] bg-[var(--color-void)] overflow-hidden select-none font-sans">
+    <div className="relative w-full h-[calc(100dvh-130px)] bg-[#080808] overflow-hidden select-none font-sans">
       {/* ─── 1. FULL-VIEWPORT LEAFLET ROADMAP CANVAS ─── */}
       <div className="absolute inset-0 z-0 dark-tiles">
         <MapContainer
@@ -378,10 +331,10 @@ export const MapScreen: React.FC = () => {
           maxBoundsViscosity={1.0}
           worldCopyJump={false}
           scrollWheelZoom={true}
-          preferCanvas={false}
+          preferCanvas={true}
           className="w-full h-full"
           zoomControl={false}
-          style={{ width: '100%', height: '100%', backgroundColor: 'var(--color-void)' }}
+          style={{ width: '100%', height: '100%', backgroundColor: '#080808' }}
         >
           <MapInvalidator />
           <MapNavigationController recenterTarget={recenterTarget} />
@@ -394,7 +347,7 @@ export const MapScreen: React.FC = () => {
             noWrap={true}
           />
 
-          {/* User Location Rendering — White Dot with Ripple Pulse vs 1km Approximate Circle vs Hidden */}
+          {/* User Location Rendering — Exact GPS Pin vs 1km Approximate Circle vs Hidden */}
           {liveCoords.latitude && liveCoords.longitude && locationDisplayMode !== 'hidden' && (
             <>
               {locationDisplayMode === 'exact' ? (
@@ -405,8 +358,8 @@ export const MapScreen: React.FC = () => {
                       center={[liveCoords.latitude, liveCoords.longitude]}
                       radius={liveAccuracyMeters}
                       pathOptions={{
-                        color: 'rgba(255, 255, 255, 0.4)',
-                        fillColor: 'rgba(255, 255, 255, 0.06)',
+                        color: '#FF4500',
+                        fillColor: '#FF4500',
                         fillOpacity: 0.06,
                         weight: 1,
                         dashArray: '3 3'
@@ -425,9 +378,9 @@ export const MapScreen: React.FC = () => {
                   center={[liveCoords.latitude, liveCoords.longitude]}
                   radius={1000}
                   pathOptions={{
-                    color: 'rgba(242, 179, 61, 0.7)',
-                    fillColor: 'rgba(242, 179, 61, 0.1)',
-                    fillOpacity: 0.1,
+                    color: '#FF4500',
+                    fillColor: '#FF4500',
+                    fillOpacity: 0.12,
                     weight: 1.5,
                     dashArray: '6 6'
                   }}
@@ -448,20 +401,15 @@ export const MapScreen: React.FC = () => {
               <Circle
                 center={[hunt.latApprox, hunt.lngApprox]}
                 radius={2000}
-                pathOptions={{
-                  color: 'rgba(229, 9, 20, 0.8)',
-                  fillColor: 'rgba(229, 9, 20, 0.1)',
-                  fillOpacity: 0.1,
-                  weight: 1.5,
-                  dashArray: '6 4'
-                }}
+                pathOptions={{ color: '#FF4500', fillColor: '#FF4500', fillOpacity: 0.08, weight: 1.5, dashArray: '6 4' }}
               />
             </React.Fragment>
           ))}
 
-          {/* Spot Markers — 44px Circular Pins with Rarity Rings */}
+          {/* Spot Markers */}
           {mapSpots.map((spot) => {
-            const icon = getCachedPinIcon(spot.rarity, spot.imageUrl);
+            const conf = RARITY_CONFIG[spot.rarity];
+            const icon = getCachedPinIcon(conf.color, spot.imageUrl);
             const isApprox = spot.privacyLevel === 'public_blurred' || spot.privacyLevel === 'approximate_only' || !spot.privacyLevel;
 
             return (
@@ -472,8 +420,8 @@ export const MapScreen: React.FC = () => {
                     center={[spot.lat, spot.lng]}
                     radius={1000}
                     pathOptions={{
-                      color: RARITY_STROKE_MAP[spot.rarity] || 'rgba(139, 147, 160, 0.6)',
-                      fillColor: RARITY_STROKE_MAP[spot.rarity] || 'rgba(139, 147, 160, 0.6)',
+                      color: conf.color,
+                      fillColor: conf.color,
                       fillOpacity: 0.08,
                       weight: 1.2,
                       dashArray: '5 5'
@@ -497,14 +445,16 @@ export const MapScreen: React.FC = () => {
                   <Popup className="dark-popup">
                     <div
                       onClick={() => handleOpenSpotCard(spot)}
-                      className="p-3 text-[var(--color-text)] font-sans cursor-pointer hover:bg-[var(--color-panel-2)] transition-colors"
+                      className="p-2.5 text-[#080808] font-sans cursor-pointer hover:bg-[#F0EBE3] rounded-lg transition-colors"
                     >
-                      <div className="flex items-center gap-2 mb-1.5">
-                        <RarityBadge rarity={spot.rarity} size="sm" />
-                        <span className="text-[10px] font-mono text-[var(--color-text-3)]">VIEW CARD →</span>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className={`text-[9px] font-data font-semibold px-1.5 py-0.5 rounded border ${conf.badgeBg}`}>
+                          {conf.label}
+                        </span>
+                        <span className="text-[10px] font-data text-[#5A5550]">TAP TO VIEW CARD →</span>
                       </div>
-                      <strong className="text-base block leading-tight text-[var(--color-text)] font-display">{spot.make} {spot.model}</strong>
-                      <span className="text-xs text-[var(--color-accent)] font-semibold mt-0.5 block">Spotted in {spot.city} · 1km Area</span>
+                      <strong className="text-sm block leading-tight text-[#080808] font-display">{spot.make} {spot.model}</strong>
+                      <span className="text-xs text-[#FF4500] font-semibold">Spotted in {spot.city} · 1km Area</span>
                     </div>
                   </Popup>
                 </Marker>
@@ -514,17 +464,17 @@ export const MapScreen: React.FC = () => {
         </MapContainer>
       </div>
 
-      {/* Top Search, Back, and Privacy Quick Trigger Bar */}
+      {/* Top Search & Back Button Bar */}
       <div className="absolute top-4 left-4 right-4 z-40 max-w-md mx-auto flex items-center gap-2 pointer-events-auto">
         <button
           onClick={() => {
             sounds.playTargetLock();
             setActiveTab('home');
           }}
-          className="h-11 px-3.5 rounded-[var(--radius-panel)] bg-[var(--color-panel)]/90 backdrop-blur-md border border-[var(--color-line)] text-[var(--color-text)] font-display text-sm tracking-wider flex items-center gap-1.5 shadow-2xl hover:border-[var(--color-accent)]/60 transition-all shrink-0 group active:scale-95 cursor-pointer"
+          className="h-11 px-3.5 rounded-xl bg-[#111111]/90 backdrop-blur-md border border-[#2C2C2C] text-[#F0EBE3] font-display text-sm tracking-wider flex items-center gap-1.5 shadow-2xl hover:border-[#FF4500]/60 transition-all shrink-0 group active:scale-95"
           title="Back to Home"
         >
-          <ArrowLeft className="w-5 h-5 text-[var(--color-accent)] group-hover:-translate-x-1 transition-transform" />
+          <ArrowLeft className="w-5 h-5 text-[#FF4500] group-hover:-translate-x-1 transition-transform" />
           <span>HOME</span>
         </button>
 
@@ -533,44 +483,85 @@ export const MapScreen: React.FC = () => {
             sounds.playTargetLock();
             setSearchModalOpen(true);
           }}
-          className="flex-1 h-11 px-3.5 rounded-[var(--radius-panel)] bg-[var(--color-panel)]/90 backdrop-blur-md border border-[var(--color-line)] text-[var(--color-text)] font-display text-sm tracking-wider flex items-center justify-between shadow-2xl hover:border-[var(--color-accent)]/60 transition-all group active:scale-95 cursor-pointer min-w-0"
+          className="flex-1 h-11 px-4 rounded-xl bg-[#111111]/90 backdrop-blur-md border border-[#2C2C2C] text-[#F0EBE3] font-display text-sm tracking-wider flex items-center justify-between shadow-2xl hover:border-[#FF4500]/60 transition-all group active:scale-95"
         >
-          <div className="flex items-center gap-2 min-w-0">
-            <Search className="w-4 h-4 text-[var(--color-accent)] group-hover:scale-110 transition-transform shrink-0" />
+          <div className="flex items-center gap-2">
+            <Search className="w-4 h-4 text-[#FF4500] group-hover:scale-110 transition-transform" />
             <span className="truncate uppercase font-bold text-xs tracking-wider">
               {selectedCity ? `${selectedCity.name} MAP` : `${user.city || 'LOCATION'} MAP`}
             </span>
           </div>
-          <span className="text-[10px] font-mono text-[var(--color-accent)] bg-[var(--color-accent)]/10 px-2 py-0.5 rounded border border-[var(--color-accent)]/30 shrink-0 ml-1">
+          <span className="text-[10px] font-data text-[#FF4500] bg-[#FF4500]/10 px-2 py-0.5 rounded border border-[#FF4500]/30 shrink-0">
             SEARCH
           </span>
         </button>
+      </div>
 
-        <button
-          onClick={() => {
-            sounds.playTargetLock();
-            setPrivacySheetOpen(true);
-          }}
-          className="h-11 px-3 rounded-[var(--radius-panel)] bg-[var(--color-panel)]/90 backdrop-blur-md border border-[var(--color-line)] text-[var(--color-text-2)] hover:text-[var(--color-text)] flex items-center gap-1.5 shadow-2xl hover:border-[var(--color-line)] transition-all cursor-pointer active:scale-95 shrink-0"
-          title="Configure Location Privacy"
-        >
-          {locationDisplayMode === 'exact' ? (
-            <>
-              <span className="w-2 h-2 rounded-full bg-[var(--color-ok)] shadow-[0_0_8px_var(--color-ok)] animate-pulse" />
-              <MapPin className="w-4 h-4 text-[var(--color-ok)]" />
-            </>
-          ) : locationDisplayMode === 'radius' ? (
-            <>
-              <span className="w-2 h-2 rounded-full bg-[var(--color-xp)] shadow-[0_0_8px_var(--color-xp)]" />
-              <Shield className="w-4 h-4 text-[var(--color-xp)]" />
-            </>
-          ) : (
-            <>
-              <span className="w-2 h-2 rounded-full bg-[var(--color-text-off)]" />
-              <EyeOff className="w-4 h-4 text-[var(--color-text-3)]" />
-            </>
-          )}
-        </button>
+      {/* Location Privacy & Visibility Mode Control Bar */}
+      <div className="absolute top-[68px] left-4 right-4 z-40 max-w-md mx-auto flex items-center justify-between pointer-events-auto">
+        <div className="flex items-center gap-1.5 bg-[#111111]/90 backdrop-blur-md border border-[#2C2C2C] rounded-2xl p-1 shadow-2xl">
+          <button
+            onClick={() => {
+              sounds.playTargetLock();
+              setLocationDisplayMode('exact');
+            }}
+            className={`px-3 py-1.5 rounded-xl font-data text-[10px] font-bold tracking-wider flex items-center gap-1.5 transition-all ${
+              locationDisplayMode === 'exact'
+                ? 'bg-[#FF4500] text-[#F0EBE3] shadow-[0_0_12px_rgba(255,69,0,0.5)]'
+                : 'text-[#9A9088] hover:text-[#F0EBE3] hover:bg-white/5'
+            }`}
+            title="Show Live Pinpoint GPS Location"
+          >
+            <MapPin className="w-3.5 h-3.5" />
+            <span>EXACT PIN</span>
+          </button>
+
+          <button
+            onClick={() => {
+              sounds.playTargetLock();
+              setLocationDisplayMode('radius');
+            }}
+            className={`px-3 py-1.5 rounded-xl font-data text-[10px] font-bold tracking-wider flex items-center gap-1.5 transition-all ${
+              locationDisplayMode === 'radius'
+                ? 'bg-[#FFA500] text-black shadow-[0_0_12px_rgba(255,165,0,0.5)]'
+                : 'text-[#9A9088] hover:text-[#F0EBE3] hover:bg-white/5'
+            }`}
+            title="Show 1km Approximate Perimeter Zone"
+          >
+            <Shield className="w-3.5 h-3.5" />
+            <span>1KM APPROX</span>
+          </button>
+
+          <button
+            onClick={() => {
+              sounds.playTargetLock();
+              setLocationDisplayMode('hidden');
+            }}
+            className={`px-3 py-1.5 rounded-xl font-data text-[10px] font-bold tracking-wider flex items-center gap-1.5 transition-all ${
+              locationDisplayMode === 'hidden'
+                ? 'bg-[#333333] text-[#F0EBE3] border border-white/20'
+                : 'text-[#9A9088] hover:text-[#F0EBE3] hover:bg-white/5'
+            }`}
+            title="Hide Location from Map"
+          >
+            <EyeOff className="w-3.5 h-3.5" />
+            <span>HIDE</span>
+          </button>
+        </div>
+
+        {/* Live Active Mode Indicator Badge with Accuracy */}
+        <div className="px-2.5 py-1.5 rounded-xl bg-[#111111]/90 backdrop-blur-md border border-[#2C2C2C] text-[9px] font-data font-bold text-[#9A9088] shadow-2xl flex items-center gap-1.5">
+          <span className={`w-2 h-2 rounded-full ${
+            locationDisplayMode === 'exact'
+              ? 'bg-[#2ECC71] shadow-[0_0_8px_#2ECC71] animate-pulse'
+              : locationDisplayMode === 'radius'
+              ? 'bg-[#FFA500] shadow-[0_0_8px_#FFA500]'
+              : 'bg-[#555555]'
+          }`} />
+          <span className="uppercase text-[#F0EBE3]">
+            {locationDisplayMode === 'exact' ? (liveAccuracyMeters ? `GPS ±${Math.round(liveAccuracyMeters)}M` : 'GPS LIVE') : locationDisplayMode === 'radius' ? '1KM RADIUS' : 'GHOST MODE'}
+          </span>
+        </div>
       </div>
 
       {/* GTA V Satellite HUD Overlay during camera transit */}
@@ -589,229 +580,89 @@ export const MapScreen: React.FC = () => {
         onSelectCity={handleSelectCity}
       />
 
-      {/* Privacy Zone Radius BottomSheet */}
-      <BottomSheet
-        isOpen={privacySheetOpen}
-        onClose={() => setPrivacySheetOpen(false)}
-        title="Location Privacy"
-      >
-        <div className="space-y-4">
-          <p className="text-secondary text-[var(--color-text-3)]">
-            Choose how your location appears on the radar and map. Your actual coordinates are never broadcast publicly.
-          </p>
-
-          <div className="space-y-2.5">
-            {/* Exact Pinpoint */}
-            <div
-              onClick={() => {
-                sounds.playTargetLock();
-                setLocationDisplayMode('exact');
-              }}
-              className={`p-4 rounded-[var(--radius-panel)] border cursor-pointer transition-all flex items-start gap-3.5 ${
-                locationDisplayMode === 'exact'
-                  ? 'bg-[var(--color-panel-2)] border-[var(--color-accent)] ring-1 ring-[var(--color-accent)]/50'
-                  : 'bg-[var(--color-void)] border-[var(--color-line)] hover:border-[var(--color-text-3)]'
-              }`}
-            >
-              <div className={`p-2.5 rounded-[var(--radius-chip)] shrink-0 ${
-                locationDisplayMode === 'exact'
-                  ? 'bg-[var(--color-accent)]/15 text-[var(--color-accent)]'
-                  : 'bg-[var(--color-panel-2)] text-[var(--color-text-3)]'
-              }`}>
-                <MapPin size={20} />
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center justify-between">
-                  <h4 className="font-display text-display-m text-[var(--color-text)]">
-                    Exact Pinpoint
-                  </h4>
-                  {locationDisplayMode === 'exact' && (
-                    <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded-full bg-[var(--color-accent)]/20 text-[var(--color-accent)] border border-[var(--color-accent)]/40">
-                      Active
-                    </span>
-                  )}
-                </div>
-                <p className="text-secondary text-[var(--color-text-3)] mt-1">
-                  Shows your real-time GPS position with live accuracy perimeter. Best for active spotters.
-                </p>
-              </div>
-            </div>
-
-            {/* 1km Blurred Zone */}
-            <div
-              onClick={() => {
-                sounds.playTargetLock();
-                setLocationDisplayMode('radius');
-              }}
-              className={`p-4 rounded-[var(--radius-panel)] border cursor-pointer transition-all flex items-start gap-3.5 ${
-                locationDisplayMode === 'radius'
-                  ? 'bg-[var(--color-panel-2)] border-[var(--color-xp)] ring-1 ring-[var(--color-xp)]/50'
-                  : 'bg-[var(--color-void)] border-[var(--color-line)] hover:border-[var(--color-text-3)]'
-              }`}
-            >
-              <div className={`p-2.5 rounded-[var(--radius-chip)] shrink-0 ${
-                locationDisplayMode === 'radius'
-                  ? 'bg-[var(--color-xp)]/15 text-[var(--color-xp)]'
-                  : 'bg-[var(--color-panel-2)] text-[var(--color-text-3)]'
-              }`}>
-                <Shield size={20} />
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center justify-between">
-                  <h4 className="font-display text-display-m text-[var(--color-text)]">
-                    1km Blurred Zone
-                  </h4>
-                  {locationDisplayMode === 'radius' && (
-                    <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded-full bg-[var(--color-xp)]/20 text-[var(--color-xp)] border border-[var(--color-xp)]/40">
-                      Active
-                    </span>
-                  )}
-                </div>
-                <p className="text-secondary text-[var(--color-text-3)] mt-1">
-                  Masks your exact location with a 1km blurred perimeter. Protects home and workplace privacy.
-                </p>
-              </div>
-            </div>
-
-            {/* Ghost Mode */}
-            <div
-              onClick={() => {
-                sounds.playTargetLock();
-                setLocationDisplayMode('hidden');
-              }}
-              className={`p-4 rounded-[var(--radius-panel)] border cursor-pointer transition-all flex items-start gap-3.5 ${
-                locationDisplayMode === 'hidden'
-                  ? 'bg-[var(--color-panel-2)] border-[var(--color-text-2)] ring-1 ring-[var(--color-text-2)]/50'
-                  : 'bg-[var(--color-void)] border-[var(--color-line)] hover:border-[var(--color-text-3)]'
-              }`}
-            >
-              <div className={`p-2.5 rounded-[var(--radius-chip)] shrink-0 ${
-                locationDisplayMode === 'hidden'
-                  ? 'bg-white/10 text-[var(--color-text)]'
-                  : 'bg-[var(--color-panel-2)] text-[var(--color-text-3)]'
-              }`}>
-                <EyeOff size={20} />
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center justify-between">
-                  <h4 className="font-display text-display-m text-[var(--color-text)]">
-                    Ghost Mode
-                  </h4>
-                  {locationDisplayMode === 'hidden' && (
-                    <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded-full bg-white/10 text-[var(--color-text)] border border-white/20">
-                      Active
-                    </span>
-                  )}
-                </div>
-                <p className="text-secondary text-[var(--color-text-3)] mt-1">
-                  Completely invisible on local radars. You can still discover cars spotted by other users.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="pt-2">
-            <Button
-              variant="primary"
-              size="lg"
-              className="w-full"
-              onClick={() => setPrivacySheetOpen(false)}
-            >
-              Save Privacy Setting
-            </Button>
-          </div>
-        </div>
-      </BottomSheet>
-
       {/* BUTTON 1: Location Radar / City Search Modal Button */}
       <button
         onClick={() => {
           sounds.playTargetLock();
           setSearchModalOpen(true);
         }}
-        className="absolute bottom-44 right-4 z-30 p-3.5 rounded-full bg-[var(--color-panel)]/95 backdrop-blur-md border border-[var(--color-line)] text-[var(--color-text)] shadow-2xl hover:border-[var(--color-accent)] transition-all pointer-events-auto group active:scale-90 cursor-pointer"
+        className="absolute bottom-44 right-4 z-30 p-3.5 rounded-full bg-[#111111]/95 backdrop-blur-md border border-[#2C2C2C] text-[#F0EBE3] shadow-2xl hover:border-[#FF4500] transition-all pointer-events-auto group active:scale-90"
         title="Search Global Cities & Radars"
       >
-        <Globe className="w-6 h-6 text-[var(--color-accent)] group-hover:rotate-45 transition-transform" />
+        <Globe className="w-6 h-6 text-[#FF4500] group-hover:rotate-45 transition-transform" />
       </button>
 
       {/* BUTTON 2: Recenter GPS Live Location Button */}
       <button
         onClick={handleRecenterGps}
-        className={`absolute bottom-28 right-4 z-30 p-3.5 rounded-full bg-[var(--color-panel)]/95 backdrop-blur-md border border-[var(--color-line)] text-[var(--color-text)] shadow-2xl hover:border-[var(--color-accent)] transition-all pointer-events-auto group active:scale-90 cursor-pointer ${
-          isLocating ? 'animate-spin border-[var(--color-accent)]' : ''
+        className={`absolute bottom-28 right-4 z-30 p-3.5 rounded-full bg-[#111111]/95 backdrop-blur-md border border-[#2C2C2C] text-[#F0EBE3] shadow-2xl hover:border-[#FF4500] transition-all glow-orange pointer-events-auto group active:scale-90 ${
+          isLocating ? 'animate-spin border-[#FF4500]' : ''
         }`}
         title="Recenter on Device GPS Location"
       >
         {isLocating ? (
-          <Navigation className="w-6 h-6 text-[var(--color-accent)]" />
+          <Navigation className="w-6 h-6 text-[#FF4500]" />
         ) : (
-          <Crosshair className="w-6 h-6 text-[var(--color-accent)] group-hover:scale-110 transition-transform" />
+          <Crosshair className="w-6 h-6 text-[#FF4500] group-hover:scale-110 transition-transform" />
         )}
       </button>
 
-      {/* Pin Tap Detail Panel */}
+      {/* Pin Tap Detail Bottom Sheet */}
       {selectedPin && (
-        <div className="absolute bottom-20 left-4 right-4 z-40 max-w-md mx-auto pointer-events-auto">
-          <div className="bg-[var(--color-panel)] border border-[var(--color-line)] rounded-[var(--radius-panel)] p-4 shadow-2xl">
-            <div className="flex gap-3.5">
-              <div className="relative w-20 h-20 rounded-[var(--radius-panel)] border border-[var(--color-line)] shrink-0 overflow-hidden bg-[var(--color-void)]">
-                <img
-                  src={selectedPin.imageUrl}
-                  alt={`${selectedPin.make} ${selectedPin.model}`}
-                  className="w-full h-full object-cover"
-                />
+        <div className="absolute bottom-20 left-4 right-4 z-40 max-w-md mx-auto bg-[#111111]/95 backdrop-blur-md border border-[#FF4500]/50 hover:border-[#FF4500] rounded-xl p-4 shadow-2xl transition-all pointer-events-auto">
+          <div
+            onClick={() => {
+              if (!activeMatchingHunt) {
+                handleOpenSpotCard(selectedPin);
+              }
+            }}
+            className="flex gap-4 cursor-pointer group"
+          >
+            <div className="relative overflow-hidden rounded-lg border border-[#2C2C2C] shrink-0 bg-[#080808]">
+              <img src={selectedPin.imageUrl} alt={selectedPin.model} className="w-24 h-24 object-cover group-hover:scale-110 transition-transform duration-300" />
+            </div>
+
+            <div className="flex-1 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between">
+                  <span className={`text-[10px] font-data font-semibold px-2 py-0.5 rounded border ${RARITY_CONFIG[selectedPin.rarity].badgeBg}`}>
+                    {RARITY_CONFIG[selectedPin.rarity].label}
+                  </span>
+                  <span className="text-[10px] font-data text-[#9A9088]">{selectedPin.distance}</span>
+                </div>
+                <h3 className="font-display text-2xl text-[#F0EBE3] mt-1 leading-none group-hover:text-[#FF4500] transition-colors">{selectedPin.make} {selectedPin.model}</h3>
+                <p className="text-xs text-[#9A9088] font-data mt-0.5">Spotted in {selectedPin.city} · Tap card to view</p>
               </div>
 
-              <div className="flex-1 min-w-0 flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between gap-2">
-                    <RarityBadge rarity={selectedPin.rarity} size="sm" />
-                    <StatChip label="DISTANCE" value={selectedPin.distance} />
-                  </div>
-                  <h3 className="font-display text-display-m text-[var(--color-text)] truncate mt-1">
-                    {selectedPin.make} {selectedPin.model}
-                  </h3>
-                  <p className="text-caption text-[var(--color-text-3)] font-mono truncate">
-                    Spotted in {selectedPin.city}
-                  </p>
-                </div>
-
-                <div className="flex gap-2 pt-2">
-                  {activeMatchingHunt ? (
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      className="flex-1"
-                      onClick={() => {
-                        setSelectedPin(null);
-                        openHuntModal(activeMatchingHunt);
-                      }}
-                    >
-                      <Flame className="w-4 h-4" /> Join Hunt
-                    </Button>
-                  ) : (
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      className="flex-1"
-                      onClick={() => {
-                        handleOpenSpotCard(selectedPin);
-                        setSelectedPin(null);
-                      }}
-                    >
-                      <Eye className="w-4 h-4" /> View 3D Card
-                    </Button>
-                  )}
-
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => setSelectedPin(null)}
+              <div className="flex gap-2 pt-2" onClick={e => e.stopPropagation()}>
+                {activeMatchingHunt ? (
+                  <button
+                    onClick={() => {
+                      setSelectedPin(null);
+                      openHuntModal(activeMatchingHunt);
+                    }}
+                    className="flex-1 py-2.5 rounded-lg bg-[#FF4500] text-[#F0EBE3] font-display text-sm tracking-wider flex items-center justify-center gap-1.5 glow-orange"
                   >
-                    Close
-                  </Button>
-                </div>
+                    <Flame className="w-4 h-4 fill-[#F0EBE3]" /> JOIN HUNT
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => {
+                      handleOpenSpotCard(selectedPin);
+                      setSelectedPin(null);
+                    }}
+                    className="flex-1 py-2.5 rounded-lg bg-[#FF4500] text-[#F0EBE3] font-display text-sm tracking-wider flex items-center justify-center gap-1.5 border border-[#FF6A00]/40 glow-orange"
+                  >
+                    <Eye className="w-4 h-4 text-[#F0EBE3]" /> VIEW 3D CARD
+                  </button>
+                )}
+
+                <button
+                  onClick={() => setSelectedPin(null)}
+                  className="px-3 py-2 rounded-lg bg-[#1A1A1A] text-[#F0EBE3] font-display text-sm hover:bg-[#2C2C2C] border border-[#2C2C2C]"
+                >
+                  CLOSE
+                </button>
               </div>
             </div>
           </div>
@@ -819,26 +670,23 @@ export const MapScreen: React.FC = () => {
       )}
 
       {/* Active Hunt Banner Overlay */}
-      {activeHunts.length > 0 && !selectedPin && (
-        <div className="absolute bottom-24 left-4 right-4 z-30 max-w-md mx-auto pointer-events-auto">
-          <div className="bg-[var(--color-panel)] border border-[var(--color-accent)]/40 rounded-[var(--radius-panel)] p-3.5 flex items-center justify-between shadow-2xl">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-[var(--radius-chip)] bg-[var(--color-void)] text-[var(--color-accent)] border border-[var(--color-accent)]/30 animate-pulse">
-                <ShieldAlert className="w-5 h-5" />
-              </div>
-              <div>
-                <h4 className="font-display text-lg text-[var(--color-text)] leading-none">ACTIVE HUNT ZONE</h4>
-                <p className="text-caption text-[var(--color-text-3)] font-mono">{activeHunts[0].carName} spotted nearby!</p>
-              </div>
+      {activeHunts.length > 0 && (
+        <div className="absolute bottom-24 left-4 right-4 z-30 max-w-md mx-auto bg-[#111111] border border-[#FF4500]/50 rounded-xl p-3 flex items-center justify-between shadow-2xl pointer-events-auto">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-[#1A1A1A] text-[#FF4500] border border-[#FF4500]/30 animate-pulse">
+              <ShieldAlert className="w-5 h-5" />
             </div>
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={() => openHuntModal(activeHunts[0])}
-            >
-              Join Hunt
-            </Button>
+            <div>
+              <h4 className="font-display text-lg text-[#F0EBE3] leading-none">ACTIVE HUNT ZONE</h4>
+              <p className="text-xs text-[#9A9088] font-data">{activeHunts[0].carName} spotted nearby!</p>
+            </div>
           </div>
+          <button
+            onClick={() => openHuntModal(activeHunts[0])}
+            className="px-3 py-1.5 rounded-lg bg-[#FF4500] text-[#F0EBE3] font-display text-xs tracking-wider glow-orange"
+          >
+            JOIN HUNT
+          </button>
         </div>
       )}
     </div>
