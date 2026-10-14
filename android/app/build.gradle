@@ -32,6 +32,8 @@ android {
             def releaseSigningConfig = signingConfigs.release
             if (releaseSigningConfig.storeFile && releaseSigningConfig.storeFile.exists()) {
                 signingConfig releaseSigningConfig
+            } else {
+                signingConfig signingConfigs.debug
             }
             minifyEnabled false
             shrinkResources false

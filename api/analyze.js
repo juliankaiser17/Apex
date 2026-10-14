@@ -8658,7 +8658,9 @@ function computeVisibilityMatrix(viewpoint, evidenceText) {
   const rearOccluded = normEv.includes("rear occluded") || normEv.includes("rear cropped") || normEv.includes("tail occluded") || normEv.includes("rear not visible");
   const frontOccluded = normEv.includes("front occluded") || normEv.includes("front cropped") || normEv.includes("nose occluded") || normEv.includes("front not visible");
   const sideOccluded = normEv.includes("side occluded") || normEv.includes("profile occluded");
-  const isCroppedOrDetail = /\b(cropped?|close[\s-]?up|detail|section|wheel\s+only|door\s+only|fender\s+only|badge\s+only|emblem\s+only|partial\s+view|tight\s+crop|macro)\b/i.test(normEv);
+  const isComponentOnly = /\b(wheel\s+only|door\s+only|fender\s+only|badge\s+only|emblem\s+only|macro\s+shot|extreme\s+close[\s-]?up|tight\s+crop)\b/i.test(normEv);
+  const isExplicitlyCroppedDetail = viewpoint === "unknown" && /\b(tightly\s+cropped|close[\s-]?up\s+shot|macro)\b/i.test(normEv);
+  const isCroppedOrDetail = isComponentOnly || isExplicitlyCroppedDetail;
   if (isCroppedOrDetail) {
     const hasHeadlightFocus = /\b(headlights?|headlamps?|front\s+lamps?)\b/i.test(normEv);
     const hasGrilleFocus = /\b(front\s+grille|radiator\s+grille)\b/i.test(normEv);
@@ -33512,7 +33514,7 @@ function resolvePipelineConfig() {
   const env = typeof process !== "undefined" ? process.env : {};
   const rawMode = (env.AI_PIPELINE || "v1").toLowerCase().trim();
   const mode = rawMode === "v2" || rawMode === "shadow" || rawMode === "vlm-first" ? rawMode : "v1";
-  const rawProvider = (env.VISION_PROVIDER || "gemini").toLowerCase().trim();
+  const rawProvider = (env.VISION_PROVIDER || "cloudflare").toLowerCase().trim();
   const primaryProvider = rawProvider === "gemini" ? "gemini" : "cloudflare";
   return {
     mode,
@@ -33547,10 +33549,10 @@ function resolvePipelineConfig() {
     killSwitches: {
       visionScanningEnabled: env.VISION_SCANNING_ENABLED !== "false",
       geminiScanningEnabled: env.GEMINI_SCANNING_ENABLED !== "false",
-      // Cloudflare stays OFF unless explicitly enabled
-      cloudflareScanningEnabled: env.CLOUDFLARE_SCANNING_ENABLED === "true",
+      // Cloudflare scanning enabled unless explicitly killed via CLOUDFLARE_SCANNING_ENABLED=false
+      cloudflareScanningEnabled: env.CLOUDFLARE_SCANNING_ENABLED !== "false",
       expensiveVerificationEnabled: env.EXPENSIVE_VERIFICATION_ENABLED !== "false",
-      vlmFirstEnabled: env.VLM_FIRST_ENABLED === "true",
+      vlmFirstEnabled: env.VLM_FIRST_ENABLED === "true" && env.AI_PIPELINE === "vlm-first",
       combinedEscalationEnabled: env.COMBINED_ESCALATION_ENABLED === "true"
     },
     freeTierBudgets: {
@@ -35887,7 +35889,7 @@ var WorkerPool = class {
         });
         return cachedResult;
       }
-      if (pipelineConfig.mode === "v2" || pipelineConfig.mode === "vlm-first" || pipelineConfig.killSwitches.vlmFirstEnabled) {
+      if (pipelineConfig.mode !== "v1" && (pipelineConfig.mode === "v2" || pipelineConfig.mode === "vlm-first" || pipelineConfig.killSwitches.vlmFirstEnabled)) {
         const v2Res = await v2Pipeline.execute({
           imageDataUrl: job.imageDataUrl,
           traceId: job.traceId,
@@ -35924,7 +35926,7 @@ var WorkerPool = class {
             totalScore: v2Res.calibratedConfidence.overall,
             isConfident: (v2Res.status === "identified" || v2Res.status === "identified_model") && v2Res.calibratedConfidence.overall >= 0.7,
             shouldAbstain: v2Res.status !== "identified" && v2Res.status !== "identified_model" && v2Res.status !== "not_in_catalogue",
-            abstentionReason: v2Res.status === "needs_more_views" ? v2Res.guidedRecovery?.userPrompt || void 0 : v2Res.status === "not_in_catalogue" ? `Spotted ${v2Res.displayName}! This vehicle is not currently in Apex's launch collectible catalogue.` : v2Res.status === "uncertain" ? "Visual evidence insufficient for definitive identification" : void 0,
+            abstentionReason: v2Res.status === "needs_more_views" ? v2Res.guidedRecovery?.userPrompt || void 0 : v2Res.status === "not_in_catalogue" ? `Spotted ${v2Res.displayName}! This vehicle is not currently in Apex's launch collectible catalogue.` : v2Res.status === "uncertain" ? v2Res.guidedRecovery?.userPrompt || "Visual evidence insufficient for definitive identification" : void 0,
             breakdown: {
               visualSimilarityWeight: 0.8,
               modelAgreementWeight: 0.8,
@@ -37106,26 +37108,20 @@ async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed: Must be POST." });
   }
   console.log("[api/analyze] Diagnostics:", {
-    provider: (process.env.VISION_PROVIDER || "gemini").toLowerCase().trim(),
+    provider: (process.env.VISION_PROVIDER || "cloudflare").toLowerCase().trim(),
     cloudflareAccountConfigured: Boolean(process.env.CLOUDFLARE_ACCOUNT_ID),
     cloudflareTokenConfigured: Boolean(process.env.CLOUDFLARE_AUTH_TOKEN),
     scanningEnabled: process.env.CLOUDFLARE_SCANNING_ENABLED !== "false",
     visionScanningEnabled: process.env.VISION_SCANNING_ENABLED !== "false",
     allowMockFallback: process.env.ALLOW_MOCK_FALLBACK === "true"
   });
-  const rawProvider = (process.env.VISION_PROVIDER || "gemini").toLowerCase().trim();
+  const rawProvider = (process.env.VISION_PROVIDER || "cloudflare").toLowerCase().trim();
   if (rawProvider !== "cloudflare" && rawProvider !== "gemini") {
     return res.status(500).json({
       error: `Server misconfiguration: Invalid VISION_PROVIDER="${rawProvider}". Supported values are "cloudflare" or "gemini". Application fails closed.`
     });
   }
   const isCloudflare = rawProvider === "cloudflare";
-  if (isCloudflare && process.env.CLOUDFLARE_SCANNING_ENABLED !== "true") {
-    return res.status(503).json({
-      error: "Cloudflare vision provider is disabled for free tier. Gemini is the active vision provider.",
-      code: "PROVIDER_DISABLED"
-    });
-  }
   const isKilled = process.env.VISION_SCANNING_ENABLED === "false" || (isCloudflare ? process.env.CLOUDFLARE_SCANNING_ENABLED === "false" : process.env.GEMINI_SCANNING_ENABLED === "false");
   if (isKilled) {
     return res.status(503).json({

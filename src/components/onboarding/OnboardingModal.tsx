@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { User, AtSign, ChevronLeft, MapPin, AlertCircle } from 'lucide-react';
 import { useApexStore } from '../../store/useApexStore';
 import { isUsernameTaken } from '../../services/userService';
-import { triggerGoogleSignIn } from '../../services/googleAuthService';
+import { triggerGoogleSignIn, type AuthDiagnosticInfo } from '../../services/googleAuthService';
 import { sounds } from '../../utils/audio';
 import { SPRING_HEAVY, SPRING_POP, SPRING_SETTLE, GLOW_ORANGE } from '../../utils/animationConfig';
 import confetti from 'canvas-confetti';
@@ -114,6 +114,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
   const [passwordInput, setPasswordInput] = useState('');
   const [isAuthLoading, setIsAuthLoading] = useState(false);
   const [authError, setAuthError] = useState('');
+  const [authDiag, setAuthDiag] = useState<AuthDiagnosticInfo | null>(null);
   const [otpCode, setOtpCode] = useState(['', '', '', '', '', '']);
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -319,6 +320,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
     sounds.playTargetLock();
     setIsAuthLoading(true);
     setAuthError('');
+    setAuthDiag(null);
 
     try {
       console.log('[AuthDiag:Google] Triggering Google Sign-In flow from OnboardingModal...');
@@ -331,51 +333,64 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
             const dName = gUser.name || userEmail.split('@')[0] || '';
             const uName = (gUser.name || userEmail.split('@')[0]).replace(/[^a-z0-9_]/gi, '').toLowerCase() || '';
 
-            await useApexStore.getState().initializeSession(gUser.id || user.id, userEmail, 'google', {
-              full_name: dName,
-              username: uName
-            });
+            try {
+              await useApexStore.getState().initializeSession(gUser.id || user.id, userEmail, 'google', {
+                full_name: dName,
+                username: uName
+              });
 
-            // 1. Authoritative check: if onboarding already completed
-            if (useApexStore.getState().onboardingCompleted) {
-              console.log('[AuthDiag:Google] 9a. Onboarding already completed. Dismissing modal...');
-              useApexStore.getState().completeOnboarding();
-              onClose();
-              setIsAuthLoading(false);
-              return;
+              // 1. Authoritative check: if onboarding already completed
+              if (useApexStore.getState().onboardingCompleted) {
+                console.log('[AuthDiag:Google] 9a. Onboarding already completed. Dismissing modal...');
+                useApexStore.getState().completeOnboarding();
+                onClose();
+                setIsAuthLoading(false);
+                return;
+              }
+
+              // 2. Established user profile check (returning user)
+              const currentUser = useApexStore.getState().user;
+              const isProfileEstablished = Boolean(
+                useApexStore.getState().onboardingCompleted ||
+                (currentUser.totalSpots && currentUser.totalSpots > 0) ||
+                (currentUser.xp && currentUser.xp > 0) ||
+                (currentUser.level && currentUser.level > 1) ||
+                (currentUser.username && !currentUser.username.startsWith('spotter_') && !currentUser.username.startsWith('user_'))
+              );
+
+              if (isProfileEstablished) {
+                console.log('[AuthDiag:Google] 9b. Established profile detected for returning user. Completing onboarding...');
+                useApexStore.getState().completeOnboarding();
+                onClose();
+                setIsAuthLoading(false);
+                return;
+              }
+
+              // 3. New account without configured profile: navigate to profile setup
+              console.log('[AuthDiag:Google] 9c. New profile setup required. Routing to profile_setup step...');
+              setDisplayNameInput(currentUser.displayName || dName);
+              setUsernameInput(currentUser.username || uName);
+              setSelectedCity(currentUser.city || '');
+              setSelectedCountry(currentUser.country || '');
+              setStep('profile_setup');
+            } catch (navErr: any) {
+              console.error('[AuthDiag:Google] Navigation/profile setup exception:', navErr);
+              setAuthDiag({
+                stage: 'NAVIGATION_FAILED',
+                title: 'Navigation State Error',
+                code: 'NAVIGATION_EXCEPTION',
+                message: navErr?.message || 'Authenticated successfully, but failed to initialize user profile.',
+                resolution: 'Check database connectivity or retry.'
+              });
+              setAuthError('Navigation failed after authentication.');
             }
-
-            // 2. Established user profile check (returning user)
-            const currentUser = useApexStore.getState().user;
-            const isProfileEstablished = Boolean(
-              useApexStore.getState().onboardingCompleted ||
-              (currentUser.totalSpots && currentUser.totalSpots > 0) ||
-              (currentUser.xp && currentUser.xp > 0) ||
-              (currentUser.level && currentUser.level > 1) ||
-              (currentUser.username && !currentUser.username.startsWith('spotter_') && !currentUser.username.startsWith('user_'))
-            );
-
-            if (isProfileEstablished) {
-              console.log('[AuthDiag:Google] 9b. Established profile detected for returning user. Completing onboarding...');
-              useApexStore.getState().completeOnboarding();
-              onClose();
-              setIsAuthLoading(false);
-              return;
-            }
-
-            // 3. New account without configured profile: navigate to profile setup
-            console.log('[AuthDiag:Google] 9c. New profile setup required. Routing to profile_setup step...');
-            setDisplayNameInput(currentUser.displayName || dName);
-            setUsernameInput(currentUser.username || uName);
-            setSelectedCity(currentUser.city || '');
-            setSelectedCountry(currentUser.country || '');
-            setStep('profile_setup');
           }
           setIsAuthLoading(false);
         },
-        (errMsg) => {
-          console.error('[AuthDiag:Google] Sign in failed callback:', errMsg);
+        (errMsg, diag) => {
+          console.error('[AuthDiag:Google] Sign in failed callback:', errMsg, diag);
           setIsAuthLoading(false);
+          setAuthDiag(diag || null);
           setAuthError(errMsg || 'Google sign in failed. Please try again or use Email.');
         }
       );
@@ -673,7 +688,31 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ isOpen, onClos
                 />
               </div>
 
-              {authError && <p className="text-[#FF4500] text-xs font-data">{authError}</p>}
+              {authError && (
+                <div className="space-y-1.5">
+                  <p className="text-[#FF4500] text-xs font-data">{authError}</p>
+                  {authDiag && authDiag.stage !== 'PICKER_CANCELED' && (
+                    <div className="p-2.5 rounded-xl bg-red-950/40 border border-red-500/30 text-left font-sans select-text">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-[11px] font-bold text-red-400 tracking-wide font-data">
+                          [{authDiag.stage}] {authDiag.title}
+                        </span>
+                        <span className="text-[9px] px-1.5 py-0.5 rounded bg-red-500/20 text-red-300 font-data font-bold">
+                          {authDiag.code}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-white/80 leading-relaxed font-sans">
+                        {authDiag.message}
+                      </p>
+                      {authDiag.resolution && (
+                        <p className="text-[10px] text-white/50 leading-relaxed mt-1 pt-1 border-t border-white/10 font-data">
+                          Guidance: {authDiag.resolution}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* PRIMARY ACTION: SIGN IN / CREATE ACCOUNT */}
               <motion.button

@@ -121,7 +121,7 @@ export class WorkerPool {
       }
 
       // ─── PIPELINE MODE: V2 OR VLM-FIRST PIPELINE ───
-      if (pipelineConfig.mode === 'v2' || pipelineConfig.mode === 'vlm-first' || pipelineConfig.killSwitches.vlmFirstEnabled) {
+      if (pipelineConfig.mode !== 'v1' && (pipelineConfig.mode === 'v2' || pipelineConfig.mode === 'vlm-first' || pipelineConfig.killSwitches.vlmFirstEnabled)) {
         const v2Res = await v2Pipeline.execute({
           imageDataUrl: job.imageDataUrl,
           traceId: job.traceId,
@@ -171,7 +171,9 @@ export class WorkerPool {
               ? (v2Res.guidedRecovery?.userPrompt || undefined)
               : v2Res.status === 'not_in_catalogue'
               ? `Spotted ${v2Res.displayName}! This vehicle is not currently in Apex's launch collectible catalogue.`
-              : (v2Res.status === 'uncertain' ? 'Visual evidence insufficient for definitive identification' : undefined),
+              : (v2Res.status === 'uncertain'
+                ? (v2Res.guidedRecovery?.userPrompt || 'Visual evidence insufficient for definitive identification')
+                : undefined),
             breakdown: {
               visualSimilarityWeight: 0.8,
               modelAgreementWeight: 0.8,

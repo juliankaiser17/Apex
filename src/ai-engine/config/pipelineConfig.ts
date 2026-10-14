@@ -62,8 +62,8 @@ export function resolvePipelineConfig(): PipelineConfig {
   const rawMode = (env.AI_PIPELINE || 'v1').toLowerCase().trim();
   const mode: PipelineMode = (rawMode === 'v2' || rawMode === 'shadow' || rawMode === 'vlm-first') ? rawMode : 'v1';
 
-  // Safe Default Invariant 2: Cloudflare Llama stays off. Provider defaults to 'gemini'.
-  const rawProvider = (env.VISION_PROVIDER || 'gemini').toLowerCase().trim();
+  // Default Provider: Cloudflare Workers AI unless explicitly configured otherwise
+  const rawProvider = (env.VISION_PROVIDER || 'cloudflare').toLowerCase().trim();
   const primaryProvider: VisionProviderType = rawProvider === 'gemini' ? 'gemini' : 'cloudflare';
 
   return {
@@ -99,10 +99,10 @@ export function resolvePipelineConfig(): PipelineConfig {
     killSwitches: {
       visionScanningEnabled: env.VISION_SCANNING_ENABLED !== 'false',
       geminiScanningEnabled: env.GEMINI_SCANNING_ENABLED !== 'false',
-      // Cloudflare stays OFF unless explicitly enabled
-      cloudflareScanningEnabled: env.CLOUDFLARE_SCANNING_ENABLED === 'true',
+      // Cloudflare scanning enabled unless explicitly killed via CLOUDFLARE_SCANNING_ENABLED=false
+      cloudflareScanningEnabled: env.CLOUDFLARE_SCANNING_ENABLED !== 'false',
       expensiveVerificationEnabled: env.EXPENSIVE_VERIFICATION_ENABLED !== 'false',
-      vlmFirstEnabled: env.VLM_FIRST_ENABLED === 'true',
+      vlmFirstEnabled: env.VLM_FIRST_ENABLED === 'true' && env.AI_PIPELINE === 'vlm-first',
       combinedEscalationEnabled: env.COMBINED_ESCALATION_ENABLED === 'true'
     },
     freeTierBudgets: {

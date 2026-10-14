@@ -124,9 +124,11 @@ export function computeVisibilityMatrix(
   const rearOccluded = normEv.includes('rear occluded') || normEv.includes('rear cropped') || normEv.includes('tail occluded') || normEv.includes('rear not visible');
   const frontOccluded = normEv.includes('front occluded') || normEv.includes('front cropped') || normEv.includes('nose occluded') || normEv.includes('front not visible');
   const sideOccluded = normEv.includes('side occluded') || normEv.includes('profile occluded');
-  const isCroppedOrDetail = /\b(cropped?|close[\s-]?up|detail|section|wheel\s+only|door\s+only|fender\s+only|badge\s+only|emblem\s+only|partial\s+view|tight\s+crop|macro)\b/i.test(normEv);
+  // For cropped / detail images, aggressively restrict observable zones only on genuine macro/component-only captures
+  const isComponentOnly = /\b(wheel\s+only|door\s+only|fender\s+only|badge\s+only|emblem\s+only|macro\s+shot|extreme\s+close[\s-]?up|tight\s+crop)\b/i.test(normEv);
+  const isExplicitlyCroppedDetail = viewpoint === 'unknown' && /\b(tightly\s+cropped|close[\s-]?up\s+shot|macro)\b/i.test(normEv);
+  const isCroppedOrDetail = isComponentOnly || isExplicitlyCroppedDetail;
 
-  // For cropped / detail images, aggressively restrict observable zones to avoid hallucinated front/rear matches
   if (isCroppedOrDetail) {
     const hasHeadlightFocus = /\b(headlights?|headlamps?|front\s+lamps?)\b/i.test(normEv);
     const hasGrilleFocus = /\b(front\s+grille|radiator\s+grille)\b/i.test(normEv);

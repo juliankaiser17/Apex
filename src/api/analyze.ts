@@ -463,7 +463,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   // Safe Diagnostic Logging (Never log token or secret values)
   console.log('[api/analyze] Diagnostics:', {
-    provider: (process.env.VISION_PROVIDER || 'gemini').toLowerCase().trim(),
+    provider: (process.env.VISION_PROVIDER || 'cloudflare').toLowerCase().trim(),
     cloudflareAccountConfigured: Boolean(process.env.CLOUDFLARE_ACCOUNT_ID),
     cloudflareTokenConfigured: Boolean(process.env.CLOUDFLARE_AUTH_TOKEN),
     scanningEnabled: process.env.CLOUDFLARE_SCANNING_ENABLED !== 'false',
@@ -472,7 +472,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   });
 
   // 1.1 Server-Side Provider Validation & Emergency AI Kill Switch
-  const rawProvider = (process.env.VISION_PROVIDER || 'gemini').toLowerCase().trim();
+  const rawProvider = (process.env.VISION_PROVIDER || 'cloudflare').toLowerCase().trim();
   if (rawProvider !== 'cloudflare' && rawProvider !== 'gemini') {
     return res.status(500).json({
       error: `Server misconfiguration: Invalid VISION_PROVIDER="${rawProvider}". Supported values are "cloudflare" or "gemini". Application fails closed.`
@@ -480,13 +480,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   const isCloudflare = rawProvider === 'cloudflare';
-  if (isCloudflare && process.env.CLOUDFLARE_SCANNING_ENABLED !== 'true') {
-    return res.status(503).json({
-      error: 'Cloudflare vision provider is disabled for free tier. Gemini is the active vision provider.',
-      code: 'PROVIDER_DISABLED'
-    });
-  }
-
   const isKilled = process.env.VISION_SCANNING_ENABLED === 'false' ||
     (isCloudflare ? process.env.CLOUDFLARE_SCANNING_ENABLED === 'false' : process.env.GEMINI_SCANNING_ENABLED === 'false');
 

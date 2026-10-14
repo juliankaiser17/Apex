@@ -118,9 +118,17 @@ async function ensureNativeGoogleInitialized(clientId: string): Promise<void> {
   }
 }
 
+export interface AuthDiagnosticInfo {
+  stage: 'PICKER_CANCELED' | 'TOKEN_RETRIEVAL_FAILED' | 'SUPABASE_REJECTED' | 'NAVIGATION_FAILED';
+  title: string;
+  code: string;
+  message: string;
+  resolution?: string;
+}
+
 export async function triggerGoogleSignIn(
   onSuccess: (userData: GoogleUserData) => void,
-  onError?: (errMessage: string) => void
+  onError?: (errMessage: string, diag?: AuthDiagnosticInfo) => void
 ): Promise<void> {
   const clientId = (import.meta.env.VITE_GOOGLE_CLIENT_ID as string) || DEFAULT_GOOGLE_CLIENT_ID;
 
@@ -137,6 +145,12 @@ export async function triggerGoogleSignIn(
 
       if (!result) {
         console.log('[AuthDiag:Google] Account picker returned null (user cancelled).');
+        onError?.('Google Sign-In was cancelled.', {
+          stage: 'PICKER_CANCELED',
+          title: 'Account Picker Dismissed',
+          code: 'USER_CANCELED',
+          message: 'The Google account selector was closed without selecting an account.'
+        });
         return;
       }
 
@@ -146,9 +160,15 @@ export async function triggerGoogleSignIn(
         hasDisplayName: Boolean(result.displayName)
       });
 
-      // If user cancelled, graceful return
+      // If user cancelled or no credentials returned
       if (!result.idToken && !result.email) {
         console.log('[AuthDiag:Google] User cancelled or no credentials returned.');
+        onError?.('No Google account selected.', {
+          stage: 'PICKER_CANCELED',
+          title: 'No Account Selected',
+          code: 'NO_CREDENTIAL_SELECTED',
+          message: 'The Google account dialog was closed without choosing credentials.'
+        });
         return;
       }
 
@@ -164,7 +184,14 @@ export async function triggerGoogleSignIn(
 
           if (supabaseError || !supabaseSession?.user) {
             console.error('[AuthDiag:Google] Supabase signInWithIdToken error:', supabaseError?.message);
-            onError?.(supabaseError?.message || 'Failed to authenticate with server. Please try again or use email sign in.');
+            const statusStr = (supabaseError as any)?.status ? ` (Status ${(supabaseError as any).status})` : '';
+            onError?.((supabaseError?.message || 'Server authentication failed.') + statusStr, {
+              stage: 'SUPABASE_REJECTED',
+              title: 'Supabase Auth Rejected',
+              code: (supabaseError as any)?.code || String((supabaseError as any)?.status || 'SUPABASE_AUTH_ERROR'),
+              message: supabaseError?.message || 'Supabase server rejected the Google ID token.',
+              resolution: 'Check that Web Client ID is configured in Supabase Dashboard -> Authentication -> Providers -> Google.'
+            });
             return;
           }
 
@@ -185,27 +212,57 @@ export async function triggerGoogleSignIn(
           return;
         } catch (supabaseErr: any) {
           console.error('[AuthDiag:Google] Supabase signInWithIdToken exception:', supabaseErr?.message || supabaseErr);
-          onError?.('Server authentication failed. Please try again or use email sign in.');
+          onError?.('Server authentication failed. Please try again or use email sign in.', {
+            stage: 'SUPABASE_REJECTED',
+            title: 'Supabase Server Exception',
+            code: 'SUPABASE_EXCEPTION',
+            message: supabaseErr?.message || 'Exception occurred during Supabase token exchange.',
+            resolution: 'Verify network connection and Supabase endpoint availability.'
+          });
           return;
         }
       } else {
         console.warn('[AuthDiag:Google] No ID token in GoogleSignIn result.');
-        onError?.('Google did not provide an authentication token. Please try again or use email sign in.');
+        onError?.('Google did not provide an authentication token. Please try again or use email sign in.', {
+          stage: 'TOKEN_RETRIEVAL_FAILED',
+          title: 'Missing Google ID Token',
+          code: 'NO_ID_TOKEN_RETURNED',
+          message: 'Account was selected, but Google Play Services did not return an ID token.',
+          resolution: 'Ensure the Web Client ID is configured as serverClientId in Google Cloud Console.'
+        });
         return;
       }
     } catch (nativeErr: any) {
       console.warn('[AuthDiag:Google] Native Google Sign-In caught error:', nativeErr);
       const errMessage = nativeErr?.message || String(nativeErr);
-      if (
+      const isExplicitCancel = 
         errMessage.includes('12501') || 
         errMessage.includes('SIGN_IN_CANCELED') || 
-        errMessage.toLowerCase().includes('cancel')
-      ) {
-        console.log('[AuthDiag:Google] Native account picker was cancelled or aborted by Google Play Services.');
-        onError?.('Google Sign-In was cancelled or rejected by Google Play Services. If this persists, please use Guest Spotter or Email.');
+        errMessage.toLowerCase().includes('canceled') ||
+        errMessage.toLowerCase().includes('cancelled');
+
+      if (isExplicitCancel) {
+        console.log('[AuthDiag:Google] Native account picker was cancelled by user.');
+        onError?.('Google Sign-In was cancelled.', {
+          stage: 'PICKER_CANCELED',
+          title: 'Sign-In Cancelled',
+          code: 'USER_CANCELED',
+          message: 'The account picker dialog was dismissed.'
+        });
         return;
       }
-      onError?.(errMessage || 'Google Sign-In failed. Please sign in with email and password.');
+
+      // Extract numeric code if present (e.g. [16], [10], etc.)
+      const codeMatch = errMessage.match(/\[(\d+)\]/);
+      const extractedCode = codeMatch ? `PLAY_SERVICES_CODE_${codeMatch[1]}` : 'PLAY_SERVICES_ERROR';
+
+      onError?.(errMessage || 'Google Sign-In failed.', {
+        stage: 'TOKEN_RETRIEVAL_FAILED',
+        title: 'Token Retrieval Failed',
+        code: extractedCode,
+        message: errMessage || 'Google Play Services was unable to issue credentials for this app.',
+        resolution: 'Verify that the APK signing certificate SHA-1 fingerprint is registered under an Android OAuth Client in Google Cloud Console (Project 708398928493).'
+      });
       return;
     }
   }
