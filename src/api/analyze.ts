@@ -293,8 +293,8 @@ function formatScanResponse(r: any) {
   const inCatalogue = isNotInCatalogue
     ? false
     : (v2
-      ? Boolean(v2.inCatalogue ?? (v2.status === 'identified' || v2.status === 'identified_model'))
-      : Boolean(canon?.status === 'identified' && finalCanonId));
+      ? Boolean(v2.inCatalogue ?? (v2.status === 'identified' || v2.status === 'identified_model' || v2.status === 'probable'))
+      : Boolean((canon?.status === 'identified' || canon?.status === 'probable') && finalCanonId));
 
   const collectibleEligible = Boolean(
     inCatalogue &&
@@ -634,9 +634,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
   }
 
-  // 4.4 Image-Hash Cache (Instant resolution on duplicate images without calling AI provider)
-  const imageSha256 = crypto.createHash('sha256').update(rawBase64).digest('hex');
-  const cachedScan = scanResultImageCache.get(imageSha256);
+  // 4.4 Image-Hash Cache (Cryptographic hash on raw decoded bytes, scoped by pipeline version)
+  const imageBytes = Buffer.from(rawBase64.replace(/[\r\n\s]/g, ''), 'base64');
+  const imageSha256 = crypto.createHash('sha256').update(imageBytes).digest('hex');
+  const versionedCacheKey = `${VISION_PIPELINE_VERSION}:${imageSha256}`;
+  const cachedScan = scanResultImageCache.get(versionedCacheKey);
   if (cachedScan && (Date.now() - cachedScan.timestamp < 86400000)) {
     console.log(`[api/analyze] Image SHA256 cache HIT for ${imageSha256.slice(0, 12)} (zero provider calls consumed)`);
     return res.status(200).json({
@@ -740,7 +742,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         specRecordId: responsePayload.canonical_vehicle_id || 'default'
       });
 
-      scanResultImageCache.set(imageSha256, {
+      scanResultImageCache.set(versionedCacheKey, {
         responsePayload,
         timestamp: Date.now()
       });

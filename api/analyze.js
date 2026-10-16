@@ -10,7 +10,7 @@ import { createClient } from "@supabase/supabase-js";
 import crypto2 from "crypto";
 
 // src/ai-engine/caching/identificationCache.ts
-var VISION_PIPELINE_VERSION = "v3.4.1-broad-recognition-restored";
+var VISION_PIPELINE_VERSION = "v3.4.2-ferrari-forensics-and-cache-isolation";
 function buildCacheKey(imageHash, provider = "cloudflare", model = "@cf/meta/llama-3.2-11b-vision-instruct") {
   const cleanHash = (imageHash || "").toLowerCase().trim();
   const cleanProvider = (provider || "cloudflare").toLowerCase().trim();
@@ -890,7 +890,7 @@ var APEX_LOCAL_VEHICLE_DATABASE = [
     model: "SF90 Stradale",
     generation: "F173",
     yearStart: 2019,
-    trim: "Assetto Fiorano",
+    trim: "Base",
     bodyStyle: "Coupe",
     engine: "4.0L Twin-Turbo V8 + Tri-Electric Motor PHEV",
     displacementCc: 3990,
@@ -919,7 +919,7 @@ var APEX_LOCAL_VEHICLE_DATABASE = [
     model: "296 GTB",
     generation: "F171",
     yearStart: 2022,
-    trim: "Assetto Fiorano",
+    trim: "Base",
     bodyStyle: "Coupe",
     engine: "3.0L 120-Degree Twin-Turbo V6 + Electric Motor",
     displacementCc: 2992,
@@ -9697,13 +9697,13 @@ var MORPHOLOGICAL_FINGERPRINTS = [
       // open slot — an actual shape signature, not generic "matrix LED" marketing wording.
       headlight_shape: {
         name: "closed_c_annular_lamp_with_open_slot",
-        positiveKeywords: ["c-shaped", "c shaped", "c-clamp", "annular lamp", "ring shaped lamp", "open slot in the lamp", "slotted lamp", "closed c daytime running light", "c shaped daytime running light", "horizontal led strip", "horizontal led", "thin horizontal led", "slender led"],
-        incompatibleKeywords: ["horizontal eyelid covers", "retractable slat cover", "round bug eye", "fried egg", "teardrop", "teardrop headlight", "elongated vertical", "vertical lens", "tall narrow lamp", "lamp bar"]
+        positiveKeywords: ["c-shaped", "c shaped", "c-clamp", "annular lamp", "ring shaped lamp", "open slot in the lamp", "slotted lamp", "closed c daytime running light", "c shaped daytime running light"],
+        incompatibleKeywords: ["horizontal eyelid covers", "retractable slat cover", "round bug eye", "fried egg", "teardrop", "teardrop headlight", "elongated vertical", "vertical lens", "tall narrow lamp", "lamp bar", "horizontal slit", "horizontal eyelid", "horizontal led strip", "horizontal led", "horizontal slats"]
       },
       front_intake_grille: {
         name: "open_nose_wing_diffuser",
-        positiveKeywords: ["open nose wing", "front diffuser channel", "low slung slotted intake", "lower bumper splitter", "shut-off gurney", "gurney", "trapezoidal grille", "mesh pattern"],
-        incompatibleKeywords: ["horizontal strakes front", "slatted front bumper", "oval grille", "full-width horizontal strakes"]
+        positiveKeywords: ["open nose wing", "front diffuser channel", "low slung slotted intake", "lower bumper splitter", "shut-off gurney", "gurney", "trapezoidal grille"],
+        incompatibleKeywords: ["horizontal strakes front", "slatted front bumper", "oval grille", "full-width horizontal strakes", "horizontal strakes", "horizontal slat", "horizontal slats", "slatted grille"]
       },
       hood_geometry: {
         name: "s_duct_hood_extractor_channel",
@@ -13834,8 +13834,8 @@ var HierarchicalClassifier = class {
         }
       }
       const hasNegativeStrakes = /\b(?:without|no|lacks?|devoid\s+of)\s+(?:horizontal\s+)?strakes?\b/i.test(evidenceText);
-      const hasDaytonaIconaCues = !hasNegativeStrakes && /\b(horizontal\s+strakes?|headlight\s+eyelids?|eyelid\s+covers?|partial\s+covers?|wraparound\s+visor|visor\s+canopy|fender-mounted\s+mirrors?|door\s+tops?\s+mirrors?|icona|(?:thin|slim|low|recessed|narrow)\s+horizontal\s+(?:head)?(?:lamps?|lights?|openings?)|(?:large|wide)\s+horizontal\s+(?:front\s+)?grille|horizontal\s+grille\s+with\s+black|horizontal\s+blade\s+splitter)\b/i.test(evidenceText);
-      const hasExplicitSf90Cues = /\b(sf90|shut-?off\s+gurney|c-shaped\s+(?:matrix\s+)?(?:led\s+)?headlights?|c-clamp\s+headlights?)\b/i.test(evidenceText);
+      const hasDaytonaIconaCues = !hasNegativeStrakes && /\b(horizontal\s+strakes?|horizontal\s+slats?|slatted\s+grille|slatted\s+bumper|headlight\s+eyelids?|eyelid\s+covers?|partial\s+covers?|wraparound\s+visor|visor\s+canopy|fender-mounted\s+mirrors?|door\s+tops?\s+mirrors?|icona|(?:thin|slim|low|recessed|narrow)\s+horizontal\s+(?:head)?(?:lamps?|lights?|openings?)|(?:large|wide)\s+horizontal\s+(?:front\s+)?grille|horizontal\s+grille\s+with\s+black|horizontal\s+blade\s+splitter)\b/i.test(evidenceText);
+      const hasExplicitSf90Cues = /\b(shut-?off\s+gurney|c-shaped\s+(?:matrix\s+)?(?:led\s+)?headlights?|c-clamp\s+headlights?)\b/i.test(evidenceText);
       const isFrontViewpoint = viewpoint === "front" || viewpoint === "front_3q";
       if (hasDaytonaIconaCues) {
         if (candNameLower.includes("daytona") || candNameLower.includes("sp3")) {
@@ -16648,25 +16648,31 @@ ${decisiveNotes ? `CANDIDATE-SPECIFIC STRUCTURAL CRITERIA TO EXAMINE (context on
 ${decisiveNotes}
 ` : ""}CRITICAL INVARIANTS:
 1. Candidate A and Candidate B are completely unordered peers. Neither candidate has any default priority, advantage, or baseline preference.
-2. For EACH of the eight zones (headlights, front_grille_intake, hood, front_aero_splitter, side_architecture, greenhouse_roof, rear_architecture, exhaust) describe exactly what you physically see, or write "NOT_VISIBLE" if the zone is out of frame/occluded from this viewpoint.
+2. For each visible zone (headlights, front_grille, hood, splitter_aero, side_waist, roofline, rear_exhaust) describe exactly what you physically see, or write "NOT_VISIBLE" if the zone is out of frame/occluded.
 3. If a feature zone is NOT_VISIBLE or OCCLUDED, it contributes exactly ZERO evidence, ZERO contradiction, and ZERO penalty. "NOT_VISIBLE" is NEVER a contradiction.
-4. Record a contradiction ONLY when the photo directly shows geometry that structurally excludes a candidate (you can point to the actual lamp shape, exhaust layout, or bumper lip in the image). Never claim a feature is absent merely because it was not described or cannot be seen. If unsure, treat the feature as UNCERTAIN, not absent.
+4. Record a contradiction ONLY when the photo directly shows geometry that structurally excludes a candidate. If unsure, treat the feature as UNCERTAIN, not absent.
 5. Do not infer rear-deck, spoiler, or exhaust architecture from a front-only view.
-6. Describe zones in your own words from the photograph. Never reuse the criteria text as an observation. Do not use your candidate preference as evidence.
+6. Describe zones in your own words from the photograph. Never reuse criteria text as an observation. Do not use your candidate preference as evidence.
 7. Model-discriminating structural traits (lamp geometry, exhaust count/position, splitter endplates, fender louvres, roof mechanics) have high weight; generic body-style wording has low weight.
 
 Output flat valid JSON only:
 {
-  "candidate_a_zones": {"headlights": "...|NOT_VISIBLE", "front_grille_intake": "...|NOT_VISIBLE", "hood": "...|NOT_VISIBLE", "front_aero_splitter": "...|NOT_VISIBLE", "side_architecture": "...|NOT_VISIBLE", "greenhouse_roof": "...|NOT_VISIBLE", "rear_architecture": "...|NOT_VISIBLE", "exhaust": "...|NOT_VISIBLE"},
-  "candidate_b_zones": {"headlights": "...|NOT_VISIBLE", "front_grille_intake": "...|NOT_VISIBLE", "hood": "...|NOT_VISIBLE", "front_aero_splitter": "...|NOT_VISIBLE", "side_architecture": "...|NOT_VISIBLE", "greenhouse_roof": "...|NOT_VISIBLE", "rear_architecture": "...|NOT_VISIBLE", "exhaust": "...|NOT_VISIBLE"},
+  "observed_zones": {
+    "headlights": "observed lamp shape | NOT_VISIBLE",
+    "front_grille": "observed intake shape | NOT_VISIBLE",
+    "hood": "observed hood contours/vents | NOT_VISIBLE",
+    "splitter_aero": "observed splitter/aero | NOT_VISIBLE",
+    "side_waist": "observed doors/mirrors | NOT_VISIBLE",
+    "roofline": "observed roof/canopy | NOT_VISIBLE",
+    "rear_exhaust": "observed rear/exhaust | NOT_VISIBLE"
+  },
   "selected_winner": "Candidate A" | "Candidate B" | "neither",
   "winner_name": "${candA}" | "${candB}" | null,
   "confidence": 0.88,
-  "margin": 0.20,
   "candidate_a_matches": ["visible trait 1"],
   "candidate_a_contradictions": [],
   "candidate_b_matches": [],
-  "candidate_b_contradictions": ["only a directly observed contradiction"],
+  "candidate_b_contradictions": ["directly observed contradiction"],
   "evidence": ["observable cue 1", "observable cue 2"],
   "reason": "Neutral comparison rationale"
 }
@@ -16681,7 +16687,7 @@ Rules:
             timeoutMs: effectiveTimeoutMs,
             temperature: 0.1,
             seed: 42,
-            maxTokens: effectiveMaxTokens,
+            maxTokens: Math.min(384, effectiveMaxTokens),
             stream: false,
             allowRawTextFallback: true
           };
@@ -16735,7 +16741,9 @@ ${neutralVerifyPrompt} [/INST]`;
             const winnerIsA = winningCandidateName === candA;
             const winnerMatches = verifyJson && Array.isArray(winnerIsA ? verifyJson.candidate_a_matches : verifyJson.candidate_b_matches) ? winnerIsA ? verifyJson.candidate_a_matches : verifyJson.candidate_b_matches : null;
             const winnerContras = verifyJson && Array.isArray(winnerIsA ? verifyJson.candidate_a_contradictions : verifyJson.candidate_b_contradictions) ? winnerIsA ? verifyJson.candidate_a_contradictions : verifyJson.candidate_b_contradictions : null;
-            const isGroundedPromotion = !winnerMatches || winnerMatches.length > (winnerContras?.length ?? 0);
+            const winnerMatchesCount = winnerMatches && Array.isArray(winnerMatches) ? winnerMatches.length : 0;
+            const winnerContrasCount = winnerContras && Array.isArray(winnerContras) ? winnerContras.length : 0;
+            const isGroundedPromotion = winnerMatchesCount > 0 && winnerMatchesCount > winnerContrasCount;
             const otherCandName = winningCandidateName === candA ? candB : candA;
             const otherCand = viableCandidates.find((c) => c.name === otherCandName);
             const targetCand = viableCandidates.find((c) => c.name === winningCandidateName);
@@ -16744,12 +16752,13 @@ ${neutralVerifyPrompt} [/INST]`;
             const unevidencedBaselineOvertake = !winnerHasPrimaryEvidence && otherHasPrimaryEvidence && (!winnerMatches || winnerMatches.length === 0);
             if (winningCandidateName && isGroundedPromotion && !unevidencedBaselineOvertake) {
               if (targetCand) {
-                targetCand.score = Math.min(0.99, targetCand.score + 0.2);
+                const evidenceBoost = Math.min(0.15, Math.max(0.05, winnerMatchesCount * 0.05));
+                targetCand.score = Math.min(0.99, targetCand.score + evidenceBoost);
               }
             } else if (winningCandidateName && unevidencedBaselineOvertake) {
               console.warn("[CloudflareVisionProvider] Neutral verification winner rejected: unevidenced baseline candidate attempted to overtake evidenced discriminator candidate without verifiable matches.");
             } else if (winningCandidateName && !isGroundedPromotion) {
-              console.warn("[CloudflareVisionProvider] Neutral verification winner rejected: claimed contradictions outnumber observed matches for the winning candidate.");
+              console.warn("[CloudflareVisionProvider] Neutral verification winner rejected: zero matches or claimed contradictions outnumber observed matches for the winning candidate.");
             }
             viableCandidates.sort((a, b) => b.score - a.score);
             const remainingCandidates = classResult.calibrated_candidates.filter((c) => !viableCandidates.includes(c));
@@ -36967,7 +36976,7 @@ function formatScanResponse(r) {
       finalCanonId = canonRecord.vehicleId;
     }
   }
-  const inCatalogue = isNotInCatalogue ? false : v2 ? Boolean(v2.inCatalogue ?? (v2.status === "identified" || v2.status === "identified_model")) : Boolean(canon?.status === "identified" && finalCanonId);
+  const inCatalogue = isNotInCatalogue ? false : v2 ? Boolean(v2.inCatalogue ?? (v2.status === "identified" || v2.status === "identified_model" || v2.status === "probable")) : Boolean((canon?.status === "identified" || canon?.status === "probable") && finalCanonId);
   const collectibleEligible = Boolean(
     inCatalogue && (resolvedStatus === "identified" || resolvedStatus === "identified_model" || resolvedStatus === "probable") && finalCanonId && !isModelExplicitlyUncertain
   );
@@ -37241,8 +37250,10 @@ async function handler(req, res) {
       code: "PHOTO_TOO_DARK"
     });
   }
-  const imageSha256 = crypto2.createHash("sha256").update(rawBase64).digest("hex");
-  const cachedScan = scanResultImageCache.get(imageSha256);
+  const imageBytes = Buffer.from(rawBase64.replace(/[\r\n\s]/g, ""), "base64");
+  const imageSha256 = crypto2.createHash("sha256").update(imageBytes).digest("hex");
+  const versionedCacheKey = `${VISION_PIPELINE_VERSION}:${imageSha256}`;
+  const cachedScan = scanResultImageCache.get(versionedCacheKey);
   if (cachedScan && Date.now() - cachedScan.timestamp < 864e5) {
     console.log(`[api/analyze] Image SHA256 cache HIT for ${imageSha256.slice(0, 12)} (zero provider calls consumed)`);
     return res.status(200).json({
@@ -37329,7 +37340,7 @@ async function handler(req, res) {
         canonicalVehicleId: responsePayload.canonical_vehicle_id,
         specRecordId: responsePayload.canonical_vehicle_id || "default"
       });
-      scanResultImageCache.set(imageSha256, {
+      scanResultImageCache.set(versionedCacheKey, {
         responsePayload,
         timestamp: Date.now()
       });

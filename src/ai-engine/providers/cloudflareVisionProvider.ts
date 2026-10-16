@@ -987,25 +987,31 @@ Compare Candidate A: "${candA}" and Candidate B: "${candB}" against the visible 
 
 ${decisiveNotes ? `CANDIDATE-SPECIFIC STRUCTURAL CRITERIA TO EXAMINE (context only — never copy this text into your observations):\n${decisiveNotes}\n` : ''}CRITICAL INVARIANTS:
 1. Candidate A and Candidate B are completely unordered peers. Neither candidate has any default priority, advantage, or baseline preference.
-2. For EACH of the eight zones (headlights, front_grille_intake, hood, front_aero_splitter, side_architecture, greenhouse_roof, rear_architecture, exhaust) describe exactly what you physically see, or write "NOT_VISIBLE" if the zone is out of frame/occluded from this viewpoint.
+2. For each visible zone (headlights, front_grille, hood, splitter_aero, side_waist, roofline, rear_exhaust) describe exactly what you physically see, or write "NOT_VISIBLE" if the zone is out of frame/occluded.
 3. If a feature zone is NOT_VISIBLE or OCCLUDED, it contributes exactly ZERO evidence, ZERO contradiction, and ZERO penalty. "NOT_VISIBLE" is NEVER a contradiction.
-4. Record a contradiction ONLY when the photo directly shows geometry that structurally excludes a candidate (you can point to the actual lamp shape, exhaust layout, or bumper lip in the image). Never claim a feature is absent merely because it was not described or cannot be seen. If unsure, treat the feature as UNCERTAIN, not absent.
+4. Record a contradiction ONLY when the photo directly shows geometry that structurally excludes a candidate. If unsure, treat the feature as UNCERTAIN, not absent.
 5. Do not infer rear-deck, spoiler, or exhaust architecture from a front-only view.
-6. Describe zones in your own words from the photograph. Never reuse the criteria text as an observation. Do not use your candidate preference as evidence.
+6. Describe zones in your own words from the photograph. Never reuse criteria text as an observation. Do not use your candidate preference as evidence.
 7. Model-discriminating structural traits (lamp geometry, exhaust count/position, splitter endplates, fender louvres, roof mechanics) have high weight; generic body-style wording has low weight.
 
 Output flat valid JSON only:
 {
-  "candidate_a_zones": {"headlights": "...|NOT_VISIBLE", "front_grille_intake": "...|NOT_VISIBLE", "hood": "...|NOT_VISIBLE", "front_aero_splitter": "...|NOT_VISIBLE", "side_architecture": "...|NOT_VISIBLE", "greenhouse_roof": "...|NOT_VISIBLE", "rear_architecture": "...|NOT_VISIBLE", "exhaust": "...|NOT_VISIBLE"},
-  "candidate_b_zones": {"headlights": "...|NOT_VISIBLE", "front_grille_intake": "...|NOT_VISIBLE", "hood": "...|NOT_VISIBLE", "front_aero_splitter": "...|NOT_VISIBLE", "side_architecture": "...|NOT_VISIBLE", "greenhouse_roof": "...|NOT_VISIBLE", "rear_architecture": "...|NOT_VISIBLE", "exhaust": "...|NOT_VISIBLE"},
+  "observed_zones": {
+    "headlights": "observed lamp shape | NOT_VISIBLE",
+    "front_grille": "observed intake shape | NOT_VISIBLE",
+    "hood": "observed hood contours/vents | NOT_VISIBLE",
+    "splitter_aero": "observed splitter/aero | NOT_VISIBLE",
+    "side_waist": "observed doors/mirrors | NOT_VISIBLE",
+    "roofline": "observed roof/canopy | NOT_VISIBLE",
+    "rear_exhaust": "observed rear/exhaust | NOT_VISIBLE"
+  },
   "selected_winner": "Candidate A" | "Candidate B" | "neither",
   "winner_name": "${candA}" | "${candB}" | null,
   "confidence": 0.88,
-  "margin": 0.20,
   "candidate_a_matches": ["visible trait 1"],
   "candidate_a_contradictions": [],
   "candidate_b_matches": [],
-  "candidate_b_contradictions": ["only a directly observed contradiction"],
+  "candidate_b_contradictions": ["directly observed contradiction"],
   "evidence": ["observable cue 1", "observable cue 2"],
   "reason": "Neutral comparison rationale"
 }
@@ -1021,7 +1027,7 @@ Rules:
             timeoutMs: effectiveTimeoutMs,
             temperature: 0.1,
             seed: 42,
-            maxTokens: effectiveMaxTokens,
+            maxTokens: Math.min(384, effectiveMaxTokens),
             stream: false,
             allowRawTextFallback: true
           };
@@ -1081,6 +1087,8 @@ Rules:
             // GROUNDED-OBSERVATION GUARD: a structured verifier answer whose winning side carries
             // as many claimed contradictions as positive matches is not a grounded promotion —
             // free-form verifier assertions must never override discriminator observations.
+            // Requirement 4: Verification must provide at least 1 verified morphological match
+            // and must never turn uncertainty into high confidence without independent supporting evidence.
             const winnerIsA = winningCandidateName === candA;
             const winnerMatches = (verifyJson && Array.isArray(winnerIsA ? verifyJson.candidate_a_matches : verifyJson.candidate_b_matches))
               ? (winnerIsA ? verifyJson.candidate_a_matches : verifyJson.candidate_b_matches)
@@ -1088,7 +1096,10 @@ Rules:
             const winnerContras = (verifyJson && Array.isArray(winnerIsA ? verifyJson.candidate_a_contradictions : verifyJson.candidate_b_contradictions))
               ? (winnerIsA ? verifyJson.candidate_a_contradictions : verifyJson.candidate_b_contradictions)
               : null;
-            const isGroundedPromotion = !winnerMatches || (winnerMatches.length > (winnerContras?.length ?? 0));
+
+            const winnerMatchesCount = (winnerMatches && Array.isArray(winnerMatches)) ? winnerMatches.length : 0;
+            const winnerContrasCount = (winnerContras && Array.isArray(winnerContras)) ? winnerContras.length : 0;
+            const isGroundedPromotion = winnerMatchesCount > 0 && (winnerMatchesCount > winnerContrasCount);
 
             const otherCandName = winningCandidateName === candA ? candB : candA;
             const otherCand = viableCandidates.find((c) => c.name === otherCandName);
@@ -1099,12 +1110,14 @@ Rules:
 
             if (winningCandidateName && isGroundedPromotion && !unevidencedBaselineOvertake) {
               if (targetCand) {
-                targetCand.score = Math.min(0.99, targetCand.score + 0.20);
+                // Proportional evidence boost strictly bounded to max 0.15
+                const evidenceBoost = Math.min(0.15, Math.max(0.05, winnerMatchesCount * 0.05));
+                targetCand.score = Math.min(0.99, targetCand.score + evidenceBoost);
               }
             } else if (winningCandidateName && unevidencedBaselineOvertake) {
               console.warn('[CloudflareVisionProvider] Neutral verification winner rejected: unevidenced baseline candidate attempted to overtake evidenced discriminator candidate without verifiable matches.');
             } else if (winningCandidateName && !isGroundedPromotion) {
-              console.warn('[CloudflareVisionProvider] Neutral verification winner rejected: claimed contradictions outnumber observed matches for the winning candidate.');
+              console.warn('[CloudflareVisionProvider] Neutral verification winner rejected: zero matches or claimed contradictions outnumber observed matches for the winning candidate.');
             }
 
             viableCandidates.sort((a, b) => b.score - a.score);

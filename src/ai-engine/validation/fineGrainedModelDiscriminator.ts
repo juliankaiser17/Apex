@@ -1061,13 +1061,13 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       // open slot — an actual shape signature, not generic "matrix LED" marketing wording.
       headlight_shape: {
         name: 'closed_c_annular_lamp_with_open_slot',
-        positiveKeywords: ['c-shaped', 'c shaped', 'c-clamp', 'annular lamp', 'ring shaped lamp', 'open slot in the lamp', 'slotted lamp', 'closed c daytime running light', 'c shaped daytime running light', 'horizontal led strip', 'horizontal led', 'thin horizontal led', 'slender led'],
-        incompatibleKeywords: ['horizontal eyelid covers', 'retractable slat cover', 'round bug eye', 'fried egg', 'teardrop', 'teardrop headlight', 'elongated vertical', 'vertical lens', 'tall narrow lamp', 'lamp bar']
+        positiveKeywords: ['c-shaped', 'c shaped', 'c-clamp', 'annular lamp', 'ring shaped lamp', 'open slot in the lamp', 'slotted lamp', 'closed c daytime running light', 'c shaped daytime running light'],
+        incompatibleKeywords: ['horizontal eyelid covers', 'retractable slat cover', 'round bug eye', 'fried egg', 'teardrop', 'teardrop headlight', 'elongated vertical', 'vertical lens', 'tall narrow lamp', 'lamp bar', 'horizontal slit', 'horizontal eyelid', 'horizontal led strip', 'horizontal led', 'horizontal slats']
       },
       front_intake_grille: {
         name: 'open_nose_wing_diffuser',
-        positiveKeywords: ['open nose wing', 'front diffuser channel', 'low slung slotted intake', 'lower bumper splitter', 'shut-off gurney', 'gurney', 'trapezoidal grille', 'mesh pattern'],
-        incompatibleKeywords: ['horizontal strakes front', 'slatted front bumper', 'oval grille', 'full-width horizontal strakes']
+        positiveKeywords: ['open nose wing', 'front diffuser channel', 'low slung slotted intake', 'lower bumper splitter', 'shut-off gurney', 'gurney', 'trapezoidal grille'],
+        incompatibleKeywords: ['horizontal strakes front', 'slatted front bumper', 'oval grille', 'full-width horizontal strakes', 'horizontal strakes', 'horizontal slat', 'horizontal slats', 'slatted grille']
       },
       hood_geometry: {
         name: 's_duct_hood_extractor_channel',

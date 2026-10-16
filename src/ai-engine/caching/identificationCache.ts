@@ -16,8 +16,12 @@ import type { IdentificationResult } from '../types';
 // v3.4.0 — Production Release:
 //   * Generic empty-model guard preventing false canonical vehicle resolution
 //   * Preserved model uncertainty throughout downstream pipeline and UI
-//   * Ferrari Daytona SP3 horizontal rear strakes & blade signature resolution
-export const VISION_PIPELINE_VERSION = 'v3.4.1-broad-recognition-restored';
+// v3.4.2 — Production Release:
+//   * Resolved Ferrari Daytona SP3 vs SF90 Stradale trait overlap
+//   * Eliminated default Assetto Fiorano variant pollution
+//   * Grounded pairwise verification promotion requiring positive visual matches
+//   * Hardened cryptographic image byte cache isolation
+export const VISION_PIPELINE_VERSION = 'v3.4.2-ferrari-forensics-and-cache-isolation';
 
 export function buildCacheKey(
   imageHash: string,
