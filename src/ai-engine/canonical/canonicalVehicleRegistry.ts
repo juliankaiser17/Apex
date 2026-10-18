@@ -169,12 +169,16 @@ class CanonicalVehicleRegistry {
         const vehicleId = v.canonical_id;
         const existing = this.registry.get(vehicleId);
 
+        const variantTrim = v.variant && v.variant !== 'Base' && !v.model.toLowerCase().includes(v.variant.toLowerCase())
+          ? v.variant
+          : undefined;
+
         const rec: CanonicalVehicleRecord = existing || {
           vehicleId,
           make: v.make,
           model: v.model,
           generation: v.generation_code || 'Base',
-          trim: v.variant || undefined,
+          trim: variantTrim,
           bodyStyle: (v.body_styles?.[0] || 'Coupe') as BodyStyle,
           yearStart: parseInt(v.production_years?.split('–')?.[0] || '2020', 10) || 2020,
           yearEnd: v.production_years?.includes('–') ? parseInt(v.production_years.split('–')[1], 10) : undefined,
@@ -194,14 +198,26 @@ class CanonicalVehicleRegistry {
           notableFacts: `${v.make} ${v.model} ${v.variant || ''}`.trim(),
           historicalInformation: `${v.make} ${v.model} produced ${v.production_years || ''}.`,
           referenceImages: [],
-          displayName: `${v.make} ${v.model}${v.variant ? ' ' + v.variant : ''}`.trim(),
-          specificityLevel: v.variant ? 4 : 1
+          displayName: computeRecordDisplayName({
+            manufacturer: v.make,
+            model: v.model,
+            generation: v.generation_code || 'Base',
+            trim: variantTrim,
+            bodyStyle: (v.body_styles?.[0] || 'Coupe') as BodyStyle
+          }),
+          specificityLevel: variantTrim ? 4 : 1
         };
 
         if (existing) {
-          if (v.variant && (!existing.trim || existing.trim === 'Base')) {
-            existing.trim = v.variant;
-            existing.displayName = `${existing.make} ${existing.model} ${v.variant}`;
+          if (variantTrim && (!existing.trim || existing.trim === 'Base')) {
+            existing.trim = variantTrim;
+            existing.displayName = computeRecordDisplayName({
+              manufacturer: existing.make,
+              model: existing.model,
+              generation: existing.generation,
+              trim: variantTrim,
+              bodyStyle: existing.bodyStyle
+            });
           }
         } else {
           this.registerVehicle(rec);
@@ -338,10 +354,15 @@ class CanonicalVehicleRegistry {
     ]);
 
 
-    // NOTE: porsche-911-gt3-992 is intentionally NOT registered here. The 992 GT3 (non-RS)
-    // has no canonical / vehicle-database record yet, and registerAliases() silently ignores
-    // unknown vehicleIds — so a registration here would be a dead no-op rather than a fix.
-    // Tracked in POSTPONED_ISSUES.md as a candidate-completeness gap.
+    this.registerAliases('porsche-911-gt3-992', [
+      '911 gt3',
+      '992 gt3',
+      'porsche 911 gt3',
+      'porsche 992 gt3',
+      '911 gt3 992',
+      'porsche 911 gt3 992',
+      'gt3 992'
+    ]);
 
     // ── FERRARI ──
     this.registerAliases('ferrari-amalfi', [
@@ -413,6 +434,13 @@ class CanonicalVehicleRegistry {
       'ferrari roma f169'
     ]);
 
+    this.registerAliases('ferrari-sf90-spider', [
+      'sf90 spider',
+      'ferrari sf90 spider',
+      'sf90 spider f173',
+      'ferrari sf90 spider f173'
+    ]);
+
     this.registerAliases('ferrari-296-gtb', [
       '296 gtb',
       '296',
@@ -421,6 +449,14 @@ class CanonicalVehicleRegistry {
       '296 gtb f171',
       'ferrari 296 gtb f171',
       '296gtb'
+    ]);
+
+    this.registerAliases('ferrari-296-gts', [
+      '296 gts',
+      'ferrari 296 gts',
+      '296 gts f171',
+      'ferrari 296 gts f171',
+      '296gts'
     ]);
 
     this.registerAliases('ferrari-812-superfast', [

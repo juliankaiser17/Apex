@@ -476,6 +476,33 @@ var APEX_LOCAL_VEHICLE_DATABASE = [
     visualSignature: { aspectRatio: 2.15, silhouetteClass: "widebody_supercar", prominentColors: ["Guards Red", "White", "GT Silver", "Shark Blue"] }
   },
   {
+    id: "porsche-911-gt3-992",
+    manufacturer: "Porsche",
+    model: "911 GT3",
+    generation: "992",
+    yearStart: 2021,
+    trim: "Base",
+    bodyStyle: "Coupe",
+    engine: "4.0L Naturally Aspirated Boxer-6 (MA2.75)",
+    displacementCc: 3996,
+    aspiration: "Naturally Aspirated",
+    cylinders: 6,
+    drivetrain: "RWD",
+    transmission: "7-Speed Dual-Clutch (PDK) / 6-Speed Manual",
+    horsepower: 502,
+    torqueNm: 470,
+    zeroToHundredSec: 3.4,
+    zeroToSixtyMphSec: 3.2,
+    topSpeedKmH: 318,
+    curbWeightKg: 1435,
+    fuelType: "Gasoline",
+    productionYears: "2021\u2013Present",
+    originCountry: "Germany",
+    notableFacts: "Features double-wishbone front suspension derived from the 911 RSR race car and an iconic swan-neck rear wing producing 50% more downforce than the 991.2 generation.",
+    baselineRarity: "epic",
+    visualSignature: { aspectRatio: 2.15, silhouetteClass: "widebody_supercar", prominentColors: ["Shark Blue", "Guards Red", "GT Silver", "Racing Yellow"] }
+  },
+  {
     id: "porsche-911-turbo",
     manufacturer: "Porsche",
     model: "911 Turbo",
@@ -724,7 +751,7 @@ var APEX_LOCAL_VEHICLE_DATABASE = [
     model: "Macan",
     generation: "Type 95B",
     yearStart: 2014,
-    trim: "GTS",
+    trim: "Base",
     bodyStyle: "SUV",
     engine: "2.9L Twin-Turbo V6",
     displacementCc: 2894,
@@ -914,6 +941,35 @@ var APEX_LOCAL_VEHICLE_DATABASE = [
     visualSignature: { aspectRatio: 2.2, silhouetteClass: "widebody_supercar", prominentColors: ["Rosso Corsa", "Giallo Modena", "Nero Daytona", "Grigio Silverstone"] }
   },
   {
+    id: "ferrari-sf90-spider",
+    manufacturer: "Ferrari",
+    model: "SF90 Spider",
+    generation: "F173",
+    yearStart: 2020,
+    trim: "Base",
+    bodyStyle: "Convertible",
+    engine: "4.0L Twin-Turbo V8 + Tri-Electric Motor PHEV",
+    displacementCc: 3990,
+    aspiration: "Hybrid",
+    cylinders: 8,
+    drivetrain: "AWD",
+    transmission: "8-Speed Dual-Clutch (F1)",
+    horsepower: 986,
+    torqueNm: 800,
+    zeroToHundredSec: 2.5,
+    zeroToSixtyMphSec: 2.4,
+    topSpeedKmH: 340,
+    curbWeightKg: 1670,
+    fuelType: "Plug-in Hybrid",
+    electricRangeKm: 25,
+    batteryCapacityKwh: 7.9,
+    productionYears: "2020\u2013Present",
+    originCountry: "Italy",
+    notableFacts: "Open-top spider version of Maranello\u2019s first plug-in hybrid supercar, featuring a retractable aluminum hardtop opening or closing in 14 seconds.",
+    baselineRarity: "legendary",
+    visualSignature: { aspectRatio: 2.15, silhouetteClass: "low_slung_coupe", prominentColors: ["Rosso Corsa", "Giallo Montecarlo", "Blu Pozzi", "Grigio Silverstone"] }
+  },
+  {
     id: "ferrari-296-gtb",
     manufacturer: "Ferrari",
     model: "296 GTB",
@@ -941,6 +997,35 @@ var APEX_LOCAL_VEHICLE_DATABASE = [
     notableFacts: 'Nicknamed "piccolo V12" by Maranello engineers due to the harmonic order resonance of its wide 120-degree hot-inside-V turbo layout.',
     baselineRarity: "epic",
     visualSignature: { aspectRatio: 2.1, silhouetteClass: "low_slung_coupe", prominentColors: ["Rosso Corsa", "Rosso Imola", "Azzurro Dino", "Blu Tour de France"] }
+  },
+  {
+    id: "ferrari-296-gts",
+    manufacturer: "Ferrari",
+    model: "296 GTS",
+    generation: "F171",
+    yearStart: 2022,
+    trim: "Base",
+    bodyStyle: "Convertible",
+    engine: "3.0L 120-Degree Twin-Turbo V6 + Electric Motor",
+    displacementCc: 2992,
+    aspiration: "Hybrid",
+    cylinders: 6,
+    drivetrain: "RWD",
+    transmission: "8-Speed Dual-Clutch",
+    horsepower: 819,
+    torqueNm: 740,
+    zeroToHundredSec: 2.9,
+    zeroToSixtyMphSec: 2.7,
+    topSpeedKmH: 330,
+    curbWeightKg: 1540,
+    fuelType: "Plug-in Hybrid",
+    electricRangeKm: 25,
+    batteryCapacityKwh: 7.45,
+    productionYears: "2022\u2013Present",
+    originCountry: "Italy",
+    notableFacts: "Retractable hard top open-top derivative of the 296 GTB berlinetta preserving the same aero efficiency and 819 hp plug-in hybrid V6 powertrain.",
+    baselineRarity: "epic",
+    visualSignature: { aspectRatio: 2.1, silhouetteClass: "low_slung_coupe", prominentColors: ["Rosso Corsa", "Grigio Scuro", "Blu Corsa", "Giallo Modena"] }
   },
   {
     id: "ferrari-488-pista",
@@ -1576,7 +1661,7 @@ var APEX_LOCAL_VEHICLE_DATABASE = [
     model: "GranTurismo",
     generation: "Gen 2 (M161)",
     yearStart: 2023,
-    trim: "Trofeo",
+    trim: "Base",
     bodyStyle: "Coupe",
     engine: "3.0L Twin-Turbocharged Nettuno V6",
     displacementCc: 2992,
@@ -1604,7 +1689,7 @@ var APEX_LOCAL_VEHICLE_DATABASE = [
     model: "M3 Competition",
     generation: "G80",
     yearStart: 2021,
-    trim: "M xDrive",
+    trim: "Base",
     bodyStyle: "Sedan",
     engine: "3.0L Twin-Turbocharged S58 Inline-6",
     displacementCc: 2993,
@@ -1825,7 +1910,7 @@ var APEX_LOCAL_VEHICLE_DATABASE = [
     generation: "R34",
     yearStart: 1999,
     yearEnd: 2002,
-    trim: "V-Spec II N\xFCr",
+    trim: "Base",
     bodyStyle: "Coupe",
     engine: "2.6L Twin-Turbo RB26DETT N1 Inline-6",
     displacementCc: 2568,
@@ -1853,7 +1938,7 @@ var APEX_LOCAL_VEHICLE_DATABASE = [
     model: "GR Supra",
     generation: "A90 (DB)",
     yearStart: 2020,
-    trim: "3.0 Premium 6MT",
+    trim: "Base",
     bodyStyle: "Coupe",
     engine: "3.0L Single Twin-Scroll Turbo B58 Inline-6",
     displacementCc: 2998,
@@ -1935,7 +2020,7 @@ var APEX_LOCAL_VEHICLE_DATABASE = [
     generation: "LFA10",
     yearStart: 2010,
     yearEnd: 2012,
-    trim: "N\xFCrburgring Package",
+    trim: "Base",
     bodyStyle: "Coupe",
     engine: "4.8L Even-Firing 72-Degree Naturally Aspirated 1LR-GUE V10",
     displacementCc: 4805,
@@ -1943,7 +2028,7 @@ var APEX_LOCAL_VEHICLE_DATABASE = [
     cylinders: 10,
     drivetrain: "RWD",
     transmission: "6-Speed Automated Sequential (ASG)",
-    horsepower: 563,
+    horsepower: 552,
     torqueNm: 480,
     zeroToHundredSec: 3.7,
     zeroToSixtyMphSec: 3.5,
@@ -1991,7 +2076,7 @@ var APEX_LOCAL_VEHICLE_DATABASE = [
     model: "Corvette Z06",
     generation: "C8",
     yearStart: 2023,
-    trim: "Z07 Performance Package",
+    trim: "Base",
     bodyStyle: "Coupe",
     engine: "5.5L Naturally Aspirated Flat-Plane Crank LT6 V8",
     displacementCc: 5463,
@@ -7344,12 +7429,13 @@ var CanonicalVehicleRegistry = class {
         }
         const vehicleId = v.canonical_id;
         const existing = this.registry.get(vehicleId);
+        const variantTrim = v.variant && v.variant !== "Base" && !v.model.toLowerCase().includes(v.variant.toLowerCase()) ? v.variant : void 0;
         const rec = existing || {
           vehicleId,
           make: v.make,
           model: v.model,
           generation: v.generation_code || "Base",
-          trim: v.variant || void 0,
+          trim: variantTrim,
           bodyStyle: v.body_styles?.[0] || "Coupe",
           yearStart: parseInt(v.production_years?.split("\u2013")?.[0] || "2020", 10) || 2020,
           yearEnd: v.production_years?.includes("\u2013") ? parseInt(v.production_years.split("\u2013")[1], 10) : void 0,
@@ -7369,13 +7455,25 @@ var CanonicalVehicleRegistry = class {
           notableFacts: `${v.make} ${v.model} ${v.variant || ""}`.trim(),
           historicalInformation: `${v.make} ${v.model} produced ${v.production_years || ""}.`,
           referenceImages: [],
-          displayName: `${v.make} ${v.model}${v.variant ? " " + v.variant : ""}`.trim(),
-          specificityLevel: v.variant ? 4 : 1
+          displayName: computeRecordDisplayName({
+            manufacturer: v.make,
+            model: v.model,
+            generation: v.generation_code || "Base",
+            trim: variantTrim,
+            bodyStyle: v.body_styles?.[0] || "Coupe"
+          }),
+          specificityLevel: variantTrim ? 4 : 1
         };
         if (existing) {
-          if (v.variant && (!existing.trim || existing.trim === "Base")) {
-            existing.trim = v.variant;
-            existing.displayName = `${existing.make} ${existing.model} ${v.variant}`;
+          if (variantTrim && (!existing.trim || existing.trim === "Base")) {
+            existing.trim = variantTrim;
+            existing.displayName = computeRecordDisplayName({
+              manufacturer: existing.make,
+              model: existing.model,
+              generation: existing.generation,
+              trim: variantTrim,
+              bodyStyle: existing.bodyStyle
+            });
           }
         } else {
           this.registerVehicle(rec);
@@ -7495,6 +7593,15 @@ var CanonicalVehicleRegistry = class {
       "cayman",
       "porsche cayman"
     ]);
+    this.registerAliases("porsche-911-gt3-992", [
+      "911 gt3",
+      "992 gt3",
+      "porsche 911 gt3",
+      "porsche 992 gt3",
+      "911 gt3 992",
+      "porsche 911 gt3 992",
+      "gt3 992"
+    ]);
     this.registerAliases("ferrari-amalfi", [
       "amalfi",
       "ferrari amalfi",
@@ -7557,6 +7664,12 @@ var CanonicalVehicleRegistry = class {
       "roma f169",
       "ferrari roma f169"
     ]);
+    this.registerAliases("ferrari-sf90-spider", [
+      "sf90 spider",
+      "ferrari sf90 spider",
+      "sf90 spider f173",
+      "ferrari sf90 spider f173"
+    ]);
     this.registerAliases("ferrari-296-gtb", [
       "296 gtb",
       "296",
@@ -7565,6 +7678,13 @@ var CanonicalVehicleRegistry = class {
       "296 gtb f171",
       "ferrari 296 gtb f171",
       "296gtb"
+    ]);
+    this.registerAliases("ferrari-296-gts", [
+      "296 gts",
+      "ferrari 296 gts",
+      "296 gts f171",
+      "ferrari 296 gts f171",
+      "296gts"
     ]);
     this.registerAliases("ferrari-812-superfast", [
       "812 superfast",
@@ -8472,7 +8592,7 @@ var hardNegativesEngine = new HardNegativesEngine();
 // src/ai-engine/validation/evidenceNormalizer.ts
 var FRONT_INDICATORS = /\b(front|nose|bonnet|hood|headlights?|headlamps?|front\s+grille|front\s+bumper|front\s+splitter|front\s+fascia|front\s+fenders?|front\s+overhang)\b/i;
 var REAR_INDICATORS = /\b(rear|tail|taillights?|tail\s+lamps?|tail[\s-]?lights?|exhaust|diffuser|rear\s+bumper|rear\s+wing|rear\s+spoiler|trunk|boot|ducktail|rear\s+fascia|rear\s+deck|rear\s+haunches|rear\s+apron)\b/i;
-var HEADLIGHT_INDICATORS = /\b(headlights?|headlamps?|drl|daytime\s+running\s+lights?|front\s+lamps?|front\s+lights?|eyelid\s+covers?|matrix\s+led|high\s+beams?)\b/i;
+var HEADLIGHT_INDICATORS = /\b(headlights?|headlamps?|drl|daytime\s+running\s+lights?|front\s+lamps?|front\s+lights?|eyelid\s+covers?|matrix\s+led|high\s+beams?|led\s+strips?)\b/i;
 var TAILLIGHT_INDICATORS = /\b(taillights?|tail\s+lamps?|tail[\s-]?lights?|rear\s+lamps?|rear\s+lights?|brake\s+lights?|rear\s+lightbar|squircle\s+taillights?)\b/i;
 var EXHAUST_INDICATORS = /\b(exhaust|tailpipes?|exhaust\s+tips?|mufflers?|exhaust\s+outlets?|quad\s+exhaust|central\s+exhaust|dual\s+exhaust)\b/i;
 var INTAKE_INDICATORS = /\b(grille|grill|air\s+intakes?|radiators?|intake\s+ducts?|cooling\s+vents?|air\s+scoops?|naca\s+ducts?|splitters?)\b/i;
@@ -8480,7 +8600,7 @@ var SIDE_INDICATORS = /\b(side|flanks?|doors?|side\s+skirts?|rockers?|side\s+sil
 var ROOF_INDICATORS = /\b(roof|roofline|canopy|targa|convertible|soft\s*top|hardtop|a-pillars?|b-pillars?|c-pillars?|buttress(?:es)?|greenhouse|sunroof)\b/i;
 var CABIN_INDICATORS = /\b(cabin|cockpit|windshield|windscreen|interior|seats?|steering\s+wheel|visor\s+canopy|glasshouse)\b/i;
 var WHEEL_INDICATORS = /\b(wheels?|rims?|alloys?|calipers?|tires?|tyres?|brakes?|ceramic\s+rotors?)\b/i;
-var COMPOUND_TRANSITION_RE = /\s*(?:[.;\n]+|,\s*(?:(?:and|while|whereas|but)\s+)?(?=(?:(?:two|three|four|dual|twin|a|an|the|each|pair\s+of|smaller|larger)\s+)?(?:front|rear|side|roof|cabin|wheels?|exhaust|intake|headlights?|headlamps?|lamps?|lights?|taillights?|hood|bonnet|nose|tail|diffuser|splitter|trunk|boot|mirrors?)\b))\s*/i;
+var COMPOUND_TRANSITION_RE = /\s*(?:[.;\n]+|,\s*(?:(?:and|while|whereas|but|with|along\s+with)\s+)?(?=(?:(?:two|three|four|dual|twin|a|an|the|each|pair\s+of|smaller|larger)\s+)?(?:(?:horizontal|vertical|slim|thin|recessed)\s+)?(?:front|rear|side|roof|cabin|wheels?|exhaust|intake|headlights?|headlamps?|lamps?|lights?|taillights?|hood|bonnet|nose|tail|diffuser|splitter|trunk|boot|mirrors?|led\s+strips?)\b))\s*/i;
 var EvidenceNormalizer = class {
   /**
    * Decompose free-text observations into localized, anatomically tagged clauses
@@ -8536,7 +8656,7 @@ var EvidenceNormalizer = class {
         case "headlights":
           if (c.hasRear || c.hasTaillights || c.hasExhaust) return false;
           if ((c.hasSide || c.hasIntake || c.hasWheels || c.hasCabin) && !c.hasHeadlights) return false;
-          if (!c.hasHeadlights && !/\b(headlights?|headlamps?|drl|lamps?|lights?|eyelid|lens)\b/i.test(c.normalizedText)) return false;
+          if (!c.hasHeadlights && !/\b(headlights?|headlamps?|drl|lamps?|lights?|eyelid|lens|led\s+strips?)\b/i.test(c.normalizedText)) return false;
           return true;
         case "front_grille":
           if (c.hasRear || c.hasTaillights || c.hasExhaust) return false;
@@ -9042,18 +9162,23 @@ var MORPHOLOGICAL_FINGERPRINTS = [
     traits: {
       headlight_shape: {
         name: "teardrop_swept_cluster",
-        positiveKeywords: ["teardrop headlight", "swept cluster", "elongated teardrop lens", "integrated daytime blade", "swept back lens"],
-        incompatibleKeywords: ["crescent", "p1-inspired", "p1 style", "p1 crescent", "c-shape black housing", "c-shape", "vertical slit", "round bug eye"]
+        positiveKeywords: ["teardrop headlight", "swept cluster", "elongated teardrop lens", "integrated daytime blade", "swept back lens", "teardrop shape", "thin horizontal led strips", "horizontal led strip", "thin horizontal led", "front lamps are thin, horizontal led strips", "swept led headlights", "sports series headlights"],
+        incompatibleKeywords: ["crescent", "p1-inspired", "p1 style", "p1 crescent", "c-shape black housing", "c-shape", "deep eye-socket", "eye socket cavity", "round bug eye"]
       },
       front_intake_grille: {
         name: "three_segment_aero_blade_bumper",
-        positiveKeywords: ["three-segment", "aero blade", "tripartite front splitter", "sports series bumper"],
-        incompatibleKeywords: ["p1 front bumper", "p1-derived", "p1-inspired", "p1 bumper", "large concave oval", "horizontal strakes"]
+        positiveKeywords: ["three-segment", "aero blade", "tripartite front splitter", "sports series bumper", "front splitter is a thin, horizontal blade", "thin, horizontal blade", "thin horizontal blade", "horizontal opening with a mesh pattern", "horizontal opening with mesh", "large, horizontal opening with a mesh pattern"],
+        incompatibleKeywords: ["p1 front bumper", "p1-derived", "p1-inspired", "p1 bumper", "deep eye socket", "large concave oval", "horizontal strakes across front"]
+      },
+      hood_geometry: {
+        name: "smooth_front_hood_no_louvers",
+        positiveKeywords: ["smooth hood", "clean front lid", "smooth flat surface with no vents", "clean bonnet without vents", "flat surface with no vents or louvers", "smooth flat surface", "smooth, flat surface with no vents or louvers"],
+        incompatibleKeywords: ["deep carbon nostrils", "hood air extractors", "fender louvers and hood nostrils", "s-duct extractor"]
       },
       side_intake_type: {
         name: "dihedral_floating_tendon_intake",
-        positiveKeywords: ["floating tendon", "tendon duct", "door channel", "no open side scoop", "smooth door tendon", "floating door tendon", "integrated door duct"],
-        incompatibleKeywords: ["side radiator", "radiator intake", "large side scoop", "large open side scoop", "radiator intake behind door", "prominent open side scoop", "strakes", "side intake", "side air intake", "side air scoop", "side radiator intake", "open side scoop", "side intake scoop", "large side air intakes"]
+        positiveKeywords: ["floating tendon", "tendon duct", "door channel", "no open side scoop", "smooth door tendon", "floating door tendon", "integrated door duct", "tendon air intake", "door air intake", "small side air intake", "small side intake", "small vertical opening", "small, vertical opening", "side air intakes are small, vertical openings", "small vertical openings", "side air intakes are small", "recessed side intake", "tendon"],
+        incompatibleKeywords: ["turning vane", "carbon turning vane", "large open side scoop", "prominent open side scoop", "crescent side scoop", "large open turning vane", "large side radiator scoop"]
       },
       roofline_greenhouse: {
         name: "flying_buttress_c_pillar",
@@ -9067,7 +9192,7 @@ var MORPHOLOGICAL_FINGERPRINTS = [
       },
       rear_architecture_and_exhaust: {
         name: "dual_lower_bumper_exhaust_tips",
-        positiveKeywords: ["dual lower exhaust", "lower bumper tips", "curved led blade", "fixed rear mesh"],
+        positiveKeywords: ["dual lower exhaust", "lower bumper tips", "curved led blade", "fixed rear mesh", "two exhaust pipes exit low in the centre", "two exhaust pipes exit low"],
         incompatibleKeywords: ["active airbrake", "dual top-exit circular titanium", "quad exhaust"]
       },
       door_architecture: {
@@ -9184,7 +9309,7 @@ var MORPHOLOGICAL_FINGERPRINTS = [
     model: "Amalfi",
     generation: "F169M",
     proportionsDescription: "Front-mid engine 2+2 grand tourer with long sweeping sculpted hood, body-color perforated front grille, clean body sides, and active 3-position rear spoiler",
-    confusableWith: ["ferrari-daytona-sp3", "ferrari-sf90-stradale", "ferrari-458-italia", "ferrari-296-gtb", "ferrari-458-spider", "ferrari-488-pista", "ferrari-roma", "ferrari-812-superfast", "ferrari-laferrari"],
+    confusableWith: ["ferrari-296-gts", "ferrari-daytona-sp3", "ferrari-sf90-stradale", "ferrari-458-italia", "ferrari-296-gtb", "ferrari-458-spider", "ferrari-488-pista", "ferrari-roma", "ferrari-812-superfast", "ferrari-laferrari"],
     traits: {
       proportions: {
         name: "front_mid_engine_2plus2_grand_tourer",
@@ -9274,7 +9399,7 @@ var MORPHOLOGICAL_FINGERPRINTS = [
     model: "Daytona SP3",
     generation: "Icona",
     proportionsDescription: "Icona hypercar with wraparound visor canopy, horizontal louvers/strakes, and fender-mounted mirrors",
-    confusableWith: ["ferrari-amalfi", "ferrari-sf90-stradale", "ferrari-488-pista", "ferrari-458-italia", "ferrari-296-gtb", "ferrari-458-spider", "ferrari-roma", "ferrari-812-superfast", "ferrari-laferrari"],
+    confusableWith: ["ferrari-sf90-spider", "ferrari-amalfi", "ferrari-sf90-stradale", "ferrari-488-pista", "ferrari-458-italia", "ferrari-296-gtb", "ferrari-458-spider", "ferrari-roma", "ferrari-812-superfast", "ferrari-laferrari"],
     traits: {
       headlight_shape: {
         name: "horizontal_eyelid_covers",
@@ -9300,7 +9425,10 @@ var MORPHOLOGICAL_FINGERPRINTS = [
           "recessed horizontal headlights",
           "horizontal led strip",
           "horizontal led strips",
-          "horizontal led"
+          "horizontal led",
+          "horizontal led strips on the front bumper",
+          "horizontal led strip on the front bumper",
+          "two horizontal led strips on the front bumper"
         ],
         incompatibleKeywords: ["open c-shape matrix", "c-clamp headlight", "c-shaped", "c-shape", "round bug eye", "elongated vertical", "swept-back headlights"]
       },
@@ -9507,7 +9635,7 @@ var MORPHOLOGICAL_FINGERPRINTS = [
     model: "458 Spider",
     generation: "F142",
     proportionsDescription: "Mid-rear naturally aspirated V8 open-top supercar with retractable aluminum hardtop, dual rear flying buttresses, single round taillights, and triple central exhaust",
-    confusableWith: ["ferrari-458-italia", "ferrari-488-pista", "ferrari-sf90-stradale", "ferrari-daytona-sp3", "ferrari-amalfi", "ferrari-296-gtb", "ferrari-roma", "ferrari-812-superfast", "ferrari-laferrari"],
+    confusableWith: ["ferrari-sf90-spider", "ferrari-296-gts", "ferrari-458-italia", "ferrari-488-pista", "ferrari-sf90-stradale", "ferrari-daytona-sp3", "ferrari-amalfi", "ferrari-296-gtb", "ferrari-roma", "ferrari-812-superfast", "ferrari-laferrari"],
     traits: {
       // STRUCTURED GEOMETRY ONLY: the F142 discriminator is a TALL, vertically oriented lens that
       // sweeps back along the wing — not generic "LED strip" wording.
@@ -9691,18 +9819,18 @@ var MORPHOLOGICAL_FINGERPRINTS = [
     model: "SF90 Stradale",
     generation: "F173",
     proportionsDescription: "Mid-engine flagship PHEV supercar with slender C-shaped matrix headlights and shut-off Gurney flap",
-    confusableWith: ["ferrari-daytona-sp3", "ferrari-amalfi", "ferrari-488-pista", "ferrari-458-italia", "ferrari-458-spider", "ferrari-296-gtb", "ferrari-roma", "ferrari-812-superfast", "ferrari-laferrari"],
+    confusableWith: ["ferrari-sf90-spider", "ferrari-daytona-sp3", "ferrari-amalfi", "ferrari-488-pista", "ferrari-458-italia", "ferrari-458-spider", "ferrari-296-gtb", "ferrari-roma", "ferrari-812-superfast", "ferrari-laferrari"],
     traits: {
       // STRUCTURED GEOMETRY ONLY: the SF90 discriminator is the CLOSED C / annular lamp with an
       // open slot — an actual shape signature, not generic "matrix LED" marketing wording.
       headlight_shape: {
         name: "closed_c_annular_lamp_with_open_slot",
         positiveKeywords: ["c-shaped", "c shaped", "c-clamp", "annular lamp", "ring shaped lamp", "open slot in the lamp", "slotted lamp", "closed c daytime running light", "c shaped daytime running light"],
-        incompatibleKeywords: ["horizontal eyelid covers", "retractable slat cover", "round bug eye", "fried egg", "teardrop", "teardrop headlight", "elongated vertical", "vertical lens", "tall narrow lamp", "lamp bar", "horizontal slit", "horizontal eyelid", "horizontal led strip", "horizontal led", "horizontal slats"]
+        incompatibleKeywords: ["horizontal eyelid covers", "retractable slat cover", "round bug eye", "fried egg", "teardrop", "teardrop headlight", "elongated vertical", "vertical lens", "tall narrow lamp", "lamp bar", "horizontal slit", "horizontal eyelid", "horizontal slats"]
       },
       front_intake_grille: {
         name: "open_nose_wing_diffuser",
-        positiveKeywords: ["open nose wing", "front diffuser channel", "low slung slotted intake", "lower bumper splitter", "shut-off gurney", "gurney", "trapezoidal grille"],
+        positiveKeywords: ["open nose wing", "front diffuser channel", "low slung slotted intake", "lower bumper splitter", "shut-off gurney", "gurney"],
         incompatibleKeywords: ["horizontal strakes front", "slatted front bumper", "oval grille", "full-width horizontal strakes", "horizontal strakes", "horizontal slat", "horizontal slats", "slatted grille"]
       },
       hood_geometry: {
@@ -9718,7 +9846,7 @@ var MORPHOLOGICAL_FINGERPRINTS = [
       roofline_greenhouse: {
         name: "conventional_coupe_greenhouse",
         positiveKeywords: ["sloping coupe roof", "conventional a-pillars", "bubble cabin", "compact glass engine deck"],
-        incompatibleKeywords: ["wraparound visor canopy", "targa visor", "hidden a-pillar"]
+        incompatibleKeywords: ["wraparound visor canopy", "targa visor", "hidden a-pillar", "retractable hardtop", "open-top", "open top", "spider", "convertible roof", "drop-top", "spider tonneau"]
       },
       rear_architecture_and_exhaust: {
         name: "dual_high_mounted_central_exhaust_squircle",
@@ -9728,6 +9856,52 @@ var MORPHOLOGICAL_FINGERPRINTS = [
       proportions: {
         name: "mid_engine_flagship_supercar",
         positiveKeywords: ["cab-forward", "mid-engine", "wide rear haunches"],
+        incompatibleKeywords: ["front-engine gt", "suv", "sedan"]
+      }
+    }
+  },
+  // ── FERRARI SF90 SPIDER ──
+  {
+    vehicleId: "ferrari-sf90-spider",
+    make: "Ferrari",
+    model: "SF90 Spider",
+    generation: "F173",
+    proportionsDescription: "Mid-engine flagship PHEV convertible with slender C-shaped matrix headlights, retractable aluminum hardtop, and dual high-mounted central exhaust",
+    confusableWith: ["ferrari-sf90-stradale", "ferrari-daytona-sp3", "ferrari-458-spider"],
+    traits: {
+      headlight_shape: {
+        name: "closed_c_annular_lamp_with_open_slot",
+        positiveKeywords: ["c-shaped", "c shaped", "c-clamp", "annular lamp", "ring shaped lamp", "open slot in the lamp", "slotted lamp", "closed c daytime running light", "c shaped daytime running light"],
+        incompatibleKeywords: ["horizontal eyelid covers", "retractable slat cover", "round bug eye", "fried egg", "teardrop", "teardrop headlight", "elongated vertical", "vertical lens", "tall narrow lamp", "lamp bar", "horizontal slit", "horizontal eyelid", "horizontal slats"]
+      },
+      front_intake_grille: {
+        name: "open_nose_wing_diffuser",
+        positiveKeywords: ["open nose wing", "front diffuser channel", "low slung slotted intake", "lower bumper splitter", "shut-off gurney", "gurney"],
+        incompatibleKeywords: ["horizontal strakes front", "slatted front bumper", "oval grille", "full-width horizontal strakes", "horizontal strakes", "horizontal slat", "horizontal slats", "slatted grille"]
+      },
+      hood_geometry: {
+        name: "s_duct_hood_extractor_channel",
+        positiveKeywords: ["s-duct", "hood air extractor", "central hood duct", "hood extractor channel", "deep bonnet channel"],
+        incompatibleKeywords: ["deep hood nostrils with strakes", "large central scoop", "shaker hood"]
+      },
+      side_intake_type: {
+        name: "high_mounted_rear_haunch_intakes",
+        positiveKeywords: ["haunch intake", "rear shoulder intake", "sculpted side waist"],
+        incompatibleKeywords: ["floating tendon", "triple fender gills"]
+      },
+      roofline_greenhouse: {
+        name: "retractable_hardtop_spider_buttresses",
+        positiveKeywords: ["retractable hardtop", "folding roof", "open-top", "open top", "spider", "convertible roof", "drop-top", "spider tonneau", "rear buttresses behind roll hoops", "buttresses behind seats"],
+        incompatibleKeywords: ["fixed coupe roof", "sloping full glass rear hatch", "closed coupe greenhouse"]
+      },
+      rear_architecture_and_exhaust: {
+        name: "dual_high_mounted_central_exhaust_squircle",
+        positiveKeywords: ["dual high-mounted central exhaust", "squircle taillights", "horizontal squircle", "shut-off gurney flap"],
+        incompatibleKeywords: ["horizontal rear strakes", "slatted rear", "full width louvers", "single central", "single exhaust", "single center", "center of the rear diffuser", "centre of the rear diffuser", "exit low in the centre", "exit low in the center", "exiting low in the centre", "exiting low in the center", "exhaust pipes exit low", "low in the rear diffuser", "low in the centre of the rear diffuser", "low in the center of the rear diffuser"]
+      },
+      proportions: {
+        name: "mid_engine_flagship_spider",
+        positiveKeywords: ["cab-forward", "mid-engine", "wide rear haunches", "mid-engine spider", "cab-forward convertible", "open-top supercar"],
         incompatibleKeywords: ["front-engine gt", "suv", "sedan"]
       }
     }
@@ -9744,7 +9918,7 @@ var MORPHOLOGICAL_FINGERPRINTS = [
     model: "296 GTB",
     generation: "F171",
     proportionsDescription: "Mid-engine two-seat berlinetta with a short low nose, recessed lamp scoops, flying-buttress rear deck and a single central exhaust",
-    confusableWith: ["ferrari-sf90-stradale", "ferrari-458-italia", "ferrari-458-spider", "ferrari-amalfi", "ferrari-daytona-sp3", "ferrari-488-pista", "ferrari-roma", "ferrari-812-superfast", "ferrari-laferrari"],
+    confusableWith: ["ferrari-296-gts", "ferrari-sf90-stradale", "ferrari-458-italia", "ferrari-458-spider", "ferrari-amalfi", "ferrari-daytona-sp3", "ferrari-488-pista", "ferrari-roma", "ferrari-812-superfast", "ferrari-laferrari"],
     traits: {
       proportions: {
         name: "mid_engine_two_seat_berlinetta",
@@ -9769,7 +9943,7 @@ var MORPHOLOGICAL_FINGERPRINTS = [
       roofline_greenhouse: {
         name: "flying_buttress_deck_over_shallow_rear_screen",
         positiveKeywords: ["flying buttress rear deck", "buttress sloping into the tail", "shallow rear screen", "narrow rear window above a buttress", "rear deck buttress over the engine bay", "flying buttress", "flying buttresses", "buttresses", "shallow rear window"],
-        incompatibleKeywords: ["wraparound visor canopy", "fixed coupe roof with a full glass hatch", "retractable hardtop", "fabric soft top", "long hood short deck gt"]
+        incompatibleKeywords: ["wraparound visor canopy", "fixed coupe roof with a full glass hatch", "retractable hardtop", "fabric soft top", "long hood short deck gt", "open-top", "open top", "spider", "convertible roof", "drop-top"]
       },
       rear_architecture_and_exhaust: {
         name: "single_central_exhaust_in_the_diffuser",
@@ -9848,6 +10022,52 @@ var MORPHOLOGICAL_FINGERPRINTS = [
         name: "active_rear_spoiler_above_a_centre_exit",
         positiveKeywords: ["active rear spoiler above the centre exit", "integrated deployable spoiler", "body-colour rear spoiler", "active rear spoiler", "deployable rear spoiler"],
         incompatibleKeywords: ["towering swan-neck wing", "full-width horizontal rear strakes", "integrated lip spoiler above strakes"]
+      }
+    }
+  },
+  // ── FERRARI 296 GTS ──
+  {
+    vehicleId: "ferrari-296-gts",
+    make: "Ferrari",
+    model: "296 GTS",
+    generation: "F171",
+    proportionsDescription: "Mid-engine two-seat spider with retractable hardtop, recessed lamp scoops, flying buttresses with aero bridge, and single central exhaust",
+    confusableWith: ["ferrari-296-gtb", "ferrari-amalfi", "ferrari-458-spider"],
+    traits: {
+      proportions: {
+        name: "mid_engine_two_seat_spider",
+        positiveKeywords: ["mid-engine two-seater", "mid-engine spider", "short front overhang", "cabin set forward", "very short nose", "compact two-seat spider", "open-top berlinetta"],
+        incompatibleKeywords: ["front-engine grand tourer", "front-mid engine 2+2", "long dash to axle", "four-door", "suv", "berlinetta"]
+      },
+      headlight_shape: {
+        name: "lamp_recessed_into_front_wing_scoop",
+        positiveKeywords: ["recessed lamp", "headlamp recessed", "lamp recessed into", "recessed into the wing", "recessed into a scoop", "lamp set into a scoop", "lamp sunk into the wing", "lamp housing undercut", "lamp inside a bodywork recess", "teardrop", "teardrop headlight", "teardrop headlights", "integrated brake cooling", "cooling duct", "brake cooling duct"],
+        incompatibleKeywords: ["c-shaped", "c shaped", "c-clamp", "annular lamp", "ring shaped lamp", "elongated vertical", "vertical lens", "lamp bar", "eyelid", "partial cover", "round bug eye", "fried egg"]
+      },
+      front_intake_grille: {
+        name: "low_wide_mesh_grille_with_exposed_radiators",
+        positiveKeywords: ["low wide mesh grille", "exposed radiators", "two large radiator openings", "wide lower mesh without slats", "low short nose with a wide mesh mouth", "single opening mouth", "mouth intake", "wide mouth grille", "wide mesh grille"],
+        incompatibleKeywords: ["horizontal strakes", "horizontal slats", "body-color perforated", "upright oval grille", "kidney grille"]
+      },
+      hood_geometry: {
+        name: "short_hood_forward_of_the_cabin",
+        positiveKeywords: ["short bonnet ahead of the cabin", "brief front lid", "short hood over a small front compartment"],
+        incompatibleKeywords: ["long sweeping hood", "long bonnet with the cabin set back", "s-duct hood channel"]
+      },
+      roofline_greenhouse: {
+        name: "retractable_hardtop_spider_with_aero_bridge",
+        positiveKeywords: ["retractable hardtop", "folding hardtop", "open-top", "open top", "spider", "convertible roof", "aero bridge", "tonneau cover", "buttresses with aero bridge"],
+        incompatibleKeywords: ["fixed coupe roof", "closed coupe greenhouse", "sloping full glass rear hatch", "berlinetta", "coupe"]
+      },
+      rear_architecture_and_exhaust: {
+        name: "single_central_exhaust_in_the_diffuser",
+        positiveKeywords: ["single central exhaust", "single centre exhaust", "one central tailpipe", "exhaust exiting the centre of the diffuser", "centre exit exhaust", "central exhaust", "center exhaust", "single central exhaust tip", "single exhaust tip", "central exhaust pipe", "center exhaust pipe", "center of the rear diffuser", "centre of the rear diffuser", "exit low in the centre", "exit low in the center", "exiting low in the centre", "exiting low in the center", "exhaust pipes exit low", "diffuser with a central exhaust"],
+        incompatibleKeywords: ["dual outer exhausts", "quad rectangular exhaust", "quad circular titanium", "high-mounted central dual exhaust", "dual high-mounted", "central dual exhaust"]
+      },
+      rear_fascia_and_strakes: {
+        name: "horizontal_rectangular_rear_lamps_integrated_in_fascia",
+        positiveKeywords: ["horizontal rectangular rear lamps", "thin horizontal rear lamps", "recessed horizontal taillights", "horizontal rear lights"],
+        incompatibleKeywords: ["round circular taillights", "single round taillights", "squircle taillights"]
       }
     }
   },
@@ -9966,7 +10186,7 @@ var MORPHOLOGICAL_FINGERPRINTS = [
     model: "911 GT3 RS",
     generation: "992",
     proportionsDescription: "Extreme motorsport-derived track car with prominent swan-neck active DRS wing, dual front hood extractor nostrils, and front fender pressure louvers",
-    confusableWith: ["porsche-911-carrera-992", "porsche-911-turbo", "porsche-911-carrera-997", "porsche-911-carrera-996", "porsche-718-boxster", "porsche-cayman-gt4-rs"],
+    confusableWith: ["porsche-911-gt3-992", "porsche-911-carrera-992", "porsche-911-turbo", "porsche-911-carrera-997", "porsche-911-carrera-996", "porsche-718-boxster", "porsche-cayman-gt4-rs"],
     traits: {
       headlight_shape: {
         name: "round_oval_projector_headlights_4point_drl",
@@ -10018,6 +10238,64 @@ var MORPHOLOGICAL_FINGERPRINTS = [
       }
     }
   },
+  // ── PORSCHE 911 GT3 (992) ──
+  {
+    vehicleId: "porsche-911-gt3-992",
+    make: "Porsche",
+    model: "911 GT3",
+    generation: "992",
+    proportionsDescription: "High-revving motorsport 911 with iconic swan-neck rear wing, dual front hood extractor nostrils, smooth front fenders without RS louvers, and central twin sports exhaust",
+    confusableWith: ["porsche-911-gt3-rs", "porsche-911-carrera-992", "porsche-911-turbo", "porsche-911-carrera-997", "porsche-cayman-gt4-rs"],
+    traits: {
+      headlight_shape: {
+        name: "round_oval_projector_headlights_4point_drl",
+        positiveKeywords: ["round headlight", "oval headlight", "4-point", "four-point led", "projector led"],
+        incompatibleKeywords: ["fried egg", "fried-egg", "vertical slit", "horizontal strakes"]
+      },
+      hood_geometry: {
+        name: "dual_hood_air_extractor_nostrils",
+        requiresMandatoryAeroPresence: true,
+        positiveKeywords: ["hood nostril", "hood extractor", "carbon hood vents", "dual nostrils", "radiator extractor", "hood vents", "extractor ducts", "cooling nostrils", "nostrils"],
+        incompatibleKeywords: ["smooth hood without vents", "clean hood without nostrils", "power bulge without nostrils", "flat smooth luggage lid", "smooth front hood", "smooth contoured front", "without hood vents"]
+      },
+      fender_architecture: {
+        name: "clean_smooth_front_fenders_without_rs_louvers",
+        positiveKeywords: ["smooth fender", "clean fenders", "unvented fender", "smooth front fenders without vents"],
+        incompatibleKeywords: ["fender louver", "fender louvers", "pressure louvers", "fender slats", "slatted fender"]
+      },
+      wing_and_spoiler_architecture: {
+        name: "swan_neck_top_mounted_rear_wing",
+        requiresMandatoryAeroPresence: true,
+        positiveKeywords: ["swan neck", "swan-neck", "rear wing", "top-mount wing", "gt3 wing", "fixed rear wing", "hanging wing"],
+        incompatibleKeywords: ["massive drs wing", "integrated active spoiler", "clean decklid without wing", "no fixed rear wing", "retractable spoiler flush with body"]
+      },
+      front_intake_grille: {
+        name: "wide_mouth_front_apron_splitter",
+        positiveKeywords: ["air dam", "motorsport front bumper", "front splitter", "wide lower intake"],
+        incompatibleKeywords: ["panamericana", "spindle grille"]
+      },
+      side_intake_type: {
+        name: "clean_flank_without_rs_cutaways",
+        positiveKeywords: ["clean flank", "smooth door", "clean body side"],
+        incompatibleKeywords: ["front wheel cutaways", "fender openings", "quarter panel air intake"]
+      },
+      rear_architecture_and_exhaust: {
+        name: "central_dual_exhaust_diffuser",
+        positiveKeywords: ["central dual exhaust", "center exhaust", "central twin pipes", "underbody diffuser"],
+        incompatibleKeywords: ["quad rectangular exhaust", "quad outer exhaust", "dual outer oval exhaust"]
+      },
+      roofline_greenhouse: {
+        name: "coupe_flyline",
+        positiveKeywords: ["coupe flyline", "sloping roof"],
+        incompatibleKeywords: ["roadster", "soft top", "speedster haunches", "two-seat convertible", "convertible roof", "open-top"]
+      },
+      proportions: {
+        name: "pure_naturally_aspirated_track_focused_911",
+        positiveKeywords: ["sloping flyline", "rear-engine", "wide rear track", "track-focused", "center-lock"],
+        incompatibleKeywords: ["front-engine gt", "suv", "sedan", "mid-engine roadster"]
+      }
+    }
+  },
   // ── PORSCHE 911 CARRERA (992) ──
   {
     vehicleId: "porsche-911-carrera-992",
@@ -10025,7 +10303,7 @@ var MORPHOLOGICAL_FINGERPRINTS = [
     model: "911 Carrera",
     generation: "992",
     proportionsDescription: "Iconic rear-engine 2+2 sports coupe with clean unvented front hood, smooth rear haunches without intercooler scoops, horizontal slat lower bumper, and flush deployable rear spoiler",
-    confusableWith: ["porsche-911-turbo", "porsche-911-gt3-rs", "porsche-911-carrera-997", "porsche-911-carrera-996", "porsche-718-boxster", "porsche-cayman-gt4-rs"],
+    confusableWith: ["porsche-911-gt3-992", "porsche-911-turbo", "porsche-911-gt3-rs", "porsche-911-carrera-997", "porsche-911-carrera-996", "porsche-718-boxster", "porsche-cayman-gt4-rs"],
     traits: {
       headlight_shape: {
         name: "compact_projector_four_point_led_cluster",
@@ -10191,7 +10469,7 @@ var MORPHOLOGICAL_FINGERPRINTS = [
     model: "911 Carrera",
     generation: "997",
     proportionsDescription: "Rear-engine sports car returning to classic round bug-eye headlights with separate bumper indicator strips",
-    confusableWith: ["porsche-911-carrera-992", "porsche-911-carrera-996", "porsche-911-gt3-rs", "porsche-911-turbo", "porsche-718-boxster"],
+    confusableWith: ["porsche-911-gt3-992", "porsche-911-carrera-992", "porsche-911-carrera-996", "porsche-911-gt3-rs", "porsche-911-turbo", "porsche-718-boxster"],
     traits: {
       headlight_shape: {
         name: "classic_round_bugeye_separate_indicators",
@@ -10831,7 +11109,7 @@ var MORPHOLOGICAL_FINGERPRINTS = [
     model: "911 Turbo",
     generation: "992",
     proportionsDescription: "Widebody rear-engine supercar coupe with rear fender intercooler scoops, active rear wing, quad rectangular exhaust, and 4-point LED headlights",
-    confusableWith: ["porsche-911-turbo-s-992", "porsche-911-carrera-992", "porsche-718-boxster", "porsche-cayman-gt4-rs", "porsche-911-carrera-997", "porsche-911-gt3-rs", "porsche-911-carrera-996"],
+    confusableWith: ["porsche-911-turbo-s-992", "porsche-911-carrera-992", "porsche-718-boxster", "porsche-cayman-gt4-rs", "porsche-911-carrera-997", "porsche-911-gt3-rs", "porsche-911-carrera-996", "porsche-911-gt3-992"],
     traits: {
       headlight_shape: {
         name: "compact_projector_four_point_led_cluster",
@@ -10954,7 +11232,7 @@ var MORPHOLOGICAL_FINGERPRINTS = [
     model: "718 Cayman GT4 RS",
     generation: "982",
     proportionsDescription: "Mid-engine track coupe with fixed carbon swan-neck rear wing, side window airboxes, side intake scoops, and dual front hood NACA ducts",
-    confusableWith: ["porsche-911-carrera-992", "porsche-718-boxster", "porsche-911-gt3-rs", "porsche-911-turbo"],
+    confusableWith: ["porsche-911-gt3-992", "porsche-911-carrera-992", "porsche-718-boxster", "porsche-911-gt3-rs", "porsche-911-turbo"],
     traits: {
       headlight_shape: {
         name: "compact_projector_four_point_led_cluster",
@@ -13621,7 +13899,7 @@ var HierarchicalClassifier = class {
       nissan: /\b(nissan|skyline|gt-?r|gtr|nismo|v-?spec|r32|r33|r34|r35|twin\s+round\s+tail|quad\s+round\s+tail|circular\s+tail)\b/i.test(evidenceText),
       honda: /\b(honda|integra|type-?r|vtec|dc2|dc5|nsx|civic|s2000)\b/i.test(evidenceText),
       toyota: /\b(toyota|supra|gr\s+supra|gazoo|2jz|a90|a80|crown\s+comfort|taxi)\b/i.test(evidenceText),
-      mclaren: /\b(mclaren|650s|675lt|720s|765lt|artura|p11|p14|senna|p1|dihedral\s+doors?|longtail\s+airbrake)\b/i.test(evidenceText),
+      mclaren: /\b(mclaren|570s|540c|600lt|sports\s+series|650s|675lt|720s|765lt|artura|p11|p14|senna|p1|dihedral(?:\s+doors?)?|longtail\s+airbrake|floating\s+(?:door\s+)?tendons?)\b/i.test(evidenceText),
       maserati: /\b(maserati|trident|mc20|grancabrio|granturismo|nettuno|triple\s+portholes?)\b/i.test(evidenceText),
       porsche: /\b(porsche|911|carrera|boxster|cayman|718|gt3|gt2|918|macan|sloping\s+flyline|teardrop\s+roofline|bulbous\s+front\s+fenders?|rear-engine)\b/i.test(evidenceText),
       ferrari: /\b(ferrari|prancing\s+horse|458|488|f8|sf90|daytona\s+sp3|icona|mustache\s+aero|f40|laferrari)\b/i.test(evidenceText),
@@ -13835,14 +14113,21 @@ var HierarchicalClassifier = class {
       }
       const hasNegativeStrakes = /\b(?:without|no|lacks?|devoid\s+of)\s+(?:horizontal\s+)?strakes?\b/i.test(evidenceText);
       const hasDaytonaIconaCues = !hasNegativeStrakes && /\b(horizontal\s+strakes?|horizontal\s+slats?|slatted\s+grille|slatted\s+bumper|headlight\s+eyelids?|eyelid\s+covers?|partial\s+covers?|wraparound\s+visor|visor\s+canopy|fender-mounted\s+mirrors?|door\s+tops?\s+mirrors?|icona|(?:thin|slim|low|recessed|narrow)\s+horizontal\s+(?:head)?(?:lamps?|lights?|openings?)|(?:large|wide)\s+horizontal\s+(?:front\s+)?grille|horizontal\s+grille\s+with\s+black|horizontal\s+blade\s+splitter)\b/i.test(evidenceText);
+      const hasHorizontalFrontLedStrips = !hasNegativeStrakes && (/\bhorizontal\s+led\s+strips?\s+on\s+(?:the\s+)?front\s+bumper\b/i.test(evidenceText) || /\bhorizontal\s+led\s+strips?\b/i.test(evidenceText) && /\bfront\s+bumper\b/i.test(evidenceText));
+      const hasCorroboratingDaytonaAero = /\b(front\s+splitter|splitter|air\s+intakes?|wide\s+intake|sloping\s+roofline|rectangular\s+rear\s+lamps?|rear\s+diffuser|dual\s+exhaust|short\s+rear\s+deck)\b/i.test(evidenceText);
+      const hasCorroboratedDaytonaLamps = hasHorizontalFrontLedStrips && hasCorroboratingDaytonaAero;
       const hasExplicitSf90Cues = /\b(shut-?off\s+gurney|c-shaped\s+(?:matrix\s+)?(?:led\s+)?headlights?|c-clamp\s+headlights?)\b/i.test(evidenceText);
       const isFrontViewpoint = viewpoint === "front" || viewpoint === "front_3q";
-      if (hasDaytonaIconaCues) {
+      if (hasDaytonaIconaCues || hasCorroboratedDaytonaLamps) {
         if (candNameLower.includes("daytona") || candNameLower.includes("sp3")) {
-          candSupporting.push("Observed horizontal strakes, headlight eyelids, or wraparound visor canopy uniquely match Ferrari Daytona SP3 Icona design");
+          candSupporting.push(
+            hasDaytonaIconaCues ? "Observed horizontal strakes, headlight eyelids, or wraparound visor canopy uniquely match Ferrari Daytona SP3 Icona design" : "Observed horizontal LED strips on front bumper with corroborating aero cues match Ferrari Daytona SP3 architecture"
+          );
           score += 0.25;
         } else if (candidateMake === "ferrari" && (candNameLower.includes("sf90") || candNameLower.includes("296") || candNameLower.includes("f8") || candNameLower.includes("roma") || candNameLower.includes("portofino") || candNameLower.includes("488") || candNameLower.includes("458"))) {
-          candContradictions.push(`Observed horizontal strakes, headlight eyelids, and wraparound canopy contradict ${candidate.name} architecture`);
+          candContradictions.push(
+            hasDaytonaIconaCues ? `Observed horizontal strakes, headlight eyelids, and wraparound canopy contradict ${candidate.name} architecture` : `Observed horizontal LED strips on front bumper contradict ${candidate.name} headlight architecture`
+          );
           score -= 0.45;
         }
       }
@@ -13869,14 +14154,24 @@ var HierarchicalClassifier = class {
         }
       }
       const has720sCues = /\b(eye-?socket|deep-?set\s+(?:head)?lights?|double-?skinned|p14)\b/i.test(evidenceText);
-      const hasP11CrescentCues = /\b(crescent|p1-?(?:style|inspired)|c-shape(?:d)?|side\s+(?:radiator\s+)?(?:intake|scoop)|p11)\b/i.test(evidenceText);
+      const hasP11CrescentCues = /\b(crescent\s+(?:head)?lights?|p1-?(?:style|inspired)\s+(?:head)?lights?|c-shape(?:d)?\s+(?:head)?lights?|turning\s+vanes?|large\s+open\s+side\s+(?:radiator\s+)?scoop|p11)\b/i.test(evidenceText);
+      const hasSportsSeriesCues = /\b(570s|540c|600lt|sports\s+series|floating\s+tendons?|tendon\s+doors?|teardrop\s+(?:swept\s+)?headlights?)\b/i.test(evidenceText);
       const has675ltCues = /\b(675lt|active\s+longtail|longtail\s+airbrake|dual\s+high-?exit|titanium\s+circular\s+exhaust|circular\s+titanium|front\s+fender\s+louvers?|fender\s+louvers?|splitter\s+endplates?|carbon\s+endplates?|extended\s+carbon|upturned\s+endplates|blade\s+with\s+endplates|winglets?\s+at\s+the\s+outer\s+corners)\b/i.test(evidenceText);
+      if (hasSportsSeriesCues) {
+        if (candNameLower.includes("570s") || candNameLower.includes("540c") || candNameLower.includes("600lt")) {
+          candSupporting.push("Observed floating aerodynamic tendon doors or teardrop headlights match McLaren Sports Series (570S)");
+          score += 0.25;
+        } else if (candNameLower.includes("650s") || candNameLower.includes("675lt") || candNameLower.includes("720s")) {
+          candContradictions.push("Observed floating tendon door architecture contradicts McLaren Super Series");
+          score -= 0.5;
+        }
+      }
       if (hasP11CrescentCues) {
         if (candNameLower.includes("650s") || candNameLower.includes("675lt") && !has720sCues) {
-          candSupporting.push("Observed P1-style crescent headlights and side intake scoops match McLaren P11 architecture");
+          candSupporting.push("Observed P1-style crescent headlights and turning vane scoops match McLaren P11 architecture");
           score += 0.25;
-        } else if (candNameLower.includes("720s") || candNameLower.includes("p14")) {
-          candContradictions.push("Observed P1-style crescent headlights and side intake scoops contradict McLaren 720S eye-socket architecture");
+        } else if (candNameLower.includes("720s") || candNameLower.includes("p14") || candNameLower.includes("570s")) {
+          candContradictions.push("Observed P1-style crescent headlights and turning vane scoops contradict candidate architecture");
           score -= 0.5;
         }
       }
@@ -14119,6 +14414,8 @@ var HierarchicalClassifier = class {
       if (n1.includes("458") && n2.includes("458")) return true;
       if (n1.includes("911") && n2.includes("911")) return true;
       if (n1.includes("hurac") && n2.includes("hurac")) return true;
+      if (n1.includes("296") && n2.includes("296")) return true;
+      if (n1.includes("sf90") && n2.includes("sf90")) return true;
       return false;
     })();
     let resolvedModelFamily = null;

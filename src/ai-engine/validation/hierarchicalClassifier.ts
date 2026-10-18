@@ -239,7 +239,7 @@ export class HierarchicalClassifier {
       nissan: /\b(nissan|skyline|gt-?r|gtr|nismo|v-?spec|r32|r33|r34|r35|twin\s+round\s+tail|quad\s+round\s+tail|circular\s+tail)\b/i.test(evidenceText),
       honda: /\b(honda|integra|type-?r|vtec|dc2|dc5|nsx|civic|s2000)\b/i.test(evidenceText),
       toyota: /\b(toyota|supra|gr\s+supra|gazoo|2jz|a90|a80|crown\s+comfort|taxi)\b/i.test(evidenceText),
-      mclaren: /\b(mclaren|650s|675lt|720s|765lt|artura|p11|p14|senna|p1|dihedral\s+doors?|longtail\s+airbrake)\b/i.test(evidenceText),
+      mclaren: /\b(mclaren|570s|540c|600lt|sports\s+series|650s|675lt|720s|765lt|artura|p11|p14|senna|p1|dihedral(?:\s+doors?)?|longtail\s+airbrake|floating\s+(?:door\s+)?tendons?)\b/i.test(evidenceText),
       maserati: /\b(maserati|trident|mc20|grancabrio|granturismo|nettuno|triple\s+portholes?)\b/i.test(evidenceText),
       porsche: /\b(porsche|911|carrera|boxster|cayman|718|gt3|gt2|918|macan|sloping\s+flyline|teardrop\s+roofline|bulbous\s+front\s+fenders?|rear-engine)\b/i.test(evidenceText),
       ferrari: /\b(ferrari|prancing\s+horse|458|488|f8|sf90|daytona\s+sp3|icona|mustache\s+aero|f40|laferrari)\b/i.test(evidenceText),
@@ -540,16 +540,31 @@ export class HierarchicalClassifier {
       const hasDaytonaIconaCues = !hasNegativeStrakes &&
         /\b(horizontal\s+strakes?|horizontal\s+slats?|slatted\s+grille|slatted\s+bumper|headlight\s+eyelids?|eyelid\s+covers?|partial\s+covers?|wraparound\s+visor|visor\s+canopy|fender-mounted\s+mirrors?|door\s+tops?\s+mirrors?|icona|(?:thin|slim|low|recessed|narrow)\s+horizontal\s+(?:head)?(?:lamps?|lights?|openings?)|(?:large|wide)\s+horizontal\s+(?:front\s+)?grille|horizontal\s+grille\s+with\s+black|horizontal\s+blade\s+splitter)\b/i.test(evidenceText);
 
+      // Daytona front bumper LED strip cues require corroborating aero/proportions so the phrase cannot independently force an identification
+      const hasHorizontalFrontLedStrips = !hasNegativeStrakes && (
+        /\bhorizontal\s+led\s+strips?\s+on\s+(?:the\s+)?front\s+bumper\b/i.test(evidenceText) ||
+        (/\bhorizontal\s+led\s+strips?\b/i.test(evidenceText) && /\bfront\s+bumper\b/i.test(evidenceText))
+      );
+      const hasCorroboratingDaytonaAero =
+        /\b(front\s+splitter|splitter|air\s+intakes?|wide\s+intake|sloping\s+roofline|rectangular\s+rear\s+lamps?|rear\s+diffuser|dual\s+exhaust|short\s+rear\s+deck)\b/i.test(evidenceText);
+      const hasCorroboratedDaytonaLamps = hasHorizontalFrontLedStrips && hasCorroboratingDaytonaAero;
+
       // Model-specific SF90 Stradale architectural cues (strictly physical C-shaped matrix / shut-off Gurney)
       const hasExplicitSf90Cues = /\b(shut-?off\s+gurney|c-shaped\s+(?:matrix\s+)?(?:led\s+)?headlights?|c-clamp\s+headlights?)\b/i.test(evidenceText);
       const isFrontViewpoint = viewpoint === 'front' || viewpoint === 'front_3q';
 
-      if (hasDaytonaIconaCues) {
+      if (hasDaytonaIconaCues || hasCorroboratedDaytonaLamps) {
         if (candNameLower.includes('daytona') || candNameLower.includes('sp3')) {
-          candSupporting.push('Observed horizontal strakes, headlight eyelids, or wraparound visor canopy uniquely match Ferrari Daytona SP3 Icona design');
+          candSupporting.push(hasDaytonaIconaCues
+            ? 'Observed horizontal strakes, headlight eyelids, or wraparound visor canopy uniquely match Ferrari Daytona SP3 Icona design'
+            : 'Observed horizontal LED strips on front bumper with corroborating aero cues match Ferrari Daytona SP3 architecture'
+          );
           score += 0.25;
         } else if (candidateMake === 'ferrari' && (candNameLower.includes('sf90') || candNameLower.includes('296') || candNameLower.includes('f8') || candNameLower.includes('roma') || candNameLower.includes('portofino') || candNameLower.includes('488') || candNameLower.includes('458'))) {
-          candContradictions.push(`Observed horizontal strakes, headlight eyelids, and wraparound canopy contradict ${candidate.name} architecture`);
+          candContradictions.push(hasDaytonaIconaCues
+            ? `Observed horizontal strakes, headlight eyelids, and wraparound canopy contradict ${candidate.name} architecture`
+            : `Observed horizontal LED strips on front bumper contradict ${candidate.name} headlight architecture`
+          );
           score -= 0.45;
         }
       }
@@ -581,21 +596,31 @@ export class HierarchicalClassifier {
         }
       }
 
-      // ── CONTRADICTION ENGINE RULE F: MCLAREN 650S vs 675LT vs 720S DISAMBIGUATION ──
+      // ── CONTRADICTION ENGINE RULE F: MCLAREN 650S vs 675LT vs 720S vs 570S DISAMBIGUATION ──
       const has720sCues = /\b(eye-?socket|deep-?set\s+(?:head)?lights?|double-?skinned|p14)\b/i.test(evidenceText);
-      // A bare "strakes" mention (e.g. an engine-cover louver) must never corroborate McLaren P11.
-      const hasP11CrescentCues = /\b(crescent|p1-?(?:style|inspired)|c-shape(?:d)?|side\s+(?:radiator\s+)?(?:intake|scoop)|p11)\b/i.test(evidenceText);
+      const hasP11CrescentCues = /\b(crescent\s+(?:head)?lights?|p1-?(?:style|inspired)\s+(?:head)?lights?|c-shape(?:d)?\s+(?:head)?lights?|turning\s+vanes?|large\s+open\s+side\s+(?:radiator\s+)?scoop|p11)\b/i.test(evidenceText);
+      const hasSportsSeriesCues = /\b(570s|540c|600lt|sports\s+series|floating\s+tendons?|tendon\s+doors?|teardrop\s+(?:swept\s+)?headlights?)\b/i.test(evidenceText);
       // GENERIC-MORPHOLOGY DISCIPLINE (Phase 4 invariant): a bare "front splitter" or "longtail"
       // mention is not 675LT-specific — every supercar has a splitter and "longtail" wording can
       // describe any LT generation. Only structurally LT-specific cues may boost 675LT / penalize 650S.
       const has675ltCues = /\b(675lt|active\s+longtail|longtail\s+airbrake|dual\s+high-?exit|titanium\s+circular\s+exhaust|circular\s+titanium|front\s+fender\s+louvers?|fender\s+louvers?|splitter\s+endplates?|carbon\s+endplates?|extended\s+carbon|upturned\s+endplates|blade\s+with\s+endplates|winglets?\s+at\s+the\s+outer\s+corners)\b/i.test(evidenceText);
 
+      if (hasSportsSeriesCues) {
+        if (candNameLower.includes('570s') || candNameLower.includes('540c') || candNameLower.includes('600lt')) {
+          candSupporting.push('Observed floating aerodynamic tendon doors or teardrop headlights match McLaren Sports Series (570S)');
+          score += 0.25;
+        } else if (candNameLower.includes('650s') || candNameLower.includes('675lt') || candNameLower.includes('720s')) {
+          candContradictions.push('Observed floating tendon door architecture contradicts McLaren Super Series');
+          score -= 0.50;
+        }
+      }
+
       if (hasP11CrescentCues) {
         if (candNameLower.includes('650s') || (candNameLower.includes('675lt') && !has720sCues)) {
-          candSupporting.push('Observed P1-style crescent headlights and side intake scoops match McLaren P11 architecture');
+          candSupporting.push('Observed P1-style crescent headlights and turning vane scoops match McLaren P11 architecture');
           score += 0.25;
-        } else if (candNameLower.includes('720s') || candNameLower.includes('p14')) {
-          candContradictions.push('Observed P1-style crescent headlights and side intake scoops contradict McLaren 720S eye-socket architecture');
+        } else if (candNameLower.includes('720s') || candNameLower.includes('p14') || candNameLower.includes('570s')) {
+          candContradictions.push('Observed P1-style crescent headlights and turning vane scoops contradict candidate architecture');
           score -= 0.50;
         }
       }
@@ -955,6 +980,8 @@ export class HierarchicalClassifier {
       if (n1.includes('458') && n2.includes('458')) return true;
       if (n1.includes('911') && n2.includes('911')) return true;
       if (n1.includes('hurac') && n2.includes('hurac')) return true;
+      if (n1.includes('296') && n2.includes('296')) return true;
+      if (n1.includes('sf90') && n2.includes('sf90')) return true;
       return false;
     })();
 

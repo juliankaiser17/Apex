@@ -34,7 +34,7 @@ export interface AnatomicalClause {
 // Regexes for detecting anatomical focus
 const FRONT_INDICATORS = /\b(front|nose|bonnet|hood|headlights?|headlamps?|front\s+grille|front\s+bumper|front\s+splitter|front\s+fascia|front\s+fenders?|front\s+overhang)\b/i;
 const REAR_INDICATORS = /\b(rear|tail|taillights?|tail\s+lamps?|tail[\s-]?lights?|exhaust|diffuser|rear\s+bumper|rear\s+wing|rear\s+spoiler|trunk|boot|ducktail|rear\s+fascia|rear\s+deck|rear\s+haunches|rear\s+apron)\b/i;
-const HEADLIGHT_INDICATORS = /\b(headlights?|headlamps?|drl|daytime\s+running\s+lights?|front\s+lamps?|front\s+lights?|eyelid\s+covers?|matrix\s+led|high\s+beams?)\b/i;
+const HEADLIGHT_INDICATORS = /\b(headlights?|headlamps?|drl|daytime\s+running\s+lights?|front\s+lamps?|front\s+lights?|eyelid\s+covers?|matrix\s+led|high\s+beams?|led\s+strips?)\b/i;
 const TAILLIGHT_INDICATORS = /\b(taillights?|tail\s+lamps?|tail[\s-]?lights?|rear\s+lamps?|rear\s+lights?|brake\s+lights?|rear\s+lightbar|squircle\s+taillights?)\b/i;
 const EXHAUST_INDICATORS = /\b(exhaust|tailpipes?|exhaust\s+tips?|mufflers?|exhaust\s+outlets?|quad\s+exhaust|central\s+exhaust|dual\s+exhaust)\b/i;
 const INTAKE_INDICATORS = /\b(grille|grill|air\s+intakes?|radiators?|intake\s+ducts?|cooling\s+vents?|air\s+scoops?|naca\s+ducts?|splitters?)\b/i;
@@ -46,7 +46,7 @@ const WHEEL_INDICATORS = /\b(wheels?|rims?|alloys?|calipers?|tires?|tyres?|brake
 // Coordinate transitional conjunctions that split multi-zone sentences:
 // Handles conjunctions and optional determiners/quantifiers before region tokens
 // e.g. "two large headlamps with LED strip, and two smaller taillamps" -> splits cleanly
-const COMPOUND_TRANSITION_RE = /\s*(?:[.;\n]+|,\s*(?:(?:and|while|whereas|but)\s+)?(?=(?:(?:two|three|four|dual|twin|a|an|the|each|pair\s+of|smaller|larger)\s+)?(?:front|rear|side|roof|cabin|wheels?|exhaust|intake|headlights?|headlamps?|lamps?|lights?|taillights?|hood|bonnet|nose|tail|diffuser|splitter|trunk|boot|mirrors?)\b))\s*/i;
+const COMPOUND_TRANSITION_RE = /\s*(?:[.;\n]+|,\s*(?:(?:and|while|whereas|but|with|along\s+with)\s+)?(?=(?:(?:two|three|four|dual|twin|a|an|the|each|pair\s+of|smaller|larger)\s+)?(?:(?:horizontal|vertical|slim|thin|recessed)\s+)?(?:front|rear|side|roof|cabin|wheels?|exhaust|intake|headlights?|headlamps?|lamps?|lights?|taillights?|hood|bonnet|nose|tail|diffuser|splitter|trunk|boot|mirrors?|led\s+strips?)\b))\s*/i;
 
 export class EvidenceNormalizer {
   /**
@@ -118,7 +118,7 @@ export class EvidenceNormalizer {
           // If explicitly describing side, intake, wheels, or cabin with no lighting mentions, exclude
           if ((c.hasSide || c.hasIntake || c.hasWheels || c.hasCabin) && !c.hasHeadlights) return false;
           // Clause MUST have lighting or lamp indicators
-          if (!c.hasHeadlights && !/\b(headlights?|headlamps?|drl|lamps?|lights?|eyelid|lens)\b/i.test(c.normalizedText)) return false;
+          if (!c.hasHeadlights && !/\b(headlights?|headlamps?|drl|lamps?|lights?|eyelid|lens|led\s+strips?)\b/i.test(c.normalizedText)) return false;
           return true;
 
         case 'front_grille':

@@ -568,18 +568,23 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
     traits: {
       headlight_shape: {
         name: 'teardrop_swept_cluster',
-        positiveKeywords: ['teardrop headlight', 'swept cluster', 'elongated teardrop lens', 'integrated daytime blade', 'swept back lens'],
-        incompatibleKeywords: ['crescent', 'p1-inspired', 'p1 style', 'p1 crescent', 'c-shape black housing', 'c-shape', 'vertical slit', 'round bug eye']
+        positiveKeywords: ['teardrop headlight', 'swept cluster', 'elongated teardrop lens', 'integrated daytime blade', 'swept back lens', 'teardrop shape', 'thin horizontal led strips', 'horizontal led strip', 'thin horizontal led', 'front lamps are thin, horizontal led strips', 'swept led headlights', 'sports series headlights'],
+        incompatibleKeywords: ['crescent', 'p1-inspired', 'p1 style', 'p1 crescent', 'c-shape black housing', 'c-shape', 'deep eye-socket', 'eye socket cavity', 'round bug eye']
       },
       front_intake_grille: {
         name: 'three_segment_aero_blade_bumper',
-        positiveKeywords: ['three-segment', 'aero blade', 'tripartite front splitter', 'sports series bumper'],
-        incompatibleKeywords: ['p1 front bumper', 'p1-derived', 'p1-inspired', 'p1 bumper', 'large concave oval', 'horizontal strakes']
+        positiveKeywords: ['three-segment', 'aero blade', 'tripartite front splitter', 'sports series bumper', 'front splitter is a thin, horizontal blade', 'thin, horizontal blade', 'thin horizontal blade', 'horizontal opening with a mesh pattern', 'horizontal opening with mesh', 'large, horizontal opening with a mesh pattern'],
+        incompatibleKeywords: ['p1 front bumper', 'p1-derived', 'p1-inspired', 'p1 bumper', 'deep eye socket', 'large concave oval', 'horizontal strakes across front']
+      },
+      hood_geometry: {
+        name: 'smooth_front_hood_no_louvers',
+        positiveKeywords: ['smooth hood', 'clean front lid', 'smooth flat surface with no vents', 'clean bonnet without vents', 'flat surface with no vents or louvers', 'smooth flat surface', 'smooth, flat surface with no vents or louvers'],
+        incompatibleKeywords: ['deep carbon nostrils', 'hood air extractors', 'fender louvers and hood nostrils', 's-duct extractor']
       },
       side_intake_type: {
         name: 'dihedral_floating_tendon_intake',
-        positiveKeywords: ['floating tendon', 'tendon duct', 'door channel', 'no open side scoop', 'smooth door tendon', 'floating door tendon', 'integrated door duct'],
-        incompatibleKeywords: ['side radiator', 'radiator intake', 'large side scoop', 'large open side scoop', 'radiator intake behind door', 'prominent open side scoop', 'strakes', 'side intake', 'side air intake', 'side air scoop', 'side radiator intake', 'open side scoop', 'side intake scoop', 'large side air intakes']
+        positiveKeywords: ['floating tendon', 'tendon duct', 'door channel', 'no open side scoop', 'smooth door tendon', 'floating door tendon', 'integrated door duct', 'tendon air intake', 'door air intake', 'small side air intake', 'small side intake', 'small vertical opening', 'small, vertical opening', 'side air intakes are small, vertical openings', 'small vertical openings', 'side air intakes are small', 'recessed side intake', 'tendon'],
+        incompatibleKeywords: ['turning vane', 'carbon turning vane', 'large open side scoop', 'prominent open side scoop', 'crescent side scoop', 'large open turning vane', 'large side radiator scoop']
       },
       roofline_greenhouse: {
         name: 'flying_buttress_c_pillar',
@@ -593,7 +598,7 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       },
       rear_architecture_and_exhaust: {
         name: 'dual_lower_bumper_exhaust_tips',
-        positiveKeywords: ['dual lower exhaust', 'lower bumper tips', 'curved led blade', 'fixed rear mesh'],
+        positiveKeywords: ['dual lower exhaust', 'lower bumper tips', 'curved led blade', 'fixed rear mesh', 'two exhaust pipes exit low in the centre', 'two exhaust pipes exit low'],
         incompatibleKeywords: ['active airbrake', 'dual top-exit circular titanium', 'quad exhaust']
       },
       door_architecture: {
@@ -687,7 +692,7 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
     model: 'Amalfi',
     generation: 'F169M',
     proportionsDescription: 'Front-mid engine 2+2 grand tourer with long sweeping sculpted hood, body-color perforated front grille, clean body sides, and active 3-position rear spoiler',
-    confusableWith: ['ferrari-daytona-sp3', 'ferrari-sf90-stradale', 'ferrari-458-italia', 'ferrari-296-gtb', 'ferrari-458-spider', 'ferrari-488-pista', 'ferrari-roma', 'ferrari-812-superfast', 'ferrari-laferrari'],
+    confusableWith: ['ferrari-296-gts', 'ferrari-daytona-sp3', 'ferrari-sf90-stradale', 'ferrari-458-italia', 'ferrari-296-gtb', 'ferrari-458-spider', 'ferrari-488-pista', 'ferrari-roma', 'ferrari-812-superfast', 'ferrari-laferrari'],
     traits: {
       proportions: {
         name: 'front_mid_engine_2plus2_grand_tourer',
@@ -766,7 +771,7 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
     model: 'Daytona SP3',
     generation: 'Icona',
     proportionsDescription: 'Icona hypercar with wraparound visor canopy, horizontal louvers/strakes, and fender-mounted mirrors',
-    confusableWith: ['ferrari-amalfi', 'ferrari-sf90-stradale', 'ferrari-488-pista', 'ferrari-458-italia', 'ferrari-296-gtb', 'ferrari-458-spider', 'ferrari-roma', 'ferrari-812-superfast', 'ferrari-laferrari'],
+    confusableWith: ['ferrari-sf90-spider', 'ferrari-amalfi', 'ferrari-sf90-stradale', 'ferrari-488-pista', 'ferrari-458-italia', 'ferrari-296-gtb', 'ferrari-458-spider', 'ferrari-roma', 'ferrari-812-superfast', 'ferrari-laferrari'],
     traits: {
       headlight_shape: {
         name: 'horizontal_eyelid_covers',
@@ -776,7 +781,8 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
           'thin horizontal headlamps', 'thin horizontal headlights', 'horizontal headlamps with black',
           'horizontal headlights with black', 'horizontal slit headlamps', 'horizontal slit headlights',
           'low horizontal headlamps', 'low horizontal headlights', 'recessed horizontal headlights',
-          'horizontal led strip', 'horizontal led strips', 'horizontal led'
+          'horizontal led strip', 'horizontal led strips', 'horizontal led',
+          'horizontal led strips on the front bumper', 'horizontal led strip on the front bumper', 'two horizontal led strips on the front bumper'
         ],
         incompatibleKeywords: ['open c-shape matrix', 'c-clamp headlight', 'c-shaped', 'c-shape', 'round bug eye', 'elongated vertical', 'swept-back headlights']
       },
@@ -922,7 +928,7 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
     model: '458 Spider',
     generation: 'F142',
     proportionsDescription: 'Mid-rear naturally aspirated V8 open-top supercar with retractable aluminum hardtop, dual rear flying buttresses, single round taillights, and triple central exhaust',
-    confusableWith: ['ferrari-458-italia', 'ferrari-488-pista', 'ferrari-sf90-stradale', 'ferrari-daytona-sp3', 'ferrari-amalfi', 'ferrari-296-gtb', 'ferrari-roma', 'ferrari-812-superfast', 'ferrari-laferrari'],
+    confusableWith: ['ferrari-sf90-spider', 'ferrari-296-gts', 'ferrari-458-italia', 'ferrari-488-pista', 'ferrari-sf90-stradale', 'ferrari-daytona-sp3', 'ferrari-amalfi', 'ferrari-296-gtb', 'ferrari-roma', 'ferrari-812-superfast', 'ferrari-laferrari'],
     traits: {
       // STRUCTURED GEOMETRY ONLY: the F142 discriminator is a TALL, vertically oriented lens that
       // sweeps back along the wing — not generic "LED strip" wording.
@@ -1055,18 +1061,18 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
     model: 'SF90 Stradale',
     generation: 'F173',
     proportionsDescription: 'Mid-engine flagship PHEV supercar with slender C-shaped matrix headlights and shut-off Gurney flap',
-    confusableWith: ['ferrari-daytona-sp3', 'ferrari-amalfi', 'ferrari-488-pista', 'ferrari-458-italia', 'ferrari-458-spider', 'ferrari-296-gtb', 'ferrari-roma', 'ferrari-812-superfast', 'ferrari-laferrari'],
+    confusableWith: ['ferrari-sf90-spider', 'ferrari-daytona-sp3', 'ferrari-amalfi', 'ferrari-488-pista', 'ferrari-458-italia', 'ferrari-458-spider', 'ferrari-296-gtb', 'ferrari-roma', 'ferrari-812-superfast', 'ferrari-laferrari'],
     traits: {
       // STRUCTURED GEOMETRY ONLY: the SF90 discriminator is the CLOSED C / annular lamp with an
       // open slot — an actual shape signature, not generic "matrix LED" marketing wording.
       headlight_shape: {
         name: 'closed_c_annular_lamp_with_open_slot',
         positiveKeywords: ['c-shaped', 'c shaped', 'c-clamp', 'annular lamp', 'ring shaped lamp', 'open slot in the lamp', 'slotted lamp', 'closed c daytime running light', 'c shaped daytime running light'],
-        incompatibleKeywords: ['horizontal eyelid covers', 'retractable slat cover', 'round bug eye', 'fried egg', 'teardrop', 'teardrop headlight', 'elongated vertical', 'vertical lens', 'tall narrow lamp', 'lamp bar', 'horizontal slit', 'horizontal eyelid', 'horizontal led strip', 'horizontal led', 'horizontal slats']
+        incompatibleKeywords: ['horizontal eyelid covers', 'retractable slat cover', 'round bug eye', 'fried egg', 'teardrop', 'teardrop headlight', 'elongated vertical', 'vertical lens', 'tall narrow lamp', 'lamp bar', 'horizontal slit', 'horizontal eyelid', 'horizontal slats']
       },
       front_intake_grille: {
         name: 'open_nose_wing_diffuser',
-        positiveKeywords: ['open nose wing', 'front diffuser channel', 'low slung slotted intake', 'lower bumper splitter', 'shut-off gurney', 'gurney', 'trapezoidal grille'],
+        positiveKeywords: ['open nose wing', 'front diffuser channel', 'low slung slotted intake', 'lower bumper splitter', 'shut-off gurney', 'gurney'],
         incompatibleKeywords: ['horizontal strakes front', 'slatted front bumper', 'oval grille', 'full-width horizontal strakes', 'horizontal strakes', 'horizontal slat', 'horizontal slats', 'slatted grille']
       },
       hood_geometry: {
@@ -1082,7 +1088,7 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       roofline_greenhouse: {
         name: 'conventional_coupe_greenhouse',
         positiveKeywords: ['sloping coupe roof', 'conventional a-pillars', 'bubble cabin', 'compact glass engine deck'],
-        incompatibleKeywords: ['wraparound visor canopy', 'targa visor', 'hidden a-pillar']
+        incompatibleKeywords: ['wraparound visor canopy', 'targa visor', 'hidden a-pillar', 'retractable hardtop', 'open-top', 'open top', 'spider', 'convertible roof', 'drop-top', 'spider tonneau']
       },
       rear_architecture_and_exhaust: {
         name: 'dual_high_mounted_central_exhaust_squircle',
@@ -1092,6 +1098,53 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       proportions: {
         name: 'mid_engine_flagship_supercar',
         positiveKeywords: ['cab-forward', 'mid-engine', 'wide rear haunches'],
+        incompatibleKeywords: ['front-engine gt', 'suv', 'sedan']
+      }
+    }
+  },
+
+  // ── FERRARI SF90 SPIDER ──
+  {
+    vehicleId: 'ferrari-sf90-spider',
+    make: 'Ferrari',
+    model: 'SF90 Spider',
+    generation: 'F173',
+    proportionsDescription: 'Mid-engine flagship PHEV convertible with slender C-shaped matrix headlights, retractable aluminum hardtop, and dual high-mounted central exhaust',
+    confusableWith: ['ferrari-sf90-stradale', 'ferrari-daytona-sp3', 'ferrari-458-spider'],
+    traits: {
+      headlight_shape: {
+        name: 'closed_c_annular_lamp_with_open_slot',
+        positiveKeywords: ['c-shaped', 'c shaped', 'c-clamp', 'annular lamp', 'ring shaped lamp', 'open slot in the lamp', 'slotted lamp', 'closed c daytime running light', 'c shaped daytime running light'],
+        incompatibleKeywords: ['horizontal eyelid covers', 'retractable slat cover', 'round bug eye', 'fried egg', 'teardrop', 'teardrop headlight', 'elongated vertical', 'vertical lens', 'tall narrow lamp', 'lamp bar', 'horizontal slit', 'horizontal eyelid', 'horizontal slats']
+      },
+      front_intake_grille: {
+        name: 'open_nose_wing_diffuser',
+        positiveKeywords: ['open nose wing', 'front diffuser channel', 'low slung slotted intake', 'lower bumper splitter', 'shut-off gurney', 'gurney'],
+        incompatibleKeywords: ['horizontal strakes front', 'slatted front bumper', 'oval grille', 'full-width horizontal strakes', 'horizontal strakes', 'horizontal slat', 'horizontal slats', 'slatted grille']
+      },
+      hood_geometry: {
+        name: 's_duct_hood_extractor_channel',
+        positiveKeywords: ['s-duct', 'hood air extractor', 'central hood duct', 'hood extractor channel', 'deep bonnet channel'],
+        incompatibleKeywords: ['deep hood nostrils with strakes', 'large central scoop', 'shaker hood']
+      },
+      side_intake_type: {
+        name: 'high_mounted_rear_haunch_intakes',
+        positiveKeywords: ['haunch intake', 'rear shoulder intake', 'sculpted side waist'],
+        incompatibleKeywords: ['floating tendon', 'triple fender gills']
+      },
+      roofline_greenhouse: {
+        name: 'retractable_hardtop_spider_buttresses',
+        positiveKeywords: ['retractable hardtop', 'folding roof', 'open-top', 'open top', 'spider', 'convertible roof', 'drop-top', 'spider tonneau', 'rear buttresses behind roll hoops', 'buttresses behind seats'],
+        incompatibleKeywords: ['fixed coupe roof', 'sloping full glass rear hatch', 'closed coupe greenhouse']
+      },
+      rear_architecture_and_exhaust: {
+        name: 'dual_high_mounted_central_exhaust_squircle',
+        positiveKeywords: ['dual high-mounted central exhaust', 'squircle taillights', 'horizontal squircle', 'shut-off gurney flap'],
+        incompatibleKeywords: ['horizontal rear strakes', 'slatted rear', 'full width louvers', 'single central', 'single exhaust', 'single center', 'center of the rear diffuser', 'centre of the rear diffuser', 'exit low in the centre', 'exit low in the center', 'exiting low in the centre', 'exiting low in the center', 'exhaust pipes exit low', 'low in the rear diffuser', 'low in the centre of the rear diffuser', 'low in the center of the rear diffuser']
+      },
+      proportions: {
+        name: 'mid_engine_flagship_spider',
+        positiveKeywords: ['cab-forward', 'mid-engine', 'wide rear haunches', 'mid-engine spider', 'cab-forward convertible', 'open-top supercar'],
         incompatibleKeywords: ['front-engine gt', 'suv', 'sedan']
       }
     }
@@ -1109,7 +1162,7 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
     model: '296 GTB',
     generation: 'F171',
     proportionsDescription: 'Mid-engine two-seat berlinetta with a short low nose, recessed lamp scoops, flying-buttress rear deck and a single central exhaust',
-    confusableWith: ['ferrari-sf90-stradale', 'ferrari-458-italia', 'ferrari-458-spider', 'ferrari-amalfi', 'ferrari-daytona-sp3', 'ferrari-488-pista', 'ferrari-roma', 'ferrari-812-superfast', 'ferrari-laferrari'],
+    confusableWith: ['ferrari-296-gts', 'ferrari-sf90-stradale', 'ferrari-458-italia', 'ferrari-458-spider', 'ferrari-amalfi', 'ferrari-daytona-sp3', 'ferrari-488-pista', 'ferrari-roma', 'ferrari-812-superfast', 'ferrari-laferrari'],
     traits: {
       proportions: {
         name: 'mid_engine_two_seat_berlinetta',
@@ -1134,7 +1187,7 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       roofline_greenhouse: {
         name: 'flying_buttress_deck_over_shallow_rear_screen',
         positiveKeywords: ['flying buttress rear deck', 'buttress sloping into the tail', 'shallow rear screen', 'narrow rear window above a buttress', 'rear deck buttress over the engine bay', 'flying buttress', 'flying buttresses', 'buttresses', 'shallow rear window'],
-        incompatibleKeywords: ['wraparound visor canopy', 'fixed coupe roof with a full glass hatch', 'retractable hardtop', 'fabric soft top', 'long hood short deck gt']
+        incompatibleKeywords: ['wraparound visor canopy', 'fixed coupe roof with a full glass hatch', 'retractable hardtop', 'fabric soft top', 'long hood short deck gt', 'open-top', 'open top', 'spider', 'convertible roof', 'drop-top']
       },
       rear_architecture_and_exhaust: {
         name: 'single_central_exhaust_in_the_diffuser',
@@ -1163,6 +1216,53 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
         name: 'active_rear_spoiler_above_a_centre_exit',
         positiveKeywords: ['active rear spoiler above the centre exit', 'integrated deployable spoiler', 'body-colour rear spoiler', 'active rear spoiler', 'deployable rear spoiler'],
         incompatibleKeywords: ['towering swan-neck wing', 'full-width horizontal rear strakes', 'integrated lip spoiler above strakes']
+      }
+    }
+  },
+
+  // ── FERRARI 296 GTS ──
+  {
+    vehicleId: 'ferrari-296-gts',
+    make: 'Ferrari',
+    model: '296 GTS',
+    generation: 'F171',
+    proportionsDescription: 'Mid-engine two-seat spider with retractable hardtop, recessed lamp scoops, flying buttresses with aero bridge, and single central exhaust',
+    confusableWith: ['ferrari-296-gtb', 'ferrari-amalfi', 'ferrari-458-spider'],
+    traits: {
+      proportions: {
+        name: 'mid_engine_two_seat_spider',
+        positiveKeywords: ['mid-engine two-seater', 'mid-engine spider', 'short front overhang', 'cabin set forward', 'very short nose', 'compact two-seat spider', 'open-top berlinetta'],
+        incompatibleKeywords: ['front-engine grand tourer', 'front-mid engine 2+2', 'long dash to axle', 'four-door', 'suv', 'berlinetta']
+      },
+      headlight_shape: {
+        name: 'lamp_recessed_into_front_wing_scoop',
+        positiveKeywords: ['recessed lamp', 'headlamp recessed', 'lamp recessed into', 'recessed into the wing', 'recessed into a scoop', 'lamp set into a scoop', 'lamp sunk into the wing', 'lamp housing undercut', 'lamp inside a bodywork recess', 'teardrop', 'teardrop headlight', 'teardrop headlights', 'integrated brake cooling', 'cooling duct', 'brake cooling duct'],
+        incompatibleKeywords: ['c-shaped', 'c shaped', 'c-clamp', 'annular lamp', 'ring shaped lamp', 'elongated vertical', 'vertical lens', 'lamp bar', 'eyelid', 'partial cover', 'round bug eye', 'fried egg']
+      },
+      front_intake_grille: {
+        name: 'low_wide_mesh_grille_with_exposed_radiators',
+        positiveKeywords: ['low wide mesh grille', 'exposed radiators', 'two large radiator openings', 'wide lower mesh without slats', 'low short nose with a wide mesh mouth', 'single opening mouth', 'mouth intake', 'wide mouth grille', 'wide mesh grille'],
+        incompatibleKeywords: ['horizontal strakes', 'horizontal slats', 'body-color perforated', 'upright oval grille', 'kidney grille']
+      },
+      hood_geometry: {
+        name: 'short_hood_forward_of_the_cabin',
+        positiveKeywords: ['short bonnet ahead of the cabin', 'brief front lid', 'short hood over a small front compartment'],
+        incompatibleKeywords: ['long sweeping hood', 'long bonnet with the cabin set back', 's-duct hood channel']
+      },
+      roofline_greenhouse: {
+        name: 'retractable_hardtop_spider_with_aero_bridge',
+        positiveKeywords: ['retractable hardtop', 'folding hardtop', 'open-top', 'open top', 'spider', 'convertible roof', 'aero bridge', 'tonneau cover', 'buttresses with aero bridge'],
+        incompatibleKeywords: ['fixed coupe roof', 'closed coupe greenhouse', 'sloping full glass rear hatch', 'berlinetta', 'coupe']
+      },
+      rear_architecture_and_exhaust: {
+        name: 'single_central_exhaust_in_the_diffuser',
+        positiveKeywords: ['single central exhaust', 'single centre exhaust', 'one central tailpipe', 'exhaust exiting the centre of the diffuser', 'centre exit exhaust', 'central exhaust', 'center exhaust', 'single central exhaust tip', 'single exhaust tip', 'central exhaust pipe', 'center exhaust pipe', 'center of the rear diffuser', 'centre of the rear diffuser', 'exit low in the centre', 'exit low in the center', 'exiting low in the centre', 'exiting low in the center', 'exhaust pipes exit low', 'diffuser with a central exhaust'],
+        incompatibleKeywords: ['dual outer exhausts', 'quad rectangular exhaust', 'quad circular titanium', 'high-mounted central dual exhaust', 'dual high-mounted', 'central dual exhaust']
+      },
+      rear_fascia_and_strakes: {
+        name: 'horizontal_rectangular_rear_lamps_integrated_in_fascia',
+        positiveKeywords: ['horizontal rectangular rear lamps', 'thin horizontal rear lamps', 'recessed horizontal taillights', 'horizontal rear lights'],
+        incompatibleKeywords: ['round circular taillights', 'single round taillights', 'squircle taillights']
       }
     }
   },
@@ -1285,7 +1385,7 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
     model: '911 GT3 RS',
     generation: '992',
     proportionsDescription: 'Extreme motorsport-derived track car with prominent swan-neck active DRS wing, dual front hood extractor nostrils, and front fender pressure louvers',
-    confusableWith: ['porsche-911-carrera-992', 'porsche-911-turbo', 'porsche-911-carrera-997', 'porsche-911-carrera-996', 'porsche-718-boxster', 'porsche-cayman-gt4-rs'],
+    confusableWith: ['porsche-911-gt3-992', 'porsche-911-carrera-992', 'porsche-911-turbo', 'porsche-911-carrera-997', 'porsche-911-carrera-996', 'porsche-718-boxster', 'porsche-cayman-gt4-rs'],
     traits: {
       headlight_shape: {
         name: 'round_oval_projector_headlights_4point_drl',
@@ -1338,6 +1438,65 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
     }
   },
 
+  // ── PORSCHE 911 GT3 (992) ──
+  {
+    vehicleId: 'porsche-911-gt3-992',
+    make: 'Porsche',
+    model: '911 GT3',
+    generation: '992',
+    proportionsDescription: 'High-revving motorsport 911 with iconic swan-neck rear wing, dual front hood extractor nostrils, smooth front fenders without RS louvers, and central twin sports exhaust',
+    confusableWith: ['porsche-911-gt3-rs', 'porsche-911-carrera-992', 'porsche-911-turbo', 'porsche-911-carrera-997', 'porsche-cayman-gt4-rs'],
+    traits: {
+      headlight_shape: {
+        name: 'round_oval_projector_headlights_4point_drl',
+        positiveKeywords: ['round headlight', 'oval headlight', '4-point', 'four-point led', 'projector led'],
+        incompatibleKeywords: ['fried egg', 'fried-egg', 'vertical slit', 'horizontal strakes']
+      },
+      hood_geometry: {
+        name: 'dual_hood_air_extractor_nostrils',
+        requiresMandatoryAeroPresence: true,
+        positiveKeywords: ['hood nostril', 'hood extractor', 'carbon hood vents', 'dual nostrils', 'radiator extractor', 'hood vents', 'extractor ducts', 'cooling nostrils', 'nostrils'],
+        incompatibleKeywords: ['smooth hood without vents', 'clean hood without nostrils', 'power bulge without nostrils', 'flat smooth luggage lid', 'smooth front hood', 'smooth contoured front', 'without hood vents']
+      },
+      fender_architecture: {
+        name: 'clean_smooth_front_fenders_without_rs_louvers',
+        positiveKeywords: ['smooth fender', 'clean fenders', 'unvented fender', 'smooth front fenders without vents'],
+        incompatibleKeywords: ['fender louver', 'fender louvers', 'pressure louvers', 'fender slats', 'slatted fender']
+      },
+      wing_and_spoiler_architecture: {
+        name: 'swan_neck_top_mounted_rear_wing',
+        requiresMandatoryAeroPresence: true,
+        positiveKeywords: ['swan neck', 'swan-neck', 'rear wing', 'top-mount wing', 'gt3 wing', 'fixed rear wing', 'hanging wing'],
+        incompatibleKeywords: ['massive drs wing', 'integrated active spoiler', 'clean decklid without wing', 'no fixed rear wing', 'retractable spoiler flush with body']
+      },
+      front_intake_grille: {
+        name: 'wide_mouth_front_apron_splitter',
+        positiveKeywords: ['air dam', 'motorsport front bumper', 'front splitter', 'wide lower intake'],
+        incompatibleKeywords: ['panamericana', 'spindle grille']
+      },
+      side_intake_type: {
+        name: 'clean_flank_without_rs_cutaways',
+        positiveKeywords: ['clean flank', 'smooth door', 'clean body side'],
+        incompatibleKeywords: ['front wheel cutaways', 'fender openings', 'quarter panel air intake']
+      },
+      rear_architecture_and_exhaust: {
+        name: 'central_dual_exhaust_diffuser',
+        positiveKeywords: ['central dual exhaust', 'center exhaust', 'central twin pipes', 'underbody diffuser'],
+        incompatibleKeywords: ['quad rectangular exhaust', 'quad outer exhaust', 'dual outer oval exhaust']
+      },
+      roofline_greenhouse: {
+        name: 'coupe_flyline',
+        positiveKeywords: ['coupe flyline', 'sloping roof'],
+        incompatibleKeywords: ['roadster', 'soft top', 'speedster haunches', 'two-seat convertible', 'convertible roof', 'open-top']
+      },
+      proportions: {
+        name: 'pure_naturally_aspirated_track_focused_911',
+        positiveKeywords: ['sloping flyline', 'rear-engine', 'wide rear track', 'track-focused', 'center-lock'],
+        incompatibleKeywords: ['front-engine gt', 'suv', 'sedan', 'mid-engine roadster']
+      }
+    }
+  },
+
   // ── PORSCHE 911 CARRERA (992) ──
   {
     vehicleId: 'porsche-911-carrera-992',
@@ -1345,7 +1504,7 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
     model: '911 Carrera',
     generation: '992',
     proportionsDescription: 'Iconic rear-engine 2+2 sports coupe with clean unvented front hood, smooth rear haunches without intercooler scoops, horizontal slat lower bumper, and flush deployable rear spoiler',
-    confusableWith: ['porsche-911-turbo', 'porsche-911-gt3-rs', 'porsche-911-carrera-997', 'porsche-911-carrera-996', 'porsche-718-boxster', 'porsche-cayman-gt4-rs'],
+    confusableWith: ['porsche-911-gt3-992', 'porsche-911-turbo', 'porsche-911-gt3-rs', 'porsche-911-carrera-997', 'porsche-911-carrera-996', 'porsche-718-boxster', 'porsche-cayman-gt4-rs'],
     traits: {
       headlight_shape: {
         name: 'compact_projector_four_point_led_cluster',
@@ -1470,7 +1629,7 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
     model: '911 Carrera',
     generation: '997',
     proportionsDescription: 'Rear-engine sports car returning to classic round bug-eye headlights with separate bumper indicator strips',
-    confusableWith: ['porsche-911-carrera-992', 'porsche-911-carrera-996', 'porsche-911-gt3-rs', 'porsche-911-turbo', 'porsche-718-boxster'],
+    confusableWith: ['porsche-911-gt3-992', 'porsche-911-carrera-992', 'porsche-911-carrera-996', 'porsche-911-gt3-rs', 'porsche-911-turbo', 'porsche-718-boxster'],
     traits: {
       headlight_shape: {
         name: 'classic_round_bugeye_separate_indicators',
@@ -2031,7 +2190,7 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
     model: '911 Turbo',
     generation: '992',
     proportionsDescription: 'Widebody rear-engine supercar coupe with rear fender intercooler scoops, active rear wing, quad rectangular exhaust, and 4-point LED headlights',
-    confusableWith: ['porsche-911-turbo-s-992', 'porsche-911-carrera-992', 'porsche-718-boxster', 'porsche-cayman-gt4-rs', 'porsche-911-carrera-997', 'porsche-911-gt3-rs', 'porsche-911-carrera-996'],
+    confusableWith: ['porsche-911-turbo-s-992', 'porsche-911-carrera-992', 'porsche-718-boxster', 'porsche-cayman-gt4-rs', 'porsche-911-carrera-997', 'porsche-911-gt3-rs', 'porsche-911-carrera-996', 'porsche-911-gt3-992'],
     traits: {
       headlight_shape: {
         name: 'compact_projector_four_point_led_cluster',
@@ -2116,7 +2275,7 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
     model: '718 Cayman GT4 RS',
     generation: '982',
     proportionsDescription: 'Mid-engine track coupe with fixed carbon swan-neck rear wing, side window airboxes, side intake scoops, and dual front hood NACA ducts',
-    confusableWith: ['porsche-911-carrera-992', 'porsche-718-boxster', 'porsche-911-gt3-rs', 'porsche-911-turbo'],
+    confusableWith: ['porsche-911-gt3-992', 'porsche-911-carrera-992', 'porsche-718-boxster', 'porsche-911-gt3-rs', 'porsche-911-turbo'],
     traits: {
       headlight_shape: {
         name: 'compact_projector_four_point_led_cluster',

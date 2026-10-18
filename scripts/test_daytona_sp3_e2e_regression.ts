@@ -154,6 +154,65 @@ async function runTestSuite() {
   assert(classification.canonical_vehicle_id === 'ferrari-daytona-sp3', `Canonical ID resolves to ferrari-daytona-sp3 (got: ${classification.canonical_vehicle_id})`);
   assert(classification.candidate_separation >= 0.20, `Candidate separation is decisive (got: ${classification.candidate_separation})`);
 
+  // ─── TEST 3B: Exact Failing 768x432 Downscaled Mobile Observation Recovery ───
+  console.log('\n--- TEST 3B: Exact Failing 768x432 Downscaled Observation Recovery ---');
+  const downscaled768ObservedEvidence = {
+    body_style: 'Two-door coupe with a sloping roofline and a short rear deck.',
+    grille: 'A large, trapezoidal grille with vertical slats, flanked by two air intakes on either side',
+    headlights: 'Two horizontal LED strips on the front bumper, with a vertical LED strip on the rear bumper',
+    taillights: 'Two exhaust pipes exiting low in the centre of the rear diffuser, with a pair of rectangular rear lamps',
+    hood: 'A smooth, flat hood with no visible vents or louvers.',
+    roofline: null,
+    windows: null,
+    wheels: null,
+    exhaust: 'Two exhaust pipes exiting low in the centre of the rear diffuser, with a pair of rectangular rear lamps',
+    aero: 'A front splitter and side air intakes.',
+    badges: null,
+    text: null,
+    body_proportions: 'Two-door coupe with a sloping roofline and a short rear deck.',
+    distinctive_details: [
+      'Two horizontal LED strips on the front bumper, with a vertical LED strip on the rear bumper.',
+      'A large, trapezoidal grille with vertical slats, flanked by two air intakes on either side.',
+      'Two exhaust pipes exiting low in the centre of the rear diffuser, with a pair of rectangular rear lamps.',
+      'A smooth, flat hood with no visible vents or louvers.',
+      'A front splitter and side air intakes.',
+      'The distinctive shape of the front bumper, with its prominent air intakes and LED strips.',
+      'The trapezoidal grille, the sloping roofline, the rectangular rear lamps, the front splitter, and the distinctive shape of the front bumper.'
+    ]
+  };
+
+  const downscaleClassification = hierarchicalClassifier.classify({
+    visual_evidence: downscaled768ObservedEvidence,
+    viewpoint: 'front_3q',
+    raw_make: 'Ferrari',
+    raw_model: 'SF90 Stradale',
+    raw_generation: 'F173',
+    raw_variant: null,
+    raw_candidates: candidateList
+  });
+
+  assert(downscaleClassification.top_candidate?.name.includes('Daytona SP3'), `Downscaled 768px top candidate is Daytona SP3 (got: ${downscaleClassification.top_candidate?.name})`);
+  assert(!downscaleClassification.top_candidate?.name.includes('SF90'), `Downscaled 768px explicitly rejects SF90 Stradale (got: ${downscaleClassification.top_candidate?.name})`);
+  assert(downscaleClassification.canonical_vehicle_id === 'ferrari-daytona-sp3', `Downscaled canonical ID resolves to ferrari-daytona-sp3 (got: ${downscaleClassification.canonical_vehicle_id})`);
+  const downscaleSf90 = downscaleClassification.calibrated_candidates.find(c => c.name.includes('SF90'));
+  assert(downscaleSf90 ? downscaleSf90.score < (downscaleClassification.top_candidate?.score || 0) : true, 'SF90 score is strictly below Daytona SP3 top candidate');
+
+  // Guardrail check: uncorroborated front bumper LED strips without Daytona aero/proportions must NOT force Daytona
+  const uncorroboratedEvidence = {
+    body_style: 'Four-door sedan with upright greenhouse',
+    grille: 'Upright chrome waterfall grille',
+    headlights: 'Two horizontal LED strips on the front bumper',
+    distinctive_details: ['Two horizontal LED strips on the front bumper']
+  };
+  const uncorroboratedClassification = hierarchicalClassifier.classify({
+    visual_evidence: uncorroboratedEvidence,
+    viewpoint: 'front_3q',
+    raw_make: 'Ferrari',
+    raw_model: 'Roma',
+    raw_candidates: candidateList
+  });
+  assert(uncorroboratedClassification.top_candidate?.name !== 'Ferrari Daytona SP3 (Icona)', 'Uncorroborated front bumper LED strips on sedan do NOT force Daytona identification');
+
   // ─── TEST 4: No Default Variant Hallucination (Assetto Fiorano Check) ───
   console.log('\n--- TEST 4: Anti-Hallucination & Default Variant Gating ---');
   const sf90DbEntry = APEX_LOCAL_VEHICLE_DATABASE.find(v => v.id === 'ferrari-sf90-stradale');
