@@ -219,7 +219,7 @@ export class HierarchicalClassifier {
 
     const observedBody = (visual_evidence.body_style || '').toLowerCase();
     const observedRoof = (visual_evidence.roofline || '').toLowerCase();
-    const openTopPattern = /\b(convertible|spider|spyder|cabriolet|roadster|soft[\s-]?top|canvas[\s-]?(?:roof|top)|fabric[\s-]?(?:roof|top)|open[\s-]?top|speedster|boxster|barchetta|drophead)\b/i;
+    const openTopPattern = /\b(convertible|spider|spyder|cabriolet|cabrio|roadster|soft[\s-]?top|canvas[\s-]?(?:roof|top)|fabric[\s-]?(?:roof|top)|open[\s-]?top|speedster|boxster|barchetta|drophead|grancabrio)\b/i;
     const isObservedOpenTop =
       openTopPattern.test(observedBody) ||
       openTopPattern.test(observedRoof) ||
@@ -419,7 +419,7 @@ export class HierarchicalClassifier {
         candBodyLower === 'convertible' ||
         candBodyLower === 'roadster' ||
         isCandidateTarga ||
-        /\b(spider|spyder|cabriolet|convertible|roadster|speedster|boxster|barchetta|miata|cielo)\b/i.test(candNameLower);
+        /\b(spider|spyder|cabriolet|cabrio|convertible|roadster|speedster|boxster|barchetta|miata|cielo|grancabrio)\b/i.test(candNameLower);
       const isCandidateCoupe =
         (candBodyLower === 'coupe' || (!candBodyLower && (candNameLower.includes('coupe') || candNameLower.includes('gt3')))) &&
         !isCandidateOpenTop;
@@ -451,7 +451,7 @@ export class HierarchicalClassifier {
           const cFamily = getFamilyToken(c.name, cCanon?.model);
           if (cFamily !== candFamily) return false;
           const cBody = (cCanon?.bodyStyle || '').toLowerCase();
-          return cBody === 'convertible' || cBody === 'targa' || cBody === 'roadster' || /\b(spider|spyder|cabriolet|convertible|roadster|targa|speedster|boxster|barchetta|miata|cielo)\b/i.test(c.name.toLowerCase());
+          return cBody === 'convertible' || cBody === 'targa' || cBody === 'roadster' || /\b(spider|spyder|cabriolet|cabrio|convertible|roadster|targa|speedster|boxster|barchetta|miata|cielo|grancabrio)\b/i.test(c.name.toLowerCase());
         });
         if (isCandidateCoupe && hasOpenTopSibling) {
           candContradictions.push(`Body style mismatch: Observed convertible/open-top architecture vs candidate fixed coupe`);
@@ -536,45 +536,30 @@ export class HierarchicalClassifier {
 
       // ── CONTRADICTION ENGINE RULE E: FERRARI MODEL-FAMILY DISAMBIGUATION ──
       const hasNegativeStrakes = /\b(?:without|no|lacks?|devoid\s+of)\s+(?:horizontal\s+)?strakes?\b/i.test(evidenceText);
-      // Model-specific Daytona Icona architectural cues (semantic front & rear equivalents)
+      // Model-specific Daytona Icona architectural cues (sculptural prototype bodywork, double-crested fenders, wraparound canopy, butterfly doors, horizontal strakes/slits, horizontal blade splitter)
       const hasDaytonaIconaCues = !hasNegativeStrakes &&
-        /\b(horizontal\s+strakes?|horizontal\s+slats?|slatted\s+grille|slatted\s+bumper|headlight\s+eyelids?|eyelid\s+covers?|partial\s+covers?|wraparound\s+visor|visor\s+canopy|fender-mounted\s+mirrors?|door\s+tops?\s+mirrors?|icona|(?:thin|slim|low|recessed|narrow)\s+horizontal\s+(?:head)?(?:lamps?|lights?|openings?)|(?:large|wide)\s+horizontal\s+(?:front\s+)?grille|horizontal\s+grille\s+with\s+black|horizontal\s+blade\s+splitter)\b/i.test(evidenceText);
+        /\b(horizontal\s+strakes?|horizontal\s+slats?|slatted\s+grille|slatted\s+bumper|headlight\s+eyelids?|eyelid\s+covers?|partial\s+covers?|wraparound\s+(?:visor|canopy|cabin|windshield|glass)|visor\s+canopy|fender-mounted\s+mirrors?|door\s+tops?\s+mirrors?|icona|horizontal\s+blade\s+splitter|double-?crested\s+(?:front\s+)?fenders?|prototype-?inspired(?:\s+sculptural)?|sculptural\s+bodywork|butterfly\s+doors?\s+(?:with\s+)?(?:integrated\s+)?(?:air\s+)?(?:intakes?|channels?)|(?:full[- ]width\s+)?horizontal\s+rear\s+strakes)\b/i.test(evidenceText);
 
-      // Daytona front bumper LED strip cues require corroborating aero/proportions so the phrase cannot independently force an identification
-      const hasHorizontalFrontLedStrips = !hasNegativeStrakes && (
-        /\bhorizontal\s+led\s+strips?\s+on\s+(?:the\s+)?front\s+bumper\b/i.test(evidenceText) ||
-        (/\bhorizontal\s+led\s+strips?\b/i.test(evidenceText) && /\bfront\s+bumper\b/i.test(evidenceText))
-      );
-      const hasCorroboratingDaytonaAero =
-        /\b(front\s+splitter|splitter|air\s+intakes?|wide\s+intake|sloping\s+roofline|rectangular\s+rear\s+lamps?|rear\s+diffuser|dual\s+exhaust|short\s+rear\s+deck)\b/i.test(evidenceText);
-      const hasCorroboratedDaytonaLamps = hasHorizontalFrontLedStrips && hasCorroboratingDaytonaAero;
-
-      // Model-specific SF90 Stradale architectural cues (strictly physical C-shaped matrix / shut-off Gurney)
-      const hasExplicitSf90Cues = /\b(shut-?off\s+gurney|c-shaped\s+(?:matrix\s+)?(?:led\s+)?headlights?|c-clamp\s+headlights?)\b/i.test(evidenceText);
+      // Model-specific SF90 Stradale architectural cues (strictly physical C-shaped matrix / brake intake integration / shut-off Gurney)
+      const hasExplicitSf90Cues = /\b(shut-?off\s+gurney|c-shaped\s+(?:matrix\s+)?(?:led\s+)?headlights?|c-clamp\s+headlights?|c-shaped\s+headlight\s+and\s+brake\s+intake|c-shaped\s+headlight\s+integration|c-shaped\s+brake\s+intake|sf90\s+stradale|sf90\s+spider)\b/i.test(evidenceText);
       const isFrontViewpoint = viewpoint === 'front' || viewpoint === 'front_3q';
 
-      if (hasDaytonaIconaCues || hasCorroboratedDaytonaLamps) {
+      if (hasDaytonaIconaCues) {
         if (candNameLower.includes('daytona') || candNameLower.includes('sp3')) {
-          candSupporting.push(hasDaytonaIconaCues
-            ? 'Observed horizontal strakes, headlight eyelids, or wraparound visor canopy uniquely match Ferrari Daytona SP3 Icona design'
-            : 'Observed horizontal LED strips on front bumper with corroborating aero cues match Ferrari Daytona SP3 architecture'
-          );
+          candSupporting.push('Observed prototype-inspired bodywork, double-crested fenders, horizontal strakes, headlight eyelids, or wraparound canopy uniquely match Ferrari Daytona SP3 Icona design');
           score += 0.25;
         } else if (candidateMake === 'ferrari' && (candNameLower.includes('sf90') || candNameLower.includes('296') || candNameLower.includes('f8') || candNameLower.includes('roma') || candNameLower.includes('portofino') || candNameLower.includes('488') || candNameLower.includes('458'))) {
-          candContradictions.push(hasDaytonaIconaCues
-            ? `Observed horizontal strakes, headlight eyelids, and wraparound canopy contradict ${candidate.name} architecture`
-            : `Observed horizontal LED strips on front bumper contradict ${candidate.name} headlight architecture`
-          );
+          candContradictions.push(`Observed prototype-inspired bodywork, double-crested fenders, horizontal strakes, or wraparound canopy contradict ${candidate.name} architecture`);
           score -= 0.45;
         }
       }
 
       if (hasExplicitSf90Cues) {
         if (candNameLower.includes('sf90')) {
-          candSupporting.push('Observed C-shaped headlights or shut-off Gurney match Ferrari SF90 Stradale architecture');
+          candSupporting.push('Observed C-shaped headlight/brake-intake integration or shut-off Gurney match Ferrari SF90 Stradale architecture');
           score += 0.25;
         } else if (candNameLower.includes('daytona') || candNameLower.includes('sp3')) {
-          candContradictions.push('Observed C-shaped headlights or shut-off Gurney contradict Ferrari Daytona SP3 architecture');
+          candContradictions.push('Observed C-shaped headlight/brake-intake integration or shut-off Gurney contradict Ferrari Daytona SP3 architecture');
           score -= 0.50;
         }
       } else if (hasNegativeStrakes && !isFrontViewpoint && (candNameLower.includes('daytona') || candNameLower.includes('sp3'))) {
@@ -645,24 +630,24 @@ export class HierarchicalClassifier {
 
 
       // ── CONTRADICTION ENGINE RULE H: MASERATI MC20 vs GRANCABRIO / GRANTURISMO ──
-      const hasMc20Cues = /\b(butterfly\s+doors?|mid-engine\s+monocoque|nettuno|rear\s+engine\s+trident\s+vents?)\b/i.test(evidenceText);
-      const hasGtCabrioCues = /\b(front-engine|long\s+hood|soft\s+top|fabric\s+roof|oval\s+concave\s+slatted\s+grille|triple\s+portholes?)\b/i.test(evidenceText);
+      const hasMc20Cues = /\b(butterfly\s+doors?|mid-engine|cab-forward|nettuno|rear\s+engine\s+trident\s+vents?|vertical\s+(?:led\s+)?(?:slit|headlights?)|compact\s+vertical|short\s+front\s+hood|hood\s+(?:nostrils?|vents?|extractors?)|rear\s+(?:fender\s+)?shoulder\s+intakes?|mid-bumper\s+exhaust|trident\s+louver)\b/i.test(evidenceText);
+      const hasGtCabrioCues = /\b(front-engine|long\s+(?:hood|bonnet)|soft\s+top|canvas\s+roof|fabric\s+roof|oval\s+concave\s+slatted\s+grille|concave\s+oval|vertical\s+slats?|chrome\s+surround|triple\s+portholes?|triple\s+(?:front\s+)?fender\s+(?:vents?|gills)|swept-back\s+almond|almond\s+headlights?|2\+2)\b/i.test(evidenceText);
 
-      if (hasGtCabrioCues) {
+      if (hasGtCabrioCues && !hasMc20Cues) {
         if (candNameLower.includes('grancabrio') || candNameLower.includes('granturismo')) {
-          candSupporting.push('Observed front-engine GT proportions, oval slatted grille, or soft top match GranTurismo/GranCabrio architecture');
+          candSupporting.push('Observed front-engine GT proportions, oval slatted grille, or triple fender gills match GranTurismo/GranCabrio architecture');
           score += 0.25;
         } else if (candNameLower.includes('mc20')) {
           candContradictions.push('Observed front-engine GT proportions, oval slatted grille, or soft top contradict MC20 mid-engine monocoque architecture');
           score -= 0.50;
         }
       }
-      if (hasMc20Cues) {
+      if (hasMc20Cues && !hasGtCabrioCues) {
         if (candNameLower.includes('mc20')) {
-          candSupporting.push('Observed mid-engine monocoque and butterfly doors match Maserati MC20 architecture');
+          candSupporting.push('Observed mid-engine / cab-forward proportions or compact vertical lamps match Maserati MC20 architecture');
           score += 0.25;
         } else if (candNameLower.includes('grancabrio') || candNameLower.includes('granturismo')) {
-          candContradictions.push('Observed mid-engine monocoque and butterfly doors contradict front-engine GranTurismo/GranCabrio architecture');
+          candContradictions.push('Observed mid-engine proportions or compact vertical lamps contradict front-engine GranTurismo/GranCabrio architecture');
           score -= 0.50;
         }
       }
@@ -763,8 +748,8 @@ export class HierarchicalClassifier {
           }
 
           // Strict body style gating: A convertible/spider must never match a fixed-roof coupe candidate!
-          const isCSpider = /\b(spider|spyder|cabriolet|convertible|roadster)\b/i.test(cNameLower);
-          const isFgSpider = /\b(spider|spyder|cabriolet|convertible|roadster)\b/i.test(fgDisplayLower) || /\b(spider|spyder|cabriolet|convertible|roadster)\b/i.test(fgModelLower);
+          const isCSpider = /\b(spider|spyder|cabriolet|cabrio|convertible|roadster|grancabrio|cielo)\b/i.test(cNameLower);
+          const isFgSpider = /\b(spider|spyder|cabriolet|cabrio|convertible|roadster|grancabrio|cielo)\b/i.test(fgDisplayLower) || /\b(spider|spyder|cabriolet|cabrio|convertible|roadster|grancabrio|cielo)\b/i.test(fgModelLower);
           if (isCSpider !== isFgSpider) {
             return false;
           }
@@ -799,7 +784,19 @@ export class HierarchicalClassifier {
 
         if (existingIdx >= 0) {
           const existing = calibratedCandidates[existingIdx];
-          existing.score = fgCand.calibratedScore;
+          const hasExistingContradictions = Boolean(existing.contradictions && existing.contradictions.length > 0);
+          const hasExistingSupporting = Boolean(existing.supporting_evidence && existing.supporting_evidence.length > 0);
+
+          if (hasExistingContradictions) {
+            existing.score = Math.min(existing.score, fgCand.calibratedScore);
+          } else if (hasExistingSupporting) {
+            existing.score = Math.max(existing.score, fgCand.calibratedScore);
+          } else {
+            existing.score = fgCand.calibratedScore;
+          }
+          if (fgCand.contradictions.length > 0) {
+            existing.score = Math.min(existing.score, fgCand.calibratedScore);
+          }
           if (!existing.supporting_evidence) existing.supporting_evidence = [];
           if (!existing.contradictions) existing.contradictions = [];
           if (!existing.unobservable_features) existing.unobservable_features = [];
@@ -958,7 +955,7 @@ export class HierarchicalClassifier {
     // are NOT model-specific evidence — counting them here previously let a generic-only match
     // bypass the specificity honesty guard and canonize a wrong exact model.
     const anyModelSpecificEvidence = fgResult.scoredCandidates.length > 0
-      ? fgResult.scoredCandidates.some((c) => c.specificEvidenceCount > 0)
+      ? (fgResult.scoredCandidates.some((c) => c.specificEvidenceCount > 0) || validCandidates.some((c) => (c.supporting_evidence?.length ?? 0) > 0 && c.score >= 0.70))
       : validCandidates.some((c) => (c.supporting_evidence?.length ?? 0) > 0);
 
     const isTiedOrDeadlocked = validCandidates.length >= 2 && separation === 0;
@@ -982,6 +979,10 @@ export class HierarchicalClassifier {
       if (n1.includes('hurac') && n2.includes('hurac')) return true;
       if (n1.includes('296') && n2.includes('296')) return true;
       if (n1.includes('sf90') && n2.includes('sf90')) return true;
+      if ((n1.includes('granturismo') || n1.includes('grancabrio')) && (n2.includes('granturismo') || n2.includes('grancabrio'))) return true;
+      if (n1.includes('mc20') && n2.includes('mc20')) return true;
+      if (n1.includes('supra') && n2.includes('supra')) return true;
+      if (n1.includes('gemera') && n2.includes('gemera')) return true;
       return false;
     })();
 

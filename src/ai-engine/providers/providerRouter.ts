@@ -64,7 +64,23 @@ export class AIProviderRouter {
         );
       }
     }
-    this.fallbackProvider = fallbackProvider || new MockFallbackProvider();
+    if (fallbackProvider) {
+      this.fallbackProvider = fallbackProvider;
+    } else {
+      const allowMockFallback = typeof process !== 'undefined' && process.env?.ALLOW_MOCK_FALLBACK === 'true';
+      const isGeminiAvailable = Boolean(typeof process !== 'undefined' && process.env?.GEMINI_API_KEY && process.env.GEMINI_API_KEY.trim().length > 5);
+      const isCfAvailable = Boolean(typeof process !== 'undefined' && process.env?.CLOUDFLARE_AUTH_TOKEN && process.env.CLOUDFLARE_AUTH_TOKEN.trim().length > 5);
+
+      if (allowMockFallback) {
+        this.fallbackProvider = new MockFallbackProvider();
+      } else if (!primaryProvider && this.primaryProvider.name === 'CloudflareVisionProvider' && isGeminiAvailable) {
+        this.fallbackProvider = new GeminiProvider();
+      } else if (!primaryProvider && this.primaryProvider.name === 'GeminiProvider' && isCfAvailable) {
+        this.fallbackProvider = new CloudflareVisionProvider();
+      } else {
+        this.fallbackProvider = new MockFallbackProvider();
+      }
+    }
   }
 
   public getCircuitState(): CircuitBreakerState {
@@ -94,11 +110,13 @@ export class AIProviderRouter {
 
   public async getActiveProviderName(): Promise<string> {
     const isPrimary = await this.primaryProvider.isAvailable();
+    const isMockFallback = this.fallbackProvider.name === 'MockFallbackProvider' || this.fallbackProvider.name === 'ApexFallbackEngine' || this.fallbackProvider instanceof MockFallbackProvider;
     const allowMockFallback = typeof process !== 'undefined' && process.env?.ALLOW_MOCK_FALLBACK === 'true';
     if (this.config.enabled && isPrimary && this.getCircuitState() !== 'OPEN') {
       return this.primaryProvider.name;
     }
-    return (allowMockFallback && this.fallbackEnabled) ? this.fallbackProvider.name : 'none';
+    const isFallbackPermitted = isMockFallback ? (allowMockFallback && this.fallbackEnabled) : true;
+    return isFallbackPermitted ? this.fallbackProvider.name : 'none';
   }
 
   public updateConfig(newConfig: Partial<ProviderCapacityConfig>) {
@@ -146,6 +164,21 @@ export class AIProviderRouter {
    * Routes request through circuit breaker with backpressure & fallback
    */
   public async routeIdentification(request: AIProviderRequest): Promise<AIProviderResponse> {
+    // Dynamic fallback provider upgrade if credentials became available after module initialization
+    if (this.fallbackProvider.name === 'MockFallbackProvider' || this.fallbackProvider.name === 'ApexFallbackEngine') {
+      const isGeminiAvailable = Boolean(typeof process !== 'undefined' && process.env?.GEMINI_API_KEY && process.env.GEMINI_API_KEY.trim().length > 5);
+      const isCfAvailable = Boolean(typeof process !== 'undefined' && process.env?.CLOUDFLARE_AUTH_TOKEN && process.env.CLOUDFLARE_AUTH_TOKEN.trim().length > 5);
+      const allowMockFallback = typeof process !== 'undefined' && process.env?.ALLOW_MOCK_FALLBACK === 'true';
+
+      if (!allowMockFallback) {
+        if (this.primaryProvider.name === 'CloudflareVisionProvider' && isGeminiAvailable) {
+          this.fallbackProvider = new GeminiProvider();
+        } else if (this.primaryProvider.name === 'GeminiProvider' && isCfAvailable) {
+          this.fallbackProvider = new CloudflareVisionProvider();
+        }
+      }
+    }
+
     const currentState = this.getCircuitState();
     const providerAttempted = this.primaryProvider.name;
 
@@ -156,12 +189,24 @@ export class AIProviderRouter {
       cloudflareTokenConfigured: Boolean(typeof process !== 'undefined' && process.env?.CLOUDFLARE_AUTH_TOKEN),
       scanningEnabled: typeof process !== 'undefined' ? process.env?.CLOUDFLARE_SCANNING_ENABLED !== 'false' : true,
       visionScanningEnabled: typeof process !== 'undefined' ? process.env?.VISION_SCANNING_ENABLED !== 'false' : true,
-      allowMockFallback: typeof process !== 'undefined' && process.env?.ALLOW_MOCK_FALLBACK === 'true'
+      allowMockFallback: typeof process !== 'undefined' && process.env?.ALLOW_MOCK_FALLBACK === 'true',
+      fallbackProvider: this.fallbackProvider.name
     });
 
-    // In production, ALLOW_MOCK_FALLBACK defaults to false; MockFallbackProvider never runs silently
+    // In production, ALLOW_MOCK_FALLBACK defaults to false for MockFallbackProvider.
+    // Real AI fallback providers (e.g. GeminiProvider) are permitted when not killed via emergency flags.
+    const isMockFallback = this.fallbackProvider.name === 'MockFallbackProvider' || this.fallbackProvider.name === 'ApexFallbackEngine' || this.fallbackProvider instanceof MockFallbackProvider;
     const allowMockFallback = typeof process !== 'undefined' && process.env?.ALLOW_MOCK_FALLBACK === 'true';
-    const isFallbackPermitted = allowMockFallback && this.fallbackEnabled && !request.options?.disableFallback;
+    const isFallbackKillswitchActive = typeof process !== 'undefined' && (
+      this.fallbackProvider.name === 'GeminiProvider'
+        ? process.env?.GEMINI_SCANNING_ENABLED === 'false' || process.env?.VISION_SCANNING_ENABLED === 'false'
+        : process.env?.CLOUDFLARE_SCANNING_ENABLED === 'false' || process.env?.VISION_SCANNING_ENABLED === 'false'
+    );
+    const isFallbackPermitted = !request.options?.disableFallback && (
+      isMockFallback
+        ? (allowMockFallback && this.fallbackEnabled)
+        : (!isFallbackKillswitchActive)
+    );
 
     // 1. Check if circuit is OPEN, Concurrency is Saturated, or Budget/Killswitch is Active
     const isPrimaryAvailable = await this.primaryProvider.isAvailable();
@@ -202,8 +247,31 @@ export class AIProviderRouter {
           durationMs: 0
         };
       }
-      // Only runs if explicitly enabled via ALLOW_MOCK_FALLBACK=true
-      const fallbackResponse = await this.fallbackProvider.identify(request);
+      const isFallbackAvail = await this.fallbackProvider.isAvailable();
+      if (!isFallbackAvail) {
+        return {
+          success: false,
+          error: failureReason,
+          errorType: !isScanningEnabled ? 'PROVIDER_UNAVAILABLE' : isBudgetExceeded ? 'PROVIDER_UNAVAILABLE' : !isPrimaryAvailable ? 'AUTH_ERROR' : currentState === 'OPEN' ? '429' : 'PROVIDER_UNAVAILABLE',
+          providerStatus: !isPrimaryAvailable ? 401 : !isScanningEnabled ? 503 : 500,
+          providerErrorCode: !isPrimaryAvailable ? 'MISSING_CREDENTIALS' : undefined,
+          providerName: this.primaryProvider.name,
+          modelUsed: 'none',
+          providerAttempted,
+          fallbackUsed: false,
+          retriesAttempted: 0,
+          retryConsumed: false,
+          tokensConsumed: { promptTokens: 0, outputTokens: 0, totalTokens: 0 },
+          durationMs: 0
+        };
+      }
+      const fallbackResponse = await this.fallbackProvider.identify({
+        ...request,
+        options: {
+          ...request.options,
+          disableFallback: true
+        }
+      });
       return {
         ...fallbackResponse,
         providerAttempted,
@@ -214,7 +282,13 @@ export class AIProviderRouter {
     // 2. Execute via Primary Provider with Concurrency Guard
     this.activeConcurrency += 1;
     try {
-      const response = await this.primaryProvider.identify(request);
+      const response = await this.primaryProvider.identify({
+        ...request,
+        options: {
+          ...request.options,
+          hasFallback: isFallbackPermitted
+        }
+      });
 
       if (response.success) {
         this.onSuccess();
@@ -230,7 +304,10 @@ export class AIProviderRouter {
       // Handle Provider Failures (429 / 5xx / Timeout / Quota / Agreement)
       this.onFailure(response.errorType);
 
-      if (!isFallbackPermitted) {
+      // Invariant: HTTP 429 quota exhaustion is FATAL on real AI providers and must NEVER be retried or fallen back.
+      // (MockFallbackProvider in dev/test with ALLOW_MOCK_FALLBACK=true is allowed to simulate fallback).
+      const isFatal429 = (response.errorType === '429' || response.errorType === 'VISION_QUOTA_EXHAUSTED') && !isMockFallback;
+      if (isFatal429 || !isFallbackPermitted) {
         return {
           ...response,
           providerName: this.primaryProvider.name,
@@ -239,13 +316,31 @@ export class AIProviderRouter {
         };
       }
 
-      // Explicit dev fallback
-      const fallbackResponse = await this.fallbackProvider.identify(request);
+      const isFallbackAvail = await this.fallbackProvider.isAvailable();
+      if (!isFallbackAvail) {
+        return {
+          ...response,
+          providerName: this.primaryProvider.name,
+          providerAttempted,
+          fallbackUsed: false
+        };
+      }
+
+      console.warn(`[AIProviderRouter] Primary vision provider (${this.primaryProvider.name}) failed with ${response.errorType || 'error'}: ${response.error}. Executing secondary provider fallback (${this.fallbackProvider.name})...`);
+
+      const fallbackResponse = await this.fallbackProvider.identify({
+        ...request,
+        options: {
+          ...request.options,
+          disableFallback: true // strictly prevent recursive fallback chains
+        }
+      });
+
       return {
         ...fallbackResponse,
         providerAttempted,
         fallbackUsed: true,
-        error: `Primary AI degraded (${response.error || 'Throttled'}). Used fallback engine.`
+        error: fallbackResponse.success ? undefined : `Primary AI degraded (${response.error || 'Failed'}). Fallback engine error: ${fallbackResponse.error}`
       };
     } catch (err: any) {
       this.onFailure('5xx');
@@ -266,7 +361,32 @@ export class AIProviderRouter {
           durationMs: 0
         };
       }
-      const fallbackResponse = await this.fallbackProvider.identify(request);
+      const isFallbackAvail = await this.fallbackProvider.isAvailable();
+      if (!isFallbackAvail) {
+        return {
+          success: false,
+          error: err?.message || 'Primary provider threw exception',
+          errorType: '5xx',
+          providerStatus: err?.status || 500,
+          providerErrorCode: err?.errorCode,
+          retriesAttempted: 0,
+          retryConsumed: false,
+          providerName: this.primaryProvider.name,
+          modelUsed: 'none',
+          providerAttempted,
+          fallbackUsed: false,
+          tokensConsumed: { promptTokens: 0, outputTokens: 0, totalTokens: 0 },
+          durationMs: 0
+        };
+      }
+      console.warn(`[AIProviderRouter] Primary vision provider exception: ${err?.message}. Executing secondary provider fallback (${this.fallbackProvider.name})...`);
+      const fallbackResponse = await this.fallbackProvider.identify({
+        ...request,
+        options: {
+          ...request.options,
+          disableFallback: true
+        }
+      });
       return {
         ...fallbackResponse,
         providerAttempted,

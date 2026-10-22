@@ -10,7 +10,7 @@ import { createClient } from "@supabase/supabase-js";
 import crypto2 from "crypto";
 
 // src/ai-engine/caching/identificationCache.ts
-var VISION_PIPELINE_VERSION = "v3.4.2-ferrari-forensics-and-cache-isolation";
+var VISION_PIPELINE_VERSION = "v3.4.4-daytona-sp3-sf90-resolution";
 function buildCacheKey(imageHash, provider = "cloudflare", model = "@cf/meta/llama-3.2-11b-vision-instruct") {
   const cleanHash = (imageHash || "").toLowerCase().trim();
   const cleanProvider = (provider || "cloudflare").toLowerCase().trim();
@@ -9011,23 +9011,49 @@ var MORPHOLOGICAL_FINGERPRINTS = [
     traits: {
       headlight_shape: {
         name: "vertical_compact_led_slit",
-        positiveKeywords: ["vertical led", "vertical slit", "compact vertical", "stacked led", "vertical headlight", "slit headlight"],
+        positiveKeywords: ["vertical led", "vertical slit", "compact vertical", "stacked led", "vertical headlight", "slit headlight", "integrated into the front fenders", "swept back along the fenders", "fender mounted", "angular headlamps", "distinctive led strip"],
         incompatibleKeywords: ["almond swept", "curved oval", "large swept back", "fried egg", "round bug eye"]
       },
       front_intake_grille: {
         name: "low_wide_horizontal_mouth_splitter",
-        positiveKeywords: ["low wide mouth", "carbon splitter", "low-slung intake", "wide lower mesh", "front splitter", "horizontal lower grille", "low mouth"],
-        incompatibleKeywords: ["upright oval grille", "concave oval grille", "tall vertical grille", "prominent central chrome oval"]
+        positiveKeywords: [
+          "low wide mouth",
+          "carbon splitter",
+          "low-slung intake",
+          "wide lower mesh",
+          "front splitter",
+          "horizontal lower grille",
+          "low mouth",
+          "lower lip/splitter",
+          "lower lip",
+          "large central intake with a lower lip",
+          "large air intake with a mesh grille",
+          "mesh grille",
+          "mesh pattern",
+          "trapezoidal grille with a mesh pattern",
+          "trapezoidal grille",
+          "flanked by two air intakes"
+        ],
+        incompatibleKeywords: ["upright oval grille", "concave oval grille", "tall vertical grille", "prominent central chrome oval", "vertical slats", "chrome surround", "chrome slatted grille"]
       },
       side_intake_type: {
         name: "rear_fender_shoulder_intake",
-        positiveKeywords: ["shoulder intake", "rear fender shoulder", "rear haunch intake", "mid-engine intake", "side air intake behind door", "c-pillar intake"],
+        positiveKeywords: [
+          "shoulder intake",
+          "rear fender shoulder",
+          "rear haunch intake",
+          "mid-engine intake",
+          "side air intake behind door",
+          "c-pillar intake",
+          "side air intakes",
+          "side air intake"
+        ],
         incompatibleKeywords: ["triple front fender gills", "shark gills", "no side intake", "smooth doors without intake"]
       },
       roofline_greenhouse: {
         name: "cab_forward_teardrop_deck",
         positiveKeywords: ["cab-forward", "cab forward", "short front hood", "glass engine cover", "teardrop cabin", "mid-engine deck", "trident louver"],
-        incompatibleKeywords: ["long hood short deck", "rearward cabin", "grand tourer proportions", "upright windshield", "2+2 coupe"]
+        incompatibleKeywords: ["long hood short deck", "rearward cabin", "grand tourer proportions", "upright windshield", "2+2 coupe", "canvas soft top", "convertible soft top", "smooth flat hood with no vents", "front-engine 2+2"]
       },
       door_architecture: {
         name: "butterfly_doors",
@@ -9041,7 +9067,20 @@ var MORPHOLOGICAL_FINGERPRINTS = [
       },
       proportions: {
         name: "mid_engine_cab_forward",
-        positiveKeywords: ["cab-forward", "cab forward", "short front overhang", "wide low-slung stance", "supercar proportions"],
+        positiveKeywords: [
+          "cab-forward",
+          "cab forward",
+          "short front overhang",
+          "wide low-slung stance",
+          "supercar proportions",
+          "sports car",
+          "low-slung",
+          "sleek low-profile",
+          "sleek, low-profile body",
+          "high-performance sports car",
+          "sloping roofline and a short rear deck",
+          "short rear deck"
+        ],
         incompatibleKeywords: ["front-engine grand tourer", "long hood short deck", "sedan proportions"]
       }
     }
@@ -9057,23 +9096,35 @@ var MORPHOLOGICAL_FINGERPRINTS = [
     traits: {
       headlight_shape: {
         name: "swept_back_almond_cluster",
-        positiveKeywords: ["almond", "swept-back almond", "curved oval", "swept back headlight", "elongated headlight"],
+        positiveKeywords: ["almond", "swept-back almond", "curved oval", "swept back headlight", "elongated headlight", "round headlights", "chrome surround", "horizontal led strip below", "projector headlights"],
         incompatibleKeywords: ["vertical slit", "vertical compact led", "horizontal strakes", "fried egg"]
       },
       front_intake_grille: {
         name: "large_concave_oval_trident_grille",
-        positiveKeywords: ["concave grille", "upright oval grille", "slatted grille", "vertical slats", "large central oval", "oval trident grille", "concave vertical"],
-        incompatibleKeywords: ["low wide horizontal mouth", "carbon front splitter", "horizontal strakes"]
+        positiveKeywords: [
+          "concave grille",
+          "upright oval grille",
+          "slatted grille",
+          "vertical slats",
+          "large central oval",
+          "oval trident grille",
+          "concave vertical",
+          "grille with vertical slats",
+          "vertical slats and a chrome surround",
+          "distinctive grille design with vertical slats",
+          "chrome surround"
+        ],
+        incompatibleKeywords: ["low wide horizontal mouth", "carbon front splitter without upper oval", "horizontal strakes", "mesh grille", "large air intake with a mesh grille", "mesh pattern", "trapezoidal grille with a mesh pattern", "trapezoidal grille"]
       },
       side_intake_type: {
         name: "front_fender_triple_gills_smooth_quarter",
         positiveKeywords: ["front fender gills", "triple gills", "shark gills", "triple fender vents", "smooth rear quarter", "no side scoops", "smooth door"],
-        incompatibleKeywords: ["rear fender shoulder intake", "large side scoop", "mid-engine intake behind door"]
+        incompatibleKeywords: ["rear fender shoulder intake", "large side scoop", "mid-engine intake behind door", "side air intakes", "side air intake"]
       },
       roofline_greenhouse: {
         name: "long_hood_rearward_cabin_gt",
-        positiveKeywords: ["long hood", "rearward cabin", "short rear deck", "sweeping fastback", "2+2", "grand tourer", "upright windshield", "long bonnet"],
-        incompatibleKeywords: ["cab-forward", "short front hood", "glass engine cover over rear axle"]
+        positiveKeywords: ["long hood", "rearward cabin", "sweeping fastback", "2+2", "grand tourer", "upright windshield", "long bonnet", "sloping hood", "sweeping fastback gt"],
+        incompatibleKeywords: ["cab-forward", "short front hood", "glass engine cover over rear axle", "short hood", "short rear deck and a short front hood"]
       },
       door_architecture: {
         name: "conventional_doors",
@@ -9088,7 +9139,7 @@ var MORPHOLOGICAL_FINGERPRINTS = [
       proportions: {
         name: "front_engine_grand_tourer",
         positiveKeywords: ["long hood", "rearward cabin", "grand tourer proportions", "long dash to axle"],
-        incompatibleKeywords: ["cab-forward mid-engine", "short front overhang"]
+        incompatibleKeywords: ["cab-forward mid-engine", "short front overhang", "supercar proportions", "cab forward", "short front hood", "cab-forward"]
       }
     }
   },
@@ -9426,9 +9477,17 @@ var MORPHOLOGICAL_FINGERPRINTS = [
           "horizontal led strip",
           "horizontal led strips",
           "horizontal led",
+          "horizontal led strip across the front bumper",
+          "thin horizontal led strip across the front bumper",
+          "thin horizontal led strip",
+          "horizontal led strip across",
           "horizontal led strips on the front bumper",
           "horizontal led strip on the front bumper",
-          "two horizontal led strips on the front bumper"
+          "two horizontal led strips on the front bumper",
+          "distinctive led strip running along the bottom edge of the bumper",
+          "distinctive led strip running along the bottom edge",
+          "distinctive led strip",
+          "led with a distinctive led strip"
         ],
         incompatibleKeywords: ["open c-shape matrix", "c-clamp headlight", "c-shaped", "c-shape", "round bug eye", "elongated vertical", "swept-back headlights"]
       },
@@ -9457,7 +9516,13 @@ var MORPHOLOGICAL_FINGERPRINTS = [
           "deep, dark carbon blade",
           "deep dark carbon blade",
           "blade that rises upward into endplates",
-          "carbon blade that rises upward"
+          "carbon blade that rises upward",
+          "deep, dark carbon fiber piece",
+          "deep dark carbon fiber piece",
+          "front splitter is a deep, dark carbon",
+          "large, horizontal grille with vertical slats",
+          "horizontal grille with vertical slats",
+          "grille with vertical slats"
         ],
         incompatibleKeywords: ["kidney grille", "singleframe", "front mustache", "deformable winglets", "shut-off gurney", "gurney", "body-color perforated", "mustache bar", "horizontal bar across grille"]
       },
@@ -9487,12 +9552,12 @@ var MORPHOLOGICAL_FINGERPRINTS = [
       },
       roofline_greenhouse: {
         name: "wraparound_visor_canopy",
-        positiveKeywords: ["wraparound visor", "visor canopy", "helmet canopy", "targa visor", "hidden a-pillar", "curved glass windshield"],
+        positiveKeywords: ["wraparound visor", "visor canopy", "helmet canopy", "targa visor", "hidden a-pillar", "curved glass windshield", "wraparound cabin and windshield", "wraparound cabin", "wraparound windshield"],
         incompatibleKeywords: ["conventional pillars", "standard coupe greenhouse", "sedan roofline", "fastback grand tourer"]
       },
       door_architecture: {
         name: "butterfly_doors_with_intake_box",
-        positiveKeywords: ["butterfly door", "fender-mounted mirror", "door tops mirror"],
+        positiveKeywords: ["butterfly door", "fender-mounted mirror", "door tops mirror", "butterfly doors with integrated air intakes", "butterfly doors with air intakes", "butterfly doors with air channel"],
         incompatibleKeywords: ["conventional door", "front hinged door"]
       },
       wing_and_spoiler_architecture: {
@@ -9502,17 +9567,39 @@ var MORPHOLOGICAL_FINGERPRINTS = [
       },
       rear_fascia_and_strakes: {
         name: "full_width_horizontal_rear_strakes",
-        positiveKeywords: ["horizontal rear strakes", "rear strakes", "horizontal slats rear", "rear louvers"],
+        positiveKeywords: [
+          "horizontal rear strakes",
+          "rear strakes",
+          "horizontal slats rear",
+          "rear louvers",
+          "horizontal led strip across the top of the rear bumper",
+          "horizontal led strip across the rear",
+          "horizontal led strip across",
+          "large, curved spoiler",
+          "curved spoiler"
+        ],
         incompatibleKeywords: ["minimalist taillight", "clean rear tail without strakes"]
       },
       rear_architecture_and_exhaust: {
         name: "full_width_horizontal_rear_strakes_twin_central_high_exit",
-        positiveKeywords: ["horizontal rear strakes", "rear strakes", "horizontal slats rear", "twin central high-exit rectangular exhaust", "central rectangular exhaust"],
+        positiveKeywords: [
+          "horizontal rear strakes",
+          "rear strakes",
+          "horizontal slats rear",
+          "twin central high-exit rectangular exhaust",
+          "central rectangular exhaust",
+          "two exhaust pipes exiting low in the centre of the rear diffuser",
+          "two exhaust pipes exiting low in the center of the rear diffuser",
+          "two exhaust pipes exiting low",
+          "two exhaust pipes exit low",
+          "exhaust pipes exiting low in the centre",
+          "exhaust pipes exiting low in the center"
+        ],
         incompatibleKeywords: ["round twin exhaust tips", "quad outer tips", "round taillights", "single round taillights", "triple central exhaust", "triple exhaust", "three central exhaust", "quad round exhaust"]
       },
       proportions: {
         name: "mid_engine_icona_prototype",
-        positiveKeywords: ["cab-forward", "prototype sports car proportions", "sculpted waist", "low slung"],
+        positiveKeywords: ["cab-forward", "prototype sports car proportions", "sculpted waist", "low slung", "prototype-inspired sculptural bodywork", "prototype-inspired", "sculptural bodywork", "double-crested front-fender forms", "double-crested front fenders", "double-crested fenders"],
         incompatibleKeywords: ["front-engine gt", "suv", "sedan", "long sweeping hood and cab-rearward"]
       }
     }
@@ -9825,13 +9912,58 @@ var MORPHOLOGICAL_FINGERPRINTS = [
       // open slot — an actual shape signature, not generic "matrix LED" marketing wording.
       headlight_shape: {
         name: "closed_c_annular_lamp_with_open_slot",
-        positiveKeywords: ["c-shaped", "c shaped", "c-clamp", "annular lamp", "ring shaped lamp", "open slot in the lamp", "slotted lamp", "closed c daytime running light", "c shaped daytime running light"],
-        incompatibleKeywords: ["horizontal eyelid covers", "retractable slat cover", "round bug eye", "fried egg", "teardrop", "teardrop headlight", "elongated vertical", "vertical lens", "tall narrow lamp", "lamp bar", "horizontal slit", "horizontal eyelid", "horizontal slats"]
+        positiveKeywords: [
+          "c-shaped",
+          "c shaped",
+          "c-clamp",
+          "annular lamp",
+          "ring shaped lamp",
+          "open slot in the lamp",
+          "slotted lamp",
+          "closed c daytime running light",
+          "c shaped daytime running light",
+          "c-shaped headlight and brake intake",
+          "c-shaped headlight/brake-intake integration",
+          "c-shaped brake intake",
+          "c-shaped headlight integration",
+          "slender c-shaped matrix headlights",
+          "c-shaped daytime running lights",
+          "slotted matrix headlights",
+          "thin horizontal led strips with a black surround",
+          "thin horizontal led strips",
+          "thin, horizontal led strips with a black surround",
+          "thin, horizontal led strips",
+          "horizontal led strips with a black surround"
+        ],
+        incompatibleKeywords: [
+          "horizontal eyelid covers",
+          "retractable slat cover",
+          "round bug eye",
+          "fried egg",
+          "teardrop",
+          "teardrop headlight",
+          "elongated vertical",
+          "vertical lens",
+          "tall narrow lamp",
+          "horizontal eyelid",
+          "horizontal strakes",
+          "horizontal slats across front bumper"
+        ]
       },
       front_intake_grille: {
         name: "open_nose_wing_diffuser",
-        positiveKeywords: ["open nose wing", "front diffuser channel", "low slung slotted intake", "lower bumper splitter", "shut-off gurney", "gurney"],
-        incompatibleKeywords: ["horizontal strakes front", "slatted front bumper", "oval grille", "full-width horizontal strakes", "horizontal strakes", "horizontal slat", "horizontal slats", "slatted grille"]
+        positiveKeywords: [
+          "open nose wing",
+          "front diffuser channel",
+          "low slung slotted intake",
+          "lower bumper splitter",
+          "shut-off gurney",
+          "gurney",
+          "trapezoidal grille with a black surround",
+          "trapezoidal grille with a horizontal bar",
+          "large, trapezoidal grille"
+        ],
+        incompatibleKeywords: ["horizontal strakes front", "slatted front bumper", "oval grille", "full-width horizontal strakes", "horizontal strakes", "horizontal slat", "horizontal slats", "slatted grille", "horizontal blade splitter", "blade splitter", "deep, dark carbon blade"]
       },
       hood_geometry: {
         name: "s_duct_hood_extractor_channel",
@@ -9846,7 +9978,7 @@ var MORPHOLOGICAL_FINGERPRINTS = [
       roofline_greenhouse: {
         name: "conventional_coupe_greenhouse",
         positiveKeywords: ["sloping coupe roof", "conventional a-pillars", "bubble cabin", "compact glass engine deck"],
-        incompatibleKeywords: ["wraparound visor canopy", "targa visor", "hidden a-pillar", "retractable hardtop", "open-top", "open top", "spider", "convertible roof", "drop-top", "spider tonneau"]
+        incompatibleKeywords: ["wraparound visor canopy", "targa visor", "hidden a-pillar", "wraparound cabin and windshield", "wraparound cabin", "wraparound windshield", "retractable hardtop", "open-top", "open top", "spider", "convertible roof", "drop-top", "spider tonneau"]
       },
       rear_architecture_and_exhaust: {
         name: "dual_high_mounted_central_exhaust_squircle",
@@ -9856,7 +9988,7 @@ var MORPHOLOGICAL_FINGERPRINTS = [
       proportions: {
         name: "mid_engine_flagship_supercar",
         positiveKeywords: ["cab-forward", "mid-engine", "wide rear haunches"],
-        incompatibleKeywords: ["front-engine gt", "suv", "sedan"]
+        incompatibleKeywords: ["front-engine gt", "suv", "sedan", "prototype-inspired sculptural bodywork", "double-crested front-fender forms", "double-crested front fenders"]
       }
     }
   },
@@ -9871,13 +10003,58 @@ var MORPHOLOGICAL_FINGERPRINTS = [
     traits: {
       headlight_shape: {
         name: "closed_c_annular_lamp_with_open_slot",
-        positiveKeywords: ["c-shaped", "c shaped", "c-clamp", "annular lamp", "ring shaped lamp", "open slot in the lamp", "slotted lamp", "closed c daytime running light", "c shaped daytime running light"],
-        incompatibleKeywords: ["horizontal eyelid covers", "retractable slat cover", "round bug eye", "fried egg", "teardrop", "teardrop headlight", "elongated vertical", "vertical lens", "tall narrow lamp", "lamp bar", "horizontal slit", "horizontal eyelid", "horizontal slats"]
+        positiveKeywords: [
+          "c-shaped",
+          "c shaped",
+          "c-clamp",
+          "annular lamp",
+          "ring shaped lamp",
+          "open slot in the lamp",
+          "slotted lamp",
+          "closed c daytime running light",
+          "c shaped daytime running light",
+          "c-shaped headlight and brake intake",
+          "c-shaped headlight/brake-intake integration",
+          "c-shaped brake intake",
+          "c-shaped headlight integration",
+          "slender c-shaped matrix headlights",
+          "c-shaped daytime running lights",
+          "slotted matrix headlights",
+          "thin horizontal led strips with a black surround",
+          "thin horizontal led strips",
+          "thin, horizontal led strips with a black surround",
+          "thin, horizontal led strips",
+          "horizontal led strips with a black surround"
+        ],
+        incompatibleKeywords: [
+          "horizontal eyelid covers",
+          "retractable slat cover",
+          "round bug eye",
+          "fried egg",
+          "teardrop",
+          "teardrop headlight",
+          "elongated vertical",
+          "vertical lens",
+          "tall narrow lamp",
+          "horizontal eyelid",
+          "horizontal strakes",
+          "horizontal slats across front bumper"
+        ]
       },
       front_intake_grille: {
         name: "open_nose_wing_diffuser",
-        positiveKeywords: ["open nose wing", "front diffuser channel", "low slung slotted intake", "lower bumper splitter", "shut-off gurney", "gurney"],
-        incompatibleKeywords: ["horizontal strakes front", "slatted front bumper", "oval grille", "full-width horizontal strakes", "horizontal strakes", "horizontal slat", "horizontal slats", "slatted grille"]
+        positiveKeywords: [
+          "open nose wing",
+          "front diffuser channel",
+          "low slung slotted intake",
+          "lower bumper splitter",
+          "shut-off gurney",
+          "gurney",
+          "trapezoidal grille with a black surround",
+          "trapezoidal grille with a horizontal bar",
+          "large, trapezoidal grille"
+        ],
+        incompatibleKeywords: ["horizontal strakes front", "slatted front bumper", "oval grille", "full-width horizontal strakes", "horizontal strakes", "horizontal slat", "horizontal slats", "slatted grille", "horizontal blade splitter", "blade splitter", "deep, dark carbon blade"]
       },
       hood_geometry: {
         name: "s_duct_hood_extractor_channel",
@@ -9892,7 +10069,7 @@ var MORPHOLOGICAL_FINGERPRINTS = [
       roofline_greenhouse: {
         name: "retractable_hardtop_spider_buttresses",
         positiveKeywords: ["retractable hardtop", "folding roof", "open-top", "open top", "spider", "convertible roof", "drop-top", "spider tonneau", "rear buttresses behind roll hoops", "buttresses behind seats"],
-        incompatibleKeywords: ["fixed coupe roof", "sloping full glass rear hatch", "closed coupe greenhouse"]
+        incompatibleKeywords: ["fixed coupe roof", "sloping full glass rear hatch", "closed coupe greenhouse", "wraparound visor canopy", "wraparound cabin and windshield", "wraparound cabin", "wraparound windshield"]
       },
       rear_architecture_and_exhaust: {
         name: "dual_high_mounted_central_exhaust_squircle",
@@ -9902,7 +10079,7 @@ var MORPHOLOGICAL_FINGERPRINTS = [
       proportions: {
         name: "mid_engine_flagship_spider",
         positiveKeywords: ["cab-forward", "mid-engine", "wide rear haunches", "mid-engine spider", "cab-forward convertible", "open-top supercar"],
-        incompatibleKeywords: ["front-engine gt", "suv", "sedan"]
+        incompatibleKeywords: ["front-engine gt", "suv", "sedan", "prototype-inspired sculptural bodywork", "double-crested front-fender forms", "double-crested front fenders"]
       }
     }
   },
@@ -10650,13 +10827,46 @@ var MORPHOLOGICAL_FINGERPRINTS = [
     traits: {
       headlight_shape: {
         name: "slim_horizontal_quad_matrix",
-        positiveKeywords: ["slim horizontal", "recessed aerodynamic blade", "matrix led", "narrow slit cluster"],
+        positiveKeywords: [
+          "slim horizontal",
+          "recessed aerodynamic blade",
+          "matrix led",
+          "narrow slit cluster",
+          "horizontal led",
+          "horizontal headlights",
+          "four round headlights with led",
+          "quad matrix",
+          "slanted matrix",
+          "matrix headlamps"
+        ],
         incompatibleKeywords: ["round bug eye", "fried egg", "almond swept"]
       },
       roofline_greenhouse: {
         name: "extended_wraparound_visor_canopy",
-        positiveKeywords: ["wraparound visor", "visor canopy", "extended wheelbase", "four-seater hypercar", "long roofline", "mega-gt"],
+        positiveKeywords: [
+          "wraparound visor",
+          "visor canopy",
+          "extended wheelbase",
+          "four-seater hypercar",
+          "long roofline",
+          "mega-gt",
+          "curved windshield",
+          "sloping roofline",
+          "canopy",
+          "wraparound windshield",
+          "panoramic windshield"
+        ],
         incompatibleKeywords: ["compact two-seat cabin", "upright sedan"]
+      },
+      front_intake_grille: {
+        name: "gemera_smooth_nose_with_splitter",
+        positiveKeywords: ["front splitter", "large air intakes on the front bumper", "splitter", "lower front intake", "aerodynamic front bumper intakes"],
+        incompatibleKeywords: ["panamericana", "singleframe", "kidney grille", "massive hood nostrils", "deep hood extractors"]
+      },
+      wing_and_spoiler_architecture: {
+        name: "clean_integrated_tail_or_small_ducktail",
+        positiveKeywords: ["integrated rear spoiler", "clean rear deck", "no top-mounted wing", "ducktail", "subtle active spoiler"],
+        incompatibleKeywords: ["giant top-mounted boomerang rear wing", "massive rear wing", "top-mounted rear wing", "rear wing with top pylons"]
       },
       door_architecture: {
         name: "katsad_automated_twisted_synchro_helix_doors",
@@ -10675,8 +10885,8 @@ var MORPHOLOGICAL_FINGERPRINTS = [
       },
       proportions: {
         name: "four_seater_mega_gt",
-        positiveKeywords: ["four-seater hypercar", "extended wheelbase", "mega-gt", "low slung long hypercar"],
-        incompatibleKeywords: ["compact 2-seater", "suv", "sedan"]
+        positiveKeywords: ["four-seater hypercar", "extended wheelbase", "mega-gt", "low slung long hypercar", "grand tourer", "hyper gt", "gemera", "four-seater", "gt hypercar"],
+        incompatibleKeywords: ["compact 2-seater", "suv", "sedan", "giant rear wing"]
       }
     }
   },
@@ -10769,7 +10979,7 @@ var MORPHOLOGICAL_FINGERPRINTS = [
       roofline_greenhouse: {
         name: "convertible_soft_top_2plus2_gt",
         positiveKeywords: ["soft top", "canvas roof", "convertible roof", "open top", "cabriolet", "open-air 2+2"],
-        incompatibleKeywords: ["fixed coupe roof", "glass engine cover over rear axle", "cab-forward teardrop"]
+        incompatibleKeywords: ["fixed coupe roof", "glass engine cover over rear axle", "cab-forward teardrop", "coupe", "fixed roof", "hardtop coupe", "sloping fastback coupe", "two-door coupe"]
       },
       rear_architecture_and_exhaust: {
         name: "quad_exhaust_tips_outer_bumper",
@@ -10810,7 +11020,7 @@ var MORPHOLOGICAL_FINGERPRINTS = [
       roofline_greenhouse: {
         name: "cielo_smart_glass_convertible_deck",
         positiveKeywords: ["cielo", "smart glass roof", "electrochromic glass", "spyder engine deck", "trident deck decal", "convertible roofline"],
-        incompatibleKeywords: ["long hood short deck", "rearward cabin", "grand tourer proportions", "canvas soft top 2+2"]
+        incompatibleKeywords: ["long hood short deck", "rearward cabin", "grand tourer proportions", "canvas soft top 2+2", "coupe", "fixed roof", "fixed coupe roof"]
       },
       proportions: {
         name: "mid_engine_cab_forward_spyder",
@@ -11488,7 +11698,9 @@ var MORPHOLOGICAL_FINGERPRINTS = [
           "round headlights",
           "round headlamps",
           "two round headlights",
-          "two round headlights with a black trim"
+          "two round headlights with a black trim",
+          "rectangular headlights",
+          "two rectangular headlights"
         ]
       },
       front_intake_grille: {
@@ -11520,7 +11732,9 @@ var MORPHOLOGICAL_FINGERPRINTS = [
           "vertical splitter in front bumper",
           "horizontal grille and a vertical splitter",
           "large opening with a horizontal grille and a vertical splitter",
-          "unique front grille design"
+          "unique front grille design",
+          "chrome surround",
+          "horizontal grille with a black surround and a chrome surround"
         ]
       },
       hood_geometry: {
@@ -11811,18 +12025,57 @@ var MORPHOLOGICAL_FINGERPRINTS = [
     traits: {
       headlight_shape: {
         name: "swept_back_six_lens_led_with_drl_hook",
-        positiveKeywords: ["six-lens led", "downward drl hook", "swept-back led headlights", "slender three-projector", "supra headlights"],
-        incompatibleKeywords: ["round bug eye", "fried egg", "vertical slit", "rectangular block"]
+        positiveKeywords: [
+          "six-lens led",
+          "downward drl hook",
+          "swept-back led headlights",
+          "slender three-projector",
+          "supra headlights",
+          "horizontal led strip",
+          "swept-back headlights",
+          "angular led",
+          "projector headlights",
+          "horizontal led",
+          "led strip",
+          "slender led",
+          "horizontal headlight"
+        ],
+        incompatibleKeywords: ["round bug eye", "fried egg", "vertical slit", "rectangular block", "rectangular halogen"]
       },
       front_intake_grille: {
         name: "central_pointed_f1_nose_tripartite_intake",
-        positiveKeywords: ["central pointed nose", "tripartite intake", "three lower intakes", "f1 style nose", "gr supra front bumper"],
-        incompatibleKeywords: ["kidney grille", "singleframe", "panamericana", "large central oval"]
+        positiveKeywords: [
+          "central pointed nose",
+          "tripartite intake",
+          "three lower intakes",
+          "f1 style nose",
+          "gr supra front bumper",
+          "trapezoidal grille",
+          "dark carbon blade",
+          "front splitter with winglets",
+          "front splitter and side air intakes",
+          "prominent lip",
+          "splitter",
+          "front splitter",
+          "carbon blade",
+          "lower front lip",
+          "winglets at the outer corners"
+        ],
+        incompatibleKeywords: ["kidney grille", "singleframe", "panamericana", "large central oval", "chrome slatted grille"]
       },
       roofline_greenhouse: {
         name: "double_bubble_aerodynamic_roof",
-        positiveKeywords: ["double-bubble", "double bubble roof", "sloping rear hatch", "compact two-seat cabin"],
-        incompatibleKeywords: ["canvas soft top", "wraparound visor canopy", "convertible roof"]
+        positiveKeywords: [
+          "double-bubble",
+          "double bubble roof",
+          "sloping rear hatch",
+          "compact two-seat cabin",
+          "two-door coupe",
+          "sloping roofline",
+          "coupe",
+          "fastback"
+        ],
+        incompatibleKeywords: ["canvas soft top", "wraparound visor canopy", "convertible roof", "upright three-box sedan", "tall glasshouse"]
       },
       side_intake_type: {
         name: "door_and_rear_quarter_sculpted_accent_ducts",
@@ -11832,12 +12085,22 @@ var MORPHOLOGICAL_FINGERPRINTS = [
       rear_architecture_and_exhaust: {
         name: "integrated_ducktail_dual_circular_exhausts",
         positiveKeywords: ["integrated ducktail spoiler", "ducktail spoiler", "dual circular exhaust", "central f1-style reverse light", "slender curved led taillights"],
-        incompatibleKeywords: ["quad round taillights", "top-exit exhaust", "horizontal rear strakes"]
+        incompatibleKeywords: ["quad round taillights", "top-exit exhaust", "horizontal rear strakes", "vertical rectangular taillights"]
       },
       proportions: {
         name: "front_engine_short_wheelbase_widebody_coupe",
-        positiveKeywords: ["long hood short rear deck", "front-engine rear-wheel drive", "golden ratio 1.55 wheelbase", "wide rear haunches"],
-        incompatibleKeywords: ["cab-forward mid-engine", "suv", "sedan"]
+        positiveKeywords: [
+          "long hood short rear deck",
+          "front-engine rear-wheel drive",
+          "golden ratio 1.55 wheelbase",
+          "wide rear haunches",
+          "two-door coupe",
+          "sports car",
+          "long curved hood",
+          "sloping roofline and a long",
+          "front-engine sports car"
+        ],
+        incompatibleKeywords: ["cab-forward mid-engine", "suv", "sedan", "upright sedan", "commercial taxi"]
       }
     }
   },
@@ -13114,27 +13377,45 @@ var MORPHOLOGICAL_FINGERPRINTS = [
       headlight_shape: {
         name: "upright_rectangular_halogen_headlamps",
         positiveKeywords: ["rectangular halogen", "square glass headlights", "amber corner marker lights", "traditional boxy headlights"],
-        incompatibleKeywords: ["swept led blade", "y-shaped drl", "pop-up"]
+        incompatibleKeywords: ["swept led blade", "y-shaped drl", "pop-up", "horizontal led strip", "swept-back headlights", "angular led"]
       },
       front_intake_grille: {
         name: "horizontal_chrome_slatted_sedan_grille",
         positiveKeywords: ["chrome slatted grille", "toyota crown emblem", "upright chrome radiator grille", "rectangular front grille"],
-        incompatibleKeywords: ["carbon front splitter", "honeycomb mesh singleframe"]
+        incompatibleKeywords: ["carbon front splitter", "honeycomb mesh singleframe", "front splitter", "dark carbon blade", "trapezoidal grille with a horizontal led"]
       },
       roofline_greenhouse: {
         name: "boxy_upright_three_box_sedan_with_taxi_roof_sign",
         positiveKeywords: ["taxi roof light", "taxi sign", "upright three-box sedan", "tall glasshouse", "silver roof on red body"],
-        incompatibleKeywords: ["low slung coupe flyline", "targa roll hoops", "mid-engine glass hatch"]
+        incompatibleKeywords: [
+          "low slung coupe flyline",
+          "targa roll hoops",
+          "mid-engine glass hatch",
+          "two-door coupe",
+          "two-door",
+          "sloping roofline",
+          "coupe",
+          "fastback",
+          "curved hood",
+          "double-bubble"
+        ]
       },
       rear_architecture_and_exhaust: {
         name: "vertical_rectangular_taillights",
         positiveKeywords: ["vertical rectangular taillights", "amber red clear tail lamp clusters", "single modest exhaust pipe"],
-        incompatibleKeywords: ["quad sport exhaust", "active rear wing", "horizontal led bar"]
+        incompatibleKeywords: ["quad sport exhaust", "active rear wing", "horizontal led bar", "ducktail spoiler"]
       },
       proportions: {
         name: "traditional_commercial_fleet_sedan",
         positiveKeywords: ["classic hong kong taxi", "commercial taxi livery", "upright utilitarian sedan"],
-        incompatibleKeywords: ["supercar", "widebody sports car"]
+        incompatibleKeywords: [
+          "supercar",
+          "widebody sports car",
+          "sports car",
+          "two-door coupe",
+          "coupe",
+          "low-slung"
+        ]
       }
     }
   },
@@ -13299,7 +13580,7 @@ var MORPHOLOGICAL_FINGERPRINTS = [
       wing_and_spoiler_architecture: {
         name: "gigantic_top_mounted_active_boomerang_rear_wing",
         positiveKeywords: ["giant top-mounted boomerang rear wing", "boomerang wing", "active carbon rear wing with top pylons", "jesko rear wing", "massive double-profile rear wing", "top-mounted rear wing", "large rear wing", "massive rear wing", "giant rear wing", "high-mounted rear wing", "top-mounted wing", "large active rear wing", "prominent rear wing", "rear wing with top pylons", "large wing"],
-        incompatibleKeywords: ["flush active lip", "no rear wing"]
+        incompatibleKeywords: ["flush active lip", "no rear wing", "clean rear deck", "no top-mounted wing"]
       },
       door_architecture: {
         name: "dihedral_synchro_helix_actuation_doors",
@@ -13319,7 +13600,7 @@ var MORPHOLOGICAL_FINGERPRINTS = [
       proportions: {
         name: "extreme_track_megacar",
         positiveKeywords: ["extreme track hypercar stance", "low slung cab forward silhouette", "carbon monocoque track car", "jesko", "attack", "jesko attack"],
-        incompatibleKeywords: ["grand tourer", "suv", "sedan"]
+        incompatibleKeywords: ["grand tourer", "suv", "sedan", "four-seater", "four seats", "four-passenger"]
       }
     }
   },
@@ -13890,7 +14171,7 @@ var HierarchicalClassifier = class {
     ].join(" ").toLowerCase();
     const observedBody = (visual_evidence.body_style || "").toLowerCase();
     const observedRoof = (visual_evidence.roofline || "").toLowerCase();
-    const openTopPattern = /\b(convertible|spider|spyder|cabriolet|roadster|soft[\s-]?top|canvas[\s-]?(?:roof|top)|fabric[\s-]?(?:roof|top)|open[\s-]?top|speedster|boxster|barchetta|drophead)\b/i;
+    const openTopPattern = /\b(convertible|spider|spyder|cabriolet|cabrio|roadster|soft[\s-]?top|canvas[\s-]?(?:roof|top)|fabric[\s-]?(?:roof|top)|open[\s-]?top|speedster|boxster|barchetta|drophead|grancabrio)\b/i;
     const isObservedOpenTop = openTopPattern.test(observedBody) || openTopPattern.test(observedRoof) || openTopPattern.test(evidenceText) || openTopPattern.test(input.raw_model || "") && !observedBody.includes("fixed") && !observedRoof.includes("fixed") || openTopPattern.test(input.raw_variant || "") && !observedBody.includes("fixed") && !observedRoof.includes("fixed");
     const isObservedCoupe = (/\b(coupe|hardtop|fixed[\s-]?roof)\b/i.test(observedBody) || /\b(coupe|fixed[\s-]?roof)\b/i.test(observedRoof)) && !isObservedOpenTop;
     const isObservedSuv = /\b(suv|crossover)\b/i.test(observedBody);
@@ -14027,7 +14308,7 @@ var HierarchicalClassifier = class {
       const canonCand = canonicalVehicleRegistry.lookupByTextOrAlias(candidate.name, candidateMake || void 0);
       const candBodyLower = (canonCand?.bodyStyle || "").toLowerCase();
       const isCandidateTarga = candBodyLower === "targa" || /\btarga\b/i.test(candNameLower);
-      const isCandidateOpenTop = candBodyLower === "convertible" || candBodyLower === "roadster" || isCandidateTarga || /\b(spider|spyder|cabriolet|convertible|roadster|speedster|boxster|barchetta|miata|cielo)\b/i.test(candNameLower);
+      const isCandidateOpenTop = candBodyLower === "convertible" || candBodyLower === "roadster" || isCandidateTarga || /\b(spider|spyder|cabriolet|cabrio|convertible|roadster|speedster|boxster|barchetta|miata|cielo|grancabrio)\b/i.test(candNameLower);
       const isCandidateCoupe = (candBodyLower === "coupe" || !candBodyLower && (candNameLower.includes("coupe") || candNameLower.includes("gt3"))) && !isCandidateOpenTop;
       const isCandidateSuv = candBodyLower === "suv" || /\b(suv|crossover|macan|cayenne|urac?an\s+sterrato|purosangue|cullinan|bentayga|dbx)\b/i.test(candNameLower);
       const isCandidateSedan = candBodyLower === "sedan" || /\b(sedan|saloon|limousine|panamera|taycan|flying\s+spur|phantom|ghost)\b/i.test(candNameLower);
@@ -14051,7 +14332,7 @@ var HierarchicalClassifier = class {
           const cFamily = getFamilyToken(c.name, cCanon?.model);
           if (cFamily !== candFamily) return false;
           const cBody = (cCanon?.bodyStyle || "").toLowerCase();
-          return cBody === "convertible" || cBody === "targa" || cBody === "roadster" || /\b(spider|spyder|cabriolet|convertible|roadster|targa|speedster|boxster|barchetta|miata|cielo)\b/i.test(c.name.toLowerCase());
+          return cBody === "convertible" || cBody === "targa" || cBody === "roadster" || /\b(spider|spyder|cabriolet|cabrio|convertible|roadster|targa|speedster|boxster|barchetta|miata|cielo|grancabrio)\b/i.test(c.name.toLowerCase());
         });
         if (isCandidateCoupe && hasOpenTopSibling) {
           candContradictions.push(`Body style mismatch: Observed convertible/open-top architecture vs candidate fixed coupe`);
@@ -14112,31 +14393,24 @@ var HierarchicalClassifier = class {
         }
       }
       const hasNegativeStrakes = /\b(?:without|no|lacks?|devoid\s+of)\s+(?:horizontal\s+)?strakes?\b/i.test(evidenceText);
-      const hasDaytonaIconaCues = !hasNegativeStrakes && /\b(horizontal\s+strakes?|horizontal\s+slats?|slatted\s+grille|slatted\s+bumper|headlight\s+eyelids?|eyelid\s+covers?|partial\s+covers?|wraparound\s+visor|visor\s+canopy|fender-mounted\s+mirrors?|door\s+tops?\s+mirrors?|icona|(?:thin|slim|low|recessed|narrow)\s+horizontal\s+(?:head)?(?:lamps?|lights?|openings?)|(?:large|wide)\s+horizontal\s+(?:front\s+)?grille|horizontal\s+grille\s+with\s+black|horizontal\s+blade\s+splitter)\b/i.test(evidenceText);
-      const hasHorizontalFrontLedStrips = !hasNegativeStrakes && (/\bhorizontal\s+led\s+strips?\s+on\s+(?:the\s+)?front\s+bumper\b/i.test(evidenceText) || /\bhorizontal\s+led\s+strips?\b/i.test(evidenceText) && /\bfront\s+bumper\b/i.test(evidenceText));
-      const hasCorroboratingDaytonaAero = /\b(front\s+splitter|splitter|air\s+intakes?|wide\s+intake|sloping\s+roofline|rectangular\s+rear\s+lamps?|rear\s+diffuser|dual\s+exhaust|short\s+rear\s+deck)\b/i.test(evidenceText);
-      const hasCorroboratedDaytonaLamps = hasHorizontalFrontLedStrips && hasCorroboratingDaytonaAero;
-      const hasExplicitSf90Cues = /\b(shut-?off\s+gurney|c-shaped\s+(?:matrix\s+)?(?:led\s+)?headlights?|c-clamp\s+headlights?)\b/i.test(evidenceText);
+      const hasDaytonaIconaCues = !hasNegativeStrakes && /\b(horizontal\s+strakes?|horizontal\s+slats?|slatted\s+grille|slatted\s+bumper|headlight\s+eyelids?|eyelid\s+covers?|partial\s+covers?|wraparound\s+(?:visor|canopy|cabin|windshield|glass)|visor\s+canopy|fender-mounted\s+mirrors?|door\s+tops?\s+mirrors?|icona|horizontal\s+blade\s+splitter|double-?crested\s+(?:front\s+)?fenders?|prototype-?inspired(?:\s+sculptural)?|sculptural\s+bodywork|butterfly\s+doors?\s+(?:with\s+)?(?:integrated\s+)?(?:air\s+)?(?:intakes?|channels?)|(?:full[- ]width\s+)?horizontal\s+rear\s+strakes)\b/i.test(evidenceText);
+      const hasExplicitSf90Cues = /\b(shut-?off\s+gurney|c-shaped\s+(?:matrix\s+)?(?:led\s+)?headlights?|c-clamp\s+headlights?|c-shaped\s+headlight\s+and\s+brake\s+intake|c-shaped\s+headlight\s+integration|c-shaped\s+brake\s+intake|sf90\s+stradale|sf90\s+spider)\b/i.test(evidenceText);
       const isFrontViewpoint = viewpoint === "front" || viewpoint === "front_3q";
-      if (hasDaytonaIconaCues || hasCorroboratedDaytonaLamps) {
+      if (hasDaytonaIconaCues) {
         if (candNameLower.includes("daytona") || candNameLower.includes("sp3")) {
-          candSupporting.push(
-            hasDaytonaIconaCues ? "Observed horizontal strakes, headlight eyelids, or wraparound visor canopy uniquely match Ferrari Daytona SP3 Icona design" : "Observed horizontal LED strips on front bumper with corroborating aero cues match Ferrari Daytona SP3 architecture"
-          );
+          candSupporting.push("Observed prototype-inspired bodywork, double-crested fenders, horizontal strakes, headlight eyelids, or wraparound canopy uniquely match Ferrari Daytona SP3 Icona design");
           score += 0.25;
         } else if (candidateMake === "ferrari" && (candNameLower.includes("sf90") || candNameLower.includes("296") || candNameLower.includes("f8") || candNameLower.includes("roma") || candNameLower.includes("portofino") || candNameLower.includes("488") || candNameLower.includes("458"))) {
-          candContradictions.push(
-            hasDaytonaIconaCues ? `Observed horizontal strakes, headlight eyelids, and wraparound canopy contradict ${candidate.name} architecture` : `Observed horizontal LED strips on front bumper contradict ${candidate.name} headlight architecture`
-          );
+          candContradictions.push(`Observed prototype-inspired bodywork, double-crested fenders, horizontal strakes, or wraparound canopy contradict ${candidate.name} architecture`);
           score -= 0.45;
         }
       }
       if (hasExplicitSf90Cues) {
         if (candNameLower.includes("sf90")) {
-          candSupporting.push("Observed C-shaped headlights or shut-off Gurney match Ferrari SF90 Stradale architecture");
+          candSupporting.push("Observed C-shaped headlight/brake-intake integration or shut-off Gurney match Ferrari SF90 Stradale architecture");
           score += 0.25;
         } else if (candNameLower.includes("daytona") || candNameLower.includes("sp3")) {
-          candContradictions.push("Observed C-shaped headlights or shut-off Gurney contradict Ferrari Daytona SP3 architecture");
+          candContradictions.push("Observed C-shaped headlight/brake-intake integration or shut-off Gurney contradict Ferrari Daytona SP3 architecture");
           score -= 0.5;
         }
       } else if (hasNegativeStrakes && !isFrontViewpoint && (candNameLower.includes("daytona") || candNameLower.includes("sp3"))) {
@@ -14193,23 +14467,23 @@ var HierarchicalClassifier = class {
           score -= 0.5;
         }
       }
-      const hasMc20Cues = /\b(butterfly\s+doors?|mid-engine\s+monocoque|nettuno|rear\s+engine\s+trident\s+vents?)\b/i.test(evidenceText);
-      const hasGtCabrioCues = /\b(front-engine|long\s+hood|soft\s+top|fabric\s+roof|oval\s+concave\s+slatted\s+grille|triple\s+portholes?)\b/i.test(evidenceText);
-      if (hasGtCabrioCues) {
+      const hasMc20Cues = /\b(butterfly\s+doors?|mid-engine|cab-forward|nettuno|rear\s+engine\s+trident\s+vents?|vertical\s+(?:led\s+)?(?:slit|headlights?)|compact\s+vertical|short\s+front\s+hood|hood\s+(?:nostrils?|vents?|extractors?)|rear\s+(?:fender\s+)?shoulder\s+intakes?|mid-bumper\s+exhaust|trident\s+louver)\b/i.test(evidenceText);
+      const hasGtCabrioCues = /\b(front-engine|long\s+(?:hood|bonnet)|soft\s+top|canvas\s+roof|fabric\s+roof|oval\s+concave\s+slatted\s+grille|concave\s+oval|vertical\s+slats?|chrome\s+surround|triple\s+portholes?|triple\s+(?:front\s+)?fender\s+(?:vents?|gills)|swept-back\s+almond|almond\s+headlights?|2\+2)\b/i.test(evidenceText);
+      if (hasGtCabrioCues && !hasMc20Cues) {
         if (candNameLower.includes("grancabrio") || candNameLower.includes("granturismo")) {
-          candSupporting.push("Observed front-engine GT proportions, oval slatted grille, or soft top match GranTurismo/GranCabrio architecture");
+          candSupporting.push("Observed front-engine GT proportions, oval slatted grille, or triple fender gills match GranTurismo/GranCabrio architecture");
           score += 0.25;
         } else if (candNameLower.includes("mc20")) {
           candContradictions.push("Observed front-engine GT proportions, oval slatted grille, or soft top contradict MC20 mid-engine monocoque architecture");
           score -= 0.5;
         }
       }
-      if (hasMc20Cues) {
+      if (hasMc20Cues && !hasGtCabrioCues) {
         if (candNameLower.includes("mc20")) {
-          candSupporting.push("Observed mid-engine monocoque and butterfly doors match Maserati MC20 architecture");
+          candSupporting.push("Observed mid-engine / cab-forward proportions or compact vertical lamps match Maserati MC20 architecture");
           score += 0.25;
         } else if (candNameLower.includes("grancabrio") || candNameLower.includes("granturismo")) {
-          candContradictions.push("Observed mid-engine monocoque and butterfly doors contradict front-engine GranTurismo/GranCabrio architecture");
+          candContradictions.push("Observed mid-engine proportions or compact vertical lamps contradict front-engine GranTurismo/GranCabrio architecture");
           score -= 0.5;
         }
       }
@@ -14286,8 +14560,8 @@ var HierarchicalClassifier = class {
           if (cCanon && cCanon.vehicleId === fgCand.vehicleId) {
             return true;
           }
-          const isCSpider = /\b(spider|spyder|cabriolet|convertible|roadster)\b/i.test(cNameLower);
-          const isFgSpider = /\b(spider|spyder|cabriolet|convertible|roadster)\b/i.test(fgDisplayLower) || /\b(spider|spyder|cabriolet|convertible|roadster)\b/i.test(fgModelLower);
+          const isCSpider = /\b(spider|spyder|cabriolet|cabrio|convertible|roadster|grancabrio|cielo)\b/i.test(cNameLower);
+          const isFgSpider = /\b(spider|spyder|cabriolet|cabrio|convertible|roadster|grancabrio|cielo)\b/i.test(fgDisplayLower) || /\b(spider|spyder|cabriolet|cabrio|convertible|roadster|grancabrio|cielo)\b/i.test(fgModelLower);
           if (isCSpider !== isFgSpider) {
             return false;
           }
@@ -14312,7 +14586,18 @@ var HierarchicalClassifier = class {
         });
         if (existingIdx >= 0) {
           const existing = calibratedCandidates[existingIdx];
-          existing.score = fgCand.calibratedScore;
+          const hasExistingContradictions = Boolean(existing.contradictions && existing.contradictions.length > 0);
+          const hasExistingSupporting = Boolean(existing.supporting_evidence && existing.supporting_evidence.length > 0);
+          if (hasExistingContradictions) {
+            existing.score = Math.min(existing.score, fgCand.calibratedScore);
+          } else if (hasExistingSupporting) {
+            existing.score = Math.max(existing.score, fgCand.calibratedScore);
+          } else {
+            existing.score = fgCand.calibratedScore;
+          }
+          if (fgCand.contradictions.length > 0) {
+            existing.score = Math.min(existing.score, fgCand.calibratedScore);
+          }
           if (!existing.supporting_evidence) existing.supporting_evidence = [];
           if (!existing.contradictions) existing.contradictions = [];
           if (!existing.unobservable_features) existing.unobservable_features = [];
@@ -14395,7 +14680,7 @@ var HierarchicalClassifier = class {
     const topCandidate = validCandidates[0] || null;
     const secondCandidate = validCandidates[1] || null;
     const separation = topCandidate ? Number((topCandidate.score - (secondCandidate?.score || 0)).toFixed(3)) : 0;
-    const anyModelSpecificEvidence = fgResult.scoredCandidates.length > 0 ? fgResult.scoredCandidates.some((c) => c.specificEvidenceCount > 0) : validCandidates.some((c) => (c.supporting_evidence?.length ?? 0) > 0);
+    const anyModelSpecificEvidence = fgResult.scoredCandidates.length > 0 ? fgResult.scoredCandidates.some((c) => c.specificEvidenceCount > 0) || validCandidates.some((c) => (c.supporting_evidence?.length ?? 0) > 0 && c.score >= 0.7) : validCandidates.some((c) => (c.supporting_evidence?.length ?? 0) > 0);
     const isTiedOrDeadlocked = validCandidates.length >= 2 && separation === 0;
     const areTiedCandidatesSameFamily = isTiedOrDeadlocked && (() => {
       const first = validCandidates[0];
@@ -14416,6 +14701,10 @@ var HierarchicalClassifier = class {
       if (n1.includes("hurac") && n2.includes("hurac")) return true;
       if (n1.includes("296") && n2.includes("296")) return true;
       if (n1.includes("sf90") && n2.includes("sf90")) return true;
+      if ((n1.includes("granturismo") || n1.includes("grancabrio")) && (n2.includes("granturismo") || n2.includes("grancabrio"))) return true;
+      if (n1.includes("mc20") && n2.includes("mc20")) return true;
+      if (n1.includes("supra") && n2.includes("supra")) return true;
+      if (n1.includes("gemera") && n2.includes("gemera")) return true;
       return false;
     })();
     let resolvedModelFamily = null;
@@ -16163,7 +16452,7 @@ var CloudflareVisionProvider = class {
     this.defaultModel = config2?.model || typeof process !== "undefined" && process.env?.CLOUDFLARE_MODEL || this.defaultModel;
     this.seed = config2?.seed ?? 42;
     this.temperature = config2?.temperature ?? 0.1;
-    this.maxTokens = config2?.maxTokens ?? 512;
+    this.maxTokens = config2?.maxTokens ?? 1024;
     this.timeoutMs = config2?.timeoutMs ?? 35e3;
   }
   resolveAccountId() {
@@ -16306,6 +16595,39 @@ var CloudflareVisionProvider = class {
       message: errMsg || "Unexpected Cloudflare Workers AI error."
     };
   }
+  async downscalePayloadIfOversized(dataUrl, maxDim = 1280, maxBytes = 600 * 1024) {
+    try {
+      if (!dataUrl || !dataUrl.startsWith("data:image")) return dataUrl;
+      const base64Index = dataUrl.indexOf(";base64,");
+      if (base64Index === -1) return dataUrl;
+      const base64Data = dataUrl.substring(base64Index + 8);
+      if (base64Data.length < 500) return dataUrl;
+      const approxBytes = Math.floor(base64Data.length * 3 / 4);
+      if (typeof process !== "undefined" && typeof Buffer !== "undefined") {
+        const sharpModule = await import("sharp").catch(() => null);
+        const sharp2 = sharpModule?.default || sharpModule;
+        if (typeof sharp2 === "function") {
+          const inputBuffer = Buffer.from(base64Data, "base64");
+          const metadata = await sharp2(inputBuffer).metadata().catch(() => null);
+          if (!metadata) return dataUrl;
+          const width = metadata.width || 0;
+          const height = metadata.height || 0;
+          if (width > maxDim || height > maxDim || approxBytes > maxBytes) {
+            const resizedBuffer = await sharp2(inputBuffer).resize({
+              width: width >= height ? maxDim : void 0,
+              height: height > width ? maxDim : void 0,
+              fit: "inside",
+              withoutEnlargement: true
+            }).jpeg({ quality: 85, progressive: false }).toBuffer();
+            return `data:image/jpeg;base64,${resizedBuffer.toString("base64")}`;
+          }
+        }
+      }
+    } catch (err) {
+      console.warn("[CloudflareVisionProvider] Downscaling notice, using original:", err);
+    }
+    return dataUrl;
+  }
   async identify(request) {
     const startTime = Date.now();
     const model = request.options?.modelOverride || this.defaultModel;
@@ -16337,6 +16659,7 @@ var CloudflareVisionProvider = class {
     if (!fullDataUrl.startsWith("data:")) {
       fullDataUrl = `data:image/jpeg;base64,${request.imageDataUrl}`;
     }
+    fullDataUrl = await this.downscalePayloadIfOversized(fullDataUrl, 1280, 600 * 1024);
     const encodedImageBytes = typeof Buffer !== "undefined" ? Buffer.byteLength(fullDataUrl, "utf8") : fullDataUrl.length;
     const cleanSystemPrompt = `You are the APEX Automotive Perception Vision Engine.
 Your sole job is rigorous visual perception of the vehicle in the supplied photo following strict evidentiary discipline.
@@ -16410,7 +16733,7 @@ Rules:
     const format = request.options?.format || "messages";
     const stream = request.options?.stream ?? false;
     const effectiveTimeoutMs = request.options?.timeoutMs || this.timeoutMs;
-    const defaultTokensForSchema = request.options?.schema === "monolithic" ? 512 : this.maxTokens;
+    const defaultTokensForSchema = request.options?.schema === "monolithic" ? 1024 : this.maxTokens;
     const effectiveMaxTokens = request.options?.maxTokens ?? defaultTokensForSchema;
     const effectiveTemperature = request.options?.temperature ?? this.temperature;
     const effectiveSeed = request.options?.seed ?? this.seed;
@@ -16450,6 +16773,10 @@ ${userPrompt} [/INST]`;
         } catch (err) {
           lastErr = err;
           const classified = this.classifyError(err);
+          if (request.options?.hasFallback) {
+            console.warn(`[CloudflareVisionProvider] Provider error encountered with fallback configured. Bypassing internal retry to preserve 2-call invariant and failover:`, err?.message);
+            break;
+          }
           if (attempt === 0 && err.isMalformedJson) {
             retriesAttempted += 1;
             retryConsumed = true;
@@ -16892,10 +17219,10 @@ ${verifyPrompt} [/INST]`;
               return "- Amalfi decisive architecture: front-mid engine 2+2 grand tourer with long sweeping hood, monolithic body-color perforated front grille, quad round exhaust in dual outer clusters. Contradicted by: mid-engine proportions, central exhaust in diffuser, horizontal strakes, C-shaped headlights.";
             }
             if (n.includes("daytona") || n.includes("sp3")) {
-              return "- Daytona SP3 decisive architecture: horizontal blade/strake architecture across lower front fascia, horizontal eyelid/slit headlights, dual hood air extractor chimneys, wraparound helmet-visor windshield canopy, fender/door-top mounted mirrors, full-width horizontal rear strakes. Contradicted by: vertical swept-back headlights, C-shaped headlights, front mustache winglets, central hood S-duct.";
+              return "- Daytona SP3 decisive architecture: prototype-inspired sculptural bodywork, double-crested front-fender forms, distinctive wraparound cabin and windshield canopy, horizontal blade/strake architecture across lower front fascia, horizontal eyelid/slit headlights, butterfly doors with integrated air intakes when visible, full-width horizontal rear strakes. Contradicted by: C-shaped headlight/brake-intake integration, vertical swept-back headlights, central hood S-duct, front mustache winglets.";
             }
             if (n.includes("sf90")) {
-              return "- SF90 Stradale decisive architecture: C-shaped / annular matrix LED headlights, deep central S-duct hood extractor channel, shut-off Gurney flap, high-mounted twin central exhaust. Contradicted by: horizontal eyelid/slit headlights, full-width front strakes, front mustache winglets, triple central exhaust.";
+              return "- SF90 Stradale decisive architecture: slender C-shaped headlight/brake-intake integration, distinct front-end geometry with central S-duct hood extractor channel, shut-off Gurney flap, high-mounted twin central exhaust. Contradicted by: double-crested front-fender forms, wraparound visor cabin/windshield, horizontal eyelid/slit headlights, horizontal blade/strake architecture across lower front fascia.";
             }
             if (n.includes("458")) {
               return "- 458 Italia/Spider decisive architecture: elongated vertical swept-back headlights running up fenders, single wide front intake with deformable aero mustache winglets, triple central exhaust, single round taillights. Contradicted by: horizontal slit headlights, C-shaped headlights, horizontal strakes, high-mounted twin central exhaust.";
@@ -16910,10 +17237,28 @@ ${verifyPrompt} [/INST]`;
               return "- Agera RS decisive architecture: bottom-mounted rear wing supported by pylons from underneath the wing blade, twin hood extractor vents, dihedral synchro-helix doors. Contradicted by: gigantic top-mounted boomerang rear wing hanging from twin carbon pylons mounted to the roof/spine.";
             }
             if (n.includes("jesko")) {
-              return "- Jesko decisive architecture: gigantic top-mounted active boomerang rear wing hanging from twin carbon pylons mounted to the roof/engine spine, low-slung 2-seater track hypercar stance, deep front carbon splitter, high-mounted central exhaust. Contradicted by: bottom-mounted rear wing supported from underneath, four-seater extended wheelbase GT architecture.";
+              return "- Jesko decisive architecture: gigantic top-mounted active boomerang rear wing hanging from twin carbon pylons mounted to the roof/engine spine, low-slung 2-seater track hypercar stance, massive deep front hood extractor air channels, aggressive front bumper dive planes/canards, deep front carbon splitter, high-mounted central exhaust. Contradicted by: smooth front hood without deep radiator extractors, slim horizontal quad matrix headlights, clean rear deck without top-mounted wing, bottom-mounted rear wing supported from underneath, four-seater extended wheelbase GT architecture.";
             }
             if (n.includes("gemera")) {
-              return "- Gemera decisive architecture: four-seater Mega-GT extended wheelbase, elongated roofline accommodating rear adult seats, giant B-pillarless twisted synchro-helix doors spanning both rows, top-exit exhausts above rear engine glass. Contradicted by: giant top-mounted boomerang rear wing, compact 2-seat track cockpit.";
+              return "- Gemera decisive architecture: four-seater Mega-GT extended wheelbase, slim horizontal matrix headlights with quad light elements, smooth sweeping front hood with Koenigsegg ghost/crest badge without deep radiator hood extractors, low front chin splitter, elongated roofline accommodating rear adult seats, giant B-pillarless twisted synchro-helix doors spanning both rows, clean rear deck without high-mounted wing, top-exit exhausts above rear engine glass. Contradicted by: gigantic top-mounted boomerang rear wing, massive deep front hood extractor air channels, aggressive front bumper dive planes/canards, compact 2-seat track cockpit.";
+            }
+            if (n.includes("mc20")) {
+              return "- Maserati MC20 decisive architecture: mid-engine cab-forward low-slung supercar proportions with short front hood, vertical compact LED slit headlights running vertically on front fenders, low wide horizontal mouth grille with central trident emblem and front carbon splitter, dual front hood air extractor vents/nostrils. Contradicted by: front-engine long sweeping hood with rearward 2+2 cabin, concave upright oval grille with vertical chrome slats, triple front fender vents/gills, elongated swept-back almond headlights, convertible canvas soft top.";
+            }
+            if (n.includes("granturismo") || n.includes("gran turismo")) {
+              return "- Maserati GranTurismo decisive architecture: front-engine grand tourer proportions with long sweeping hood and rearward 2+2 cabin, large concave upright oval front grille with vertical slats and large trident emblem, triple horizontal front fender vents/gills behind front wheels, elongated swept-back almond/teardrop headlights. Contradicted by: mid-engine cab-forward supercar proportions, short front hood, vertical compact LED slit headlights, dual front hood nostrils, butterfly doors, rear fender shoulder intakes.";
+            }
+            if (n.includes("grancabrio") || n.includes("gran cabrio")) {
+              return "- Maserati GranCabrio decisive architecture: front-engine 2+2 convertible grand tourer with canvas fabric soft-top, long sweeping hood, large concave upright oval front grille with vertical slats, triple horizontal front fender gills. Contradicted by: fixed coupe roof, mid-engine cab-forward proportions, short front hood, vertical LED slit headlights.";
+            }
+            if (n.includes("supra")) {
+              return "- Toyota GR Supra (A90) decisive architecture: front-engine two-door sports coupe with short wheelbase and wide rear track, double-bubble roof, prominent central nose cone with tripartite lower intake, sweeping headlights with horizontal/hook LED DRLs, integrated rear ducktail spoiler. Contradicted by: four-door passenger sedan proportions, upright formal three-box sedan greenhouse, commercial taxi roof sign, rectangular halogen block headlights, upright chrome slatted grille.";
+            }
+            if (n.includes("crown comfort") || n.includes("taxi")) {
+              return "- Toyota Crown Comfort (Taxi) decisive architecture: upright utilitarian traditional four-door three-box commercial fleet sedan, rectangular halogen headlights with amber corner lamps, horizontal chrome slatted front grille, formal upright glasshouse, commercial taxi livery or roof sign. Contradicted by: two-door sports coupe proportions, low-slung body, sloping fastback roofline, double-bubble roof, swept-back LED headlights, front splitter.";
+            }
+            if (n.includes("camry")) {
+              return "- Toyota Camry decisive architecture: modern front-wheel-drive four-door family sedan, wide catamaran lower bumper grille, swept-back sedan headlights, formal four-door sedan roofline. Contradicted by: two-door low-slung sports coupe proportions, double-bubble roof, central pointed nose cone.";
             }
             if (n.includes("boxster")) {
               return "- 718 Boxster decisive architecture: compact mid-engine 2-seater roadster with fabric soft-top, side air intakes on rear quarter fenders, central/dual lower exhaust in rear bumper diffuser. Contradicted by: upward top-pipe exhaust exiting on top engine deck behind headrests, fixed coupe roof, hypercar monocoque.";
@@ -17667,7 +18012,22 @@ var AIProviderRouter = class {
         );
       }
     }
-    this.fallbackProvider = fallbackProvider || new MockFallbackProvider();
+    if (fallbackProvider) {
+      this.fallbackProvider = fallbackProvider;
+    } else {
+      const allowMockFallback = typeof process !== "undefined" && process.env?.ALLOW_MOCK_FALLBACK === "true";
+      const isGeminiAvailable = Boolean(typeof process !== "undefined" && process.env?.GEMINI_API_KEY && process.env.GEMINI_API_KEY.trim().length > 5);
+      const isCfAvailable = Boolean(typeof process !== "undefined" && process.env?.CLOUDFLARE_AUTH_TOKEN && process.env.CLOUDFLARE_AUTH_TOKEN.trim().length > 5);
+      if (allowMockFallback) {
+        this.fallbackProvider = new MockFallbackProvider();
+      } else if (!primaryProvider && this.primaryProvider.name === "CloudflareVisionProvider" && isGeminiAvailable) {
+        this.fallbackProvider = new GeminiProvider();
+      } else if (!primaryProvider && this.primaryProvider.name === "GeminiProvider" && isCfAvailable) {
+        this.fallbackProvider = new CloudflareVisionProvider();
+      } else {
+        this.fallbackProvider = new MockFallbackProvider();
+      }
+    }
   }
   getCircuitState() {
     if (this.circuitState === "OPEN") {
@@ -17691,11 +18051,13 @@ var AIProviderRouter = class {
   }
   async getActiveProviderName() {
     const isPrimary = await this.primaryProvider.isAvailable();
+    const isMockFallback = this.fallbackProvider.name === "MockFallbackProvider" || this.fallbackProvider.name === "ApexFallbackEngine" || this.fallbackProvider instanceof MockFallbackProvider;
     const allowMockFallback = typeof process !== "undefined" && process.env?.ALLOW_MOCK_FALLBACK === "true";
     if (this.config.enabled && isPrimary && this.getCircuitState() !== "OPEN") {
       return this.primaryProvider.name;
     }
-    return allowMockFallback && this.fallbackEnabled ? this.fallbackProvider.name : "none";
+    const isFallbackPermitted = isMockFallback ? allowMockFallback && this.fallbackEnabled : true;
+    return isFallbackPermitted ? this.fallbackProvider.name : "none";
   }
   updateConfig(newConfig) {
     this.config = { ...this.config, ...newConfig };
@@ -17729,6 +18091,18 @@ var AIProviderRouter = class {
    * Routes request through circuit breaker with backpressure & fallback
    */
   async routeIdentification(request) {
+    if (this.fallbackProvider.name === "MockFallbackProvider" || this.fallbackProvider.name === "ApexFallbackEngine") {
+      const isGeminiAvailable = Boolean(typeof process !== "undefined" && process.env?.GEMINI_API_KEY && process.env.GEMINI_API_KEY.trim().length > 5);
+      const isCfAvailable = Boolean(typeof process !== "undefined" && process.env?.CLOUDFLARE_AUTH_TOKEN && process.env.CLOUDFLARE_AUTH_TOKEN.trim().length > 5);
+      const allowMockFallback2 = typeof process !== "undefined" && process.env?.ALLOW_MOCK_FALLBACK === "true";
+      if (!allowMockFallback2) {
+        if (this.primaryProvider.name === "CloudflareVisionProvider" && isGeminiAvailable) {
+          this.fallbackProvider = new GeminiProvider();
+        } else if (this.primaryProvider.name === "GeminiProvider" && isCfAvailable) {
+          this.fallbackProvider = new CloudflareVisionProvider();
+        }
+      }
+    }
     const currentState = this.getCircuitState();
     const providerAttempted = this.primaryProvider.name;
     console.log("[AIProviderRouter] Diagnostics:", {
@@ -17737,10 +18111,13 @@ var AIProviderRouter = class {
       cloudflareTokenConfigured: Boolean(typeof process !== "undefined" && process.env?.CLOUDFLARE_AUTH_TOKEN),
       scanningEnabled: typeof process !== "undefined" ? process.env?.CLOUDFLARE_SCANNING_ENABLED !== "false" : true,
       visionScanningEnabled: typeof process !== "undefined" ? process.env?.VISION_SCANNING_ENABLED !== "false" : true,
-      allowMockFallback: typeof process !== "undefined" && process.env?.ALLOW_MOCK_FALLBACK === "true"
+      allowMockFallback: typeof process !== "undefined" && process.env?.ALLOW_MOCK_FALLBACK === "true",
+      fallbackProvider: this.fallbackProvider.name
     });
+    const isMockFallback = this.fallbackProvider.name === "MockFallbackProvider" || this.fallbackProvider.name === "ApexFallbackEngine" || this.fallbackProvider instanceof MockFallbackProvider;
     const allowMockFallback = typeof process !== "undefined" && process.env?.ALLOW_MOCK_FALLBACK === "true";
-    const isFallbackPermitted = allowMockFallback && this.fallbackEnabled && !request.options?.disableFallback;
+    const isFallbackKillswitchActive = typeof process !== "undefined" && (this.fallbackProvider.name === "GeminiProvider" ? process.env?.GEMINI_SCANNING_ENABLED === "false" || process.env?.VISION_SCANNING_ENABLED === "false" : process.env?.CLOUDFLARE_SCANNING_ENABLED === "false" || process.env?.VISION_SCANNING_ENABLED === "false");
+    const isFallbackPermitted = !request.options?.disableFallback && (isMockFallback ? allowMockFallback && this.fallbackEnabled : !isFallbackKillswitchActive);
     const isPrimaryAvailable = await this.primaryProvider.isAvailable();
     const isScanningEnabled = typeof process !== "undefined" ? this.primaryProvider.name === "CloudflareVisionProvider" ? process.env?.CLOUDFLARE_SCANNING_ENABLED !== "false" && process.env?.VISION_SCANNING_ENABLED !== "false" : process.env?.GEMINI_SCANNING_ENABLED !== "false" && process.env?.VISION_SCANNING_ENABLED !== "false" : true;
     const isBudgetExceeded = this.dailyCostEstimateUsd >= this.config.dailyBudgetUsd;
@@ -17766,7 +18143,31 @@ var AIProviderRouter = class {
           durationMs: 0
         };
       }
-      const fallbackResponse = await this.fallbackProvider.identify(request);
+      const isFallbackAvail = await this.fallbackProvider.isAvailable();
+      if (!isFallbackAvail) {
+        return {
+          success: false,
+          error: failureReason,
+          errorType: !isScanningEnabled ? "PROVIDER_UNAVAILABLE" : isBudgetExceeded ? "PROVIDER_UNAVAILABLE" : !isPrimaryAvailable ? "AUTH_ERROR" : currentState === "OPEN" ? "429" : "PROVIDER_UNAVAILABLE",
+          providerStatus: !isPrimaryAvailable ? 401 : !isScanningEnabled ? 503 : 500,
+          providerErrorCode: !isPrimaryAvailable ? "MISSING_CREDENTIALS" : void 0,
+          providerName: this.primaryProvider.name,
+          modelUsed: "none",
+          providerAttempted,
+          fallbackUsed: false,
+          retriesAttempted: 0,
+          retryConsumed: false,
+          tokensConsumed: { promptTokens: 0, outputTokens: 0, totalTokens: 0 },
+          durationMs: 0
+        };
+      }
+      const fallbackResponse = await this.fallbackProvider.identify({
+        ...request,
+        options: {
+          ...request.options,
+          disableFallback: true
+        }
+      });
       return {
         ...fallbackResponse,
         providerAttempted,
@@ -17775,7 +18176,13 @@ var AIProviderRouter = class {
     }
     this.activeConcurrency += 1;
     try {
-      const response = await this.primaryProvider.identify(request);
+      const response = await this.primaryProvider.identify({
+        ...request,
+        options: {
+          ...request.options,
+          hasFallback: isFallbackPermitted
+        }
+      });
       if (response.success) {
         this.onSuccess();
         this.dailyScansCount += 1;
@@ -17787,7 +18194,8 @@ var AIProviderRouter = class {
         };
       }
       this.onFailure(response.errorType);
-      if (!isFallbackPermitted) {
+      const isFatal429 = (response.errorType === "429" || response.errorType === "VISION_QUOTA_EXHAUSTED") && !isMockFallback;
+      if (isFatal429 || !isFallbackPermitted) {
         return {
           ...response,
           providerName: this.primaryProvider.name,
@@ -17795,12 +18203,29 @@ var AIProviderRouter = class {
           fallbackUsed: false
         };
       }
-      const fallbackResponse = await this.fallbackProvider.identify(request);
+      const isFallbackAvail = await this.fallbackProvider.isAvailable();
+      if (!isFallbackAvail) {
+        return {
+          ...response,
+          providerName: this.primaryProvider.name,
+          providerAttempted,
+          fallbackUsed: false
+        };
+      }
+      console.warn(`[AIProviderRouter] Primary vision provider (${this.primaryProvider.name}) failed with ${response.errorType || "error"}: ${response.error}. Executing secondary provider fallback (${this.fallbackProvider.name})...`);
+      const fallbackResponse = await this.fallbackProvider.identify({
+        ...request,
+        options: {
+          ...request.options,
+          disableFallback: true
+          // strictly prevent recursive fallback chains
+        }
+      });
       return {
         ...fallbackResponse,
         providerAttempted,
         fallbackUsed: true,
-        error: `Primary AI degraded (${response.error || "Throttled"}). Used fallback engine.`
+        error: fallbackResponse.success ? void 0 : `Primary AI degraded (${response.error || "Failed"}). Fallback engine error: ${fallbackResponse.error}`
       };
     } catch (err) {
       this.onFailure("5xx");
@@ -17821,7 +18246,32 @@ var AIProviderRouter = class {
           durationMs: 0
         };
       }
-      const fallbackResponse = await this.fallbackProvider.identify(request);
+      const isFallbackAvail = await this.fallbackProvider.isAvailable();
+      if (!isFallbackAvail) {
+        return {
+          success: false,
+          error: err?.message || "Primary provider threw exception",
+          errorType: "5xx",
+          providerStatus: err?.status || 500,
+          providerErrorCode: err?.errorCode,
+          retriesAttempted: 0,
+          retryConsumed: false,
+          providerName: this.primaryProvider.name,
+          modelUsed: "none",
+          providerAttempted,
+          fallbackUsed: false,
+          tokensConsumed: { promptTokens: 0, outputTokens: 0, totalTokens: 0 },
+          durationMs: 0
+        };
+      }
+      console.warn(`[AIProviderRouter] Primary vision provider exception: ${err?.message}. Executing secondary provider fallback (${this.fallbackProvider.name})...`);
+      const fallbackResponse = await this.fallbackProvider.identify({
+        ...request,
+        options: {
+          ...request.options,
+          disableFallback: true
+        }
+      });
       return {
         ...fallbackResponse,
         providerAttempted,

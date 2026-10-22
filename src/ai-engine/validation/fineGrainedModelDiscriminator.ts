@@ -414,23 +414,31 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
     traits: {
       headlight_shape: {
         name: 'vertical_compact_led_slit',
-        positiveKeywords: ['vertical led', 'vertical slit', 'compact vertical', 'stacked led', 'vertical headlight', 'slit headlight'],
+        positiveKeywords: ['vertical led', 'vertical slit', 'compact vertical', 'stacked led', 'vertical headlight', 'slit headlight', 'integrated into the front fenders', 'swept back along the fenders', 'fender mounted', 'angular headlamps', 'distinctive led strip'],
         incompatibleKeywords: ['almond swept', 'curved oval', 'large swept back', 'fried egg', 'round bug eye']
       },
       front_intake_grille: {
         name: 'low_wide_horizontal_mouth_splitter',
-        positiveKeywords: ['low wide mouth', 'carbon splitter', 'low-slung intake', 'wide lower mesh', 'front splitter', 'horizontal lower grille', 'low mouth'],
-        incompatibleKeywords: ['upright oval grille', 'concave oval grille', 'tall vertical grille', 'prominent central chrome oval']
+        positiveKeywords: [
+          'low wide mouth', 'carbon splitter', 'low-slung intake', 'wide lower mesh', 'front splitter',
+          'horizontal lower grille', 'low mouth', 'lower lip/splitter', 'lower lip',
+          'large central intake with a lower lip', 'large air intake with a mesh grille', 'mesh grille',
+          'mesh pattern', 'trapezoidal grille with a mesh pattern', 'trapezoidal grille', 'flanked by two air intakes'
+        ],
+        incompatibleKeywords: ['upright oval grille', 'concave oval grille', 'tall vertical grille', 'prominent central chrome oval', 'vertical slats', 'chrome surround', 'chrome slatted grille']
       },
       side_intake_type: {
         name: 'rear_fender_shoulder_intake',
-        positiveKeywords: ['shoulder intake', 'rear fender shoulder', 'rear haunch intake', 'mid-engine intake', 'side air intake behind door', 'c-pillar intake'],
+        positiveKeywords: [
+          'shoulder intake', 'rear fender shoulder', 'rear haunch intake', 'mid-engine intake',
+          'side air intake behind door', 'c-pillar intake', 'side air intakes', 'side air intake'
+        ],
         incompatibleKeywords: ['triple front fender gills', 'shark gills', 'no side intake', 'smooth doors without intake']
       },
       roofline_greenhouse: {
         name: 'cab_forward_teardrop_deck',
         positiveKeywords: ['cab-forward', 'cab forward', 'short front hood', 'glass engine cover', 'teardrop cabin', 'mid-engine deck', 'trident louver'],
-        incompatibleKeywords: ['long hood short deck', 'rearward cabin', 'grand tourer proportions', 'upright windshield', '2+2 coupe']
+        incompatibleKeywords: ['long hood short deck', 'rearward cabin', 'grand tourer proportions', 'upright windshield', '2+2 coupe', 'canvas soft top', 'convertible soft top', 'smooth flat hood with no vents', 'front-engine 2+2']
       },
       door_architecture: {
         name: 'butterfly_doors',
@@ -444,7 +452,11 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       },
       proportions: {
         name: 'mid_engine_cab_forward',
-        positiveKeywords: ['cab-forward', 'cab forward', 'short front overhang', 'wide low-slung stance', 'supercar proportions'],
+        positiveKeywords: [
+          'cab-forward', 'cab forward', 'short front overhang', 'wide low-slung stance', 'supercar proportions',
+          'sports car', 'low-slung', 'sleek low-profile', 'sleek, low-profile body', 'high-performance sports car',
+          'sloping roofline and a short rear deck', 'short rear deck'
+        ],
         incompatibleKeywords: ['front-engine grand tourer', 'long hood short deck', 'sedan proportions']
       }
     }
@@ -461,23 +473,27 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
     traits: {
       headlight_shape: {
         name: 'swept_back_almond_cluster',
-        positiveKeywords: ['almond', 'swept-back almond', 'curved oval', 'swept back headlight', 'elongated headlight'],
+        positiveKeywords: ['almond', 'swept-back almond', 'curved oval', 'swept back headlight', 'elongated headlight', 'round headlights', 'chrome surround', 'horizontal led strip below', 'projector headlights'],
         incompatibleKeywords: ['vertical slit', 'vertical compact led', 'horizontal strakes', 'fried egg']
       },
       front_intake_grille: {
         name: 'large_concave_oval_trident_grille',
-        positiveKeywords: ['concave grille', 'upright oval grille', 'slatted grille', 'vertical slats', 'large central oval', 'oval trident grille', 'concave vertical'],
-        incompatibleKeywords: ['low wide horizontal mouth', 'carbon front splitter', 'horizontal strakes']
+        positiveKeywords: [
+          'concave grille', 'upright oval grille', 'slatted grille', 'vertical slats',
+          'large central oval', 'oval trident grille', 'concave vertical', 'grille with vertical slats',
+          'vertical slats and a chrome surround', 'distinctive grille design with vertical slats', 'chrome surround'
+        ],
+        incompatibleKeywords: ['low wide horizontal mouth', 'carbon front splitter without upper oval', 'horizontal strakes', 'mesh grille', 'large air intake with a mesh grille', 'mesh pattern', 'trapezoidal grille with a mesh pattern', 'trapezoidal grille']
       },
       side_intake_type: {
         name: 'front_fender_triple_gills_smooth_quarter',
         positiveKeywords: ['front fender gills', 'triple gills', 'shark gills', 'triple fender vents', 'smooth rear quarter', 'no side scoops', 'smooth door'],
-        incompatibleKeywords: ['rear fender shoulder intake', 'large side scoop', 'mid-engine intake behind door']
+        incompatibleKeywords: ['rear fender shoulder intake', 'large side scoop', 'mid-engine intake behind door', 'side air intakes', 'side air intake']
       },
       roofline_greenhouse: {
         name: 'long_hood_rearward_cabin_gt',
-        positiveKeywords: ['long hood', 'rearward cabin', 'short rear deck', 'sweeping fastback', '2+2', 'grand tourer', 'upright windshield', 'long bonnet'],
-        incompatibleKeywords: ['cab-forward', 'short front hood', 'glass engine cover over rear axle']
+        positiveKeywords: ['long hood', 'rearward cabin', 'sweeping fastback', '2+2', 'grand tourer', 'upright windshield', 'long bonnet', 'sloping hood', 'sweeping fastback gt'],
+        incompatibleKeywords: ['cab-forward', 'short front hood', 'glass engine cover over rear axle', 'short hood', 'short rear deck and a short front hood']
       },
       door_architecture: {
         name: 'conventional_doors',
@@ -492,7 +508,7 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       proportions: {
         name: 'front_engine_grand_tourer',
         positiveKeywords: ['long hood', 'rearward cabin', 'grand tourer proportions', 'long dash to axle'],
-        incompatibleKeywords: ['cab-forward mid-engine', 'short front overhang']
+        incompatibleKeywords: ['cab-forward mid-engine', 'short front overhang', 'supercar proportions', 'cab forward', 'short front hood', 'cab-forward']
       }
     }
   },
@@ -782,7 +798,11 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
           'horizontal headlights with black', 'horizontal slit headlamps', 'horizontal slit headlights',
           'low horizontal headlamps', 'low horizontal headlights', 'recessed horizontal headlights',
           'horizontal led strip', 'horizontal led strips', 'horizontal led',
-          'horizontal led strips on the front bumper', 'horizontal led strip on the front bumper', 'two horizontal led strips on the front bumper'
+          'horizontal led strip across the front bumper', 'thin horizontal led strip across the front bumper',
+          'thin horizontal led strip', 'horizontal led strip across',
+          'horizontal led strips on the front bumper', 'horizontal led strip on the front bumper', 'two horizontal led strips on the front bumper',
+          'distinctive led strip running along the bottom edge of the bumper', 'distinctive led strip running along the bottom edge',
+          'distinctive led strip', 'led with a distinctive led strip'
         ],
         incompatibleKeywords: ['open c-shape matrix', 'c-clamp headlight', 'c-shaped', 'c-shape', 'round bug eye', 'elongated vertical', 'swept-back headlights']
       },
@@ -795,7 +815,9 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
           'horizontal front grille', 'horizontal front intake', 'horizontal blade', 'horizontal splitter',
           'low flat front splitter', 'horizontal bumper opening',
           'front splitter with a deep, dark carbon blade', 'deep, dark carbon blade', 'deep dark carbon blade',
-          'blade that rises upward into endplates', 'carbon blade that rises upward'
+          'blade that rises upward into endplates', 'carbon blade that rises upward',
+          'deep, dark carbon fiber piece', 'deep dark carbon fiber piece', 'front splitter is a deep, dark carbon',
+          'large, horizontal grille with vertical slats', 'horizontal grille with vertical slats', 'grille with vertical slats'
         ],
         incompatibleKeywords: ['kidney grille', 'singleframe', 'front mustache', 'deformable winglets', 'shut-off gurney', 'gurney', 'body-color perforated', 'mustache bar', 'horizontal bar across grille']
       },
@@ -816,12 +838,12 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       },
       roofline_greenhouse: {
         name: 'wraparound_visor_canopy',
-        positiveKeywords: ['wraparound visor', 'visor canopy', 'helmet canopy', 'targa visor', 'hidden a-pillar', 'curved glass windshield'],
+        positiveKeywords: ['wraparound visor', 'visor canopy', 'helmet canopy', 'targa visor', 'hidden a-pillar', 'curved glass windshield', 'wraparound cabin and windshield', 'wraparound cabin', 'wraparound windshield'],
         incompatibleKeywords: ['conventional pillars', 'standard coupe greenhouse', 'sedan roofline', 'fastback grand tourer']
       },
       door_architecture: {
         name: 'butterfly_doors_with_intake_box',
-        positiveKeywords: ['butterfly door', 'fender-mounted mirror', 'door tops mirror'],
+        positiveKeywords: ['butterfly door', 'fender-mounted mirror', 'door tops mirror', 'butterfly doors with integrated air intakes', 'butterfly doors with air intakes', 'butterfly doors with air channel'],
         incompatibleKeywords: ['conventional door', 'front hinged door']
       },
       wing_and_spoiler_architecture: {
@@ -831,17 +853,23 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       },
       rear_fascia_and_strakes: {
         name: 'full_width_horizontal_rear_strakes',
-        positiveKeywords: ['horizontal rear strakes', 'rear strakes', 'horizontal slats rear', 'rear louvers'],
+        positiveKeywords: [
+          'horizontal rear strakes', 'rear strakes', 'horizontal slats rear', 'rear louvers',
+          'horizontal led strip across the top of the rear bumper', 'horizontal led strip across the rear', 'horizontal led strip across', 'large, curved spoiler', 'curved spoiler'
+        ],
         incompatibleKeywords: ['minimalist taillight', 'clean rear tail without strakes']
       },
       rear_architecture_and_exhaust: {
         name: 'full_width_horizontal_rear_strakes_twin_central_high_exit',
-        positiveKeywords: ['horizontal rear strakes', 'rear strakes', 'horizontal slats rear', 'twin central high-exit rectangular exhaust', 'central rectangular exhaust'],
+        positiveKeywords: [
+          'horizontal rear strakes', 'rear strakes', 'horizontal slats rear', 'twin central high-exit rectangular exhaust', 'central rectangular exhaust',
+          'two exhaust pipes exiting low in the centre of the rear diffuser', 'two exhaust pipes exiting low in the center of the rear diffuser', 'two exhaust pipes exiting low', 'two exhaust pipes exit low', 'exhaust pipes exiting low in the centre', 'exhaust pipes exiting low in the center'
+        ],
         incompatibleKeywords: ['round twin exhaust tips', 'quad outer tips', 'round taillights', 'single round taillights', 'triple central exhaust', 'triple exhaust', 'three central exhaust', 'quad round exhaust']
       },
       proportions: {
         name: 'mid_engine_icona_prototype',
-        positiveKeywords: ['cab-forward', 'prototype sports car proportions', 'sculpted waist', 'low slung'],
+        positiveKeywords: ['cab-forward', 'prototype sports car proportions', 'sculpted waist', 'low slung', 'prototype-inspired sculptural bodywork', 'prototype-inspired', 'sculptural bodywork', 'double-crested front-fender forms', 'double-crested front fenders', 'double-crested fenders'],
         incompatibleKeywords: ['front-engine gt', 'suv', 'sedan', 'long sweeping hood and cab-rearward']
       }
     }
@@ -1067,13 +1095,26 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       // open slot — an actual shape signature, not generic "matrix LED" marketing wording.
       headlight_shape: {
         name: 'closed_c_annular_lamp_with_open_slot',
-        positiveKeywords: ['c-shaped', 'c shaped', 'c-clamp', 'annular lamp', 'ring shaped lamp', 'open slot in the lamp', 'slotted lamp', 'closed c daytime running light', 'c shaped daytime running light'],
-        incompatibleKeywords: ['horizontal eyelid covers', 'retractable slat cover', 'round bug eye', 'fried egg', 'teardrop', 'teardrop headlight', 'elongated vertical', 'vertical lens', 'tall narrow lamp', 'lamp bar', 'horizontal slit', 'horizontal eyelid', 'horizontal slats']
+        positiveKeywords: [
+          'c-shaped', 'c shaped', 'c-clamp', 'annular lamp', 'ring shaped lamp', 'open slot in the lamp', 'slotted lamp',
+          'closed c daytime running light', 'c shaped daytime running light',
+          'c-shaped headlight and brake intake', 'c-shaped headlight/brake-intake integration', 'c-shaped brake intake', 'c-shaped headlight integration',
+          'slender c-shaped matrix headlights', 'c-shaped daytime running lights', 'slotted matrix headlights',
+          'thin horizontal led strips with a black surround', 'thin horizontal led strips',
+          'thin, horizontal led strips with a black surround', 'thin, horizontal led strips', 'horizontal led strips with a black surround'
+        ],
+        incompatibleKeywords: [
+          'horizontal eyelid covers', 'retractable slat cover', 'round bug eye', 'fried egg', 'teardrop', 'teardrop headlight',
+          'elongated vertical', 'vertical lens', 'tall narrow lamp', 'horizontal eyelid', 'horizontal strakes', 'horizontal slats across front bumper'
+        ]
       },
       front_intake_grille: {
         name: 'open_nose_wing_diffuser',
-        positiveKeywords: ['open nose wing', 'front diffuser channel', 'low slung slotted intake', 'lower bumper splitter', 'shut-off gurney', 'gurney'],
-        incompatibleKeywords: ['horizontal strakes front', 'slatted front bumper', 'oval grille', 'full-width horizontal strakes', 'horizontal strakes', 'horizontal slat', 'horizontal slats', 'slatted grille']
+        positiveKeywords: [
+          'open nose wing', 'front diffuser channel', 'low slung slotted intake', 'lower bumper splitter', 'shut-off gurney', 'gurney',
+          'trapezoidal grille with a black surround', 'trapezoidal grille with a horizontal bar', 'large, trapezoidal grille'
+        ],
+        incompatibleKeywords: ['horizontal strakes front', 'slatted front bumper', 'oval grille', 'full-width horizontal strakes', 'horizontal strakes', 'horizontal slat', 'horizontal slats', 'slatted grille', 'horizontal blade splitter', 'blade splitter', 'deep, dark carbon blade']
       },
       hood_geometry: {
         name: 's_duct_hood_extractor_channel',
@@ -1088,7 +1129,7 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       roofline_greenhouse: {
         name: 'conventional_coupe_greenhouse',
         positiveKeywords: ['sloping coupe roof', 'conventional a-pillars', 'bubble cabin', 'compact glass engine deck'],
-        incompatibleKeywords: ['wraparound visor canopy', 'targa visor', 'hidden a-pillar', 'retractable hardtop', 'open-top', 'open top', 'spider', 'convertible roof', 'drop-top', 'spider tonneau']
+        incompatibleKeywords: ['wraparound visor canopy', 'targa visor', 'hidden a-pillar', 'wraparound cabin and windshield', 'wraparound cabin', 'wraparound windshield', 'retractable hardtop', 'open-top', 'open top', 'spider', 'convertible roof', 'drop-top', 'spider tonneau']
       },
       rear_architecture_and_exhaust: {
         name: 'dual_high_mounted_central_exhaust_squircle',
@@ -1098,7 +1139,7 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       proportions: {
         name: 'mid_engine_flagship_supercar',
         positiveKeywords: ['cab-forward', 'mid-engine', 'wide rear haunches'],
-        incompatibleKeywords: ['front-engine gt', 'suv', 'sedan']
+        incompatibleKeywords: ['front-engine gt', 'suv', 'sedan', 'prototype-inspired sculptural bodywork', 'double-crested front-fender forms', 'double-crested front fenders']
       }
     }
   },
@@ -1114,13 +1155,26 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
     traits: {
       headlight_shape: {
         name: 'closed_c_annular_lamp_with_open_slot',
-        positiveKeywords: ['c-shaped', 'c shaped', 'c-clamp', 'annular lamp', 'ring shaped lamp', 'open slot in the lamp', 'slotted lamp', 'closed c daytime running light', 'c shaped daytime running light'],
-        incompatibleKeywords: ['horizontal eyelid covers', 'retractable slat cover', 'round bug eye', 'fried egg', 'teardrop', 'teardrop headlight', 'elongated vertical', 'vertical lens', 'tall narrow lamp', 'lamp bar', 'horizontal slit', 'horizontal eyelid', 'horizontal slats']
+        positiveKeywords: [
+          'c-shaped', 'c shaped', 'c-clamp', 'annular lamp', 'ring shaped lamp', 'open slot in the lamp', 'slotted lamp',
+          'closed c daytime running light', 'c shaped daytime running light',
+          'c-shaped headlight and brake intake', 'c-shaped headlight/brake-intake integration', 'c-shaped brake intake', 'c-shaped headlight integration',
+          'slender c-shaped matrix headlights', 'c-shaped daytime running lights', 'slotted matrix headlights',
+          'thin horizontal led strips with a black surround', 'thin horizontal led strips',
+          'thin, horizontal led strips with a black surround', 'thin, horizontal led strips', 'horizontal led strips with a black surround'
+        ],
+        incompatibleKeywords: [
+          'horizontal eyelid covers', 'retractable slat cover', 'round bug eye', 'fried egg', 'teardrop', 'teardrop headlight',
+          'elongated vertical', 'vertical lens', 'tall narrow lamp', 'horizontal eyelid', 'horizontal strakes', 'horizontal slats across front bumper'
+        ]
       },
       front_intake_grille: {
         name: 'open_nose_wing_diffuser',
-        positiveKeywords: ['open nose wing', 'front diffuser channel', 'low slung slotted intake', 'lower bumper splitter', 'shut-off gurney', 'gurney'],
-        incompatibleKeywords: ['horizontal strakes front', 'slatted front bumper', 'oval grille', 'full-width horizontal strakes', 'horizontal strakes', 'horizontal slat', 'horizontal slats', 'slatted grille']
+        positiveKeywords: [
+          'open nose wing', 'front diffuser channel', 'low slung slotted intake', 'lower bumper splitter', 'shut-off gurney', 'gurney',
+          'trapezoidal grille with a black surround', 'trapezoidal grille with a horizontal bar', 'large, trapezoidal grille'
+        ],
+        incompatibleKeywords: ['horizontal strakes front', 'slatted front bumper', 'oval grille', 'full-width horizontal strakes', 'horizontal strakes', 'horizontal slat', 'horizontal slats', 'slatted grille', 'horizontal blade splitter', 'blade splitter', 'deep, dark carbon blade']
       },
       hood_geometry: {
         name: 's_duct_hood_extractor_channel',
@@ -1135,7 +1189,7 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       roofline_greenhouse: {
         name: 'retractable_hardtop_spider_buttresses',
         positiveKeywords: ['retractable hardtop', 'folding roof', 'open-top', 'open top', 'spider', 'convertible roof', 'drop-top', 'spider tonneau', 'rear buttresses behind roll hoops', 'buttresses behind seats'],
-        incompatibleKeywords: ['fixed coupe roof', 'sloping full glass rear hatch', 'closed coupe greenhouse']
+        incompatibleKeywords: ['fixed coupe roof', 'sloping full glass rear hatch', 'closed coupe greenhouse', 'wraparound visor canopy', 'wraparound cabin and windshield', 'wraparound cabin', 'wraparound windshield']
       },
       rear_architecture_and_exhaust: {
         name: 'dual_high_mounted_central_exhaust_squircle',
@@ -1145,7 +1199,7 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       proportions: {
         name: 'mid_engine_flagship_spider',
         positiveKeywords: ['cab-forward', 'mid-engine', 'wide rear haunches', 'mid-engine spider', 'cab-forward convertible', 'open-top supercar'],
-        incompatibleKeywords: ['front-engine gt', 'suv', 'sedan']
+        incompatibleKeywords: ['front-engine gt', 'suv', 'sedan', 'prototype-inspired sculptural bodywork', 'double-crested front-fender forms', 'double-crested front fenders']
       }
     }
   },
@@ -1736,13 +1790,31 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
     traits: {
       headlight_shape: {
         name: 'slim_horizontal_quad_matrix',
-        positiveKeywords: ['slim horizontal', 'recessed aerodynamic blade', 'matrix led', 'narrow slit cluster'],
+        positiveKeywords: [
+          'slim horizontal', 'recessed aerodynamic blade', 'matrix led', 'narrow slit cluster',
+          'horizontal led', 'horizontal headlights', 'four round headlights with led', 'quad matrix',
+          'slanted matrix', 'matrix headlamps'
+        ],
         incompatibleKeywords: ['round bug eye', 'fried egg', 'almond swept']
       },
       roofline_greenhouse: {
         name: 'extended_wraparound_visor_canopy',
-        positiveKeywords: ['wraparound visor', 'visor canopy', 'extended wheelbase', 'four-seater hypercar', 'long roofline', 'mega-gt'],
+        positiveKeywords: [
+          'wraparound visor', 'visor canopy', 'extended wheelbase', 'four-seater hypercar',
+          'long roofline', 'mega-gt', 'curved windshield', 'sloping roofline', 'canopy',
+          'wraparound windshield', 'panoramic windshield'
+        ],
         incompatibleKeywords: ['compact two-seat cabin', 'upright sedan']
+      },
+      front_intake_grille: {
+        name: 'gemera_smooth_nose_with_splitter',
+        positiveKeywords: ['front splitter', 'large air intakes on the front bumper', 'splitter', 'lower front intake', 'aerodynamic front bumper intakes'],
+        incompatibleKeywords: ['panamericana', 'singleframe', 'kidney grille', 'massive hood nostrils', 'deep hood extractors']
+      },
+      wing_and_spoiler_architecture: {
+        name: 'clean_integrated_tail_or_small_ducktail',
+        positiveKeywords: ['integrated rear spoiler', 'clean rear deck', 'no top-mounted wing', 'ducktail', 'subtle active spoiler'],
+        incompatibleKeywords: ['giant top-mounted boomerang rear wing', 'massive rear wing', 'top-mounted rear wing', 'rear wing with top pylons']
       },
       door_architecture: {
         name: 'katsad_automated_twisted_synchro_helix_doors',
@@ -1761,8 +1833,8 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       },
       proportions: {
         name: 'four_seater_mega_gt',
-        positiveKeywords: ['four-seater hypercar', 'extended wheelbase', 'mega-gt', 'low slung long hypercar'],
-        incompatibleKeywords: ['compact 2-seater', 'suv', 'sedan']
+        positiveKeywords: ['four-seater hypercar', 'extended wheelbase', 'mega-gt', 'low slung long hypercar', 'grand tourer', 'hyper gt', 'gemera', 'four-seater', 'gt hypercar'],
+        incompatibleKeywords: ['compact 2-seater', 'suv', 'sedan', 'giant rear wing']
       }
     }
   },
@@ -1858,7 +1930,7 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       roofline_greenhouse: {
         name: 'convertible_soft_top_2plus2_gt',
         positiveKeywords: ['soft top', 'canvas roof', 'convertible roof', 'open top', 'cabriolet', 'open-air 2+2'],
-        incompatibleKeywords: ['fixed coupe roof', 'glass engine cover over rear axle', 'cab-forward teardrop']
+        incompatibleKeywords: ['fixed coupe roof', 'glass engine cover over rear axle', 'cab-forward teardrop', 'coupe', 'fixed roof', 'hardtop coupe', 'sloping fastback coupe', 'two-door coupe']
       },
       rear_architecture_and_exhaust: {
         name: 'quad_exhaust_tips_outer_bumper',
@@ -1900,7 +1972,7 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       roofline_greenhouse: {
         name: 'cielo_smart_glass_convertible_deck',
         positiveKeywords: ['cielo', 'smart glass roof', 'electrochromic glass', 'spyder engine deck', 'trident deck decal', 'convertible roofline'],
-        incompatibleKeywords: ['long hood short deck', 'rearward cabin', 'grand tourer proportions', 'canvas soft top 2+2']
+        incompatibleKeywords: ['long hood short deck', 'rearward cabin', 'grand tourer proportions', 'canvas soft top 2+2', 'coupe', 'fixed roof', 'fixed coupe roof']
       },
       proportions: {
         name: 'mid_engine_cab_forward_spyder',
@@ -2437,7 +2509,8 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
         incompatibleKeywords: [
           'upright trapezoidal lens', 'vertical rectangular lens', 'round bug eye', 'fried egg',
           'trapezoidal headlight', 'upright trapezoidal headlights', 'vertical bi-xenon',
-          'round headlights', 'round headlamps', 'two round headlights', 'two round headlights with a black trim'
+          'round headlights', 'round headlamps', 'two round headlights', 'two round headlights with a black trim',
+          'rectangular headlights', 'two rectangular headlights'
         ]
       },
       front_intake_grille: {
@@ -2450,7 +2523,8 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
           'front bumper with integrated aerodynamic ypsilon winglets', 'aerodynamic winglets', 'triangular winglets', 'y-shaped lower air intakes',
           'y-shaped air intakes', 'distinctive y shape', 'distinctive "y" shape',
           'vertical splitter', 'vertical splitter in front bumper', 'horizontal grille and a vertical splitter',
-          'large opening with a horizontal grille and a vertical splitter', 'unique front grille design'
+          'large opening with a horizontal grille and a vertical splitter', 'unique front grille design',
+          'chrome surround', 'horizontal grille with a black surround and a chrome surround'
         ]
       },
       hood_geometry: {
@@ -2670,18 +2744,29 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
     traits: {
       headlight_shape: {
         name: 'swept_back_six_lens_led_with_drl_hook',
-        positiveKeywords: ['six-lens led', 'downward drl hook', 'swept-back led headlights', 'slender three-projector', 'supra headlights'],
-        incompatibleKeywords: ['round bug eye', 'fried egg', 'vertical slit', 'rectangular block']
+        positiveKeywords: [
+          'six-lens led', 'downward drl hook', 'swept-back led headlights', 'slender three-projector', 'supra headlights',
+          'horizontal led strip', 'swept-back headlights', 'angular led', 'projector headlights', 'horizontal led', 'led strip',
+          'slender led', 'horizontal headlight'
+        ],
+        incompatibleKeywords: ['round bug eye', 'fried egg', 'vertical slit', 'rectangular block', 'rectangular halogen']
       },
       front_intake_grille: {
         name: 'central_pointed_f1_nose_tripartite_intake',
-        positiveKeywords: ['central pointed nose', 'tripartite intake', 'three lower intakes', 'f1 style nose', 'gr supra front bumper'],
-        incompatibleKeywords: ['kidney grille', 'singleframe', 'panamericana', 'large central oval']
+        positiveKeywords: [
+          'central pointed nose', 'tripartite intake', 'three lower intakes', 'f1 style nose', 'gr supra front bumper',
+          'trapezoidal grille', 'dark carbon blade', 'front splitter with winglets', 'front splitter and side air intakes',
+          'prominent lip', 'splitter', 'front splitter', 'carbon blade', 'lower front lip', 'winglets at the outer corners'
+        ],
+        incompatibleKeywords: ['kidney grille', 'singleframe', 'panamericana', 'large central oval', 'chrome slatted grille']
       },
       roofline_greenhouse: {
         name: 'double_bubble_aerodynamic_roof',
-        positiveKeywords: ['double-bubble', 'double bubble roof', 'sloping rear hatch', 'compact two-seat cabin'],
-        incompatibleKeywords: ['canvas soft top', 'wraparound visor canopy', 'convertible roof']
+        positiveKeywords: [
+          'double-bubble', 'double bubble roof', 'sloping rear hatch', 'compact two-seat cabin',
+          'two-door coupe', 'sloping roofline', 'coupe', 'fastback'
+        ],
+        incompatibleKeywords: ['canvas soft top', 'wraparound visor canopy', 'convertible roof', 'upright three-box sedan', 'tall glasshouse']
       },
       side_intake_type: {
         name: 'door_and_rear_quarter_sculpted_accent_ducts',
@@ -2691,12 +2776,15 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       rear_architecture_and_exhaust: {
         name: 'integrated_ducktail_dual_circular_exhausts',
         positiveKeywords: ['integrated ducktail spoiler', 'ducktail spoiler', 'dual circular exhaust', 'central f1-style reverse light', 'slender curved led taillights'],
-        incompatibleKeywords: ['quad round taillights', 'top-exit exhaust', 'horizontal rear strakes']
+        incompatibleKeywords: ['quad round taillights', 'top-exit exhaust', 'horizontal rear strakes', 'vertical rectangular taillights']
       },
       proportions: {
         name: 'front_engine_short_wheelbase_widebody_coupe',
-        positiveKeywords: ['long hood short rear deck', 'front-engine rear-wheel drive', 'golden ratio 1.55 wheelbase', 'wide rear haunches'],
-        incompatibleKeywords: ['cab-forward mid-engine', 'suv', 'sedan']
+        positiveKeywords: [
+          'long hood short rear deck', 'front-engine rear-wheel drive', 'golden ratio 1.55 wheelbase', 'wide rear haunches',
+          'two-door coupe', 'sports car', 'long curved hood', 'sloping roofline and a long', 'front-engine sports car'
+        ],
+        incompatibleKeywords: ['cab-forward mid-engine', 'suv', 'sedan', 'upright sedan', 'commercial taxi']
       }
     }
   },
@@ -3946,27 +4034,32 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       headlight_shape: {
         name: 'upright_rectangular_halogen_headlamps',
         positiveKeywords: ['rectangular halogen', 'square glass headlights', 'amber corner marker lights', 'traditional boxy headlights'],
-        incompatibleKeywords: ['swept led blade', 'y-shaped drl', 'pop-up']
+        incompatibleKeywords: ['swept led blade', 'y-shaped drl', 'pop-up', 'horizontal led strip', 'swept-back headlights', 'angular led']
       },
       front_intake_grille: {
         name: 'horizontal_chrome_slatted_sedan_grille',
         positiveKeywords: ['chrome slatted grille', 'toyota crown emblem', 'upright chrome radiator grille', 'rectangular front grille'],
-        incompatibleKeywords: ['carbon front splitter', 'honeycomb mesh singleframe']
+        incompatibleKeywords: ['carbon front splitter', 'honeycomb mesh singleframe', 'front splitter', 'dark carbon blade', 'trapezoidal grille with a horizontal led']
       },
       roofline_greenhouse: {
         name: 'boxy_upright_three_box_sedan_with_taxi_roof_sign',
         positiveKeywords: ['taxi roof light', 'taxi sign', 'upright three-box sedan', 'tall glasshouse', 'silver roof on red body'],
-        incompatibleKeywords: ['low slung coupe flyline', 'targa roll hoops', 'mid-engine glass hatch']
+        incompatibleKeywords: [
+          'low slung coupe flyline', 'targa roll hoops', 'mid-engine glass hatch',
+          'two-door coupe', 'two-door', 'sloping roofline', 'coupe', 'fastback', 'curved hood', 'double-bubble'
+        ]
       },
       rear_architecture_and_exhaust: {
         name: 'vertical_rectangular_taillights',
         positiveKeywords: ['vertical rectangular taillights', 'amber red clear tail lamp clusters', 'single modest exhaust pipe'],
-        incompatibleKeywords: ['quad sport exhaust', 'active rear wing', 'horizontal led bar']
+        incompatibleKeywords: ['quad sport exhaust', 'active rear wing', 'horizontal led bar', 'ducktail spoiler']
       },
       proportions: {
         name: 'traditional_commercial_fleet_sedan',
         positiveKeywords: ['classic hong kong taxi', 'commercial taxi livery', 'upright utilitarian sedan'],
-        incompatibleKeywords: ['supercar', 'widebody sports car']
+        incompatibleKeywords: [
+          'supercar', 'widebody sports car', 'sports car', 'two-door coupe', 'coupe', 'low-slung'
+        ]
       }
     }
   },
@@ -4136,7 +4229,7 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       wing_and_spoiler_architecture: {
         name: 'gigantic_top_mounted_active_boomerang_rear_wing',
         positiveKeywords: ['giant top-mounted boomerang rear wing', 'boomerang wing', 'active carbon rear wing with top pylons', 'jesko rear wing', 'massive double-profile rear wing', 'top-mounted rear wing', 'large rear wing', 'massive rear wing', 'giant rear wing', 'high-mounted rear wing', 'top-mounted wing', 'large active rear wing', 'prominent rear wing', 'rear wing with top pylons', 'large wing'],
-        incompatibleKeywords: ['flush active lip', 'no rear wing']
+        incompatibleKeywords: ['flush active lip', 'no rear wing', 'clean rear deck', 'no top-mounted wing']
       },
       door_architecture: {
         name: 'dihedral_synchro_helix_actuation_doors',
@@ -4156,7 +4249,7 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       proportions: {
         name: 'extreme_track_megacar',
         positiveKeywords: ['extreme track hypercar stance', 'low slung cab forward silhouette', 'carbon monocoque track car', 'jesko', 'attack', 'jesko attack'],
-        incompatibleKeywords: ['grand tourer', 'suv', 'sedan']
+        incompatibleKeywords: ['grand tourer', 'suv', 'sedan', 'four-seater', 'four seats', 'four-passenger']
       }
     }
   },

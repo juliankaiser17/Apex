@@ -17,11 +17,13 @@ import type { IdentificationResult } from '../types';
 //   * Generic empty-model guard preventing false canonical vehicle resolution
 //   * Preserved model uncertainty throughout downstream pipeline and UI
 // v3.4.2 — Production Release:
-//   * Resolved Ferrari Daytona SP3 vs SF90 Stradale trait overlap
-//   * Eliminated default Assetto Fiorano variant pollution
-//   * Grounded pairwise verification promotion requiring positive visual matches
-//   * Hardened cryptographic image byte cache isolation
-export const VISION_PIPELINE_VERSION = 'v3.4.2-ferrari-forensics-and-cache-isolation';
+// v3.4.4 — Production Release:
+//   * Hardened Ferrari Daytona SP3 vs SF90 Stradale morphological disambiguation
+//   * Eliminated score overwrite inversion in candidate calibration
+//   * Preserved contradiction penalties during fine-grained candidate merging
+//   * Enforced C-shaped headlight/brake-intake integration for SF90 without false LED strip contradictions
+//   * Cryptographic cache isolation invalidating contaminated cache
+export const VISION_PIPELINE_VERSION = 'v3.4.4-daytona-sp3-sf90-resolution';
 
 export function buildCacheKey(
   imageHash: string,

@@ -63,7 +63,7 @@ export class CloudflareVisionProvider implements AIProvider {
     this.defaultModel = config?.model || (typeof process !== 'undefined' && process.env?.CLOUDFLARE_MODEL) || this.defaultModel;
     this.seed = config?.seed ?? 42;
     this.temperature = config?.temperature ?? 0.1;
-    this.maxTokens = config?.maxTokens ?? 512;
+    this.maxTokens = config?.maxTokens ?? 1024;
     this.timeoutMs = config?.timeoutMs ?? 35000;
   }
 
@@ -258,6 +258,44 @@ export class CloudflareVisionProvider implements AIProvider {
     };
   }
 
+  private async downscalePayloadIfOversized(dataUrl: string, maxDim = 1280, maxBytes = 600 * 1024): Promise<string> {
+    try {
+      if (!dataUrl || !dataUrl.startsWith('data:image')) return dataUrl;
+      const base64Index = dataUrl.indexOf(';base64,');
+      if (base64Index === -1) return dataUrl;
+      const base64Data = dataUrl.substring(base64Index + 8);
+      if (base64Data.length < 500) return dataUrl;
+      const approxBytes = Math.floor((base64Data.length * 3) / 4);
+
+      if (typeof process !== 'undefined' && typeof Buffer !== 'undefined') {
+        const sharpModule = await import('sharp').catch(() => null);
+        const sharp = sharpModule?.default || sharpModule;
+        if (typeof sharp === 'function') {
+          const inputBuffer = Buffer.from(base64Data, 'base64');
+          const metadata = await sharp(inputBuffer).metadata().catch(() => null);
+          if (!metadata) return dataUrl;
+          const width = metadata.width || 0;
+          const height = metadata.height || 0;
+          if (width > maxDim || height > maxDim || approxBytes > maxBytes) {
+            const resizedBuffer = await sharp(inputBuffer)
+              .resize({
+                width: width >= height ? maxDim : undefined,
+                height: height > width ? maxDim : undefined,
+                fit: 'inside',
+                withoutEnlargement: true
+              })
+              .jpeg({ quality: 85, progressive: false })
+              .toBuffer();
+            return `data:image/jpeg;base64,${resizedBuffer.toString('base64')}`;
+          }
+        }
+      }
+    } catch (err) {
+      console.warn('[CloudflareVisionProvider] Downscaling notice, using original:', err);
+    }
+    return dataUrl;
+  }
+
   public async identify(request: AIProviderRequest): Promise<AIProviderResponse> {
     const startTime = Date.now();
     const model = request.options?.modelOverride || this.defaultModel;
@@ -293,6 +331,7 @@ export class CloudflareVisionProvider implements AIProvider {
     if (!fullDataUrl.startsWith('data:')) {
       fullDataUrl = `data:image/jpeg;base64,${request.imageDataUrl}`;
     }
+    fullDataUrl = await this.downscalePayloadIfOversized(fullDataUrl, 1280, 600 * 1024);
     const encodedImageBytes = typeof Buffer !== 'undefined' ? Buffer.byteLength(fullDataUrl, 'utf8') : fullDataUrl.length;
 
     // ─── APEX EVIDENTIARY VEHICLE PERCEPTION PROMPTS ───
@@ -373,7 +412,7 @@ Rules:
     const format = request.options?.format || 'messages';
     const stream = request.options?.stream ?? false;
     const effectiveTimeoutMs = request.options?.timeoutMs || this.timeoutMs;
-    const defaultTokensForSchema = request.options?.schema === 'monolithic' ? 512 : this.maxTokens;
+    const defaultTokensForSchema = request.options?.schema === 'monolithic' ? 1024 : this.maxTokens;
     const effectiveMaxTokens = request.options?.maxTokens ?? defaultTokensForSchema;
     const effectiveTemperature = request.options?.temperature ?? this.temperature;
     const effectiveSeed = request.options?.seed ?? this.seed;
@@ -414,6 +453,14 @@ Rules:
         } catch (err: any) {
           lastErr = err;
           const classified = this.classifyError(err);
+
+          // Invariant: If a secondary fallback provider is configured, do not retry internally.
+          // Bypassing internal retry allows router to fail over immediately to secondary provider
+          // while bounding total expensive operations strictly to 2.
+          if (request.options?.hasFallback) {
+            console.warn(`[CloudflareVisionProvider] Provider error encountered with fallback configured. Bypassing internal retry to preserve 2-call invariant and failover:`, err?.message);
+            break;
+          }
 
           // Bounded retry on malformed JSON response (at most 1 retry, max 2 calls per scan)
           if (attempt === 0 && err.isMalformedJson) {
@@ -934,10 +981,10 @@ Rules:
               return '- Amalfi decisive architecture: front-mid engine 2+2 grand tourer with long sweeping hood, monolithic body-color perforated front grille, quad round exhaust in dual outer clusters. Contradicted by: mid-engine proportions, central exhaust in diffuser, horizontal strakes, C-shaped headlights.';
             }
             if (n.includes('daytona') || n.includes('sp3')) {
-              return '- Daytona SP3 decisive architecture: horizontal blade/strake architecture across lower front fascia, horizontal eyelid/slit headlights, dual hood air extractor chimneys, wraparound helmet-visor windshield canopy, fender/door-top mounted mirrors, full-width horizontal rear strakes. Contradicted by: vertical swept-back headlights, C-shaped headlights, front mustache winglets, central hood S-duct.';
+              return '- Daytona SP3 decisive architecture: prototype-inspired sculptural bodywork, double-crested front-fender forms, distinctive wraparound cabin and windshield canopy, horizontal blade/strake architecture across lower front fascia, horizontal eyelid/slit headlights, butterfly doors with integrated air intakes when visible, full-width horizontal rear strakes. Contradicted by: C-shaped headlight/brake-intake integration, vertical swept-back headlights, central hood S-duct, front mustache winglets.';
             }
             if (n.includes('sf90')) {
-              return '- SF90 Stradale decisive architecture: C-shaped / annular matrix LED headlights, deep central S-duct hood extractor channel, shut-off Gurney flap, high-mounted twin central exhaust. Contradicted by: horizontal eyelid/slit headlights, full-width front strakes, front mustache winglets, triple central exhaust.';
+              return '- SF90 Stradale decisive architecture: slender C-shaped headlight/brake-intake integration, distinct front-end geometry with central S-duct hood extractor channel, shut-off Gurney flap, high-mounted twin central exhaust. Contradicted by: double-crested front-fender forms, wraparound visor cabin/windshield, horizontal eyelid/slit headlights, horizontal blade/strake architecture across lower front fascia.';
             }
             if (n.includes('458')) {
               return '- 458 Italia/Spider decisive architecture: elongated vertical swept-back headlights running up fenders, single wide front intake with deformable aero mustache winglets, triple central exhaust, single round taillights. Contradicted by: horizontal slit headlights, C-shaped headlights, horizontal strakes, high-mounted twin central exhaust.';
@@ -952,10 +999,28 @@ Rules:
               return '- Agera RS decisive architecture: bottom-mounted rear wing supported by pylons from underneath the wing blade, twin hood extractor vents, dihedral synchro-helix doors. Contradicted by: gigantic top-mounted boomerang rear wing hanging from twin carbon pylons mounted to the roof/spine.';
             }
             if (n.includes('jesko')) {
-              return '- Jesko decisive architecture: gigantic top-mounted active boomerang rear wing hanging from twin carbon pylons mounted to the roof/engine spine, low-slung 2-seater track hypercar stance, deep front carbon splitter, high-mounted central exhaust. Contradicted by: bottom-mounted rear wing supported from underneath, four-seater extended wheelbase GT architecture.';
+              return '- Jesko decisive architecture: gigantic top-mounted active boomerang rear wing hanging from twin carbon pylons mounted to the roof/engine spine, low-slung 2-seater track hypercar stance, massive deep front hood extractor air channels, aggressive front bumper dive planes/canards, deep front carbon splitter, high-mounted central exhaust. Contradicted by: smooth front hood without deep radiator extractors, slim horizontal quad matrix headlights, clean rear deck without top-mounted wing, bottom-mounted rear wing supported from underneath, four-seater extended wheelbase GT architecture.';
             }
             if (n.includes('gemera')) {
-              return '- Gemera decisive architecture: four-seater Mega-GT extended wheelbase, elongated roofline accommodating rear adult seats, giant B-pillarless twisted synchro-helix doors spanning both rows, top-exit exhausts above rear engine glass. Contradicted by: giant top-mounted boomerang rear wing, compact 2-seat track cockpit.';
+              return '- Gemera decisive architecture: four-seater Mega-GT extended wheelbase, slim horizontal matrix headlights with quad light elements, smooth sweeping front hood with Koenigsegg ghost/crest badge without deep radiator hood extractors, low front chin splitter, elongated roofline accommodating rear adult seats, giant B-pillarless twisted synchro-helix doors spanning both rows, clean rear deck without high-mounted wing, top-exit exhausts above rear engine glass. Contradicted by: gigantic top-mounted boomerang rear wing, massive deep front hood extractor air channels, aggressive front bumper dive planes/canards, compact 2-seat track cockpit.';
+            }
+            if (n.includes('mc20')) {
+              return '- Maserati MC20 decisive architecture: mid-engine cab-forward low-slung supercar proportions with short front hood, vertical compact LED slit headlights running vertically on front fenders, low wide horizontal mouth grille with central trident emblem and front carbon splitter, dual front hood air extractor vents/nostrils. Contradicted by: front-engine long sweeping hood with rearward 2+2 cabin, concave upright oval grille with vertical chrome slats, triple front fender vents/gills, elongated swept-back almond headlights, convertible canvas soft top.';
+            }
+            if (n.includes('granturismo') || n.includes('gran turismo')) {
+              return '- Maserati GranTurismo decisive architecture: front-engine grand tourer proportions with long sweeping hood and rearward 2+2 cabin, large concave upright oval front grille with vertical slats and large trident emblem, triple horizontal front fender vents/gills behind front wheels, elongated swept-back almond/teardrop headlights. Contradicted by: mid-engine cab-forward supercar proportions, short front hood, vertical compact LED slit headlights, dual front hood nostrils, butterfly doors, rear fender shoulder intakes.';
+            }
+            if (n.includes('grancabrio') || n.includes('gran cabrio')) {
+              return '- Maserati GranCabrio decisive architecture: front-engine 2+2 convertible grand tourer with canvas fabric soft-top, long sweeping hood, large concave upright oval front grille with vertical slats, triple horizontal front fender gills. Contradicted by: fixed coupe roof, mid-engine cab-forward proportions, short front hood, vertical LED slit headlights.';
+            }
+            if (n.includes('supra')) {
+              return '- Toyota GR Supra (A90) decisive architecture: front-engine two-door sports coupe with short wheelbase and wide rear track, double-bubble roof, prominent central nose cone with tripartite lower intake, sweeping headlights with horizontal/hook LED DRLs, integrated rear ducktail spoiler. Contradicted by: four-door passenger sedan proportions, upright formal three-box sedan greenhouse, commercial taxi roof sign, rectangular halogen block headlights, upright chrome slatted grille.';
+            }
+            if (n.includes('crown comfort') || n.includes('taxi')) {
+              return '- Toyota Crown Comfort (Taxi) decisive architecture: upright utilitarian traditional four-door three-box commercial fleet sedan, rectangular halogen headlights with amber corner lamps, horizontal chrome slatted front grille, formal upright glasshouse, commercial taxi livery or roof sign. Contradicted by: two-door sports coupe proportions, low-slung body, sloping fastback roofline, double-bubble roof, swept-back LED headlights, front splitter.';
+            }
+            if (n.includes('camry')) {
+              return '- Toyota Camry decisive architecture: modern front-wheel-drive four-door family sedan, wide catamaran lower bumper grille, swept-back sedan headlights, formal four-door sedan roofline. Contradicted by: two-door low-slung sports coupe proportions, double-bubble roof, central pointed nose cone.';
             }
             if (n.includes('boxster')) {
               return '- 718 Boxster decisive architecture: compact mid-engine 2-seater roadster with fabric soft-top, side air intakes on rear quarter fenders, central/dual lower exhaust in rear bumper diffuser. Contradicted by: upward top-pipe exhaust exiting on top engine deck behind headrests, fixed coupe roof, hypercar monocoque.';

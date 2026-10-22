@@ -16,6 +16,7 @@ export interface AIProviderRequest {
     temperature?: number;
     timeoutMs?: number;
     disableFallback?: boolean;
+    hasFallback?: boolean;
     format?: 'messages' | 'inst';
     schema?: 'minimal' | 'monolithic';
     maxTokens?: number;
