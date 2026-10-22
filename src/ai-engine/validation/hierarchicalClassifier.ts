@@ -838,7 +838,10 @@ export class HierarchicalClassifier {
       const canon = canonicalVehicleRegistry.lookupByTextOrAlias(candidateName, evidenceScopeMake);
       if (!canon) return false;
       if (fgResult.scoredCandidates.some((c) => c.vehicleId === canon.vehicleId)) return true;
-      return Boolean(fineGrainedModelDiscriminator.getFingerprint(canon.vehicleId));
+      return Boolean(
+        fineGrainedModelDiscriminator.getFingerprint(canon.vehicleId) ||
+        fineGrainedModelDiscriminator.getFingerprint(candidateName)
+      );
     };
 
     const fgWinner = fgResult.topCandidate;
@@ -889,8 +892,12 @@ export class HierarchicalClassifier {
       if (!canon) return false;
       if (resolvedMake && normalizeBrandKey(canon.make) !== normalizeBrandKey(resolvedMake)) return false;
       const fp = fineGrainedModelDiscriminator.getFingerprint(canon.vehicleId) ||
-                 fineGrainedModelDiscriminator.getFingerprint(canon.displayName || cand.name);
-      const inDb = APEX_LOCAL_VEHICLE_DATABASE.some((v) => v.id === canon.vehicleId);
+                 fineGrainedModelDiscriminator.getFingerprint(canon.displayName || '') ||
+                 fineGrainedModelDiscriminator.getFingerprint(cand.name);
+      const inDb = APEX_LOCAL_VEHICLE_DATABASE.some((v) =>
+        v.id === canon.vehicleId ||
+        (normalizeBrandKey(v.manufacturer) === normalizeBrandKey(canon.make) && v.model.toLowerCase() === canon.model.toLowerCase())
+      );
       return Boolean(inDb || fp);
     };
 

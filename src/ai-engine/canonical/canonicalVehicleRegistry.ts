@@ -152,17 +152,15 @@ class CanonicalVehicleRegistry {
       this.registerVehicle(record);
     });
 
-    // 1b. Ingest Tier 1 Canonical Registry Variants (122 launch exotic/sports variants)
+    // 1b. Ingest Tier 1 Canonical Registry Variants
     const excludedCommuterModels = new Set([
-      'corolla', 'camry', 'golf', 'altima', 'elantra', 'accord', 'sentra', 'malibu',
-      'rav4', 'crv', 'cx5', 'outback', 'forte', 'explorer', 'f150', 'harrier',
-      'safari', 'punch', 'tiago', 'altroz', 'scorpion', 'xuv700', 'bolero', 'brezza', 'baleno', 'ambassador'
+      'harrier', 'safari', 'punch', 'tiago', 'altroz', 'scorpion', 'xuv700', 'bolero', 'brezza', 'baleno', 'ambassador'
     ]);
 
     if (tier1RegistryData && Array.isArray((tier1RegistryData as any).variants)) {
       for (const v of (tier1RegistryData as any).variants) {
         const normModel = this.normalize(v.model);
-        if (excludedCommuterModels.has(normModel) && !(normModel === 'civic' && this.normalize(v.variant) === 'typer')) {
+        if (excludedCommuterModels.has(normModel)) {
           continue;
         }
 
@@ -414,10 +412,8 @@ class CanonicalVehicleRegistry {
       'sf90 stradale',
       'ferrari sf90',
       'ferrari sf90 stradale',
-      'sf90 spider',
-      'ferrari sf90 spider',
-      'sf90 spider (sf90)',
-      'ferrari sf90 spider (sf90)',
+      'sf90 coupe',
+      'ferrari sf90 coupe',
       'sf90 assetto fiorano',
       'sf90 stradale assetto fiorano',
       'ferrari sf90 stradale assetto fiorano',
@@ -1055,6 +1051,99 @@ class CanonicalVehicleRegistry {
       'granturismo folgore',
       'new granturismo'
     ]);
+
+    // ── PRIORITY CATALOG EXPANSIONS ──
+    // Ferrari
+    this.registerAliases('ferrari-812-gts', ['812 gts', 'ferrari 812 gts', '812 spider']);
+    this.registerAliases('ferrari-812-competizione', ['812 competizione', 'ferrari 812 competizione', 'competizione']);
+    this.registerAliases('ferrari-roma-spider', ['roma spider', 'ferrari roma spider', 'roma convertible']);
+    this.registerAliases('ferrari-purosangue', ['purosangue', 'ferrari purosangue', 'ferrari suv']);
+    this.registerAliases('ferrari-f8-tributo', ['f8', 'f8 tributo', 'ferrari f8', 'ferrari f8 tributo']);
+    this.registerAliases('ferrari-f8-spider', ['f8 spider', 'ferrari f8 spider']);
+    this.registerAliases('ferrari-488-gtb', ['488', '488 gtb', 'ferrari 488', 'ferrari 488 gtb']);
+    this.registerAliases('ferrari-488-spider', ['488 spider', 'ferrari 488 spider']);
+
+    // Koenigsegg
+    this.registerAliases('koenigsegg-jesko-attack', ['jesko attack', 'koenigsegg jesko attack', 'jesko with wing']);
+    this.registerAliases('koenigsegg-jesko-absolut', ['jesko absolut', 'koenigsegg jesko absolut', 'low drag jesko']);
+    this.registerAliases('koenigsegg-regera', ['regera', 'koenigsegg regera']);
+    this.registerAliases('koenigsegg-agera-rs', ['agera rs', 'koenigsegg agera rs', 'agera']);
+    this.registerAliases('koenigsegg-cc850', ['cc850', 'koenigsegg cc850', 'cc8s 50th']);
+    this.registerAliases('koenigsegg-one-1', ['one:1', 'one 1', 'koenigsegg one:1', 'koenigsegg one 1']);
+
+    // Bugatti
+    this.registerAliases('bugatti-chiron-pur-sport', ['chiron pur sport', 'pur sport', 'bugatti pur sport']);
+    this.registerAliases('bugatti-chiron-sport', ['chiron sport', 'bugatti chiron sport']);
+    this.registerAliases('bugatti-veyron', ['veyron', 'bugatti veyron', 'veyron 16.4']);
+    this.registerAliases('bugatti-divo', ['divo', 'bugatti divo']);
+    this.registerAliases('bugatti-bolide', ['bolide', 'bugatti bolide']);
+    this.registerAliases('bugatti-tourbillon', ['tourbillon', 'bugatti tourbillon']);
+
+    // McLaren
+    this.registerAliases('mclaren-600lt', ['600lt', 'mclaren 600lt', '600 lt', '600lt coupe', '600lt spider']);
+    this.registerAliases('mclaren-750s', ['750s', 'mclaren 750s', '750s coupe', '750s spider']);
+    this.registerAliases('mclaren-senna', ['senna', 'mclaren senna']);
+    this.registerAliases('mclaren-speedtail', ['speedtail', 'mclaren speedtail']);
+
+    // Maserati
+    this.registerAliases('maserati-mc12', ['mc12', 'maserati mc12', 'mc 12']);
+
+    // Porsche
+    this.registerAliases('porsche-911-gt2-rs', ['gt2 rs', '911 gt2 rs', 'porsche 911 gt2 rs', 'gt2rs', '991 gt2 rs']);
+    this.registerAliases('porsche-911-dakar', ['911 dakar', 'porsche 911 dakar', 'dakar 911', 'porsche dakar']);
+    this.registerAliases('porsche-taycan', ['taycan', 'porsche taycan', 'taycan 4s', 'taycan turbo', 'taycan cross turismo']);
+
+    // Lamborghini
+    this.registerAliases('lamborghini-urus', ['urus', 'lamborghini urus', 'urus s', 'urus performante']);
+
+    // ── HONG KONG ROAD CARS & TAXIS ──
+    // Toyota
+    this.registerAliases('toyota-corolla', ['corolla', 'toyota corolla', 'corolla sedan', 'corolla altis']);
+    this.registerAliases('toyota-camry', ['camry', 'toyota camry', 'camry sedan']);
+    this.registerAliases('toyota-prius', ['prius', 'toyota prius', 'prius hybrid']);
+    this.registerAliases('toyota-yaris', ['yaris', 'toyota yaris', 'yaris hatchback']);
+    this.registerAliases('toyota-alphard', ['alphard', 'toyota alphard', 'alphard hybrid', 'alphard v6']);
+    this.registerAliases('toyota-vellfire', ['vellfire', 'toyota vellfire', 'vellfire hybrid']);
+    this.registerAliases('toyota-crown-comfort-taxi', [
+      'crown comfort', 'crown comfort taxi', 'comfort taxi', 'hong kong taxi', 'hk taxi',
+      'urban taxi', 'new territories taxi', 'lantau taxi', 'red taxi', 'green taxi', 'blue taxi',
+      'toyota crown', 'toyota crown comfort', 'toyota taxi'
+    ]);
+
+    // Honda
+    this.registerAliases('honda-civic', ['civic', 'honda civic', 'civic sedan', 'civic hatchback']);
+    this.registerAliases('honda-accord', ['accord', 'honda accord']);
+    this.registerAliases('honda-fit', ['fit', 'jazz', 'honda fit', 'honda jazz']);
+    this.registerAliases('honda-stepwgn', ['stepwgn', 'honda stepwgn', 'stepwagon', 'honda stepwagon', 'stepwgn spada']);
+    this.registerAliases('honda-odyssey', ['odyssey', 'honda odyssey', 'odyssey absolute']);
+
+    // Nissan
+    this.registerAliases('nissan-note', ['note', 'nissan note', 'note e-power', 'nissan note e-power']);
+    this.registerAliases('nissan-serena', ['serena', 'nissan serena', 'serena e-power', 'serena highway star']);
+    this.registerAliases('nissan-x-trail', ['x-trail', 'xtrail', 'nissan x-trail', 'nissan xtrail']);
+    this.registerAliases('nissan-nv200-taxi', ['nv200 taxi', 'nissan nv200 taxi', 'nv200', 'nissan nv200', 'wheelchair taxi', 'hk nv200 taxi']);
+
+    // Mazda
+    this.registerAliases('mazda-mazda2', ['mazda2', 'mazda 2', 'demio']);
+    this.registerAliases('mazda-mazda3', ['mazda3', 'mazda 3', 'axela']);
+    this.registerAliases('mazda-cx-5', ['cx-5', 'cx5', 'mazda cx-5', 'mazda cx5']);
+
+    // Volkswagen
+    this.registerAliases('volkswagen-golf', ['golf', 'volkswagen golf', 'vw golf', 'golf tsi']);
+    this.registerAliases('volkswagen-tiguan', ['tiguan', 'volkswagen tiguan', 'vw tiguan']);
+
+    // Lexus
+    this.registerAliases('lexus-es', ['es', 'lexus es', 'es300h', 'es250']);
+    this.registerAliases('lexus-rx', ['rx', 'lexus rx', 'rx350', 'rx450h', 'rx500h']);
+    this.registerAliases('lexus-lm', ['lm', 'lexus lm', 'lm350', 'lm500h', 'lexus mpv']);
+
+    // Tesla
+    this.registerAliases('tesla-model-3', ['model 3', 'tesla model 3', 'model3', 'tesla model3']);
+    this.registerAliases('tesla-model-y', ['model y', 'tesla model y', 'modely', 'tesla modely']);
+
+    // BYD
+    this.registerAliases('byd-atto-3', ['atto 3', 'byd atto 3', 'atto3', 'yuan plus']);
+    this.registerAliases('byd-seal', ['seal', 'byd seal']);
   }
 
   public registerVehicle(record: CanonicalVehicleRecord) {

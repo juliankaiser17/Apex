@@ -23,7 +23,11 @@ import type { IdentificationResult } from '../types';
 //   * Preserved contradiction penalties during fine-grained candidate merging
 //   * Enforced C-shaped headlight/brake-intake integration for SF90 without false LED strip contradictions
 //   * Cryptographic cache isolation invalidating contaminated cache
-export const VISION_PIPELINE_VERSION = 'v3.4.4-daytona-sp3-sf90-resolution';
+// v3.5.0 — Production Launch Release:
+//   * Complete Launch Catalog (Ferrari, Koenigsegg, Bugatti, McLaren, Maserati, Porsche, Lamborghini, etc.)
+//   * Full Hong Kong Road-Car & Multi-Area Taxi (Crown Comfort, NV200) fine-grained morphological coverage
+//   * Commuter vehicle catalog unlock and alias normalization
+export const VISION_PIPELINE_VERSION = 'v3.5.0-launch-catalog-and-hk-roadcars';
 
 export function buildCacheKey(
   imageHash: string,

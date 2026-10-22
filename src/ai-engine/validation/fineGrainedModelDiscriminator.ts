@@ -4033,17 +4033,21 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
     traits: {
       headlight_shape: {
         name: 'upright_rectangular_halogen_headlamps',
-        positiveKeywords: ['rectangular halogen', 'square glass headlights', 'amber corner marker lights', 'traditional boxy headlights'],
+        positiveKeywords: ['rectangular halogen', 'square glass headlights', 'amber corner marker lights', 'traditional boxy headlights', 'rectangular front lamps'],
         incompatibleKeywords: ['swept led blade', 'y-shaped drl', 'pop-up', 'horizontal led strip', 'swept-back headlights', 'angular led']
       },
       front_intake_grille: {
         name: 'horizontal_chrome_slatted_sedan_grille',
-        positiveKeywords: ['chrome slatted grille', 'toyota crown emblem', 'upright chrome radiator grille', 'rectangular front grille'],
+        positiveKeywords: ['chrome slatted grille', 'toyota crown emblem', 'upright chrome radiator grille', 'rectangular front grille', 'chrome grille surround'],
         incompatibleKeywords: ['carbon front splitter', 'honeycomb mesh singleframe', 'front splitter', 'dark carbon blade', 'trapezoidal grille with a horizontal led']
       },
       roofline_greenhouse: {
         name: 'boxy_upright_three_box_sedan_with_taxi_roof_sign',
-        positiveKeywords: ['taxi roof light', 'taxi sign', 'upright three-box sedan', 'tall glasshouse', 'silver roof on red body'],
+        positiveKeywords: [
+          'taxi roof light', 'taxi sign', 'taxi roof sign', 'upright three-box sedan', 'tall glasshouse',
+          'silver roof on red body', 'white roof on green body', 'white roof on blue body', 'dual-tone taxi livery',
+          'urban taxi', 'new territories taxi', 'lantau taxi', 'taxi lamp'
+        ],
         incompatibleKeywords: [
           'low slung coupe flyline', 'targa roll hoops', 'mid-engine glass hatch',
           'two-door coupe', 'two-door', 'sloping roofline', 'coupe', 'fastback', 'curved hood', 'double-bubble'
@@ -4051,12 +4055,15 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
       },
       rear_architecture_and_exhaust: {
         name: 'vertical_rectangular_taillights',
-        positiveKeywords: ['vertical rectangular taillights', 'amber red clear tail lamp clusters', 'single modest exhaust pipe'],
+        positiveKeywords: ['vertical rectangular taillights', 'amber red clear tail lamp clusters', 'single modest exhaust pipe', 'passenger fare decal', '5 seats decal', '4 seats decal'],
         incompatibleKeywords: ['quad sport exhaust', 'active rear wing', 'horizontal led bar', 'ducktail spoiler']
       },
       proportions: {
         name: 'traditional_commercial_fleet_sedan',
-        positiveKeywords: ['classic hong kong taxi', 'commercial taxi livery', 'upright utilitarian sedan'],
+        positiveKeywords: [
+          'classic hong kong taxi', 'hong kong taxi', 'commercial taxi livery', 'upright utilitarian sedan',
+          'red taxi', 'green taxi', 'blue taxi', 'hk taxi', 'urban taxi livery', 'green passenger medallion'
+        ],
         incompatibleKeywords: [
           'supercar', 'widebody sports car', 'sports car', 'two-door coupe', 'coupe', 'low-slung'
         ]
@@ -4336,6 +4343,1668 @@ export const MORPHOLOGICAL_FINGERPRINTS: ModelMorphologicalFingerprint[] = [
         incompatibleKeywords: ['low slung sports car', 'coupe', 'sedan']
       }
     }
+  },
+
+  // ── FERRARI 812 GTS ──
+  {
+    vehicleId: 'ferrari-812-gts',
+    make: 'Ferrari',
+    model: '812 GTS',
+    generation: 'F152M',
+    proportionsDescription: 'Front-mid V12 open-top spider with retractable hardtop, twin aerodynamic rear buttresses, long sculpted hood, and quad round exhaust pipes',
+    confusableWith: [],
+    traits: {
+      headlight_shape: {
+        name: 'swept_back_fender_led_slits',
+        positiveKeywords: ['swept-back headlights', 'vertical led drl strip', 'fender mounted headlamps', 'slanted front lights'],
+        incompatibleKeywords: ['pop-up', 'round headlights', 'horizontal quad led']
+      },
+      front_intake_grille: {
+        name: 'wide_mouth_mesh_grille_with_hood_ducts',
+        positiveKeywords: ['wide front mouth grille', 'mesh radiator intake', 'hood extraction vents', 'sculpted front nose'],
+        incompatibleKeywords: ['spindle grille', 'panamericana', 'kidney grille']
+      },
+      roofline_greenhouse: {
+        name: 'retractable_hardtop_with_twin_buttresses',
+        positiveKeywords: ['twin rear buttresses', 'buttresses behind seats', 'open retractable hardtop', 'flying buttresses with rollover hoops', 'spider roofline'],
+        incompatibleKeywords: ['fixed fastback coupe roof', 'panoramic glass roof', 'soft top canvas']
+      },
+      rear_architecture_and_exhaust: {
+        name: 'quad_round_exhaust_tips_with_circular_lamps',
+        positiveKeywords: ['quad round exhaust', 'four round exhaust tips', 'quad circular taillights', 'two round taillights on each side', 'aggressive rear diffuser'],
+        incompatibleKeywords: ['center exit exhaust', 'vertical stacked exhaust']
+      },
+      proportions: {
+        name: 'front_mid_v12_spider',
+        positiveKeywords: ['front-mid engine spider', 'long hood short deck convertible', 'grand tourer proportions'],
+        incompatibleKeywords: ['suv', 'cab forward mid engine prototype', 'sedan']
+      }
+    }
+  },
+
+  // ── FERRARI 812 COMPETIZIONE ──
+  {
+    vehicleId: 'ferrari-812-competizione',
+    make: 'Ferrari',
+    model: '812 Competizione',
+    generation: 'F152M',
+    proportionsDescription: 'Hardcore front-mid V12 track special with full-width transverse carbon hood blade, vortex generator louvres replacing rear glass, and rectangular exhaust outlets',
+    confusableWith: [],
+    traits: {
+      hood_geometry: {
+        name: 'transverse_carbon_fiber_blade',
+        positiveKeywords: ['transverse carbon blade', 'carbon fiber blade across hood', 'hood air extraction blade', 'carbon transverse slat'],
+        incompatibleKeywords: ['smooth flat hood without blade']
+      },
+      roofline_greenhouse: {
+        name: 'vortex_generators_replacing_rear_screen',
+        positiveKeywords: ['vortex generators on rear screen', 'aluminum rear screen with louvres', 'blind rear screen', 'vortex louvres', 'no rear glass'],
+        incompatibleKeywords: ['clear glass rear window', 'convertible roof', 'open spider']
+      },
+      wing_and_spoiler_architecture: {
+        name: 'prominent_full_width_rear_ducktail_spoiler',
+        positiveKeywords: ['full-width rear spoiler', 'high upturned rear ducktail', 'prominent rear lip spoiler spanning entire tail'],
+        incompatibleKeywords: ['swan neck wing', 'no spoiler']
+      },
+      rear_architecture_and_exhaust: {
+        name: 'outboard_vertical_rectangular_exhausts',
+        positiveKeywords: ['outboard rectangular exhaust pipes', 'vertical rectangular exhausts at diffuser edges', 'full-width diffuser'],
+        incompatibleKeywords: ['quad round exhaust tips', 'central exhaust']
+      },
+      proportions: {
+        name: 'extreme_front_mid_v12_track_car',
+        positiveKeywords: ['hardcore front-mid v12 track car', 'wide track silhouette', 'aggressive aerodynamic body'],
+        incompatibleKeywords: ['suv', 'sedan']
+      }
+    }
+  },
+
+  // ── FERRARI ROMA SPIDER ──
+  {
+    vehicleId: 'ferrari-roma-spider',
+    make: 'Ferrari',
+    model: 'Roma Spider',
+    generation: 'F169',
+    proportionsDescription: 'Front-mid V8 2+2 convertible with tailored soft top fabric roof, shark-nose body-colored perforated grille, and quad exhaust tips',
+    confusableWith: [],
+    traits: {
+      front_intake_grille: {
+        name: 'shark_nose_perforated_grid_grille',
+        positiveKeywords: ['perforated body-colored grille', 'shark-nose front', 'monolithic front grille with holes', 'body color grille'],
+        incompatibleKeywords: ['black mesh wide mouth', 'chrome slatted grille']
+      },
+      headlight_shape: {
+        name: 'horizontal_linear_led_drl_slit',
+        positiveKeywords: ['horizontal led slit dividing headlights', 'linear led bar through headlamps', 'horizontal drl strip'],
+        incompatibleKeywords: ['round headlights', 'vertical slit']
+      },
+      roofline_greenhouse: {
+        name: 'tailored_soft_top_fabric_roof',
+        positiveKeywords: ['fabric soft top', 'canvas convertible roof', 'retractable soft top', 'roma spider roof'],
+        incompatibleKeywords: ['fixed metal coupe roof', 'retractable hardtop with buttresses']
+      },
+      rear_architecture_and_exhaust: {
+        name: 'quad_oval_exhaust_with_horizontal_gem_lamps',
+        positiveKeywords: ['quad oval exhaust tips', 'slim horizontal led taillights', 'flush active rear spoiler'],
+        incompatibleKeywords: ['round circular taillights', 'center exhaust']
+      },
+      proportions: {
+        name: 'front_engine_2_plus_2_spider',
+        positiveKeywords: ['front-engine convertible', 'elegant 2+2 spider silhouette', 'minimalist retro grand tourer'],
+        incompatibleKeywords: ['mid-engine cab-forward', 'suv']
+      }
+    }
+  },
+
+  // ── FERRARI PUROSANGUE ──
+  {
+    vehicleId: 'ferrari-purosangue',
+    make: 'Ferrari',
+    model: 'Purosangue',
+    generation: 'F175',
+    proportionsDescription: 'High-riding 4-door 4-seater front-mid V12 with rear welcome suicide doors, split front lighting, and quad exhaust pipes',
+    confusableWith: [],
+    traits: {
+      headlight_shape: {
+        name: 'split_horizontal_drl_strip_and_lower_pods',
+        positiveKeywords: ['split front lighting', 'ultra-slim horizontal drl strip', 'c-shaped front aero duct around lamps', 'hidden lower headlights'],
+        incompatibleKeywords: ['large round headlights', 'vertical headlight cluster']
+      },
+      front_intake_grille: {
+        name: 'smooth_closed_upper_nose_with_lower_intake',
+        positiveKeywords: ['smooth front nose without upper grille', 'wide lower front bumper intake', 'lower carbon splitter'],
+        incompatibleKeywords: ['massive upper grille', 'hexagonal honeycomb upper grille']
+      },
+      door_architecture: {
+        name: 'rear_hinged_welcome_suicide_doors',
+        positiveKeywords: ['rear-hinged doors', 'welcome doors', 'suicide doors', 'four-door sports body'],
+        incompatibleKeywords: ['two-door coupe', 'sliding doors']
+      },
+      roofline_greenhouse: {
+        name: 'four_door_coupe_suv_greenhouse',
+        positiveKeywords: ['high-riding four-door silhouette', 'crossover roofline', 'four-door fastback'],
+        incompatibleKeywords: ['two-door supercar flyline', 'convertible soft top']
+      },
+      rear_architecture_and_exhaust: {
+        name: 'quad_round_exhaust_in_large_rear_diffuser',
+        positiveKeywords: ['quad round exhaust pipes', 'two dual round exhaust tips', 'large rear diffuser', 'horizontal taillights connected by aero duct'],
+        incompatibleKeywords: ['single exhaust', 'no exhaust']
+      },
+      proportions: {
+        name: 'high_riding_front_mid_v12_active_crossover',
+        positiveKeywords: ['high ground clearance', 'sports crossover stance', 'ferrari suv proportions', 'muscular wheel arches with floating cladding'],
+        incompatibleKeywords: ['low slung mid-engine supercar', 'sedan']
+      }
+    }
+  },
+
+  // ── FERRARI F8 TRIBUTO / SPIDER ──
+  {
+    vehicleId: 'ferrari-f8-tributo',
+    make: 'Ferrari',
+    model: 'F8 Tributo',
+    generation: 'F142MFL',
+    proportionsDescription: 'Mid-engine V8 berlinetta with front S-Duct hood scoop, horizontal compact twin-element LED headlamps with L-shaped brake cooling intakes, and quad round taillights',
+    confusableWith: [],
+    traits: {
+      headlight_shape: {
+        name: 'horizontal_compact_led_with_l_shaped_cooling_air_intake',
+        positiveKeywords: ['compact horizontal led headlights', 'l-shaped brake cooling air intake above lamps', 'horizontal led headlamps with upper intake slot'],
+        incompatibleKeywords: ['long swept-back vertical headlights', 'dual projector vertical lights', 'round headlights']
+      },
+      hood_geometry: {
+        name: 'central_s_duct_front_aero_channel',
+        positiveKeywords: ['front s-duct channel', 's-duct hood scoop', 'central hood air exit duct'],
+        incompatibleKeywords: ['smooth flat hood without s-duct']
+      },
+      rear_architecture_and_exhaust: {
+        name: 'quad_round_taillights_with_dual_mid_height_exhaust',
+        positiveKeywords: ['quad round circular taillights', 'four round taillights', 'two circular lamps on each side', 'dual round exhausts flanking license plate'],
+        incompatibleKeywords: ['dual single round taillights', 'horizontal led blade taillights']
+      },
+      side_intake_type: {
+        name: 'scalloped_side_air_intake_with_central_splitter',
+        positiveKeywords: ['side air intake behind door', 'scalloped side air scoop', 'side intake with horizontal divider'],
+        incompatibleKeywords: ['smooth side without intake', 'floating tendon door']
+      },
+      proportions: {
+        name: 'mid_engine_v8_berlinetta',
+        positiveKeywords: ['mid-engine supercar silhouette', 'cab-forward stance', 'louvered lexan engine cover'],
+        incompatibleKeywords: ['front engine grand tourer', 'suv']
+      }
+    }
+  },
+  {
+    vehicleId: 'ferrari-f8-spider',
+    make: 'Ferrari',
+    model: 'F8 Spider',
+    generation: 'F142MFL',
+    proportionsDescription: 'Mid-engine V8 retractable hardtop spider with front S-Duct, compact LED lamps with cooling intakes, twin rear flying buttresses, and quad round taillights',
+    confusableWith: [],
+    traits: {
+      headlight_shape: {
+        name: 'horizontal_compact_led_with_l_shaped_intake',
+        positiveKeywords: ['compact horizontal led headlights', 'l-shaped air intake above lights'],
+        incompatibleKeywords: ['long swept-back vertical headlights']
+      },
+      roofline_greenhouse: {
+        name: 'retractable_hardtop_with_twin_buttresses',
+        positiveKeywords: ['twin rear buttresses', 'spider retractable hardtop', 'flying buttresses with engine louvres'],
+        incompatibleKeywords: ['fixed coupe roof', 'louvered lexan fastback rear glass']
+      },
+      rear_architecture_and_exhaust: {
+        name: 'quad_round_taillights_with_dual_exhausts',
+        positiveKeywords: ['quad round circular taillights', 'four round taillights', 'dual round exhaust tips'],
+        incompatibleKeywords: ['single round taillights on each side']
+      },
+      proportions: {
+        name: 'mid_engine_v8_spider',
+        positiveKeywords: ['mid-engine convertible', 'spider proportions'],
+        incompatibleKeywords: ['front engine coupe', 'suv']
+      }
+    }
+  },
+
+  // ── FERRARI 488 GTB / SPIDER ──
+  {
+    vehicleId: 'ferrari-488-gtb',
+    make: 'Ferrari',
+    model: '488 GTB',
+    generation: 'F142M',
+    proportionsDescription: 'Mid-engine V8 coupe with large scalloped side air intake divided by a horizontal central strake, dual projector headlamps, and dual round taillights',
+    confusableWith: [],
+    traits: {
+      headlight_shape: {
+        name: 'long_swept_back_vertical_projector_headlights',
+        positiveKeywords: ['swept-back headlights', 'dual projector lenses swept up fenders', 'vertical led light pipe along outer edge'],
+        incompatibleKeywords: ['compact horizontal led with intake above', 'horizontal slit']
+      },
+      side_intake_type: {
+        name: 'scalloped_side_intake_with_horizontal_central_strake',
+        positiveKeywords: ['scalloped side air intake', 'horizontal central strake dividing intake', 'side scoop divided by winglet', 'large door haunch air scoop'],
+        incompatibleKeywords: ['smooth doors without intake', 's-duct hood scoop']
+      },
+      rear_architecture_and_exhaust: {
+        name: 'dual_single_circular_taillights_with_twin_exhausts',
+        positiveKeywords: ['dual single round taillights', 'one circular lamp on each side', 'dual round exhaust tips flanking license plate'],
+        incompatibleKeywords: ['quad round taillights', 'four circular taillights', 'center quad exhaust']
+      },
+      hood_geometry: {
+        name: 'dual_longitudinal_hood_ridges_without_s_duct',
+        positiveKeywords: ['hood contours', 'dual hood creases without central s-duct hole'],
+        incompatibleKeywords: ['through-body s-duct', 'transverse carbon blade']
+      },
+      proportions: {
+        name: 'mid_engine_v8_berlinetta',
+        positiveKeywords: ['mid-engine supercar', 'low slung cab forward', 'glass rear engine cover'],
+        incompatibleKeywords: ['front engine grand tourer', 'suv']
+      }
+    }
+  },
+  {
+    vehicleId: 'ferrari-488-spider',
+    make: 'Ferrari',
+    model: '488 Spider',
+    generation: 'F142M',
+    proportionsDescription: 'Retractable hardtop convertible mid-engine V8 with scalloped side scoops divided by horizontal strake and flying buttresses',
+    confusableWith: [],
+    traits: {
+      headlight_shape: {
+        name: 'long_swept_back_vertical_headlights',
+        positiveKeywords: ['swept-back headlights', 'projector headlights'],
+        incompatibleKeywords: ['compact horizontal led with intake above']
+      },
+      side_intake_type: {
+        name: 'scalloped_side_scoop_with_strake',
+        positiveKeywords: ['scalloped side air scoop', 'horizontal strake in side intake'],
+        incompatibleKeywords: ['smooth doors']
+      },
+      roofline_greenhouse: {
+        name: 'retractable_hardtop_with_flying_buttresses',
+        positiveKeywords: ['flying buttresses', 'retractable hardtop', 'vertical rear window between buttresses'],
+        incompatibleKeywords: ['sloping glass rear engine hatch', 'fixed roof']
+      },
+      rear_architecture_and_exhaust: {
+        name: 'single_round_taillights_with_twin_exhausts',
+        positiveKeywords: ['dual single circular taillights', 'one round lamp on each side', 'dual exhaust tips'],
+        incompatibleKeywords: ['quad round circular taillights']
+      }
+    }
+  },
+
+  // ── KOENIGSEGG JESKO ATTACK & ABSOLUT ──
+  {
+    vehicleId: 'koenigsegg-jesko-attack',
+    make: 'Koenigsegg',
+    model: 'Jesko Attack',
+    generation: 'Jesko',
+    proportionsDescription: 'High-downforce megacar featuring massive top-mounted active boomerang rear wing, wraparound canopy, and deep front carbon splitter',
+    confusableWith: [],
+    traits: {
+      wing_and_spoiler_architecture: {
+        name: 'gigantic_top_mounted_active_boomerang_rear_wing',
+        positiveKeywords: ['giant top-mounted boomerang rear wing', 'boomerang wing', 'active carbon rear wing with top pylons', 'jesko rear wing', 'massive double-profile rear wing', 'top-mounted rear wing', 'large rear wing', 'massive rear wing'],
+        incompatibleKeywords: ['twin vertical fins without wing', 'no rear wing', 'flush rear deck']
+      },
+      roofline_greenhouse: {
+        name: 'fighter_jet_wraparound_visor_canopy',
+        positiveKeywords: ['fighter jet canopy', 'wraparound visor windshield', 'curved panoramic windshield', 'helmet visor cockpit'],
+        incompatibleKeywords: ['upright windshield', 'four-door sedan greenhouse']
+      },
+      door_architecture: {
+        name: 'dihedral_synchro_helix_actuation_doors',
+        positiveKeywords: ['dihedral synchro-helix doors', 'koenigsegg doors', 'doors rotating outward and upward'],
+        incompatibleKeywords: ['conventional front-hinged doors', 'gullwing']
+      },
+      rear_architecture_and_exhaust: {
+        name: 'central_high_mounted_exhaust_outlet',
+        positiveKeywords: ['central high-mounted exhaust', 'center exhaust outlet in rear mesh', 'extreme carbon diffuser with strakes'],
+        incompatibleKeywords: ['quad corner exhaust tips', 'no exhaust']
+      },
+      proportions: {
+        name: 'extreme_track_megacar',
+        positiveKeywords: ['extreme track hypercar stance', 'low slung cab forward silhouette', 'carbon monocoque track car', 'jesko attack'],
+        incompatibleKeywords: ['grand tourer', 'suv', 'sedan']
+      }
+    }
+  },
+  {
+    vehicleId: 'koenigsegg-jesko-absolut',
+    make: 'Koenigsegg',
+    model: 'Jesko Absolut',
+    generation: 'Jesko',
+    proportionsDescription: 'Low-drag maximum-velocity megacar featuring twin vertical stabilizer fins, elongated rear deck, NO giant rear wing, and rear aero dish wheels',
+    confusableWith: [],
+    traits: {
+      wing_and_spoiler_architecture: {
+        name: 'twin_vertical_stabilizer_fins_low_drag',
+        positiveKeywords: ['twin vertical stabilizer fins', 'fighter-jet vertical fins', 'two vertical fins on rear deck', 'no giant rear wing', 'wingless rear deck', 'low drag tail'],
+        incompatibleKeywords: ['giant top-mounted boomerang rear wing', 'boomerang wing', 'massive rear wing']
+      },
+      roofline_greenhouse: {
+        name: 'fighter_jet_canopy_with_elongated_tail',
+        positiveKeywords: ['wraparound visor canopy', 'elongated rear clamshell', 'extended streamlined tail'],
+        incompatibleKeywords: ['upright sedan windshield']
+      },
+      door_architecture: {
+        name: 'dihedral_synchro_helix_actuation_doors',
+        positiveKeywords: ['dihedral synchro-helix doors', 'koenigsegg doors'],
+        incompatibleKeywords: ['conventional front-hinged doors']
+      },
+      rear_architecture_and_exhaust: {
+        name: 'central_high_mounted_exhaust_with_extended_diffuser',
+        positiveKeywords: ['central exhaust outlet', 'elongated rear diffuser', 'extended low-drag tail'],
+        incompatibleKeywords: ['quad exhausts']
+      },
+      proportions: {
+        name: 'maximum_speed_streamliner_megacar',
+        positiveKeywords: ['streamlined hypercar', 'low drag high speed silhouette', 'rear aero wheel covers', 'jesko absolut'],
+        incompatibleKeywords: ['high downforce track wing', 'suv']
+      }
+    }
+  },
+
+  // ── KOENIGSEGG REGERA ──
+  {
+    vehicleId: 'koenigsegg-regera',
+    make: 'Koenigsegg',
+    model: 'Regera',
+    generation: 'Regera',
+    proportionsDescription: 'Direct-drive luxury megacar with single large central fish-tail oval titanium exhaust, folding top-mounted rear wing, and Autoskin hydraulics',
+    confusableWith: [],
+    traits: {
+      rear_architecture_and_exhaust: {
+        name: 'central_fish_tail_oval_titanium_exhaust',
+        positiveKeywords: ['central fish-tail exhaust', 'wide oval titanium exhaust in center of diffuser', 'akrapovic titanium fish-tail exhaust', 'folding top-mounted rear wing'],
+        incompatibleKeywords: ['twin round exhausts', 'quad corner exhausts', 'high mounted center exhaust']
+      },
+      roofline_greenhouse: {
+        name: 'wraparound_visor_canopy_with_detachable_roof',
+        positiveKeywords: ['wraparound visor windshield', 'detachable hardtop', 'autoskin hydraulic panels'],
+        incompatibleKeywords: ['fixed metal roof without targa option']
+      },
+      door_architecture: {
+        name: 'dihedral_synchro_helix_actuation_doors',
+        positiveKeywords: ['dihedral synchro-helix doors', 'koenigsegg doors'],
+        incompatibleKeywords: ['scissor doors', 'butterfly doors']
+      },
+      proportions: {
+        name: 'luxury_grand_touring_megacar',
+        positiveKeywords: ['luxury megacar stance', 'flowing streamlined body', 'clean rear deck without permanent high wing'],
+        incompatibleKeywords: ['suv', 'sedan']
+      }
+    }
+  },
+
+  // ── KOENIGSEGG AGERA RS ──
+  {
+    vehicleId: 'koenigsegg-agera-rs',
+    make: 'Koenigsegg',
+    model: 'Agera RS',
+    generation: 'Agera',
+    proportionsDescription: 'Lightweight carbon hypercar with central oval exhaust, top-mounted active rear wing with endplates, and classic Agera clamshell',
+    confusableWith: [],
+    traits: {
+      wing_and_spoiler_architecture: {
+        name: 'active_rear_wing_with_carbon_endplates',
+        positiveKeywords: ['active rear wing on dual pylons', 'carbon wing with endplates', 'top-exit rear wing'],
+        incompatibleKeywords: ['no wing', 'twin vertical fins only']
+      },
+      rear_architecture_and_exhaust: {
+        name: 'central_single_oval_exhaust_outlet',
+        positiveKeywords: ['central oval exhaust outlet', 'single large center exhaust', 'oval led taillights'],
+        incompatibleKeywords: ['quad exhausts', 'fish-tail exhaust']
+      },
+      roofline_greenhouse: {
+        name: 'classic_agera_wraparound_visor',
+        positiveKeywords: ['wraparound windshield', 'detachable hardtop roof'],
+        incompatibleKeywords: ['upright windshield']
+      }
+    }
+  },
+
+  // ── KOENIGSEGG CC850 ──
+  {
+    vehicleId: 'koenigsegg-cc850',
+    make: 'Koenigsegg',
+    model: 'CC850',
+    generation: 'CC850',
+    proportionsDescription: 'CC8S 20th anniversary homage with retro teardrop greenhouse, triple round circular taillights in black horizontal panel, and phone-dial wheels',
+    confusableWith: [],
+    traits: {
+      rear_architecture_and_exhaust: {
+        name: 'triple_round_cluster_taillights_in_horizontal_panel',
+        positiveKeywords: ['triple round taillights', 'three round lights on each side in black panel', 'retro round taillight cluster', 'central exhaust'],
+        incompatibleKeywords: ['full width horizontal light bar', 'vertical taillights']
+      },
+      headlight_shape: {
+        name: 'rounded_teardrop_retro_headlights',
+        positiveKeywords: ['rounded teardrop headlights', 'clean retro headlamps', 'cc8s tribute lights'],
+        incompatibleKeywords: ['sharp angular led blades']
+      },
+      roofline_greenhouse: {
+        name: 'retro_clean_teardrop_cockpit',
+        positiveKeywords: ['clean teardrop cockpit', 'detachable hardtop roof', 'telephone-dial wheels'],
+        incompatibleKeywords: ['extreme track aero package']
+      }
+    }
+  },
+
+  // ── KOENIGSEGG ONE:1 ──
+  {
+    vehicleId: 'koenigsegg-one-1',
+    make: 'Koenigsegg',
+    model: 'One:1',
+    generation: 'Agera',
+    proportionsDescription: '1:1 power-to-weight megacar with roof-mounted air intake scoop extending directly into active swan-neck rear wing and dual front dive planes',
+    confusableWith: [],
+    traits: {
+      roofline_greenhouse: {
+        name: 'roof_mounted_air_scoop_connected_to_wing',
+        positiveKeywords: ['roof-mounted air scoop', 'central roof intake running into rear wing', 'roof snorkel connected to wing pylon'],
+        incompatibleKeywords: ['smooth roof without scoop']
+      },
+      wing_and_spoiler_architecture: {
+        name: 'top_mounted_swan_neck_double_wing',
+        positiveKeywords: ['top-mounted swan-neck rear wing', 'active double-surface rear wing', 'carbon rear wing linked to roof pylon'],
+        incompatibleKeywords: ['flush rear spoiler', 'no wing']
+      },
+      fender_architecture: {
+        name: 'dual_front_carbon_canards_dive_planes',
+        positiveKeywords: ['carbon dive planes on front bumper', 'front canards', 'front louvres in carbon fenders'],
+        incompatibleKeywords: ['smooth front bumper without dive planes']
+      }
+    }
+  },
+
+  // ── BUGATTI CHIRON PUR SPORT / SPORT / VEYRON / DIVO / BOLIDE / TOURBILLON ──
+  {
+    vehicleId: 'bugatti-chiron-pur-sport',
+    make: 'Bugatti',
+    model: 'Chiron Pur Sport',
+    generation: 'Chiron',
+    proportionsDescription: 'Agility-focused hypercar with massive fixed 1.9-metre carbon rear wing, split front splitter, enlarged horseshoe, and titanium exhaust',
+    confusableWith: [],
+    traits: {
+      wing_and_spoiler_architecture: {
+        name: 'massive_fixed_carbon_rear_wing_1_9_metre',
+        positiveKeywords: ['fixed 1.9-metre rear wing', 'massive fixed carbon rear wing', 'inward-angled rear wing pylons', 'fixed rear wing with bugatti lettering'],
+        incompatibleKeywords: ['active pop-up spoiler', 'no rear wing', 'twin stabilizer fins']
+      },
+      front_intake_grille: {
+        name: 'enlarged_horseshoe_grille_with_split_splitter',
+        positiveKeywords: ['enlarged horseshoe grille', 'huge front corner air intakes', 'prominent front splitter with vertical endplates'],
+        incompatibleKeywords: ['small chrome horseshoe', 'kidney grille']
+      },
+      rear_architecture_and_exhaust: {
+        name: 'dual_3d_printed_titanium_exhaust_tips',
+        positiveKeywords: ['3d-printed titanium exhaust tips', 'dual round upward-angled center exhaust pipes', 'titanium central exhaust', 'full-width horizontal led taillight bar'],
+        incompatibleKeywords: ['quad vertically stacked exhausts', 'quad horizontal row exhaust']
+      },
+      proportions: {
+        name: 'hypercar_track_stance',
+        positiveKeywords: ['widebody hypercar', 'magnesium aero blade wheels', 'negative camber agile track stance'],
+        incompatibleKeywords: ['suv', 'sedan']
+      }
+    }
+  },
+  {
+    vehicleId: 'bugatti-chiron-sport',
+    make: 'Bugatti',
+    model: 'Chiron Sport',
+    generation: 'Chiron',
+    proportionsDescription: 'Track-oriented Chiron with quad round grouped central exhaust pipes, carbon windscreen wipers, and horseshoe grille',
+    confusableWith: [],
+    traits: {
+      rear_architecture_and_exhaust: {
+        name: 'quad_round_grouped_central_exhaust_pipes',
+        positiveKeywords: ['quad round exhaust pipes grouped in center', 'four circular exhaust tips in horizontal row', 'central quad round exhausts', 'active pop-up rear wing'],
+        incompatibleKeywords: ['vertically stacked twin twin exhausts', 'fixed 1.9m wing', 'dual titanium tips']
+      },
+      front_intake_grille: {
+        name: 'signature_bugatti_horseshoe_grille',
+        positiveKeywords: ['horseshoe grille', 'bugatti macaron emblem', 'quad led headlights'],
+        incompatibleKeywords: ['singleframe', 'double kidney']
+      }
+    }
+  },
+  {
+    vehicleId: 'bugatti-veyron',
+    make: 'Bugatti',
+    model: 'Veyron 16.4',
+    generation: 'EB 16.4',
+    proportionsDescription: 'Iconic EB 16.4 hypercar with rounded curvaceous dome proportions, chrome-surround horseshoe grille, and dual top engine air snorkels behind cabin',
+    confusableWith: [],
+    traits: {
+      front_intake_grille: {
+        name: 'upright_chrome_surround_horseshoe_grille',
+        positiveKeywords: ['upright horseshoe grille with chrome surround', 'bugatti macaron logo on chrome horseshoe', 'rounded front air intakes'],
+        incompatibleKeywords: ['full width light bar', 'quad square led projectors', 'sharp angular front']
+      },
+      roofline_greenhouse: {
+        name: 'rounded_dome_cabin_with_dual_top_air_snorkels',
+        positiveKeywords: ['twin polished aluminum engine air snorkels', 'dual top engine air intakes behind headrests', 'rounded dome roofline'],
+        incompatibleKeywords: ['sharp angular roof', 'flat engine cover']
+      },
+      rear_architecture_and_exhaust: {
+        name: 'dual_circular_rear_taillight_pods',
+        positiveKeywords: ['dual round taillights on each side', 'circular taillight pods', 'central rectangular exhaust pipe', 'active rear wing with airbrake function'],
+        incompatibleKeywords: ['full width horizontal led light bar', 'quad stacked exhaust']
+      },
+      proportions: {
+        name: 'rounded_voluptuous_w16_hypercar',
+        positiveKeywords: ['rounded bulbous proportions', 'two-tone color scheme', 'curvaceous hypercar body'],
+        incompatibleKeywords: ['sharp knife-edge creases', 'suv']
+      }
+    }
+  },
+  {
+    vehicleId: 'bugatti-divo',
+    make: 'Bugatti',
+    model: 'Divo',
+    generation: 'Divo',
+    proportionsDescription: 'Coachbuilt track hypercar with 3D finned matrix taillights, angular front LED blade headlights, shortened C-line, and wide active rear wing with central shark fin',
+    confusableWith: [],
+    traits: {
+      headlight_shape: {
+        name: 'ultra_slim_horizontal_led_blades_with_outer_vents',
+        positiveKeywords: ['ultra-slim horizontal led headlights', 'angular led blade headlamps', 'vertical outer air curtains in front fenders'],
+        incompatibleKeywords: ['four square led eyes', 'round headlights']
+      },
+      rear_architecture_and_exhaust: {
+        name: '3d_finned_parametric_matrix_led_taillights',
+        positiveKeywords: ['3d finned taillights', 'parametric matrix rear led fins', 'central shark fin', 'wide fixed active rear wing', 'quad rectangular exhaust pipes in center'],
+        incompatibleKeywords: ['continuous straight led light bar', 'round taillights']
+      },
+      side_intake_type: {
+        name: 'shortened_angular_c_line_contour',
+        positiveKeywords: ['narrowed c-line', 'shortened side c-curve', 'sculpted side air scoop with central carbon divider'],
+        incompatibleKeywords: ['full traditional round c-line']
+      }
+    }
+  },
+  {
+    vehicleId: 'bugatti-bolide',
+    make: 'Bugatti',
+    model: 'Bolide',
+    generation: 'Bolide',
+    proportionsDescription: 'Extreme track-only hypercar with X-shaped headlights and X-shaped taillights, massive roof scoop, and Le Mans prototype aerodynamics',
+    confusableWith: [],
+    traits: {
+      headlight_shape: {
+        name: 'x_shaped_front_led_headlights',
+        positiveKeywords: ['x-shaped headlights', 'x-signature front lights', 'le mans prototype front aero'],
+        incompatibleKeywords: ['horizontal square led eyes', 'round lights']
+      },
+      rear_architecture_and_exhaust: {
+        name: 'x_shaped_led_taillights_with_central_quad_exhaust',
+        positiveKeywords: ['x-shaped taillights', 'x-signature rear led lamps', 'quad central high-mounted exhausts framed by x-lights', 'towering multi-element rear wing'],
+        incompatibleKeywords: ['single straight light strip', 'round taillights']
+      },
+      roofline_greenhouse: {
+        name: 'prototype_cockpit_with_dimpled_roof_scoop',
+        positiveKeywords: ['massive roof air scoop with morphable skin', 'le mans prototype cockpit', 'shark fin spine connecting scoop to wing'],
+        incompatibleKeywords: ['standard road car roof']
+      }
+    }
+  },
+  {
+    vehicleId: 'bugatti-tourbillon',
+    make: 'Bugatti',
+    model: 'Tourbillon',
+    generation: 'Tourbillon',
+    proportionsDescription: 'Next-gen hybrid hypercar with dihedral doors, illuminated horseshoe grille integrated into aero nose, and full-width illuminated BUGATTI rear light ribbon',
+    confusableWith: [],
+    traits: {
+      front_intake_grille: {
+        name: 'aero_integrated_illuminated_horseshoe_grille',
+        positiveKeywords: ['aerodynamic horseshoe grille', 'forward-jutting nose with floating fenders', 'illuminated bugatti macaron'],
+        incompatibleKeywords: ['conventional square bumper']
+      },
+      door_architecture: {
+        name: 'dihedral_gullwing_doors',
+        positiveKeywords: ['dihedral doors opening upward and forward', 'electrically actuated gullwing-dihedral doors'],
+        incompatibleKeywords: ['conventional front-hinged doors']
+      },
+      rear_architecture_and_exhaust: {
+        name: 'sweeping_curved_led_ribbon_with_illuminated_bugatti',
+        positiveKeywords: ['curved sweeping led rear ribbon', 'illuminated bugatti script across rear', 'giant stepped rear diffuser'],
+        incompatibleKeywords: ['straight horizontal light bar', 'stacked quad exhausts']
+      }
+    }
+  },
+
+  // ── MCLAREN 600LT / 750S / SENNA / SPEEDTAIL ──
+  {
+    vehicleId: 'mclaren-600lt',
+    make: 'McLaren',
+    model: '600LT',
+    generation: 'Sports Series',
+    proportionsDescription: 'Longtail Sports Series with signature top-exit exhausts exiting straight up through rear engine deck, fixed rear wing, and extended carbon splitter',
+    confusableWith: [],
+    traits: {
+      rear_architecture_and_exhaust: {
+        name: 'top_exit_upward_firing_exhaust_pipes',
+        positiveKeywords: ['top-exit exhaust', 'exhaust exiting straight up through rear engine deck', 'top-mounted exhaust tips on rear deck', 'exhaust heat shields on engine cover'],
+        incompatibleKeywords: ['lower bumper exhaust', 'exhaust exiting through diffuser', 'quad exhaust']
+      },
+      wing_and_spoiler_architecture: {
+        name: 'fixed_carbon_fiber_rear_wing',
+        positiveKeywords: ['fixed rear wing on rear deck', 'carbon rear wing with endplates', 'extended carbon rear diffuser'],
+        incompatibleKeywords: ['active pop-up airbrake flush with body', 'no rear wing']
+      },
+      front_intake_grille: {
+        name: 'extended_carbon_front_splitter_with_winglets',
+        positiveKeywords: ['extended carbon front splitter', 'side aero winglets on front bumper', 'carbon side skirts with 600lt branding'],
+        incompatibleKeywords: ['clean 570s bumper without splitter winglets']
+      },
+      proportions: {
+        name: 'longtail_sports_series_stance',
+        positiveKeywords: ['elongated longtail rear', 'carbon lightweight track silhouette', 'dihedral doors'],
+        incompatibleKeywords: ['suv', 'sedan']
+      }
+    }
+  },
+  {
+    vehicleId: 'mclaren-750s',
+    make: 'McLaren',
+    model: '750S',
+    generation: 'Super Series',
+    proportionsDescription: 'Super Series supercar with central high-exit stainless steel exhaust pipe, 20% larger raised active rear wing, and narrower eye-socket headlights',
+    confusableWith: [],
+    traits: {
+      rear_architecture_and_exhaust: {
+        name: 'central_high_exit_stainless_steel_exhaust',
+        positiveKeywords: ['central high-exit exhaust', 'single central exhaust pipe exiting through upper rear mesh', 'f1-inspired central exhaust', 'raised active rear wing with central cutout'],
+        incompatibleKeywords: ['dual round outer exhausts', 'quad exhaust pipes', 'top-exit vertical exhausts']
+      },
+      headlight_shape: {
+        name: 'narrower_eye_socket_headlamps_with_body_color_surrounds',
+        positiveKeywords: ['narrower eye-socket headlight recesses', 'body-colored headlight surrounds', 'integrated led headlamp sockets'],
+        incompatibleKeywords: ['deep dark carbon eye sockets of 720s', 'speedmark lamps']
+      },
+      wing_and_spoiler_architecture: {
+        name: 'raised_active_rear_wing_20_percent_larger',
+        positiveKeywords: ['raised active rear wing', 'larger active airbrake wing', 'extended rear spoiler with central exhaust notch'],
+        incompatibleKeywords: ['fixed giant swan-neck wing', 'no rear wing']
+      }
+    }
+  },
+  {
+    vehicleId: 'mclaren-senna',
+    make: 'McLaren',
+    model: 'Senna',
+    generation: 'Ultimate Series',
+    proportionsDescription: 'Track-focused hypercar with giant top-mounted swan-neck active rear wing, glazed lower door glass panels, and triple high-exit central exhausts',
+    confusableWith: [],
+    traits: {
+      wing_and_spoiler_architecture: {
+        name: 'giant_top_mounted_swan_neck_active_rear_wing',
+        positiveKeywords: ['giant swan-neck rear wing', 'top-mounted carbon active rear wing', 'massive double-element rear wing towering above roofline', 'senna rear wing'],
+        incompatibleKeywords: ['flush active spoiler', 'no rear wing', 'small lip spoiler']
+      },
+      door_architecture: {
+        name: 'dihedral_doors_with_glazed_lower_glass_panels',
+        positiveKeywords: ['see-through lower door glass', 'glazed door panels', 'transparent glass insert in doors', 'dihedral doors with upper and lower glass'],
+        incompatibleKeywords: ['solid carbon door panels without glass']
+      },
+      rear_architecture_and_exhaust: {
+        name: 'triple_or_dual_high_mounted_central_exhausts',
+        positiveKeywords: ['triple central high-mounted exhaust pipes', 'slash-cut exhaust tips exiting from rear deck', 'colossal stepped rear carbon diffuser'],
+        incompatibleKeywords: ['lower diffuser exhausts', 'side exit exhaust']
+      },
+      proportions: {
+        name: 'brutal_form_follows_function_track_hypercar',
+        positiveKeywords: ['brutal aerodynamic track car silhouette', 'active front aero flaps in intakes', 'roof snorkel air scoop'],
+        incompatibleKeywords: ['elegant grand tourer', 'suv']
+      }
+    }
+  },
+  {
+    vehicleId: 'mclaren-speedtail',
+    make: 'McLaren',
+    model: 'Speedtail',
+    generation: 'Ultimate Series',
+    proportionsDescription: 'Hyper-GT streamliner with 3-seat central driving position, elongated teardrop tail, flexible carbon active ailerons, and static front wheel aero covers',
+    confusableWith: [],
+    traits: {
+      proportions: {
+        name: 'ultra_long_streamlined_teardrop_body',
+        positiveKeywords: ['ultra-long teardrop streamliner body', 'extended streamlined tail', '5.2-metre hyper-gt silhouette', '3-seat central driving cockpit'],
+        incompatibleKeywords: ['short rear overhang', 'tall track wing', 'suv']
+      },
+      wing_and_spoiler_architecture: {
+        name: 'seamless_flexible_carbon_active_ailerons',
+        positiveKeywords: ['flexible carbon active ailerons', 'seamless rear ailerons bending upward without panel gaps', 'flush longtail rear'],
+        incompatibleKeywords: ['raised wing with pylons', 'fixed carbon wing']
+      },
+      fender_architecture: {
+        name: 'static_aerodynamic_carbon_front_wheel_covers',
+        positiveKeywords: ['static front wheel aero covers', 'enclosed carbon front wheel discs', 'smooth aerodynamic wheel covers'],
+        incompatibleKeywords: ['open multi-spoke alloy wheels on all corners']
+      },
+      headlight_shape: {
+        name: 'razor_thin_horizontal_led_slits',
+        positiveKeywords: ['ultra-slim horizontal led headlamps', 'minimalist front light slits'],
+        incompatibleKeywords: ['large eye socket headlamps', 'round lights']
+      }
+    }
+  },
+
+  // ── MASERATI MC12 ──
+  {
+    vehicleId: 'maserati-mc12',
+    make: 'Maserati',
+    model: 'MC12',
+    generation: 'MC12',
+    proportionsDescription: 'FIA GT homologation hypercar built on Enzo chassis with full-width rear carbon wing, removable targa roof, and elongated trident nose',
+    confusableWith: [],
+    traits: {
+      wing_and_spoiler_architecture: {
+        name: 'colossal_full_width_rear_carbon_wing',
+        positiveKeywords: ['giant full-width rear wing', 'over 2-metre wide carbon rear wing', 'homologation race wing spanning full body width'],
+        incompatibleKeywords: ['flush active lip', 'no rear wing']
+      },
+      front_intake_grille: {
+        name: 'elongated_low_oval_grille_with_maserati_trident',
+        positiveKeywords: ['low oval grille with prominent trident', 'elongated nose with hood extraction louvres', 'blue and white livery or dark blue paint'],
+        incompatibleKeywords: ['vertical slat grille', 'panamericana']
+      },
+      roofline_greenhouse: {
+        name: 'extended_cockpit_with_removable_targa_hardtop',
+        positiveKeywords: ['removable targa roof panel', 'elongated low cockpit', 'rear windowless engine deck with air scoop'],
+        incompatibleKeywords: ['four-door sedan roofline']
+      },
+      proportions: {
+        name: 'exceptionally_long_and_wide_fia_gt_homologation',
+        positiveKeywords: ['long low wide homologation racecar', 'extreme width and length', 'enzo-derived prototype proportions'],
+        incompatibleKeywords: ['compact roadster', 'suv']
+      }
+    }
+  },
+
+  // ── PORSCHE 911 GT2 RS / 911 DAKAR / TAYCAN ──
+  {
+    vehicleId: 'porsche-911-gt2-rs',
+    make: 'Porsche',
+    model: '911 GT2 RS',
+    generation: '991.2',
+    proportionsDescription: 'Extreme twin-turbo flat-6 track car with dual NACA ducts on carbon hood, large side air intakes ahead of rear wheels, and massive fixed carbon wing',
+    confusableWith: [],
+    traits: {
+      hood_geometry: {
+        name: 'dual_naca_air_intake_ducts_on_carbon_hood',
+        positiveKeywords: ['dual naca ducts on hood', 'twin naca vents in carbon bonnet', 'carbon fiber hood with naca ducts'],
+        incompatibleKeywords: ['smooth hood without naca ducts', 'large dual extraction nostrils']
+      },
+      side_intake_type: {
+        name: 'large_rear_fender_turbo_air_intakes',
+        positiveKeywords: ['large side air intakes in rear fenders', 'turbo side scoops ahead of rear wheels', 'wide turbo rear haunches with intakes'],
+        incompatibleKeywords: ['smooth rear fenders without side air intakes (gt3)']
+      },
+      wing_and_spoiler_architecture: {
+        name: 'massive_fixed_carbon_rear_wing_with_endplates',
+        positiveKeywords: ['massive fixed carbon rear wing', 'tall aluminum wing uprights', 'prominent rear wing endplates'],
+        incompatibleKeywords: ['retractable pop-up spoiler', 'no rear wing', 'ducktail spoiler']
+      },
+      rear_architecture_and_exhaust: {
+        name: 'dual_large_round_titanium_exhaust_outlets',
+        positiveKeywords: ['dual large round titanium exhaust tips', 'two wide circular exhaust outlets in diffuser', 'intercooler water spray vents in rear bumper'],
+        incompatibleKeywords: ['central dual exhaust (gt3)', 'quad exhaust tips']
+      },
+      proportions: {
+        name: 'extreme_widebody_911_turbo_track_weapon',
+        positiveKeywords: ['widebody 911 track stance', 'flared wheel arches with front fender vents', 'weissach package carbon roof and hood'],
+        incompatibleKeywords: ['suv', 'cabriolet']
+      }
+    }
+  },
+  {
+    vehicleId: 'porsche-911-dakar',
+    make: 'Porsche',
+    model: '911 Dakar',
+    generation: '992',
+    proportionsDescription: 'All-terrain 911 with +50mm lifted suspension, knobby all-terrain tires, red forged aluminum recovery hooks, and fixed CFRP ducktail spoiler',
+    confusableWith: [],
+    traits: {
+      proportions: {
+        name: 'lifted_all_terrain_off_road_sports_car',
+        positiveKeywords: ['lifted ride height', 'high ground clearance', 'knobby all-terrain tires', 'pirelli scorpion all-terrain tires', 'black plastic wheel arch cladding', 'roughroads livery'],
+        incompatibleKeywords: ['ultra-low slammed track car', 'low profile slick racing tires']
+      },
+      front_intake_grille: {
+        name: 'stainless_steel_skid_plate_and_red_recovery_eye',
+        positiveKeywords: ['red forged aluminum recovery hook', 'stainless steel front skid plate', 'mesh intake with rock guards'],
+        incompatibleKeywords: ['low carbon track splitter']
+      },
+      wing_and_spoiler_architecture: {
+        name: 'fixed_lightweight_cfrp_ducktail_rear_spoiler',
+        positiveKeywords: ['fixed ducktail spoiler', 'cfrp rear spoiler', 'integrated rear spoiler lip'],
+        incompatibleKeywords: ['massive towering swan neck wing', 'pop-up electric spoiler']
+      },
+      hood_geometry: {
+        name: 'gt3_style_dual_air_extraction_nostrils',
+        positiveKeywords: ['dual air extraction vents in front hood', 'cfra lightweight hood'],
+        incompatibleKeywords: ['transverse blade', 'smooth hood']
+      }
+    }
+  },
+  {
+    vehicleId: 'porsche-taycan',
+    make: 'Porsche',
+    model: 'Taycan',
+    generation: 'J1',
+    proportionsDescription: 'Pure electric sports sedan with four-point LED matrix headlights in vertical air curtains, closed aero nose, and full-width glass light strip',
+    confusableWith: [],
+    traits: {
+      headlight_shape: {
+        name: 'floating_four_point_led_in_vertical_air_curtains',
+        positiveKeywords: ['four-point led headlights', 'floating headlamp units', 'vertical air curtain channel flanking headlights', 'matrix led lamps in recesses'],
+        incompatibleKeywords: ['round circular headlights (911)', 'oval headlights', 'fried egg']
+      },
+      front_intake_grille: {
+        name: 'smooth_closed_aerodynamic_nose',
+        positiveKeywords: ['closed front nose', 'smooth electric front fascia with lower active louvres', 'no upper radiator grille'],
+        incompatibleKeywords: ['open radiator grille with chrome slats', 'singleframe', 'double kidney']
+      },
+      rear_architecture_and_exhaust: {
+        name: 'continuous_full_width_glass_light_strip_with_porsche_script',
+        positiveKeywords: ['full-width continuous glass light strip', 'three-dimensional illuminated porsche lettering', 'clean flush rear bumper without exhaust tips', 'no exhaust'],
+        incompatibleKeywords: ['dual exhaust tips', 'quad exhaust pipes', 'central exhaust']
+      },
+      roofline_greenhouse: {
+        name: 'four_door_sports_sedan_flyline',
+        positiveKeywords: ['four-door sports saloon flyline', 'sloping rear roofline with flush glass', 'panoramic fixed glass roof'],
+        incompatibleKeywords: ['two-door coupe', 'tall suv roofline']
+      },
+      proportions: {
+        name: 'wide_low_slung_electric_performance_sedan',
+        positiveKeywords: ['wide low-slung electric sedan', 'muscular rear haunches', 'aerodynamic flush door handles'],
+        incompatibleKeywords: ['suv', 'tall hatchback']
+      }
+    }
+  },
+
+  // ── LAMBORGHINI URUS ──
+  {
+    vehicleId: 'lamborghini-urus',
+    make: 'Lamborghini',
+    model: 'Urus',
+    generation: 'Urus',
+    proportionsDescription: 'Super SUV with hexagonal front air intakes, Y-shaped daytime running lamps, high ground clearance, coupe roofline, and quad exhaust pipes',
+    confusableWith: [],
+    traits: {
+      front_intake_grille: {
+        name: 'massive_hexagonal_mesh_intake_with_y_aero_motifs',
+        positiveKeywords: ['massive hexagonal front grille', 'y-shaped horizontal aero slats in grille', 'aggressive angular front bumper intakes'],
+        incompatibleKeywords: ['smooth closed front nose', 'round mouth grille', 'chrome slatted grille']
+      },
+      headlight_shape: {
+        name: 'sharp_horizontal_led_with_y_shaped_drl',
+        positiveKeywords: ['y-shaped daytime running lights', 'sharp angular led headlights', 'horizontal y-motif led'],
+        incompatibleKeywords: ['round headlights', 'vertical slit headlights']
+      },
+      proportions: {
+        name: 'high_performance_super_suv_coupe_silhouette',
+        positiveKeywords: ['high ground clearance super suv', 'sloping coupe-suv roofline', 'muscular angular hexagonal wheel arches', 'tall muscular stance'],
+        incompatibleKeywords: ['low slung mid engine supercar', 'sedan']
+      },
+      rear_architecture_and_exhaust: {
+        name: 'quad_round_or_oval_exhaust_with_y_motif_taillights',
+        positiveKeywords: ['quad exhaust pipes', 'four round exhaust tips in rear diffuser', 'y-shaped horizontal led taillights', 'rear roof spoiler'],
+        incompatibleKeywords: ['single exhaust', 'no exhaust']
+      }
+    }
+  },
+
+  // ── HONG KONG ROAD CARS: EVERYDAY VEHICLES ──
+  {
+    vehicleId: 'toyota-corolla',
+    make: 'Toyota',
+    model: 'Corolla',
+    generation: 'E210',
+    proportionsDescription: 'Modern compact sedan/hatchback with wide trapezoidal black lower bumper grille, J-shaped LED headlights, and centered Toyota emblem',
+    confusableWith: [],
+    traits: {
+      front_intake_grille: {
+        name: 'wide_trapezoidal_lower_mesh_grille',
+        positiveKeywords: ['large trapezoidal lower bumper grille', 'wide black mesh lower intake', 'slim upper horizontal grille slit with toyota emblem'],
+        incompatibleKeywords: ['panamericana', 'spindle grille', 'kidney grille']
+      },
+      headlight_shape: {
+        name: 'swept_back_j_shaped_bi_beam_led_lamps',
+        positiveKeywords: ['j-shaped led daytime running lights', 'bi-beam led headlamps', 'swept-back angular headlights'],
+        incompatibleKeywords: ['round headlights', 'pop-up', 'quad square led eyes']
+      },
+      proportions: {
+        name: 'practical_compact_family_sedan_or_hatchback',
+        positiveKeywords: ['compact family sedan', 'four-door passenger sedan', 'conventional hatchback', 'practical commuter proportions'],
+        incompatibleKeywords: ['supercar', 'low-slung widebody', 'convertible']
+      },
+      rear_architecture_and_exhaust: {
+        name: 'horizontal_angular_taillights_with_connecting_brow',
+        positiveKeywords: ['horizontal angular taillights', 'clean trunk lid with centered toyota logo', 'subtle hidden exhaust pipe'],
+        incompatibleKeywords: ['quad sport exhaust', 'massive rear wing', 'central exhaust']
+      }
+    }
+  },
+  {
+    vehicleId: 'toyota-prius',
+    make: 'Toyota',
+    model: 'Prius',
+    generation: 'XW60',
+    proportionsDescription: 'Aerodynamic wedge liftback with hammerhead front fascia, ultra-slim C-shaped LED lamps, continuous rear lightbar, and high Kammback tail',
+    confusableWith: [],
+    traits: {
+      front_intake_grille: {
+        name: 'hammerhead_front_aero_fascia',
+        positiveKeywords: ['hammerhead front fascia', 'ultra-slim upper intake slit', 'sharp aerodynamic nose with lower intake'],
+        incompatibleKeywords: ['massive mesh grille', 'chrome waterfall grille']
+      },
+      headlight_shape: {
+        name: 'ultra_slim_c_shaped_bracket_led_lamps',
+        positiveKeywords: ['c-shaped led daytime running lights', 'ultra-slim bracket headlamps', 'thin sharp claw-like led lights'],
+        incompatibleKeywords: ['round headlights', 'square halogen lamps']
+      },
+      roofline_greenhouse: {
+        name: 'extreme_aerodynamic_wedge_liftback_kammback',
+        positiveKeywords: ['aerodynamic wedge silhouette', 'steep windshield rake continuing to roof apex', 'kammback high rear deck', 'hidden rear door handles in c-pillar'],
+        incompatibleKeywords: ['three-box upright sedan', 'boxy suv']
+      },
+      rear_architecture_and_exhaust: {
+        name: 'continuous_horizontal_led_lightbar',
+        positiveKeywords: ['full-width horizontal led taillight bar', 'smoked rear light strip', 'prius lettering across tailgate', 'clean flush rear bumper without visible exhaust'],
+        incompatibleKeywords: ['quad exhaust', 'vertical taillights']
+      },
+      proportions: {
+        name: 'low_drag_hybrid_liftback',
+        positiveKeywords: ['aerodynamic hybrid liftback', 'sleek tear-drop profile with large aerodynamic alloy wheels'],
+        incompatibleKeywords: ['suv', 'pickup truck']
+      }
+    }
+  },
+  {
+    vehicleId: 'toyota-yaris',
+    make: 'Toyota',
+    model: 'Yaris',
+    generation: 'XP210',
+    proportionsDescription: 'Subcompact city hatchback with wide trapezoidal lower grille, bulbous front fenders, muscular rear haunches, and compact wheelbase',
+    confusableWith: [],
+    traits: {
+      front_intake_grille: {
+        name: 'bold_wide_trapezoidal_front_mouth_grille',
+        positiveKeywords: ['large wide trapezoidal grille', 'black mouth grille filling lower bumper', 'curved upper nose with toyota badge'],
+        incompatibleKeywords: ['spindle grille', 'kidney grille']
+      },
+      proportions: {
+        name: 'chunky_subcompact_city_hatchback',
+        positiveKeywords: ['compact city hatchback', 'short front and rear overhangs', 'bulbous muscular rear haunches', 'stubby subcompact proportions'],
+        incompatibleKeywords: ['long luxury sedan', 'suv']
+      },
+      rear_architecture_and_exhaust: {
+        name: 'connected_horizontal_taillight_bridge',
+        positiveKeywords: ['horizontal black bridge connecting rear taillights', 'curved rear tail lamps', 'curved hatch glass'],
+        incompatibleKeywords: ['quad exhaust pipes', 'vertical light bars']
+      }
+    }
+  },
+  {
+    vehicleId: 'honda-civic',
+    make: 'Honda',
+    model: 'Civic',
+    generation: 'FL',
+    proportionsDescription: 'Modern C-segment sedan/hatchback with low horizontal hood, wide sleek LED headlights integrated with upper slim grille, and fastback roofline',
+    confusableWith: [],
+    traits: {
+      front_intake_grille: {
+        name: 'slim_upper_grille_with_integrated_horizontal_headlamps',
+        positiveKeywords: ['slim horizontal upper grille bar', 'black horizontal bar connecting headlights', 'wide lower air intake'],
+        incompatibleKeywords: ['large chrome shield grille', 'spindle grille']
+      },
+      headlight_shape: {
+        name: 'sleek_horizontal_led_with_inverted_l_drl',
+        positiveKeywords: ['horizontal sleek led headlights', 'inverted l-shaped daytime running light strip', 'linear led eyebrows'],
+        incompatibleKeywords: ['round headlamps', 'vertical headlights']
+      },
+      roofline_greenhouse: {
+        name: 'sleek_fastback_sedan_hatchback_greenhouse',
+        positiveKeywords: ['sloping fastback c-pillar', 'extended rear quarter glass window', 'low horizontal beltline'],
+        incompatibleKeywords: ['upright boxy roof', 'convertible soft top']
+      },
+      rear_architecture_and_exhaust: {
+        name: 'c_shaped_or_full_width_tail_lamps',
+        positiveKeywords: ['horizontal wrap-around taillights', 'clean trunk lid with centered honda badge', 'integrated subtle rear lip'],
+        incompatibleKeywords: ['quad exhaust', 'massive high wing (non-type r)']
+      }
+    }
+  },
+  {
+    vehicleId: 'honda-accord',
+    make: 'Honda',
+    model: 'Accord',
+    generation: 'CY',
+    proportionsDescription: 'Midsize executive sedan with fastback silhouette, full-width horizontal rear lightbar, and clean black mesh grille',
+    confusableWith: [],
+    traits: {
+      front_intake_grille: {
+        name: 'upright_gloss_black_mesh_hexagonal_grille',
+        positiveKeywords: ['gloss black hexagonal mesh grille', 'upright clean front grille', 'honda emblem centered in mesh'],
+        incompatibleKeywords: ['massive cascading chrome shield', 'spindle grille']
+      },
+      rear_architecture_and_exhaust: {
+        name: 'continuous_horizontal_led_lightbar',
+        positiveKeywords: ['full-width horizontal led taillight bar', 'ultra-slim rear light bar', 'centered small honda badge dividing lightbar'],
+        incompatibleKeywords: ['vertical taillights', 'round exhaust cannons']
+      },
+      proportions: {
+        name: 'long_executive_midsize_fastback_sedan',
+        positiveKeywords: ['long midsize executive sedan', 'fastback roofline', 'extended elegant wheelbase'],
+        incompatibleKeywords: ['hatchback', 'suv']
+      }
+    }
+  },
+  {
+    vehicleId: 'honda-fit',
+    make: 'Honda',
+    model: 'Fit',
+    generation: 'GR',
+    proportionsDescription: 'Subcompact tall city hatchback with ultra-thin A-pillars, large front quarter glass windows, short steep hood, and friendly rounded LED lamps',
+    confusableWith: [],
+    traits: {
+      roofline_greenhouse: {
+        name: 'one_box_monospace_with_prominent_a_pillar_quarter_windows',
+        positiveKeywords: ['large triangular front quarter glass ahead of front doors', 'ultra-thin front a-pillars', 'tall upright roofline', 'monospace city car greenhouse', 'fit', 'jazz'],
+        incompatibleKeywords: ['long low hood', 'sloping sports coupe flyline']
+      },
+      headlight_shape: {
+        name: 'friendly_rounded_projector_led_eyes',
+        positiveKeywords: ['friendly rounded led headlights', 'u-shaped led daytime running lights', 'large expressive headlamp lenses'],
+        incompatibleKeywords: ['aggressive razor slit lights', 'quad square led']
+      },
+      proportions: {
+        name: 'tall_subcompact_city_monospace',
+        positiveKeywords: ['tall subcompact hatchback', 'short steep hood', 'clever high-roof city car proportions'],
+        incompatibleKeywords: ['long sedan', 'supercar']
+      }
+    }
+  },
+  {
+    vehicleId: 'nissan-note',
+    make: 'Nissan',
+    model: 'Note',
+    generation: 'E13',
+    proportionsDescription: 'Compact series-hybrid hatchback with V-Motion front grille, slim headlights, e-POWER badging, and horizontal rear light strip',
+    confusableWith: [],
+    traits: {
+      front_intake_grille: {
+        name: 'nissan_v_motion_grille_outline',
+        positiveKeywords: ['v-motion front grille', 'chrome v-bar outline', 'patterned geometric grille mesh', 'nissan emblem'],
+        incompatibleKeywords: ['spindle grille', 'kidney grille']
+      },
+      rear_architecture_and_exhaust: {
+        name: 'horizontal_connecting_rear_light_strip_with_nissan_script',
+        positiveKeywords: ['horizontal led taillight strip', 'nissan lettering spaced across tailgate', 'e-power blue emblem on rear hatch'],
+        incompatibleKeywords: ['quad exhausts', 'round circular taillights']
+      },
+      proportions: {
+        name: 'subcompact_e_power_hatchback',
+        positiveKeywords: ['compact hatchback', 'two-tone roof option', 'practical Japanese commuter hatchback'],
+        incompatibleKeywords: ['suv', 'sports car']
+      }
+    }
+  },
+  {
+    vehicleId: 'nissan-x-trail',
+    make: 'Nissan',
+    model: 'X-Trail',
+    generation: 'T33',
+    proportionsDescription: 'Crossover SUV with prominent chrome V-Motion grille, split two-tier headlamps with high DRLs, and black protective lower cladding',
+    confusableWith: [],
+    traits: {
+      headlight_shape: {
+        name: 'split_two_tier_headlamp_configuration',
+        positiveKeywords: ['split headlights', 'slim horizontal upper daytime running lights', 'rectangular lower main beam headlamp pods'],
+        incompatibleKeywords: ['single round headlamps', 'pop-up']
+      },
+      front_intake_grille: {
+        name: 'bold_chrome_v_motion_horseshoe_grille',
+        positiveKeywords: ['prominent chrome v-motion grille', 'thick chrome v-bar around black mesh', 'nissan badge in grille'],
+        incompatibleKeywords: ['spindle grille', 'panamericana']
+      },
+      proportions: {
+        name: 'compact_crossover_suv_stance',
+        positiveKeywords: ['crossover suv proportions', 'black protective wheel arch cladding', 'silver roof rails', 'high ground clearance'],
+        incompatibleKeywords: ['sedan', 'coupe']
+      }
+    }
+  },
+  {
+    vehicleId: 'mazda-mazda2',
+    make: 'Mazda',
+    model: 'Mazda2',
+    generation: 'DJ',
+    proportionsDescription: 'Subcompact Kodo hatchback with signature chrome wing grille embracing swept-back headlamps and sculpted flanks',
+    confusableWith: [],
+    traits: {
+      front_intake_grille: {
+        name: 'signature_five_point_shield_grille_with_chrome_wing',
+        positiveKeywords: ['five-point shield grille', 'chrome signature wing under grille', 'mesh radiator grille with mazda badge'],
+        incompatibleKeywords: ['spindle grille', 'double kidney']
+      },
+      proportions: {
+        name: 'subcompact_kodo_hatchback',
+        positiveKeywords: ['subcompact 5-door hatchback', 'sculpted curved flanks', 'short overhangs'],
+        incompatibleKeywords: ['sedan', 'suv']
+      }
+    }
+  },
+  {
+    vehicleId: 'mazda-mazda3',
+    make: 'Mazda',
+    model: 'Mazda3',
+    generation: 'BP',
+    proportionsDescription: 'Sculptural C-segment hatchback with massive solid curved C-pillars, black mesh shield grille, and razor-thin projector headlamps',
+    confusableWith: [],
+    traits: {
+      roofline_greenhouse: {
+        name: 'massive_solid_sculptural_c_pillar',
+        positiveKeywords: ['thick solid c-pillar without quarter window', 'heavy curved c-pillar', 'minimalist curved body reflections without sharp crease lines'],
+        incompatibleKeywords: ['thin c-pillar with quarter glass', 'boxy upright roof']
+      },
+      front_intake_grille: {
+        name: 'deep_concave_black_mesh_shield_grille',
+        positiveKeywords: ['deep black mesh shield grille', 'dark chrome signature wing', 'large forward-leaning grille'],
+        incompatibleKeywords: ['chrome horizontal slatted grille']
+      },
+      headlight_shape: {
+        name: 'razor_thin_projector_slits_with_led_ring',
+        positiveKeywords: ['slender horizontal headlights', 'circular projector lens in dark slit', 'led daytime running light ring'],
+        incompatibleKeywords: ['square halogen lamps', 'quad square led']
+      }
+    }
+  },
+  {
+    vehicleId: 'mazda-cx-5',
+    make: 'Mazda',
+    model: 'CX-5',
+    generation: 'KF',
+    proportionsDescription: 'Crossover SUV with concave mesh wing grille underlined by chrome wing, slender horizontal LED headlamps, and high stance',
+    confusableWith: [],
+    traits: {
+      front_intake_grille: {
+        name: 'concave_mesh_grille_with_chrome_signature_wing',
+        positiveKeywords: ['concave mesh front grille', 'three-dimensional grille texture', 'chrome signature wing supporting headlights', 'mazda badge'],
+        incompatibleKeywords: ['horizontal slatted chrome grille', 'spindle grille']
+      },
+      headlight_shape: {
+        name: 'slender_horizontal_led_headlights',
+        positiveKeywords: ['slender horizontal led lamps', 'dual l-shaped led running light accents'],
+        incompatibleKeywords: ['split two-tier headlights', 'large halogen lights']
+      },
+      proportions: {
+        name: 'athletic_crossover_suv',
+        positiveKeywords: ['sleek compact suv', 'high ground clearance with subtle black arch trims', 'soul red crystal or metallic paint'],
+        incompatibleKeywords: ['hatchback', 'sedan']
+      }
+    }
+  },
+  {
+    vehicleId: 'volkswagen-golf',
+    make: 'Volkswagen',
+    model: 'Golf',
+    generation: 'Mk8',
+    proportionsDescription: 'Iconic European hatchback with connecting LED front light bar, thick forward-leaning C-pillar, and clean horizontal lines',
+    confusableWith: [],
+    traits: {
+      roofline_greenhouse: {
+        name: 'trademark_forward_leaning_hockey_stick_c_pillar',
+        positiveKeywords: ['forward-leaning thick c-pillar', 'hockey stick shaped c-pillar', 'trademark golf c-pillar', 'two-box European hatchback greenhouse'],
+        incompatibleKeywords: ['flowing pillarless curved haunch', 'three-box sedan']
+      },
+      front_intake_grille: {
+        name: 'ultra_slim_upper_grille_with_connecting_led_lightbar',
+        positiveKeywords: ['connecting horizontal led front light strip', 'slim upper grille slit with centered vw roundel', 'wide lower front air intake with body colored strakes'],
+        incompatibleKeywords: ['massive shield grille', 'vertical kidney grille']
+      },
+      rear_architecture_and_exhaust: {
+        name: 'geometric_horizontal_taillights',
+        positiveKeywords: ['angular geometric horizontal taillights', 'clean rear hatch with large centered vw roundel handle'],
+        incompatibleKeywords: ['quad exhaust pipes', 'massive rear wing']
+      }
+    }
+  },
+  {
+    vehicleId: 'volkswagen-tiguan',
+    make: 'Volkswagen',
+    model: 'Tiguan',
+    generation: 'Mk3',
+    proportionsDescription: 'Compact crossover SUV with glass-covered horizontal grille bar, continuous rear LED strip, and upright SUV proportions',
+    confusableWith: [],
+    traits: {
+      front_intake_grille: {
+        name: 'glass_covered_horizontal_grille_strip_with_led_bar',
+        positiveKeywords: ['glass-covered upper grille strip', 'horizontal led light bar connecting headlamps', 'large lower bumper air intake with chrome or black accents'],
+        incompatibleKeywords: ['spindle grille', 'waterfall grille']
+      },
+      rear_architecture_and_exhaust: {
+        name: 'continuous_horizontal_led_taillight_bar',
+        positiveKeywords: ['full-width horizontal rear led light strip', 'tiguan lettering on tailgate', 'integrated rear roof spoiler'],
+        incompatibleKeywords: ['vertical taillights']
+      },
+      proportions: {
+        name: 'upright_european_compact_suv',
+        positiveKeywords: ['upright suv silhouette', 'silver roof rails', 'high beltline with clean character line'],
+        incompatibleKeywords: ['low hatchback', 'coupe']
+      }
+    }
+  },
+
+  // ── HONG KONG ROAD CARS: SUVS & MPVS ──
+  {
+    vehicleId: 'toyota-alphard',
+    make: 'Toyota',
+    model: 'Alphard',
+    generation: 'AH40',
+    proportionsDescription: 'Flagship luxury boxy Japanese MPV with colossal cascading forward-jutting chrome shield grille, split B-pillar fin, and executive sliding doors',
+    confusableWith: [],
+    traits: {
+      front_intake_grille: {
+        name: 'colossal_cascading_chrome_shield_grille',
+        positiveKeywords: [
+          'massive chrome shield grille', 'cascading forward-jutting chrome grille', 'chrome block pattern grille filling entire front',
+          'alphard emblem', 'colossal front grille', 'cascading chrome bars'
+        ],
+        incompatibleKeywords: ['spindle body', 'split horizontal dark chrome bars', 'smooth closed nose']
+      },
+      roofline_greenhouse: {
+        name: 'ultra_tall_luxury_box_with_shark_fin_b_pillar',
+        positiveKeywords: [
+          'ultra tall boxy mpv', 'forward-leaning shark fin b-pillar', 'prominent rear roof spoiler',
+          'executive luxury minivan greenhouse', 'alphard silhouette'
+        ],
+        incompatibleKeywords: ['low slung sports car', 'sedan', 'coupe']
+      },
+      door_architecture: {
+        name: 'dual_power_sliding_passenger_doors',
+        positiveKeywords: ['dual sliding doors', 'power sliding side passenger doors', 'recessed door slide tracks'],
+        incompatibleKeywords: ['gullwing doors', 'scissor doors', 'two-door coupe']
+      },
+      rear_architecture_and_exhaust: {
+        name: 'geometric_wing_like_taillights',
+        positiveKeywords: ['wing-like led rear taillight clusters', 'large vertical tailgate', 'horizontal chrome garnish between taillights'],
+        incompatibleKeywords: ['quad sport exhausts', 'active wing']
+      },
+      proportions: {
+        name: 'premier_hong_kong_executive_mpv',
+        positiveKeywords: ['hong kong luxury mpv', 'alphard', 'monolithic high-roof luxury transport', 'executive boxy minivan'],
+        incompatibleKeywords: ['sports car', 'suv', 'compact sedan']
+      }
+    }
+  },
+  {
+    vehicleId: 'toyota-vellfire',
+    make: 'Toyota',
+    model: 'Vellfire',
+    generation: 'AH40',
+    proportionsDescription: 'Sport-luxury sister MPV of Alphard with split horizontal-blade dual-tier headlights, bold dark chrome horizontal grille bars, and clear tail bar',
+    confusableWith: [],
+    traits: {
+      headlight_shape: {
+        name: 'split_two_tier_horizontal_blade_led_lamps',
+        positiveKeywords: ['split horizontal headlights', 'two-tier horizontal blade led headlamps', 'distinctive double-deck front lights'],
+        incompatibleKeywords: ['single cluster headlamps', 'round lights']
+      },
+      front_intake_grille: {
+        name: 'bold_horizontal_dark_chrome_slatted_grille',
+        positiveKeywords: ['bold horizontal dark chrome bars', 'wide horizontal grille slats across entire front', 'vellfire dark chrome front'],
+        incompatibleKeywords: ['cascading vertical chrome block grille (alphard)', 'spindle body']
+      },
+      door_architecture: {
+        name: 'dual_power_sliding_passenger_doors',
+        positiveKeywords: ['dual sliding doors', 'side sliding passenger doors'],
+        incompatibleKeywords: ['two-door']
+      },
+      rear_architecture_and_exhaust: {
+        name: 'horizontal_clear_lens_taillight_bar',
+        positiveKeywords: ['clear lens taillights', 'horizontal clear led rear bar spanning tailgate', 'vellfire badging'],
+        incompatibleKeywords: ['red wing-like taillights (alphard)']
+      },
+      proportions: {
+        name: 'sport_luxury_boxy_mpv',
+        positiveKeywords: ['sporty luxury mpv', 'boxy high-roof minivan silhouette'],
+        incompatibleKeywords: ['supercar', 'sedan']
+      }
+    }
+  },
+  {
+    vehicleId: 'honda-stepwgn',
+    make: 'Honda',
+    model: 'Stepwgn',
+    generation: 'RP6-8',
+    proportionsDescription: 'Ultra-boxy Japanese midsize family minivan with clean slab sides, flat vertical front face with horizontal chrome bars, and vertical taillights',
+    confusableWith: [],
+    traits: {
+      proportions: {
+        name: 'uncompromisingly_boxy_japanese_family_minivan',
+        positiveKeywords: ['ultra boxy minivan', 'clean slab-sided body', 'flat vertical nose', 'boxy Japanese family van', 'stepwgn', 'stepwagon'],
+        incompatibleKeywords: ['aerodynamic sports car', 'curved aggressive coupe']
+      },
+      front_intake_grille: {
+        name: 'clean_horizontal_chrome_bar_grille',
+        positiveKeywords: ['clean horizontal chrome bar grille', 'rectangular headlights integrated with upper chrome bar', 'simple honest minivan face'],
+        incompatibleKeywords: ['cascading shield grille', 'v-motion grille']
+      },
+      door_architecture: {
+        name: 'dual_sliding_side_doors',
+        positiveKeywords: ['dual sliding doors', 'sliding passenger doors'],
+        incompatibleKeywords: ['conventional swing rear doors only', 'two-door']
+      },
+      rear_architecture_and_exhaust: {
+        name: 'slender_vertical_led_taillight_strips',
+        positiveKeywords: ['slender vertical rear taillights framing tailgate', 'flat vertical rear tailgate', 'clean upright rear'],
+        incompatibleKeywords: ['horizontal light bar spanning full width', 'quad exhausts']
+      }
+    }
+  },
+  {
+    vehicleId: 'honda-odyssey',
+    make: 'Honda',
+    model: 'Odyssey',
+    generation: 'RC',
+    proportionsDescription: 'Lower-riding Japanese executive MPV with wide multi-slat chrome grille, sculpted side character lines, and dual sliding doors',
+    confusableWith: [],
+    traits: {
+      front_intake_grille: {
+        name: 'wide_horizontal_multi_slat_chrome_shield',
+        positiveKeywords: ['wide multi-slat chrome grille', 'thick upper chrome brow over jewel-eye headlights', 'cascading horizontal chrome bars'],
+        incompatibleKeywords: ['spindle grille', 'split two-tier headlights']
+      },
+      proportions: {
+        name: 'sleek_lower_slung_executive_mpv',
+        positiveKeywords: ['lower-riding executive mpv', 'sleeker stance than stepwgn', 'sculpted dynamic character line on flank'],
+        incompatibleKeywords: ['ultra boxy van', 'suv']
+      },
+      door_architecture: {
+        name: 'dual_sliding_passenger_doors',
+        positiveKeywords: ['dual sliding doors', 'power sliding passenger doors'],
+        incompatibleKeywords: ['two-door coupe']
+      }
+    }
+  },
+  {
+    vehicleId: 'nissan-serena',
+    make: 'Nissan',
+    model: 'Serena',
+    generation: 'C28',
+    proportionsDescription: 'Family MPV with large V-Motion grille integrating horizontal LED slats, dual-tone floating roof, dual sliding doors, and vertical rear lights',
+    confusableWith: [],
+    traits: {
+      front_intake_grille: {
+        name: 'illuminated_horizontal_slat_v_motion_grille',
+        positiveKeywords: ['large v-motion grille integrating horizontal led bars', 'illuminated horizontal slats in front grille', 'bold modern nissan front face'],
+        incompatibleKeywords: ['colossal chrome block shield', 'spindle body']
+      },
+      roofline_greenhouse: {
+        name: 'floating_dual_tone_roof_with_black_pillars',
+        positiveKeywords: ['two-tone black roof on boxy mpv', 'floating roof design', 'large side windows for maximum visibility'],
+        incompatibleKeywords: ['sports car coupe flyline']
+      },
+      door_architecture: {
+        name: 'hands_free_dual_sliding_doors',
+        positiveKeywords: ['dual sliding doors', 'side sliding passenger doors'],
+        incompatibleKeywords: ['two-door']
+      },
+      rear_architecture_and_exhaust: {
+        name: 'tall_vertical_led_rear_pillar_lights',
+        positiveKeywords: ['tall vertical taillight pillars', 'vertical led rear light bars', 'e-power emblem'],
+        incompatibleKeywords: ['horizontal tail bar']
+      }
+    }
+  },
+  {
+    vehicleId: 'lexus-es',
+    make: 'Lexus',
+    model: 'ES',
+    generation: 'XZ10',
+    proportionsDescription: 'Executive luxury sedan with vertical-slat spindle grille, sharp L-shaped DRLs, and elegant flowing roofline',
+    confusableWith: [],
+    traits: {
+      front_intake_grille: {
+        name: 'signature_lexus_spindle_grille_with_vertical_slats',
+        positiveKeywords: ['vertical-slat spindle grille', 'radiating vertical bars in spindle grille', 'pinched hourglass front grille', 'chrome spindle frame'],
+        incompatibleKeywords: ['horizontal bar grille', 'double kidney', 'closed electric nose']
+      },
+      headlight_shape: {
+        name: 'sharp_checkmark_l_shaped_drl_with_triple_beam_leds',
+        positiveKeywords: ['sharp l-shaped daytime running lights', 'checkmark led drl', 'triple-beam led projector headlights'],
+        incompatibleKeywords: ['round headlights', 'split two-tier headlamps']
+      },
+      proportions: {
+        name: 'executive_luxury_fwd_sedan',
+        positiveKeywords: ['sleek executive luxury sedan', 'flowing roofline', 'chrome window trim surround'],
+        incompatibleKeywords: ['boxy minivan', 'suv']
+      }
+    }
+  },
+  {
+    vehicleId: 'lexus-rx',
+    make: 'Lexus',
+    model: 'RX',
+    generation: 'ALA10',
+    proportionsDescription: 'Luxury midsize SUV with Spindle Body seamless front nose, floating black C-pillar roofline, and full-width rear light blade',
+    confusableWith: [],
+    traits: {
+      front_intake_grille: {
+        name: 'seamless_spindle_body_front_fascia',
+        positiveKeywords: ['seamless spindle body', 'body-colored upper nose blending into lower diamond mesh', 'spindle body grille'],
+        incompatibleKeywords: ['chrome-framed spindle grille', 'waterfall grille']
+      },
+      roofline_greenhouse: {
+        name: 'signature_floating_roof_c_pillar_design',
+        positiveKeywords: ['floating roof design', 'blacked-out rear c-pillar glass', 'sharp coupe-like crossover roofline'],
+        incompatibleKeywords: ['boxy upright minivan', 'two-door coupe']
+      },
+      rear_architecture_and_exhaust: {
+        name: 'full_width_horizontal_l_shaped_rear_light_blade',
+        positiveKeywords: ['full-width rear led light blade', 'horizontal light strip across tailgate', 'lexus script spaced across rear'],
+        incompatibleKeywords: ['vertical taillights', 'dual round exhaust tips']
+      }
+    }
+  },
+  {
+    vehicleId: 'lexus-lm',
+    make: 'Lexus',
+    model: 'LM',
+    generation: 'AW10',
+    proportionsDescription: 'Ultra-luxury flagship MPV with gigantic Spindle Body front grille covering entire face, signature L-shaped DRLs, and full-width rear light bar',
+    confusableWith: [],
+    traits: {
+      front_intake_grille: {
+        name: 'colossal_full_height_lexus_spindle_body_grille',
+        positiveKeywords: ['massive lexus spindle body grille', 'spindle body grille covering entire front face', 'seamless body-colored upper spindle with interlocking diamond mesh', 'lexus emblem on hood'],
+        incompatibleKeywords: ['cascading chrome block shield (alphard)', 'horizontal dark chrome bars (vellfire)']
+      },
+      headlight_shape: {
+        name: 'triple_beam_led_with_underline_l_shaped_drl',
+        positiveKeywords: ['triple-beam led headlights', 'sharp underline l-shaped drls', 'distinctive lexus front light signature'],
+        incompatibleKeywords: ['split two-tier horizontal blades']
+      },
+      rear_architecture_and_exhaust: {
+        name: 'full_width_curved_u_shaped_rear_light_bar',
+        positiveKeywords: ['curved u-shaped rear led light bar spanning tailgate', 'full-width horizontal light bar with lexus lettering'],
+        incompatibleKeywords: ['wing-like red taillight clusters (alphard)']
+      },
+      door_architecture: {
+        name: 'executive_power_sliding_doors',
+        positiveKeywords: ['power sliding doors', 'dual sliding doors with privacy glass'],
+        incompatibleKeywords: ['two-door coupe']
+      },
+      proportions: {
+        name: 'pinnacle_luxury_flagship_mpv',
+        positiveKeywords: ['ultra-luxury flagship mpv', 'vip chauffeur transport silhouette', 'high-roof boxy limousine mpv'],
+        incompatibleKeywords: ['sports car', 'sedan']
+      }
+    }
+  },
+  {
+    vehicleId: 'tesla-model-3',
+    make: 'Tesla',
+    model: 'Model 3',
+    generation: 'Highland',
+    proportionsDescription: 'Aerodynamic electric compact sedan with smooth grille-less nose, razor-thin wing headlights, full glass panoramic roof, and flush door handles',
+    confusableWith: [],
+    traits: {
+      front_intake_grille: {
+        name: 'smooth_closed_aerodynamic_bumper_no_grille',
+        positiveKeywords: ['smooth closed front bumper', 'completely grille-less front nose', 'minimalist bumper without radiator grille', 'clean aerodynamic front lip'],
+        incompatibleKeywords: ['open radiator grille', 'chrome grille', 'honeycomb mesh']
+      },
+      headlight_shape: {
+        name: 'sleek_horizontal_wing_led_headlamps',
+        positiveKeywords: ['sleek horizontal wing led headlights', 'sharp razor-thin front headlights', 'straight lower led light blade'],
+        incompatibleKeywords: ['round headlamps', 'vertical lights', 'split lights']
+      },
+      roofline_greenhouse: {
+        name: 'continuous_all_glass_panoramic_canopy',
+        positiveKeywords: ['full glass panoramic roof', 'continuous glass canopy from windshield to rear glass', 'flush frameless door windows', 'flush door handles'],
+        incompatibleKeywords: ['metal roof with sunroof', 'convertible soft top', 'suv tall roof']
+      },
+      rear_architecture_and_exhaust: {
+        name: 'c_shaped_one_piece_tail_lamps_no_exhaust',
+        positiveKeywords: ['one-piece wrap-around c-shaped led taillights', 'integrated ducktail trunk lid spoiler', 'clean bumper without exhaust pipes', 'no exhaust tips'],
+        incompatibleKeywords: ['quad exhausts', 'dual exhaust pipes']
+      },
+      proportions: {
+        name: 'compact_electric_sports_sedan',
+        positiveKeywords: ['aerodynamic electric sedan', 'low hood line', 'flush door handles', 'tesla silhouette'],
+        incompatibleKeywords: ['tall suv', 'boxy minivan']
+      }
+    }
+  },
+  {
+    vehicleId: 'tesla-model-y',
+    make: 'Tesla',
+    model: 'Model Y',
+    generation: 'Model Y',
+    proportionsDescription: 'Electric crossover SUV with taller greenhouse and ride height than Model 3, black satin exterior window trim, and hatchback rear liftgate',
+    confusableWith: [],
+    traits: {
+      proportions: {
+        name: 'tall_crossover_coupe_suv_stance',
+        positiveKeywords: ['electric crossover suv', 'taller roofline than model 3', 'higher ride height', 'black satin window trim', 'thick body sides'],
+        incompatibleKeywords: ['low slung sports sedan (model 3)', 'convertible']
+      },
+      front_intake_grille: {
+        name: 'smooth_closed_crossover_nose',
+        positiveKeywords: ['smooth closed front bumper', 'grille-less front nose', 'lower bumper intake slit'],
+        incompatibleKeywords: ['radiator grille with mesh']
+      },
+      roofline_greenhouse: {
+        name: 'tall_panoramic_glass_canopy_hatchback',
+        positiveKeywords: ['tall panoramic all-glass roof', 'hatchback rear liftgate', 'tall greenhouse'],
+        incompatibleKeywords: ['low sedan trunk lid']
+      },
+      rear_architecture_and_exhaust: {
+        name: 'crossover_hatchback_tailgate_no_exhaust',
+        positiveKeywords: ['tall hatchback tailgate', 'wrap-around led taillights', 'clean bumper without exhaust tips'],
+        incompatibleKeywords: ['quad exhaust pipes']
+      }
+    }
+  },
+  {
+    vehicleId: 'byd-atto-3',
+    make: 'BYD',
+    model: 'Atto 3',
+    generation: 'Atto 3',
+    proportionsDescription: 'Compact electric crossover SUV with Dragon Face 3.0 brushed silver wing connecting headlights, wave-pattern C-pillar, and continuous rear lightbar',
+    confusableWith: [],
+    traits: {
+      front_intake_grille: {
+        name: 'dragon_face_brushed_silver_wing_bar',
+        positiveKeywords: ['brushed silver wing bar connecting headlights', 'dragon face 3.0 front', 'embossed byd logo on silver trim', 'closed electric nose with lower air dam'],
+        incompatibleKeywords: ['completely plain smooth nose without silver bar (tesla)', 'open chrome grille']
+      },
+      roofline_greenhouse: {
+        name: 'crossover_roofline_with_wave_pattern_d_pillar',
+        positiveKeywords: ['silver textured wave-pattern d-pillar trim', 'scale pattern c-pillar trim panel', 'silver roof rails'],
+        incompatibleKeywords: ['plain black pillars', 'low sports car roof']
+      },
+      rear_architecture_and_exhaust: {
+        name: 'full_width_continuous_rear_led_lightbar',
+        positiveKeywords: ['full-width continuous led taillight bar', 'build your dreams or byd lettering on tailgate', 'clean bumper without exhaust'],
+        incompatibleKeywords: ['quad exhausts', 'separate round taillights']
+      },
+      proportions: {
+        name: 'compact_electric_crossover_suv',
+        positiveKeywords: ['compact electric crossover suv', 'high ground clearance', 'black wheel arch cladding'],
+        incompatibleKeywords: ['sedan', 'supercar']
+      }
+    }
+  },
+  {
+    vehicleId: 'byd-seal',
+    make: 'BYD',
+    model: 'Seal',
+    generation: 'Seal',
+    proportionsDescription: 'Electric sports sedan with double U-shaped floating headlights, ripple side DRLs, ducktail spoiler, and full-width waterdrop taillight bar',
+    confusableWith: [],
+    traits: {
+      headlight_shape: {
+        name: 'double_u_shaped_floating_led_with_ripple_drls',
+        positiveKeywords: ['double u-shaped floating headlights', 'curved ripple led daytime running lights in bumper corners', 'ocean x front headlamps'],
+        incompatibleKeywords: ['straight wing headlight blade (tesla)', 'round headlights']
+      },
+      front_intake_grille: {
+        name: 'ocean_x_closed_sports_fascia',
+        positiveKeywords: ['x-shaped front fascia contours', 'sculpted aerodynamic nose with lower air intake and side gills'],
+        incompatibleKeywords: ['completely flat bumper', 'radiator grille']
+      },
+      rear_architecture_and_exhaust: {
+        name: 'full_width_waterdrop_matrix_led_lightbar',
+        positiveKeywords: ['full-width waterdrop matrix led taillight bar', 'dot-matrix waterdrop light pattern', 'ducktail rear spoiler lip', 'aggressive rear diffuser fins'],
+        incompatibleKeywords: ['c-shaped two-piece tail lamps (tesla)', 'exhaust pipes']
+      },
+      proportions: {
+        name: 'sleek_electric_sports_sedan',
+        positiveKeywords: ['sleek low-slung electric sedan', 'coupe-like roofline', 'flush door handles'],
+        incompatibleKeywords: ['tall suv', 'boxy minivan']
+      }
+    }
+  },
+
+  // ── HONG KONG TAXI: NISSAN NV200 TAXI ──
+  {
+    vehicleId: 'nissan-nv200-taxi',
+    make: 'Nissan',
+    model: 'NV200 Taxi',
+    generation: 'M20',
+    proportionsDescription: 'Wheelchair-accessible compact MPV Hong Kong taxi with dual sliding doors, high roof, taxi roof light sign, and red/green livery',
+    confusableWith: [],
+    traits: {
+      proportions: {
+        name: 'utilitarian_compact_van_mpv_taxi',
+        positiveKeywords: [
+          'compact van-based taxi', 'tall utilitarian mini-mpv', 'wheelchair accessible taxi',
+          'nv200 taxi', 'high roofline compact van silhouette', 'dual sliding passenger doors'
+        ],
+        incompatibleKeywords: ['low slung sports car', 'traditional 3-box sedan (crown comfort)', 'coupe']
+      },
+      front_intake_grille: {
+        name: 'slanted_front_hood_with_nissan_v_grille',
+        positiveKeywords: ['slanted short front hood', 'nissan emblem on front grille', 'black or chrome nissan grille', 'steep front angle'],
+        incompatibleKeywords: ['upright waterfall chrome grille (crown comfort)', 'horizontal chrome bars']
+      },
+      roofline_greenhouse: {
+        name: 'high_roof_with_illuminated_taxi_sign',
+        positiveKeywords: ['taxi roof sign', 'taxi roof light', 'high roof with dual sliding doors', 'hong kong taxi livery', 'red body silver roof', 'green body white roof'],
+        incompatibleKeywords: ['low sloping roof', 'convertible']
+      },
+      rear_architecture_and_exhaust: {
+        name: 'tall_vertical_rectangular_taillights_beside_lift_tailgate',
+        positiveKeywords: ['tall vertical taillights flanking rear tailgate', 'wide vertical rear hatch', 'wheelchair ramp badge', 'taxi decal'],
+        incompatibleKeywords: ['quad exhausts', 'horizontal light bar']
+      }
+    }
   }
 ];
 
@@ -4366,7 +6035,7 @@ export class FineGrainedModelDiscriminator {
   public getFingerprint(query: string): ModelMorphologicalFingerprint | null {
     if (!query) return null;
     const norm = query.toLowerCase().trim();
-    return this.fingerprintCatalog.get(norm) || null;
+    return this.fingerprintCatalog.get(norm) || this.resolveFingerprintForCandidate(norm) || null;
   }
 
   public findFingerprintsByMake(make: string): ModelMorphologicalFingerprint[] {
