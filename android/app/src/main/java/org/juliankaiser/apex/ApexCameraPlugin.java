@@ -416,7 +416,7 @@ public class ApexCameraPlugin extends Plugin {
     }
 
     private String bitmapToDataUrl(Bitmap bitmap) {
-        int maxDim = 1600;
+        int maxDim = 1280;
         Bitmap scaled = bitmap;
         if (bitmap.getWidth() > maxDim || bitmap.getHeight() > maxDim) {
             float scale = Math.min((float) maxDim / bitmap.getWidth(), (float) maxDim / bitmap.getHeight());
@@ -426,7 +426,7 @@ public class ApexCameraPlugin extends Plugin {
         }
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        scaled.compress(Bitmap.CompressFormat.JPEG, 90, baos);
+        scaled.compress(Bitmap.CompressFormat.JPEG, 85, baos);
         byte[] jpegBytes = baos.toByteArray();
         if (scaled != bitmap) {
             scaled.recycle();

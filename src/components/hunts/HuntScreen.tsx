@@ -159,28 +159,56 @@ const getAiHuntHint = (carName: string) => {
 };
 
 export const HuntScreen: React.FC<HuntScreenProps> = ({ hunt, onClose, onOpenScanner }) => {
-  const { user, abandonHunt } = useApexStore();
+  const { user, garage, abandonHunt } = useApexStore();
   const [showCancelConfirmModal, setShowCancelConfirmModal] = useState(false);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   
-  // Real or simulated user coordinates
-  const userLat = user.latitude || 22.2855;
-  const userLng = user.longitude || 114.1577;
-  const userGpsPos: [number, number] = [userLat, userLng];
+  const isCreator = Boolean(
+    hunt && (
+      (hunt.creatorId && hunt.creatorId === user.id) ||
+      (hunt.creatorUsername && hunt.creatorUsername === user.username) ||
+      garage.some(c => c.id === hunt.cardId)
+    )
+  );
 
-  // Target coordinates
-  const targetLat = hunt?.latApprox || userLat + 0.007;
-  const targetLng = hunt?.lngApprox || userLng + 0.005;
-  const targetPos: [number, number] = [targetLat, targetLng];
+  // Check if valid user coordinates exist (never substitute Hong Kong or Japan)
+  const hasUserLocation = Boolean(
+    typeof user.latitude === 'number' &&
+    typeof user.longitude === 'number' &&
+    (user.latitude !== 0 || user.longitude !== 0)
+  );
 
-  // Distance calculation
-  const initialDist = calculateDistanceKm(userLat, userLng, targetLat, targetLng);
-  const [distanceKm, setDistanceKm] = useState(initialDist);
+  const hasTargetLocation = Boolean(
+    hunt &&
+    typeof hunt.latApprox === 'number' &&
+    typeof hunt.lngApprox === 'number' &&
+    (hunt.latApprox !== 0 || hunt.lngApprox !== 0)
+  );
+
+  const userGpsPos: [number, number] | null = hasUserLocation
+    ? [user.latitude!, user.longitude!]
+    : null;
+
+  // Genuine target coordinates: never fabricate or default to Hong Kong or Tokyo
+  const targetPos: [number, number] = hasTargetLocation
+    ? [hunt!.latApprox!, hunt!.lngApprox!]
+    : (userGpsPos || [26.8467, 80.9462]);
+
+  const mapCenter: [number, number] = targetPos;
+
+  // Real distance calculation
+  const calculatedDist = (userGpsPos && hasTargetLocation)
+    ? calculateDistanceKm(userGpsPos[0], userGpsPos[1], targetPos[0], targetPos[1])
+    : null;
+
+  const [simulatedDistanceKm, setSimulatedDistanceKm] = useState<number | null>(null);
+  const distanceKm = simulatedDistanceKm ?? calculatedDist;
 
   // 1km Zone & 7-Minute Timer (420 seconds)
-  const [inZone, setInZone] = useState(initialDist <= 1.0);
+  const [simulatedInZone, setSimulatedInZone] = useState<boolean | null>(null);
+  const inZone = simulatedInZone ?? (distanceKm !== null && distanceKm <= 1.0);
   const [zoneSecondsLeft, setZoneSecondsLeft] = useState(420); // 7:00 minutes
-  const [isTimerActive, setIsTimerActive] = useState(initialDist <= 1.0);
+  const [isTimerActive, setIsTimerActive] = useState(inZone && !isCreator);
 
   // Trigger sound when entering hunt
   useEffect(() => {
@@ -204,17 +232,17 @@ export const HuntScreen: React.FC<HuntScreenProps> = ({ hunt, onClose, onOpenSca
     return () => clearInterval(interval);
   }, [isTimerActive]);
 
-  // Helper to toggle simulated 1km zone entry
+  // Helper to toggle simulated 1km zone entry (for testing/development)
   const handleToggleZoneEntry = () => {
     if (!inZone) {
-      setInZone(true);
+      setSimulatedInZone(true);
       setIsTimerActive(true);
-      setDistanceKm(0.4);
+      setSimulatedDistanceKm(0.4);
       sounds.playXpPop();
     } else {
-      setInZone(false);
+      setSimulatedInZone(false);
       setIsTimerActive(false);
-      setDistanceKm(1.8);
+      setSimulatedDistanceKm(1.8);
     }
   };
 
@@ -232,15 +260,24 @@ export const HuntScreen: React.FC<HuntScreenProps> = ({ hunt, onClose, onOpenSca
   const seconds = zoneSecondsLeft % 60;
   const formattedTimer = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 
-  // Mock Active Participating Hunters Leaderboard
-  const huntersList = [
+  // Active Participating Hunters Leaderboard
+  const huntersList = isCreator ? [
     { rank: 1, name: 'ApexPhantom', distance: '0.2 km', xp: '+1,500 XP', badge: '1ST PLACE', isUser: false },
-    { rank: 2, name: user.displayName || user.username || 'You (Hunter)', distance: inZone ? `${distanceKm.toFixed(1)} km` : '0.4 km', xp: '+1,000 XP', badge: '2ND PLACE', isUser: true },
+    { rank: 2, name: 'VelocityHunter', distance: '0.4 km', xp: '+1,000 XP', badge: '2ND PLACE', isUser: false },
     { rank: 3, name: 'TurboVeloce', distance: '0.6 km', xp: '+750 XP', badge: '3RD PLACE', isUser: false },
     { rank: 4, name: 'DriftMaster99', distance: '0.8 km', xp: '+400 XP', badge: 'TOP 10', isUser: false },
-    { rank: 5, name: 'NightRacer_HK', distance: '1.1 km', xp: '+400 XP', badge: 'TOP 10', isUser: false },
-    { rank: 6, name: 'ShadowApex', distance: '1.3 km', xp: '+400 XP', badge: 'TOP 10', isUser: false },
-    { rank: 7, name: 'KevlarGhost', distance: '1.5 km', xp: '+400 XP', badge: 'TOP 10', isUser: false },
+    { rank: 5, name: 'ShadowApex', distance: '1.1 km', xp: '+400 XP', badge: 'TOP 10', isUser: false },
+    { rank: 6, name: 'KevlarGhost', distance: '1.3 km', xp: '+400 XP', badge: 'TOP 10', isUser: false },
+    { rank: 7, name: 'ApexSpecter', distance: '1.5 km', xp: '+400 XP', badge: 'TOP 10', isUser: false },
+    { rank: 8, name: 'SpeedDemon88', distance: '1.9 km', xp: '+150 XP', badge: 'RUNNER UP', isUser: false }
+  ] : [
+    { rank: 1, name: 'ApexPhantom', distance: '0.2 km', xp: '+1,500 XP', badge: '1ST PLACE', isUser: false },
+    { rank: 2, name: user.displayName || user.username || 'You (Hunter)', distance: inZone ? (distanceKm ? `${distanceKm.toFixed(1)} km` : '0.4 km') : (distanceKm ? `${distanceKm.toFixed(1)} km` : 'Radar pending'), xp: '+1,000 XP', badge: '2ND PLACE', isUser: true },
+    { rank: 3, name: 'TurboVeloce', distance: '0.6 km', xp: '+750 XP', badge: '3RD PLACE', isUser: false },
+    { rank: 4, name: 'DriftMaster99', distance: '0.8 km', xp: '+400 XP', badge: 'TOP 10', isUser: false },
+    { rank: 5, name: 'ShadowApex', distance: '1.1 km', xp: '+400 XP', badge: 'TOP 10', isUser: false },
+    { rank: 6, name: 'KevlarGhost', distance: '1.3 km', xp: '+400 XP', badge: 'TOP 10', isUser: false },
+    { rank: 7, name: 'ApexSpecter', distance: '1.5 km', xp: '+400 XP', badge: 'TOP 10', isUser: false },
     { rank: 8, name: 'SpeedDemon88', distance: '1.9 km', xp: '+150 XP', badge: 'RUNNER UP', isUser: false }
   ];
 
@@ -249,53 +286,82 @@ export const HuntScreen: React.FC<HuntScreenProps> = ({ hunt, onClose, onOpenSca
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 bg-[#080808] flex flex-col select-none overflow-hidden font-sans"
+      className="fixed inset-0 z-50 bg-[#080808] flex flex-col select-none overflow-hidden font-sans touch-none overscroll-none"
     >
       {/* 1. TOP DEDICATED HUNT HEADER WITH NAVIGATION CONTROLS */}
-      <div className="absolute top-4 left-4 right-4 z-40 flex items-center justify-between max-w-md mx-auto pointer-events-auto">
+      <div 
+        className="absolute top-4 left-4 right-4 z-40 flex items-center justify-between max-w-md mx-auto pointer-events-none"
+        onPointerDown={(e) => e.stopPropagation()}
+        onTouchStart={(e) => e.stopPropagation()}
+      >
         {/* Left: Return to App / Home (Keeps Hunt Active in Background) */}
         <button
-          onClick={onClose}
-          className="h-10 px-3.5 rounded-xl bg-[#111111]/90 backdrop-blur-md border border-[#2C2C2C] text-[#F0EBE3] text-xs font-data flex items-center gap-1.5 hover:border-[#FF4500]/60 transition-colors shadow-2xl"
+          onClick={(e) => {
+            e.stopPropagation();
+            onClose();
+          }}
+          onPointerDown={(e) => e.stopPropagation()}
+          onTouchStart={(e) => e.stopPropagation()}
+          className="pointer-events-auto h-10 px-3.5 rounded-xl bg-[#111111]/90 backdrop-blur-md border border-[#2C2C2C] text-[#F0EBE3] text-xs font-data flex items-center gap-1.5 hover:border-[#FF4500]/60 transition-colors shadow-2xl cursor-pointer"
           title="Return to Home / App (Keep Hunt Active)"
         >
           <ArrowLeft className="w-4 h-4 text-[#FF4500]" />
           <span className="uppercase font-bold tracking-wider">HOME / APP</span>
         </button>
 
-        {/* Center: Live 7-Min Timer or Distance */}
-        <div className="flex items-center gap-1.5 bg-[#0C0C0C]/95 backdrop-blur-md px-3 py-1.5 rounded-full border border-[#FF2200]/50 shadow-2xl">
-          <Flame className="w-4 h-4 text-[#FF2200] animate-pulse" />
-          {inZone ? (
+        {/* Center: Live Status Indicator */}
+        <div 
+          className="pointer-events-auto flex items-center gap-1.5 bg-[#0C0C0C]/95 backdrop-blur-md px-3 py-1.5 rounded-full border border-[#FF4500]/50 shadow-2xl"
+          onPointerDown={(e) => e.stopPropagation()}
+          onTouchStart={(e) => e.stopPropagation()}
+        >
+          <Flame className="w-4 h-4 text-[#FF4500] animate-pulse" />
+          {isCreator ? (
+            <span className="font-data font-black text-xs text-[#F0EBE3] tracking-wider">
+              BROADCAST ACTIVE · 8 HUNTERS
+            </span>
+          ) : inZone ? (
             <div className="flex items-center gap-1 font-data font-black text-xs text-[#FF2200]">
               <Clock className="w-3.5 h-3.5" />
               <span>{formattedTimer}</span>
             </div>
-          ) : (
+          ) : distanceKm !== null ? (
             <span className="font-data font-black text-xs text-[#F0EBE3] tracking-wider">
               {distanceKm.toFixed(1)} KM AWAY
+            </span>
+          ) : (
+            <span className="font-data font-black text-xs text-[#9A9088] tracking-wider">
+              RADAR TARGET LOCKED
             </span>
           )}
         </div>
 
-        {/* Right: Quit / Abandon Hunt (With Confirmation) */}
+        {/* Right: Creator 'END' or Hunter 'QUIT' Button */}
         <button
-          onClick={() => setShowCancelConfirmModal(true)}
-          className="h-10 px-3.5 rounded-xl bg-[#111111]/90 backdrop-blur-md border border-[#FF2200]/40 text-[#9A9088] hover:text-[#FF2200] text-xs font-data flex items-center gap-1 hover:border-[#FF2200] transition-colors shadow-2xl"
-          title="Quit Hunt"
+          onClick={(e) => {
+            e.stopPropagation();
+            setShowCancelConfirmModal(true);
+          }}
+          onPointerDown={(e) => e.stopPropagation()}
+          onTouchStart={(e) => e.stopPropagation()}
+          className="pointer-events-auto h-10 px-3.5 rounded-xl bg-[#111111]/90 backdrop-blur-md border border-[#FF2200]/40 text-[#9A9088] hover:text-[#FF2200] text-xs font-data flex items-center gap-1 hover:border-[#FF2200] transition-colors shadow-2xl cursor-pointer"
+          title={isCreator ? 'End Broadcast' : 'Quit Hunt'}
         >
           <LogOut className="w-3.5 h-3.5 text-[#FF2200]" />
-          <span className="uppercase font-bold tracking-wider">QUIT</span>
+          <span className="uppercase font-bold tracking-wider">{isCreator ? 'END' : 'QUIT'}</span>
         </button>
       </div>
 
       {/* 2. FULL-SCREEN DEDICATED LEAFLET HUNT MAP */}
-      <div className="w-full h-full dark-tiles">
+      <div className="w-full h-full dark-tiles select-none touch-none overscroll-none relative">
         <MapContainer
-          center={userGpsPos}
+          center={mapCenter}
           zoom={14}
           zoomControl={false}
           scrollWheelZoom={true}
+          doubleClickZoom={true}
+          touchZoom={true}
+          bounceAtZoomLimits={false}
           preferCanvas={true}
           className="w-full h-full"
           style={{ width: '100%', height: '100%', backgroundColor: '#080808' }}
@@ -308,8 +374,8 @@ export const HuntScreen: React.FC<HuntScreenProps> = ({ hunt, onClose, onOpenSca
           />
           <MapInvalidator />
 
-          {/* User Location GPS Marker */}
-          <Marker position={userGpsPos} icon={createGpsDotIcon()} />
+          {/* Genuine User Location GPS Marker (only if genuinely available) */}
+          {userGpsPos && <Marker position={userGpsPos} icon={createGpsDotIcon()} />}
 
           {/* 1km Radius Hunt Zone Perimeter Circle */}
           <Circle
@@ -327,25 +393,54 @@ export const HuntScreen: React.FC<HuntScreenProps> = ({ hunt, onClose, onOpenSca
           {/* Target Car Marker (Directly on / above 1km perimeter) */}
           <Marker position={targetPos} icon={createHuntTargetIcon()} />
 
-          {/* Other Competing Live Hunters Pins */}
-          <Marker position={[targetLat + 0.002, targetLng - 0.003]} icon={createHunterGpsIcon(1)} />
-          <Marker position={[targetLat - 0.004, targetLng + 0.004]} icon={createHunterGpsIcon(3)} />
-          <Marker position={[targetLat + 0.005, targetLng + 0.002]} icon={createHunterGpsIcon(4)} />
+          {/* Other Competing Live Hunters Pins (Anchored relative to target) */}
+          {hasTargetLocation && (
+            <>
+              <Marker position={[targetPos[0] + 0.002, targetPos[1] - 0.003]} icon={createHunterGpsIcon(1)} />
+              <Marker position={[targetPos[0] - 0.004, targetPos[1] + 0.004]} icon={createHunterGpsIcon(3)} />
+              <Marker position={[targetPos[0] + 0.005, targetPos[1] + 0.002]} icon={createHunterGpsIcon(4)} />
+            </>
+          )}
 
-          {/* Navigation Polyline from User to Target */}
-          <Polyline
-            positions={[userGpsPos, targetPos]}
-            pathOptions={{ color: '#FF2200', weight: 3, dashArray: '6, 8' }}
-          />
+          {/* Navigation Polyline from User to Target (Only rendered if genuine user GPS is known) */}
+          {userGpsPos && (
+            <Polyline
+              positions={[userGpsPos, targetPos]}
+              pathOptions={{ color: '#FF2200', weight: 3, dashArray: '6, 8' }}
+            />
+          )}
         </MapContainer>
       </div>
 
-      {/* 3. FLOATING 1KM ZONE ENTERED ALERT & 7-MINUTE TIMER BANNER */}
-      {inZone && (
+      {/* 3. CREATOR BROADCAST STATUS BANNER */}
+      {isCreator && (
+        <div 
+          className="absolute top-18 left-4 right-4 z-30 max-w-md mx-auto bg-[#140F08]/95 backdrop-blur-md border border-[#FF4500]/60 rounded-2xl p-3.5 shadow-2xl flex items-center justify-between pointer-events-none"
+          onPointerDown={(e) => e.stopPropagation()}
+          onTouchStart={(e) => e.stopPropagation()}
+        >
+          <div>
+            <span className="text-[10px] font-data font-bold text-[#FF4500] uppercase tracking-wider block">
+              COMMUNITY BOUNTY BROADCAST
+            </span>
+            <span className="text-xs font-data text-[#F0EBE3] font-semibold block">
+              {hunt.carName} · {hunt.city || user.city || 'Active Area'}
+            </span>
+          </div>
+          <span className="px-2.5 py-1 rounded-full bg-[#FF4500]/20 border border-[#FF4500]/40 text-[#FF4500] font-data font-bold text-[10px]">
+            RADAR PIN LIVE
+          </span>
+        </div>
+      )}
+
+      {/* 4. FLOATING 1KM ZONE ENTERED ALERT & 7-MINUTE TIMER BANNER (Hunters Only) */}
+      {!isCreator && inZone && (
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="absolute top-18 left-4 right-4 z-30 max-w-md mx-auto bg-[#140808]/95 backdrop-blur-md border border-[#FF2200] rounded-2xl p-3.5 shadow-[0_0_30px_rgba(255,34,0,0.4)] space-y-2"
+          className="absolute top-18 left-4 right-4 z-30 max-w-md mx-auto bg-[#140808]/95 backdrop-blur-md border border-[#FF2200] rounded-2xl p-3.5 shadow-[0_0_30px_rgba(255,34,0,0.4)] space-y-2 pointer-events-none"
+          onPointerDown={(e) => e.stopPropagation()}
+          onTouchStart={(e) => e.stopPropagation()}
         >
           <div className="flex items-center justify-between">
             <span className="flex items-center gap-1.5 text-xs font-data font-black text-[#FF2200] tracking-widest uppercase">
@@ -358,7 +453,7 @@ export const HuntScreen: React.FC<HuntScreenProps> = ({ hunt, onClose, onOpenSca
           </div>
 
           {/* AI Hints Inside Zone */}
-          <div className="bg-[#0A0A0A] border border-[#222222] rounded-xl p-2.5 space-y-1 text-xs">
+          <div className="bg-[#0A0A0A] border border-[#222222] rounded-xl p-2.5 space-y-1 text-xs pointer-events-auto">
             <div className="flex items-center gap-1.5 text-[#FF2200] font-data font-bold uppercase tracking-wider text-[10px]">
               <Sparkles className="w-3.5 h-3.5" />
               <span>AI RADAR TELEMETRY HINT</span>
@@ -373,39 +468,57 @@ export const HuntScreen: React.FC<HuntScreenProps> = ({ hunt, onClose, onOpenSca
         </motion.div>
       )}
 
-      {/* 4. FLOATING OUTSIDE ZONE BANNER (If outside 1km) */}
-      {!inZone && (
-        <div className="absolute top-18 left-4 right-4 z-30 max-w-md mx-auto bg-[#111111]/90 backdrop-blur-md border border-[#222222] rounded-2xl p-3 shadow-2xl flex items-center justify-between">
+      {/* 5. FLOATING OUTSIDE ZONE BANNER (Hunters Only, outside 1km) */}
+      {!isCreator && !inZone && (
+        <div 
+          className="absolute top-18 left-4 right-4 z-30 max-w-md mx-auto bg-[#111111]/90 backdrop-blur-md border border-[#222222] rounded-2xl p-3 shadow-2xl flex items-center justify-between pointer-events-none"
+          onPointerDown={(e) => e.stopPropagation()}
+          onTouchStart={(e) => e.stopPropagation()}
+        >
           <div>
             <span className="text-[10px] font-data font-bold text-[#FF4500] uppercase tracking-wider block">
               NAVIGATE TO 1KM PERIMETER
             </span>
             <span className="text-xs font-data text-[#F0EBE3] font-semibold block">
-              {hunt.carName} · {distanceKm.toFixed(1)} km away
+              {hunt.carName} {distanceKm !== null ? `· ${distanceKm.toFixed(1)} km away` : '· Tracking Target'}
             </span>
           </div>
 
           <button
-            onClick={handleToggleZoneEntry}
-            className="px-3 py-1.5 rounded-xl bg-[#222222] hover:bg-[#333333] text-[11px] font-data font-bold text-white transition-colors"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleToggleZoneEntry();
+            }}
+            onPointerDown={(e) => e.stopPropagation()}
+            onTouchStart={(e) => e.stopPropagation()}
+            className="pointer-events-auto px-3 py-1.5 rounded-xl bg-[#222222] hover:bg-[#333333] text-[11px] font-data font-bold text-white transition-colors cursor-pointer"
           >
             SIMULATE 1KM
           </button>
         </div>
       )}
 
-      {/* 5. SLIDING LOCAL LEADERBOARD DRAWER (Tiered XP System) */}
-      <div className="absolute bottom-24 left-4 right-4 z-40 max-w-md mx-auto pointer-events-auto">
-        <div className="bg-[#0C0C0C]/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden">
+      {/* 6. SLIDING LOCAL LEADERBOARD DRAWER (Tiered XP System) */}
+      <div 
+        className="absolute bottom-24 left-4 right-4 z-40 max-w-md mx-auto pointer-events-none"
+        onPointerDown={(e) => e.stopPropagation()}
+        onTouchStart={(e) => e.stopPropagation()}
+      >
+        <div className="pointer-events-auto bg-[#0C0C0C]/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden">
           {/* Header Bar: Tap to Expand/Collapse */}
           <div 
-            onClick={() => setShowLeaderboard(!showLeaderboard)}
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowLeaderboard(!showLeaderboard);
+            }}
+            onPointerDown={(e) => e.stopPropagation()}
+            onTouchStart={(e) => e.stopPropagation()}
             className="p-3.5 flex items-center justify-between cursor-pointer hover:bg-white/5 transition-colors border-b border-white/5"
           >
             <div className="flex items-center gap-2">
               <Trophy className="w-4 h-4 text-[#FFD700]" />
               <span className="text-xs font-data font-bold text-[#F0EBE3] uppercase tracking-wider">
-                LOCAL HUNTER LEADERBOARD
+                {isCreator ? 'LIVE SPOTTERS ON RADAR' : 'LOCAL HUNTER LEADERBOARD'}
               </span>
               <span className="text-[10px] font-data font-bold px-2 py-0.5 rounded-full bg-[#FF4500]/20 text-[#FF4500] border border-[#FF4500]/30">
                 8 LIVE
@@ -474,24 +587,51 @@ export const HuntScreen: React.FC<HuntScreenProps> = ({ hunt, onClose, onOpenSca
         </div>
       </div>
 
-      {/* 6. BOTTOM SCAN BUTTON */}
-      <div className="absolute bottom-6 left-4 right-4 z-40 max-w-md mx-auto pointer-events-auto">
-        <button
-          onClick={() => {
-            sounds.playTargetLock();
-            onOpenScanner();
-          }}
-          className="w-full h-14 rounded-2xl bg-[#FF2200] text-white font-display text-xl tracking-wider flex items-center justify-center gap-2 shadow-[0_4px_24px_rgba(255,34,0,0.5)] hover:bg-[#FF3300] transition-colors"
-        >
-          <Camera className="w-6 h-6" />
-          <span>{inZone ? 'SCAN & CLAIM BOUNTY' : 'SCAN TARGET VEHICLE'}</span>
-        </button>
+      {/* 7. BOTTOM ACTION BUTTON (Context-Aware) */}
+      <div 
+        className="absolute bottom-6 left-4 right-4 z-40 max-w-md mx-auto pointer-events-none"
+        onPointerDown={(e) => e.stopPropagation()}
+        onTouchStart={(e) => e.stopPropagation()}
+      >
+        {isCreator ? (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onClose();
+            }}
+            onPointerDown={(e) => e.stopPropagation()}
+            onTouchStart={(e) => e.stopPropagation()}
+            className="pointer-events-auto w-full h-14 rounded-2xl bg-gradient-to-r from-[#1A1A1A] to-[#222222] border border-[#FF4500]/50 text-[#F0EBE3] font-display text-base tracking-wider flex items-center justify-center gap-2 shadow-[0_4px_24px_rgba(0,0,0,0.6)] hover:border-[#FF4500] transition-colors cursor-pointer"
+          >
+            <ArrowLeft className="w-5 h-5 text-[#FF4500]" />
+            <span>BROADCASTING · RETURN TO APP</span>
+          </button>
+        ) : (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              sounds.playTargetLock();
+              onOpenScanner();
+            }}
+            onPointerDown={(e) => e.stopPropagation()}
+            onTouchStart={(e) => e.stopPropagation()}
+            className="pointer-events-auto w-full h-14 rounded-2xl bg-[#FF2200] text-white font-display text-xl tracking-wider flex items-center justify-center gap-2 shadow-[0_4px_24px_rgba(255,34,0,0.5)] hover:bg-[#FF3300] transition-colors cursor-pointer"
+          >
+            <Camera className="w-6 h-6" />
+            <span>{inZone ? 'SCAN & CLAIM BOUNTY' : 'SCAN TARGET VEHICLE'}</span>
+          </button>
+        )}
       </div>
 
-      {/* 7. QUIT HUNT CONFIRMATION MODAL */}
+      {/* 8. QUIT HUNT / END BROADCAST CONFIRMATION MODAL */}
       <AnimatePresence>
         {showCancelConfirmModal && (
-          <div className="fixed inset-0 z-50 bg-[#080808]/85 backdrop-blur-sm flex items-center justify-center p-4">
+          <div 
+            className="fixed inset-0 z-50 bg-[#080808]/85 backdrop-blur-sm flex items-center justify-center p-4"
+            onClick={(e) => e.stopPropagation()}
+            onPointerDown={(e) => e.stopPropagation()}
+            onTouchStart={(e) => e.stopPropagation()}
+          >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
@@ -504,11 +644,15 @@ export const HuntScreen: React.FC<HuntScreenProps> = ({ hunt, onClose, onOpenSca
 
               <div className="space-y-1">
                 <span className="text-[10px] font-data font-semibold text-[#FF2200] uppercase tracking-wider bg-[#1F0500] px-3 py-1 rounded-full border border-[#FF2200]/40">
-                  CONFIRM QUIT HUNT
+                  {isCreator ? 'CONFIRM END BROADCAST' : 'CONFIRM QUIT HUNT'}
                 </span>
-                <h3 className="font-display text-2xl text-[#F0EBE3] pt-2">QUIT THIS HUNT?</h3>
+                <h3 className="font-display text-2xl text-[#F0EBE3] pt-2">
+                  {isCreator ? 'END THIS BROADCAST?' : 'QUIT THIS HUNT?'}
+                </h3>
                 <p className="text-xs text-[#9A9088] leading-relaxed">
-                  Are you sure you want to abandon hunting {hunt.carName}? You will lose your leaderboard spot and XP rewards.
+                  {isCreator 
+                    ? `Are you sure you want to end your broadcast for ${hunt.carName}? Nearby hunters will no longer see this live vehicle on radar.`
+                    : `Are you sure you want to abandon hunting ${hunt.carName}? You will lose your leaderboard spot and XP rewards.`}
                 </p>
               </div>
 
@@ -517,14 +661,14 @@ export const HuntScreen: React.FC<HuntScreenProps> = ({ hunt, onClose, onOpenSca
                   onClick={handleConfirmAbandon}
                   className="w-full py-3.5 rounded-xl bg-[#FF2200] text-white font-display text-lg tracking-wider flex items-center justify-center gap-2 shadow-[0_0_15px_#FF2200]"
                 >
-                  <X className="w-5 h-5" /> YES, QUIT HUNT
+                  <X className="w-5 h-5" /> {isCreator ? 'YES, END BROADCAST' : 'YES, QUIT HUNT'}
                 </button>
 
                 <button
                   onClick={() => setShowCancelConfirmModal(false)}
                   className="w-full py-3 rounded-xl bg-[#1A1A1A] hover:bg-[#2C2C2C] text-[#F0EBE3] font-display text-sm tracking-wider border border-[#2C2C2C]"
                 >
-                  KEEP HUNTING
+                  {isCreator ? 'KEEP BROADCASTING' : 'KEEP HUNTING'}
                 </button>
               </div>
             </motion.div>

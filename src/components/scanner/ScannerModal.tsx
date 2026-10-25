@@ -204,9 +204,9 @@ export const ScannerModal: React.FC = () => {
   };
 
   // Helper: Fast Client-Side Image Preprocessor
-  // Preserves high-resolution visual cues (up to 1600px, JPEG 0.90) for fine-grained morphological discrimination
-  // Bypasses canvas re-encoding when native CameraX frame is already optimal (< 2.5MB, <= 1600px)
-  const optimizeScanImage = async (dataUrl: string, maxDimension = 1600, quality = 0.90): Promise<string> => {
+  // Preserves high-resolution visual cues (up to 1280px, JPEG 0.85) for fine-grained morphological discrimination
+  // Bypasses canvas re-encoding when native CameraX frame is already optimal (< 800KB, <= 1280px)
+  const optimizeScanImage = async (dataUrl: string, maxDimension = 1280, quality = 0.85): Promise<string> => {
     return new Promise((resolve) => {
       if (!dataUrl || !dataUrl.startsWith('data:image')) {
         resolve(dataUrl);
@@ -220,9 +220,9 @@ export const ScannerModal: React.FC = () => {
           let { width, height } = img;
           const maxSide = Math.max(width, height);
 
-          // BYPASS: If image is already appropriately sized (maxSide <= 1600 and byte size < 2.5MB),
+          // BYPASS: If image is already appropriately sized (maxSide <= 1280 and byte size < 800KB),
           // send directly without decoding -> canvas -> re-compressing to avoid generational JPEG artifacts
-          if (maxSide <= maxDimension && rawByteEstimate < 2500000) {
+          if (maxSide <= maxDimension && rawByteEstimate < 800000) {
             console.log('[CAMERA] optimizeScanImage bypassed (already optimal):', {
               width,
               height,
@@ -325,6 +325,7 @@ export const ScannerModal: React.FC = () => {
         infraReason === 'AUTH_SESSION_EXPIRED' ||
         infraReason === 'AUTH_REFRESH_FAILED' ||
         infraReason === 'VISION_PROVIDER_UNAVAILABLE' ||
+        infraReason === 'SERVER_ERROR' ||
         aiResult.rejection_reason === 'actual_device_offline' ||
         (aiResult.status as string) === 'provider_unavailable'
       )) {
@@ -335,6 +336,7 @@ export const ScannerModal: React.FC = () => {
            infraReason === 'AUTH_REFRESH_FAILED' ? 'Unable to refresh authentication session. Please sign in.' :
            (infraReason === 'RATE_LIMITED' || infraReason === 'RATE_LIMIT_EXCEEDED') ? 'Apex is temporarily rate-limited. Please try again shortly.' :
            infraReason === 'NETWORK_TIMEOUT' ? 'The vision request timed out. Please retry.' :
+           infraReason === 'SERVER_ERROR' ? 'A temporary server error occurred. Please try scanning again.' :
            aiResult.rejection_reason === 'actual_device_offline' ? 'You’re offline, so Apex is using offline identification.' :
            'Apex’s vision service is temporarily unreachable. Please retry.')
         );

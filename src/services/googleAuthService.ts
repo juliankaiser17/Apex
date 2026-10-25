@@ -22,6 +22,8 @@ export interface GoogleUserData {
 }
 
 export const DEBUG_KEYSTORE_SHA1 = '93:5E:D3:F7:6E:8C:17:6E:34:BB:84:D6:97:44:D0:41:EC:69:55:71';
+export const RELEASE_KEYSTORE_SHA1 = '4D:2F:D5:24:2B:63:2E:D8:EC:5C:F8:E6:DA:33:B1:D6:9F:DE:9F:31';
+export const ANDROID_PACKAGE_NAME = 'org.juliankaiser.apex';
 const DEFAULT_GOOGLE_CLIENT_ID = '708398928493-8qkjhla9p00kkjrse5f0l4d8spo9pj6c.apps.googleusercontent.com';
 
 declare global {
@@ -235,11 +237,25 @@ export async function triggerGoogleSignIn(
     } catch (nativeErr: any) {
       console.warn('[AuthDiag:Google] Native Google Sign-In caught error:', nativeErr);
       const errMessage = nativeErr?.message || String(nativeErr);
+      const errCode = nativeErr?.code || '';
+
+      // Check if this error is an internal credential error containing numbers or standard exception types
+      const hasSpecificErrorCode = 
+        Boolean(errMessage.match(/\[\d+\]/)) ||
+        errMessage.includes('Cannot find a matching credential') ||
+        errMessage.includes('DEVELOPER_ERROR') ||
+        errMessage.includes('12500') ||
+        errMessage.includes('10:') ||
+        errMessage.includes('16:');
+
+      // True cancellation only occurs when the user actively dismisses the picker
       const isExplicitCancel = 
-        errMessage.includes('12501') || 
-        errMessage.includes('SIGN_IN_CANCELED') || 
-        errMessage.toLowerCase().includes('canceled') ||
-        errMessage.toLowerCase().includes('cancelled');
+        !hasSpecificErrorCode && (
+          errCode === 'SIGN_IN_CANCELED' ||
+          errMessage === 'The user canceled the sign-in flow.' ||
+          errMessage.includes('12501') ||
+          (errMessage.includes('GetCredentialCancellationException') && !errMessage.includes('[16]'))
+        );
 
       if (isExplicitCancel) {
         console.log('[AuthDiag:Google] Native account picker was cancelled by user.');
@@ -253,15 +269,31 @@ export async function triggerGoogleSignIn(
       }
 
       // Extract numeric code if present (e.g. [16], [10], etc.)
-      const codeMatch = errMessage.match(/\[(\d+)\]/);
-      const extractedCode = codeMatch ? `PLAY_SERVICES_CODE_${codeMatch[1]}` : 'PLAY_SERVICES_ERROR';
+      const codeMatch = errMessage.match(/\[(\d+)\]/) || errMessage.match(/\b(10|16|12500|12502)\b/);
+      const numericCode = codeMatch ? codeMatch[1] : null;
+      let extractedCode = numericCode ? `PLAY_SERVICES_CODE_${numericCode}` : (errCode || 'PLAY_SERVICES_ERROR');
+      let title = 'Token Retrieval Failed';
+      let userFriendlyMessage = 'Google Sign-In failed.';
+      let resolution = `Verify that the APK signing certificate SHA-1 fingerprint (${RELEASE_KEYSTORE_SHA1}) is registered under an Android OAuth Client in Google Cloud Console (Project 708398928493).`;
 
-      onError?.(errMessage || 'Google Sign-In failed.', {
+      if (numericCode === '16' || errMessage.includes('Cannot find a matching credential')) {
+        extractedCode = 'PLAY_SERVICES_CODE_16';
+        title = 'No Matching OAuth Credential (Code 16)';
+        userFriendlyMessage = 'Google Play Services cannot find a matching OAuth client credential for this release APK.';
+        resolution = `Google Cloud Console must have an Android OAuth Client configured for package "${ANDROID_PACKAGE_NAME}" with release SHA-1 (${RELEASE_KEYSTORE_SHA1}).`;
+      } else if (numericCode === '10' || errMessage.includes('DEVELOPER_ERROR')) {
+        extractedCode = 'PLAY_SERVICES_CODE_10';
+        title = 'OAuth Developer Configuration Error (Code 10)';
+        userFriendlyMessage = 'Google Play Services rejected the app configuration.';
+        resolution = `Check Google Cloud Console OAuth Client: verify package "${ANDROID_PACKAGE_NAME}" matches release SHA-1 (${RELEASE_KEYSTORE_SHA1}) and Web Client ID (${clientId}) is correct.`;
+      }
+
+      onError?.(userFriendlyMessage, {
         stage: 'TOKEN_RETRIEVAL_FAILED',
-        title: 'Token Retrieval Failed',
+        title,
         code: extractedCode,
         message: errMessage || 'Google Play Services was unable to issue credentials for this app.',
-        resolution: 'Verify that the APK signing certificate SHA-1 fingerprint is registered under an Android OAuth Client in Google Cloud Console (Project 708398928493).'
+        resolution
       });
       return;
     }

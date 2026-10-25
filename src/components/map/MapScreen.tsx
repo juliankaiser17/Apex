@@ -230,13 +230,15 @@ export const MapScreen: React.FC = () => {
 
     feedPosts.forEach(post => {
       if (post.card && post.card.isPublic !== false && post.card.privacyLevel !== 'no_hunt_private') {
-        cardMap.set(post.card.id, post.card);
+        if (post.card.latApprox && post.card.lngApprox && post.card.latApprox !== 0 && post.card.lngApprox !== 0) {
+          cardMap.set(post.card.id, post.card);
+        }
       }
     });
 
     garage.forEach(card => {
       if (card.isPublic !== false && card.privacyLevel !== 'no_hunt_private') {
-        if (!cardMap.has(card.id)) {
+        if (!cardMap.has(card.id) && card.latApprox && card.lngApprox && card.latApprox !== 0 && card.lngApprox !== 0) {
           cardMap.set(card.id, card);
         }
       }
@@ -246,17 +248,19 @@ export const MapScreen: React.FC = () => {
     const userLat = liveCoords.latitude;
     const userLng = liveCoords.longitude;
 
-    return allCards.map((card, index) => {
-      const lat = card.latApprox || (userLat ? userLat + ((index % 5) - 2) * 0.005 : 26.8467);
-      const lng = card.lngApprox || (userLng ? userLng + (((index + 1) % 5) - 2) * 0.005 : 80.9462);
+    return allCards.map((card) => {
+      const lat = card.latApprox;
+      const lng = card.lngApprox;
 
-      let distanceStr = `${(0.4 + (index % 5) * 0.4).toFixed(1)} km away`;
-      if (userLat && userLng && lat && lng) {
+      let distanceStr = '';
+      if (userLat && userLng && lat && lng && userLat !== 0 && userLng !== 0) {
         const latRad = ((lat + userLat) / 2) * (Math.PI / 180);
         const dx = (lng - userLng) * Math.cos(latRad) * 111.32;
         const dy = (lat - userLat) * 110.54;
         const distKm = Math.sqrt(dx * dx + dy * dy);
         distanceStr = distKm < 0.1 ? 'Right here' : `${distKm.toFixed(1)} km away`;
+      } else {
+        distanceStr = card.city && card.city !== 'Location Unavailable' ? card.city : 'Spotted';
       }
 
       return {
@@ -264,11 +268,11 @@ export const MapScreen: React.FC = () => {
         id: `map-spot-${card.id}`,
         lat,
         lng,
-        city: card.city || user.city || 'Radar Sector',
+        city: card.city || 'Radar Sector',
         distance: distanceStr
       };
     });
-  }, [garage, feedPosts, liveCoords.latitude, liveCoords.longitude, user.city]);
+  }, [garage, feedPosts, liveCoords.latitude, liveCoords.longitude]);
 
   const activeMatchingHunt = useMemo(() => {
     if (!selectedPin) return null;
@@ -567,8 +571,8 @@ export const MapScreen: React.FC = () => {
       {/* GTA V Satellite HUD Overlay during camera transit */}
       {gtaAnimationPhase && (
         <Gta5SatelliteHud
-          cityName={selectedCity?.name || 'Hong Kong'}
-          countryName={selectedCity?.country || 'Japan'}
+          cityName={selectedCity?.name || user.city || 'Sector Map'}
+          countryName={selectedCity?.country || user.country || 'Global'}
           phase={gtaAnimationPhase}
         />
       )}
@@ -635,17 +639,23 @@ export const MapScreen: React.FC = () => {
               </div>
 
               <div className="flex gap-2 pt-2" onClick={e => e.stopPropagation()}>
-                {activeMatchingHunt ? (
-                  <button
-                    onClick={() => {
-                      setSelectedPin(null);
-                      openHuntModal(activeMatchingHunt);
-                    }}
-                    className="flex-1 py-2.5 rounded-lg bg-[#FF4500] text-[#F0EBE3] font-display text-sm tracking-wider flex items-center justify-center gap-1.5 glow-orange"
-                  >
-                    <Flame className="w-4 h-4 fill-[#F0EBE3]" /> JOIN HUNT
-                  </button>
-                ) : (
+                {activeMatchingHunt ? (() => {
+                  const isCreatorOfMatch = Boolean(
+                    activeMatchingHunt.creatorId === user.id ||
+                    garage.some(c => c.id === activeMatchingHunt.cardId)
+                  );
+                  return (
+                    <button
+                      onClick={() => {
+                        setSelectedPin(null);
+                        openHuntModal(activeMatchingHunt);
+                      }}
+                      className="flex-1 py-2.5 rounded-lg bg-[#FF4500] text-[#F0EBE3] font-display text-sm tracking-wider flex items-center justify-center gap-1.5 glow-orange"
+                    >
+                      <Flame className="w-4 h-4 fill-[#F0EBE3]" /> {isCreatorOfMatch ? 'VIEW YOUR BROADCAST' : 'JOIN HUNT'}
+                    </button>
+                  );
+                })() : (
                   <button
                     onClick={() => {
                       handleOpenSpotCard(selectedPin);
@@ -670,25 +680,36 @@ export const MapScreen: React.FC = () => {
       )}
 
       {/* Active Hunt Banner Overlay */}
-      {activeHunts.length > 0 && (
-        <div className="absolute bottom-24 left-4 right-4 z-30 max-w-md mx-auto bg-[#111111] border border-[#FF4500]/50 rounded-xl p-3 flex items-center justify-between shadow-2xl pointer-events-auto">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-[#1A1A1A] text-[#FF4500] border border-[#FF4500]/30 animate-pulse">
-              <ShieldAlert className="w-5 h-5" />
+      {activeHunts.length > 0 && (() => {
+        const hunt = activeHunts[0];
+        const isCreator = Boolean(
+          hunt.creatorId === user.id ||
+          garage.some(c => c.id === hunt.cardId)
+        );
+        return (
+          <div className="absolute bottom-24 left-4 right-4 z-30 max-w-md mx-auto bg-[#111111] border border-[#FF4500]/50 rounded-xl p-3 flex items-center justify-between shadow-2xl pointer-events-auto">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-[#1A1A1A] text-[#FF4500] border border-[#FF4500]/30 animate-pulse">
+                <ShieldAlert className="w-5 h-5" />
+              </div>
+              <div>
+                <h4 className="font-display text-lg text-[#F0EBE3] leading-none">
+                  {isCreator ? 'YOUR HUNT BROADCAST' : 'ACTIVE HUNT ZONE'}
+                </h4>
+                <p className="text-xs text-[#9A9088] font-data">
+                  {isCreator ? `${hunt.carName} · Broadcasting to nearby spotters` : `${hunt.carName} spotted nearby!`}
+                </p>
+              </div>
             </div>
-            <div>
-              <h4 className="font-display text-lg text-[#F0EBE3] leading-none">ACTIVE HUNT ZONE</h4>
-              <p className="text-xs text-[#9A9088] font-data">{activeHunts[0].carName} spotted nearby!</p>
-            </div>
+            <button
+              onClick={() => openHuntModal(hunt)}
+              className="px-3 py-1.5 rounded-lg bg-[#FF4500] text-[#F0EBE3] font-display text-xs tracking-wider glow-orange"
+            >
+              {isCreator ? 'VIEW BROADCAST' : 'JOIN HUNT'}
+            </button>
           </div>
-          <button
-            onClick={() => openHuntModal(activeHunts[0])}
-            className="px-3 py-1.5 rounded-lg bg-[#FF4500] text-[#F0EBE3] font-display text-xs tracking-wider glow-orange"
-          >
-            JOIN HUNT
-          </button>
-        </div>
-      )}
+        );
+      })()}
     </div>
   );
 };

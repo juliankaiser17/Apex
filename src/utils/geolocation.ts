@@ -156,63 +156,7 @@ export async function geocodeCity(cityName: string): Promise<{ lat: number; lng:
   return { lat: 0, lng: 0, city: clean, country: 'Global' };
 }
 
-/**
- * High-accuracy, non-rate-limited IP-based Geolocation fallback
- */
-async function fetchIpGeolocation(): Promise<{ latitude: number; longitude: number; city: string; country: string } | null> {
-  // Provider 1: ipwho.is (CORS-friendly, accurate city/coordinates, no rate limit errors)
-  try {
-    const res = await fetch('https://ipwho.is/', { signal: AbortSignal.timeout(3500) });
-    if (res.ok) {
-      const data = await res.json();
-      if (data.success && data.latitude && data.longitude) {
-        return {
-          latitude: Number(data.latitude),
-          longitude: Number(data.longitude),
-          city: data.city || data.region || 'Current City',
-          country: data.country || 'Global'
-        };
-      }
-    }
-  } catch (e) {}
 
-  // Provider 2: ipwhois.app
-  try {
-    const res = await fetch('https://ipwhois.app/json/', { signal: AbortSignal.timeout(3500) });
-    if (res.ok) {
-      const data = await res.json();
-      if (data.success && data.latitude && data.longitude) {
-        return {
-          latitude: Number(data.latitude),
-          longitude: Number(data.longitude),
-          city: data.city || data.region || 'Current City',
-          country: data.country || 'Global'
-        };
-      }
-    }
-  } catch (e) {}
-
-  // Provider 3: ipinfo.io
-  try {
-    const res = await fetch('https://ipinfo.io/json', { signal: AbortSignal.timeout(3500) });
-    if (res.ok) {
-      const data = await res.json();
-      if (data.loc) {
-        const [lat, lng] = data.loc.split(',').map(Number);
-        if (!isNaN(lat) && !isNaN(lng)) {
-          return {
-            latitude: lat,
-            longitude: lng,
-            city: data.city || data.region || 'Current City',
-            country: data.country || 'Global'
-          };
-        }
-      }
-    }
-  } catch (e) {}
-
-  return null;
-}
 
 /**
  * Request real device GPS location permission with progressive multi-tier fallback
@@ -306,36 +250,18 @@ export async function requestRealLocationPermission(): Promise<LocationPermissio
     };
   }
 
-  // 3. High-Accuracy IP Geolocation fallback (accurate to real ISP city/region)
-  const ipGeo = await fetchIpGeolocation();
-  if (ipGeo && ipGeo.latitude !== 0 && ipGeo.longitude !== 0) {
-    const approx = offsetCoordinatesApprox(ipGeo.latitude, ipGeo.longitude);
-    return {
-      granted: false,
-      isFallback: true,
-      latitude: ipGeo.latitude,
-      longitude: ipGeo.longitude,
-      ...approx,
-      city: ipGeo.city,
-      country: ipGeo.country,
-      accuracyMeters: 2500
-    };
-  }
-
-  // 4. Timezone estimation without hardcoding arbitrary cities
-  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
-  const tzCity = tz.split('/')[1]?.replace(/_/g, ' ') || 'Your City';
-
+  // 3. Honest fallback: When hardware GPS / HTML5 geolocation is not acquired,
+  // return an honest unavailable state. Never substitute IP-derived guesses or fabricated coordinates.
   return {
     granted: false,
-    isFallback: true,
+    isFallback: false,
     latitude: 0,
     longitude: 0,
     latApprox: 0,
     lngApprox: 0,
-    city: tzCity,
-    country: 'Global',
-    accuracyMeters: 10000
+    city: '',
+    country: '',
+    accuracyMeters: undefined
   };
 }
 

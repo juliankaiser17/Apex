@@ -5,7 +5,7 @@ import { useApexStore } from '../../store/useApexStore';
 import { RARITY_CONFIG } from '../../utils/rarity';
 
 export const ActiveHuntNotification: React.FC = () => {
-  const { activeHuntAlert, dismissHuntAlert, openHuntModal } = useApexStore();
+  const { activeHuntAlert, dismissHuntAlert, openHuntModal, user, garage } = useApexStore();
   const [timeLeft, setTimeLeft] = useState(262); // ~4m 22s
 
   useEffect(() => {
@@ -17,6 +17,11 @@ export const ActiveHuntNotification: React.FC = () => {
   }, [activeHuntAlert]);
 
   if (!activeHuntAlert) return null;
+
+  const isCreator = Boolean(
+    activeHuntAlert.creatorId === user.id ||
+    garage.some(c => c.id === activeHuntAlert.cardId)
+  );
 
   const minutes = Math.floor(timeLeft / 60);
   const seconds = timeLeft % 60;
@@ -40,7 +45,7 @@ export const ActiveHuntNotification: React.FC = () => {
           <div className="flex-1">
             <div className="flex items-center justify-between">
               <span className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded border ${rarityConf.badgeBg}`}>
-                RARE HUNT SPOTTED
+                {isCreator ? 'YOUR HUNT BROADCAST' : 'RARE HUNT SPOTTED'}
               </span>
               <span className="text-xs font-mono font-bold text-rose-400 flex items-center gap-1">
                 <Clock className="w-3.5 h-3.5" /> {formattedTime}
@@ -48,7 +53,9 @@ export const ActiveHuntNotification: React.FC = () => {
             </div>
 
             <h4 className="font-display text-xl text-white mt-0.5">{activeHuntAlert.carName}</h4>
-            <p className="text-xs text-slate-300 font-mono">Spotted 0.4 km away in {activeHuntAlert.city}</p>
+            <p className="text-xs text-slate-300 font-mono">
+              {isCreator ? `Broadcasting live spot in ${activeHuntAlert.city}` : `Spotted 0.4 km away in ${activeHuntAlert.city}`}
+            </p>
           </div>
 
           <button
@@ -58,7 +65,7 @@ export const ActiveHuntNotification: React.FC = () => {
             }}
             className="p-3 rounded-2xl bg-[#FF5500] hover:bg-orange-600 text-white font-display text-xs tracking-wider flex items-center gap-1 shadow-lg"
           >
-            HUNT <ChevronRight className="w-4 h-4" />
+            {isCreator ? 'VIEW' : 'HUNT'} <ChevronRight className="w-4 h-4" />
           </button>
 
           <button

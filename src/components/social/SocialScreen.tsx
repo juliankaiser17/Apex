@@ -22,7 +22,7 @@ import {
   Video,
   Play
 } from 'lucide-react';
-import { useApexStore, SAMPLE_FEED_POSTS } from '../../store/useApexStore';
+import { useApexStore } from '../../store/useApexStore';
 import type { FeedPost, CarCard, LeaderboardEntry } from '../../types/apex';
 import { Card3DDetail } from '../garage/Card3DDetail';
 import { CommentsModal } from './CommentsModal';
@@ -146,7 +146,7 @@ export const SocialScreen: React.FC = () => {
     }
   };
 
-  const activeFeedPosts = (feedPosts && feedPosts.length > 0) ? feedPosts : SAMPLE_FEED_POSTS;
+  const activeFeedPosts = feedPosts || [];
 
   return (
     <>

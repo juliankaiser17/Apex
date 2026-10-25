@@ -51,9 +51,9 @@ ALSO IN THERE
 
 Apex is an independent fan project. It isn't affiliated with or endorsed by any car manufacturer, and brand names are used only to identify vehicles.
 
-Questions, bugs, or a car it got wrong: support@apexspotter.app
-Privacy Policy: https://apexspotter.app/privacy
-Terms of Service: https://apexspotter.app/terms
+Questions, bugs, or a car it got wrong: group.rainz@gmail.com
+Privacy Policy: https://apex-spotter.vercel.app/privacy.html
+Terms of Service: https://apex-spotter.vercel.app/terms.html
 ```
 
 ---

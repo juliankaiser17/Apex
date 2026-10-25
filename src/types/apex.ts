@@ -257,6 +257,8 @@ export interface Badge {
 export interface Hunt {
   id: string;
   cardId: string;
+  creatorId?: string;
+  creatorUsername?: string;
   carName: string;
   make: string;
   model: string;

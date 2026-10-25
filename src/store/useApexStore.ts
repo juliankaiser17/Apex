@@ -653,10 +653,10 @@ const createSampleCard = (partial: Partial<CarCard> & { id: string; make: string
   interestingFact: 'Precision track-tested engineering.',
   briefHistory: 'Iconic performance heritage model.',
   modsDetected: [],
-  latApprox: 35.6762,
-  lngApprox: 139.6503,
-  city: 'Tokyo',
-  country: 'Japan',
+  latApprox: 0,
+  lngApprox: 0,
+  city: '',
+  country: '',
   xpEarned: 250,
   marketValueLowUsd: 85000,
   marketValueHighUsd: 120000,
@@ -891,14 +891,17 @@ const getSavedPosts = (): FeedPost[] => {
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          const userPostIds = new Set(parsed.map((p: any) => p.id));
-          const nonDuplicateSamples = SAMPLE_FEED_POSTS.filter(s => !userPostIds.has(s.id));
-          return [...parsed, ...nonDuplicateSamples];
+          const sampleIds = new Set(SAMPLE_FEED_POSTS.map(s => s.id));
+          const filtered = parsed.filter((p: any) => p && p.id && !sampleIds.has(p.id) && !p.id.startsWith('post-sample-'));
+          if (filtered.length !== parsed.length) {
+            localStorage.setItem('apex_user_posts', JSON.stringify(filtered));
+          }
+          return filtered;
         }
       }
     }
   } catch (e) {}
-  return SAMPLE_FEED_POSTS;
+  return [];
 };
 
 const getSavedOnboarding = (): boolean => {
@@ -1798,7 +1801,7 @@ export const useApexStore = create<ApexState>((set, get) => ({
             briefHistory: specs.briefHistory || g.brief_history || existing?.briefHistory || `${g.make} ${g.model}`,
             modsDetected: specs.modsDetected || g.mods_detected || existing?.modsDetected || [],
             imageUrl: g.image_url || existing?.imageUrl || '',
-            imageHash: g.image_hash || existing?.imageHash,
+            imageHash: g.image_hash || specs.imageHash || existing?.imageHash,
             latApprox: g.latitude || existing?.latApprox || 0,
             lngApprox: g.longitude || existing?.lngApprox || 0,
             city: g.city || existing?.city || 'Local Area',
@@ -1837,7 +1840,6 @@ export const useApexStore = create<ApexState>((set, get) => ({
             rarity: (c.rarity || 'common').toLowerCase(),
             card_number: c.cardNumber || `#APX-${Math.floor(100000 + Math.random() * 900000)}`,
             image_url: c.imageUrl || '',
-            image_hash: c.imageHash || null,
             city: c.city || 'Local Area',
             country: c.country || 'Global',
             latitude: c.latApprox || null,
@@ -1848,17 +1850,64 @@ export const useApexStore = create<ApexState>((set, get) => ({
             is_minted: true,
             scanned_at: c.createdAt || new Date().toISOString(),
             body_style: c.bodyStyle || 'Coupe',
-            confidence: c.aiConfidence || 0.95
+            confidence: c.aiConfidence || 0.95,
+            specs: {
+              ...(c as any).specs,
+              imageHash: c.imageHash || null,
+              generation: c.generation,
+              trim: c.trim,
+              productionYears: c.productionYears,
+              discontinuedStatus: c.discontinuedStatus,
+              engine: c.engine,
+              torqueNm: c.torqueNm,
+              zeroToHundredSec: c.zeroToHundredSec,
+              kerbWeightKg: c.kerbWeightKg,
+              originCountry: c.originCountry,
+              interestingFact: c.interestingFact,
+              briefHistory: c.briefHistory,
+              modsDetected: c.modsDetected,
+              rarityScore: c.rarityScore,
+              privacyLevel: c.privacyLevel,
+              marketValueLowUsd: c.marketValueLowUsd,
+              marketValueHighUsd: c.marketValueHighUsd
+            }
           }));
 
-          supabase.from('garage').upsert(syncPayloads, { onConflict: 'id' }).then(({ error: syncErr }) => {
-            if (!syncErr) {
-              unrecordedCards.forEach(c => { (c as any).serverRecorded = true; });
-              persistLightweightGarage(userId, hydratedGarage);
-            } else {
-              console.warn('[SyncUnsyncedCards] Background upsert notice:', syncErr.message);
+          supabase.from('garage').upsert(syncPayloads, { onConflict: 'id' }).then(
+            ({ error: syncErr }) => {
+              if (!syncErr) {
+                const syncedIds = new Set(unrecordedCards.map(c => c.id));
+                set((s) => ({
+                  garage: s.garage.map(c => syncedIds.has(c.id) ? { ...c, serverRecorded: true, cloudSyncError: undefined } : c),
+                  selectedCardForDetail: s.selectedCardForDetail && syncedIds.has(s.selectedCardForDetail.id)
+                    ? { ...s.selectedCardForDetail, serverRecorded: true, cloudSyncError: undefined }
+                    : s.selectedCardForDetail
+                }));
+                persistLightweightGarage(userId, get().garage);
+              } else {
+                console.warn('[SyncUnsyncedCards] Background upsert notice:', syncErr.message);
+                const errMsg = syncErr.message;
+                const syncedIds = new Set(unrecordedCards.map(c => c.id));
+                set((s) => ({
+                  garage: s.garage.map(c => syncedIds.has(c.id) ? { ...c, serverRecorded: false, cloudSyncError: errMsg } : c),
+                  selectedCardForDetail: s.selectedCardForDetail && syncedIds.has(s.selectedCardForDetail.id)
+                    ? { ...s.selectedCardForDetail, serverRecorded: false, cloudSyncError: errMsg }
+                    : s.selectedCardForDetail
+                }));
+              }
+            },
+            (err: any) => {
+              console.warn('[SyncUnsyncedCards] Background upsert exception:', err);
+              const errMsg = err?.message || 'Network exception';
+              const syncedIds = new Set(unrecordedCards.map(c => c.id));
+              set((s) => ({
+                garage: s.garage.map(c => syncedIds.has(c.id) ? { ...c, serverRecorded: false, cloudSyncError: errMsg } : c),
+                selectedCardForDetail: s.selectedCardForDetail && syncedIds.has(s.selectedCardForDetail.id)
+                  ? { ...s.selectedCardForDetail, serverRecorded: false, cloudSyncError: errMsg }
+                  : s.selectedCardForDetail
+              }));
             }
-          });
+          );
         }
       }
 
@@ -2076,9 +2125,7 @@ export const useApexStore = create<ApexState>((set, get) => ({
         const serverPostIds = new Set(mappedPosts.map(p => p.id));
         const localOnly = localSaved.filter(p => !serverPostIds.has(p.id));
         const mergedAll = [...localOnly, ...mappedPosts];
-        const allPostIds = new Set(mergedAll.map(p => p.id));
-        const nonDuplicateSamples = SAMPLE_FEED_POSTS.filter(s => !allPostIds.has(s.id));
-        set({ feedPosts: [...mergedAll, ...nonDuplicateSamples] });
+        set({ feedPosts: mergedAll });
       } else {
         set({ feedPosts: getSavedPosts() });
       }
@@ -2155,6 +2202,40 @@ export const useApexStore = create<ApexState>((set, get) => ({
 
     let localRarityData: LocalRarityInfo | undefined = newCard.localRarity;
 
+    // Location Correctness: Reconcile scan location with genuine captured coordinates
+    const currentUser = get().user;
+    const hasRealUserCoords = Boolean(currentUser.latitude && currentUser.longitude && currentUser.latitude !== 0 && currentUser.longitude !== 0);
+    const isMockOrScannerFallback = (
+      (!newCard.latApprox || newCard.latApprox === 0) ||
+      (Math.abs(newCard.latApprox - 35.6762) < 0.05 && Math.abs(newCard.lngApprox - 139.6503) < 0.05 && (newCard.city === 'Tokyo' || !currentUser.city || currentUser.city !== 'Tokyo')) ||
+      (Math.abs(newCard.latApprox - 22.2855) < 0.05 && Math.abs(newCard.lngApprox - 114.1577) < 0.05 && (newCard.city === 'Hong Kong' || !currentUser.city || currentUser.city !== 'Hong Kong'))
+    );
+
+    let resolvedLat = newCard.latApprox || 0;
+    let resolvedLng = newCard.lngApprox || 0;
+    let resolvedCity = newCard.city || '';
+    let resolvedCountry = newCard.country || '';
+
+    if (hasRealUserCoords && (isMockOrScannerFallback || !resolvedLat || !resolvedLng)) {
+      resolvedLat = currentUser.latitude;
+      resolvedLng = currentUser.longitude;
+      resolvedCity = currentUser.city || 'Local Area';
+      resolvedCountry = currentUser.country || 'Global';
+    } else if (!hasRealUserCoords && isMockOrScannerFallback) {
+      resolvedLat = 0;
+      resolvedLng = 0;
+      resolvedCity = 'Location Unavailable';
+      resolvedCountry = '';
+    }
+
+    newCard = {
+      ...newCard,
+      latApprox: resolvedLat,
+      lngApprox: resolvedLng,
+      city: resolvedCity,
+      country: resolvedCountry
+    };
+
     // Check if scan was already recorded authoritatively during onScanCompleted
     if ((newCard as any).serverRecorded) {
       if ((newCard as any).serverCardId) {
@@ -2185,8 +2266,8 @@ export const useApexStore = create<ApexState>((set, get) => ({
         p_image_url: newCard.imageUrl,
         p_city: newCard.city || 'Local Area',
         p_country: newCard.country || 'Global',
-        p_latitude: isPublicCard ? (newCard.latApprox || null) : null,
-        p_longitude: isPublicCard ? (newCard.lngApprox || null) : null,
+        p_latitude: isPublicCard && newCard.latApprox !== 0 ? (newCard.latApprox || null) : null,
+        p_longitude: isPublicCard && newCard.lngApprox !== 0 ? (newCard.lngApprox || null) : null,
         p_horsepower: newCard.horsepower || 0,
         p_top_speed_kmh: newCard.topSpeedKmH || 0,
         p_caption: postCaption,
@@ -2399,7 +2480,6 @@ export const useApexStore = create<ApexState>((set, get) => ({
           rarity: (authoritativeCard.rarity || 'common').toLowerCase(),
           card_number: authoritativeCard.cardNumber || `#APX-${Math.floor(100000 + Math.random() * 900000)}`,
           image_url: authoritativeCard.imageUrl || '',
-          image_hash: authoritativeCard.imageHash || null,
           city: authoritativeCard.city || 'Local Area',
           country: authoritativeCard.country || 'Global',
           latitude: authoritativeCard.latApprox || null,
@@ -2412,6 +2492,7 @@ export const useApexStore = create<ApexState>((set, get) => ({
           body_style: authoritativeCard.bodyStyle || 'Coupe',
           confidence: authoritativeCard.aiConfidence || 0.95,
           specs: {
+            imageHash: authoritativeCard.imageHash || null,
             generation: authoritativeCard.generation,
             trim: authoritativeCard.trim,
             productionYears: authoritativeCard.productionYears,
@@ -2435,15 +2516,37 @@ export const useApexStore = create<ApexState>((set, get) => ({
           ({ error: upsertErr }) => {
             if (upsertErr) {
               console.warn('[Garage Cloud Persistence] Direct upsert warning:', upsertErr.message || upsertErr);
+              (authoritativeCard as any).serverRecorded = false;
               (authoritativeCard as any).cloudSyncError = upsertErr.message;
+              set((s) => ({
+                garage: s.garage.map(c => c.id === authoritativeCard.id ? { ...c, serverRecorded: false, cloudSyncError: upsertErr.message } : c),
+                selectedCardForDetail: s.selectedCardForDetail?.id === authoritativeCard.id
+                  ? { ...s.selectedCardForDetail, serverRecorded: false, cloudSyncError: upsertErr.message }
+                  : s.selectedCardForDetail
+              }));
             } else {
               (authoritativeCard as any).serverRecorded = true;
               (authoritativeCard as any).cloudSyncError = undefined;
+              set((s) => ({
+                garage: s.garage.map(c => c.id === authoritativeCard.id ? { ...c, serverRecorded: true, cloudSyncError: undefined } : c),
+                selectedCardForDetail: s.selectedCardForDetail?.id === authoritativeCard.id
+                  ? { ...s.selectedCardForDetail, serverRecorded: true, cloudSyncError: undefined }
+                  : s.selectedCardForDetail
+              }));
+              persistLightweightGarage(updatedUser.id, get().garage);
             }
           },
           (err: any) => {
             console.warn('[Garage Cloud Persistence] Exception:', err);
-            (authoritativeCard as any).cloudSyncError = err?.message || 'Network exception';
+            const errMsg = err?.message || 'Network exception';
+            (authoritativeCard as any).serverRecorded = false;
+            (authoritativeCard as any).cloudSyncError = errMsg;
+            set((s) => ({
+              garage: s.garage.map(c => c.id === authoritativeCard.id ? { ...c, serverRecorded: false, cloudSyncError: errMsg } : c),
+              selectedCardForDetail: s.selectedCardForDetail?.id === authoritativeCard.id
+                ? { ...s.selectedCardForDetail, serverRecorded: false, cloudSyncError: errMsg }
+                : s.selectedCardForDetail
+            }));
           }
         );
 
@@ -2717,32 +2820,43 @@ export const useApexStore = create<ApexState>((set, get) => ({
       const remaining = huntId ? state.activeHunts.filter(h => h.id !== huntId) : [];
       return {
         activeHunts: remaining,
-        activeHuntAlert: null,
-        activeHuntModal: null
+        activeHuntAlert: state.activeHuntAlert?.id === huntId ? null : state.activeHuntAlert,
+        activeHuntModal: state.activeHuntModal?.id === huntId ? null : state.activeHuntModal
       };
     });
   },
 
   triggerMockHunt: (card) => {
+    const user = get().user;
+    const isRealCardLoc = card.latApprox && card.lngApprox && card.latApprox !== 0 && card.lngApprox !== 0;
+    const isRealUserLoc = user.latitude && user.longitude && user.latitude !== 0 && user.longitude !== 0;
+    const lat = isRealCardLoc ? card.latApprox : (isRealUserLoc ? user.latitude : 0);
+    const lng = isRealCardLoc ? card.lngApprox : (isRealUserLoc ? user.longitude : 0);
+    const city = (isRealCardLoc && card.city && card.city !== 'Location Unavailable')
+      ? card.city
+      : (isRealUserLoc && user.city ? user.city : (card.city || 'Location Unavailable'));
+
     const mockHunt: Hunt = {
       id: `hunt-${Date.now()}`,
       cardId: card.id,
+      creatorId: user.id,
+      creatorUsername: user.username || user.displayName || 'You',
       carName: `${card.make} ${card.model}`,
       make: card.make,
       model: card.model,
       rarity: card.rarity,
-      latApprox: card.latApprox,
-      lngApprox: card.lngApprox,
+      latApprox: lat,
+      lngApprox: lng,
       radiusKm: 1.0,
       startedAt: new Date().toISOString(),
       expiresAt: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
       participantsCount: 8,
-      city: card.city,
+      city: city,
       imageUrl: card.imageUrl,
       status: 'active'
     };
     set((state) => ({
-      activeHunts: [mockHunt, ...state.activeHunts],
+      activeHunts: [mockHunt, ...state.activeHunts.filter(h => h.cardId !== card.id)],
       activeHuntAlert: mockHunt,
       activeHuntModal: null
     }));
@@ -2751,6 +2865,26 @@ export const useApexStore = create<ApexState>((set, get) => ({
   onScanCompleted: async (card: CarCard) => {
     // 1. Authoritative Server Path: record_car_scan transaction on database
     try {
+      const currentUser = get().user;
+      const hasRealUserCoords = Boolean(currentUser.latitude && currentUser.longitude && currentUser.latitude !== 0 && currentUser.longitude !== 0);
+      const isMockOrScannerFallback = (
+        (!card.latApprox || card.latApprox === 0) ||
+        (Math.abs(card.latApprox - 35.6762) < 0.05 && Math.abs(card.lngApprox - 139.6503) < 0.05 && (card.city === 'Tokyo' || !currentUser.city || currentUser.city !== 'Tokyo')) ||
+        (Math.abs(card.latApprox - 22.2855) < 0.05 && Math.abs(card.lngApprox - 114.1577) < 0.05 && (card.city === 'Hong Kong' || !currentUser.city || currentUser.city !== 'Hong Kong'))
+      );
+
+      if (hasRealUserCoords && (isMockOrScannerFallback || !card.latApprox || !card.lngApprox)) {
+        card.latApprox = currentUser.latitude;
+        card.lngApprox = currentUser.longitude;
+        card.city = currentUser.city || 'Local Area';
+        card.country = currentUser.country || 'Global';
+      } else if (!hasRealUserCoords && isMockOrScannerFallback) {
+        card.latApprox = 0;
+        card.lngApprox = 0;
+        card.city = 'Location Unavailable';
+        card.country = '';
+      }
+
       const canonicalId = (card as any).canonicalVehicleId || 
         `${card.make}-${card.model}`.toLowerCase().replace(/[^a-z0-9]+/g, '-');
       const imageHash = card.imageHash || computeImageSha256(card.imageUrl) || `hash_${card.make}_${card.model}_${card.id}`;
@@ -2763,8 +2897,8 @@ export const useApexStore = create<ApexState>((set, get) => ({
         p_image_url: card.imageUrl,
         p_city: card.city || 'Local Area',
         p_country: card.country || 'Global',
-        p_latitude: card.latApprox || null,
-        p_longitude: card.lngApprox || null,
+        p_latitude: card.latApprox !== 0 ? (card.latApprox || null) : null,
+        p_longitude: card.lngApprox !== 0 ? (card.lngApprox || null) : null,
         p_horsepower: card.horsepower || 0,
         p_top_speed_kmh: card.topSpeedKmH || 0,
         p_caption: null, // Hard invariant: scan event never auto-publishes to community feed

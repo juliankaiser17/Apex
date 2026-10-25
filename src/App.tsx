@@ -54,19 +54,17 @@ export const App: React.FC = () => {
           authUser.user_metadata
         );
 
-        // Acquire accurate real location only if user is already onboarded
-        if (useApexStore.getState().onboardingCompleted) {
-          requestRealLocationPermission().then((res) => {
-            if (res.city && res.city !== 'Your City' && res.latitude !== 0) {
-              useApexStore.getState().updateUserProfile({
-                city: res.city,
-                country: res.country,
-                latitude: res.latitude,
-                longitude: res.longitude
-              });
-            }
-          }).catch(() => {});
-        }
+        // Acquire accurate real location
+        requestRealLocationPermission().then((res) => {
+          if (res.latitude !== 0 && res.longitude !== 0) {
+            useApexStore.getState().updateUserProfile({
+              city: res.city || useApexStore.getState().user.city,
+              country: res.country || useApexStore.getState().user.country,
+              latitude: res.latitude,
+              longitude: res.longitude
+            });
+          }
+        }).catch(() => {});
 
         if (typeof window !== 'undefined' && window.location.hash && window.location.hash.includes('access_token=')) {
           window.history.replaceState(null, '', window.location.pathname);
@@ -85,6 +83,17 @@ export const App: React.FC = () => {
           useApexStore.getState().setAuthStatus('GUEST', null);
           logAuthTransition('GUEST_SESSION_STARTED');
         }
+        // Acquire real location for guest/cached session
+        requestRealLocationPermission().then((res) => {
+          if (res.latitude !== 0 && res.longitude !== 0) {
+            useApexStore.getState().updateUserProfile({
+              city: res.city || useApexStore.getState().user.city,
+              country: res.country || useApexStore.getState().user.country,
+              latitude: res.latitude,
+              longitude: res.longitude
+            });
+          }
+        }).catch(() => {});
         setIsAuthReady(true);
       }
     }).catch((err) => {

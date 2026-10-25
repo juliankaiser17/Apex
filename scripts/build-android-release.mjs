@@ -71,10 +71,21 @@ if (isConfiguredForSigning) {
   console.log('   Building release artifacts using default/configured signing...\n');
 }
 
-// 5. Build Release AAB (Android App Bundle for Google Play)
-console.log('🔨 Step 3: Compiling Android App Bundle (bundleRelease)...');
+// 5. Clean stale build artifacts to ensure fresh packaging of web assets
+console.log('🧹 Step 3: Cleaning stale build outputs (gradlew clean)...');
 const gradlewCmd = process.platform === 'win32' ? '.\\gradlew.bat' : './gradlew';
+try {
+  const oldApkPath = path.resolve(androidDir, 'app/build/outputs/apk/release/app-release.apk');
+  if (fs.existsSync(oldApkPath)) fs.unlinkSync(oldApkPath);
+  const oldAabPath = path.resolve(androidDir, 'app/build/outputs/bundle/release/app-release.aab');
+  if (fs.existsSync(oldAabPath)) fs.unlinkSync(oldAabPath);
+  execSync(`${gradlewCmd} clean`, { stdio: 'inherit', cwd: androidDir });
+} catch (err) {
+  console.warn('⚠️ Gradle clean notice:', err.message);
+}
 
+// 6. Build Release AAB (Android App Bundle for Google Play)
+console.log('\n🔨 Step 4: Compiling Android App Bundle (bundleRelease)...');
 try {
   execSync(`${gradlewCmd} bundleRelease`, { stdio: 'inherit', cwd: androidDir });
   const aabPath = path.resolve(androidDir, 'app/build/outputs/bundle/release/app-release.aab');
@@ -87,8 +98,8 @@ try {
   process.exit(1);
 }
 
-// 6. Build Release APK (for direct sideload testing)
-console.log('\n🔨 Step 4: Compiling Release APK (assembleRelease)...');
+// 7. Build Release APK (for direct sideload testing)
+console.log('\n🔨 Step 5: Compiling Release APK (assembleRelease)...');
 let targetApk = null;
 try {
   execSync(`${gradlewCmd} assembleRelease`, { stdio: 'inherit', cwd: androidDir });
@@ -104,10 +115,12 @@ try {
 
     console.log(`✅ Release APK generated: ${targetApk} (${(stats.size / 1024 / 1024).toFixed(2)} MB)`);
     console.log(`   SHA-256: ${apkSha256}`);
+    console.log(`   Timestamp: ${stats.mtime.toLocaleString()}`);
 
     const desktopDir = path.resolve(process.env.USERPROFILE || process.env.HOME || '', 'Desktop');
     if (fs.existsSync(desktopDir)) {
       const desktopApk = path.resolve(desktopDir, 'Apex-Beta-v1.0.apk');
+      if (fs.existsSync(desktopApk)) fs.unlinkSync(desktopApk);
       fs.copyFileSync(targetApk, desktopApk);
       console.log(`📱 Copied release APK to Desktop: ${desktopApk}`);
     }
