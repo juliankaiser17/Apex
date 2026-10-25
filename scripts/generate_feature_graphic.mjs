@@ -21,7 +21,7 @@ async function createFeatureGraphic() {
     .png()
     .toBuffer();
 
-  console.log('2. Preparing Phone Screen (Scanner HUD)...');
+  console.log('2. Preparing Phone Screen (Scanner HUD with Ferrari 458 Spider)...');
   const screenW = 208;
   const screenH = 434;
   const phoneW = screenW + 12;
@@ -75,10 +75,11 @@ async function createFeatureGraphic() {
     </svg>
   `);
 
-  console.log('3. Preparing Hero Collectible Card...');
+  console.log('3. Preparing Hero Collectible Card (Ferrari 458 Spider)...');
   const cardW = 275;
   const cardH = 316;
-  const cardCropped = await sharp('docs/store/card_ferrari.png')
+  const cardCropped = await sharp('docs/store/screenshots/5_populated_garage.png')
+    .extract({ left: 545, top: 600, width: 475, height: 545 })
     .resize(cardW, cardH, { fit: 'fill' })
     .toBuffer();
 
@@ -108,7 +109,7 @@ async function createFeatureGraphic() {
     </svg>
   `);
 
-  console.log('4. Generating Main Canvas...');
+  console.log('4. Generating Main Canvas & Typography...');
   const phoneX = 492;
   const phoneY = 27;
 
@@ -221,7 +222,7 @@ async function createFeatureGraphic() {
           <rect x="0" y="0" width="144" height="34" rx="8" fill="rgba(229, 9, 20, 0.10)" stroke="rgba(229, 9, 20, 0.35)" stroke-width="1" />
           <circle cx="16" cy="17" r="4" fill="#EF4444" />
           <text x="28" y="21" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11" font-weight="700" letter-spacing="0.5" fill="#FCA5A5">
-            5,000+ HP GARAGE
+            EXOTIC GARAGE
           </text>
         </g>
       </g>
@@ -244,25 +245,22 @@ async function createFeatureGraphic() {
     </svg>
   `);
 
-  console.log('5. Compositing Real Assets...');
+  console.log('5. Compositing Real Assets into 1024x500 Feature Graphic...');
   await sharp(mainSvg)
     .composite([
       // 1. App Icon
       { input: roundedIcon, top: 46, left: 50 },
-      // 2. Phone Frame & Screen
+      // 2. Phone Frame & Screen (showing live Ferrari 458 Spider scan)
       { input: phoneFrame, top: phoneY, left: phoneX },
       { input: roundedScreen, top: phoneY + 6, left: phoneX + 6 },
-      // 3. Card & Border
+      // 3. Card & Border (showing minted Ferrari 458 Spider card)
       { input: roundedCard, top: cardY, left: cardX },
       { input: cardBorder, top: cardY, left: cardX },
     ])
     .jpeg({ quality: 96 })
     .toFile('docs/store/feature_graphic_1024x500.jpg');
 
-  // Also overwrite the original script for maintainability
-  fs.copyFileSync('scripts/generate_feature_graphic_v4.mjs', 'scripts/generate_feature_graphic.mjs');
-
-  console.log('✅ Success! Overwrote docs/store/feature_graphic_1024x500.jpg');
+  console.log('✅ Success! Overwrote docs/store/feature_graphic_1024x500.jpg with Ferrari 458 Spider');
 }
 
 createFeatureGraphic().catch(console.error);

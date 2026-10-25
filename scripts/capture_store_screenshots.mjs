@@ -26,7 +26,7 @@ const SCREENSHOT_CONFIGS = [
   {
     shot: 1,
     id: 'shot_1_legendary_reveal',
-    title: 'Legendary Card Reveal (Ferrari Daytona SP3)',
+    title: 'Legendary Card Reveal (Ferrari 458 Spider)',
     filename: '1_legendary_card_reveal.png'
   },
   {
@@ -44,7 +44,7 @@ const SCREENSHOT_CONFIGS = [
   {
     shot: 4,
     id: 'shot_4_hunt_alert',
-    title: 'Active Sector Radar Hunt Alert (McLaren P1)',
+    title: 'Active Sector Radar Hunt Alert (McLaren 650S Spider)',
     filename: '4_hunt_alert_active.png'
   },
   {

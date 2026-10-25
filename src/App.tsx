@@ -26,6 +26,10 @@ import { applyAppTheme } from './utils/theme';
 
 import { logAuthTransition } from './utils/authLogger';
 
+const StoreScreenshotFixtures = import.meta.env.DEV 
+  ? React.lazy(() => import('./components/dev/StoreScreenshotFixtures').then(m => ({ default: m.StoreScreenshotFixtures }))) 
+  : null;
+
 export const App: React.FC = () => {
   const [isAuthReady, setIsAuthReady] = useState(false);
   useEffect(() => {
@@ -199,6 +203,15 @@ export const App: React.FC = () => {
       }
     }
   }, [onboardingCompleted, userId, userUsername, userStreakDays, userStreakLastAt]);
+
+  // Dev-only store screenshot mode (0 network calls, local static fixtures)
+  if (import.meta.env.DEV && StoreScreenshotFixtures && typeof window !== 'undefined' && window.location.search.includes('fixture=screenshot')) {
+    return (
+      <React.Suspense fallback={null}>
+        <StoreScreenshotFixtures />
+      </React.Suspense>
+    );
+  }
 
   if (!isAuthReady) {
     return (
